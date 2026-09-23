@@ -108,6 +108,17 @@
       "required": true,
       "environment": "both",
       "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-xmod-compat"
+    },
+    {
+      "id": "luckperms",
+      "name": "LuckPerms",
+      "source": "modrinth",
+      "project_id": "Vebnzrzj",
+      "version": "5.4.102-forge",
+      "version_id": "AudvOzqV",
+      "required": true,
+      "environment": "server",
+      "url": "https://modrinth.com/plugin/luckperms"
     }
   ]
 }
