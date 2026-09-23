@@ -1,0 +1,29 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+hs_err_pid*
+
+# Minecraft runtime
+logs/
+crash-reports/
+debug/
+screenshots/
+world/
+server.properties
+
+# Generated/runtime data
+cache/
+libraries/
+versions/
+
+# Local secrets
+.env
+*.local
