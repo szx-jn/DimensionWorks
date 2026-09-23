@@ -48,6 +48,66 @@
       "environment": "both",
       "status": "pending-release",
       "notes": "Use a fixed GitHub Release asset after the DimensionWorks fork/build pipeline is established. Do not reference a moving branch or Actions artifact in the final modpack."
+    },
+    {
+      "id": "ftb-library",
+      "name": "FTB Library",
+      "source": "curseforge",
+      "project_slug": "ftb-library-forge",
+      "version": "2001.2.13",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-library-forge"
+    },
+    {
+      "id": "ftb-teams",
+      "name": "FTB Teams",
+      "source": "curseforge",
+      "project_slug": "ftb-teams-forge",
+      "version": "2001.3.2",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-teams-forge"
+    },
+    {
+      "id": "ftb-quests",
+      "name": "FTB Quests",
+      "source": "curseforge",
+      "project_slug": "ftb-quests-forge",
+      "version": "2001.4.22",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-quests-forge"
+    },
+    {
+      "id": "ftb-essentials",
+      "name": "FTB Essentials",
+      "source": "curseforge",
+      "project_slug": "ftb-essentials",
+      "version": "2001.2.4",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-essentials"
+    },
+    {
+      "id": "ftb-ultimine",
+      "name": "FTB Ultimine",
+      "source": "curseforge",
+      "project_slug": "ftb-ultimine-forge",
+      "version": "2001.1.8",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-ultimine-forge"
+    },
+    {
+      "id": "ftb-xmod-compat",
+      "name": "FTB XMod Compat",
+      "source": "curseforge",
+      "project_slug": "ftb-xmod-compat",
+      "version": "2.1.3",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ftb-xmod-compat"
     }
   ]
 }
