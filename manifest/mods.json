@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "minecraft": {
+    "version": "1.20.1",
+    "loader": "forge"
+  },
+  "mods": [
+    {
+      "id": "create",
+      "name": "Create",
+      "source": "modrinth",
+      "project_id": "LNytGWDc",
+      "version": "1.20.1-6.0.5",
+      "version_id": "Ju7BfP9E",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create"
+    },
+    {
+      "id": "mekanism",
+      "name": "Mekanism",
+      "source": "modrinth",
+      "project_id": "Ce6I4WUE",
+      "version": "10.4.15.75",
+      "version_id": "9iboPfea",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/mekanism"
+    },
+    {
+      "id": "ae2",
+      "name": "Applied Energistics 2",
+      "source": "modrinth",
+      "project_id": "XxWD5pD3",
+      "version": "15.4.9",
+      "version_id": "8V4aHdXi",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/ae2"
+    },
+    {
+      "id": "create-mobile-packages-dimensionworks",
+      "name": "Create Mobile Packages — DimensionWorks",
+      "source": "github-release",
+      "repository": "szx-jn/Create-Mobile-Packages",
+      "version": null,
+      "required": true,
+      "environment": "both",
+      "status": "pending-release",
+      "notes": "Use a fixed GitHub Release asset after the DimensionWorks fork/build pipeline is established. Do not reference a moving branch or Actions artifact in the final modpack."
+    }
+  ]
+}
