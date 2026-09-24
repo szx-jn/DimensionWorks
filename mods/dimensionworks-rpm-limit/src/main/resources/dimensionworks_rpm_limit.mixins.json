@@ -1,0 +1,1 @@
+{"required":true,"minVersion":"0.8","package":"dev.szx.dimensionworks.rpmlimit.mixin","compatibilityLevel":"JAVA_17","refmap":"dimensionworks_rpm_limit.refmap.json","mixins":["KineticBlockEntityMixin"],"client":[],"server":[]}
