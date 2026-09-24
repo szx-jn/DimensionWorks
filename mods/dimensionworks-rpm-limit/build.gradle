@@ -34,6 +34,8 @@ repositories {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.5-127:slim')
+    // Create 6.0.5 ships Ponder separately; the slim Create artifact does not expose its classes to javac.
+    compileOnly fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.52')
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
