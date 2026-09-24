@@ -20,8 +20,7 @@ const RpmLimitApi = Java.loadClass("dev.szx.dimensionworks.rpmlimit.RpmLimitApi"
 RpmLimitApi.setLimit(player, 64)
 const limit = RpmLimitApi.getLimit(player)
 
-// UUID string -> limit
-RpmLimitApi.setLimit(player.uuid.toString(), 128)
+// UUID string -> read limit
 const limit2 = RpmLimitApi.getLimit(player.uuid.toString())
 ```
 
