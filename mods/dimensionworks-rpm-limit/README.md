@@ -6,7 +6,7 @@ New players start at **32 RPM**. The hard maximum is **10240 RPM**.
 ## Command
 Requires permission level 2:
 ```
-/dimensionworks rpm <player> <limit>
+/dw rpm <player> <limit>
 ```
 
 This changes the target player's RPM limit for Create kinetic networks they own.
