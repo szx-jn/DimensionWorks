@@ -23,13 +23,6 @@ public final class RpmLimitApi {
         RpmLimitManager.setLimit(player, rpm);
     }
 
-    public static void setLimit(UUID playerId, int rpm) {
-        RpmLimitManager.setLimit(playerId, rpm);
-    }
-
-    public static void setLimit(String playerId, int rpm) {
-        setLimit(UUID.fromString(playerId), rpm);
-    }
 
     public static int getDefaultLimit() {
         return RpmLimitConfig.DEFAULT_RPM.get();
