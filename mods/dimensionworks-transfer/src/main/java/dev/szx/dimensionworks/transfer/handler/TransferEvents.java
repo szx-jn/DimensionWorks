@@ -150,8 +150,7 @@ public final class TransferEvents {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("dwtransfer").executes(context -> {
             ServerPlayer player = context.getSource().getPlayerOrException();
-            TerritoryManager.sendToTransfer(player);
-            return 1;
+            return TransferController.use(player) ? 1 : 0;
         }));
     }
 }

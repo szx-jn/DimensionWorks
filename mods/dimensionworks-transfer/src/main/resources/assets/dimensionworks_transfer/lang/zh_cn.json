@@ -1,0 +1,8 @@
+{
+  "key.categories.dimensionworks_transfer": "维度工序传送",
+  "key.dimensionworks_transfer.toggle": "进入/返回中转维度",
+  "message.dimensionworks_transfer.locked": "必须先消耗维度钥匙才能进入中转维度。",
+  "message.dimensionworks_transfer.no_return": "没有可用的返回点。",
+  "message.dimensionworks_transfer.dimension_missing": "返回点所在的维度未加载。",
+  "message.dimensionworks_transfer.returned": "已返回进入中转维度前的位置。"
+}

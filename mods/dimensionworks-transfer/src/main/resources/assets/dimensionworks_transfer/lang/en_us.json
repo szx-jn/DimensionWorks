@@ -1,0 +1,8 @@
+{
+  "key.categories.dimensionworks_transfer": "DimensionWorks Transfer",
+  "key.dimensionworks_transfer.toggle": "Enter/Return from Transfer Dimension",
+  "message.dimensionworks_transfer.locked": "Consume a Dimension Key before entering the transfer dimension.",
+  "message.dimensionworks_transfer.no_return": "No return point is available.",
+  "message.dimensionworks_transfer.dimension_missing": "The saved return dimension is not loaded.",
+  "message.dimensionworks_transfer.returned": "Returned to your previous location."
+}
