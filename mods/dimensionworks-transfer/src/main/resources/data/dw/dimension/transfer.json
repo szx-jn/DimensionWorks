@@ -1,0 +1,10 @@
+{
+  "type": "dw:transfer",
+  "generator": {
+    "type": "dimensionworks_transfer:void",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "dw:transfer_void"
+    }
+  }
+}
