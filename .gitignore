@@ -24,6 +24,13 @@ cache/
 libraries/
 versions/
 
+# Gradle
+.gradle/
+build/
+bin/
+run/
+out/
+
 # Local secrets
 .env
 *.local
