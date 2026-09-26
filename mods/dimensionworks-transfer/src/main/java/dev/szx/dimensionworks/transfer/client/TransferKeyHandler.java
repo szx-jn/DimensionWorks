@@ -1,13 +1,14 @@
 package dev.szx.dimensionworks.transfer.client;
 
 import dev.szx.dimensionworks.transfer.WDTransfer;
+import dev.szx.dimensionworks.transfer.network.TransferNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/** Sends the shared transfer command when the configurable key is pressed. */
+/** Sends a dedicated server request when the configurable key is pressed. */
 @Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
 public final class TransferKeyHandler {
     private TransferKeyHandler() {
@@ -25,7 +26,7 @@ public final class TransferKeyHandler {
         }
 
         while (TransferKeyMappings.OPEN_TRANSFER.consumeClick()) {
-            minecraft.player.connection.sendCommand("dwtransfer");
+            TransferNetwork.sendToggleRequest();
         }
     }
 }

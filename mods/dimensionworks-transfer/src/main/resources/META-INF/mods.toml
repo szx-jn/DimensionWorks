@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_transfer"
-version="0.1.0"
+version="0.2.0"
 displayName="DimensionWorks Transfer"
 authors="szx-jn"
 description='''Per-player isolated transfer dimension (dw:transfer) for DimensionWorks.'''

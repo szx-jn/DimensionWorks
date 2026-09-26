@@ -1,0 +1,7 @@
+{
+  "item.kubejs.dimension_key": "Dimension Key",
+  "item.kubejs.dimension_key.tooltip": "Consume once to permanently unlock the transfer dimension.",
+  "message.kubejs.dimension_key.unlocked": "The Dimension Key accepted your offering. The transfer dimension is now permanently unlocked.",
+  "message.kubejs.dimension_key.already_unlocked": "The transfer dimension is already permanently unlocked.",
+  "message.kubejs.dimension_key.failed": "The Dimension Key could not be consumed. Please try again."
+}

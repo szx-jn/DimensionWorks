@@ -4,6 +4,8 @@ Adds `dw:transfer`, a per-player isolated staging dimension for DimensionWorks.
 
 ## Behaviour
 
+- **Dimension key access.** The configurable `P` key sends a dedicated server request. The server checks the `dimensionworks_transfer.unlocked` tag before entering or returning; no OP permission is required.
+- **Independent admin path.** The OP 2 `/dwtransfer` command and the player key use separate permission paths.
 - **Void world.** The chunk generator emits nothing at all. All blocks come from plot setup.
 - **No sky.** A custom `DimensionSpecialEffects` suppresses sky, clouds, and weather rendering.
 - **Constant light.** `fixed_time` is pinned to noon and the lightmap is forced bright, so every
@@ -43,7 +45,9 @@ plot.
 
 ## Commands
 
-- `/dwtransfer` - send yourself to `dw:transfer`, claiming a plot on first use.
+- `/dwtransfer` - OP 2 administrative entry. It bypasses the permanent unlock tag, sends you to `dw:transfer`, and claims a plot on first use.
+- `/dwtransfer` inside `dw:transfer` returns to the saved source location and clears the return point.
+- The default `P` key is the player path. It works without OP only after consuming the KubeJS dimension key.
 
 ## Build
 

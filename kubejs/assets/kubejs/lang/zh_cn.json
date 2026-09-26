@@ -1,0 +1,7 @@
+{
+  "item.kubejs.dimension_key": "维度钥匙",
+  "item.kubejs.dimension_key.tooltip": "消耗一次后永久解锁中转维度。",
+  "message.kubejs.dimension_key.unlocked": "维度钥匙已经生效，中转维度现已永久解锁。",
+  "message.kubejs.dimension_key.already_unlocked": "中转维度已经永久解锁。",
+  "message.kubejs.dimension_key.failed": "维度钥匙未能生效，请重试。"
+}

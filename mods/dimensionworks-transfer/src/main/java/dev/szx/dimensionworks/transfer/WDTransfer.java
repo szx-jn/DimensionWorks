@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.transfer;
 
 import com.mojang.logging.LogUtils;
+import dev.szx.dimensionworks.transfer.network.TransferNetwork;
 import dev.szx.dimensionworks.transfer.worldgen.ModChunkGenerators;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -18,6 +19,7 @@ public final class WDTransfer {
 
     public WDTransfer(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
+        TransferNetwork.register();
         ModChunkGenerators.CHUNK_GENERATORS.register(modEventBus);
         LOGGER.info("DimensionWorks Transfer loaded");
     }

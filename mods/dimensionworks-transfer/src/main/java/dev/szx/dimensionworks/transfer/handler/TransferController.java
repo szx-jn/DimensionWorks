@@ -14,19 +14,29 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-/** Shared entry point for the command and configurable key binding. */
+/** Server-side entry points for the OP2 command and player key request. */
 public final class TransferController {
     private TransferController() {
     }
 
-    public static boolean use(ServerPlayer player) {
-        if (player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {
-            return returnToSavedPoint(player);
-        }
+    /** OP 2 administrative entry point. It deliberately bypasses the unlock tag. */
+    public static boolean useAdmin(ServerPlayer player) {
+        return toggle(player);
+    }
+
+    /** Player key entry point. The server-side connection supplies this player. */
+    public static boolean useFromKey(ServerPlayer player) {
         if (!TransferAccess.hasUnlockTag(player)) {
             player.displayClientMessage(
                     Component.translatable("message.dimensionworks_transfer.locked"), true);
             return false;
+        }
+        return toggle(player);
+    }
+
+    private static boolean toggle(ServerPlayer player) {
+        if (player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {
+            return returnToSavedPoint(player);
         }
         return enterTransfer(player);
     }

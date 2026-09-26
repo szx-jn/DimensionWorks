@@ -148,9 +148,11 @@ public final class TransferEvents {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        dispatcher.register(Commands.literal("dwtransfer").executes(context -> {
-            ServerPlayer player = context.getSource().getPlayerOrException();
-            return TransferController.use(player) ? 1 : 0;
-        }));
+        dispatcher.register(Commands.literal("dwtransfer")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> {
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    return TransferController.useAdmin(player) ? 1 : 0;
+                }));
     }
 }

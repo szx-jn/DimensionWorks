@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.1.0'
+version = '0.2.0'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_transfer'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
