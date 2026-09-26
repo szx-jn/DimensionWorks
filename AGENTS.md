@@ -71,10 +71,11 @@ README 中的原则需要转化成可执行的约束：
 - 提交信息使用带 scope 的 Conventional Commits，例如 `feat(rpm): ...`、`fix(transfer): ...`、`docs(rpm): ...`、`ci: ...`。
 - 文档使用中文，与现有 README 一致。
 - 改动行为时同步更新对应 `mods/<name>/README.md`，尤其是暴露给 KubeJS 或命令行的接口。
+- 每次构建完成后，在回复里给出产物链接：本地产物（自研 Mod 的 `gradle build` jar、`dist/*.mrpack`）用绝对路径的 Markdown 文件链接，远程产物用可点击 URL。
 
 ## 边界
 
 - 不擅自往 `manifest/mods.json` 添加 Mod；新增依赖前先说明理由并确认。
-- 不修改第三方 Mod 的源码。需要改动时走 fork，并在整合包中引用固定的 GitHub Release 资产，不引用移动分支或 Actions 产物。`Create-Mobile-Packages` 即为此模式，目前状态为 `pending-release`。
+- 不修改第三方 Mod 的源码。需要改动时走 fork，并在整合包中引用固定的 GitHub Release 资产，不引用移动分支或 Actions 产物。`Create-Mobile-Packages` 即为此模式，已建立固定 Release 流程。
 - `manifest/mods.json` 中标记为 `pending-release` 或尚未固定版本的条目，在最终整合包交付前必须替换为固定版本。
 - 本仓库原创的代码、配置、脚本和文档默认 MIT License；第三方 Mod、资源与数据包遵循各自许可，不要将第三方代码复制进本仓库。

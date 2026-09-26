@@ -23,6 +23,9 @@ server.properties
 cache/
 libraries/
 versions/
+dist/
+__pycache__/
+*.py[cod]
 
 # Gradle
 .gradle/

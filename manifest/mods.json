@@ -21,8 +21,8 @@
       "name": "Mekanism",
       "source": "modrinth",
       "project_id": "Ce6I4WUE",
-      "version": "10.4.15.75",
-      "version_id": "9iboPfea",
+      "version": "10.4.16.80",
+      "version_id": "uxe1WQp4",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/mekanism"
@@ -32,8 +32,8 @@
       "name": "Applied Energistics 2",
       "source": "modrinth",
       "project_id": "XxWD5pD3",
-      "version": "15.4.9",
-      "version_id": "8V4aHdXi",
+      "version": "15.4.10",
+      "version_id": "7KVs6HMQ",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/ae2"
@@ -43,17 +43,20 @@
       "name": "Create Mobile Packages — DimensionWorks",
       "source": "github-release",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "version": null,
+      "release": "1.20.1-0.6.1-dimensionworks.1",
+      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.1.jar",
+      "version": "0.6.1-dimensionworks.1",
       "required": true,
       "environment": "both",
-      "status": "pending-release",
-      "notes": "Use a fixed GitHub Release asset after the DimensionWorks fork/build pipeline is established. Do not reference a moving branch or Actions artifact in the final modpack."
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.1"
     },
     {
       "id": "ftb-library",
       "name": "FTB Library",
       "source": "curseforge",
       "project_slug": "ftb-library-forge",
+      "file_id": 8226927,
+      "file_name": "ftb-library-forge-2001.2.13.jar",
       "version": "2001.2.13",
       "required": true,
       "environment": "both",
@@ -64,6 +67,8 @@
       "name": "FTB Teams",
       "source": "curseforge",
       "project_slug": "ftb-teams-forge",
+      "file_id": 7499810,
+      "file_name": "ftb-teams-forge-2001.3.2.jar",
       "version": "2001.3.2",
       "required": true,
       "environment": "both",
@@ -74,6 +79,8 @@
       "name": "FTB Quests",
       "source": "curseforge",
       "project_slug": "ftb-quests-forge",
+      "file_id": 8078538,
+      "file_name": "ftb-quests-forge-2001.4.22.jar",
       "version": "2001.4.22",
       "required": true,
       "environment": "both",
@@ -84,6 +91,8 @@
       "name": "FTB Essentials",
       "source": "curseforge",
       "project_slug": "ftb-essentials",
+      "file_id": 7609948,
+      "file_name": "ftb-essentials-forge-2001.2.4.jar",
       "version": "2001.2.4",
       "required": true,
       "environment": "both",
@@ -94,6 +103,8 @@
       "name": "FTB Ultimine",
       "source": "curseforge",
       "project_slug": "ftb-ultimine-forge",
+      "file_id": 7880472,
+      "file_name": "ftb-ultimine-forge-2001.1.8.jar",
       "version": "2001.1.8",
       "required": true,
       "environment": "both",
@@ -104,6 +115,8 @@
       "name": "FTB XMod Compat",
       "source": "curseforge",
       "project_slug": "ftb-xmod-compat",
+      "file_id": 6402486,
+      "file_name": "ftb-xmod-compat-forge-2.1.3.jar",
       "version": "2.1.3",
       "required": true,
       "environment": "both",
@@ -126,6 +139,7 @@
       "source": "curseforge",
       "project_slug": "ae2-crafting-tree",
       "file_id": 7182165,
+      "file_name": "ae2ct-1.20.1-1.1.1.jar",
       "version": "1.20.1-1.1.1",
       "required": true,
       "environment": "both",
@@ -196,6 +210,28 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/appleskin"
+    },
+    {
+      "id": "appflux",
+      "name": "Applied Flux",
+      "source": "modrinth",
+      "project_id": "oMgZ004U",
+      "version": "1.20-1.3.7-forge",
+      "version_id": "cAcdjzEn",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/appflux"
+    },
+    {
+      "id": "appmek",
+      "name": "Applied Mekanistics",
+      "source": "modrinth",
+      "project_id": "IiATswDj",
+      "version": "1.4.3",
+      "version_id": "9n9p68Qq",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/applied-mekanistics"
     },
     {
       "id": "appliedcreate",
@@ -319,6 +355,50 @@
       "url": "https://modrinth.com/mod/controlling"
     },
     {
+      "id": "copycats",
+      "name": "Create: Copycats+",
+      "source": "modrinth",
+      "project_id": "UT2M39wf",
+      "version": "3.0.10+mc.1.20.1-forge",
+      "version_id": "LlMxIysb",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/copycats"
+    },
+    {
+      "id": "create_additional_logistics",
+      "name": "Create: Additional Logistics",
+      "source": "modrinth",
+      "project_id": "CZaz7aje",
+      "version": "1.4.5",
+      "version_id": "j5Gbthe0",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create-additional-logistics"
+    },
+    {
+      "id": "create_diesel_generators",
+      "name": "Create: Diesel Generators",
+      "source": "modrinth",
+      "project_id": "ZM3tt6p1",
+      "version": "1.20.1-1.3.12",
+      "version_id": "DTQVvA5H",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create-diesel-generators"
+    },
+    {
+      "id": "create_enchantment_industry",
+      "name": "Create: Enchantment Industry",
+      "source": "modrinth",
+      "project_id": "JWGBpFUP",
+      "version": "1.4.1",
+      "version_id": "caLmFTZ1",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create-enchantment-industry"
+    },
+    {
       "id": "create_power_loader",
       "name": "Create: Power Loader",
       "source": "modrinth",
@@ -328,6 +408,17 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/create-power-loader"
+    },
+    {
+      "id": "createaddition",
+      "name": "Create Crafts & Additions",
+      "source": "modrinth",
+      "project_id": "kU1G12Nn",
+      "version": "forge-1.20.1-1.3.3",
+      "version_id": "9LgyB6Yb",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/createaddition"
     },
     {
       "id": "createfastschematiccannon",
@@ -389,7 +480,7 @@
       "name": "DimensionWorks RPM Limit",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-rpm-limit",
-      "version": "0.1.0",
+      "version": "0.3.9",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-rpm-limit"
@@ -399,7 +490,7 @@
       "name": "DimensionWorks Transfer",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-transfer",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-transfer"
@@ -483,6 +574,17 @@
       "url": "https://modrinth.com/mod/glodium"
     },
     {
+      "id": "goggleson",
+      "name": "Goggles On!",
+      "source": "modrinth",
+      "project_id": "St2vbaWx",
+      "version": "1.1.0",
+      "version_id": "mnGebfPs",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/goggles-on"
+    },
+    {
       "id": "guideme",
       "name": "GuideME",
       "source": "modrinth",
@@ -520,8 +622,8 @@
       "name": "IMBlocker",
       "source": "modrinth",
       "project_id": "WMDesFsZ",
-      "version": "5.5.0",
-      "version_id": "6XnV6Gqd",
+      "version": "5.6.1",
+      "version_id": "hXYtiMlY",
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/imblocker-original"
@@ -536,6 +638,28 @@
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/iris-shader-folder"
+    },
+    {
+      "id": "inventoryhud",
+      "name": "InventoryHUD+",
+      "source": "modrinth",
+      "project_id": "Kp2uclYl",
+      "version": "3.4.26",
+      "version_id": "xnDlNpNS",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/inventoryhudplus"
+    },
+    {
+      "id": "inventoryprofilesnext",
+      "name": "Inventory Profiles Next",
+      "source": "modrinth",
+      "project_id": "O7RBXm3n",
+      "version": "forge-1.20.1-1.10.20",
+      "version_id": "CrtAI3P9",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/inventory-profiles-next"
     },
     {
       "id": "itemborders",
@@ -569,6 +693,17 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/jade"
+    },
+    {
+      "id": "jadeaddons",
+      "name": "Jade Addons",
+      "source": "modrinth",
+      "project_id": "xuDOzCLy",
+      "version": "5.5.1+forge",
+      "version_id": "l9IrZYLt",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/jade-addons-forge"
     },
     {
       "id": "jecharacters",
@@ -624,6 +759,61 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/kotlin-for-forge"
+    },
+    {
+      "id": "kubejs",
+      "name": "KubeJS",
+      "source": "modrinth",
+      "project_id": "umyGl7zF",
+      "version": "2001.6.5-build.26+forge",
+      "version_id": "hVR2xUSr",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kubejs"
+    },
+    {
+      "id": "kubejs_create",
+      "name": "KubeJS Create",
+      "source": "modrinth",
+      "project_id": "T38eAZQC",
+      "version": "2001.3.0-build.8+forge",
+      "version_id": "5vppyenb",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kubejs-create"
+    },
+    {
+      "id": "libipn",
+      "name": "libIPN",
+      "source": "modrinth",
+      "project_id": "onSQdWhM",
+      "version": "forge-1.20-4.0.2",
+      "version_id": "pdAXmKcS",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/libipn"
+    },
+    {
+      "id": "megacells",
+      "name": "MEGA Cells",
+      "source": "modrinth",
+      "project_id": "jjuIRIVr",
+      "version": "forge-2.4.6",
+      "version_id": "SH2D1n3s",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/mega"
+    },
+    {
+      "id": "meplacementtool",
+      "name": "ME Placement Tool",
+      "source": "modrinth",
+      "project_id": "uDNrWncj",
+      "version": "2.1.4-forge1.20.1",
+      "version_id": "QRZ243QS",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/me-placement-tool"
     },
     {
       "id": "melody",
@@ -708,6 +898,7 @@
       "source": "curseforge",
       "project_slug": "overloaded-armor-bar",
       "file_id": 4631133,
+      "file_name": "overloadedarmorbar-1.20.1-1.jar",
       "version": "1.20.1-1",
       "required": true,
       "environment": "client",
@@ -723,6 +914,17 @@
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/prism-lib"
+    },
+    {
+      "id": "rhino",
+      "name": "Rhino",
+      "source": "modrinth",
+      "project_id": "sk9knFPE",
+      "version": "2001.2.3-build.10+forge",
+      "version_id": "uNALdylI",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/rhino"
     },
     {
       "id": "searchables",
@@ -741,6 +943,7 @@
       "source": "curseforge",
       "project_slug": "smsn",
       "file_id": 7911351,
+      "file_name": "smsn-forge-1.4.0-1.20.1.jar",
       "version": "1.4.0-1.20.1",
       "required": true,
       "environment": "both",
@@ -758,12 +961,23 @@
       "url": "https://modrinth.com/mod/sodium-extras"
     },
     {
+      "id": "sophisticated_backpacks_create_integration",
+      "name": "Sophisticated Backpacks Create Integration",
+      "source": "modrinth",
+      "project_id": "s85zLEDe",
+      "version": "1.20.1-0.1.10.167",
+      "version_id": "gzpoJdRt",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/sophisticated-backpacks-create-integration"
+    },
+    {
       "id": "sophisticatedbackpacks",
       "name": "Sophisticated Backpacks",
       "source": "modrinth",
       "project_id": "TyCTlI4b",
-      "version": "1.20.1-3.24.35.1675",
-      "version_id": "Q0WNvzoq",
+      "version": "1.20.1-3.26.3.2157",
+      "version_id": "XxOZuQnU",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/sophisticated-backpacks"
@@ -773,8 +987,8 @@
       "name": "Sophisticated Core",
       "source": "modrinth",
       "project_id": "nmoqTijg",
-      "version": "1.20.1-1.3.21.1676",
-      "version_id": "JZ6uqaIK",
+      "version": "1.20.1-1.5.1.2335",
+      "version_id": "1Xl7lP0L",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/sophisticated-core"
@@ -807,6 +1021,7 @@
       "source": "curseforge",
       "project_slug": "trashslot",
       "file_id": 7772364,
+      "file_name": "trashslot-forge-1.20.1-15.1.4.jar",
       "version": "15.1.4+forge-1.20.1",
       "required": true,
       "environment": "both",

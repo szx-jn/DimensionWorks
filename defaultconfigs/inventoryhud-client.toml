@@ -1,0 +1,4 @@
+[inventoryhud]
+	# Keep the inventory item HUD disabled by default.
+	# Players can still toggle it with the InventoryHUD+ key binding.
+	byDefault = false
