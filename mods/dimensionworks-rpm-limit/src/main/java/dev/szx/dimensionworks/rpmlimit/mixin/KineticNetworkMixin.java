@@ -6,29 +6,33 @@ import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Re-evaluates the whole network before Create pushes network state to its members.
+ * Keeps stress accounting in the same effective RPM space that machines actually use.
  *
- * <p>{@code KineticNetwork.sync()} is the same place where Create recalculates and clears
- * overstress for every member, so hooking here gives the mismatch state the same automatic
- * recovery behaviour without destroying any blocks.
+ * <p>Propagation still keeps Create's raw source graph untouched. Only the stress/capacity totals
+ * are scaled when a player limit makes a member or generator run slower than its theoretical
+ * network speed.
  */
 @Mixin(value = KineticNetwork.class, remap = false)
 public abstract class KineticNetworkMixin {
 
-    @Inject(method = "sync", at = @At("HEAD"), remap = false)
-    private void dimensionworks$evaluateSpeedMismatch(CallbackInfo ci) {
-        RpmLimitManager.evaluateNetwork((KineticNetwork) (Object) this);
+    @Inject(method = "getActualStressOf", at = @At("RETURN"), cancellable = true, remap = false)
+    private void dimensionworks$limitEffectiveStress(KineticBlockEntity be,
+                                                     CallbackInfoReturnable<Float> cir) {
+        float raw = be.getTheoreticalSpeed();
+        float scale = RpmLimitManager.effectiveScale(be, raw);
+        if (scale < 1)
+            cir.setReturnValue(cir.getReturnValueF() * scale);
     }
 
-    /**
-     * Clears the flag on a member that leaves the network. Otherwise a disconnected block could
-     * keep its old red mismatch state until it joins another network.
-     */
-    @Inject(method = "remove", at = @At("HEAD"), remap = false)
-    private void dimensionworks$clearRemovedMismatch(KineticBlockEntity be, CallbackInfo ci) {
-        RpmLimitManager.setSpeedMismatch(be, false);
+    @Inject(method = "getActualCapacityOf", at = @At("RETURN"), cancellable = true, remap = false)
+    private void dimensionworks$limitEffectiveCapacity(KineticBlockEntity be,
+                                                       CallbackInfoReturnable<Float> cir) {
+        float raw = be.getGeneratedSpeed();
+        float scale = RpmLimitManager.effectiveScale(be, raw);
+        if (scale < 1)
+            cir.setReturnValue(cir.getReturnValueF() * scale);
     }
 }

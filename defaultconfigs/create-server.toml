@@ -1,0 +1,14 @@
+# 随整合包分发的 Create 服务端默认值。
+#
+# 只写需要覆盖的键，其余键由 Forge 在新建世界时按 Create 自己的默认值补齐。
+# 注意：服务端配置存放在每个存档的 serverconfig/ 下，本文件只在“新建世界”时生效。
+# 已经存在的世界必须直接改 <存档>/serverconfig/create-server.toml，本文件对它无效。
+#
+# 为什么必须随包分发：Create 的 maxRotationSpeed 默认只有 256，而 DimensionWorks 的
+# 转速体系按 10240 设计（见 mods/dimensionworks-rpm-limit）。缺了本文件的存档会被 Forge
+# 建成空配置，加载时所有键都回落到 Create 默认值，转速上限就变成 256。
+
+[kinetics]
+	#Maximum allowed rotation speed for any Kinetic Block.
+	#Range: > 64
+	maxRotationSpeed = 10240

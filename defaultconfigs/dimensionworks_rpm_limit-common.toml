@@ -1,0 +1,27 @@
+[rpm]
+	#Range: 1 ~ 10240
+	defaultRpm = 32
+	#Range: 1 ~ 10240
+	maxRpm = 10240
+	#12 ticks = 0.6 seconds
+	#Range: 1 ~ 200
+	cacheIntervalTicks = 12
+
+[overspeed]
+	#Machines spinning past their own saturation point process several batches per tick.
+	enabled = true
+	#Hard ceiling for the batch multiplier of every machine.
+	#Range: 1 ~ 64
+	cap = 15
+	#Multiply the machine's stress impact by its batch multiplier.
+	stressScaling = true
+	#Step table written as ratio:multiplier pairs, where ratio = RPM / the machine's saturation point.
+	#The multiplier of the last reached breakpoint is used; the cap above overrides larger values.
+	#Fallback value: 1:1,2:2,4:2.5,8:3.5,10:5,12:7,14:8.5,16:10,18:11.5,20:15
+	stepTable = "1:1,2:2,4:2.5,8:3.5,10:5,12:7,14:8.5,16:10,18:11.5,20:15"
+	#Saturation point assumed for whitelisted machines that are not known by name.
+	#Range: 1 ~ 10240
+	defaultSaturationRpm = 512
+	#Extra block entity classes that should batch too, as fully qualified or simple names.
+	#Rotation-only and item-moving blocks must stay out of this list.
+	classWhitelist = []

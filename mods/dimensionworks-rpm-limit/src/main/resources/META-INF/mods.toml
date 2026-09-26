@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_rpm_limit"
-version="0.1.0"
+version="0.3.9"
 displayName="DimensionWorks RPM Limit"
 authors="szx-jn"
 description='''Per-player Create rotational speed limits for DimensionWorks.'''
@@ -23,5 +23,5 @@ side="BOTH"
 modId="create"
 mandatory=true
 versionRange="[6.0.8,6.1)"
-ordering="AFTER"
+ordering="BEFORE"
 side="BOTH"

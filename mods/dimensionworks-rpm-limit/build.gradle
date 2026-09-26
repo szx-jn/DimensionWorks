@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.1.0'
+version = '0.3.9'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_rpm_limit'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -28,6 +28,7 @@ minecraft {
 
 repositories {
     maven { name = 'Create'; url = 'https://maven.createmod.net' }
+    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
     mavenCentral()
 }
 
@@ -36,7 +37,13 @@ dependencies {
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     // The slim Create artifact needs Ponder on both the compile and runtime classpaths.
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
+    // Create's slim artifact also omits its jar-in-jar Flywheel runtime dependency.
+    runtimeOnly fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
+    runtimeOnly 'io.github.llamalad7:mixinextras-forge:0.4.1'
+    runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
 
 mixin {
@@ -47,6 +54,10 @@ mixin {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 jar {
