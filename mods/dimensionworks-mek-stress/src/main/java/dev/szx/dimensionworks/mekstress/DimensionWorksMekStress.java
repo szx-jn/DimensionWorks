@@ -72,10 +72,21 @@ public final class DimensionWorksMekStress {
     );
 
     public static final RegistryObject<BlockEntityType<MemoryDriveBlockEntity>> MEMORY_DRIVE_BLOCK_ENTITY =
-        BLOCK_ENTITIES.register("memory_drive", () -> BlockEntityType.Builder.of(
+        BLOCK_ENTITIES.register("memory_drive", DimensionWorksMekStress::createMemoryDriveBlockEntity);
+
+    private static BlockEntityType<MemoryDriveBlockEntity> createMemoryDriveBlockEntity() {
+        Block[] blocks = DRIVE_BLOCKS.values().stream().map(RegistryObject::get).toArray(Block[]::new);
+        BlockEntityType<MemoryDriveBlockEntity> type = BlockEntityType.Builder.of(
             (pos, state) -> new MemoryDriveBlockEntity(blockEntityType(), pos, state),
-            DRIVE_BLOCKS.values().stream().map(RegistryObject::get).toArray(Block[]::new)
-        ).build(null));
+            blocks
+        ).build(null);
+        for (Block block : blocks) {
+            if (block instanceof MemoryDriveBlock drive) {
+                drive.setBlockEntity(MemoryDriveBlockEntity.class, type, null, null);
+            }
+        }
+        return type;
+    }
 
     public static final RegistryObject<MenuType<MemoryDriveMenu>> MEMORY_DRIVE_MENU = MENUS.register(
         "memory_drive",

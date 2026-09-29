@@ -22,8 +22,7 @@
             "type": "command",
             "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/auto_commit_push.py\"",
             "timeout": 180,
-            "statusMessage": "Committing and pushing completed changes",
-            "additionalContextLimit": 2000
+            "statusMessage": "Committing and pushing completed changes"
           }
         ]
       }
