@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "dimensionworks_mek_stress:block/memory_drive_ddr5" }
+  }
+}

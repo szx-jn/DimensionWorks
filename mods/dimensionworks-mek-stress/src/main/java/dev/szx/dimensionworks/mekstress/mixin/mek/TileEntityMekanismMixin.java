@@ -1,17 +1,10 @@
 package dev.szx.dimensionworks.mekstress.mixin.mek;
 
-import dev.szx.dimensionworks.mekstress.api.StressPoweredMachine;
-import dev.szx.dimensionworks.mekstress.api.StressSupplySource;
-import dev.szx.dimensionworks.mekstress.core.StressEnergyBuffer;
-import dev.szx.dimensionworks.mekstress.core.StressPowerState;
-import dev.szx.dimensionworks.mekstress.core.StressRules;
-import dev.szx.dimensionworks.mekstress.core.StressMachineTier;
-import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.tier.BaseTier;
-import mekanism.common.block.attribute.Attribute;
+import dev.szx.dimensionworks.mekstress.core.WorkScheduler;
+import dev.szx.dimensionworks.mekstress.memory.MachinePowerManager;
+import dev.szx.dimensionworks.mekstress.memory.StressRules;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,96 +12,52 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = TileEntityMekanism.class, remap = false)
-public abstract class TileEntityMekanismMixin implements StressPoweredMachine {
-
-    @Override
-    @Nullable
-    public StressEnergyBuffer dimensionworks$stressEnergyBuffer() {
-        TileEntityMekanism self = (TileEntityMekanism) (Object) this;
-        for (IEnergyContainer container : self.getEnergyContainers(null)) {
-            if (container instanceof StressEnergyBuffer buffer) {
-                return buffer;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void dimensionworks$rechargeFromStress(long gameTick) {
-        dimensionworks$stressPowerState().tryFillBuffer(gameTick);
-    }
-
-    @Override
-    public int dimensionworks$requiredRpm() {
-        TileEntityMekanism self = (TileEntityMekanism) (Object) this;
-        BaseTier baseTier = Attribute.getBaseTier(self.getBlockType());
-        return StressMachineTier.forBaseTier(baseTier == null ? null : baseTier.name()).requiredRpm();
-    }
-
+public abstract class TileEntityMekanismMixin {
     @Unique
-    private StressPowerState dimensionworks$stressPowerState;
-
-    @Unique
-    private boolean dimensionworks$repeatingUpdates;
-
-    @Override
-    public StressPowerState dimensionworks$stressPowerState() {
-        if (dimensionworks$stressPowerState == null) {
-            dimensionworks$stressPowerState = new StressPowerState(this);
-        }
-        return dimensionworks$stressPowerState;
-    }
-
-    @Override
-    public void dimensionworks$registerStressSource(StressSupplySource source, long gameTick) {
-        dimensionworks$stressPowerState().register(source, gameTick);
-    }
-
-    @Override
-    public double dimensionworks$speedMultiplier(long gameTick) {
-        return dimensionworks$stressPowerState().speedMultiplier(gameTick);
-    }
-
-    @Override
-    public int dimensionworks$batches(long gameTick) {
-        return dimensionworks$stressPowerState().batches(gameTick);
-    }
-
-    @Override
-    public boolean dimensionworks$disabledEnergyInfrastructure() {
-        return StressRules.isDisabledEnergyInfrastructure((TileEntityMekanism) (Object) this);
-    }
+    private boolean dimensionworks$repeatingUpdate;
 
     @Inject(method = "onUpdateServer", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$runOverspeedBatches(CallbackInfo ci) {
-        if (dimensionworks$repeatingUpdates) {
+    private void dimensionworks$scheduleMechanicalWork(CallbackInfo ci) {
+        if (dimensionworks$repeatingUpdate) {
+            return;
+        }
+        TileEntityMekanism self = (TileEntityMekanism) (Object) this;
+        if (!StressRules.isEligible(self)) {
+            return;
+        }
+        Level level = self.getLevel();
+        if (level == null || level.isClientSide) {
             return;
         }
 
-        TileEntityMekanism self = (TileEntityMekanism) (Object) this;
-        if (StressRules.isDisabledEnergyInfrastructure(self)) {
+        long tick = level.getGameTime();
+        MachinePowerManager.DirectSource direct = MachinePowerManager.directSource(self);
+        boolean aeRoute = MachinePowerManager.hasAeRoute(self, tick);
+        MachinePowerManager.updateDirectStress(self, aeRoute ? null : direct);
+
+        double workRate = MachinePowerManager.workRate(self, tick);
+        int calls = WorkScheduler.callsForRate(workRate, tick);
+        if (calls <= 0) {
             ci.cancel();
             return;
         }
-
-        Level level = self.getLevel();
-        if (level == null || level.isClientSide()) {
+        if (calls == 1) {
             return;
         }
 
-        int batches = dimensionworks$batches(level.getGameTime());
-        if (batches <= 1) {
-            return;
-        }
-
-        dimensionworks$repeatingUpdates = true;
+        ci.cancel();
+        dimensionworks$repeatingUpdate = true;
         try {
             TileEntityMekanismInvoker invoker = (TileEntityMekanismInvoker) this;
-            for (int i = 1; i < batches; i++) {
+            for (int i = 0; i < calls; i++) {
                 invoker.dimensionworks$onUpdateServer();
             }
         } finally {
-            dimensionworks$repeatingUpdates = false;
+            dimensionworks$repeatingUpdate = false;
         }
+    }
+    @Inject(method = "blockRemoved", at = @At("HEAD"), remap = false)
+    private void dimensionworks$clearRemovedBlock(CallbackInfo ci) {
+        MachinePowerManager.clearForRemoval((TileEntityMekanism) (Object) this);
     }
 }

@@ -1,1 +1,6 @@
-{"pack":{"pack_format":15,"description":"DimensionWorks Mekanism Stress"}}
+{
+  "pack": {
+    "description": "DimensionWorks ME Mechanical Power",
+    "pack_format": 15
+  }
+}

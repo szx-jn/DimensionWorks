@@ -1,24 +1,53 @@
 package dev.szx.dimensionworks.mekstress.mixin.mek;
 
-import dev.szx.dimensionworks.mekstress.core.StressContainerOwner;
+import appeng.api.config.Actionable;
+import dev.szx.dimensionworks.mekstress.memory.MachinePowerManager;
+import dev.szx.dimensionworks.mekstress.memory.StressRules;
+import mekanism.api.Action;
+import mekanism.api.AutomationType;
+import mekanism.api.math.FloatingLong;
+import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.tile.base.TileEntityMekanism;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = MachineEnergyContainer.class, remap = false)
+@Mixin(value = BasicEnergyContainer.class, remap = false)
 public abstract class MachineEnergyContainerMixin {
+    @Inject(method = "insert", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$rejectExternalFe(FloatingLong amount, Action action, AutomationType automationType,
+                                                  CallbackInfoReturnable<FloatingLong> cir) {
+        TileEntityMekanism tile = dimensionworks$machineTile();
+        if (tile != null && StressRules.isEligible(tile) && automationType != AutomationType.INTERNAL) {
+            cir.setReturnValue(amount);
+        }
+    }
 
-    @Shadow
-    @Final
-    protected TileEntityMekanism tile;
+    @Inject(method = "extract", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$useStressPower(FloatingLong amount, Action action, AutomationType automationType,
+                                               CallbackInfoReturnable<FloatingLong> cir) {
+        TileEntityMekanism tile = dimensionworks$machineTile();
+        if (tile == null || !StressRules.isEligible(tile) || amount.isZero()) {
+            return;
+        }
+        if (automationType != AutomationType.INTERNAL) {
+            cir.setReturnValue(FloatingLong.ZERO);
+            return;
+        }
+        long tick = tile.getLevel() == null ? 0L : tile.getLevel().getGameTime();
+        Actionable mode = action == Action.SIMULATE ? Actionable.SIMULATE : Actionable.MODULATE;
+        if (!MachinePowerManager.consumeForProcessing(tile, tick, mode)) {
+            cir.setReturnValue(FloatingLong.ZERO);
+            return;
+        }
+        cir.setReturnValue(amount);
+    }
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
-    private void dimensionworks$setOwner(CallbackInfo ci) {
-        ((StressContainerOwner) (Object) this).dimensionworks$setOwner(tile);
+    private TileEntityMekanism dimensionworks$machineTile() {
+        return this instanceof MachineEnergyContainerAccessor accessor
+            ? accessor.dimensionworks$machineTile()
+            : null;
     }
 }

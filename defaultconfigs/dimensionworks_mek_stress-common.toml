@@ -1,21 +1,39 @@
-[energy]
-	#Mekanism joules represented by one Applied Create stress unit.
-	#Range: 0.001 ~ 1000000.0
-	joulesPerSu = 2.5
+[memory_card_capacity]
+	#SU stored by one DDR1 Memory Card.
+	ddr1CardSu = 8192
+	#SU stored by one DDR2 Memory Card.
+	ddr2CardSu = 9216
+	#SU stored by one DDR3 Memory Card.
+	ddr3CardSu = 10240
+	#SU stored by one DDR4 Memory Card.
+	ddr4CardSu = 12288
+	#SU stored by one DDR5 Memory Card.
+	ddr5CardSu = 16384
 
-[card]
-	#Requested RPM stored by a newly configured stress output card.
-	#Range: 0 ~ 10240
-	defaultRpm = 32
-	#Upper bound accepted by the card UI before the owner limit is applied.
-	#Range: 1 ~ 10240
-	maxRpm = 10240
-	#Default maximum stress delivered by one output bus each tick.
-	#Range: 0 ~ 1048576
-	defaultStressPerTick = 1024
-	#Absolute per-tick stress limit accepted by the card UI.
-	#Range: 1 ~ 1048576
-	maxStressPerTick = 1048576
-	#RPM used when an export bus has no resolvable owning player.
-	#Range: 1 ~ 10240
-	ownerFallbackRpm = 32
+[memory_drive_bandwidth]
+	#RPM bandwidth provided by one DDR1 Memory Drive.
+	ddr1BandwidthRpm = 8192
+	#RPM bandwidth provided by one DDR2 Memory Drive.
+	ddr2BandwidthRpm = 16384
+	#RPM bandwidth provided by one DDR3 Memory Drive.
+	ddr3BandwidthRpm = 32768
+	#RPM bandwidth provided by one DDR4 Memory Drive.
+	ddr4BandwidthRpm = 65536
+	#RPM bandwidth provided by one DDR5 Memory Drive.
+	ddr5BandwidthRpm = 131072
+
+[mekanism_machine_rpm]
+	#Basic Mekanism machine target RPM.
+	basicRpm = 512
+	#Advanced Mekanism machine target RPM.
+	advancedRpm = 1024
+	#Elite Mekanism machine target RPM.
+	eliteRpm = 2048
+	#Ultimate Mekanism machine target RPM.
+	ultimateRpm = 4096
+
+[tuning]
+	#Exponent for network efficiency and AE production scaling.
+	efficiencyExponent = 1.25
+	#Maximum effective RPM available to a Create-direct machine.
+	directMaxRpm = 10240

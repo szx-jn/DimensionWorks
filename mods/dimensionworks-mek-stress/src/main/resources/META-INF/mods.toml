@@ -4,10 +4,10 @@ license="MIT"
 
 [[mods]]
 modId="dimensionworks_mek_stress"
-version="0.1.0"
-displayName="DimensionWorks Mekanism Stress"
+version="0.2.1"
+displayName="DimensionWorks ME Mechanical Power"
 authors="szx-jn"
-description='''Stress-only energy bridge for Mekanism machines and AE2 export buses.'''
+description='''ME Memory storage, global bandwidth scheduling and Mekanism/Create mechanical power routes for DimensionWorks.'''
 
 [[dependencies.dimensionworks_mek_stress]]
 modId="forge"
@@ -61,6 +61,6 @@ side="BOTH"
 [[dependencies.dimensionworks_mek_stress]]
 modId="dimensionworks_rpm_limit"
 mandatory=true
-versionRange="[0.4.4,1)"
+versionRange="[0.3.9,1)"
 ordering="AFTER"
 side="BOTH"

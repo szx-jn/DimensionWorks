@@ -1,54 +1,53 @@
-# DimensionWorks Mekanism Stress
+# DimensionWorks ME Mechanical Power
 
-把 Mekanism 耗能机器接入 Applied Create 的 ME 应力网络。
+把 Create 机械动力、Mekanism 机器和 AE2 网络连接成两套独立工程路线：
 
-## 功能
+- ME 数字路线：Memory Drive 提供实时 SU 库存，Memory Drive 自身提供网络 RPM 带宽；所有 AE 驱动机器按统一拥塞系数 `q` 调度。
+- Create 直连路线：机器直接从相邻 Create 动力轴读取实际 RPM，不占用 ME 库存，也不经过 `q` 调度。
 
-- Mekanism 机器不再接受 Forge Energy、能量槽或红石转换能量，只能由安装了 `stress_output_card` 的 AE2 ME 输出总线供能。
-- ME 输出总线朝向的 Mekanism 设备，把 ME 网络中的 `appliedcreate:stress` 按转换率写入机器原生 FE 能量缓冲；机器运行时按实际 FE 消耗扣减库存。
-- SU 库存与容量以原生 FE 缓冲为唯一存储，Jade、能量条和能量页显示时向下取整换算为 SU。
-- 加工速度与应力需求使用 `dimensionworks_rpm_limit` 的阶跃超速曲线，以机器自身等级的最低 RPM 作为 1x 基准。
-- Jade 对可接受应力的 Mekanism 机器隐藏原本的 FE 数据，改显示机器当前库存与容量：`内部应力：X / Y SU`。
-- 能量立方、感应矩阵、量子纠缠、通用线缆、热导线缆和充能台保留方块与存档数据，但其能量能力失效；其配方由 KubeJS 移除并从 JEI 隐藏。
+本 Mod 不修改 Applied Create、AE2、Mekanism、Create 的源码。Applied Create 原有的应力存储 Cell、组件、外壳和创造 Cell 全部退役，不能继续挂载、读写或供应 `StressKey`。
 
-## 机器转速门槛
+## Memory 参数
 
-- 基础机器：`128 RPM`
-- 进阶机器：`512 RPM`
-- 精英机器：`2048 RPM`
-- 终极机器：`10240 RPM`
+| DDR | 每 Drive 槽位 | 单卡 SU | 单 Drive 带宽 |
+|---|---:|---:|---:|
+| DDR1 | 4 | 8,192 | 8,192 RPM |
+| DDR2 | 8 | 9,216 | 16,384 RPM |
+| DDR3 | 16 | 10,240 | 32,768 RPM |
+| DDR4 | 32 | 12,288 | 65,536 RPM |
+| DDR5 | 64 | 16,384 | 131,072 RPM |
 
-供能转速低于机器门槛时不消耗应力，机器也不会运行。达到门槛后，超速曲线以该机器门槛作为 1x 饱和基准。
-总线断开、未配置应力或转速低于门槛时，机器已有的内部 SU 会保留但冻结，不能继续驱动加工。
+每个逻辑 AE 网络最多统计两台 Drive。第三台会使网络容量、带宽和输出归零，但 Drive 内已有 Card 与 SU 不会丢失；移除多余 Drive 后自动恢复。
 
-## 应力输出卡
+## 调度公式
 
-- 物品 ID：`dimensionworks_mek_stress:stress_output_card`
-- 只可安装在 AE2 ME 输出总线，最多一张。
-- 默认 `32 RPM`、每 tick 最多输出 `1024 SU`，拆下后设置保留。
-- 输出总线的配置槽可以把 JEI 中的 `appliedcreate:stress` 拖入作为输出目标；未配置应力时不会供电。
-- 手持卡片右键可打开设置界面，修改输出 RPM 与每 tick 最多输出的 SU；数值单位仍为 SU，
-  “每 tick”只描述输出速率上限。
-- 装卡后总线专职供应力，不再导出普通物品；拆卡后恢复普通导出。
-- 卡片 RPM 会受总线所有者当前的 `dimensionworks_rpm_limit` 限速约束。
+```text
+D_RPM = Σ effectiveRpm + Σ gearboxExportRpm
+D_SU  = Σ 8 * effectiveRpm + Σ gearboxExportSuPerTick
+C     = Σ driveCardCount * configuredCardCapacity
+B     = Σ driveBandwidth
+q_su  = D_SU == 0 ? 1 : min(1, storedSu / D_SU)
+q_bw  = D_RPM == 0 ? 1 : min(1, B / D_RPM)
+q     = min(q_su, q_bw)
 
-## 配置
+AE actualRpm     = effectiveRpm * q
+AE efficiency    = q^1.25
+AE production    = (effectiveRpm / tierRpm) * q^2.25
+Create direct    = min(adjacentRpm, configuredDirectMaxRpm) / tierRpm
+```
 
-公共配置默认值：
+空闲机器计入带宽需求，但只有实际加工 tick 才扣除 `8 * effectiveRpm * q` SU。Gearbox IMPORT 向网络输入 SU；Gearbox EXPORT 与输出总线共用同一个 `q`。
 
-- `joulesPerSu = 2.5`
-- `defaultRpm = 32`
-- `maxRpm = 10240`
-- `defaultStressPerTick = 1024`
-- `maxStressPerTick = 1048576`
-- `ownerFallbackRpm = 32`
+## 工程接口
 
-## 兼容修复
+- `memory_drive_ddr1..5`：每页显示 10 槽，按 DDR 等级只接受同等级 Memory Card。
+- `memory_card_ddr1..5`：只影响网络 SU 容量，不影响 Drive 带宽。
+- `stress_output_card`：只可安装于 AE2 ME 输出总线，最多一张。装卡后总线停止普通物品导出，并驱动相邻的合格 Mekanism 机器。
+- `/dw memory`：读取附近已连接 Drive 所在逻辑网格的状态快照。
 
-- Applied Create 的 ME 齿轮箱应力自定义上限始终至少为 `8 × 当前输出转速`。界面校验、菜单夹取和方块实体存入时会使用同一个动态上限。
-- AE2 网格能量存储忽略重复节点移除。FTB Ultimine 连锁破坏线缆总线导致的第二次移除不再抛异常，后续方块可以继续连锁处理。
+所有平衡值位于 COMMON 配置 `dimensionworks_mek_stress-common.toml`。槽数、结构规则、两台 Drive 上限、公式和两条路线的基本结构不可配置。
 
-构建：
+## 构建
 
 ```sh
 gradle build --no-daemon

@@ -487,10 +487,10 @@
     },
     {
       "id": "dimensionworks_mek_stress",
-      "name": "DimensionWorks Mekanism Stress",
+      "name": "DimensionWorks ME Mechanical Power",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-mek-stress",
-      "version": "0.1.0",
+      "version": "0.2.1",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
