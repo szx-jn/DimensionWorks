@@ -1,16 +1,13 @@
 package dev.szx.dimensionworks.mekstress;
 
-import appeng.core.definitions.AEParts;
 import dev.szx.dimensionworks.mekstress.block.MemoryDriveBlock;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
 import dev.szx.dimensionworks.mekstress.card.MemoryCardItem;
-import dev.szx.dimensionworks.mekstress.card.StressOutputCardItem;
 import dev.szx.dimensionworks.mekstress.command.MemoryCommand;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import dev.szx.dimensionworks.mekstress.memory.MemoryDriveMenu;
 import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
 import dev.szx.dimensionworks.mekstress.memory.MemoryLegacyMigration;
-import dev.szx.dimensionworks.mekstress.memory.MachinePowerRegistry;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.world.inventory.MenuType;
@@ -66,11 +63,6 @@ public final class DimensionWorksMekStress {
         }
     }
 
-    public static final RegistryObject<Item> STRESS_OUTPUT_CARD = ITEMS.register(
-        "stress_output_card",
-        () -> new StressOutputCardItem(new Item.Properties().stacksTo(1))
-    );
-
     public static final RegistryObject<BlockEntityType<MemoryDriveBlockEntity>> MEMORY_DRIVE_BLOCK_ENTITY =
         BLOCK_ENTITIES.register("memory_drive", DimensionWorksMekStress::createMemoryDriveBlockEntity);
 
@@ -109,13 +101,11 @@ public final class DimensionWorksMekStress {
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onChunkLoad);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onEntityJoin);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onEntityLeave);
-        MinecraftForge.EVENT_BUS.addListener(MachinePowerRegistry::onServerTick);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             MemoryGridService.register();
-            appeng.api.upgrades.Upgrades.add(STRESS_OUTPUT_CARD.get(), AEParts.EXPORT_BUS, 1);
         });
     }
 
@@ -123,7 +113,6 @@ public final class DimensionWorksMekStress {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             DRIVE_BLOCKS.values().forEach(event::accept);
             MEMORY_CARDS.values().forEach(event::accept);
-            event.accept(STRESS_OUTPUT_CARD);
         }
     }
 

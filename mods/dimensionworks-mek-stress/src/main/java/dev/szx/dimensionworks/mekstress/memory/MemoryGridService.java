@@ -16,7 +16,6 @@ import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkSnapshot;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
-import dev.szx.dimensionworks.mekstress.core.MachineTier;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import dev.szx.dimensionworks.mekstress.core.NetworkMath;
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
     private static final long CONSUMER_TIMEOUT_TICKS = 3L;
 
     private final IGrid grid;
-    private final Map<GlobalPos, MachineDemand> machineDemands = new HashMap<>();
     private final Map<GlobalPos, GearboxDemand> gearboxDemands = new HashMap<>();
     private boolean mounted;
     private long lastComputedTick = Long.MIN_VALUE;
@@ -142,10 +140,6 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
 
         long demandRpm = 0L;
         long demandSu = 0L;
-        for (MachineDemand demand : machineDemands.values()) {
-            demandRpm = saturatedAdd(demandRpm, demand.effectiveRpm);
-            demandSu = saturatedAdd(demandSu, (long) demand.effectiveRpm * 8L);
-        }
         for (GearboxDemand demand : gearboxDemands.values()) {
             demandRpm = saturatedAdd(demandRpm, demand.requestedRpm);
             demandSu = saturatedAdd(demandSu, demand.requestedSuPerTick);
@@ -251,22 +245,6 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
     }
 
     @Override
-    public void reportOutputBus(GlobalPos busPos, GlobalPos machinePos, int effectiveRpm, MachineTier tier, long gameTick) {
-        long tick = normalizedTick(gameTick);
-        MachineDemand current = machineDemands.get(machinePos);
-        boolean changed = current == null || current.lastSeenTick < tick - CONSUMER_TIMEOUT_TICKS
-            || effectiveRpm < current.effectiveRpm;
-        if (changed) {
-            machineDemands.put(machinePos, new MachineDemand(busPos, effectiveRpm, tier, tick));
-        } else {
-            machineDemands.put(machinePos, new MachineDemand(current.busPos, current.effectiveRpm, current.tier, tick));
-        }
-        if (changed) {
-            lastComputedTick = Long.MIN_VALUE;
-        }
-    }
-
-    @Override
     public void reportGearboxExport(GlobalPos gearboxPos, int requestedRpm, long requestedSuPerTick, long gameTick) {
         long tick = normalizedTick(gameTick);
         int rpm = Math.max(0, requestedRpm);
@@ -340,7 +318,6 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
     }
 
     private void expire(long gameTick) {
-        machineDemands.values().removeIf(demand -> gameTick - demand.lastSeenTick > CONSUMER_TIMEOUT_TICKS);
         gearboxDemands.values().removeIf(demand -> gameTick - demand.lastSeenTick > CONSUMER_TIMEOUT_TICKS);
     }
 
@@ -368,9 +345,6 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
             return Long.MAX_VALUE;
         }
         return a + b;
-    }
-
-    private record MachineDemand(GlobalPos busPos, int effectiveRpm, MachineTier tier, long lastSeenTick) {
     }
 
     private record GearboxDemand(int requestedRpm, long requestedSuPerTick, long lastSeenTick) {

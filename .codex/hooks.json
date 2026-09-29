@@ -9,8 +9,7 @@
             "type": "command",
             "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/pack_preflight.py\"",
             "timeout": 180,
-            "statusMessage": "Running DimensionWorks packaging preflight",
-            "additionalContextLimit": 2000
+            "statusMessage": "Running DimensionWorks packaging preflight"
           }
         ]
       }

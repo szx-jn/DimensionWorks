@@ -34,8 +34,7 @@ const dwMemoryItems = [
   'dimensionworks_mek_stress:memory_card_ddr2',
   'dimensionworks_mek_stress:memory_card_ddr3',
   'dimensionworks_mek_stress:memory_card_ddr4',
-  'dimensionworks_mek_stress:memory_card_ddr5',
-  'dimensionworks_mek_stress:stress_output_card'
+  'dimensionworks_mek_stress:memory_card_ddr5'
 ]
 
 StartupEvents.modifyCreativeTab('appliedcreate:main', event => {

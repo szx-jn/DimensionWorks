@@ -4,6 +4,7 @@ import appeng.api.inventories.InternalInventory;
 import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
+import dev.szx.dimensionworks.mekstress.core.MemoryDrivePaging;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -16,8 +17,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class MemoryDriveMenu extends AbstractContainerMenu {
-    public static final int SLOTS_PER_PAGE = 10;
-    public static final int MAX_PAGE = 6;
+    public static final int SLOTS_PER_PAGE = MemoryDrivePaging.SLOTS_PER_PAGE;
 
     private final MemoryDriveBlockEntity drive;
     private final Player player;
@@ -34,15 +34,16 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
         this.player = inventory.player;
 
         for (int slot = 0; slot < SLOTS_PER_PAGE; slot++) {
-            addSlot(new PagedDriveSlot(this, slot, 16 + (slot % 5) * 22, 26 + (slot / 5) * 22));
+            addSlot(new PagedDriveSlot(this, slot, 8 + MemoryDrivePaging.slotX(slot),
+                14 + MemoryDrivePaging.slotY(slot)));
         }
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inventory, col + row * 9 + 9, 16 + col * 18, 84 + row * 18));
+                addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 117 + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inventory, col, 16 + col * 18, 142));
+            addSlot(new Slot(inventory, col, 8 + col * 18, 175));
         }
         syncData = new ContainerData() {
             @Override
@@ -104,12 +105,20 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
     }
 
     public int pageOffset() {
-        return page * SLOTS_PER_PAGE;
+        return MemoryDrivePaging.pageOffset(page);
+    }
+
+    public int pageCount() {
+        return MemoryDrivePaging.pageCount(drive.tier().slotsPerDrive());
+    }
+
+    public boolean isPageSlotActive(int pageSlot) {
+        return pageOffset() + pageSlot < drive.tier().slotsPerDrive();
     }
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (player != this.player || id < 0 || id > MAX_PAGE) {
+        if (player != this.player || id < 0 || id >= pageCount()) {
             return false;
         }
         page = id;

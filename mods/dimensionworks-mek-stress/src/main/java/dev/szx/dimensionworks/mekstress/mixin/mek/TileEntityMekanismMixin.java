@@ -32,8 +32,7 @@ public abstract class TileEntityMekanismMixin {
 
         long tick = level.getGameTime();
         MachinePowerManager.DirectSource direct = MachinePowerManager.directSource(self);
-        boolean aeRoute = MachinePowerManager.hasAeRoute(self, tick);
-        MachinePowerManager.updateDirectStress(self, aeRoute ? null : direct);
+        MachinePowerManager.updateDirectStress(self, direct, tick);
 
         double workRate = MachinePowerManager.workRate(self, tick);
         int calls = WorkScheduler.callsForRate(workRate, tick);

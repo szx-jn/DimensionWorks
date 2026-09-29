@@ -1,13 +1,11 @@
 package dev.szx.dimensionworks.mekstress.memory;
 
-import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.core.MachineTier;
 import java.util.Set;
 import mekanism.api.tier.BaseTier;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.tile.base.TileEntityMekanism;
-import net.minecraft.world.item.ItemStack;
 
 /** Structural eligibility and tier rules for the Mekanism bridge. */
 public final class StressRules {
@@ -52,15 +50,5 @@ public final class StressRules {
 
     public static int targetRpm(TileEntityMekanism tile) {
         return MekStressConfig.machineRpm(machineTier(tile));
-    }
-
-    public static boolean hasStressOutputCard(appeng.api.upgrades.IUpgradeableObject machine) {
-        ItemStack card = DimensionWorksMekStress.STRESS_OUTPUT_CARD.get().getDefaultInstance();
-        for (ItemStack stack : machine.getUpgrades()) {
-            if (ItemStack.isSameItemSameTags(stack, card)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

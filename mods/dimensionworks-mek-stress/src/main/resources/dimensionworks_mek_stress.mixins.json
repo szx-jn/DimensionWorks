@@ -5,12 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "dimensionworks_mek_stress.refmap.json",
   "mixins": [
-    "ae2.ExportBusPartMixin",
-    "ae2.IOBusPartMixin",
     "appliedcreate.MEGearboxBlockEntityMixin",
     "appliedcreate.StorageCellsMixin",
     "create.KineticBlockEntityMixin",
     "mek.MachineEnergyContainerMixin",
+    "mek.JadeDataProviderMixin",
     "mek.MachineEnergyContainerAccessor",
     "mek.TileEntityMekanismInvoker",
     "mek.TileEntityMekanismMixin"

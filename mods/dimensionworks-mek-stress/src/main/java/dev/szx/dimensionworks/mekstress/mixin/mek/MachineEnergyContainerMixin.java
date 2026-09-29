@@ -2,6 +2,7 @@ package dev.szx.dimensionworks.mekstress.mixin.mek;
 
 import appeng.api.config.Actionable;
 import dev.szx.dimensionworks.mekstress.memory.MachinePowerManager;
+import dev.szx.dimensionworks.mekstress.memory.ProcessingEnergyRegistry;
 import dev.szx.dimensionworks.mekstress.memory.StressRules;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
@@ -9,6 +10,7 @@ import mekanism.api.math.FloatingLong;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.minecraft.core.GlobalPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,6 +43,11 @@ public abstract class MachineEnergyContainerMixin {
         if (!MachinePowerManager.consumeForProcessing(tile, tick, mode)) {
             cir.setReturnValue(FloatingLong.ZERO);
             return;
+        }
+        if (action != Action.SIMULATE && tile.getLevel() != null) {
+            long requestedFe = Math.max(1L, amount.ceil().longValue());
+            ProcessingEnergyRegistry.record(
+                GlobalPos.of(tile.getLevel().dimension(), tile.getBlockPos()), tick, requestedFe);
         }
         cir.setReturnValue(amount);
     }

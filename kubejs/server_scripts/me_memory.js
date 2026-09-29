@@ -70,13 +70,6 @@ ServerEvents.recipes(event => {
     })
   }
 
-  event.shapeless('dimensionworks_mek_stress:stress_output_card', [
-    'ae2:basic_card',
-    'ae2:engineering_processor',
-    'mekanism:alloy_atomic',
-    'mekanism:ultimate_control_circuit'
-  ])
-
   retiredAppliedCreateItems.forEach(id => event.remove({ output: id }))
   event.remove({ id: 'appliedcreate:creative_motor_from_stress_cell' })
 })

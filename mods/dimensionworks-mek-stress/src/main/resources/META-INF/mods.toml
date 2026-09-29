@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="dimensionworks_mek_stress"
-version="0.2.1"
+version="0.2.2"
 displayName="DimensionWorks ME Mechanical Power"
 authors="szx-jn"
 description='''ME Memory storage, global bandwidth scheduling and Mekanism/Create mechanical power routes for DimensionWorks.'''
