@@ -1,5 +1,5 @@
 {
-  "description": "DimensionWorks packaging preflight. Checks .mrpack-related Bash commands before they run.",
+  "description": "DimensionWorks packaging preflight and automatic commit/push after completed turns.",
   "hooks": {
     "PreToolUse": [
       {
@@ -10,6 +10,19 @@
             "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/pack_preflight.py\"",
             "timeout": 180,
             "statusMessage": "Running DimensionWorks packaging preflight",
+            "additionalContextLimit": 2000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/auto_commit_push.py\"",
+            "timeout": 180,
+            "statusMessage": "Committing and pushing completed changes",
             "additionalContextLimit": 2000
           }
         ]
