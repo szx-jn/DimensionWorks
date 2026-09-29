@@ -182,11 +182,17 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
 
         @Override
         public ItemStack getItem() {
+            if (!isActive()) {
+                return ItemStack.EMPTY;
+            }
             return inventory().getStackInSlot(inventorySlot());
         }
 
         @Override
         public void set(ItemStack stack) {
+            if (!isActive()) {
+                return;
+            }
             if (!stack.isEmpty() && !mayPlace(stack)) {
                 return;
             }
