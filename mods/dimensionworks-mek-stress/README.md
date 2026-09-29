@@ -7,6 +7,8 @@
 
 本 Mod 不修改 Applied Create、AE2、Mekanism、Create 的源码。Applied Create 原有的应力存储 Cell、组件、外壳和创造 Cell 全部退役，不能继续挂载、读写或供应 `StressKey`。
 
+KubeJS 会把 `memory_drive_ddr1..5`、`memory_card_ddr1..5` 和 `stress_output_card` 加入 Applied Create 创造标签；原版“工具与实用物品”标签也由 Mod 注册这些物品。旧应力存储物品会从创造标签、JEI 展示和配方中移除，已有实例继续由迁移队列清除。
+
 ## Memory 参数
 
 | DDR | 每 Drive 槽位 | 单卡 SU | 单 Drive 带宽 |
