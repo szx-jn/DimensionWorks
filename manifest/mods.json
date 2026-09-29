@@ -814,6 +814,28 @@
       "url": "https://modrinth.com/mod/kubejs-create"
     },
     {
+      "id": "l2library",
+      "name": "L2 Library",
+      "source": "modrinth",
+      "project_id": "4Vh3BQ3F",
+      "version": "2.5.3",
+      "version_id": "lg7mW3eS",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/l2library"
+    },
+    {
+      "id": "l2complements",
+      "name": "L2 Complements",
+      "source": "modrinth",
+      "project_id": "oPrh2Lz3",
+      "version": "2.6.1",
+      "version_id": "TvdiYrC4",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/l2-complements"
+    },
+    {
       "id": "libipn",
       "name": "libIPN",
       "source": "modrinth",
@@ -934,6 +956,17 @@
       "required": true,
       "environment": "client",
       "url": "https://www.curseforge.com/minecraft/mc-mods/overloaded-armor-bar"
+    },
+    {
+      "id": "patchouli",
+      "name": "Patchouli",
+      "source": "modrinth",
+      "project_id": "nU0bVIaL",
+      "version": "1.20.1-85-forge",
+      "version_id": "94dtOLgZ",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/patchouli"
     },
     {
       "id": "prism",

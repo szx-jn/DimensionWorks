@@ -26,7 +26,7 @@ DEFAULT_INSTANCE_DIR = (
 DEFAULT_VERSION = "0.1.0-alpha.1"
 FORGE_VERSION = "47.4.23"
 USER_AGENT = "DimensionWorks-Packager/0.1"
-OVERRIDE_DIRS = ("defaultconfigs", "kubejs", "resourcepacks")
+OVERRIDE_DIRS = ("defaultconfigs", "kubejs", "resourcepacks", "shaderpacks")
 VERBOSE = False
 REPO_CONFIG_OVERRIDE_DIRS = ("config",)
 IGNORED_OVERRIDE_FILES = {".DS_Store", "README", "README.md"}
@@ -43,6 +43,7 @@ INSTANCE_CONFIG_FILES = (
     Path("CustomSkinLoader/CustomSkinLoader.json"),
     Path("minemenu/menu.json"),
 )
+REPO_OVERRIDE_FILES = (Path("options.txt"),)
 
 
 def request_json(url: str) -> Any:
@@ -278,6 +279,9 @@ def build_pack(version: str, output: Path, cache_dir: Path, instance_dir: Path) 
         )
     for relative in INSTANCE_CONFIG_FILES:
         copied += copy_override_file(instance_dir / relative, overrides, relative)
+
+    for relative in REPO_OVERRIDE_FILES:
+        copied += copy_override_file(ROOT / relative, overrides, relative)
 
     mods_override = overrides / "mods"
     mods_override.mkdir(parents=True, exist_ok=True)

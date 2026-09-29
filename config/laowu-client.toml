@@ -1,0 +1,123 @@
+#游戏内按 K 调整过的第一人称手持物品显示参数。
+#每项格式：物品注册名|X旋转|Y旋转|Z旋转|X位移|Y位移|Z位移|缩放。
+#不同物品会分别保存，只影响第一人称手持显示。
+held_item_transforms = []
+#游戏内按 K 调整过的第三人称手持物品显示参数。
+#每项格式：物品注册名|X旋转|Y旋转|Z旋转|X位移|Y位移|Z位移|缩放。
+#不同物品会分别保存，只影响第三人称手持显示。
+third_person_item_transforms = []
+#游戏内按 K 调整过的物品栏与容器 GUI 物品显示参数。
+#每项格式：物品注册名|X旋转|Y旋转|Z旋转|X位移|Y位移|Z位移|缩放。
+#该配置与手持显示参数独立保存，不影响掉落物和方块展示框。
+gui_item_transforms = []
+#两只及以上猫咪进入哈气状态时，专属哈气音频的客户端音量倍率。
+#0.0 为静音，1.0 为默认音量，2.0 为双倍音量；游戏内按 V 调整。
+#Range: 0.0 ~ 2.0
+hissing_pair_volume = 1.0
+#是否以自己为中心，每10～15分钟额外刷新方块材质猫咪。
+#个人偏好会同步给服务端；其他玩家及原版自然刷猫不受影响。
+nearby_cat_spawning = true
+#是否显示附近宠物猫的血条（不显示野生猫）；激光笔轮盘中修改，只影响自己的画面。
+cat_health_bars = false
+#是否显示宠物猫的团队色轮廓和主人头像；只影响自己的画面。
+cat_team_preview = false
+
+#哈气姿势。Pitch 为 X 轴角度，Roll 为 Z 轴角度，Offset 单位为模型像素。
+[hissing_pose]
+	#躯干前后倾斜角度。
+	#Range: -180.0 ~ 180.0
+	bodyPitch = 90.0
+	#躯干高度；负值向上。
+	#Range: -16.0 ~ 16.0
+	bodyYOffset = -1.0
+	#躯干前后偏移；负值向前。
+	#Range: -16.0 ~ 16.0
+	bodyZOffset = -1.0
+	#胸部相对躯干的旋转角度。
+	#Range: -180.0 ~ 180.0
+	chestPitch = 40.0
+	#胸部高度微调；负值向上。
+	#Range: -16.0 ~ 16.0
+	chestYOffset = -1.65
+	#胸部前后位置；负值向猫头方向，正值向尾巴方向。
+	#Range: -16.0 ~ 16.0
+	chestZOffset = 2.0
+	#腹部相对躯干的旋转角度。
+	#Range: -180.0 ~ 180.0
+	bellyPitch = 0.0
+	#腹部高度微调；负值向上，用于拱背。
+	#Range: -16.0 ~ 16.0
+	bellyYOffset = -3.0
+	#腹部前后位置；负值向猫头方向，正值向尾巴方向。
+	#Range: -16.0 ~ 16.0
+	bellyZOffset = 1.0
+	#臀部相对躯干的旋转角度。
+	#Range: -180.0 ~ 180.0
+	hipsPitch = -35.0
+	#臀部高度微调；负值向上。
+	#Range: -16.0 ~ 16.0
+	hipsYOffset = -1.0
+	#臀部前后位置；负值向猫头方向，正值向尾巴方向。
+	#Range: -16.0 ~ 16.0
+	hipsZOffset = 1.0
+	#头部俯仰角度。
+	#Range: -180.0 ~ 180.0
+	headPitch = 20.0
+	#从正面看头部左右歪斜角度。
+	#Range: -180.0 ~ 180.0
+	headRoll = 20.0
+	#头部高度；负值向上。
+	#Range: -16.0 ~ 16.0
+	headYOffset = 1.0
+	#头部前后偏移；负值向前。
+	#Range: -16.0 ~ 16.0
+	headZOffset = 1.0
+	#后腿前后旋转角度。
+	#Range: -180.0 ~ 180.0
+	hindLegPitch = -12.0
+	#后腿高度；负值向上。
+	#Range: -16.0 ~ 16.0
+	hindLegYOffset = -5.0
+	#后腿前后偏移。
+	#Range: -16.0 ~ 16.0
+	hindLegZOffset = 0.0
+	#后腿长度倍率；1.0 为原版。
+	#Range: 0.5 ~ 2.0
+	hindLegLengthScale = 2.0
+	#前腿前后旋转角度。
+	#Range: -180.0 ~ 180.0
+	frontLegPitch = 10.0
+	#前腿高度；负值向上。
+	#Range: -16.0 ~ 16.0
+	frontLegYOffset = 0.0
+	#前腿前后偏移。
+	#Range: -16.0 ~ 16.0
+	frontLegZOffset = 1.0
+	#前腿长度倍率；1.0 为原版。
+	#Range: 0.5 ~ 2.0
+	frontLegLengthScale = 1.0
+	#尾巴根部旋转角度；负值使尾巴向腹部下方收起。
+	#Range: -180.0 ~ 180.0
+	tailBasePitch = -35.0
+	#尾巴根部高度；负值向上。
+	#Range: -16.0 ~ 16.0
+	tailBaseYOffset = 0.0
+	#尾巴根部前后偏移；负值向前。
+	#Range: -16.0 ~ 16.0
+	tailBaseZOffset = 0.0
+	#尾巴根部长度倍率；夹尾巴建议 0.5~0.8。
+	#Range: 0.5 ~ 2.0
+	tailBaseLengthScale = 0.65
+	#尾巴末端旋转角度；负值使尾尖夹向后腿之间。
+	#Range: -180.0 ~ 180.0
+	tailTipPitch = -20.0
+	#尾巴末端高度；数值已对齐缩短后的根段末端。
+	#Range: -16.0 ~ 16.0
+	tailTipYOffset = -0.7
+	#尾巴末端前后偏移；数值已对齐缩短后的根段末端。
+	#Range: -16.0 ~ 16.0
+	tailTipZOffset = -9.0
+	#尾巴末端长度倍率；夹尾巴建议 0.5~0.8。
+	#Range: 0.5 ~ 2.0
+	tailTipLengthScale = 0.55
+

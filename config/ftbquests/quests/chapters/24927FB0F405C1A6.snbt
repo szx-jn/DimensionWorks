@@ -1,0 +1,674 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "24927FB0F405C1A6"
+	group: "7548F9E1983F8BC3"
+	icon: "laowu:devouring_cat"
+	id: "24927FB0F405C1A6"
+	order_index: 3
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"铁砧砸猫或纸棍攻击即可获得（需要铲子铲起）"
+				"（注；鼓风机可以复原猫）"
+			]
+			id: "57BA80CB13C67AB3"
+			rewards: [{
+				count: 10
+				id: "612928B11B078C10"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "老吴！！！老吴！！！"
+			tasks: [{
+				id: "47F5C270996E0BAE"
+				item: {
+					Count: 1
+					id: "laowu:cat_pancake"
+					tag: {
+						LaoWuCatAttributes: {
+							Current: {
+								attack: 82
+								health: 30
+								intelligence: 8
+								luck: 18
+								speed: 6
+								stamina: 25
+							}
+							Potential: {
+								attack: 82
+								health: 76
+								intelligence: 74
+								luck: 20
+								speed: 11
+								stamina: 73
+							}
+							Version: 3
+						}
+						LaoWuCatGenome: {
+							Regions: {
+								body_front: "minecraft:red"
+								body_rear: "minecraft:red"
+								ears: "minecraft:red"
+								front_legs: "minecraft:red"
+								head_primary: "minecraft:red"
+								head_secondary: "minecraft:red"
+								hind_legs: "minecraft:red"
+								left_eye: "minecraft:red"
+								muzzle: "minecraft:red"
+								right_eye: "minecraft:red"
+								tail: "minecraft:red"
+							}
+							Version: 2
+						}
+						LaoWuCatTexture: "minecraft:textures/entity/cat/red.png"
+						LaoWuCatTraits: {
+							Traits: [
+								{
+									Id: "laowu:tail_held_high"
+									Level: 1
+								}
+								{
+									Id: "laowu:air_raid_siren"
+									Level: 1
+								}
+							]
+							Version: 1
+						}
+						LaoWuCatVariant: "minecraft:red"
+					}
+				}
+				type: "item"
+			}]
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["57BA80CB13C67AB3"]
+			description: [
+				"小范围内吸取气体（下方放置鼓风机即可）"
+				"也可用于洗涤等等只需在上方放置流体储罐（如果放置药水的话会范围提供效果）以及动力泵，属于范围洗涤（鼓风机需吹气）"
+			]
+			hide_dependency_lines: false
+			id: "0B9B6B8D6F95A250"
+			rewards: [{
+				id: "7079A19649E8A05E"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "两猫儿辨老吴"
+			tasks: [{
+				id: "3A21EC16FD02C0F1"
+				item: "laowu:hissing_collector"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["0B9B6B8D6F95A250"]
+			description: ["一只猫可以无限获得猫毛（包括未铲起的猫饼）"]
+			hide_dependency_lines: false
+			id: "65AC51C3C4E59A3A"
+			rewards: [{
+				id: "4DA0B8220E517ACA"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "为什么到处是....."
+			tasks: [{
+				id: "7667F3B3BE950290"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["0B9B6B8D6F95A250"]
+			hide_dependency_lines: false
+			id: "0948840B0DED1D2B"
+			rewards: [{
+				id: "09E54B6ED9FB6F79"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "注入灵魂！！！！（哈基蜜）"
+			tasks: [{
+				id: "44B609AB9B87A1EC"
+				item: "laowu:cat_dough"
+				type: "item"
+			}]
+			title: "猫太少怎么办"
+			x: 2.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["65AC51C3C4E59A3A"]
+			description: ["需要哈气和哈基蜜冲压"]
+			hide_dependency_lines: true
+			id: "5EBFD7F9D40164A2"
+			rewards: [{
+				id: "1B9E87E52268F021"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "此乃何物...."
+			tasks: [{
+				id: "7C62E34A3FFF983A"
+				item: "laowu:cat_ingot"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 7.0d
+		}
+		{
+			id: "32075CFCCF1BFDB8"
+			subtitle: "虽然没伤害但是击退高"
+			tasks: [{
+				id: "55B7BF880F53BE22"
+				item: "create:cardboard_sword"
+				type: "item"
+			}]
+			x: 0.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["65AC51C3C4E59A3A"]
+			hide_dependency_lines: false
+			id: "1BCA6CD45FFE3DEE"
+			rewards: [{
+				id: "2B5F39FA2263FB42"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "推荐使用糖制作哈基蜜"
+			tasks: [{
+				id: "7727D2F3186D1405"
+				item: "minecraft:sugar"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 0.5d
+		}
+		{
+			dependencies: ["5EBFD7F9D40164A2"]
+			hide_dependency_lines: false
+			id: "702E7E20C78171CD"
+			rewards: [{
+				id: "2333B1FB31413674"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "421AD27D77420932"
+				item: "laowu:cat_sheet"
+				type: "item"
+			}]
+			x: -4.5d
+			y: 7.0d
+		}
+		{
+			dependencies: ["1F28825A20373F28"]
+			hide_dependency_lines: false
+			id: "5354F90C0B376867"
+			rewards: [{
+				id: "291AD241B3405C23"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "14D361D3FEC1B51D"
+				item: "laowu:cat_spring"
+				type: "item"
+			}]
+			x: 0.5d
+			y: 8.5d
+		}
+		{
+			dependencies: ["702E7E20C78171CD"]
+			hide_dependency_lines: false
+			id: "046F94254CA2D142"
+			rewards: [{
+				id: "7560B558F8B0D158"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "14B3ED1E195A9237"
+				item: "laowu:cat_gear"
+				type: "item"
+			}]
+			x: -4.5d
+			y: 8.5d
+		}
+		{
+			dependencies: [
+				"5354F90C0B376867"
+				"046F94254CA2D142"
+			]
+			dependency_requirement: "one_completed"
+			hide_dependency_lines: true
+			id: "4D635C6C76542A2E"
+			rewards: [{
+				id: "5382B32577653449"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "164629A661A96D1E"
+				item: "laowu:cat_component"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 8.5d
+		}
+		{
+			dependencies: ["5EBFD7F9D40164A2"]
+			description: ["动力锯切割即可获得（其实可以吃喵）"]
+			hide_dependency_lines: false
+			id: "1F28825A20373F28"
+			rewards: [{
+				id: "2A8FFCF49E6FB942"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "07E0BC39D900F412"
+				item: "laowu:cat_strip"
+				type: "item"
+			}]
+			x: 0.5d
+			y: 7.0d
+		}
+		{
+			dependencies: ["5354F90C0B376867"]
+			description: ["使用猫大炮发射（不会破坏地形）"]
+			hide_dependency_lines: false
+			id: "6CCC823472802F5B"
+			rewards: [{
+				id: "3E0139C33A6F7B56"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "真的会炸"
+			tasks: [{
+				id: "2C3EACD3998BD568"
+				item: "laowu:cat_grenade"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 8.5d
+		}
+		{
+			dependencies: ["4D635C6C76542A2E"]
+			hide_dependency_lines: false
+			id: "4C83E320BB0A0F5C"
+			subtitle: "？！夜视？！"
+			tasks: [{
+				id: "5A6B623CF386AD76"
+				item: {
+					Count: 1
+					id: "laowu:cat_helmet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -3.5d
+			y: 10.0d
+		}
+		{
+			dependencies: ["4D635C6C76542A2E"]
+			hide_dependency_lines: false
+			id: "7FFC8B26DF55D4E8"
+			subtitle: "嚼口香糖回血？！"
+			tasks: [{
+				id: "1BEA3A735F7DADF7"
+				item: {
+					Count: 1
+					id: "laowu:cat_chestplate"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.5d
+			y: 10.0d
+		}
+		{
+			dependencies: ["4D635C6C76542A2E"]
+			hide_dependency_lines: false
+			id: "78F358BB145513F7"
+			subtitle: "？！老吴撼地掌？！"
+			tasks: [{
+				id: "4740E07E79D30D1E"
+				item: {
+					Count: 1
+					id: "laowu:cat_leggings"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.5d
+			y: 10.0d
+		}
+		{
+			dependencies: ["4D635C6C76542A2E"]
+			hide_dependency_lines: false
+			id: "020B1B2B18F10709"
+			subtitle: "？！苦力怕怕？！"
+			tasks: [{
+				id: "3821A6D8EAD93389"
+				item: {
+					Count: 1
+					id: "laowu:cat_boots"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -0.5d
+			y: 10.0d
+		}
+		{
+			dependencies: [
+				"4C83E320BB0A0F5C"
+				"78F358BB145513F7"
+				"7FFC8B26DF55D4E8"
+				"020B1B2B18F10709"
+			]
+			dependency_requirement: "one_completed"
+			hide_dependency_lines: false
+			id: "5C48EB374B09DC4F"
+			subtitle: "所有哈基咪系列装备可以使用哈气修复"
+			tasks: [{
+				id: "3B3372A0166FDD61"
+				title: "耐久？"
+				type: "checkmark"
+			}]
+			x: -2.0d
+			y: 11.0d
+		}
+		{
+			dependencies: ["5C48EB374B09DC4F"]
+			hide_dependency_lines: false
+			id: "2EB209C6E5434FC4"
+			subtitle: "强化平a加10点伤害"
+			tasks: [{
+				id: "071F246B6AB32BF7"
+				item: {
+					Count: 1
+					id: "laowu:cat_sword"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -4.0d
+			y: 12.0d
+		}
+		{
+			dependencies: ["5C48EB374B09DC4F"]
+			hide_dependency_lines: false
+			id: "169F84AF23540F94"
+			subtitle: "连锁也可自动熔炼"
+			tasks: [{
+				id: "65AC15B7E7F92C02"
+				item: {
+					Count: 1
+					id: "laowu:cat_pickaxe"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -3.0d
+			y: 12.0d
+		}
+		{
+			dependencies: ["5C48EB374B09DC4F"]
+			hide_dependency_lines: false
+			id: "73244B9AB5EF90A4"
+			subtitle: "话说为什么不直接右键呢？"
+			tasks: [{
+				id: "106B8FDC61E471E5"
+				item: {
+					Count: 1
+					id: "laowu:cat_axe"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.0d
+			y: 12.0d
+		}
+		{
+			dependencies: ["5C48EB374B09DC4F"]
+			hide_dependency_lines: false
+			id: "2524BE2ECA0FE28E"
+			subtitle: "冲刺，冲！"
+			tasks: [{
+				id: "753AE3B0381796C4"
+				item: {
+					Count: 1
+					id: "laowu:cat_shovel"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.0d
+			y: 12.0d
+		}
+		{
+			dependencies: ["5C48EB374B09DC4F"]
+			hide_dependency_lines: false
+			id: "06B69EC8AB895A27"
+			subtitle: "无尽贪婪（雾）"
+			tasks: [{
+				id: "4AD63390871B28FA"
+				item: {
+					Count: 1
+					id: "laowu:cat_hoe"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.0d
+			y: 12.0d
+		}
+		{
+			dependencies: ["65AC51C3C4E59A3A"]
+			description: ["冷知识：猫饼放入工作盆加上搅拌机后可以直接生产哈基咪每只250mb（需超级加热）"]
+			hide_dependency_lines: false
+			id: "5631D8D72810BD92"
+			rewards: [{
+				id: "42522AA28A15BBCB"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "1CF9A6962BC2ECAB"
+				title: "这是啥？？？"
+				type: "checkmark"
+			}]
+			x: -4.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["5C48EB374B09DC4F"]
+			description: [
+				"放入装备以及输入哈气后即可修复"
+				"（注：如果输入药水和箭会变成对于药水效果的箭）"
+			]
+			hide_dependency_lines: false
+			id: "7E29FE592237ED53"
+			tasks: [{
+				id: "719B9C4A45F58F3D"
+				item: "laowu:infiltration_tank"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 11.0d
+		}
+		{
+			dependencies: ["7E29FE592237ED53"]
+			hide_dependency_lines: false
+			id: "761BF0C3ACE075C1"
+			subtitle: "弥补了没有mc没有足球杯？"
+			tasks: [{
+				id: "479287147D916728"
+				item: "laowu:cat_ball"
+				type: "item"
+			}]
+			x: 3.0d
+			y: 10.0d
+		}
+		{
+			dependencies: ["761BF0C3ACE075C1"]
+			description: ["垃圾桶"]
+			hide_dependency_lines: false
+			id: "36B6D053330E087E"
+			subtitle: "他也许真的可以吃掉地球"
+			tasks: [{
+				id: "081EE1AB487EE1E9"
+				item: "laowu:devouring_cat"
+				type: "item"
+			}]
+			x: 4.5d
+			y: 10.0d
+		}
+		{
+			id: "08D642598483D709"
+			subtitle: "都属于钻石套"
+			tasks: [{
+				id: "4E78461E4DFBED2D"
+				title: "老吴装备？"
+				type: "checkmark"
+			}]
+			x: -1.5d
+			y: 13.5d
+		}
+		{
+			id: "1294E8FAF4242841"
+			subtitle: "与下界升级模板一样（数值不一样）"
+			tasks: [{
+				id: "234C1073527D665C"
+				item: "laowu:cat_upgrade_smithing_template"
+				type: "item"
+			}]
+			x: -3.5d
+			y: 13.5d
+		}
+		{
+			description: ["需要使用机械手放置图腾"]
+			id: "05264022A57D4FAB"
+			subtitle: "九命猫？"
+			tasks: [{
+				id: "6CAB223B43A347A7"
+				item: "laowu:cat_totem"
+				type: "item"
+			}]
+			x: -2.5d
+			y: 13.5d
+		}
+		{
+			id: "7C7BBDC763C7D6C1"
+			tasks: [{
+				id: "01CD92AD9A269F7F"
+				item: "laowu:cat_cannon"
+				type: "item"
+			}]
+			x: -0.5d
+			y: 13.5d
+		}
+		{
+			dependencies: ["57BA80CB13C67AB3"]
+			description: ["使用此装置可以直接产生哈气还不会吵（使用动力泵传输）"]
+			hide_dependency_lines: false
+			id: "6DDC5CF43E98F355"
+			rewards: [{
+				id: "2298AEC87977EDDD"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			subtitle: "似猫吵死了喵"
+			tasks: [{
+				id: "5FF9238DE41F4EA4"
+				item: "laowu:cat_carrier"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			description: ["猫咪培养请打开b站搜索速溶御坂的教学视频"]
+			id: "0F7A2A9F9A335C4C"
+			rewards: [{
+				id: "711C1F7883BD09E2"
+				item: "laowu:cat_fur"
+				type: "item"
+			}]
+			tasks: [{
+				id: "7F2BE714D9A9DBD1"
+				title: "我想养神猫"
+				type: "checkmark"
+			}]
+			x: -2.0d
+			y: -1.5d
+		}
+		{
+			description: [".....测试的时候被突脸了（鼠标-999hp）"]
+			id: "0D967A3F1FCD0222"
+			subtitle: "boss"
+			tasks: [{
+				id: "3FD21A4BD8C86151"
+				item: "laowu:butter_bread"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 15.0d
+		}
+		{
+			dependencies: ["0D967A3F1FCD0222"]
+			id: "45DCB1BC7C56349B"
+			invisible: true
+			rewards: [
+				{
+					id: "555628562F3DB98C"
+					item: "laowu:cat_cannon"
+					type: "item"
+				}
+				{
+					count: 20
+					id: "1206F66E1CE805E5"
+					item: "laowu:cat_grenade"
+					type: "item"
+				}
+			]
+			tasks: [{
+				entity: "laowu:butter_cat"
+				id: "0FF8355BF1CE3580"
+				type: "kill"
+				value: 1L
+			}]
+			x: -0.5d
+			y: 15.0d
+		}
+	]
+	title: "老吴学"
+}

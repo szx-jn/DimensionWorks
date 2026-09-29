@@ -1,0 +1,39 @@
+[memory_card_capacity]
+	#SU stored by one DDR1 Memory Card.
+	ddr1CardSu = 8192
+	#SU stored by one DDR2 Memory Card.
+	ddr2CardSu = 9216
+	#SU stored by one DDR3 Memory Card.
+	ddr3CardSu = 10240
+	#SU stored by one DDR4 Memory Card.
+	ddr4CardSu = 12288
+	#SU stored by one DDR5 Memory Card.
+	ddr5CardSu = 16384
+
+[memory_drive_bandwidth]
+	#RPM bandwidth provided by one DDR1 Memory Drive.
+	ddr1BandwidthRpm = 8192
+	#RPM bandwidth provided by one DDR2 Memory Drive.
+	ddr2BandwidthRpm = 16384
+	#RPM bandwidth provided by one DDR3 Memory Drive.
+	ddr3BandwidthRpm = 32768
+	#RPM bandwidth provided by one DDR4 Memory Drive.
+	ddr4BandwidthRpm = 65536
+	#RPM bandwidth provided by one DDR5 Memory Drive.
+	ddr5BandwidthRpm = 131072
+
+[mekanism_machine_rpm]
+	#Basic Mekanism machine target RPM.
+	basicRpm = 512
+	#Advanced Mekanism machine target RPM.
+	advancedRpm = 1024
+	#Elite Mekanism machine target RPM.
+	eliteRpm = 2048
+	#Ultimate Mekanism machine target RPM.
+	ultimateRpm = 4096
+
+[tuning]
+	#Exponent for network efficiency and AE production scaling.
+	efficiencyExponent = 1.25
+	#Maximum effective RPM available to a Create-direct machine.
+	directMaxRpm = 10240

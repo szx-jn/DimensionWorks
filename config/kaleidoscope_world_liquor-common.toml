@@ -1,0 +1,5 @@
+
+[crazy_effect]
+	#启用后给目标施加游戏内所有的药水效果，关闭仅原版效果
+	enableModdedEffects = false
+

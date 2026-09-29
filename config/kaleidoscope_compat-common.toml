@@ -1,0 +1,75 @@
+
+#Main configuration for Kaleidoscope Compat
+[general]
+	#NONE: Disable all datapacks except soup
+	#COMPAT: Extensive compatibility with other mod items
+	#UNITE: Duplicate items of the unified module
+	datapack_mode = "COMPAT"
+	#Enable soup base material
+	soup_datapack_enabled = false
+
+#Kitchen mod compatibility settings
+[kitchen]
+	#Enable fuzzy recipes (FlexPotRecipe and FlexStockpotRecipe)
+	fuzzy_recipes_enabled = true
+	#Whether Nourishment effect is blocked when player has Satiated Shield
+	block_enabled = true
+
+	[kitchen.lunch_bag]
+		#Whether the modified Transmutation Lunch Bag behavior is enabled
+		back_behavior_enabled = false
+		#Whether AppleSkin mod compatibility is enabled
+		appleskin_compat_enabled = true
+
+	[kitchen.scarecrow]
+		#Whether scarecrows can repel phantoms
+		repel_phantoms = true
+
+#FarmersDelight mod compatibility settings
+[farmersdelight]
+	#Whether all FarmersDelight cooking pot recipes are disabled
+	cooking_pot_recipes_disabled = false
+	#Whether the FarmersDelight cooking pot GUI is disabled
+	cooking_pot_gui_disabled = false
+	#Whether all FarmersDelight cutting board recipes are disabled
+	cutting_board_recipes_disabled = false
+	#Whether rich soil hoe tilling is enabled
+	rich_soil_hoe_enabled = true
+
+#Youkai's Feasts mod compatibility settings
+[youkaisfeasts]
+	#Whether all Youkai's Homecoming steaming recipes are disabled
+	steaming_recipes_disabled = false
+
+#Farm and Charm mod compatibility settings
+[farm_and_charm]
+	#Whether all Farm and Charm cooking pot recipes are disabled
+	cooking_pot_recipes_disabled = false
+	#Whether Farm and Charm mod compatibility is enabled
+	compat_enabled = true
+
+#Vinery mod compatibility settings
+[vinery]
+	#Whether all Vinery fermentation barrel recipes are disabled
+	barrel_recipes_disabled = false
+
+#Little Maid mod compatibility settings
+[little_maid]
+	#Whether Little Maid chopping board task is enabled
+	chopping_board_enabled = true
+	#Whether Little Maid millstone task is enabled
+	millstone_enabled = true
+	#Whether Little Maid pressing tub task is enabled
+	pressing_tub_enabled = true
+
+#Other compatibility settings
+[other]
+	#Whether JEI compatibility is enabled
+	jei_compat_enabled = true
+	#Whether Thirst mod compatibility is enabled
+	thirst_compat_enabled = true
+	#Whether Quark sickle harvest fix is enabled
+	quark_sickle_harvest_fix_enabled = true
+	#Whether to suppress tag file loading error logs
+	suppress_tag_load_errors = false
+

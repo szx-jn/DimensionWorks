@@ -1,0 +1,16 @@
+{
+    "ModSettings": {
+        "always_include_hotbar": true,
+        "enable_updates_check": false,
+        "first_run": false
+    },
+    "GuiSettings": {
+        "enable_profiles_ui": {
+            "value": false
+        }
+    },
+    "AutoRefillSettings": {
+        "auto_refill_prefer_smaller_stacks": true,
+        "auto_refill_match_any_food": true
+    }
+}

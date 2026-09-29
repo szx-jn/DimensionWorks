@@ -1,0 +1,137 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "6675825202D8DA94"
+	group: ""
+	icon: {
+		Count: 1
+		id: "witherstormmod:amulet"
+		tag: { }
+	}
+	id: "6675825202D8DA94"
+	order_index: 3
+	quest_links: [ ]
+	quests: [
+		{
+			id: "1B969A5DB77114A3"
+			tasks: [{
+				id: "45DA6578F8D9A113"
+				item: "minecraft:wither_skeleton_skull"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			id: "56409F3D6662E3C0"
+			subtitle: "即可获得命令附魔书"
+			tasks: [{
+				entity: "witherstormmod:withered_symbiont"
+				id: "3F069C15DB92AA8B"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			id: "2031EFAEDEEE0D14"
+			subtitle: "附魔书需要做一个炸弹和装备（用于攻击命令方块）"
+			tasks: [{
+				id: "36BA92841B2B75EA"
+				item: "witherstormmod:command_block_book"
+				type: "item"
+			}]
+			x: 4.0d
+			y: 0.0d
+		}
+		{
+			id: "6B0DD9C8152A6FE6"
+			subtitle: "可用于治疗凋零病"
+			tasks: [{
+				id: "0B6DC11247CC4943"
+				item: "witherstormmod:golden_apple_stew"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 0.0d
+		}
+		{
+			id: "7E6AE836BE61A8AE"
+			subtitle: "可查看当前凋零风暴阶段性"
+			tasks: [{
+				id: "60FC4E7148C38399"
+				item: {
+					Count: 1
+					id: "witherstormmod:phasometer"
+					tag: { }
+				}
+				type: "item"
+			}]
+			x: 0.0d
+			y: -2.0d
+		}
+		{
+			id: "27B18A5EA55CBC45"
+			tasks: [{
+				id: "1B7D7044DB754682"
+				item: "witherstormmod:super_tnt"
+				type: "item"
+			}]
+			x: 6.0d
+			y: 0.0d
+		}
+		{
+			id: "358BA57C5EB29421"
+			subtitle: "五阶段后即可炸掉凋零风暴（陷入假死）"
+			tasks: [{
+				id: "6F0BADA521422D4A"
+				item: {
+					Count: 1
+					id: "witherstormmod:formidibomb"
+					tag: { }
+				}
+				type: "item"
+			}]
+			x: 8.0d
+			y: 0.0d
+		}
+		{
+			description: ["放上三个凋零头即可复活凋零风暴（激活后）"]
+			id: "5499E331977DA826"
+			subtitle: "使用青金石基座激活"
+			tasks: [{
+				id: "1E2EB5AAD0E1A159"
+				item: "witherstormmod:super_beacon"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 1.5d
+		}
+		{
+			description: ["红石块，绿宝石块，铁块，钻石块以风暴信标为中心东南西北做地基激活"]
+			id: "667FFD3C9A1FA287"
+			subtitle: "可与风暴信标连接"
+			tasks: [{
+				id: "1DDD030BF2F24608"
+				item: "witherstormmod:super_support_beacon"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 1.5d
+		}
+		{
+			description: ["进入凋零风暴体内不要使用打包工具打包命令方块会使凋零风暴无敌"]
+			id: "03F4018B228C8638"
+			subtitle: "不想打可以使用打包工具把凋零风暴打包（包裹不要丢入岩浆）"
+			tasks: [{
+				id: "2390B2477F8C1A5B"
+				title: "温馨提示"
+				type: "checkmark"
+			}]
+			x: 2.0d
+			y: -2.0d
+		}
+	]
+	title: "凋零风暴"
+}

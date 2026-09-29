@@ -1,0 +1,25 @@
+
+[factory]
+	#Real-time seconds before a filled ampoule decays after leaving its origin dimension.
+	#Range: 1 ~ 86400
+	stabilitySeconds = 60
+	#Successful batches required before the factory phase rotates.
+	#Range: 1 ~ 1024
+	phaseBatches = 8
+	#Fluid capacity of one ampoule in mB.
+	#Range: 1 ~ 10000
+	ampouleCapacity = 250
+	#Fluid consumed by one stabilization operation in mB.
+	#Range: 1 ~ 100000
+	stabilizationInput = 1000
+	#Factory machines reach their maximum native processing rate at this RPM.
+	#Range: 1 ~ 10240
+	kineticSaturationRpm = 512
+	#Create stress impact of each factory controller and stabilizer.
+	#Range: 0.0 ~ 1024.0
+	stressImpact = 64.0
+	#Deterministic strength of implemented numeric modules, from 10 to 25 percent.
+	#Reserved modules receive no behavior from this value until their milestone is enabled.
+	#Range: 10 ~ 25
+	numericModulePercent = 25
+

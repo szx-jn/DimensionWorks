@@ -1,0 +1,360 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "6A7C41E0D9B58F73"
+	group: ""
+	icon: "alexscaves:abyssmarine"
+	id: "6A7C41E0D9B58F73"
+	order_index: 2
+	quest_links: [ ]
+	quests: [
+		{
+			id: "6585B0CEDB6F6242"
+			subtitle: "完成一套可循环供料的基础机械动力工序"
+			tasks: [{
+				id: "6726A9AF6243AE65"
+				item: "create:mechanical_mixer"
+				type: "item"
+			}]
+			title: "洞穴生态工业前置"
+			x: -2.0d
+			y: 5.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "234CFA93B72985F2"
+			subtitle: "搅拌机负责重建富铁黏液和钕材料"
+			tasks: [{
+				id: "02A3178CC235C703"
+				item: "create:mechanical_mixer"
+				type: "item"
+			}]
+			title: "磁场：搭建极性工序"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "5D7E1FE67847AD2B"
+			subtitle: "从首个富铁黏液样本开始建立净增长"
+			tasks: [{
+				count: 8L
+				id: "0562C7C7139060C2"
+				item: "alexscaves:ferrouslime_ball"
+				type: "item"
+			}]
+			title: "磁场：首次增殖"
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "5976954DE868CF91"
+			optional: true
+			subtitle: "让极性残渣重新进入生产链（预览：极性冶炼塔启用后可用）"
+			tasks: [{
+				count: 4L
+				id: "4F350E46B0C7C432"
+				item: "dimensionworks_cave_factory:polarity_residue"
+				type: "item"
+			}]
+			title: "磁场：建立保底回收"
+			x: 4.0d
+			y: 0.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "33C28B9F6AB3D2FD"
+			subtitle: "维持充能方铅岩库存"
+			tasks: [{
+				count: 16L
+				id: "63DDCCC597971224"
+				item: "alexscaves:energized_galena_neutral"
+				type: "item"
+			}]
+			title: "磁场：交付稳定库存"
+			x: 6.0d
+			y: 0.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "4BA0E2FD853B28CE"
+			subtitle: "压力机负责石灰岩、树脂和星树果"
+			tasks: [{
+				id: "6C5D8EEA79F0D06C"
+				item: "create:mechanical_press"
+				type: "item"
+			}]
+			title: "原始：搭建生态工序"
+			x: 0.0d
+			y: 2.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "24DF5A37DBDD0703"
+			subtitle: "从南洋杉木料中持续提取树脂"
+			tasks: [{
+				count: 8L
+				id: "253F77EF14DB0167"
+				item: "alexscaves:pewen_sap"
+				type: "item"
+			}]
+			title: "原始：首次增殖"
+			x: 2.0d
+			y: 2.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "1CE0CDB1EC966A6F"
+			optional: true
+			subtitle: "让原生残渣补回三项生态材料（预览：原生质生物反应器启用后可用）"
+			tasks: [{
+				count: 4L
+				id: "3D5AF765FC6EEA27"
+				item: "dimensionworks_cave_factory:genesis_residue"
+				type: "item"
+			}]
+			title: "原始：建立保底回收"
+			x: 4.0d
+			y: 2.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "69DB48CFC0A76376"
+			subtitle: "维持石灰岩库存"
+			tasks: [{
+				count: 32L
+				id: "00E304F4E675ED86"
+				item: "alexscaves:limestone"
+				type: "item"
+			}]
+			title: "原始：交付稳定库存"
+			x: 6.0d
+			y: 2.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "15CE18E51D8CD9F6"
+			subtitle: "粉碎轮负责铀精炼，酸液从毒化海抽取"
+			tasks: [{
+				id: "5A58FF0A8441B4D6"
+				item: "create:crushing_wheel"
+				type: "item"
+			}]
+			title: "毒化：搭建辐射工序"
+			x: 0.0d
+			y: 4.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "1BEDF972A0B2D2EB"
+			subtitle: "从火药和酸液开始重建硫粉"
+			tasks: [{
+				count: 8L
+				id: "2C73E36C1895D813"
+				item: "alexscaves:sulfur_dust"
+				type: "item"
+			}]
+			title: "毒化：首次增殖"
+			x: 2.0d
+			y: 4.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "601E390F43936C8C"
+			optional: true
+			subtitle: "让衰变残渣补回辐射与核素材料（预览：同位素衰变炉启用后可用）"
+			tasks: [{
+				count: 4L
+				id: "2B240BEC3687555B"
+				item: "dimensionworks_cave_factory:decay_residue"
+				type: "item"
+			}]
+			title: "毒化：建立保底回收"
+			x: 4.0d
+			y: 4.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "0D6730F5810ABAA3"
+			subtitle: "维持铀晶碎片库存"
+			tasks: [{
+				count: 16L
+				id: "358F7379CF978B9E"
+				item: "alexscaves:uranium_shard"
+				type: "item"
+			}]
+			title: "毒化：交付稳定库存"
+			x: 6.0d
+			y: 4.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "1DA059F728141B4D"
+			subtitle: "机械臂负责收获贻贝和海猪投喂"
+			tasks: [{
+				id: "59E138A01688536F"
+				item: "create:mechanical_arm"
+				type: "item"
+			}]
+			title: "渊海：搭建压力工序"
+			x: 0.0d
+			y: 6.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "419AED98ADFF0BB2"
+			subtitle: "从首个贻贝板开始重建渊海石"
+			tasks: [{
+				count: 8L
+				id: "1073C8C8393CD9E7"
+				item: "alexscaves:abyssmarine"
+				type: "item"
+			}]
+			title: "渊海：首次增殖"
+			x: 2.0d
+			y: 6.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "551CD9A777A93194"
+			subtitle: "用渊压残渣补回淤泥、荧光质和海雪"
+			tasks: [{
+				count: 4L
+				id: "6BA5C280F99C61C3"
+				item: "dimensionworks_cave_factory:pressure_residue"
+				type: "item"
+			}]
+			title: "渊海：建立保底回收"
+			x: 4.0d
+			y: 6.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "28A5C1BF3B95893C"
+			subtitle: "用投喂循环维持海雪库存"
+			tasks: [{
+				count: 16L
+				id: "5656E8FD30B53199"
+				item: "alexscaves:marine_snow"
+				type: "item"
+			}]
+			title: "渊海：交付稳定库存"
+			x: 6.0d
+			y: 6.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "29A3C92B7C0BA915"
+			subtitle: "动力锯负责荆棘木循环"
+			tasks: [{
+				id: "77932AAF990FBD31"
+				item: "create:mechanical_saw"
+				type: "item"
+			}]
+			title: "异寂：搭建暗相工序"
+			x: 0.0d
+			y: 8.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "10B507C6F49D6AC6"
+			subtitle: "从粪岩和鸟粪开始重建秽岩"
+			tasks: [{
+				count: 8L
+				id: "15BC2E5BFBCBB0C8"
+				item: "alexscaves:coprolith"
+				type: "item"
+			}]
+			title: "异寂：首次增殖"
+			x: 2.0d
+			y: 8.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "153C3C055D6CA58C"
+			optional: true
+			subtitle: "让暗相残渣补回粪岩、骨粉和暗布（预览：暗相谐振器启用后可用）"
+			tasks: [{
+				count: 4L
+				id: "66D48E0F24CC5292"
+				item: "dimensionworks_cave_factory:umbral_residue"
+				type: "item"
+			}]
+			title: "异寂：建立保底回收"
+			x: 4.0d
+			y: 8.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "0F1E1AA1336173AB"
+			subtitle: "维持纯粹黑暗库存"
+			tasks: [{
+				count: 8L
+				id: "0A1C0809219ED769"
+				item: "alexscaves:pure_darkness"
+				type: "item"
+			}]
+			title: "异寂：交付稳定库存"
+			x: 6.0d
+			y: 8.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "272914221E3664BE"
+			subtitle: "注液器负责紫色苏打，压力机负责糖晶"
+			tasks: [{
+				id: "5B44B004C3577B8D"
+				item: "create:spout"
+				type: "item"
+			}]
+			title: "糖果：搭建糖晶工序"
+			x: 0.0d
+			y: 10.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "0A1DA35CB2A4EDDA"
+			subtitle: "从糖和薄荷粉开始重建冰糖"
+			tasks: [{
+				count: 8L
+				id: "25939D3E08BFB625"
+				item: "alexscaves:rock_candy_white"
+				type: "item"
+			}]
+			title: "糖果：首次增殖"
+			x: 2.0d
+			y: 10.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "425C2ECB8F9B9D59"
+			optional: true
+			subtitle: "让糖晶残渣补回糖、干燥海带和苏打（预览：糖晶析出器启用后可用）"
+			tasks: [{
+				count: 4L
+				id: "23C4924210AF5DC1"
+				item: "dimensionworks_cave_factory:crystal_residue"
+				type: "item"
+			}]
+			title: "糖果：建立保底回收"
+			x: 4.0d
+			y: 10.0d
+		}
+		{
+			hide_dependency_lines: false
+			id: "360D07E8E32B7D53"
+			subtitle: "维持明胶库存"
+			tasks: [{
+				count: 16L
+				id: "722090BBCB0DCC9A"
+				item: "alexscaves:gelatin_pink"
+				type: "item"
+			}]
+			title: "糖果：交付稳定库存"
+			x: 6.0d
+			y: 10.0d
+		}
+	]
+	title: "洞穴生态工业"
+}

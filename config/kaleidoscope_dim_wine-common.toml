@@ -1,0 +1,82 @@
+
+#通用配置
+["Common Config"]
+	#末影龙死亡后是否生成龙血流体
+	#Whether to spawn Dragon Blood fluid after Ender Dragon death
+	dragonBloodSpawnEnabled = true
+
+#实体战利品
+["Entity Loot"]
+
+	#[暮色森林]实体战利品掉落
+	["Entity Loot"."Twilight Forest Entity Loot"]
+		#红帽矮人和红帽工兵掉落哥布林精华的概率（%） [无抢夺, 抢夺I, 抢夺II, 抢夺III]
+		#Drop chances for Goblin Essence from Redcap (%) [no Looting, Looting I, Looting II, Looting III]
+		redcapGoblinEssenceLootingChances = [0.15, 0.2, 0.25, 0.3]
+		#红帽矮人和红帽工兵每级抢夺额外掉落的最小数量
+		#Minimum bonus drops per Looting level for Redcap and Redcap Sapper
+		#Range: 0 ~ 10
+		redcapLootingBonusMin = 0
+		#红帽矮人和红帽工兵每级抢夺额外掉落的最大数量
+		#Maximum bonus drops per Looting level for Redcap and Redcap Sapper
+		#Range: 0 ~ 10
+		redcapLootingBonusMax = 1
+
+	#[天境]实体战利品掉落
+	["Entity Loot"."Aether Entity Loot"]
+		#武神女王掉落天使之翼的概率（%）
+		#Chance for Valkyrie Queen to drop Angel Wings (%)
+		#Range: 0.0 ~ 1.0
+		angelWingsDropChance = 1.0
+		#武神女王掉落天使之翼的最小数量
+		#Minimum number of Angel Wings dropped by Valkyrie Queen
+		#Range: 0 ~ 64
+		angelWingsDropMin = 1
+		#武神女王掉落天使之翼的最大数量
+		#Maximum number of Angel Wings dropped by Valkyrie Queen
+		#Range: 0 ~ 64
+		angelWingsDropMax = 1
+
+#方块战利品
+["Block Loot"]
+	#绯红菌核掉落绯红菌露的概率（%） [无时运, 时运I, 时运II, 时运III]
+	#Chances for Crimson Nylium to drop Crimson Fungal Sap (%) [no Fortune, Fortune I, Fortune II, Fortune III]
+	crimsonNyliumFungalSapChances = [0.05, 0.075, 0.1, 0.15]
+	#绯红菌核掉落绯红菌露的基础数量
+	#Base count of Crimson Fungal Sap dropped from Crimson Nylium
+	#Range: 0 ~ 64
+	crimsonNyliumFungalSapCount = 1
+	#诡异菌核掉落诡影菌髓的概率（%） [无时运, 时运I, 时运II, 时运III]
+	#Chances for Warped Nylium to drop Warped Fungal Sap (%) [no Fortune, Fortune I, Fortune II, Fortune III]
+	warpedNyliumFungalSapChances = [0.05, 0.075, 0.1, 0.15]
+	#诡异菌核掉落诡影菌髓的基础数量
+	#Base count of Warped Fungal Sap dropped from Warped Nylium
+	#Range: 0 ~ 64
+	warpedNyliumFungalSapCount = 1
+	#草掉落啤酒花种子的概率（%）
+	#Chance for grass to drop Hop Seed when broken (%)
+	#Range: 0.0 ~ 1.0
+	grassHopSeedDropChance = 0.05
+
+#下落的铁砧配方
+["Anvil Drop Recipes"]
+	#铁砧掉落将凝灰岩转换为凝碳粉时的最小产出数量（设为0禁用该配方）
+	#Minimum output amount when converting Tuff to Carbocretin Powder via Anvil Drop (set 0 to disable)
+	#Range: 0 ~ 64
+	anvilTuffToCarbocretinMinOutput = 1
+	#铁砧掉落将凝灰岩转换为凝碳粉时的最大产出数量（设为0禁用该配方）
+	#Maximum output amount when converting Tuff to Carbocretin Powder via Anvil Drop (set 0 to disable)
+	#Range: 0 ~ 64
+	anvilTuffToCarbocretinMaxOutput = 3
+
+#小彩蛋
+["Easter Eggs"]
+	#摔落在基岩上掉落小灯串(基岩)的概率（%）
+	#Chance to drop String Lights(Bedrock) when falling on Bedrock (%)
+	#Range: 0.0 ~ 1.0
+	bedrockFallDropChance = 0.015
+	#凋灵掉落小灯串(命令方块)的概率（%）
+	#Chance for Wither to drop String Lights(Command Block) (%)
+	#Range: 0.0 ~ 1.0
+	witherCommandLightsDropChance = 0.015
+
