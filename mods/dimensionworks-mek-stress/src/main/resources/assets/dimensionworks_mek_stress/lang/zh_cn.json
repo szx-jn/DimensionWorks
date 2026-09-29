@@ -1,0 +1,13 @@
+{
+  "item.dimensionworks_mek_stress.stress_output_card": "应力输出卡",
+  "tooltip.dimensionworks_mek_stress.rpm": "转速：%s RPM",
+  "tooltip.dimensionworks_mek_stress.stress": "每 tick 输出应力上限：%s SU",
+  "tooltip.dimensionworks_mek_stress.export_bus_only": "仅可安装于 ME 输出总线",
+  "gui.dimensionworks_mek_stress.card_settings": "应力输出卡设置",
+  "gui.dimensionworks_mek_stress.rpm": "转速",
+  "gui.dimensionworks_mek_stress.stress": "每 tick 输出应力（SU）",
+  "gui.dimensionworks_mek_stress.energy": "%s SU",
+  "gui.dimensionworks_mek_stress.energy_fraction": "%s / %s SU",
+  "gui.dimensionworks_mek_stress.apply": "确认",
+  "jade.dimensionworks_mek_stress.stored_su": "内部应力：%s / %s SU"
+}

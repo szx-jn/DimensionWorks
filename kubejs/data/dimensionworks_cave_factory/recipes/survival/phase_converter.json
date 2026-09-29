@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "b": {
+      "item": "alexscaves:baleen_bone"
+    },
+    "e": {
+      "item": "create:electron_tube"
+    },
+    "g": {
+      "item": "alexscaves:gazing_pearl"
+    },
+    "m": {
+      "item": "create:precision_mechanism"
+    },
+    "p": {
+      "item": "alexscaves:pearl"
+    }
+  },
+  "pattern": [
+    "beb",
+    "mgm",
+    "bpb"
+  ],
+  "result": {
+    "item": "dimensionworks_cave_factory:phase_converter"
+  },
+  "show_notification": true
+}

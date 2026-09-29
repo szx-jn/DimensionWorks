@@ -1,0 +1,5 @@
+{
+  "type": "dimensionworks_cave_factory:fluid_stabilization",
+  "input": { "fluid": "dimensionworks_cave_factory:primordial_protoplasm" },
+  "result": { "item": "dimensionworks_cave_factory:genesis_matrix", "count": 1 }
+}

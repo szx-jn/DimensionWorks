@@ -1,0 +1,86 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "2AD308811F7ABBF7"
+	group: ""
+	id: "2AD308811F7ABBF7"
+	order_index: 0
+	quest_links: [ ]
+	quests: [
+		{
+			id: "02180E609375FF13"
+			subtitle: "打勾即为生效"
+			tasks: [{
+				id: "5AD23A0CD56F7142"
+				title: "123"
+				type: "checkmark"
+			}]
+			title: "皮蛋是给"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["02180E609375FF13"]
+			hide_dependency_lines: false
+			id: "340A2B50B4DF5775"
+			rewards: [{
+				id: "0B250A7D0D8684E5"
+				item: "create:wrench"
+				type: "item"
+			}]
+			subtitle: "甲级战犯皮蛋曾经说过不送扳手的机械动力整合包不是一个好整合包"
+			tasks: [{
+				id: "7040FF5E377E4B80"
+				title: "哟吼吼吼吼"
+				type: "checkmark"
+			}]
+			x: 0.0d
+			y: -2.0d
+		}
+		{
+			id: "74D1A86A3C0BFF88"
+			rewards: [{
+				count: 5
+				id: "4407D1963701FCFE"
+				item: "kaleidoscope_nether:forgetfulness_soup"
+				type: "item"
+			}]
+			subtitle: "标题可能会有误导性无需理会"
+			tasks: [{
+				id: "5F401516F7B3B2F8"
+				title: "意义不明的副标题"
+				type: "checkmark"
+			}]
+			x: 2.5d
+			y: 0.0d
+		}
+		{
+			dependencies: ["02180E609375FF13"]
+			hide_dependency_lines: false
+			id: "2137F522B49F75CB"
+			rewards: [{
+				id: "1E4DBE98D735BE70"
+				item: {
+					Count: 1
+					id: "sophisticatedbackpacks:backpack"
+					tag: {
+						borderColor: 15961002
+						clothColor: 15961002
+						inventorySlots: 27
+						upgradeSlots: 1
+					}
+				}
+				type: "item"
+			}]
+			subtitle: "甲级战犯皮蛋把粉色染料丢进去了!!!!"
+			tasks: [{
+				id: "6F797AB5C8569503"
+				title: "背包！"
+				type: "checkmark"
+			}]
+			x: -1.5d
+			y: -2.0d
+		}
+	]
+	title: "前情提要"
+}

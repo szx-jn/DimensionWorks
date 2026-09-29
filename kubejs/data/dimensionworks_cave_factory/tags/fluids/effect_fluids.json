@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "dimensionworks_cave_factory:polarized_flux",
+    "dimensionworks_cave_factory:primordial_protoplasm",
+    "dimensionworks_cave_factory:radionuclide_slurry",
+    "dimensionworks_cave_factory:abyssal_brine",
+    "dimensionworks_cave_factory:umbral_condensate",
+    "dimensionworks_cave_factory:supersaturated_syrup"
+  ]
+}

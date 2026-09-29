@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.3.9'
+version = '0.4.4'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_rpm_limit'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -29,12 +29,14 @@ minecraft {
 repositories {
     maven { name = 'Create'; url = 'https://maven.createmod.net' }
     maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
+    maven { name = 'Curios'; url = 'https://maven.theillusivec4.top/' }
     mavenCentral()
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
+    implementation fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
     // The slim Create artifact needs Ponder on both the compile and runtime classpaths.
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
     // Create's slim artifact also omits its jar-in-jar Flywheel runtime dependency.

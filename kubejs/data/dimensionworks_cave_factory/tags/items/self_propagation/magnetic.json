@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "alexscaves:raw_scarlet_neodymium",
+    "alexscaves:raw_azure_neodymium",
+    "alexscaves:ferrouslime_ball",
+    "alexscaves:galena",
+    "alexscaves:energized_galena_scarlet",
+    "alexscaves:energized_galena_azure",
+    "alexscaves:energized_galena_neutral"
+  ]
+}

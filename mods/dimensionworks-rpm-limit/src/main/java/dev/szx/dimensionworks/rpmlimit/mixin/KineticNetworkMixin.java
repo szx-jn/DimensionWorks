@@ -34,5 +34,8 @@ public abstract class KineticNetworkMixin {
         float scale = RpmLimitManager.effectiveScale(be, raw);
         if (scale < 1)
             cir.setReturnValue(cir.getReturnValueF() * scale);
+        float curseMultiplier = RpmLimitManager.stressCapacityMultiplier(be);
+        if (curseMultiplier != 1.0f)
+            cir.setReturnValue(cir.getReturnValueF() * curseMultiplier);
     }
 }

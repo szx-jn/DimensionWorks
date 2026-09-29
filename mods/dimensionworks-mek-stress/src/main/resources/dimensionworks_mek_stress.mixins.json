@@ -1,0 +1,40 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.szx.dimensionworks.mekstress.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "dimensionworks_mek_stress.refmap.json",
+  "mixins": [
+    "mek.TileEntityMekanismMixin",
+    "mek.TileEntityMekanismInvoker",
+    "mek.BasicEnergyContainerMixin",
+    "mek.EnergyHandlerManagerMixin",
+    "mek.MachineEnergyContainerMixin",
+    "mek.LaserEnergyContainerMixin",
+    "mek.MatrixEnergyContainerMixin",
+    "mek.EnergyNetworkMixin",
+    "mek.HeatNetworkMixin",
+    "ae2.AEBaseMenuInvoker",
+    "ae2.AEBaseMenuStressSyncMixin",
+    "ae2.ExportBusPartMixin",
+    "ae2.GridEnergyStorageMixin",
+    "ae2.IOBusMenuMixin",
+    "appliedcreate.MEGearboxBlockEntityMixin",
+    "appliedcreate.MEGearboxMenuMixin",
+    "ae2.IOBusPartMixin"
+  ],
+  "client": [
+    "mek.client.EnergyDisplayMixin",
+    "mek.client.GuiEnergyGaugeMixin",
+    "mek.client.GuiEnergyTabMixin",
+    "appliedcreate.MEGearboxScreenMixin",
+    "ae2.client.AEBaseScreenAccessor",
+    "ae2.client.AbstractContainerScreenInvoker",
+    "ae2.client.ScreenAccessor",
+    "ae2.client.IOBusScreenMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "description": "DimensionWorks packaging preflight. Checks .mrpack-related Bash commands before they run.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/pack_preflight.py\"",
+            "timeout": 180,
+            "statusMessage": "Running DimensionWorks packaging preflight",
+            "additionalContextLimit": 2000
+          }
+        ]
+      }
+    ]
+  }
+}

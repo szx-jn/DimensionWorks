@@ -18,6 +18,7 @@ public final class DimensionWorksRpmLimit {
     public DimensionWorksRpmLimit() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, RpmLimitConfig.SPEC);
         MinecraftForge.EVENT_BUS.register(RpmForgeEvents.class);
+        MinecraftForge.EVENT_BUS.register(GearHeartForgeEvents.class);
 
         // The overspeed step table is parsed from a config string rather than read per machine, so a
         // reload has to swap the parsed table over instead of re-parsing it on every tick.

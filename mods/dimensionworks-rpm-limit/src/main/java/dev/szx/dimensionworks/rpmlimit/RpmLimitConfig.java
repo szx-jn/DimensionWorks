@@ -19,6 +19,12 @@ public final class RpmLimitConfig {
     public static final ForgeConfigSpec.IntValue OVERSPEED_DEFAULT_SATURATION;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> OVERSPEED_CLASS_WHITELIST;
 
+    public static final ForgeConfigSpec.DoubleValue GEAR_HEART_OUTPUT_FAILURE_CHANCE;
+    public static final ForgeConfigSpec.DoubleValue GEAR_HEART_FREEZE_CHANCE;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_FREEZE_INTERVAL_MIN_SECONDS;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_FREEZE_INTERVAL_MAX_SECONDS;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_FREEZE_DURATION_TICKS;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
@@ -59,6 +65,21 @@ public final class RpmLimitConfig {
                 List::of,
                 entry -> entry instanceof String
             );
+        builder.pop();
+
+        builder.push("gearHeart");
+        GEAR_HEART_OUTPUT_FAILURE_CHANCE = builder
+            .comment("Chance for a cursed gear heart owner's completed machine operation to fail output.")
+            .defineInRange("outputFailureChance", 0.35d, 0.0d, 1.0d);
+        GEAR_HEART_FREEZE_CHANCE = builder
+            .comment("Chance to freeze for the configured duration when a freeze interval elapses.")
+            .defineInRange("freezeChance", 0.75d, 0.0d, 1.0d);
+        GEAR_HEART_FREEZE_INTERVAL_MIN_SECONDS = builder
+            .defineInRange("freezeIntervalMinSeconds", 40, 1, 3600);
+        GEAR_HEART_FREEZE_INTERVAL_MAX_SECONDS = builder
+            .defineInRange("freezeIntervalMaxSeconds", 240, 1, 3600);
+        GEAR_HEART_FREEZE_DURATION_TICKS = builder
+            .defineInRange("freezeDurationTicks", 20, 1, 200);
         builder.pop();
 
         SPEC = builder.build();

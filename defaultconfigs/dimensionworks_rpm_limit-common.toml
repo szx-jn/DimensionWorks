@@ -25,3 +25,17 @@
 	#Extra block entity classes that should batch too, as fully qualified or simple names.
 	#Rotation-only and item-moving blocks must stay out of this list.
 	classWhitelist = []
+
+[gearHeart]
+	#Chance for a cursed gear heart owner's completed machine operation to fail output.
+	#Range: 0.0 ~ 1.0
+	outputFailureChance = 0.35
+	#Chance to freeze for the configured duration when a freeze interval elapses.
+	#Range: 0.0 ~ 1.0
+	freezeChance = 0.75
+	#Range: 1 ~ 3600
+	freezeIntervalMinSeconds = 40
+	#Range: 1 ~ 3600
+	freezeIntervalMaxSeconds = 240
+	#Range: 1 ~ 200
+	freezeDurationTicks = 20

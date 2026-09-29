@@ -1,0 +1,13 @@
+{
+  "item.dimensionworks_mek_stress.stress_output_card": "Stress Output Card",
+  "tooltip.dimensionworks_mek_stress.rpm": "RPM: %s",
+  "tooltip.dimensionworks_mek_stress.stress": "Stress output per tick: %s SU",
+  "tooltip.dimensionworks_mek_stress.export_bus_only": "ME Export Bus only",
+  "gui.dimensionworks_mek_stress.card_settings": "Stress Output Card Settings",
+  "gui.dimensionworks_mek_stress.rpm": "RPM",
+  "gui.dimensionworks_mek_stress.stress": "Stress output per tick (SU)",
+  "gui.dimensionworks_mek_stress.energy": "%s SU",
+  "gui.dimensionworks_mek_stress.energy_fraction": "%s / %s SU",
+  "gui.dimensionworks_mek_stress.apply": "Apply",
+  "jade.dimensionworks_mek_stress.stored_su": "Internal stress: %s / %s SU"
+}

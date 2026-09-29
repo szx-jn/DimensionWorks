@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=x": { "model": "dimensionworks_cave_factory:block/factory_port", "x": 90, "y": 90 },
+    "axis=y": { "model": "dimensionworks_cave_factory:block/factory_port" },
+    "axis=z": { "model": "dimensionworks_cave_factory:block/factory_port", "x": 90 }
+  }
+}

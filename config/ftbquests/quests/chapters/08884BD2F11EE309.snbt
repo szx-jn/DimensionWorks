@@ -1,0 +1,182 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "08884BD2F11EE309"
+	group: "7548F9E1983F8BC3"
+	icon: "create:brass_ingot"
+	id: "08884BD2F11EE309"
+	order_index: 1
+	quest_links: [ ]
+	quests: [
+		{
+			id: "7B933F2B6DD5F322"
+			rewards: [{
+				id: "5445942E8EE7DBD7"
+				type: "xp_levels"
+				xp_levels: 5
+			}]
+			subtitle: "黄铜的机械才是王道你那安山合金根本没技巧"
+			tasks: [{
+				id: "5154425524EE21A3"
+				item: "create:brass_ingot"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "690FAC40D7FAE03D"
+			subtitle: "过滤，精准出量！"
+			tasks: [{
+				id: "4E6B41ACA5F93D86"
+				item: "create:smart_chute"
+				type: "item"
+			}]
+			x: 0.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["45D15FF9B9C0BCD5"]
+			description: ["简单来说你可以办到的他也可以办到？"]
+			hide_dependency_lines: false
+			id: "1CF6ED87C3B5094A"
+			subtitle: "这个东西很好的弥补的史蒂夫没有第三只手的缺点"
+			tasks: [{
+				id: "7E001711F444A0AF"
+				item: "create:deployer"
+				type: "item"
+			}]
+			x: -3.5d
+			y: 0.0d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "45D15FF9B9C0BCD5"
+			tasks: [{
+				id: "131B044C8B911CB2"
+				item: "create:brass_hand"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "64DE2DE50104D860"
+			tasks: [{
+				id: "5A71337A76EFEE26"
+				item: "create:brass_casing"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["64DE2DE50104D860"]
+			hide_dependency_lines: false
+			id: "143B269CAE119846"
+			subtitle: "？！自动合成？！"
+			tasks: [{
+				id: "4A1A2C4A0D3B6F45"
+				item: "create:mechanical_crafter"
+				type: "item"
+			}]
+			x: 2.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["143B269CAE119846"]
+			hide_dependency_lines: false
+			id: "0F1DFE05BE9F5DD3"
+			subtitle: "也许可以试试粉碎自己？"
+			tasks: [{
+				id: "746358825D6E8022"
+				item: "create:crushing_wheel"
+				type: "item"
+			}]
+			x: 2.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["64DE2DE50104D860"]
+			hide_dependency_lines: false
+			id: "63058254D2A503A5"
+			subtitle: "无法形容请w思考"
+			tasks: [{
+				id: "2BE60AEE4662C8FF"
+				item: "create:mechanical_arm"
+				type: "item"
+			}]
+			x: 3.5d
+			y: 0.0d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "78AC134BED864BAB"
+			subtitle: "精准,控制出量以及入量"
+			tasks: [{
+				id: "195E2B7388DF7C96"
+				item: "create:brass_funnel"
+				type: "item"
+			}]
+			x: 0.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["64DE2DE50104D860"]
+			hide_dependency_lines: false
+			id: "105584B89F79FB21"
+			subtitle: "这东西违背能量守恒定律了！！！"
+			tasks: [{
+				id: "4B4092DE2B5770B4"
+				item: "create:rotation_speed_controller"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "7ED7E3BE79CB95A6"
+			tasks: [{
+				id: "1006A72DBDB04679"
+				item: "create:brass_tunnel"
+				type: "item"
+			}]
+			x: -1.5d
+			y: -1.5d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "1B05106E70688A2B"
+			subtitle: "可控制指定液体输出"
+			tasks: [{
+				id: "4146EB803E272C09"
+				item: "create:smart_fluid_pipe"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["7B933F2B6DD5F322"]
+			hide_dependency_lines: false
+			id: "261240BD6373A6F3"
+			tasks: [{
+				id: "0733E54B10E3076C"
+				item: "createdieselgenerators:diesel_engine"
+				type: "item"
+			}]
+			x: -2.0d
+			y: 2.0d
+		}
+	]
+	title: "黄铜机械"
+}

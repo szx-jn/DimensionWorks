@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "item": "alexscaves:abyssmarine"
+    },
+    "m": {
+      "item": "create:precision_mechanism"
+    },
+    "p": {
+      "item": "alexscaves:pearl"
+    },
+    "t": {
+      "item": "create:fluid_tank"
+    }
+  },
+  "pattern": [
+    "pap",
+    "ata",
+    "pmp"
+  ],
+  "result": {
+    "item": "dimensionworks_cave_factory:pressure_buffer"
+  },
+  "show_notification": true
+}

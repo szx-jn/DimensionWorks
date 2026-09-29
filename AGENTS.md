@@ -55,6 +55,9 @@ README 中的原则需要转化成可执行的约束：
 - 构建失败时给出真实错误输出，不要隐藏或改写为“应该没问题”。
 - 仅改文档、KubeJS 或 JSON 数据时，说明进行了哪些检查，例如 JSON 语法、命名空间、引用路径。
 - 未经实际运行验证的内容不要描述为已验证。
+- 打包整合包必须走 `python3 scripts/package_mrpack.py`；它会自动先跑 `scripts/pack_hook.py` 预检（Mod 清单、实例配置、JSON、KubeJS 语法、自增殖配方规则、任务图、仓库内 Mod 构建），预检失败则不产出 `.mrpack`。
+- 仓库级 `.codex/hooks.json` 会在 Codex 的 Bash 调用命中 `scripts/package_mrpack.py` 时自动运行 `.codex/hooks/pack_preflight.py`，先做静态预检；失败则阻断命令，成功只回传一行 `PACK-HOOK OK`。项目钩子首次使用或内容变更后必须由用户在 `/hooks` 中信任。
+- 汇报打包结果时只保留钩子的错误日志，或一行成功信息，不要贴构建与下载的冗余输出。
 
 ## 产物纪律
 

@@ -1,0 +1,776 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "6125DB3AB7B67CCD"
+	group: "7548F9E1983F8BC3"
+	icon: "create:andesite_alloy"
+	id: "6125DB3AB7B67CCD"
+	order_index: 0
+	quest_links: [ ]
+	quests: [
+		{
+			id: "1C265C11A9626791"
+			rewards: [{
+				count: 5
+				id: "3B900ECF12EA881F"
+				item: "create:andesite_alloy"
+				type: "item"
+			}]
+			subtitle: "机械师离不开的好东西"
+			tasks: [{
+				id: "6D19B1C647966344"
+				item: "minecraft:andesite"
+				type: "item"
+			}]
+			title: "安山石"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["1C265C11A9626791"]
+			hide_dependency_lines: false
+			id: "08AB30141D59308C"
+			subtitle: "贯穿基础机械动力机器的核心物品"
+			tasks: [{
+				id: "521FA92B53E159C3"
+				item: "create:andesite_alloy"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "1F25992524C99F24"
+			subtitle: "酒壶：曲柄会自己转！！！"
+			tasks: [{
+				id: "7A7EB034FDF965F7"
+				item: "create:hand_crank"
+				type: "item"
+			}]
+			x: 1.0d
+			y: -1.0d
+		}
+		{
+			dependencies: ["4CEEB9CB7D852BD4"]
+			hide_dependency_lines: false
+			id: "7BFAF47A7B90DAD7"
+			subtitle: "风驰电站（其实羊毛也可以）"
+			tasks: [{
+				id: "5F56C8954B11C111"
+				item: "create:white_sail"
+				type: "item"
+			}]
+			x: 6.0d
+			y: 1.5d
+		}
+		{
+			dependencies: ["7BFAF47A7B90DAD7"]
+			hide_dependency_lines: false
+			id: "6667608468768F3A"
+			tasks: [{
+				id: "7822438089FC6BDE"
+				item: "create:windmill_bearing"
+				type: "item"
+			}]
+			x: 8.0d
+			y: 1.5d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "4CEEB9CB7D852BD4"
+			tasks: [{
+				id: "5D589292CC616C98"
+				item: "create:shaft"
+				type: "item"
+			}]
+			x: 4.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["4CEEB9CB7D852BD4"]
+			hide_dependency_lines: false
+			id: "5F11A8525B90F315"
+			subtitle: "同时启动999个水车打造河电站（电脑会自己死，不用管他）"
+			tasks: [{
+				id: "6ACE78B4C65159C9"
+				item: "create:water_wheel"
+				type: "item"
+			}]
+			x: 6.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["4CEEB9CB7D852BD4"]
+			hide_dependency_lines: false
+			id: "3AE67D33C696AFE1"
+			subtitle: "把全世界的齿轮并联在一起即可获得并并并！"
+			tasks: [{
+				id: "4B864BFEDE9D6582"
+				item: "create:cogwheel"
+				type: "item"
+			}]
+			x: 8.5d
+			y: -1.5d
+		}
+		{
+			dependencies: ["3AE67D33C696AFE1"]
+			hide_dependency_lines: false
+			id: "36A3417241645AE1"
+			subtitle: "可曾听闻大带小螺旋升天起飞的故事"
+			tasks: [{
+				id: "6EF83106005B2EBC"
+				item: "create:large_cogwheel"
+				type: "item"
+			}]
+			x: 8.5d
+			y: 0.0d
+		}
+		{
+			dependencies: ["058113F59552EAEF"]
+			id: "3ECC54A171DC8B4E"
+			subtitle: "四面八方流通（也会让转向反转）"
+			tasks: [{
+				id: "3A16B7E97A244202"
+				item: "create:gearbox"
+				type: "item"
+			}]
+			x: 5.5d
+			y: -2.5d
+		}
+		{
+			dependencies: ["058113F59552EAEF"]
+			id: "13443B2C1AA0A183"
+			subtitle: "竖过来的四面（也会让转向反转）"
+			tasks: [{
+				id: "0DE3CD16DA43CDC2"
+				item: "create:vertical_gearbox"
+				type: "item"
+			}]
+			x: 5.5d
+			y: -4.0d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "0477319A6B2A09B0"
+			subtitle: "好用，美观，简单!"
+			tasks: [{
+				id: "459D4783351376D5"
+				item: "create:andesite_casing"
+				type: "item"
+			}]
+			x: 4.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["4CEEB9CB7D852BD4"]
+			id: "058113F59552EAEF"
+			tasks: [{
+				id: "3A2FFBEB28790953"
+				title: "传动必备！"
+				type: "checkmark"
+			}]
+			x: 5.5d
+			y: -1.5d
+		}
+		{
+			dependencies: [
+				"0477319A6B2A09B0"
+				"15F16E4FEB5894C2"
+			]
+			hide_dependency_lines: false
+			id: "6E512D4E6C245C48"
+			subtitle: "抱着把地球压爆的决心去使用吧"
+			tasks: [{
+				id: "7EEB3B2672DCBD2B"
+				item: "create:mechanical_press"
+				type: "item"
+			}]
+			x: 6.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["6E512D4E6C245C48"]
+			hide_dependency_lines: false
+			id: "5ED796D87BB9CB73"
+			subtitle: "冲压机：压力！！！！（把铁丢到冲压机下或放置在上方有冲压机的置物台上冲压获得）"
+			tasks: [{
+				id: "3A3209CC44313C23"
+				item: "create:iron_sheet"
+				type: "item"
+			}]
+			x: 8.0d
+			y: 4.5d
+		}
+		{
+			dependencies: ["6E512D4E6C245C48"]
+			hide_dependency_lines: true
+			id: "46133479E0F353CA"
+			tasks: [{
+				id: "1183C513E625AC63"
+				item: "create:golden_sheet"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 7.5d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			id: "1D9C7C2AA78542AD"
+			subtitle: "为什么这么像帽子....."
+			tasks: [{
+				id: "2B2782E7753DD0BD"
+				item: "create:whisk"
+				type: "item"
+			}]
+			x: 9.5d
+			y: 4.5d
+		}
+		{
+			dependencies: ["1D9C7C2AA78542AD"]
+			hide_dependency_lines: false
+			id: "4C73DEF8DBCBF85B"
+			subtitle: "它可以搅拌基岩吗？？？（需要工作盆）"
+			tasks: [{
+				id: "578981B53AC970C2"
+				item: "create:mechanical_mixer"
+				type: "item"
+			}]
+			x: 11.0d
+			y: 4.5d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "6C33DFF85A53E754"
+			subtitle: "可容纳液体，物品，垃圾，乱七八糟的玩意"
+			tasks: [{
+				id: "63E157D396694309"
+				item: "create:basin"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			description: ["很显然根本装不下，所以我们后续还有更好的存储！"]
+			hide_dependency_lines: false
+			id: "6EB0BF22BB1C4F89"
+			subtitle: "话说他可以装下整个世界吗？"
+			tasks: [{
+				id: "489357F51F595C1F"
+				item: "create:item_vault"
+				type: "item"
+			}]
+			x: 8.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			hide_dependency_lines: false
+			id: "55436F4DB1DED28D"
+			subtitle: "似漏斗非漏斗"
+			tasks: [{
+				id: "2D0E322D94C196F0"
+				item: "create:chute"
+				type: "item"
+			}]
+			x: 9.5d
+			y: 3.0d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			hide_dependency_lines: false
+			id: "716F05EA83C96E59"
+			subtitle: "无论是切割物品还是树都是手到擒来（包括生物）"
+			tasks: [{
+				id: "383314CDEB580148"
+				item: "create:mechanical_saw"
+				type: "item"
+			}]
+			x: 8.0d
+			y: 6.0d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			hide_dependency_lines: false
+			id: "0ED10E3E9F24F193"
+			subtitle: "对着黑奴（烈焰人）....."
+			tasks: [{
+				id: "7743089A7A3511CA"
+				item: "create:empty_blaze_burner"
+				type: "item"
+			}]
+			x: 9.5d
+			y: 6.0d
+		}
+		{
+			dependencies: ["0ED10E3E9F24F193"]
+			hide_dependency_lines: false
+			id: "5A7AEA34E3422920"
+			rewards: [{
+				id: "0D2590CCCAC4B8D3"
+				type: "xp_levels"
+				xp_levels: 5
+			}]
+			subtitle: "给他喂点可燃性的物品试试？"
+			tasks: [{
+				id: "59EAB5D42E9C639D"
+				item: "create:blaze_burner"
+				type: "item"
+			}]
+			x: 10.5d
+			y: 7.0d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			id: "76EBD1A0556D7348"
+			subtitle: "如果这玩意可以当回旋镖？？？？"
+			tasks: [{
+				id: "69F429DEEF549046"
+				item: "create:propeller"
+				type: "item"
+			}]
+			x: 6.0d
+			y: 4.5d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			hide_dependency_lines: false
+			id: "1A18E492CB99AF7B"
+			rewards: [{
+				id: "30E56FC922EC6C29"
+				type: "xp_levels"
+				xp_levels: 5
+			}]
+			subtitle: "此灯泡非灯泡而是带领你走向黄铜机械的小零件"
+			tasks: [{
+				id: "37CB3BC29A94D9DA"
+				item: "create:electron_tube"
+				type: "item"
+			}]
+			x: 6.5d
+			y: 6.0d
+		}
+		{
+			dependencies: ["76EBD1A0556D7348"]
+			hide_dependency_lines: false
+			id: "6CA9CC2465A3E7FB"
+			subtitle: "洗涤，燃烧，缠冤都需要它"
+			tasks: [{
+				id: "00CC3A168EC27E6F"
+				item: "create:encased_fan"
+				type: "item"
+			}]
+			x: 4.0d
+			y: 4.5d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			hide_dependency_lines: true
+			id: "21B005F6B3BE309C"
+			tasks: [{
+				id: "07EF87B3A51C5087"
+				item: "createaddition:rolling_mill"
+				type: "item"
+			}]
+			x: 8.0d
+			y: 8.5d
+		}
+		{
+			dependencies: ["21B005F6B3BE309C"]
+			hide_dependency_lines: false
+			id: "6586D6F3FD79E5BF"
+			subtitle: "前期没必要，后期还没做（这个整合包还没做到那里！）"
+			tasks: [{
+				id: "61001696C2AE67FA"
+				item: "createaddition:iron_rod"
+				type: "item"
+			}]
+			x: 6.0d
+			y: 10.0d
+		}
+		{
+			dependencies: ["21B005F6B3BE309C"]
+			hide_dependency_lines: false
+			id: "70D7FBF17E71ACB8"
+			subtitle: "前期没必要，后期还没做（这个整合包还没做到那里！）"
+			tasks: [{
+				id: "05AF3CDD2617A406"
+				item: "createaddition:gold_rod"
+				type: "item"
+			}]
+			x: 7.0d
+			y: 10.0d
+		}
+		{
+			dependencies: ["21B005F6B3BE309C"]
+			hide_dependency_lines: false
+			id: "2877AD695A63B32B"
+			subtitle: "前期没必要，后期还没做（这个整合包还没做到那里！）"
+			tasks: [{
+				id: "6254B5C047A73AA4"
+				item: "createaddition:brass_rod"
+				type: "item"
+			}]
+			x: 8.0d
+			y: 10.0d
+		}
+		{
+			dependencies: ["21B005F6B3BE309C"]
+			hide_dependency_lines: false
+			id: "1B3147D762A6CF9A"
+			subtitle: "前期没必要，后期还没做（这个整合包还没做到那里！）"
+			tasks: [{
+				id: "586FD6BA1B8D7EF4"
+				item: "createaddition:copper_rod"
+				type: "item"
+			}]
+			x: 9.0d
+			y: 10.0d
+		}
+		{
+			dependencies: ["21B005F6B3BE309C"]
+			hide_dependency_lines: false
+			id: "69CC366DC089E12B"
+			subtitle: "前期没必要，后期还没做（这个整合包还没做到那里！）"
+			tasks: [{
+				id: "680D16FF4C730202"
+				item: "createaddition:electrum_rod"
+				type: "item"
+			}]
+			x: 10.0d
+			y: 10.0d
+		}
+		{
+			dependencies: [
+				"0477319A6B2A09B0"
+				"08AB30141D59308C"
+			]
+			dependency_requirement: "one_completed"
+			hide_dependency_lines: false
+			id: "15F16E4FEB5894C2"
+			tasks: [{
+				id: "57BD6B25A3E895EC"
+				item: "create:depot"
+				type: "item"
+			}]
+			x: 4.0d
+			y: 1.5d
+		}
+		{
+			dependencies: ["46133479E0F353CA"]
+			description: ["把他放置在流体储罐上即可变为蒸汽炉"]
+			hide_dependency_lines: false
+			id: "6064FE235298680A"
+			subtitle: "甲级战犯皮蛋曾经说过不会造蒸汽机的机械师不是一个好机械师"
+			tasks: [{
+				id: "43979A67601B2673"
+				item: "create:steam_engine"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 9.0d
+		}
+		{
+			dependencies: ["6E512D4E6C245C48"]
+			hide_dependency_lines: true
+			id: "3E57738B260C7C9E"
+			subtitle: "大部分流体类的都需要它"
+			tasks: [{
+				id: "468F45FEA60B2992"
+				item: "create:copper_sheet"
+				type: "item"
+			}]
+			x: 11.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["3E57738B260C7C9E"]
+			hide_dependency_lines: false
+			id: "6DD8B10680B06219"
+			subtitle: "理论上但凡是液体他都可以装下包括......尿（虽然没有就是了）"
+			tasks: [{
+				id: "6C308BB8E3F04ECA"
+				item: "create:fluid_tank"
+				type: "item"
+			}]
+			x: 11.0d
+			y: 1.5d
+		}
+		{
+			dependencies: ["3E57738B260C7C9E"]
+			hide_dependency_lines: false
+			id: "258CA69E5C907C8F"
+			subtitle: "水管而已...."
+			tasks: [{
+				id: "6C1C63CA8E4623D9"
+				item: "create:fluid_pipe"
+				type: "item"
+			}]
+			x: 12.5d
+			y: 3.0d
+		}
+		{
+			dependencies: ["258CA69E5C907C8F"]
+			hide_dependency_lines: false
+			id: "1089D8BA30D5AF0F"
+			subtitle: "它可以抽取液体走向四面八法"
+			tasks: [{
+				id: "6E185516C01BAA88"
+				item: "create:mechanical_pump"
+				type: "item"
+			}]
+			x: 14.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["46133479E0F353CA"]
+			hide_dependency_lines: false
+			id: "4EC81073FBFF4613"
+			rewards: [{
+				id: "4969741A7737342A"
+				type: "xp_levels"
+				xp_levels: 5
+			}]
+			subtitle: "拆，转向万能的扳手！"
+			tasks: [{
+				id: "1ACB4AC108ACE11F"
+				item: "create:wrench"
+				type: "item"
+			}]
+			x: 2.0d
+			y: 6.0d
+		}
+		{
+			dependencies: ["5ED796D87BB9CB73"]
+			hide_dependency_lines: false
+			id: "1C5C26925E3A4A57"
+			subtitle: "理论上它可以把所有方块粘在一起"
+			tasks: [{
+				id: "3C11E8AD6417B25E"
+				item: {
+					Count: 1
+					id: "create:super_glue"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 5.0d
+			y: 6.0d
+		}
+		{
+			dependencies: ["3AE67D33C696AFE1"]
+			hide_dependency_lines: false
+			id: "28959DA41A3ECA4D"
+			subtitle: "独转转不如众转转"
+			tasks: [{
+				id: "5A4572FF276C65DD"
+				item: "create:encased_chain_drive"
+				type: "item"
+			}]
+			x: 8.5d
+			y: -3.0d
+		}
+		{
+			dependencies: ["3AE67D33C696AFE1"]
+			hide_dependency_lines: false
+			id: "2CF5FC976A9733FF"
+			subtitle: "挂挡，离合，油门，启动！"
+			tasks: [{
+				id: "2A982D4DD9680D55"
+				item: "create:clutch"
+				type: "item"
+			}]
+			x: 10.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["3AE67D33C696AFE1"]
+			hide_dependency_lines: false
+			id: "4D6A46FB68CD8527"
+			subtitle: "顾名思义"
+			tasks: [{
+				id: "0E8B037F0D3749E7"
+				item: "create:gearshift"
+				type: "item"
+			}]
+			x: 7.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["3AE67D33C696AFE1"]
+			hide_dependency_lines: false
+			id: "63B8E20E10A928D9"
+			subtitle: "要不磨点基岩试试...."
+			tasks: [{
+				id: "62FF8F6D5D04FE45"
+				item: "create:millstone"
+				type: "item"
+			}]
+			x: 10.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["5F11A8525B90F315"]
+			hide_dependency_lines: false
+			id: "583A9ABC054BF62C"
+			subtitle: "一车更比一车强"
+			tasks: [{
+				id: "4AA05131CCBAECEE"
+				item: "create:large_water_wheel"
+				type: "item"
+			}]
+			x: 7.5d
+			y: 0.0d
+		}
+		{
+			dependencies: ["4CEEB9CB7D852BD4"]
+			hide_dependency_lines: false
+			id: "340993E24FC83068"
+			subtitle: "转起来！转起来！"
+			tasks: [{
+				id: "5FB7C58A8966F00F"
+				item: "create:mechanical_bearing"
+				type: "item"
+			}]
+			x: 4.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["340993E24FC83068"]
+			hide_dependency_lines: false
+			id: "5EFA2F01CF892521"
+			subtitle: "对，这是汽车底盘"
+			tasks: [{
+				id: "5D586F3B34ACA558"
+				item: "create:linear_chassis"
+				type: "item"
+			}]
+			x: 4.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["46133479E0F353CA"]
+			hide_dependency_lines: false
+			id: "57D7761B630563EB"
+			rewards: [{
+				id: "46832BEF13198688"
+				item: "minecraft:diamond"
+				type: "item"
+			}]
+			subtitle: "整合包中具体信息已有显示此物品约等于蛆（如果你非要做的话就奖励一个勤劳奖吧！）"
+			tasks: [{
+				id: "21FF8DD20788D6EA"
+				item: "create:goggles"
+				type: "item"
+			}]
+			x: 0.5d
+			y: 7.5d
+		}
+		{
+			dependencies: ["3AE67D33C696AFE1"]
+			hide_dependency_lines: false
+			id: "11AA8CB5084461E5"
+			subtitle: "建造刷石机的好帮手"
+			tasks: [{
+				id: "471916449BC45CD9"
+				item: "create:mechanical_drill"
+				type: "item"
+			}]
+			x: 10.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "5138B2D6A7F8BD5C"
+			subtitle: "铁轨，装配站，激活，扳手,理论上他也许真的可以装下整个地球？"
+			tasks: [{
+				id: "04E9A5500B4A12C2"
+				item: "create:cart_assembler"
+				type: "item"
+			}]
+			x: 11.5d
+			y: 0.0d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "77118E86BD53FC6D"
+			subtitle: "这不比漏斗快多了？？？"
+			tasks: [{
+				id: "45A418F9E78D78A2"
+				item: "create:andesite_funnel"
+				type: "item"
+			}]
+			x: 2.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "5CE4FCFC6DA3B836"
+			subtitle: "什么香香脆脆我们最爱美好时光传送带！"
+			tasks: [{
+				id: "5560E3C45042851E"
+				item: "create:belt_connector"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["08AB30141D59308C"]
+			hide_dependency_lines: false
+			id: "0E0863A3D053F04C"
+			subtitle: "分拣员招聘联系电话：10086"
+			tasks: [{
+				id: "2092B3DFB91BA6B1"
+				item: "create:andesite_tunnel"
+				type: "item"
+			}]
+			x: 2.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["340993E24FC83068"]
+			description: ["可以把移动中的存储空间（箱子之类）通过这个移动到另外一个移动存储接口"]
+			hide_dependency_lines: false
+			id: "7590DF272F4C16C4"
+			subtitle: "烦不烦，一直转！"
+			tasks: [{
+				id: "2BEF4B62E3AEFEAA"
+				item: "create:portable_storage_interface"
+				type: "item"
+			}]
+			x: 3.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["46133479E0F353CA"]
+			hide_dependency_lines: false
+			id: "10B005A1171D9C8D"
+			rewards: [{
+				id: "708FC72F49419334"
+				item: "create:precision_mechanism"
+				type: "item"
+			}]
+			subtitle: "因为讨厌合成这个所有坏事成双了...."
+			tasks: [{
+				id: "575718CDD0B404CD"
+				item: "create:precision_mechanism"
+				type: "item"
+			}]
+			x: 3.5d
+			y: 7.5d
+		}
+	]
+	title: "安山机械"
+}

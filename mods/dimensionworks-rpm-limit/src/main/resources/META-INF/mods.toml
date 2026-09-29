@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_rpm_limit"
-version="0.3.9"
+version="0.4.4"
 displayName="DimensionWorks RPM Limit"
 authors="szx-jn"
 description='''Per-player Create rotational speed limits for DimensionWorks.'''
@@ -12,6 +12,12 @@ modId="forge"
 mandatory=true
 versionRange="[47.0,)"
 ordering="NONE"
+side="BOTH"
+[[dependencies.dimensionworks_rpm_limit]]
+modId="curios"
+mandatory=true
+versionRange="[5.14.1,6)"
+ordering="AFTER"
 side="BOTH"
 [[dependencies.dimensionworks_rpm_limit]]
 modId="minecraft"

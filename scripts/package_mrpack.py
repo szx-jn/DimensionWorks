@@ -7,20 +7,42 @@ import argparse
 import hashlib
 import json
 import shutil
+import sys
 import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pack_hook  # noqa: E402  (sibling packaging preflight hook)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifest" / "mods.json"
+DEFAULT_INSTANCE_DIR = (
+    Path.home() / "Library" / "Application Support" / "minecraft" / "versions" / "DimensionWorks"
+)
 DEFAULT_VERSION = "0.1.0-alpha.1"
 FORGE_VERSION = "47.4.23"
 USER_AGENT = "DimensionWorks-Packager/0.1"
-OVERRIDE_DIRS = ("config", "defaultconfigs", "kubejs", "resourcepacks")
+OVERRIDE_DIRS = ("defaultconfigs", "kubejs", "resourcepacks")
+VERBOSE = False
+REPO_CONFIG_OVERRIDE_DIRS = ("config",)
 IGNORED_OVERRIDE_FILES = {".DS_Store", "README", "README.md"}
+INSTANCE_CONFIG_TREES = (
+    (Path("config"), Path("config"), True),
+    (Path("defaultconfigs"), Path("defaultconfigs"), False),
+    (Path("local"), Path("local"), False),
+    (Path("kubejs/config"), Path("kubejs/config"), False),
+)
+INSTANCE_CONFIG_FILES = (
+    Path("options.txt"),
+    Path("log4j2.xml"),
+    Path("rhino.local.properties"),
+    Path("CustomSkinLoader/CustomSkinLoader.json"),
+    Path("minemenu/menu.json"),
+)
 
 
 def request_json(url: str) -> Any:
@@ -52,7 +74,8 @@ def cached_file(cache_dir: Path, source: str, filename: str, url: str) -> Path:
     destination = cache_dir / source / filename
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not destination.is_file() or destination.stat().st_size == 0:
-        print(f"download: {url}")
+        if VERBOSE:
+            print(f"download: {url}")
         download(url, destination)
     return destination
 
@@ -140,22 +163,45 @@ def in_repo_jar(mod: dict[str, Any]) -> Path:
     return jar
 
 
-def copy_override_tree(source_root: Path, overrides_root: Path) -> int:
+def copy_override_tree(
+    source_root: Path,
+    overrides_root: Path,
+    *,
+    destination_root: Path | None = None,
+    ignored_files: frozenset[str] = IGNORED_OVERRIDE_FILES,
+    required: bool = False,
+) -> int:
     copied = 0
-    if not source_root.exists():
+    if not source_root.is_dir():
+        if required:
+            raise FileNotFoundError(f"missing required override directory: {source_root}")
         return copied
+    tree_destination = destination_root or Path(source_root.name)
     for source in source_root.rglob("*"):
-        if not source.is_file() or source.name in IGNORED_OVERRIDE_FILES:
+        if not source.is_file() or source.name in ignored_files:
             continue
         relative = source.relative_to(source_root)
-        destination = overrides_root / source_root.name / relative
+        destination = overrides_root / tree_destination / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         copied += 1
     return copied
 
 
-def build_pack(version: str, output: Path, cache_dir: Path) -> None:
+def copy_override_file(
+    source: Path,
+    overrides_root: Path,
+    destination_relative: Path,
+) -> int:
+    if not source.is_file():
+        return 0
+    destination = overrides_root / destination_relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+    return 1
+
+
+def build_pack(version: str, output: Path, cache_dir: Path, instance_dir: Path) -> str:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     index_files: list[dict[str, Any]] = []
     in_repo_mods: list[Path] = []
@@ -218,8 +264,20 @@ def build_pack(version: str, output: Path, cache_dir: Path) -> None:
 
     overrides = staging / "overrides"
     copied = 0
+    for directory in REPO_CONFIG_OVERRIDE_DIRS:
+        copied += copy_override_tree(ROOT / directory, overrides)
     for directory in OVERRIDE_DIRS:
         copied += copy_override_tree(ROOT / directory, overrides)
+    for source_relative, destination_relative, required in INSTANCE_CONFIG_TREES:
+        copied += copy_override_tree(
+            instance_dir / source_relative,
+            overrides,
+            destination_root=destination_relative,
+            ignored_files=frozenset(),
+            required=required,
+        )
+    for relative in INSTANCE_CONFIG_FILES:
+        copied += copy_override_file(instance_dir / relative, overrides, relative)
 
     mods_override = overrides / "mods"
     mods_override.mkdir(parents=True, exist_ok=True)
@@ -235,8 +293,8 @@ def build_pack(version: str, output: Path, cache_dir: Path) -> None:
                 archive.write(path, path.relative_to(staging).as_posix())
     shutil.rmtree(staging)
 
-    print(
-        f"created {output} ({output.stat().st_size} bytes), "
+    return (
+        f"{output} ({output.stat().st_size} bytes), "
         f"{len(index_files)} downloaded mods, {len(in_repo_mods)} in-repo mods, "
         f"{copied - len(in_repo_mods)} override files"
     )
@@ -245,6 +303,9 @@ def build_pack(version: str, output: Path, cache_dir: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", default=DEFAULT_VERSION)
+    parser.add_argument("--skip-hook", action="store_true", help="skip the packaging preflight hook")
+    parser.add_argument("--skip-build", action="store_true", help="skip in-repo mod builds in the hook")
+    parser.add_argument("--verbose", action="store_true", help="print every hook step and download")
     parser.add_argument(
         "--output",
         type=Path,
@@ -255,9 +316,35 @@ def main() -> None:
         type=Path,
         default=Path("/private/tmp/dimensionworks-pack-cache"),
     )
+    parser.add_argument(
+        "--instance-dir",
+        type=Path,
+        default=DEFAULT_INSTANCE_DIR,
+        help="game instance root containing config/ (default: %(default)s)",
+    )
     args = parser.parse_args()
+    global VERBOSE
+    VERBOSE = args.verbose
     output = args.output or ROOT / "dist" / f"DimensionWorks-{args.version}.mrpack"
-    build_pack(args.version, output.resolve(), args.cache_dir.resolve())
+    hook_summary = "skipped"
+    if not args.skip_hook:
+        ok, message = pack_hook.run_all(
+            args.instance_dir.expanduser().resolve(),
+            skip_build=args.skip_build,
+            verbose=args.verbose,
+        )
+        if not ok:
+            print("PACK-HOOK FAIL")
+            print(message)
+            raise SystemExit(1)
+        hook_summary = message
+    pack_summary = build_pack(
+        args.version,
+        output.resolve(),
+        args.cache_dir.resolve(),
+        args.instance_dir.expanduser().resolve(),
+    )
+    print(f"PACK OK: {pack_summary} | hook: {hook_summary}")
 
 
 if __name__ == "__main__":

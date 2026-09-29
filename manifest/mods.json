@@ -43,12 +43,12 @@
       "name": "Create Mobile Packages — DimensionWorks",
       "source": "github-release",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "release": "1.20.1-0.6.1-dimensionworks.1",
-      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.1.jar",
-      "version": "0.6.1-dimensionworks.1",
+      "release": "1.20.1-0.6.1-dimensionworks.2",
+      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.2.jar",
+      "version": "0.6.1-dimensionworks.2",
       "required": true,
       "environment": "both",
-      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.1"
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.2"
     },
     {
       "id": "ftb-library",
@@ -480,10 +480,30 @@
       "name": "DimensionWorks RPM Limit",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-rpm-limit",
-      "version": "0.3.9",
+      "version": "0.4.4",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-rpm-limit"
+    },
+    {
+      "id": "dimensionworks_mek_stress",
+      "name": "DimensionWorks Mekanism Stress",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-mek-stress",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
+    },
+    {
+      "id": "dimensionworks_cave_factory",
+      "name": "DimensionWorks Cave Factory",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-cave-factory",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-cave-factory"
     },
     {
       "id": "dimensionworks_transfer",
@@ -550,6 +570,17 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/fancymenu"
+    },
+    {
+      "id": "fancy_entity_renderer",
+      "name": "Fancy Entity Renderer",
+      "source": "modrinth",
+      "project_id": "RQ6INv2n",
+      "version": "0.4.6",
+      "version_id": "nC3OBHwC",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/fancy-entity-renderer"
     },
     {
       "id": "ferritecore",
@@ -1070,6 +1101,249 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/xaeros-world-map"
+    },
+    {
+      "id": "farmersdelight",
+      "name": "Farmer's Delight",
+      "source": "modrinth",
+      "project_id": "R2OftAxM",
+      "version": "1.20.1-1.3.4",
+      "version_id": "SiIpcZzM",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/farmers-delight"
+    },
+    {
+      "id": "brewinandchewin",
+      "name": "Brewin' And Chewin'",
+      "source": "modrinth",
+      "project_id": "hIu9KJTT",
+      "version": "1.20.1-3.2.1",
+      "version_id": "9myDFPCD",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/brewin-and-chewin"
+    },
+    {
+      "id": "sliceanddice",
+      "name": "Create Slice & Dice",
+      "source": "modrinth",
+      "project_id": "GmjmRQ0A",
+      "version": "3.6.0",
+      "version_id": "KWLI8Ng7",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/slice-and-dice"
+    },
+    {
+      "id": "mekanismdelight",
+      "name": "MekanismDelight",
+      "source": "modrinth",
+      "project_id": "NEUFDicS",
+      "version": "1.1.3",
+      "version_id": "7TaHijd8",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/mekanismdelight"
+    },
+    {
+      "id": "caves_delight",
+      "name": "Caves Delight",
+      "source": "modrinth",
+      "project_id": "FM6bfCfc",
+      "version": "1.1.0",
+      "version_id": "LQLqxrtE",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/caves_delight"
+    },
+    {
+      "id": "aethersdelight",
+      "name": "Aether's Delight",
+      "source": "modrinth",
+      "project_id": "XUztKPS9",
+      "version": "0.1.3.1",
+      "version_id": "IMQRjMr0",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/the-aethers-delight"
+    },
+    {
+      "id": "kaleidoscope_cookery",
+      "name": "Kaleidoscope Cookery",
+      "source": "modrinth",
+      "project_id": "v17FatAc",
+      "version": "1.5.1-forge+mc1.20.1",
+      "version_id": "oR27Hgav",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscope-cookery"
+    },
+    {
+      "id": "kaleidoscope_tavern",
+      "name": "Kaleidoscope Tavern",
+      "source": "modrinth",
+      "project_id": "r9RZvhiJ",
+      "version": "1.2.0-forge+mc1.20.1",
+      "version_id": "mUnU2u9e",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscopetavern"
+    },
+    {
+      "id": "kaleidoscope_compat",
+      "name": "Kaleidoscope Compat",
+      "source": "modrinth",
+      "project_id": "Xm1eP54z",
+      "version": "2.6.5-forge+mc1.20.1-Patch",
+      "version_id": "F0Fnk6VA",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscope-compat"
+    },
+    {
+      "id": "kaleidoscope_contraption",
+      "name": "Kaleidoscope Contraption",
+      "source": "modrinth",
+      "project_id": "JCCAvv9N",
+      "version": "1.0.3",
+      "version_id": "SaePvs9e",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscope-contraption"
+    },
+    {
+      "id": "kaleidoscopecookery_automation",
+      "name": "Kaleidoscope Cookery Automation",
+      "source": "modrinth",
+      "project_id": "7KEJ7Rz9",
+      "version": "1.0.1",
+      "version_id": "bLfdiPdc",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscopecookery-automation"
+    },
+    {
+      "id": "creategearsandtavern",
+      "name": "Create: Gears and Tavern",
+      "source": "modrinth",
+      "project_id": "ZjAeukl9",
+      "version": "1.1.8",
+      "version_id": "nCV9N6aB",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create-gears-and-tavern"
+    },
+    {
+      "id": "kaleidoscope_world_liquor",
+      "name": "Kaleidoscope World Liquor",
+      "source": "modrinth",
+      "project_id": "ePVLCraM",
+      "version": "1.1.11-forge+mc1.20.1-fix",
+      "version_id": "fZ7Z4b16",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscope-world-liquor"
+    },
+    {
+      "id": "kaleidoscope_nether",
+      "name": "Kaleidoscope Nether",
+      "source": "modrinth",
+      "project_id": "O4YuhMsI",
+      "version": "1.1.8-forge+mc1.20.1",
+      "version_id": "kn43NNqm",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscope-nether"
+    },
+    {
+      "id": "kaleidoscope_end",
+      "name": "Kaleidoscope End",
+      "source": "modrinth",
+      "project_id": "8GKUHBM6",
+      "version": "1.0.14-forge+mc1.20.1",
+      "version_id": "YS2tfy6v",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscope-end"
+    },
+    {
+      "id": "kaleidoscope_dim_wine",
+      "name": "Kaleidoscope: Dimensions Wine",
+      "source": "modrinth",
+      "project_id": "BrGJp2pm",
+      "version": "1.1.8-mc1.20.1-forge",
+      "version_id": "JDLbCoNO",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/kaleidoscopedimensions-wine"
+    },
+    {
+      "id": "touhou_little_maid",
+      "name": "Touhou Little Maid",
+      "source": "modrinth",
+      "project_id": "R0bDWFAW",
+      "version": "1.5.3-forge+mc1.20.1",
+      "version_id": "g1SKoGQJ",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/touhou-little-maid"
+    },
+    {
+      "id": "maidusehandcrank",
+      "name": "MaidUseHandCrank",
+      "source": "modrinth",
+      "project_id": "kVNtrRcL",
+      "version": "1.6.1",
+      "version_id": "aYR5F40k",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/maidusehandcrank"
+    },
+    {
+      "id": "maidtavern",
+      "name": "Maid Tavern",
+      "source": "modrinth",
+      "project_id": "2dJriPNX",
+      "version": "1.2.0-forge+mc1.20.1",
+      "version_id": "HsfZoPLY",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/maid-tavern"
+    },
+    {
+      "id": "maid_storage_manager",
+      "name": "Maid Storage Manager",
+      "source": "modrinth",
+      "project_id": "5sIJPqAj",
+      "version": "1.15.6",
+      "version_id": "xTNPlwGP",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/maid-storage-manager"
+    },
+    {
+      "id": "laowu",
+      "name": "Create: Meowchanics",
+      "source": "curseforge",
+      "project_slug": "create-meowchanics",
+      "file_id": "8919386",
+      "file_name": "create-meowchanics-2.2.1-forge-1.20.1.jar",
+      "version": "2.2.1",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/create-meowchanics"
+    },
+    {
+      "id": "netmusic",
+      "name": "Net Music",
+      "source": "modrinth",
+      "project_id": "gKNuqaQq",
+      "version": "1.5.2-forge+mc1.20.1",
+      "version_id": "QbkPicTz",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/net-music"
     }
   ]
 }

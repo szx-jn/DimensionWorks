@@ -1,0 +1,27 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "07DDD0CAE18A7217"
+	group: ""
+	icon: "kubejs:gear_heart_enchanted"
+	id: "07DDD0CAE18A7217"
+	order_index: 1
+	quest_links: [ ]
+	quests: [{
+		id: "40917E4DCDE7F6E5"
+		rewards: [{
+			id: "4674506C79D3DB79"
+			type: "xp_levels"
+			xp_levels: 5
+		}]
+		subtitle: "伴随着你诞生这个世界"
+		tasks: [{
+			id: "19A5AAF6786B4DA0"
+			item: "kubejs:gear_heart"
+			type: "item"
+		}]
+		x: 0.0d
+		y: 0.0d
+	}]
+	title: "齿轮之心"
+}

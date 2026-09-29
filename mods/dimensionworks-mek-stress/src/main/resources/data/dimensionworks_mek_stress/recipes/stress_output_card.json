@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "ae2:basic_card"
+    },
+    {
+      "item": "appliedcreate:stress_processor"
+    },
+    {
+      "item": "mekanism:alloy_infused"
+    }
+  ],
+  "result": {
+    "item": "dimensionworks_mek_stress:stress_output_card",
+    "count": 1
+  }
+}

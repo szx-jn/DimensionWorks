@@ -25,7 +25,13 @@ public final class RpmForgeEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent e) {
         RpmLimitManager.init(e.getEntity());
         if (e.getEntity() instanceof ServerPlayer player)
-            RpmLimitManager.applyLimitToOwned(player, RpmLimitManager.get(player.getUUID()));
+            RpmLimitManager.applyLimitToOwned(player, RpmLimitManager.getEffectiveLimit(player.getUUID()));
+    }
+
+    @SubscribeEvent
+    public static void logout(PlayerEvent.PlayerLoggedOutEvent e) {
+        if (e.getEntity() instanceof ServerPlayer player)
+            GearHeartEffects.clearPlayer(player);
     }
 
     public static void config(ModConfigEvent event) {
@@ -84,6 +90,8 @@ public final class RpmForgeEvents {
     public static void tick(TickEvent.PlayerTickEvent e) {
         if (e.phase == TickEvent.Phase.END && e.player instanceof ServerPlayer p)
             RpmLimitManager.refresh(p.server.getPlayerList().getPlayers(), p.server.getTickCount());
+        if (e.phase == TickEvent.Phase.END && e.player instanceof ServerPlayer p)
+            GearHeartEffects.tickPlayer(p);
     }
 
     @SubscribeEvent

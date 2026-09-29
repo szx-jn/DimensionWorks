@@ -59,6 +59,9 @@ public abstract class KineticBlockEntityMixin {
         float multiplier = OverspeedBonus.stressMultiplier((KineticBlockEntity) (Object) this);
         if (multiplier > 1)
             cir.setReturnValue(cir.getReturnValueF() * multiplier);
+        float curseMultiplier = RpmLimitManager.stressCostMultiplier((KineticBlockEntity) (Object) this);
+        if (curseMultiplier != 1.0f)
+            cir.setReturnValue(cir.getReturnValueF() * curseMultiplier);
     }
 
     /**

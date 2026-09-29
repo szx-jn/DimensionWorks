@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.szx.dimensionworks.cavefactory.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "dimensionworks_cave_factory.refmap.json",
+  "mixins": [
+    "BasinOperatingBlockEntityMixin",
+    "ContraptionMixin"
+  ],
+  "client": [],
+  "server": []
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "dimensionworks_cave_factory:polarity_residue",
+    "dimensionworks_cave_factory:genesis_residue",
+    "dimensionworks_cave_factory:decay_residue",
+    "dimensionworks_cave_factory:pressure_residue",
+    "dimensionworks_cave_factory:umbral_residue",
+    "dimensionworks_cave_factory:crystal_residue"
+  ]
+}

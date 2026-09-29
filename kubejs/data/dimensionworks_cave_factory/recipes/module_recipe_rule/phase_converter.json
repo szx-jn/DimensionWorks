@@ -1,0 +1,11 @@
+{
+  "type": "dimensionworks_cave_factory:module_recipe_rule",
+  "module": "phase_converter",
+  "recipes": [
+    "create:mixing/andesite_alloy",
+    "create:mixing/brass_ingot",
+    "create:compacting/andesite_from_flint",
+    "dimensionworks_cave_factory:self_propagation/abyssal/abyssmarine_primary",
+    "dimensionworks_cave_factory:self_propagation/abyssal/bioluminesscence_primary"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "item": "alexscaves:abyssmarine"
+    },
+    "c": {
+      "item": "dimensionworks_cave_factory:factory_casing"
+    },
+    "m": {
+      "item": "create:precision_mechanism"
+    },
+    "p": {
+      "item": "dimensionworks_cave_factory:factory_port"
+    },
+    "r": {
+      "item": "alexscaves:pearl"
+    }
+  },
+  "pattern": [
+    "rar",
+    "cmc",
+    "rpr"
+  ],
+  "result": {
+    "item": "dimensionworks_cave_factory:abyssal_pressure_tower"
+  },
+  "show_notification": true
+}

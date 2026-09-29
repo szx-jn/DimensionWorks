@@ -35,5 +35,6 @@ run/
 out/
 
 # Local secrets
+.hmcl/
 .env
 *.local

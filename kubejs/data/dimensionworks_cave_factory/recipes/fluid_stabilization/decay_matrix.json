@@ -1,0 +1,5 @@
+{
+  "type": "dimensionworks_cave_factory:fluid_stabilization",
+  "input": { "fluid": "dimensionworks_cave_factory:radionuclide_slurry" },
+  "result": { "item": "dimensionworks_cave_factory:decay_matrix", "count": 1 }
+}

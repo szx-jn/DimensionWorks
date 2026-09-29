@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "alexscaves:guano",
+    "alexscaves:guanostone",
+    "alexscaves:coprolith",
+    "#alexscaves:thornwood_logs",
+    "alexscaves:pure_darkness"
+  ]
+}

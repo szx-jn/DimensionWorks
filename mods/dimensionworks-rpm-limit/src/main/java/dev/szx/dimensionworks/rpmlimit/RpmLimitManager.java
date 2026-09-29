@@ -25,6 +25,9 @@ public final class RpmLimitManager {
     private static final String SYNC_MACHINE_LIMIT_KEY = "DimensionWorksMachineRpmLimit";
 
     private static final Map<UUID, Integer> CACHE = new ConcurrentHashMap<>();
+    private static final Map<UUID, Map<String, Integer>> EXTERNAL_LIMITS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Map<String, Float>> STRESS_COST_MULTIPLIERS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Map<String, Float>> STRESS_CAPACITY_MULTIPLIERS = new ConcurrentHashMap<>();
     private static long last = Long.MIN_VALUE;
 
     public static void init(Player p) {
@@ -44,12 +47,63 @@ public final class RpmLimitManager {
         return get(id);
     }
 
+    public static int getEffectiveLimit(UUID id) {
+        int effective = get(id);
+        for (int external : externalLimits(id).values())
+            effective = Math.min(effective, sanitize(external));
+        return effective;
+    }
+
     public static void setLimit(ServerPlayer p, int rpm) {
         int v = sanitize(rpm);
         p.getPersistentData().putInt(PLAYER_KEY, v);
         p.getPersistentData().putBoolean(INIT_KEY, true);
         CACHE.put(p.getUUID(), v);
-        applyLimitToOwned(p, v);
+        applyLimitToOwned(p, getEffectiveLimit(p.getUUID()));
+    }
+
+    public static void setExternalLimit(ServerPlayer player, String source, int rpm) {
+        Integer previous = externalLimits(player.getUUID()).put(source, sanitize(rpm));
+        if (previous == null || previous != sanitize(rpm))
+            applyLimitToOwned(player, getEffectiveLimit(player.getUUID()));
+    }
+
+    public static void removeExternalLimit(ServerPlayer player, String source) {
+        Map<String, Integer> limits = externalLimits(player.getUUID());
+        if (limits.remove(source) != null)
+            applyLimitToOwned(player, getEffectiveLimit(player.getUUID()));
+    }
+
+    public static void setStressCostMultiplier(ServerPlayer player, String source, double multiplier) {
+        float value = sanitizeMultiplier(multiplier);
+        Float previous = stressMultipliers(player.getUUID(), STRESS_COST_MULTIPLIERS).put(source, value);
+        if (previous == null || previous != value)
+            markOwnedNetworksDirty(player);
+    }
+
+    public static void removeStressCostMultiplier(ServerPlayer player, String source) {
+        if (stressMultipliers(player.getUUID(), STRESS_COST_MULTIPLIERS).remove(source) != null)
+            markOwnedNetworksDirty(player);
+    }
+
+    public static void setStressCapacityMultiplier(ServerPlayer player, String source, double multiplier) {
+        float value = sanitizeMultiplier(multiplier);
+        Float previous = stressMultipliers(player.getUUID(), STRESS_CAPACITY_MULTIPLIERS).put(source, value);
+        if (previous == null || previous != value)
+            markOwnedNetworksDirty(player);
+    }
+
+    public static void removeStressCapacityMultiplier(ServerPlayer player, String source) {
+        if (stressMultipliers(player.getUUID(), STRESS_CAPACITY_MULTIPLIERS).remove(source) != null)
+            markOwnedNetworksDirty(player);
+    }
+
+    public static float stressCostMultiplier(KineticBlockEntity k) {
+        return ownerMultiplier(k, STRESS_COST_MULTIPLIERS);
+    }
+
+    public static float stressCapacityMultiplier(KineticBlockEntity k) {
+        return ownerMultiplier(k, STRESS_CAPACITY_MULTIPLIERS);
     }
 
     public static void refresh(Iterable<ServerPlayer> ps, long tick) {
@@ -62,7 +116,7 @@ public final class RpmLimitManager {
             p.getPersistentData().putInt(PLAYER_KEY, v);
             Integer previous = CACHE.put(p.getUUID(), v);
             if (previous == null || previous != v)
-                applyLimitToOwned(p, v);
+                applyLimitToOwned(p, getEffectiveLimit(p.getUUID()));
         }
     }
 
@@ -130,7 +184,7 @@ public final class RpmLimitManager {
         if (player == null)
             return;
 
-        int limit = get(direct);
+        int limit = getEffectiveLimit(direct);
         boolean changed = setMachineLimit(k, limit);
         if (!changed)
             return;
@@ -177,13 +231,36 @@ public final class RpmLimitManager {
         return changed;
     }
 
+    private static void markOwnedNetworksDirty(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        if (server == null)
+            return;
+
+        for (ServerLevel level : server.getAllLevels()) {
+            for (ChunkHolder holder : ((ChunkMapAccessor) level.getChunkSource().chunkMap)
+                .dimensionworks$getChunks()) {
+                LevelChunk chunk = holder.getFullChunk();
+                if (chunk == null)
+                    continue;
+
+                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                    if (!(blockEntity instanceof KineticBlockEntity kinetic))
+                        continue;
+                    if (!player.getUUID().equals(owner(kinetic)))
+                        continue;
+                    kinetic.networkDirty = true;
+                    kinetic.setChanged();
+                }
+            }
+        }
+    }
+
 
     private static int limitFor(KineticBlockEntity k) {
         UUID owner = owner(k);
         if (k.getLevel() != null && !k.getLevel().isClientSide && owner != null) {
-            Integer live = CACHE.get(owner);
-            if (live != null)
-                return live;
+            if (CACHE.containsKey(owner))
+                return getEffectiveLimit(owner);
         }
 
         int stored = storedMachineLimit(k);
@@ -205,8 +282,32 @@ public final class RpmLimitManager {
     }
 
     private static int limitForOwner(UUID owner) {
-        Integer live = CACHE.get(owner);
-        return live == null ? RpmLimitConfig.DEFAULT_RPM.get() : live;
+        return getEffectiveLimit(owner);
+    }
+
+    private static Map<String, Integer> externalLimits(UUID owner) {
+        return EXTERNAL_LIMITS.computeIfAbsent(owner, ignored -> new ConcurrentHashMap<>());
+    }
+
+    private static Map<String, Float> stressMultipliers(UUID owner, Map<UUID, Map<String, Float>> container) {
+        return container.computeIfAbsent(owner, ignored -> new ConcurrentHashMap<>());
+    }
+
+    private static float ownerMultiplier(KineticBlockEntity k, Map<UUID, Map<String, Float>> container) {
+        UUID owner = owner(k);
+        if (owner == null)
+            return 1.0f;
+        Map<String, Float> multipliers = container.get(owner);
+        if (multipliers == null || multipliers.isEmpty())
+            return 1.0f;
+        float result = 1.0f;
+        for (float multiplier : multipliers.values())
+            result *= multiplier;
+        return result;
+    }
+
+    private static float sanitizeMultiplier(double multiplier) {
+        return (float) Math.max(0.0d, Math.min(16.0d, multiplier));
     }
 
     private static int storedMachineLimit(KineticBlockEntity k) {

@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.rpmlimit.mixin;
 
 import com.simibubi.create.content.kinetics.millstone.MillstoneBlockEntity;
+import dev.szx.dimensionworks.rpmlimit.GearHeartEffects;
 import dev.szx.dimensionworks.rpmlimit.OverspeedBonus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -21,5 +22,14 @@ public abstract class MillstoneBlockEntityMixin {
             (MillstoneBlockEntity) (Object) this,
             this::dimensionworks$process
         );
+    }
+
+    @Inject(method = "process", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$failCursedMillstoneOutput(CallbackInfo ci) {
+        MillstoneBlockEntity millstone = (MillstoneBlockEntity) (Object) this;
+        if (GearHeartEffects.shouldFailOutput(millstone)) {
+            GearHeartEffects.failMillstoneOutput(millstone);
+            ci.cancel();
+        }
     }
 }

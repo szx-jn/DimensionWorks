@@ -8,7 +8,15 @@
 # 转速体系按 10240 设计（见 mods/dimensionworks-rpm-limit）。缺了本文件的存档会被 Forge
 # 建成空配置，加载时所有键都回落到 Create 默认值，转速上限就变成 256。
 
+# DimensionWorks 将软管滑轮判定无限流体所需的最小连通流体方块数从 10000 降为 2048，
+# 使规模达到 2048 格及以上的岩浆池可作为无限岩浆源。
+
 [kinetics]
 	#Maximum allowed rotation speed for any Kinetic Block.
 	#Range: > 64
 	maxRotationSpeed = 10240
+
+[fluids]
+	#The minimum amount of fluid blocks the hose pulley needs to find before deeming it an infinite source.
+	#Range: > -1
+	hosePulleyBlockThreshold = 2048

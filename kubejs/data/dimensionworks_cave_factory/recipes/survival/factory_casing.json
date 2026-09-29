@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "b": {
+      "item": "create:brass_casing"
+    },
+    "i": {
+      "item": "create:industrial_iron_block"
+    },
+    "s": {
+      "item": "create:shaft"
+    }
+  },
+  "pattern": [
+    "ibi",
+    "bsb",
+    "ibi"
+  ],
+  "result": {
+    "count": 8,
+    "item": "dimensionworks_cave_factory:factory_casing"
+  },
+  "show_notification": true
+}

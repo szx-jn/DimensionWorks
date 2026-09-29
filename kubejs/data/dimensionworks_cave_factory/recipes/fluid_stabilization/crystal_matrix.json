@@ -1,0 +1,5 @@
+{
+  "type": "dimensionworks_cave_factory:fluid_stabilization",
+  "input": { "fluid": "dimensionworks_cave_factory:supersaturated_syrup" },
+  "result": { "item": "dimensionworks_cave_factory:crystal_matrix", "count": 1 }
+}

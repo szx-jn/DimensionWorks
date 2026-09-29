@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "item": "alexscaves:abyssmarine"
+    },
+    "g": {
+      "item": "alexscaves:depth_glass"
+    },
+    "p": {
+      "item": "alexscaves:pearl"
+    }
+  },
+  "pattern": [
+    " g ",
+    "gag",
+    " p "
+  ],
+  "result": {
+    "count": 2,
+    "item": "dimensionworks_cave_factory:fluid_ampoule"
+  },
+  "show_notification": true
+}

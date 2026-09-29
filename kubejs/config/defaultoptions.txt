@@ -1,1 +1,7 @@
+guiScale:3
+key_key.aether.open_accessories.desc:key.keyboard.f8
 key_key.curios.open.desc:key.keyboard.keypad.9
+key_key.ftbquests.quests:key.keyboard.f8
+key_key.jei.copy.recipe.id:key.keyboard.equal
+key_key.open_menu:key.keyboard.f8
+key_key.pickItem:key.keyboard.equal

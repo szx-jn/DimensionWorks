@@ -4,6 +4,49 @@
 New players start at **32 RPM**. The hard maximum is **10240 RPM**.
 The mod declares Create as a `BEFORE` dependency and its Mixin configuration is required, so the Create kinetic hooks are applied before Create's content is loaded.
 
+## 齿轮之心
+
+RPM Limit 模组同时承载 KubeJS 齿轮之心的运行行为。物品本身由
+`kubejs/startup_scripts/gear_heart.js` 注册，模组只判断物品 ID 与
+`CustomModelData`，不注册第二套物品，也不会写入配方。
+
+- Curios 专属槽：`gear_heart`。只有 `kubejs:gear_heart` 和
+  `kubejs:gear_heart_enchanted` 可以装备。`CurioUnequipEvent` 使用
+  `Event.Result.DENY` 拒绝取下，避免对不可取消事件调用 `setCanceled` 导致崩溃；
+  死亡掉落规则为 `ALWAYS_KEEP`。
+- 基础增益：交互距离 +2、急迫 II、幸运 I。基础增益只在饰品实际生效时施加，
+  下线或异常移除后会清理。
+- `kubejs:gear_heart` 本身就是破损/受诅咒物品；`CustomModelData=0` 与 `1`
+  仅切换常态/破损外观，两态都会显示并生效七条诅咒。
+  `kubejs:gear_heart_enchanted` 是祝福占位，不显示也不承载诅咒。
+- 七条诅咒默认全部处于未破除状态：攻击伤害降至 70%（向下取整）、机械转速上限 32、
+  产出失败、随机冻结、夜晚饥饿消耗翻倍、应力消耗翻倍、应力产出降至 80%。
+- `gear_heart_repair_fragment_1` 至 `_7` 为无配方的占位修复碎片。右键已装备的
+  破损齿轮之心会破除对应诅咒；已破除项写入物品 NBT 的
+  `DimensionWorksGearHeartRepaired` 位掩码，立即停止原诅咒并改为绿色破除效果。
+  转速上限诅咒破除后，玩家的持久 RPM 上限会直接改为 512。
+- 旧版 `kubejs:gear_heart_enchanted` 且 `CustomModelData=2` 的诅咒物品会在装备后
+  自动迁移为破损态 `kubejs:gear_heart`，保留原有破除位。
+- 产出失败已接入搅拌盆/机械压力机、动力锯、磨石和置物台冲压路径。失败时本次
+  输入被消耗且不产出，动画和网络速度逻辑不被重跑。
+- 输出失败、冻结和夜晚饥饿触发时会在快捷栏上方显示红色诅咒提示，不写服务端日志。
+
+### 配置（COMMON，`[gearHeart]`）
+
+| 键 | 默认值 | 说明 |
+| --- | --- | --- |
+| `outputFailureChance` | `0.35` | 每次完成的受支持机械操作产出失败的概率 |
+| `freezeChance` | `0.75` | 冻结间隔到期后实际冻结的概率 |
+| `freezeIntervalMinSeconds` | `40` | 随机冻结间隔下限（秒） |
+| `freezeIntervalMaxSeconds` | `240` | 随机冻结间隔上限（秒） |
+| `freezeDurationTicks` | `20` | 每次冻结时长（20 tick = 1 秒） |
+
+### 运行边界
+
+产出失败只覆盖已接入的 Create 加工路径，其他模组机器不会因为没有通用产出
+钩子而被误伤。冻结会取消服务端移动、交互、方块破坏、物品丢弃和容器点击；
+它不更改客户端时钟，也不会在玩家离线后继续计时。
+
 ## Create 全局转速上限
 
 Create 自身还会用 `kinetics.maxRotationSpeed` 钳制所有动力方块，默认只有 256 RPM。

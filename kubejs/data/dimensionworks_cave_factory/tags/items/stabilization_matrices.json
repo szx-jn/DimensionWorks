@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "dimensionworks_cave_factory:polarity_matrix",
+    "dimensionworks_cave_factory:genesis_matrix",
+    "dimensionworks_cave_factory:decay_matrix",
+    "dimensionworks_cave_factory:pressure_matrix",
+    "dimensionworks_cave_factory:umbral_matrix",
+    "dimensionworks_cave_factory:crystal_matrix"
+  ]
+}

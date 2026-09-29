@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "dimensionworks_cave_factory:block/fluid_stabilizer" }
+  }
+}

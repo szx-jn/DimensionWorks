@@ -1,0 +1,108 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "0BC727D39F6C68C1"
+	group: "7548F9E1983F8BC3"
+	icon: "create:package_frogport"
+	id: "0BC727D39F6C68C1"
+	order_index: 2
+	quest_links: [ ]
+	quests: [
+		{
+			id: "6E0E648E283DA53E"
+			tasks: [{
+				id: "400A70520D1A0353"
+				item: "create:package_frogport"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			id: "6780FCDC215D07FA"
+			subtitle: "仓库必备小蜜蜂！"
+			tasks: [{
+				id: "1F13A0280578AD4C"
+				item: "create_mobile_packages:robo_bee"
+				type: "item"
+			}]
+			x: 2.5d
+			y: 0.0d
+		}
+		{
+			id: "7FAE2A35273F38EC"
+			tasks: [{
+				id: "0590A86D47D89763"
+				item: "create:packager"
+				type: "item"
+			}]
+			x: 2.5d
+			y: -2.5d
+		}
+		{
+			hide_dependency_lines: false
+			id: "07C5F05033E1FE4F"
+			subtitle: "需要一只猫对其右键（猫要训服）"
+			tasks: [{
+				id: "4C442A9430579B38"
+				item: "laowu:transport_suit"
+				type: "item"
+			}]
+			x: 5.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["6780FCDC215D07FA"]
+			description: [
+				"该物流不同于蛙港，其功能如：向玩家传输物品所有非常适合建造仓库。"
+				"例"
+			]
+			hide_dependency_lines: false
+			id: "324AB66F9ABB2E0A"
+			tasks: [{
+				id: "11B305AE4CB90029"
+				item: "create_mobile_packages:bee_port"
+				type: "item"
+			}]
+			x: 2.5d
+			y: 2.0d
+		}
+		{
+			dependencies: ["6E0E648E283DA53E"]
+			hide_dependency_lines: false
+			id: "18CE316E5EA9D7C2"
+			tasks: [{
+				id: "34FAEA2669060B5B"
+				item: "create:chain_conveyor"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["07C5F05033E1FE4F"]
+			description: ["需要在坐垫下方放置打包机坐垫需要一只物流职业的猫（需要训服）,蹲下右键猫背上的箱子更改猫咪物流为你想要的名字（需要两个猫咪物流名字一样，但必须更改哪怕是两个1）两个名字相同的物流猫咪会弹射起步交换位置从而自动输入打包机存入"]
+			hide_dependency_lines: false
+			id: "45341285627842E2"
+			tasks: [{
+				id: "650F15FBBE4554D9"
+				item: "create:red_seat"
+				type: "item"
+			}]
+			x: 5.0d
+			y: 2.0d
+		}
+		{
+			id: "58FB3E2019AD5D59"
+			subtitle: "此工具经过甲级战犯皮蛋的魔改目前已处于跳出三界之外不在五行之中除了玩家什么都能打包"
+			tasks: [{
+				id: "51E7C047176B5E7A"
+				item: "create_mobile_packages:mobile_packager"
+				type: "item"
+			}]
+			x: 5.0d
+			y: -2.5d
+		}
+	]
+	title: "物流"
+}

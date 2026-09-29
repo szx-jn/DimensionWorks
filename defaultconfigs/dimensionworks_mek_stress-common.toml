@@ -1,0 +1,21 @@
+[energy]
+	#Mekanism joules represented by one Applied Create stress unit.
+	#Range: 0.001 ~ 1000000.0
+	joulesPerSu = 2.5
+
+[card]
+	#Requested RPM stored by a newly configured stress output card.
+	#Range: 0 ~ 10240
+	defaultRpm = 32
+	#Upper bound accepted by the card UI before the owner limit is applied.
+	#Range: 1 ~ 10240
+	maxRpm = 10240
+	#Default maximum stress delivered by one output bus each tick.
+	#Range: 0 ~ 1048576
+	defaultStressPerTick = 1024
+	#Absolute per-tick stress limit accepted by the card UI.
+	#Range: 1 ~ 1048576
+	maxStressPerTick = 1048576
+	#RPM used when an export bus has no resolvable owning player.
+	#Range: 1 ~ 10240
+	ownerFallbackRpm = 32

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "b": {
+      "item": "dimensionworks_cave_factory:factory_casing"
+    },
+    "p": {
+      "item": "create:precision_mechanism"
+    },
+    "t": {
+      "item": "create:fluid_tank"
+    },
+    "q": {
+      "item": "create:fluid_pipe"
+    }
+  },
+  "pattern": [
+    "qpq",
+    "btb",
+    "qpq"
+  ],
+  "result": {
+    "item": "dimensionworks_cave_factory:fluid_stabilizer"
+  },
+  "show_notification": true
+}
