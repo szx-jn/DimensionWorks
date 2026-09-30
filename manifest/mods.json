@@ -485,6 +485,16 @@
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
     },
     {
+      "id": "dimensionworks_wrench_compat",
+      "name": "DimensionWorks Wrench Compatibility",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-wrench-compat",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-wrench-compat"
+    },
+    {
       "id": "dimensionworks_cave_factory",
       "name": "DimensionWorks Cave Factory",
       "source": "in-repo",

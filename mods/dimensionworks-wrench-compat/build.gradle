@@ -1,0 +1,53 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'eclipse'
+    id 'idea'
+}
+
+version = '0.1.0'
+group = 'dev.szx.dimensionworks'
+base.archivesName = 'dimensionworks_wrench_compat'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+}
+
+repositories {
+    maven { name = 'Create'; url = 'https://maven.createmod.net' }
+    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
+    maven {
+        name = 'FTB'
+        url = 'https://maven.ftb.dev/releases'
+        metadataSources { artifact() }
+        content { includeGroup 'dev.ftb.mods' }
+    }
+    maven { name = 'Architectury'; url = 'https://maven.architectury.dev/' }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
+    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
+    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
+    compileOnly 'dev.architectury:architectury-forge:9.2.14'
+    compileOnly(fg.deobf('dev.ftb.mods:ftb-ultimine-forge:2001.1.8')) {
+        transitive = false
+    }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+jar {
+    finalizedBy 'reobfJar'
+}
