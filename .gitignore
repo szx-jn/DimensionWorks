@@ -20,6 +20,8 @@ world/
 server.properties
 
 # Generated/runtime data
+.npm-cache/
+node_modules/
 cache/
 libraries/
 versions/
