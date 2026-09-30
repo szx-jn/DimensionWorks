@@ -50,6 +50,24 @@ python3 scripts/package_mrpack.py --major-bump --version 1.0.0
 
 实例的 `config/` 缺失时打包失败，其余实例配置不存在时跳过。账号文件、`servers.dat`、存档、日志、缓存、地图个人数据、Mod 本体和启动器数据不会写入整合包。默认输出到 `dist/`。macOS 默认实例目录为 `~/Library/Application Support/minecraft/versions/DimensionWorks`，可通过 `--instance-dir` 覆盖。
 
+## 打包服务端
+
+生成可直接解压开服的完整 Forge 服务端 zip：
+
+```sh
+python3 scripts/package_server.py
+```
+
+脚本从同一份 `manifest/mods.json` 中筛选 `environment` 为 `both` 或 `server` 的必需 Mod，排除仅客户端 Mod，并构建 `source` 为 `in-repo` 的自研 Mod。它会安装固定版 Forge `47.4.23`，写入已安装的 `libraries/`、服务端 `config/`、`defaultconfigs/`、`kubejs/`、`server.properties`、`eula.txt`、`user_jvm_args.txt`、Linux/Windows 启动脚本和中文开服说明。
+
+默认输出到 `dist/DimensionWorks-Server-<当前 VERSION>.zip`，不递增 `VERSION`。服务端包不包含世界存档、日志、玩家名单、RCON 密码或其他运行时私有数据。Linux/开服面板启动命令为 `bash start.sh`；Windows 运行 `start.bat`。首次启动前仍需由服主阅读并同意 Minecraft EULA，把 `eula.txt` 改为 `eula=true`。
+
+可指定其他输出路径：
+
+```sh
+python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
+```
+
 ## 打包前钩子
 
 `scripts/pack_hook.py` 是打包预检钩子。`scripts/package_mrpack.py` 每次运行都会自动先跑它，也可以单独执行：
@@ -102,3 +120,11 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 4. 确认游戏实例的 `config/` 已经是想进包的状态，打包时实例配置会覆盖仓库配置。
 5. 运行 `python3 scripts/package_mrpack.py`；钩子会自动先跑，失败就不会产出整合包。
 6. 确认 `dist/DimensionWorks-<版本>.mrpack` 生成，记下大小并把路径交付。
+
+## 每次打包服务端要做什么
+
+1. 确认根目录 `VERSION`、自研 Mod 版本和 `manifest/mods.json` 已同步。
+2. 确认 `manifest/mods.json` 的 `environment` 标记正确，仅客户端 Mod 不应进入服务端。
+3. 运行 `python3 scripts/package_server.py`；钩子会先做静态检查和自研 Mod 构建。
+4. 检查服务端 zip 中的 `mods/`、`config/`、`defaultconfigs/`、`kubejs/`、`libraries/` 和启动脚本。
+5. 服务端交付前，至少验证压缩包可解压、Forge 启动参数路径存在，并尽可能实际启动一次服务端。

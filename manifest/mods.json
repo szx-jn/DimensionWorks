@@ -886,7 +886,7 @@
       "version": "1.12.3",
       "version_id": "nJMYNfU1",
       "required": true,
-      "environment": "both",
+      "environment": "client",
       "url": "https://modrinth.com/mod/mine-menu"
     },
     {
