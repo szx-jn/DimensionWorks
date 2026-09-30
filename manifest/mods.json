@@ -212,17 +212,6 @@
       "url": "https://modrinth.com/mod/appleskin"
     },
     {
-      "id": "appflux",
-      "name": "Applied Flux",
-      "source": "modrinth",
-      "project_id": "oMgZ004U",
-      "version": "1.20-1.3.7-forge",
-      "version_id": "cAcdjzEn",
-      "required": true,
-      "environment": "both",
-      "url": "https://modrinth.com/mod/appflux"
-    },
-    {
       "id": "appmek",
       "name": "Applied Mekanistics",
       "source": "modrinth",
@@ -408,17 +397,6 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/create-power-loader"
-    },
-    {
-      "id": "createaddition",
-      "name": "Create Crafts & Additions",
-      "source": "modrinth",
-      "project_id": "kU1G12Nn",
-      "version": "forge-1.20.1-1.3.3",
-      "version_id": "9LgyB6Yb",
-      "required": true,
-      "environment": "both",
-      "url": "https://modrinth.com/mod/createaddition"
     },
     {
       "id": "createfastschematiccannon",
