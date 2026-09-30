@@ -935,14 +935,15 @@
     },
     {
       "id": "oculus",
-      "name": "Oculus",
-      "source": "modrinth",
-      "project_id": "GchcoXML",
-      "version": "1.20.1-1.8.0",
-      "version_id": "iQ1SwGc3",
+      "name": "Mekalus (Oculus)",
+      "source": "curseforge",
+      "project_slug": "mekalus-oculus-fork-with-fixed-mekanism-mekasuit",
+      "file_id": 6994299,
+      "file_name": "mekalus-mc1.20.1-1.8.0.1.jar",
+      "version": "1.20.1-1.8.0.1",
       "required": true,
       "environment": "client",
-      "url": "https://modrinth.com/mod/oculus"
+      "url": "https://www.curseforge.com/minecraft/mc-mods/mekalus-oculus-fork-with-fixed-mekanism-mekasuit"
     },
     {
       "id": "overloadedarmorbar",
