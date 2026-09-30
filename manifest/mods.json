@@ -17,6 +17,17 @@
       "url": "https://modrinth.com/mod/create"
     },
     {
+      "id": "create-ultimine",
+      "name": "Create Ultimine",
+      "source": "modrinth",
+      "project_id": "vUE54e5E",
+      "version": "1.20.1-forge-1.3.1",
+      "version_id": "v1WWGazc",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create-ultimine"
+    },
+    {
       "id": "mekanism",
       "name": "Mekanism",
       "source": "modrinth",
