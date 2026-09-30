@@ -92,15 +92,15 @@ public final class MemoryJadePlugin implements IWailaPlugin {
                 || !StressRules.isEligible(machine) || machine.getLevel() == null) {
                 return;
             }
-            long tick = machine.getLevel().getGameTime();
-            MachinePowerManager.DirectSource direct = MachinePowerManager.directSource(machine);
+            MachinePowerManager.DirectSource route = MachinePowerManager.powerRoute(machine);
             data.putBoolean(MACHINE_KEY, true);
             data.putString("tier", StressRules.machineTier(machine).name());
-            data.putString("route", direct == null ? "NONE" : "CREATE");
-            data.putInt("effectiveRpm", direct == null ? 0 : Math.round(direct.rpm()));
-            data.putLong("suPerTick", MachinePowerManager.convertedSuDemand(machine, tick));
-            data.putDouble("production", MachinePowerManager.workRate(machine, tick));
-            data.putString("status", direct == null ? "NO_POWER" : "OK");
+            data.putString("route", route == null ? "NONE" : "CREATE");
+            int rpm = MachinePowerManager.currentRpm(route);
+            data.putInt("effectiveRpm", rpm);
+            data.putLong("suPerTick", MachinePowerManager.suPerTick(route));
+            data.putDouble("production", MachinePowerManager.workRate(machine, route));
+            data.putString("status", rpm > 0 ? "OK" : "NO_POWER");
         }
 
         @Override

@@ -4,7 +4,7 @@
 
 - AE 侧库存由 Memory Drive 与 Memory Card 提供。Gearbox IMPORT 把 Create 应力存入网络，Gearbox EXPORT 从网络扣除 SU 后输出应力。
 - Create 侧动力只能从 ME Gearbox EXPORT 取出。合格 Mekanism 加工机器必须位于该齿轮箱供能的 Create 网络内。
-- 机器内部 FE 不再提供可用能量。FE 请求只作为加工工作量记录，并按 `2.5 FE = 1 SU` 向上取整扣除网络 SU。
+- 合格 Mekanism 机器不再读取或换算 FE。只要连接的 EXPORT 齿轮箱正在输出，机器就持续按 `当前有效 RPM × 8` 占用网络 SU；空闲机器也占用。机器拒绝一切 FE 输入。
 
 本 Mod 不修改 Applied Create、AE2、Mekanism、Create 的源码。Applied Create 原有的应力存储 Cell、组件、外壳和创造 Cell 全部退役，不能继续挂载、读写或供应 `StressKey`。
 
@@ -27,17 +27,27 @@ KubeJS 会把 `memory_drive_ddr1..5` 和 DDR1～5 × 六形态共 30 个 `memory
 ## 应力守恒
 
 ```text
-fullLoad      = Σ Create member stressPerRpm * configuredRpm
-requestedSu   = ceil(fullLoad)
-q             = min(stockQ, bandwidthQ)
-outputRpm     = round(configuredRpm * q)
-chargedSu     = min(requestedSu, availableSu)
+fullLoad       = Create 网络在有效 RPM 下的完整应力负载
+requestedSu    = ceil(fullLoad)
+stockQ         = storedSu / requestedSu
+rpmQ           = bandwidthRpm / requestedRpm，低于 0.6 时归零
+q              = min(stockQ, rpmQ)
+outputRpm      = round(effectiveRpm * q)
+chargedSu      = min(requestedSu, 当前可用 SU)
 perRpmCapacity = chargedSu / outputRpm
 ```
 
+ME Gearbox EXPORT 只有在负载、有效 RPM、实际输出 RPM、实际扣费和 `q > 0` 全部有效时才运行；任一条件缺失都会同时清除输出速度与宣告容量。没有 SU、没有 RPM 带宽、没有下游机器负载或 RPM 覆盖率低于 60% 时，全网机械动力停止。
+
+RPM 需求以每台 EXPORT 齿轮箱为一个占用单位，同一 AE 网络内求和；多台下游机器只放大该齿轮箱的 SU 应力需求，不重复占用 RPM。机器所在齿轮箱暂时停转时，机器仍保留其 Create 应力需求，避免“机器等齿轮箱、齿轮箱等负载”的死锁。
+
 ME Gearbox EXPORT 向 Create 网络宣告的容量严格等于本次实际扣除的 SU。下游机器在 `outputRpm` 下最多只能消费 `chargedSu`；超出部分触发 Create 原有应力过载，不能无中生有。
 
-合格 Mekanism 机器实际加工时才会记录 FE 工作量。空闲机器不占 SU，也不产生 Create 应力；每 tick 的请求汇总换算后写入 Memory 网络账本。
+## Jade
+
+- 合格 Mekanism 加工机器的 Mekanism FE/J 元素被移除。
+- 本 Mod 的 MEK Jade 条目显示当前有效 RPM、`RPM × 8` 的 SU/t 占用和当前工作倍率。
+- 非加工 MEK 设备的 Jade 能量显示保持不变。
 
 ## 工程接口
 

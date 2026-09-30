@@ -31,10 +31,10 @@ public abstract class TileEntityMekanismMixin {
         }
 
         long tick = level.getGameTime();
-        MachinePowerManager.DirectSource direct = MachinePowerManager.directSource(self);
-        MachinePowerManager.updateDirectStress(self, direct, tick);
+        MachinePowerManager.DirectSource route = MachinePowerManager.powerRoute(self);
+        MachinePowerManager.updateDirectStress(self, route);
 
-        double workRate = MachinePowerManager.workRate(self, tick);
+        double workRate = MachinePowerManager.workRate(self, route);
         int calls = WorkScheduler.callsForRate(workRate, tick);
         if (calls <= 0) {
             ci.cancel();

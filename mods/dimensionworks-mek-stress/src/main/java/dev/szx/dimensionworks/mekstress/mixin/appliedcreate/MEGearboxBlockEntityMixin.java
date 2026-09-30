@@ -5,12 +5,10 @@ import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.storage.MEStorage;
 import com.loliball.appliedcreate.energy.MEGearboxBlockEntity;
-import com.simibubi.create.content.kinetics.KineticNetwork;
-import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import dev.szx.dimensionworks.mekstress.api.IMEGearboxExportState;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.core.StressTransfer;
-import java.util.ArrayList;
-import java.util.List;
+import dev.szx.dimensionworks.mekstress.memory.MachinePowerManager;
 import net.minecraft.core.GlobalPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -20,27 +18,50 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = MEGearboxBlockEntity.class, remap = false)
-public abstract class MEGearboxBlockEntityMixin {
+public abstract class MEGearboxBlockEntityMixin implements IMEGearboxExportState {
     @Unique
     private boolean dimensionworks$exportRunning;
     @Unique
     private int dimensionworks$outputRpm;
     @Unique
     private float dimensionworks$advertisedStressPerRpm;
+    @Unique
+    private long dimensionworks$chargedSu;
+
+    @Override
+    @Unique
+    public boolean dimensionworks$isExportRunning() {
+        return dimensionworks$exportRunning;
+    }
+
+    @Override
+    @Unique
+    public int dimensionworks$getExportOutputRpm() {
+        return dimensionworks$outputRpm;
+    }
+
+    @Override
+    @Unique
+    public long dimensionworks$getExportChargedSu() {
+        return dimensionworks$chargedSu;
+    }
 
     @Inject(method = "getGeneratedSpeed", at = @At("RETURN"), cancellable = true, remap = false)
     private void dimensionworks$getActualOutputSpeed(CallbackInfoReturnable<Float> cir) {
         MEGearboxBlockEntity self = (MEGearboxBlockEntity) (Object) this;
-        if (dimensionworks$exportRunning && self.getMode() == MEGearboxBlockEntity.Mode.EXPORT) {
-            cir.setReturnValue(Math.copySign(dimensionworks$outputRpm, self.getConfiguredSpeed()));
+        if (self.getMode() != MEGearboxBlockEntity.Mode.EXPORT) {
+            return;
         }
+        cir.setReturnValue(dimensionworks$exportRunning
+            ? Math.copySign(dimensionworks$outputRpm, self.getConfiguredSpeed())
+            : 0.0F);
     }
 
     @Inject(method = "calculateAddedStressCapacity", at = @At("RETURN"), cancellable = true, remap = false)
     private void dimensionworks$advertiseOnlyChargedStress(CallbackInfoReturnable<Float> cir) {
         MEGearboxBlockEntity self = (MEGearboxBlockEntity) (Object) this;
-        if (dimensionworks$exportRunning && self.getMode() == MEGearboxBlockEntity.Mode.EXPORT) {
-            cir.setReturnValue(dimensionworks$advertisedStressPerRpm);
+        if (self.getMode() == MEGearboxBlockEntity.Mode.EXPORT) {
+            cir.setReturnValue(dimensionworks$exportRunning ? dimensionworks$advertisedStressPerRpm : 0.0F);
         }
     }
 
@@ -55,12 +76,6 @@ public abstract class MEGearboxBlockEntityMixin {
             return;
         }
 
-        int configuredRpm = Math.abs(self.getConfiguredSpeed());
-        if (configuredRpm <= 0) {
-            dimensionworks$setExportState(false, 0, 0.0F);
-            return;
-        }
-
         IMemoryGridService service = self.getMainNode().getGrid() == null
             ? null
             : self.getMainNode().getGrid().getService(IMemoryGridService.class);
@@ -69,58 +84,66 @@ public abstract class MEGearboxBlockEntityMixin {
             return;
         }
 
+        MachinePowerManager.GearboxDemand demand = MachinePowerManager.inspectGearbox(self);
+        int requestedRpm = demand == null ? 0 : demand.requestedRpm();
+        long requestedSu = demand == null ? 0L : demand.requestedSuPerTick();
         long tick = self.getLevel().getGameTime();
         GlobalPos gearboxPos = GlobalPos.of(self.getLevel().dimension(), self.getBlockPos());
-        double fullSpeedLoad = dimensionworks$fullSpeedLoad(self, configuredRpm);
-        long requestedSu = fullSpeedLoad <= 0.0D ? 0L : (long) Math.ceil(fullSpeedLoad);
-        service.reportGearboxExport(gearboxPos, configuredRpm, requestedSu, tick);
+        service.reportGearboxExport(gearboxPos, requestedRpm, requestedSu, tick);
+
+        if (requestedRpm <= 0 || requestedSu <= 0L || demand.fullSpeedLoad() <= 0.0D) {
+            dimensionworks$deactivate();
+            return;
+        }
 
         double q = service.finalQ(tick);
-        int outputRpm = StressTransfer.outputRpm(configuredRpm, q);
-        long proportionalRequest = outputRpm <= 0 || fullSpeedLoad <= 0.0D
+        if (q <= 0.0D) {
+            dimensionworks$deactivate();
+            return;
+        }
+
+        int outputRpm = StressTransfer.outputRpm(requestedRpm, q);
+        long proportionalRequest = outputRpm <= 0
             ? 0L
-            : Math.max(1L, (long) Math.ceil(fullSpeedLoad * outputRpm / configuredRpm));
+            : saturatedCeil(demand.fullSpeedLoad() * outputRpm / requestedRpm);
         long available = proportionalRequest <= 0L
             ? 0L
             : service.extractSu(proportionalRequest, Actionable.SIMULATE, tick);
         long charge = StressTransfer.chargedSu(proportionalRequest, available);
         long charged = charge <= 0L ? 0L : service.extractSu(charge, Actionable.MODULATE, tick);
-        float advertisedStress = StressTransfer.capacityPerRpm(charged, outputRpm);
-
-        dimensionworks$setExportState(true, outputRpm, advertisedStress);
+        if (!StressTransfer.canRun(requestedRpm, demand.fullSpeedLoad(), outputRpm, charged)) {
+            dimensionworks$deactivate();
+            return;
+        }
+        dimensionworks$setExportState(true, outputRpm,
+            StressTransfer.capacityPerRpm(charged, outputRpm), charged);
     }
 
     @Unique
     private void dimensionworks$deactivate() {
-        dimensionworks$setExportState(false, 0, 0.0F);
+        dimensionworks$setExportState(false, 0, 0.0F, 0L);
     }
 
     @Unique
-    private void dimensionworks$setExportState(boolean running, int outputRpm, float advertisedStress) {
+    private void dimensionworks$setExportState(boolean running, int outputRpm, float advertisedStress, long chargedSu) {
         boolean changed = dimensionworks$exportRunning != running
             || dimensionworks$outputRpm != outputRpm
-            || Float.compare(dimensionworks$advertisedStressPerRpm, advertisedStress) != 0;
+            || Float.compare(dimensionworks$advertisedStressPerRpm, advertisedStress) != 0
+            || dimensionworks$chargedSu != chargedSu;
         dimensionworks$exportRunning = running;
         dimensionworks$outputRpm = outputRpm;
         dimensionworks$advertisedStressPerRpm = advertisedStress;
+        dimensionworks$chargedSu = chargedSu;
         if (changed) {
             ((MEGearboxBlockEntity) (Object) this).updateGeneratedRotation();
         }
     }
 
     @Unique
-    private static double dimensionworks$fullSpeedLoad(MEGearboxBlockEntity gearbox, int configuredRpm) {
-        if (!gearbox.hasNetwork()) {
-            return 0.0D;
+    private static long saturatedCeil(double value) {
+        if (!Double.isFinite(value) || value <= 0.0D) {
+            return 0L;
         }
-        KineticNetwork network = gearbox.getOrCreateNetwork();
-        List<Float> stressPerRpm = new ArrayList<>(network.members.size());
-        for (var entry : network.members.entrySet()) {
-            KineticBlockEntity member = entry.getKey();
-            if (member != gearbox) {
-                stressPerRpm.add(entry.getValue());
-            }
-        }
-        return StressTransfer.fullSpeedLoad(stressPerRpm, configuredRpm);
+        return value >= (double) Long.MAX_VALUE ? Long.MAX_VALUE : (long) Math.ceil(value);
     }
 }

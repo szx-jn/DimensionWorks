@@ -13,6 +13,6 @@ public record MemoryNetworkSnapshot(
     MemoryNetworkStatus status
 ) {
     public static MemoryNetworkSnapshot empty(MemoryNetworkStatus status) {
-        return new MemoryNetworkSnapshot(0, 0L, 0L, 0L, 0L, 0L, 1.0D, 1.0D, 1.0D, status);
+        return new MemoryNetworkSnapshot(0, 0L, 0L, 0L, 0L, 0L, 0.0D, 0.0D, 0.0D, status);
     }
 }

@@ -36,18 +36,11 @@ public final class MekStressConfig {
     public static final ForgeConfigSpec.IntValue ELITE_MACHINE_RPM;
     public static final ForgeConfigSpec.IntValue ULTIMATE_MACHINE_RPM;
     public static final ForgeConfigSpec.DoubleValue EFFICIENCY_EXPONENT;
-    public static final ForgeConfigSpec.DoubleValue MEKANISM_FE_PER_SU;
     public static final ForgeConfigSpec.IntValue DIRECT_MAX_RPM;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
-        builder.comment("FE consumed by one unit of Mekanism processing work.")
-            .push("energy");
-        MEKANISM_FE_PER_SU = builder
-            .comment("Mekanism FE represented by one SU. Default: 2.5 FE = 1 SU.")
-            .defineInRange("mekanismPerSu", 2.5D, 0.001D, 1_000_000.0D);
-        builder.pop();
 
         builder.comment("Base SU stored by one balanced Memory Card. Card archetypes scale this value.")
             .push("memory_card_capacity");
@@ -204,7 +197,4 @@ public final class MekStressConfig {
         return DIRECT_MAX_RPM.get();
     }
 
-    public static double fePerSu() {
-        return MEKANISM_FE_PER_SU.get();
-    }
 }

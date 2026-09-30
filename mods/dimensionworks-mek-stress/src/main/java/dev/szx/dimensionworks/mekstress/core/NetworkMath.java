@@ -2,6 +2,8 @@ package dev.szx.dimensionworks.mekstress.core;
 
 /** Pure math for ME network congestion and production scaling. */
 public final class NetworkMath {
+    public static final double MIN_RPM_SCALE = 0.6D;
+
     private NetworkMath() {
     }
 
@@ -42,6 +44,18 @@ public final class NetworkMath {
         return clampRatio((double) bandwidthRpm / (double) demandRpm);
     }
 
+    /** RPM coverage is throttled proportionally and cut off below 60%. */
+    public static double rpmQ(long bandwidthRpm, long demandRpm) {
+        if (bandwidthRpm <= 0L || demandRpm <= 0L) {
+            return 0.0D;
+        }
+        double ratio = (double) bandwidthRpm / (double) demandRpm;
+        if (ratio < MIN_RPM_SCALE) {
+            return 0.0D;
+        }
+        return Math.min(1.0D, ratio);
+    }
+
     public static double finalQ(double stockQ, double bandwidthQ) {
         return Math.min(clampRatio(stockQ), clampRatio(bandwidthQ));
     }
@@ -53,7 +67,7 @@ public final class NetworkMath {
         }
         return finalQ(
             stockRatio(storedSu, demandSuPerTick),
-            bandwidthQ(bandwidthRpm, demandRpm));
+            rpmQ(bandwidthRpm, demandRpm));
     }
 
     public static double efficiency(double q, double exponent) {

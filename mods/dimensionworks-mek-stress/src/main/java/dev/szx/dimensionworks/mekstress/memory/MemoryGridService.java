@@ -10,6 +10,7 @@ import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
+import com.loliball.appliedcreate.energy.MEGearboxBlockEntity;
 import com.loliball.appliedcreate.storage.StressKey;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkSnapshot;
@@ -29,12 +30,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 /** One ME Memory service per logical AE2 grid. */
 public final class MemoryGridService implements IMemoryGridService, IStorageProvider {
+    private static final long GEARBOX_SCAN_INTERVAL_TICKS = 10L;
     private static final long CONSUMER_TIMEOUT_TICKS = 3L;
 
     private final IGrid grid;
     private final Map<GlobalPos, GearboxDemand> gearboxDemands = new HashMap<>();
     private boolean mounted;
     private long lastComputedTick = Long.MIN_VALUE;
+    private long lastGearboxScanTick = Long.MIN_VALUE;
     private MemoryNetworkSnapshot lastSnapshot = MemoryNetworkSnapshot.empty(MemoryNetworkStatus.NO_DRIVE);
 
     private final MEStorage storage = new MEStorage() {
@@ -114,6 +117,7 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
             return lastSnapshot;
         }
         expire(tick);
+        refreshGearboxDemands(tick);
         List<MemoryDriveBlockEntity> drives = findDrives();
         boolean tooMany = drives.size() > MemoryTier.MAX_DRIVES_PER_NETWORK;
         MemoryNetworkStatus status = drives.isEmpty()
@@ -144,17 +148,17 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
             demandSu = saturatedAdd(demandSu, demand.requestedSuPerTick);
         }
 
-        double stockQ = status == MemoryNetworkStatus.TOO_MANY_DRIVES
-            ? 0.0D
-            : NetworkMath.stockRatio(stored, demandSu);
-        double bandwidthQ = status == MemoryNetworkStatus.TOO_MANY_DRIVES
-            ? 0.0D
-            : NetworkMath.bandwidthQ(bandwidth, demandRpm);
-        if (status == MemoryNetworkStatus.NO_DRIVE && (demandRpm > 0L || demandSu > 0L)) {
-            stockQ = 0.0D;
-            bandwidthQ = 0.0D;
-        }
-        double q = NetworkMath.finalQ(stockQ, bandwidthQ);
+        boolean poweredStatus = status == MemoryNetworkStatus.OK;
+        boolean hasDemand = demandSu > 0L && demandRpm > 0L;
+        double stockQ = poweredStatus && hasDemand
+            ? NetworkMath.stockRatio(stored, demandSu)
+            : 0.0D;
+        double bandwidthQ = poweredStatus && hasDemand
+            ? NetworkMath.rpmQ(bandwidth, demandRpm)
+            : 0.0D;
+        double q = poweredStatus
+            ? NetworkMath.availableQ(stored, demandSu, bandwidth, demandRpm)
+            : 0.0D;
 
         MemoryNetworkSnapshot snapshot = new MemoryNetworkSnapshot(
             drives.size(), capacity, stored, bandwidth, demandRpm, demandSu, stockQ, bandwidthQ, q, status);
@@ -265,6 +269,7 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
     @Override
     public void invalidateSnapshot() {
         lastComputedTick = Long.MIN_VALUE;
+        lastGearboxScanTick = Long.MIN_VALUE;
     }
 
     private void updateSnapshotStorage(long delta) {
@@ -278,9 +283,14 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
             stored = Math.max(0L, stored + delta);
         }
         stored = Math.min(stored, lastSnapshot.capacitySu());
-        double stockQ = NetworkMath.stockRatio(stored, lastSnapshot.demandSuPerTick());
-        double bandwidthQ = NetworkMath.bandwidthQ(lastSnapshot.bandwidthRpm(), lastSnapshot.demandRpm());
-        double q = NetworkMath.finalQ(stockQ, bandwidthQ);
+        long demandSu = lastSnapshot.demandSuPerTick();
+        long demandRpm = lastSnapshot.demandRpm();
+        boolean hasDemand = demandSu > 0L && demandRpm > 0L;
+        double stockQ = hasDemand ? NetworkMath.stockRatio(stored, demandSu) : 0.0D;
+        double bandwidthQ = hasDemand ? NetworkMath.rpmQ(lastSnapshot.bandwidthRpm(), demandRpm) : 0.0D;
+        double q = lastSnapshot.status() == MemoryNetworkStatus.OK
+            ? NetworkMath.availableQ(stored, demandSu, lastSnapshot.bandwidthRpm(), demandRpm)
+            : 0.0D;
         lastSnapshot = new MemoryNetworkSnapshot(
             lastSnapshot.driveCount(), lastSnapshot.capacitySu(), stored, lastSnapshot.bandwidthRpm(),
             lastSnapshot.demandRpm(), lastSnapshot.demandSuPerTick(), stockQ, bandwidthQ, q, lastSnapshot.status());
@@ -318,6 +328,31 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
 
     private void expire(long gameTick) {
         gearboxDemands.values().removeIf(demand -> gameTick - demand.lastSeenTick > CONSUMER_TIMEOUT_TICKS);
+    }
+
+    private void refreshGearboxDemands(long tick) {
+        if (lastGearboxScanTick != Long.MIN_VALUE
+            && tick - lastGearboxScanTick < GEARBOX_SCAN_INTERVAL_TICKS) {
+            return;
+        }
+        lastGearboxScanTick = tick;
+        Map<GlobalPos, GearboxDemand> scanned = new LinkedHashMap<>();
+        for (IGridNode node : grid.getNodes()) {
+            Object owner = node.getOwner();
+            if (!(owner instanceof MEGearboxBlockEntity gearbox)
+                || gearbox.getLevel() == null || gearbox.getLevel().isClientSide
+                || gearbox.getMode() != MEGearboxBlockEntity.Mode.EXPORT) {
+                continue;
+            }
+            MachinePowerManager.GearboxDemand demand = MachinePowerManager.inspectGearbox(gearbox);
+            int rpm = demand == null ? 0 : demand.requestedRpm();
+            long su = demand == null ? 0L : demand.requestedSuPerTick();
+            GlobalPos pos = GlobalPos.of(gearbox.getLevel().dimension(), gearbox.getBlockPos());
+            scanned.put(pos, new GearboxDemand(rpm, su, tick));
+        }
+        gearboxDemands.clear();
+        gearboxDemands.putAll(scanned);
+        lastComputedTick = Long.MIN_VALUE;
     }
 
     private List<MemoryDriveBlockEntity> findDrives() {
