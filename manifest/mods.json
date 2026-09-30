@@ -1247,14 +1247,15 @@
     },
     {
       "id": "kaleidoscopecookery_automation",
-      "name": "Kaleidoscope Cookery Automation",
-      "source": "modrinth",
-      "project_id": "7KEJ7Rz9",
-      "version": "1.0.1",
-      "version_id": "bLfdiPdc",
+      "name": "Kaleidoscope Cookery Automation - DimensionWorks",
+      "source": "github-release",
+      "repository": "szx-jn/KaleidoscopeCookery-Automation",
+      "release": "1.20.1-1.0.1-dimensionworks.1",
+      "asset": "kaleidoscopecookery_automation-1.20.1-1.0.1-dimensionworks.1.jar",
+      "version": "1.0.1-dimensionworks.1",
       "required": true,
       "environment": "both",
-      "url": "https://modrinth.com/mod/kaleidoscopecookery-automation"
+      "url": "https://github.com/szx-jn/KaleidoscopeCookery-Automation/releases/tag/1.20.1-1.0.1-dimensionworks.1"
     },
     {
       "id": "creategearsandtavern",
