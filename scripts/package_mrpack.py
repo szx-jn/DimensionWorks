@@ -16,6 +16,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pack_hook  # noqa: E402  (sibling packaging preflight hook)
+import pack_version  # noqa: E402  (sibling release version rules)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +24,6 @@ MANIFEST = ROOT / "manifest" / "mods.json"
 DEFAULT_INSTANCE_DIR = (
     Path.home() / "Library" / "Application Support" / "minecraft" / "versions" / "DimensionWorks"
 )
-DEFAULT_VERSION = "0.1.0-alpha.1"
 FORGE_VERSION = "47.4.23"
 USER_AGENT = "DimensionWorks-Packager/0.1"
 OVERRIDE_DIRS = ("defaultconfigs", "kubejs", "resourcepacks", "shaderpacks")
@@ -306,7 +306,17 @@ def build_pack(version: str, output: Path, cache_dir: Path, instance_dir: Path) 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", default=DEFAULT_VERSION)
+    parser.add_argument("--version", default=None)
+    parser.add_argument(
+        "--dimension-complete",
+        action="store_true",
+        help="bump the minor version because a dimension was completed",
+    )
+    parser.add_argument(
+        "--major-bump",
+        action="store_true",
+        help="bump the major version only when explicitly requested",
+    )
     parser.add_argument("--skip-hook", action="store_true", help="skip the packaging preflight hook")
     parser.add_argument("--skip-build", action="store_true", help="skip in-repo mod builds in the hook")
     parser.add_argument("--verbose", action="store_true", help="print every hook step and download")
@@ -329,13 +339,27 @@ def main() -> None:
     args = parser.parse_args()
     global VERBOSE
     VERBOSE = args.verbose
-    output = args.output or ROOT / "dist" / f"DimensionWorks-{args.version}.mrpack"
+    try:
+        version = pack_version.resolve_version(
+            args.version,
+            dimension_complete=args.dimension_complete,
+            major_bump=args.major_bump,
+        )
+    except pack_version.VersionRuleError as error:
+        print("PACK-HOOK FAIL")
+        print("step: pack-version")
+        print(f"detail: {error}")
+        raise SystemExit(1)
+    output = args.output or ROOT / "dist" / f"DimensionWorks-{version}.mrpack"
     hook_summary = "skipped"
     if not args.skip_hook:
         ok, message = pack_hook.run_all(
             args.instance_dir.expanduser().resolve(),
             skip_build=args.skip_build,
             verbose=args.verbose,
+            requested_version=str(version),
+            dimension_complete=args.dimension_complete,
+            major_bump=args.major_bump,
         )
         if not ok:
             print("PACK-HOOK FAIL")
@@ -343,11 +367,12 @@ def main() -> None:
             raise SystemExit(1)
         hook_summary = message
     pack_summary = build_pack(
-        args.version,
+        str(version),
         output.resolve(),
         args.cache_dir.resolve(),
         args.instance_dir.expanduser().resolve(),
     )
+    pack_version.write_current_version(version)
     print(f"PACK OK: {pack_summary} | hook: {hook_summary}")
 
 

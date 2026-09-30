@@ -28,6 +28,9 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pack_version  # noqa: E402  (sibling release version rules)
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifest" / "mods.json"
 DEFAULT_INSTANCE_DIR = (
@@ -94,6 +97,26 @@ def check_manifest() -> CheckResult:
 def check_instance(instance_dir: Path) -> CheckResult:
     missing = [str(path) for path in (instance_dir / "config",) if not path.is_dir()]
     return CheckResult("instance-config", not missing, str(instance_dir), missing)
+
+
+def check_pack_version(
+    requested_version: str | None,
+    *,
+    dimension_complete: bool,
+    major_bump: bool,
+    version_file: Path = pack_version.VERSION_FILE,
+) -> CheckResult:
+    try:
+        current = pack_version.read_current_version(version_file)
+        target = pack_version.resolve_version(
+            requested_version,
+            dimension_complete=dimension_complete,
+            major_bump=major_bump,
+            current=current,
+        )
+    except pack_version.VersionRuleError as error:
+        return CheckResult("pack-version", False, "invalid release version", [str(error)])
+    return CheckResult("pack-version", True, f"{current} -> {target}")
 
 
 def check_json() -> CheckResult:
@@ -266,10 +289,23 @@ def check_builds() -> CheckResult:
     return CheckResult("in-repo-build", True, ", ".join(built), log)
 
 
-def run_all(instance_dir: Path, *, skip_build: bool, verbose: bool) -> tuple[bool, str]:
+def run_all(
+    instance_dir: Path,
+    *,
+    skip_build: bool,
+    verbose: bool,
+    requested_version: str | None = None,
+    dimension_complete: bool = False,
+    major_bump: bool = False,
+) -> tuple[bool, str]:
     started = time.monotonic()
     checks = [
         check_manifest,
+        lambda: check_pack_version(
+            requested_version,
+            dimension_complete=dimension_complete,
+            major_bump=major_bump,
+        ),
         lambda: check_instance(instance_dir),
         check_json,
         check_kubejs_syntax,
@@ -314,6 +350,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verbose", action="store_true", help="print every step result")
     parser.add_argument("--skip-build", action="store_true", help="skip in-repo mod builds")
+    parser.add_argument("--version", default=None, help="requested x.x.x pack version")
+    parser.add_argument(
+        "--dimension-complete",
+        action="store_true",
+        help="allow the minor version to increase after a dimension is completed",
+    )
+    parser.add_argument(
+        "--major-bump",
+        action="store_true",
+        help="allow a major version increase only when explicitly requested",
+    )
     parser.add_argument(
         "--instance-dir",
         type=Path,
@@ -323,7 +370,12 @@ def main() -> int:
     args = parser.parse_args()
 
     ok, message = run_all(
-        args.instance_dir.expanduser().resolve(), skip_build=args.skip_build, verbose=args.verbose
+        args.instance_dir.expanduser().resolve(),
+        skip_build=args.skip_build,
+        verbose=args.verbose,
+        requested_version=args.version,
+        dimension_complete=args.dimension_complete,
+        major_bump=args.major_bump,
     )
     if not ok:
         print("PACK-HOOK FAIL")

@@ -69,6 +69,13 @@ README 中的原则需要转化成可执行的约束：
 
 `.gitignore` 目前未覆盖 `build/`、`bin/`、`run/`、`.gradle/`，在 `mods/` 下新增 Gradle 工程时注意不要让这些目录进入提交。
 
+## 整合包版本
+
+- 版本固定使用 `x.x.x`，禁止 `alpha`、`beta` 或其他后缀。
+- 根目录 `VERSION` 是当前已采用版本的唯一来源。普通小更新自动把补丁号加一。
+- 只有在明确完成一个维度后才允许次版本加一，并使用 `--dimension-complete`。
+- 主版本默认保持 `0`；只有用户单独明确要求时才可用 `--major-bump` 提升。
+
 ## 提交与文档
 
 - 提交信息使用带 scope 的 Conventional Commits，例如 `feat(rpm): ...`、`fix(transfer): ...`、`docs(rpm): ...`、`ci: ...`。

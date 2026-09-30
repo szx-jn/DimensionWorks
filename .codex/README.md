@@ -8,6 +8,7 @@
 
 - 匹配 `python3 scripts/package_mrpack.py`、绝对路径调用和等价 Python 调用。
 - 先运行 `scripts/pack_hook.py --skip-build`，失败时阻断打包并回传错误日志。
+- `pack-version` 规则：只接受 `x.x.x`；普通更新自动补丁加一，次版本只允许在明确标记维度完成后增加，主版本只允许显式确认。
 - 成功时只向模型回传一行 `PACK-HOOK OK`。
 - 禁止在 Codex 中通过 `package_mrpack.py --skip-hook` 绕过预检。
 - 打包命令未携带 `--skip-build` 时，`package_mrpack.py` 随后仍会执行完整预检和仓库内 Mod 构建。

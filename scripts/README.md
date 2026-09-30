@@ -29,7 +29,21 @@ python3 scripts/pixelate_gear_heart_textures.py
 生成可拖入 Prism Launcher、MultiMC、Modrinth App 或 ATLauncher 的 Modrinth `.mrpack`：
 
 ```sh
-python3 scripts/package_mrpack.py --version 0.1.0-alpha.1
+python3 scripts/package_mrpack.py
+```
+
+整合包版本固定使用 `x.x.x`，不添加 `alpha`、`beta` 或其他后缀。根目录 `VERSION` 保存当前已采用版本；普通打包自动把补丁号加一，例如当前 `0.1.2` 会生成 `0.1.3`。
+
+完成一个维度后才能增加次版本号：
+
+```sh
+python3 scripts/package_mrpack.py --dimension-complete  # 0.1.2 -> 0.2.0
+```
+
+主版本默认保持 `0`。只有收到单独指令时才可执行主版本提升：
+
+```sh
+python3 scripts/package_mrpack.py --major-bump --version 1.0.0
 ```
 
 脚本以 `manifest/mods.json` 为唯一 Mod 清单，远程文件使用固定版本和固定下载地址。仓库的 `config/`、`defaultconfigs/`、`kubejs/`、`resourcepacks/` 先作为基础写入 `overrides/`，随后直接叠加游戏实例的 `config/`、`defaultconfigs/`、`local/`、`kubejs/config/`，以及 `options.txt`、`log4j2.xml`、`rhino.local.properties`、`CustomSkinLoader/CustomSkinLoader.json`、`minemenu/menu.json`。实例文件同名时优先，确保游戏内当前配置进入整合包。
@@ -49,6 +63,7 @@ python3 scripts/pack_hook.py --skip-build
 钩子按顺序检查：
 
 - `manifest`：条目字段完整，版本不是 `pending-release`，没有移动分支引用。
+- `pack-version`：版本格式必须是 `x.x.x`；普通更新只能补丁加一，次版本必须标记维度完成，主版本必须显式确认。
 - `instance-config`：实例 `config/` 存在（打包必需）。
 - `json`：`manifest/mods.json`、`kubejs/data`、`kubejs/assets` 与 `config/ftbquests` 下所有 JSON 可解析。
 - `kubejs-syntax`：`node --check` 扫全部 KubeJS 脚本。
@@ -82,7 +97,8 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 ## 每次打包整合包要做什么
 
 1. 对好版本号：自研 Mod 的 `build.gradle` 或 `gradle.properties`、`manifest/mods.json` 里的 `version`，必要时同步 README。
-2. 确认 `manifest/mods.json` 没有未固定版本，远程条目都有固定版本 ID 或固定 Release 资产。
-3. 确认游戏实例的 `config/` 已经是想进包的状态，打包时实例配置会覆盖仓库配置。
-4. 运行 `python3 scripts/package_mrpack.py --version <版本>`；钩子会自动先跑，失败就不会产出整合包。
-5. 确认 `dist/DimensionWorks-<版本>.mrpack` 生成，记下大小并把路径交付。
+2. 确认根目录 `VERSION` 是当前已发布版本。普通小更新不要手工跳号，打包脚本会自动生成并写回下一个补丁版。
+3. 确认 `manifest/mods.json` 没有未固定版本，远程条目都有固定版本 ID 或固定 Release 资产。
+4. 确认游戏实例的 `config/` 已经是想进包的状态，打包时实例配置会覆盖仓库配置。
+5. 运行 `python3 scripts/package_mrpack.py`；钩子会自动先跑，失败就不会产出整合包。
+6. 确认 `dist/DimensionWorks-<版本>.mrpack` 生成，记下大小并把路径交付。

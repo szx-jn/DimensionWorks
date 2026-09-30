@@ -101,6 +101,16 @@ def packaging_tokens(command: str) -> list[str]:
     return []
 
 
+def option_value(tokens: list[str], option: str) -> str | None:
+    for index, token in enumerate(tokens):
+        if token == option and index + 1 < len(tokens):
+            return tokens[index + 1]
+        prefix = f"{option}="
+        if token.startswith(prefix):
+            return token[len(prefix):]
+    return None
+
+
 def deny(reason: str, system_message: str) -> int:
     reason = reason[:MAX_REASON_CHARS]
     payload = {
@@ -170,6 +180,13 @@ def main() -> int:
         )
 
     hook_command = [sys.executable, str(PACK_HOOK), "--skip-build"]
+    version = option_value(tokens, "--version")
+    if version:
+        hook_command.extend(["--version", version])
+    if "--dimension-complete" in tokens:
+        hook_command.append("--dimension-complete")
+    if "--major-bump" in tokens:
+        hook_command.append("--major-bump")
     if "--instance-dir" in tokens:
         index = tokens.index("--instance-dir")
         if index + 1 < len(tokens):
