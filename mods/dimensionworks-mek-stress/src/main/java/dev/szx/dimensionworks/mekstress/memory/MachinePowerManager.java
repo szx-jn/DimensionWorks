@@ -153,10 +153,7 @@ public final class MachinePowerManager {
         if (effectiveRpm <= 0) {
             return new GearboxDemand(0, 0L, 0.0D);
         }
-        double fullSpeedLoad = fullSpeedLoad(gearbox, effectiveRpm);
-        if (fullSpeedLoad <= 0.0D) {
-            return new GearboxDemand(0, 0L, 0.0D);
-        }
+        double fullSpeedLoad = MachinePowerMath.gearboxLoad(downstreamLoad(gearbox, effectiveRpm), effectiveRpm);
         return new GearboxDemand(effectiveRpm, (long) Math.ceil(fullSpeedLoad), fullSpeedLoad);
     }
 
@@ -211,7 +208,7 @@ public final class MachinePowerManager {
         return null;
     }
 
-    private static double fullSpeedLoad(MEGearboxBlockEntity gearbox, int effectiveRpm) {
+    private static double downstreamLoad(MEGearboxBlockEntity gearbox, int effectiveRpm) {
         double load = 0.0D;
         Set<KineticNetwork> networks = new HashSet<>();
         Set<KineticBlockEntity> representedMembers = new HashSet<>();

@@ -91,7 +91,7 @@ public abstract class MEGearboxBlockEntityMixin implements IMEGearboxExportState
         GlobalPos gearboxPos = GlobalPos.of(self.getLevel().dimension(), self.getBlockPos());
         service.reportGearboxExport(gearboxPos, requestedRpm, requestedSu, tick);
 
-        if (requestedRpm <= 0 || requestedSu <= 0L || demand.fullSpeedLoad() <= 0.0D) {
+        if (requestedRpm <= 0 || requestedSu <= 0L) {
             dimensionworks$deactivate();
             return;
         }

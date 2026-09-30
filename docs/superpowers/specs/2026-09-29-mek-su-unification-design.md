@@ -10,14 +10,17 @@
 
 - 合格 MEK 机器不再读取、换算或接收 FE。内部配方系统在有有效机械动力时看到满能量，无有效机械动力时看到零能量。
 - 机器从相邻 Create 动力网络中的 ME Gearbox EXPORT 取动力。只要齿轮箱实际输出 RPM 大于零，机器就按 `当前有效 RPM × 8` 占用网络 SU；空闲机器也持续占用。
-- 机器只在当前齿轮箱因无 SU 等原因停转时保留 Create 应力需求，但工作倍率、加工与 Jade 运行状态均为零。这避免“机器等齿轮箱、齿轮箱等负载”的死锁。
+- 齿轮箱不依赖下游机器决定是否启动。空载时使用 `有效 RPM × 8` 的基础负载；接入机器后，SU 需求取基础负载与下游实际完整应力负载的较大值。
+- 机器只读取齿轮箱实际输出的有效 RPM 与已扣除 SU：供能有效时工作，任一缺失时工作倍率、加工与 Jade 运行状态均为零。
+- 单台标准机器仍对应每 RPM `8` SU；多台机器只放大齿轮箱的 SU 负载，不重复累计 RPM。
 - ME Gearbox IMPORT 仍把 Create 应力存入 AE；ME Gearbox EXPORT 从 AE 输出应力，并执行严格 SU 守恒。
 - Applied Create 原有的 `stress_output_card`、AE 输出总线路由和相关 Jade 总线显示保持退役。
 
 ## 网络计算
 
 ```text
-fullLoad       = Create 网络在有效 RPM 下的完整应力负载
+idleLoad       = effectiveRpm * 8
+fullLoad       = max(idleLoad, Create 网络完整应力负载)
 requestedSu    = ceil(fullLoad)
 stockQ         = storedSu / requestedSu
 rpmQ           = bandwidthRpm / requestedRpm，低于 0.6 时归零
@@ -29,9 +32,9 @@ perRpmCapacity = chargedSu / outputRpm
 
 - `effectiveRpm` 先经过玩家 RPM 上限，再经过 `directMaxRpm`。
 - `requestedRpm` 以每台 EXPORT 齿轮箱为一个占用单位；同一 AE 网络内的齿轮箱需求求和。多台下游机器只增加 SU 应力，不重复占用 RPM。
-- 机器侧的固定贡献是每 RPM `8` SU 应力。实际通过网络扣除的 SU 仍按实际输出 RPM 等比例计算。
+- 齿轮箱空载时的固定贡献是每 RPM `8` SU 应力；有下游负载时取较大值。实际通过网络扣除的 SU 仍按实际输出 RPM 等比例计算。
 - 库存 SU、RPM 带宽、SU 需求或 RPM 需求任一项为零或为负，`q` 固定为零。零需求也不视为可用动力。
-- 齿轮箱只有在负载、有效 RPM、实际输出 RPM、实际扣费和 `q > 0` 全部有效时才运行；否则立即清除输出速度与宣告容量。
+- 齿轮箱在有效 RPM、实际输出 RPM、实际扣费和 `q > 0` 全部有效时运行，不要求存在下游负载；否则立即清除输出速度与宣告容量。
 - 齿轮箱向 Create 宣告的每 RPM 容量必须等于实际扣除的 SU 除以实际输出 RPM。下游不能消费高于本次 ME 库存允许值的应力。
 
 ## 路由与缓存

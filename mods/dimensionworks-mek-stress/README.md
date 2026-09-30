@@ -27,7 +27,8 @@ KubeJS 会把 `memory_drive_ddr1..5` 和 DDR1～5 × 六形态共 30 个 `memory
 ## 应力守恒
 
 ```text
-fullLoad       = Create 网络在有效 RPM 下的完整应力负载
+idleLoad       = effectiveRpm * 8
+fullLoad       = max(idleLoad, Create 网络完整应力负载)
 requestedSu    = ceil(fullLoad)
 stockQ         = storedSu / requestedSu
 rpmQ           = bandwidthRpm / requestedRpm，低于 0.6 时归零
@@ -37,9 +38,11 @@ chargedSu      = min(requestedSu, 当前可用 SU)
 perRpmCapacity = chargedSu / outputRpm
 ```
 
-ME Gearbox EXPORT 只有在负载、有效 RPM、实际输出 RPM、实际扣费和 `q > 0` 全部有效时才运行；任一条件缺失都会同时清除输出速度与宣告容量。没有 SU、没有 RPM 带宽、没有下游机器负载或 RPM 覆盖率低于 60% 时，全网机械动力停止。
+空载 EXPORT 齿轮箱的基础负载为 `有效 RPM × 8`。接入下游机器时取“基础负载”与“实际完整应力负载”的较大值，因此单台标准机器仍保持原有 `RPM × 8` 标定，多台机器会继续按总负载增长。
 
-RPM 需求以每台 EXPORT 齿轮箱为一个占用单位，同一 AE 网络内求和；多台下游机器只放大该齿轮箱的 SU 应力需求，不重复占用 RPM。机器所在齿轮箱暂时停转时，机器仍保留其 Create 应力需求，避免“机器等齿轮箱、齿轮箱等负载”的死锁。
+ME Gearbox EXPORT 只有在有效 RPM、实际输出 RPM、实际扣费和 `q > 0` 全部有效时才运行；任一条件缺失都会同时清除输出速度与宣告容量。没有 SU、没有 RPM 带宽或 RPM 覆盖率低于 60% 时，全网机械动力停止；没有下游机器时，齿轮箱仍按基础负载运行。
+
+RPM 需求以每台 EXPORT 齿轮箱为一个占用单位，同一 AE 网络内求和；下游机器只放大该齿轮箱的 SU 应力需求，不重复占用 RPM。齿轮箱不需要等待下游机器出现才开始运行，因此不会形成“机器等齿轮箱、齿轮箱等负载”的死锁。
 
 ME Gearbox EXPORT 向 Create 网络宣告的容量严格等于本次实际扣除的 SU。下游机器在 `outputRpm` 下最多只能消费 `chargedSu`；超出部分触发 Create 原有应力过载，不能无中生有。
 
