@@ -7,12 +7,13 @@ import appeng.api.networking.IManagedGridNode;
 import appeng.blockentity.grid.AENetworkInvBlockEntity;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
-import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkSnapshot;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.block.MemoryDriveBlock;
+import dev.szx.dimensionworks.mekstress.card.MemoryCardItem;
+import dev.szx.dimensionworks.mekstress.core.MemoryDriveMath;
 import dev.szx.dimensionworks.mekstress.core.MemoryDriveStore;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import java.util.Set;
@@ -42,8 +43,8 @@ public final class MemoryDriveBlockEntity extends AENetworkInvBlockEntity {
         if (state.getBlock() instanceof MemoryDriveBlock driveBlock) {
             tier = driveBlock.tier();
         }
-        store = new MemoryDriveStore(tier, 0);
-        store.setCardCapacitySu(MekStressConfig.cardCapacitySu(tier));
+        store = new MemoryDriveStore(tier);
+        store.setConfiguration(0, 0L, MekStressConfig.driveBandwidthRpm(tier));
         inventory.setFilter(new IAEItemFilter() {
             @Override
             public boolean allowInsert(InternalInventory inventory, int slot, ItemStack stack) {
@@ -97,7 +98,6 @@ public final class MemoryDriveBlockEntity extends AENetworkInvBlockEntity {
     @Override
     public void loadTag(CompoundTag tag) {
         super.loadTag(tag);
-        store.setCardCapacitySu(MekStressConfig.cardCapacitySu(tier));
         refreshCards();
         store.restore(tag.getLong(STORED_SU_KEY));
     }
@@ -123,13 +123,25 @@ public final class MemoryDriveBlockEntity extends AENetworkInvBlockEntity {
     public void refreshCards() {
         int previousCards = store.cardCount();
         int cards = 0;
+        long capacitySu = 0L;
+        long bandwidthDeltaRpm = 0L;
+        long baseCardCapacitySu = MekStressConfig.cardCapacitySu(tier);
+        long baseDriveBandwidthRpm = MekStressConfig.driveBandwidthRpm(tier);
+
         for (int slot = 0; slot < tier.slotsPerDrive(); slot++) {
-            if (isMatchingCard(inventory.getStackInSlot(slot))) {
-                cards++;
+            ItemStack stack = inventory.getStackInSlot(slot);
+            if (!(stack.getItem() instanceof MemoryCardItem card) || card.tier() != tier) {
+                continue;
             }
+            cards++;
+            capacitySu = saturatedAdd(capacitySu, MemoryDriveMath.cardCapacitySu(
+                baseCardCapacitySu, MekStressConfig.storageExponent(card.type())));
+            bandwidthDeltaRpm = saturatedAdd(bandwidthDeltaRpm, MemoryDriveMath.bandwidthDeltaRpm(
+                baseDriveBandwidthRpm, MekStressConfig.speedExponent(card.type()), tier.slotsPerDrive()));
         }
-        store.setCardCapacitySu(MekStressConfig.cardCapacitySu(tier));
-        store.setCardCount(cards);
+        long bandwidthRpm = MemoryDriveMath.effectiveBandwidthRpm(
+            baseDriveBandwidthRpm, tier.slotsPerDrive(), bandwidthDeltaRpm);
+        store.setConfiguration(cards, capacitySu, bandwidthRpm);
         if (cards != previousCards) {
             invalidateNetworkSnapshot();
         }
@@ -137,16 +149,15 @@ public final class MemoryDriveBlockEntity extends AENetworkInvBlockEntity {
     }
 
     public boolean isMatchingCard(ItemStack stack) {
-        return stack.getItem() == DimensionWorksMekStress.memoryCard(tier).get();
+        return stack.getItem() instanceof MemoryCardItem card && card.tier() == tier;
     }
 
     public long capacitySu() {
-        store.setCardCapacitySu(MekStressConfig.cardCapacitySu(tier));
         return store.capacitySu();
     }
 
     public long bandwidthRpm() {
-        return MekStressConfig.driveBandwidthRpm(tier);
+        return store.bandwidthRpm();
     }
 
     public void applyNetworkSnapshot(MemoryNetworkSnapshot snapshot) {
@@ -193,5 +204,15 @@ public final class MemoryDriveBlockEntity extends AENetworkInvBlockEntity {
         if (service != null) {
             service.invalidateSnapshot();
         }
+    }
+
+    private static long saturatedAdd(long a, long b) {
+        if (b > 0L && a > Long.MAX_VALUE - b) {
+            return Long.MAX_VALUE;
+        }
+        if (b < 0L && a < Long.MIN_VALUE - b) {
+            return Long.MIN_VALUE;
+        }
+        return a + b;
     }
 }

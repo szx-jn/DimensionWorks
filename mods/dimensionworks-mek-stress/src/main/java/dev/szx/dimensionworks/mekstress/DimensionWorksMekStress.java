@@ -3,12 +3,15 @@ package dev.szx.dimensionworks.mekstress;
 import dev.szx.dimensionworks.mekstress.block.MemoryDriveBlock;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
 import dev.szx.dimensionworks.mekstress.card.MemoryCardItem;
+import dev.szx.dimensionworks.mekstress.card.MemoryCardCraftingHandler;
 import dev.szx.dimensionworks.mekstress.command.MemoryCommand;
+import dev.szx.dimensionworks.mekstress.core.MemoryCardType;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import dev.szx.dimensionworks.mekstress.memory.MemoryDriveMenu;
 import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
 import dev.szx.dimensionworks.mekstress.memory.MemoryLegacyMigration;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -44,7 +47,8 @@ public final class DimensionWorksMekStress {
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MOD_ID);
 
     private static final Map<MemoryTier, RegistryObject<MemoryDriveBlock>> DRIVE_BLOCKS = new EnumMap<>(MemoryTier.class);
-    private static final Map<MemoryTier, RegistryObject<MemoryCardItem>> MEMORY_CARDS = new EnumMap<>(MemoryTier.class);
+    private static final Map<MemoryTier, Map<MemoryCardType, RegistryObject<MemoryCardItem>>> MEMORY_CARDS =
+        new EnumMap<>(MemoryTier.class);
 
     static {
         BlockBehaviour.Properties driveProperties = BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
@@ -57,9 +61,13 @@ public final class DimensionWorksMekStress {
             DRIVE_BLOCKS.put(tier, block);
             ITEMS.register(driveName, () -> new BlockItem(block.get(), new Item.Properties()));
 
-            String cardName = "memory_card_ddr" + tier.index();
-            MEMORY_CARDS.put(tier, ITEMS.register(cardName,
-                () -> new MemoryCardItem(tier, new Item.Properties())));
+            Map<MemoryCardType, RegistryObject<MemoryCardItem>> cards = new EnumMap<>(MemoryCardType.class);
+            for (MemoryCardType cardType : MemoryCardType.values()) {
+                String cardName = "memory_card_ddr" + tier.index() + "_" + cardType.id();
+                cards.put(cardType, ITEMS.register(cardName,
+                    () -> new MemoryCardItem(tier, cardType, new Item.Properties())));
+            }
+            MEMORY_CARDS.put(tier, Map.copyOf(cards));
         }
     }
 
@@ -96,6 +104,8 @@ public final class DimensionWorksMekStress {
         modBus.addListener(this::commonSetup);
         modBus.addListener(this::buildCreativeTabs);
         MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
+        MinecraftForge.EVENT_BUS.addListener(MemoryCardCraftingHandler::onItemCrafted);
+        MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onMissingMappings);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onServerStarted);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onServerTick);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onChunkLoad);
@@ -112,7 +122,7 @@ public final class DimensionWorksMekStress {
     private void buildCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             DRIVE_BLOCKS.values().forEach(event::accept);
-            MEMORY_CARDS.values().forEach(event::accept);
+            allMemoryCards().forEach(event::accept);
         }
     }
 
@@ -120,8 +130,14 @@ public final class DimensionWorksMekStress {
         MemoryCommand.register(event.getDispatcher());
     }
 
-    public static RegistryObject<MemoryCardItem> memoryCard(MemoryTier tier) {
-        return MEMORY_CARDS.get(tier);
+    public static RegistryObject<MemoryCardItem> memoryCard(MemoryTier tier, MemoryCardType type) {
+        return MEMORY_CARDS.get(tier).get(type);
+    }
+
+    public static List<RegistryObject<MemoryCardItem>> allMemoryCards() {
+        return MEMORY_CARDS.values().stream()
+            .flatMap(cards -> cards.values().stream())
+            .toList();
     }
 
     public static RegistryObject<MemoryDriveBlock> memoryDrive(MemoryTier tier) {

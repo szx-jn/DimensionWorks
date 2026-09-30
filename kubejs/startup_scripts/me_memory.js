@@ -24,18 +24,28 @@ const dwRetiredStressStorageItems = [
   'appliedcreate:creative_stress_cell'
 ]
 
+const dwMemoryCardTypes = [
+  'economy',
+  'balanced',
+  'high_speed',
+  'high_storage',
+  'defective',
+  'final'
+]
+
 const dwMemoryItems = [
   'dimensionworks_mek_stress:memory_drive_ddr1',
   'dimensionworks_mek_stress:memory_drive_ddr2',
   'dimensionworks_mek_stress:memory_drive_ddr3',
   'dimensionworks_mek_stress:memory_drive_ddr4',
-  'dimensionworks_mek_stress:memory_drive_ddr5',
-  'dimensionworks_mek_stress:memory_card_ddr1',
-  'dimensionworks_mek_stress:memory_card_ddr2',
-  'dimensionworks_mek_stress:memory_card_ddr3',
-  'dimensionworks_mek_stress:memory_card_ddr4',
-  'dimensionworks_mek_stress:memory_card_ddr5'
+  'dimensionworks_mek_stress:memory_drive_ddr5'
 ]
+
+for (let tier = 1; tier <= 5; tier++) {
+  dwMemoryCardTypes.forEach(type => {
+    dwMemoryItems.push(`dimensionworks_mek_stress:memory_card_ddr${tier}_${type}`)
+  })
+}
 
 StartupEvents.modifyCreativeTab('appliedcreate:main', event => {
   dwRetiredStressStorageItems.forEach(id => event.remove(id))

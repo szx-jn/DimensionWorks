@@ -4,15 +4,15 @@
 	mekanismPerSu = 2.5
 
 [memory_card_capacity]
-	#SU stored by one DDR1 Memory Card.
+	#Base SU stored by one DDR1 balanced Memory Card.
 	ddr1CardSu = 8192
-	#SU stored by one DDR2 Memory Card.
+	#Base SU stored by one DDR2 balanced Memory Card.
 	ddr2CardSu = 9216
-	#SU stored by one DDR3 Memory Card.
+	#Base SU stored by one DDR3 balanced Memory Card.
 	ddr3CardSu = 10240
-	#SU stored by one DDR4 Memory Card.
+	#Base SU stored by one DDR4 balanced Memory Card.
 	ddr4CardSu = 12288
-	#SU stored by one DDR5 Memory Card.
+	#Base SU stored by one DDR5 balanced Memory Card.
 	ddr5CardSu = 16384
 
 [memory_drive_bandwidth]
@@ -26,6 +26,29 @@
 	ddr4BandwidthRpm = 65536
 	#RPM bandwidth provided by one DDR5 Memory Drive.
 	ddr5BandwidthRpm = 131072
+
+[memory_card_types]
+	#Independent chance for each crafted normal card to become a defective card.
+	#Range: 0.0 ~ 1.0
+	defectiveChance = 0.25
+	[memory_card_types.economy]
+		storageExponent = -1
+		speedExponent = -1
+	[memory_card_types.balanced]
+		storageExponent = 0
+		speedExponent = 0
+	[memory_card_types.high_speed]
+		storageExponent = -1
+		speedExponent = 1
+	[memory_card_types.high_storage]
+		storageExponent = 1
+		speedExponent = -1
+	[memory_card_types.defective]
+		storageExponent = -2
+		speedExponent = -2
+	[memory_card_types.final]
+		storageExponent = 2
+		speedExponent = 2
 
 [mekanism_machine_rpm]
 	#Basic Mekanism machine target RPM.

@@ -7,16 +7,18 @@ package dev.szx.dimensionworks.mekstress.core;
 public final class MemoryDriveStore {
     private final MemoryTier tier;
     private int cardCount;
-    private long cardCapacitySu;
+    private long capacitySu;
     private long storedSu;
 
-    public MemoryDriveStore(MemoryTier tier, int cardCount) {
+    private long bandwidthRpm;
+
+    public MemoryDriveStore(MemoryTier tier) {
         if (tier == null) {
             throw new NullPointerException("tier");
         }
         this.tier = tier;
-        this.cardCapacitySu = tier.cardCapacitySu();
-        setCardCount(cardCount);
+        this.capacitySu = 0L;
+        this.bandwidthRpm = tier.driveBandwidthRpm();
     }
 
     public MemoryTier tier() {
@@ -27,18 +29,19 @@ public final class MemoryDriveStore {
         return cardCount;
     }
 
-    public void setCardCount(int cardCount) {
+    public void setConfiguration(int cardCount, long capacitySu, long bandwidthRpm) {
         this.cardCount = Math.max(0, Math.min(cardCount, tier.slotsPerDrive()));
+        this.capacitySu = Math.max(0L, capacitySu);
+        this.bandwidthRpm = Math.max(0L, bandwidthRpm);
         truncateToCapacity();
     }
 
     public long capacitySu() {
-        return Math.multiplyExact((long) cardCount, cardCapacitySu);
+        return capacitySu;
     }
 
-    public void setCardCapacitySu(long cardCapacitySu) {
-        this.cardCapacitySu = Math.max(0L, cardCapacitySu);
-        truncateToCapacity();
+    public long bandwidthRpm() {
+        return bandwidthRpm;
     }
 
     public long storedSu() {

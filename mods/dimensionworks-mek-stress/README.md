@@ -8,17 +8,19 @@
 
 本 Mod 不修改 Applied Create、AE2、Mekanism、Create 的源码。Applied Create 原有的应力存储 Cell、组件、外壳和创造 Cell 全部退役，不能继续挂载、读写或供应 `StressKey`。
 
-KubeJS 会把 `memory_drive_ddr1..5` 和 `memory_card_ddr1..5` 加入创造标签；`stress_output_card` 及其配方、资源、总线逻辑和 Jade 显示已全部删除。
+KubeJS 会把 `memory_drive_ddr1..5` 和 DDR1～5 × 六形态共 30 个 `memory_card_ddrN_*` 加入创造标签；`stress_output_card` 及其配方、资源、总线逻辑和 Jade 显示已全部删除。
 
 ## Memory 参数
 
-| DDR | 每 Drive 槽位 | 单卡 SU | 单 Drive 带宽 |
+| DDR | 每 Drive 槽位 | 基础单卡容量 `C_d` | 基础驱动带宽 `B_d` |
 |---|---:|---:|---:|
-| DDR1 | 4 | 8,192 | 8,192 RPM |
-| DDR2 | 8 | 9,216 | 16,384 RPM |
-| DDR3 | 16 | 10,240 | 32,768 RPM |
-| DDR4 | 32 | 12,288 | 65,536 RPM |
-| DDR5 | 64 | 16,384 | 131,072 RPM |
+| DDR1 | 4 | 8,192 SU | 8,192 RPM |
+| DDR2 | 8 | 9,216 SU | 16,384 RPM |
+| DDR3 | 16 | 10,240 SU | 32,768 RPM |
+| DDR4 | 32 | 12,288 SU | 65,536 RPM |
+| DDR5 | 64 | 16,384 SU | 131,072 RPM |
+
+每种卡用二维二进制指数 `(a,v)` 描述：劣质 `(-2,-2)`、经济 `(-1,-1)`、均衡 `(0,0)`、高速 `(-1,+1)`、高存储 `(+1,-1)`、最终 `(+2,+2)`。单卡容量 `C(d,t)=C_d×2^a`；驱动器有效带宽 `B=max(0,B_d+Σ round(B_d×(2^v-1)/S_d))`。空驱动器保留基础速度，均衡满盘保持原标定。
 
 每个逻辑 AE 网络最多统计两台 Drive。第三台会使网络容量、带宽和输出归零，但 Drive 内已有 Card 与 SU 不会丢失；移除多余 Drive 后自动恢复。
 
@@ -40,7 +42,9 @@ ME Gearbox EXPORT 向 Create 网络宣告的容量严格等于本次实际扣除
 ## 工程接口
 
 - `memory_drive_ddr1..5`：使用 AE2 驱动器背景，每页 4 列 × 5 行共 20 槽，按 DDR 等级只接受同等级 Memory Card。
-- `memory_card_ddr1..5`：只影响网络 SU 容量，不影响 Drive 带宽。
+- `memory_card_ddrN_{economy,balanced,high_speed,high_storage,defective,final}`：只影响所在驱动器的容量与有效带宽。
+- 正常卡配方每次固定产出 4 张；每张独立有 25% 概率变为同 DDR 劣质卡，自动合成假玩家跳过该判定。
+- 经济型、均衡型、高速型、高存储型可合成；劣质型只作副产物，最终型仅注册，毕业配方待定。
 - `appliedcreate:me_gearbox`：IMPORT 输入应力到 AE，EXPORT 从 AE 输出应力并执行 SU 守恒。
 - `/dw memory`：读取附近已连接 Drive 所在逻辑网格的状态快照。
 

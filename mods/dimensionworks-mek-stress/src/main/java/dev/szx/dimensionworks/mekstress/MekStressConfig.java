@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.mekstress;
 
 import dev.szx.dimensionworks.mekstress.core.MachineTier;
+import dev.szx.dimensionworks.mekstress.core.MemoryCardType;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import net.minecraftforge.common.ForgeConfigSpec;
 
@@ -17,6 +18,19 @@ public final class MekStressConfig {
     public static final ForgeConfigSpec.LongValue DDR3_DRIVE_BANDWIDTH;
     public static final ForgeConfigSpec.LongValue DDR4_DRIVE_BANDWIDTH;
     public static final ForgeConfigSpec.LongValue DDR5_DRIVE_BANDWIDTH;
+    public static final ForgeConfigSpec.IntValue ECONOMY_STORAGE_EXPONENT;
+    public static final ForgeConfigSpec.IntValue ECONOMY_SPEED_EXPONENT;
+    public static final ForgeConfigSpec.IntValue BALANCED_STORAGE_EXPONENT;
+    public static final ForgeConfigSpec.IntValue BALANCED_SPEED_EXPONENT;
+    public static final ForgeConfigSpec.IntValue HIGH_SPEED_STORAGE_EXPONENT;
+    public static final ForgeConfigSpec.IntValue HIGH_SPEED_SPEED_EXPONENT;
+    public static final ForgeConfigSpec.IntValue HIGH_STORAGE_STORAGE_EXPONENT;
+    public static final ForgeConfigSpec.IntValue HIGH_STORAGE_SPEED_EXPONENT;
+    public static final ForgeConfigSpec.IntValue DEFECTIVE_STORAGE_EXPONENT;
+    public static final ForgeConfigSpec.IntValue DEFECTIVE_SPEED_EXPONENT;
+    public static final ForgeConfigSpec.IntValue FINAL_STORAGE_EXPONENT;
+    public static final ForgeConfigSpec.IntValue FINAL_SPEED_EXPONENT;
+    public static final ForgeConfigSpec.DoubleValue DEFECTIVE_CHANCE;
     public static final ForgeConfigSpec.IntValue BASIC_MACHINE_RPM;
     public static final ForgeConfigSpec.IntValue ADVANCED_MACHINE_RPM;
     public static final ForgeConfigSpec.IntValue ELITE_MACHINE_RPM;
@@ -35,7 +49,7 @@ public final class MekStressConfig {
             .defineInRange("mekanismPerSu", 2.5D, 0.001D, 1_000_000.0D);
         builder.pop();
 
-        builder.comment("SU stored by one Memory Card. Card count changes capacity only, never bandwidth.")
+        builder.comment("Base SU stored by one balanced Memory Card. Card archetypes scale this value.")
             .push("memory_card_capacity");
         DDR1_CARD_SU = card(builder, "ddr1", MemoryTier.DDR1.defaultCardCapacitySu());
         DDR2_CARD_SU = card(builder, "ddr2", MemoryTier.DDR2.defaultCardCapacitySu());
@@ -51,6 +65,37 @@ public final class MekStressConfig {
         DDR3_DRIVE_BANDWIDTH = bandwidth(builder, "ddr3", MemoryTier.DDR3.defaultDriveBandwidthRpm());
         DDR4_DRIVE_BANDWIDTH = bandwidth(builder, "ddr4", MemoryTier.DDR4.defaultDriveBandwidthRpm());
         DDR5_DRIVE_BANDWIDTH = bandwidth(builder, "ddr5", MemoryTier.DDR5.defaultDriveBandwidthRpm());
+        builder.pop();
+
+        builder.comment("Per-card storage and speed exponents for each memory-card archetype.")
+            .push("memory_card_types");
+        builder.push(MemoryCardType.ECONOMY.id());
+        ECONOMY_STORAGE_EXPONENT = exponent(builder, "storageExponent", MemoryCardType.ECONOMY.defaultStorageExponent());
+        ECONOMY_SPEED_EXPONENT = exponent(builder, "speedExponent", MemoryCardType.ECONOMY.defaultSpeedExponent());
+        builder.pop();
+        builder.push(MemoryCardType.BALANCED.id());
+        BALANCED_STORAGE_EXPONENT = exponent(builder, "storageExponent", MemoryCardType.BALANCED.defaultStorageExponent());
+        BALANCED_SPEED_EXPONENT = exponent(builder, "speedExponent", MemoryCardType.BALANCED.defaultSpeedExponent());
+        builder.pop();
+        builder.push(MemoryCardType.HIGH_SPEED.id());
+        HIGH_SPEED_STORAGE_EXPONENT = exponent(builder, "storageExponent", MemoryCardType.HIGH_SPEED.defaultStorageExponent());
+        HIGH_SPEED_SPEED_EXPONENT = exponent(builder, "speedExponent", MemoryCardType.HIGH_SPEED.defaultSpeedExponent());
+        builder.pop();
+        builder.push(MemoryCardType.HIGH_STORAGE.id());
+        HIGH_STORAGE_STORAGE_EXPONENT = exponent(builder, "storageExponent", MemoryCardType.HIGH_STORAGE.defaultStorageExponent());
+        HIGH_STORAGE_SPEED_EXPONENT = exponent(builder, "speedExponent", MemoryCardType.HIGH_STORAGE.defaultSpeedExponent());
+        builder.pop();
+        builder.push(MemoryCardType.DEFECTIVE.id());
+        DEFECTIVE_STORAGE_EXPONENT = exponent(builder, "storageExponent", MemoryCardType.DEFECTIVE.defaultStorageExponent());
+        DEFECTIVE_SPEED_EXPONENT = exponent(builder, "speedExponent", MemoryCardType.DEFECTIVE.defaultSpeedExponent());
+        builder.pop();
+        builder.push(MemoryCardType.FINAL.id());
+        FINAL_STORAGE_EXPONENT = exponent(builder, "storageExponent", MemoryCardType.FINAL.defaultStorageExponent());
+        FINAL_SPEED_EXPONENT = exponent(builder, "speedExponent", MemoryCardType.FINAL.defaultSpeedExponent());
+        builder.pop();
+        DEFECTIVE_CHANCE = builder
+            .comment("Independent chance for each crafted normal card to become a defective card.")
+            .defineInRange("defectiveChance", 0.25D, 0.0D, 1.0D);
         builder.pop();
 
         builder.comment("Target RPM for each Mekanism machine quality tier.")
@@ -77,7 +122,7 @@ public final class MekStressConfig {
     }
 
     private static ForgeConfigSpec.LongValue card(ForgeConfigSpec.Builder builder, String tier, long value) {
-        return builder.comment("SU per " + tier.toUpperCase() + " Memory Card.")
+        return builder.comment("Base SU stored by one balanced " + tier.toUpperCase() + " Memory Card.")
             .defineInRange(tier + "CardSu", value, 1L, Long.MAX_VALUE);
     }
 
@@ -89,6 +134,11 @@ public final class MekStressConfig {
     private static ForgeConfigSpec.IntValue machineRpm(ForgeConfigSpec.Builder builder, String tier, int value) {
         return builder.comment(tier + " Mekanism machine target RPM.")
             .defineInRange(tier + "Rpm", value, 1, 65_536);
+    }
+
+    private static ForgeConfigSpec.IntValue exponent(
+        ForgeConfigSpec.Builder builder, String key, int defaultValue) {
+        return builder.defineInRange(key, defaultValue, -8, 8);
     }
 
     public static long cardCapacitySu(MemoryTier tier) {
@@ -109,6 +159,32 @@ public final class MekStressConfig {
             case DDR4 -> DDR4_DRIVE_BANDWIDTH.get();
             case DDR5 -> DDR5_DRIVE_BANDWIDTH.get();
         };
+    }
+
+    public static int storageExponent(MemoryCardType type) {
+        return switch (type) {
+            case ECONOMY -> ECONOMY_STORAGE_EXPONENT.get();
+            case BALANCED -> BALANCED_STORAGE_EXPONENT.get();
+            case HIGH_SPEED -> HIGH_SPEED_STORAGE_EXPONENT.get();
+            case HIGH_STORAGE -> HIGH_STORAGE_STORAGE_EXPONENT.get();
+            case DEFECTIVE -> DEFECTIVE_STORAGE_EXPONENT.get();
+            case FINAL -> FINAL_STORAGE_EXPONENT.get();
+        };
+    }
+
+    public static int speedExponent(MemoryCardType type) {
+        return switch (type) {
+            case ECONOMY -> ECONOMY_SPEED_EXPONENT.get();
+            case BALANCED -> BALANCED_SPEED_EXPONENT.get();
+            case HIGH_SPEED -> HIGH_SPEED_SPEED_EXPONENT.get();
+            case HIGH_STORAGE -> HIGH_STORAGE_SPEED_EXPONENT.get();
+            case DEFECTIVE -> DEFECTIVE_SPEED_EXPONENT.get();
+            case FINAL -> FINAL_SPEED_EXPONENT.get();
+        };
+    }
+
+    public static double defectiveChance() {
+        return DEFECTIVE_CHANCE.get();
     }
 
     public static int machineRpm(MachineTier tier) {

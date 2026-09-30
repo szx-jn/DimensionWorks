@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "dimensionworks_mek_stress:item/memory_card_ddr4",
+    "layer1": "dimensionworks_mek_stress:item/memory_card_defective_overlay"
+  }
+}

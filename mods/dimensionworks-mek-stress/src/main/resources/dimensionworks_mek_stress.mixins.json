@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "dimensionworks_mek_stress.refmap.json",
   "mixins": [
+    "minecraft.CraftingMenuMemoryCardMixin",
+    "minecraft.InventoryMenuMemoryCardMixin",
     "appliedcreate.MEGearboxBlockEntityMixin",
     "appliedcreate.StorageCellsMixin",
     "create.KineticBlockEntityMixin",

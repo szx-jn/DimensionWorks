@@ -3,10 +3,12 @@ package dev.szx.dimensionworks.mekstress.memory;
 import appeng.api.inventories.ISegmentedInventory;
 import appeng.api.inventories.InternalInventory;
 import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
+import dev.szx.dimensionworks.mekstress.core.MemoryCardMigration;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.Direction;
@@ -20,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,6 +35,8 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.MissingMappingsEvent;
 import net.minecraftforge.items.IItemHandler;
 
 /** Bounded removal queue for retired Applied Create stress storage items. */
@@ -63,6 +68,18 @@ public final class MemoryLegacyMigration {
     private static final Set<EntityRef> QUEUED_ENTITIES = new HashSet<>();
 
     private MemoryLegacyMigration() {
+    }
+
+    public static void onMissingMappings(MissingMappingsEvent event) {
+        if (event.getKey() != ForgeRegistries.Keys.ITEMS) {
+            return;
+        }
+        List<MissingMappingsEvent.Mapping<Item>> mappings =
+            event.getMappings(ForgeRegistries.Keys.ITEMS, DimensionWorksMekStress.MOD_ID);
+        for (MissingMappingsEvent.Mapping<Item> mapping : mappings) {
+            MemoryCardMigration.legacyMapping(mapping.getKey().getPath()).ifPresent(legacy ->
+                mapping.remap(DimensionWorksMekStress.memoryCard(legacy.tier(), legacy.type()).get()));
+        }
     }
 
     public static void onServerStarted(ServerStartedEvent event) {

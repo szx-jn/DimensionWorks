@@ -11,7 +11,6 @@ import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import com.loliball.appliedcreate.storage.StressKey;
-import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkSnapshot;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
@@ -134,7 +133,7 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
                 }
                 capacity = saturatedAdd(capacity, driveCapacity);
                 stored = saturatedAdd(stored, driveStored);
-                bandwidth = saturatedAdd(bandwidth, MekStressConfig.driveBandwidthRpm(drive.tier()));
+                bandwidth = saturatedAdd(bandwidth, drive.bandwidthRpm());
             }
         }
 
