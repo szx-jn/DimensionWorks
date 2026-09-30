@@ -39,4 +39,11 @@ public final class StressTransfer {
         }
         return (float) ((double) chargedSu / outputRpm);
     }
+
+    public static boolean canRun(int configuredRpm, double fullSpeedLoad, int outputRpm, long chargedSu) {
+        return configuredRpm > 0
+            && Double.isFinite(fullSpeedLoad) && fullSpeedLoad > 0.0D
+            && outputRpm > 0
+            && chargedSu > 0L;
+    }
 }

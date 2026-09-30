@@ -30,4 +30,12 @@ class StressTransferTest {
         assertEquals(0.0F, StressTransfer.capacityPerRpm(700L, 0), 1.0E-6F);
         assertEquals(0.0F, StressTransfer.capacityPerRpm(0L, 64), 1.0E-6F);
     }
+
+    @Test
+    void requiresLoadSpeedAndChargedSuBeforeRunning() {
+        assertEquals(true, StressTransfer.canRun(256, 768.0D, 256, 768L));
+        assertEquals(false, StressTransfer.canRun(256, 0.0D, 256, 768L));
+        assertEquals(false, StressTransfer.canRun(256, 768.0D, 0, 768L));
+        assertEquals(false, StressTransfer.canRun(256, 768.0D, 256, 0L));
+    }
 }

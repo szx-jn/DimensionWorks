@@ -46,6 +46,16 @@ public final class NetworkMath {
         return Math.min(clampRatio(stockQ), clampRatio(bandwidthQ));
     }
 
+    /** Mechanical power is available only when both SU stock and RPM bandwidth exist. */
+    public static double availableQ(long storedSu, long demandSuPerTick, long bandwidthRpm, long demandRpm) {
+        if (storedSu <= 0L || demandSuPerTick <= 0L || bandwidthRpm <= 0L || demandRpm <= 0L) {
+            return 0.0D;
+        }
+        return finalQ(
+            stockRatio(storedSu, demandSuPerTick),
+            bandwidthQ(bandwidthRpm, demandRpm));
+    }
+
     public static double efficiency(double q, double exponent) {
         return Math.pow(clampRatio(q), exponent);
     }

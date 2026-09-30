@@ -40,4 +40,14 @@ class NetworkMathTest {
         assertEquals(1.0D, NetworkMath.bandwidthQ(0L, 0L), 1.0E-9D);
         assertEquals(1.0D, NetworkMath.finalQ(1.0D, 1.0D), 1.0E-9D);
     }
+
+    @Test
+    void requiresBothSuAndRpmForAvailableMechanicalPower() {
+        assertEquals(0.0D, NetworkMath.availableQ(0L, 100L, 1_024L, 256L), 1.0E-9D);
+        assertEquals(0.0D, NetworkMath.availableQ(100L, 100L, 0L, 256L), 1.0E-9D);
+        assertEquals(0.0D, NetworkMath.availableQ(100L, 0L, 1_024L, 256L), 1.0E-9D);
+        assertEquals(0.0D, NetworkMath.availableQ(100L, 100L, 1_024L, 0L), 1.0E-9D);
+        assertEquals(0.5D, NetworkMath.availableQ(100L, 200L, 1_024L, 512L), 1.0E-9D);
+        assertEquals(1.0D, NetworkMath.availableQ(200L, 200L, 1_024L, 512L), 1.0E-9D);
+    }
 }
