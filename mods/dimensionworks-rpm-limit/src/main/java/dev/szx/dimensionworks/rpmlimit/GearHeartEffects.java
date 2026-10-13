@@ -13,8 +13,10 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Runtime effects driven by the equipped Gear Heart. */
 public final class GearHeartEffects {
@@ -28,6 +30,7 @@ public final class GearHeartEffects {
     private static final String RPM_SOURCE = "gear_heart:rpm";
     private static final String BONUS_STATE_KEY = "dimensionworks_gear_heart_bonuses";
     private static final FixedIntervalTokenBucket TOKEN_BUCKET = new FixedIntervalTokenBucket();
+    private static final Map<UUID, Integer> ACTIVE_QUOTA_MASKS = new ConcurrentHashMap<>();
 
     private static final UUID BLOCK_REACH_ID =
         UUID.fromString("61ee7d0c-7d95-4a6c-b50a-6ce2168df0a4");
@@ -40,6 +43,7 @@ public final class GearHeartEffects {
         Optional<ItemStack> maybeHeart = equippedHeart(player);
         if (maybeHeart.isEmpty()) {
             clearAll(player);
+            ACTIVE_QUOTA_MASKS.remove(player.getUUID());
             return;
         }
 
@@ -47,19 +51,38 @@ public final class GearHeartEffects {
         applyBaseBonuses(player);
         if (GearHeartState.isFullyReleased(heart) || !GearHeartState.isCursed(heart)) {
             clearCurses(player);
+            ACTIVE_QUOTA_MASKS.remove(player.getUUID());
             return;
         }
+
+        ACTIVE_QUOTA_MASKS.put(player.getUUID(), GearHeartState.getRepairedMask(heart));
         syncQuotaState(player, heart);
     }
 
     public static void clearPlayer(ServerPlayer player) {
         clearAll(player);
         TOKEN_BUCKET.clearOwner(player.getUUID());
+        ACTIVE_QUOTA_MASKS.remove(player.getUUID());
     }
 
     public static boolean tryQuota(UUID owner, GearHeartQuotaType type,
                                    double amount, double perSecond, long tick) {
         return TOKEN_BUCKET.tryTake(owner, type, amount, perSecond, tick);
+    }
+
+    public static int activeQuotaMask(UUID owner) {
+        return owner == null ? 0 : ACTIVE_QUOTA_MASKS.getOrDefault(owner, 0);
+    }
+
+    public static boolean anyQuotaUnreleased(int quotaBit) {
+        synchronized (ACTIVE_QUOTA_MASKS) {
+            for (int mask : ACTIVE_QUOTA_MASKS.values()) {
+                if ((mask & quotaBit) == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static RepairResult repairEquippedCurse(ServerPlayer player, int repairBit) {

@@ -26,8 +26,6 @@ public final class RpmLimitManager {
 
     private static final Map<UUID, Integer> CACHE = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, Integer>> EXTERNAL_LIMITS = new ConcurrentHashMap<>();
-    private static final Map<UUID, Map<String, Float>> STRESS_COST_MULTIPLIERS = new ConcurrentHashMap<>();
-    private static final Map<UUID, Map<String, Float>> STRESS_CAPACITY_MULTIPLIERS = new ConcurrentHashMap<>();
     private static long last = Long.MIN_VALUE;
 
     public static void init(Player p) {
@@ -74,37 +72,6 @@ public final class RpmLimitManager {
             applyLimitToOwned(player, getEffectiveLimit(player.getUUID()));
     }
 
-    public static void setStressCostMultiplier(ServerPlayer player, String source, double multiplier) {
-        float value = sanitizeMultiplier(multiplier);
-        Float previous = stressMultipliers(player.getUUID(), STRESS_COST_MULTIPLIERS).put(source, value);
-        if (previous == null || previous != value)
-            markOwnedNetworksDirty(player);
-    }
-
-    public static void removeStressCostMultiplier(ServerPlayer player, String source) {
-        if (stressMultipliers(player.getUUID(), STRESS_COST_MULTIPLIERS).remove(source) != null)
-            markOwnedNetworksDirty(player);
-    }
-
-    public static void setStressCapacityMultiplier(ServerPlayer player, String source, double multiplier) {
-        float value = sanitizeMultiplier(multiplier);
-        Float previous = stressMultipliers(player.getUUID(), STRESS_CAPACITY_MULTIPLIERS).put(source, value);
-        if (previous == null || previous != value)
-            markOwnedNetworksDirty(player);
-    }
-
-    public static void removeStressCapacityMultiplier(ServerPlayer player, String source) {
-        if (stressMultipliers(player.getUUID(), STRESS_CAPACITY_MULTIPLIERS).remove(source) != null)
-            markOwnedNetworksDirty(player);
-    }
-
-    public static float stressCostMultiplier(KineticBlockEntity k) {
-        return ownerMultiplier(k, STRESS_COST_MULTIPLIERS);
-    }
-
-    public static float stressCapacityMultiplier(KineticBlockEntity k) {
-        return ownerMultiplier(k, STRESS_CAPACITY_MULTIPLIERS);
-    }
 
     public static void refresh(Iterable<ServerPlayer> ps, long tick) {
         int i = Math.max(1, RpmLimitConfig.CACHE_INTERVAL_TICKS.get());
@@ -231,29 +198,6 @@ public final class RpmLimitManager {
         return changed;
     }
 
-    private static void markOwnedNetworksDirty(ServerPlayer player) {
-        MinecraftServer server = player.getServer();
-        if (server == null)
-            return;
-
-        for (ServerLevel level : server.getAllLevels()) {
-            for (ChunkHolder holder : ((ChunkMapAccessor) level.getChunkSource().chunkMap)
-                .dimensionworks$getChunks()) {
-                LevelChunk chunk = holder.getFullChunk();
-                if (chunk == null)
-                    continue;
-
-                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                    if (!(blockEntity instanceof KineticBlockEntity kinetic))
-                        continue;
-                    if (!player.getUUID().equals(owner(kinetic)))
-                        continue;
-                    kinetic.networkDirty = true;
-                    kinetic.setChanged();
-                }
-            }
-        }
-    }
 
 
     private static int limitFor(KineticBlockEntity k) {
@@ -289,26 +233,6 @@ public final class RpmLimitManager {
         return EXTERNAL_LIMITS.computeIfAbsent(owner, ignored -> new ConcurrentHashMap<>());
     }
 
-    private static Map<String, Float> stressMultipliers(UUID owner, Map<UUID, Map<String, Float>> container) {
-        return container.computeIfAbsent(owner, ignored -> new ConcurrentHashMap<>());
-    }
-
-    private static float ownerMultiplier(KineticBlockEntity k, Map<UUID, Map<String, Float>> container) {
-        UUID owner = owner(k);
-        if (owner == null)
-            return 1.0f;
-        Map<String, Float> multipliers = container.get(owner);
-        if (multipliers == null || multipliers.isEmpty())
-            return 1.0f;
-        float result = 1.0f;
-        for (float multiplier : multipliers.values())
-            result *= multiplier;
-        return result;
-    }
-
-    private static float sanitizeMultiplier(double multiplier) {
-        return (float) Math.max(0.0d, Math.min(16.0d, multiplier));
-    }
 
     private static int storedMachineLimit(KineticBlockEntity k) {
         CompoundTag data = k.getPersistentData();
