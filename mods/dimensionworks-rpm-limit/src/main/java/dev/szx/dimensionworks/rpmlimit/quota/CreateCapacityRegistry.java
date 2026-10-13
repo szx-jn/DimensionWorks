@@ -49,6 +49,9 @@ public final class CreateCapacityRegistry {
         }
 
         double sharedRaw = raw.getOrDefault(GearHeartOwnerResolver.SHARED_OWNER, 0.0D);
+        if (!GearHeartEffects.hasQuota(owner)) {
+            return naturalCapacity;
+        }
         double sharedScaled = sharedRaw > 0.0D
             ? scaleBucket(raw, GearHeartOwnerResolver.SHARED_OWNER,
                 Math.min(limit, GearHeartQuotaPolicy.limit(

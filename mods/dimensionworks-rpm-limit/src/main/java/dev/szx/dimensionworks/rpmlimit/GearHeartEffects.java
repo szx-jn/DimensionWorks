@@ -13,8 +13,11 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -83,6 +86,31 @@ public final class GearHeartEffects {
             }
         }
         return false;
+    }
+
+    public static boolean hasQuota(UUID owner) {
+        return owner != null && ACTIVE_QUOTA_MASKS.containsKey(owner);
+    }
+
+    public static Set<UUID> unreleasedOwners(int quotaBit) {
+        Set<UUID> owners = new LinkedHashSet<>();
+        synchronized (ACTIVE_QUOTA_MASKS) {
+            for (Map.Entry<UUID, Integer> entry : ACTIVE_QUOTA_MASKS.entrySet()) {
+                if ((entry.getValue() & quotaBit) == 0) {
+                    owners.add(entry.getKey());
+                }
+            }
+        }
+        return owners;
+    }
+
+    public static boolean tryQuotaForOwners(Collection<UUID> owners, GearHeartQuotaType type,
+                                            double amount, double perSecond, long tick) {
+        return TOKEN_BUCKET.tryTakeMany(owners, type, amount, perSecond, tick);
+    }
+
+    public static boolean tryQuotaPlan(Collection<FixedIntervalTokenBucket.QuotaRequest> requests) {
+        return TOKEN_BUCKET.tryTakePlan(requests);
     }
 
     public static RepairResult repairEquippedCurse(ServerPlayer player, int repairBit) {

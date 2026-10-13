@@ -31,3 +31,10 @@ mandatory=true
 versionRange="[6.0.8,6.1)"
 ordering="BEFORE"
 side="BOTH"
+
+[[dependencies.dimensionworks_rpm_limit]]
+modId="mekanism"
+mandatory=true
+versionRange="[10.4.16,10.5)"
+ordering="AFTER"
+side="BOTH"
