@@ -31,6 +31,7 @@ repositories {
     maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
     maven { name = 'Curios'; url = 'https://maven.theillusivec4.top/' }
     maven { name = 'ModMaven'; url = 'https://modmaven.dev' }
+    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
     mavenCentral()
 }
 
@@ -39,6 +40,7 @@ dependencies {
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     implementation fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
     implementation fg.deobf('mekanism:Mekanism:1.20.1-10.4.16.80')
+    implementation fg.deobf('appeng:appliedenergistics2-forge:15.4.10')
     // The slim Create artifact needs Ponder on both the compile and runtime classpaths.
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
     // Create's slim artifact also omits its jar-in-jar Flywheel runtime dependency.
