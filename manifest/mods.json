@@ -479,7 +479,7 @@
       "name": "DimensionWorks RPM Limit",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-rpm-limit",
-      "version": "0.4.4",
+      "version": "0.4.5",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-rpm-limit"

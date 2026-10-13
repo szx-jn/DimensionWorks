@@ -6,46 +6,52 @@ The mod declares Create as a `BEFORE` dependency and its Mixin configuration is 
 
 ## 齿轮之心
 
-RPM Limit 模组同时承载 KubeJS 齿轮之心的运行行为。物品本身由
-`kubejs/startup_scripts/gear_heart.js` 注册，模组只判断物品 ID 与
-`CustomModelData`，不注册第二套物品，也不会写入配方。
+RPM Limit 模组承载 KubeJS 齿轮之心的工业额度运行时。物品由 `kubejs` 注册，Java 只按装备者 UUID 聚合当前加载且活跃的系统，不扫描卸载区块。
 
-- Curios 专属槽：`gear_heart`。只有 `kubejs:gear_heart` 和
-  `kubejs:gear_heart_enchanted` 可以装备。`CurioUnequipEvent` 使用
-  `Event.Result.DENY` 拒绝取下，避免对不可取消事件调用 `setCanceled` 导致崩溃；
-  死亡掉落规则为 `ALWAYS_KEEP`。
-- 基础增益：交互距离 +2、急迫 II、幸运 I。基础增益只在饰品实际生效时施加，
-  下线或异常移除后会清理。
-- `kubejs:gear_heart` 本身就是破损/受诅咒物品；`CustomModelData=0` 与 `1`
-  仅切换常态/破损外观，两态都会显示并生效七条诅咒。
-  `kubejs:gear_heart_enchanted` 是祝福占位，不显示也不承载诅咒。
-- 七条诅咒默认全部处于未破除状态：攻击伤害降至 70%（向下取整）、机械转速上限 32、
-  产出失败、随机冻结、夜晚饥饿消耗翻倍、应力消耗翻倍、应力产出降至 80%。
-- `gear_heart_repair_fragment_1` 至 `_7` 为无配方的占位修复碎片。右键已装备的
-  破损齿轮之心会破除对应诅咒；已破除项写入物品 NBT 的
-  `DimensionWorksGearHeartRepaired` 位掩码，立即停止原诅咒并改为绿色破除效果。
-  转速上限诅咒破除后，玩家的持久 RPM 上限会直接改为 512。
-- 旧版 `kubejs:gear_heart_enchanted` 且 `CustomModelData=2` 的诅咒物品会在装备后
-  自动迁移为破损态 `kubejs:gear_heart`，保留原有破除位。
-- 产出失败已接入搅拌盆/机械压力机、动力锯、磨石和置物台冲压路径。失败时本次
-  输入被消耗且不产出，动画和网络速度逻辑不被重跑。
-- 输出失败、冻结和夜晚饥饿触发时会在快捷栏上方显示红色诅咒提示，不写服务端日志。
+- Curios 专属槽 `gear_heart` 只接受 `kubejs:gear_heart` 与 `kubejs:gear_heart_enchanted`；不可手动取下，死亡保留。
+- 基础增益仍为交互距离 +2、急迫 II、幸运 I。
+- 旧 `CustomModelData=2` 祝福物品会在装备时迁移为受破损态，`DimensionWorksGearHeartRepaired` 按原位保留。
+- 修复必须按 1 到 7 顺序使用碎片；第七项完成后物品替换为 `kubejs:gear_heart_enchanted`，进入“全链释限”。
+- 所有额度按 `min(齿轮之心额度, 原模组能力)` 应用；修复或最终释限只能移除齿轮之心额度。
+- 无所有者系统进入共享后备桶，每个仍受诅咒的装备者都要承担共享用量。
+
+### 七阶段
+
+| 阶段 | 诅咒 | 单项修复 |
+| --- | --- | --- |
+| 1 | 装备者网络 32 RPM | 恢复 512 RPM |
+| 2 | 全部活跃 Create 网络合计 4,096 SU | 立即移除自有 Create 容量额度 |
+| 3 | Mek 矿物处理 8 次/秒 | 64 次/秒 |
+| 4 | AE2 自动合成 1 个 | 80 个 |
+| 5 | `gear_heart:cross_process` 16 件/秒 | 128 件/秒 |
+| 6 | Mek/AE2 活跃设备各 8 台 | 各 64 台 |
+| 7 | `gear_heart:final_production` 16 件/秒 | 128 件/秒 |
+
+Create 容量、Mek 处理和 AE2 提交都在真实输出或提交边界先做完整预检；固定间隔令牌桶按玩家与额度类型隔离，同 tick 的多类请求原子提交，拒绝时不消耗输入或令牌。Create、Mek 和 AE2 白名单最终产物在空间模拟通过后才申请第七项额度。
+
+Mek 直接机械供能接受正反两个方向：有效速度按 `abs(RPM)` 收口，应力按 `abs(RPM) × 8` 计算，零转速不供能。该行为由 `dimensionworks-mek-stress` 的 `MachinePowerMath` 与输出 Mixin 覆盖。
 
 ### 配置（COMMON，`[gearHeart]`）
 
-| 键 | 默认值 | 说明 |
-| --- | --- | --- |
-| `outputFailureChance` | `0.35` | 每次完成的受支持机械操作产出失败的概率 |
-| `freezeChance` | `0.75` | 冻结间隔到期后实际冻结的概率 |
-| `freezeIntervalMinSeconds` | `40` | 随机冻结间隔下限（秒） |
-| `freezeIntervalMaxSeconds` | `240` | 随机冻结间隔上限（秒） |
-| `freezeDurationTicks` | `20` | 每次冻结时长（20 tick = 1 秒） |
+| 键 | 默认值 |
+| --- | ---: |
+| `rotationCursedRpm` | 32 |
+| `rotationRepairedRpm` | 512 |
+| `createCapacityCursedSu` | 4096 |
+| `mekOreOperationsCursedPerSecond` | 8 |
+| `mekOreOperationsRepairedPerSecond` | 64 |
+| `aeCraftingJobsCursed` | 1 |
+| `aeCraftingJobsRepaired` | 80 |
+| `crossProcessItemsCursedPerSecond` | 16 |
+| `crossProcessItemsRepairedPerSecond` | 128 |
+| `activeMachinesCursed` | 8 |
+| `activeMachinesRepaired` | 64 |
+| `finalProductionItemsCursedPerSecond` | 16 |
+| `finalProductionItemsRepairedPerSecond` | 128 |
 
-### 运行边界
+### 运行边界与验收状态
 
-产出失败只覆盖已接入的 Create 加工路径，其他模组机器不会因为没有通用产出
-钩子而被误伤。冻结会取消服务端移动、交互、方块破坏、物品丢弃和容器点击；
-它不更改客户端时钟，也不会在玩家离线后继续计时。
+随机攻击、产出失败、冻结和夜晚饥饿配置已删除；不再取消玩家操作或吞入输入。构建、单元测试、Mixin 合同、JSON、KubeJS 与打包预检均通过；尚未实际进入游戏验证双人隔离、任务图、JEI 配方和正反向供能，因此这些项目仍标记为未运行时验证。
 
 ## Create 全局转速上限
 

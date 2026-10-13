@@ -28,16 +28,16 @@
 	classWhitelist = []
 
 [gearHeart]
-	#Chance for a cursed gear heart owner's completed machine operation to fail output.
-	#Range: 0.0 ~ 1.0
-	outputFailureChance = 0.35
-	#Chance to freeze for the configured duration when a freeze interval elapses.
-	#Range: 0.0 ~ 1.0
-	freezeChance = 0.75
-	#Range: 1 ~ 3600
-	freezeIntervalMinSeconds = 40
-	#Range: 1 ~ 3600
-	freezeIntervalMaxSeconds = 240
-	#Range: 1 ~ 200
-	freezeDurationTicks = 20
-
+    rotationCursedRpm = 32
+    rotationRepairedRpm = 512
+    createCapacityCursedSu = 4096
+    mekOreOperationsCursedPerSecond = 8
+    mekOreOperationsRepairedPerSecond = 64
+    aeCraftingJobsCursed = 1
+    aeCraftingJobsRepaired = 80
+    crossProcessItemsCursedPerSecond = 16
+    crossProcessItemsRepairedPerSecond = 128
+    activeMachinesCursed = 8
+    activeMachinesRepaired = 64
+    finalProductionItemsCursedPerSecond = 16
+    finalProductionItemsRepairedPerSecond = 128

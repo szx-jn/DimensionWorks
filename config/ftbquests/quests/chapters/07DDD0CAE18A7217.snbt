@@ -7,21 +7,135 @@
 	id: "07DDD0CAE18A7217"
 	order_index: 1
 	quest_links: [ ]
-	quests: [{
-		id: "40917E4DCDE7F6E5"
-		rewards: [{
-			id: "4674506C79D3DB79"
-			type: "xp_levels"
-			xp_levels: 5
-		}]
-		subtitle: "伴随着你诞生这个世界"
-		tasks: [{
-			id: "19A5AAF6786B4DA0"
-			item: "kubejs:gear_heart"
-			type: "item"
-		}]
-		x: 0.0d
-		y: 0.0d
-	}]
+	quests: [
+		{
+			id: "40917E4DCDE7F6E5"
+			rewards: [{
+				id: "4674506C79D3DB79"
+				type: "xp_levels"
+				xp_levels: 5
+			}]
+			subtitle: "伴随着你诞生这个世界"
+			tasks: [{
+				id: "19A5AAF6786B4DA0"
+				item: "kubejs:gear_heart"
+				type: "item"
+			}]
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["40917E4DCDE7F6E5"]
+			hide_dependency_lines: false
+			id: "C405363F17B9E624"
+			subtitle: "诅咒：32 RPM；祝福：恢复 512 RPM"
+			tasks: [{
+				id: "5BE1924C8B650807"
+				item: "kubejs:gear_heart_repair_fragment_1"
+				type: "item"
+			}]
+			title: "安山校准齿片"
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["C405363F17B9E624"]
+			hide_dependency_lines: false
+			id: "8E1C4BA4D5D33391"
+			subtitle: "诅咒：Create 合计 4,096 SU；祝福：立即释放自有额度"
+			tasks: [{
+				id: "062074DDA749C95D"
+				item: "kubejs:gear_heart_repair_fragment_2"
+				type: "item"
+			}]
+			title: "黄铜应力垫片"
+			x: 4.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["8E1C4BA4D5D33391"]
+			hide_dependency_lines: false
+			id: "755C22E10F4965B3"
+			subtitle: "诅咒：矿物处理 8 次/秒；祝福：提高到 64 次/秒"
+			tasks: [{
+				id: "5B04C74795E0C209"
+				item: "kubejs:gear_heart_repair_fragment_3"
+				type: "item"
+			}]
+			title: "冶化同步环"
+			x: 6.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["755C22E10F4965B3"]
+			hide_dependency_lines: false
+			id: "DF25F0301998CAA9"
+			subtitle: "诅咒：ME 并发 1 个；祝福：提高到 80 个"
+			tasks: [{
+				id: "1F7D253008B0A3FF"
+				item: "kubejs:gear_heart_repair_fragment_4"
+				type: "item"
+			}]
+			title: "ME 调度芯片"
+			x: 8.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["DF25F0301998CAA9"]
+			hide_dependency_lines: false
+			id: "A565E569C5BD20F6"
+			subtitle: "诅咒：跨工序 16 件/秒；祝福：提高到 128 件/秒"
+			tasks: [{
+				id: "8C303BA45C85A140"
+				item: "kubejs:gear_heart_repair_fragment_5"
+				type: "item"
+			}]
+			title: "跨域耦合环"
+			x: 10.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["A565E569C5BD20F6"]
+			hide_dependency_lines: false
+			id: "328F8A40F4E27C24"
+			subtitle: "诅咒：活跃机器 8 台；祝福：提高到 64 台"
+			tasks: [{
+				id: "ABB6D2C279CD0038"
+				item: "kubejs:gear_heart_repair_fragment_6"
+				type: "item"
+			}]
+			title: "供能稳压芯"
+			x: 12.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["328F8A40F4E27C24"]
+			hide_dependency_lines: false
+			id: "F3B1FB5F0660503A"
+			subtitle: "诅咒：白名单 16 件/秒；祝福：提高到 128 件/秒"
+			tasks: [{
+				id: "9075638FD7367C89"
+				item: "kubejs:gear_heart_repair_fragment_7"
+				type: "item"
+			}]
+			title: "矩阵调度核"
+			x: 14.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["F3B1FB5F0660503A"]
+			hide_dependency_lines: false
+			id: "89245EAF3B93C070"
+			subtitle: "七项工业瓶颈全部破除，齿轮之心进入全链释限"
+			tasks: [{
+				id: "82AAA6F8E02EFA5D"
+				item: "kubejs:gear_heart_enchanted"
+				type: "item"
+			}]
+			title: "全链齿轮之心"
+			x: 16.0d
+			y: 0.0d
+		}
+	]
 	title: "齿轮之心"
 }
