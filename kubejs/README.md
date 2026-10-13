@@ -17,22 +17,22 @@
 
 ## 齿轮之心
 
-`startup_scripts/gear_heart.js` 注册两个最高稀有度的齿轮之心和七个占位修复碎片，不包含配方。
+`startup_scripts/gear_heart.js` 注册两个最高稀有度的齿轮之心和七个独立贴图的修复碎片；`server_scripts/gear_heart_recipes.js` 提供七个固定 ID 配方。
 四张齿轮之心贴图均为 32x32；所有状态都不启用附魔光效。
 
 | 物品 | `CustomModelData` | 状态 |
 | --- | --- | --- |
-| `kubejs:gear_heart` | `0` | 常态外观，携带七条未破除诅咒 |
-| `kubejs:gear_heart` | `1` | 破损外观，携带同样的七条未破除诅咒 |
-| `kubejs:gear_heart_enchanted` | `0` | 祝福占位，不显示诅咒 |
+| `kubejs:gear_heart` | `0` | 常态外观，携带七条未修复工业瓶颈 |
+| `kubejs:gear_heart` | `1` | 破损外观，携带同样的七条未修复工业瓶颈 |
+| `kubejs:gear_heart_enchanted` | `0` | 全链释限，不显示工业瓶颈 |
 
-`kubejs:gear_heart` 本身就是受诅咒物品，不需要手动设置 `CustomModelData`；物品说明会直接列出当前七条诅咒，已破除项在原位置改为绿色效果。
-`kubejs:gear_heart_enchanted` 的旧 `CustomModelData=2` 诅咒物品会在装备后自动迁移为
-破损态 `kubejs:gear_heart`。`kubejs:gear_heart_repair_fragment_1` 至 `_7` 为占位物品，
-右键已装备的破损齿轮之心可分别破除七条诅咒，当前无配方。
+`kubejs:gear_heart` 本身就是带工业瓶颈的物品，不需要手动设置 `CustomModelData`；物品说明会直接列出当前七条工业瓶颈，已破除项在原位置改为绿色效果。
+`kubejs:gear_heart_enchanted` 的旧 `CustomModelData=2` 受损物品会在装备后自动迁移为
+破损态 `kubejs:gear_heart`。`kubejs:gear_heart_repair_fragment_1` 至 `_7` 对应七个固定配方，
+右键已装备的破损齿轮之心必须按 1 到 7 的顺序破除七条工业瓶颈。
 
 `data/curios/` 新增专属 `gear_heart` 槽，只接受齿轮之心；装备后由 RPM Limit 模组拦截
-手动取下并设为死亡保留。物品提供交互距离 +2、急迫 II 和幸运 I，诅咒运行效果与
+手动取下并设为死亡保留。物品提供交互距离 +2、急迫 II 和幸运 I，工业额度运行效果与
 破除位写入同一模组，详见 `mods/dimensionworks-rpm-limit/README.md`。
 
 贴图生成流程见 `scripts/README.md`。

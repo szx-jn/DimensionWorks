@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "create:precision_mechanism",
+    "dimensionworks_mek_stress:memory_drive_ddr1",
+    "dimensionworks_mek_stress:memory_card_ddr3_balanced",
+    "appliedcreate:me_gearbox"
+  ]
+}

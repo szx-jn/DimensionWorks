@@ -36,6 +36,6 @@ StartupEvents.registry('item', event => {
       .tooltip(Text.translate(`item.kubejs.gear_heart_repair_fragment_${index}.tooltip`))
       .maxStackSize(16)
       .rarity('rare')
-      .texture('kubejs:item/gear_heart_repair_fragment')
+      .texture(`kubejs:item/gear_heart_repair_fragment_${index}`)
   }
 })

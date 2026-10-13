@@ -19,6 +19,16 @@ ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / "docs/assets/gear_heart_reference.png"
 TEXTURE_DIR = ROOT / "kubejs/assets/kubejs/textures/item"
 PREVIEW = ROOT / "docs/assets/gear_heart_states_preview.png"
+FRAGMENT_PREVIEW = ROOT / "docs/assets/gear_heart_fragments_preview.png"
+FRAGMENT_PALETTES = (
+    ((50, 57, 61, 255), (139, 150, 154, 255), (205, 214, 216, 255)),
+    ((74, 47, 20, 255), (174, 116, 42, 255), (244, 191, 82, 255)),
+    ((16, 69, 76, 255), (32, 157, 166, 255), (91, 235, 224, 255)),
+    ((28, 78, 45, 255), (72, 166, 87, 255), (156, 239, 147, 255)),
+    ((86, 43, 28, 255), (185, 91, 54, 255), (248, 157, 96, 255)),
+    ((49, 30, 84, 255), (126, 76, 199, 255), (86, 222, 235, 255)),
+    ((94, 70, 17, 255), (211, 166, 42, 255), (77, 220, 224, 255)),
+)
 
 SIZE = 32
 PREVIEW_SCALE = 8
@@ -210,6 +220,56 @@ def make_repair_fragment() -> Image.Image:
     return image
 
 
+def make_repair_fragment_variant(index: int) -> Image.Image:
+    outline, fill, highlight = FRAGMENT_PALETTES[index - 1]
+    base = make_repair_fragment()
+    pixels = base.load()
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if pixels[x, y][3] > 0:
+                pixels[x, y] = fill
+    result = base.rotate((index - 1) * 30, resample=Image.Resampling.NEAREST, center=(SIZE / 2, SIZE / 2))
+    draw = ImageDraw.Draw(result)
+    if index == 1:
+        draw.ellipse((11, 11, 21, 21), outline=outline, width=2)
+        draw.point((16, 16), fill=highlight)
+    elif index == 2:
+        draw.rounded_rectangle((7, 9, 25, 23), radius=4, outline=outline, width=2)
+        draw.line(((11, 16), (21, 16)), fill=highlight, width=2)
+    elif index == 3:
+        draw.ellipse((7, 7, 25, 25), outline=outline, width=3)
+        draw.ellipse((12, 12, 20, 20), outline=highlight, width=2)
+    elif index == 4:
+        draw.rectangle((9, 9, 23, 23), outline=outline, width=2)
+        for y in (12, 16, 20):
+            draw.line(((5, y), (9, y)), fill=highlight, width=2)
+            draw.line(((23, y), (27, y)), fill=highlight, width=2)
+    elif index == 5:
+        draw.ellipse((4, 8, 17, 24), outline=outline, width=2)
+        draw.ellipse((15, 8, 28, 24), outline=outline, width=2)
+        draw.rectangle((14, 14, 18, 18), fill=highlight)
+    elif index == 6:
+        draw.polygon([(8, 6), (24, 6), (28, 16), (24, 26), (8, 26), (4, 16)], outline=outline, width=2)
+        draw.ellipse((12, 11, 20, 21), outline=highlight, width=2)
+    else:
+        draw.rectangle((13, 4, 19, 28), outline=outline, width=2)
+        draw.rectangle((4, 13, 28, 19), outline=outline, width=2)
+        draw.rectangle((14, 14, 18, 18), fill=highlight)
+    return quantize_rgba(result)
+
+def make_fragment_preview(images: dict[int, Image.Image]) -> None:
+    gap = 8
+    width = SIZE * 7 * PREVIEW_SCALE + gap * 6
+    preview = Image.new("RGBA", (width, SIZE * PREVIEW_SCALE), (28, 28, 31, 255))
+    draw = ImageDraw.Draw(preview)
+    for index in range(1, 8):
+        scaled = images[index].resize((SIZE * PREVIEW_SCALE, SIZE * PREVIEW_SCALE), Image.Resampling.NEAREST)
+        x = (index - 1) * (SIZE * PREVIEW_SCALE + gap)
+        preview.alpha_composite(scaled, (x, 0))
+        draw.rectangle((x, 0, x + SIZE * PREVIEW_SCALE - 1, SIZE * PREVIEW_SCALE - 1), outline=(70, 70, 76, 255))
+    FRAGMENT_PREVIEW.parent.mkdir(parents=True, exist_ok=True)
+    preview.save(FRAGMENT_PREVIEW)
+
 def make_preview(images: dict[str, Image.Image]) -> None:
     gap = 8
     preview = Image.new(
@@ -252,11 +312,20 @@ def main() -> None:
         print(f"wrote {output.relative_to(ROOT)}")
 
     make_preview(images)
-    fragment = make_repair_fragment()
-    fragment_output = TEXTURE_DIR / "gear_heart_repair_fragment.png"
-    fragment.save(fragment_output)
-    print(f"wrote {fragment_output.relative_to(ROOT)}")
+    fragments = {}
+    for index in range(1, 8):
+        fragment = make_repair_fragment_variant(index)
+        output = TEXTURE_DIR / f"gear_heart_repair_fragment_{index}.png"
+        fragment.save(output)
+        fragments[index] = fragment
+        print(f"wrote {output.relative_to(ROOT)}")
+
+    legacy_output = TEXTURE_DIR / "gear_heart_repair_fragment.png"
+    fragments[1].save(legacy_output)
+    make_fragment_preview(fragments)
+    print(f"wrote {legacy_output.relative_to(ROOT)}")
     print(f"wrote {PREVIEW.relative_to(ROOT)}")
+    print(f"wrote {FRAGMENT_PREVIEW.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

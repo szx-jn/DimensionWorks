@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "dimensionworks_cave_factory:polarity_matrix",
+    "dimensionworks_cave_factory:genesis_matrix",
+    "dimensionworks_cave_factory:decay_matrix",
+    "dimensionworks_cave_factory:crystal_matrix",
+    "dimensionworks_cave_factory:umbral_matrix",
+    "dimensionworks_cave_factory:phase_matrix",
+    "dimensionworks_mek_stress:memory_card_ddr5_balanced",
+    "dimensionworks_mek_stress:memory_card_ddr5_high_speed",
+    "dimensionworks_mek_stress:memory_card_ddr5_high_storage",
+    "dimensionworks_mek_stress:memory_drive_ddr5"
+  ]
+}

@@ -14,7 +14,7 @@ python3 scripts/generate_dimension_key_texture.py
 
 ## 生成齿轮之心与修复碎片贴图
 
-以 `docs/assets/gear_heart_reference.png` 为用户提供的模板，使用 Pillow 去除黑底并像素化为 32x32，再生成常态、破损、诅咒和祝福四态；脚本同时绘制七个修复碎片共用的 32x32 占位贴图：
+以 `docs/assets/gear_heart_reference.png` 为用户提供的模板，使用 Pillow 去除黑底并像素化为 32x32，再生成常态、破损、诅咒和祝福四态；脚本同时绘制七个独立轮廓与配色的 32x32 修复碎片贴图：
 
 ```sh
 python3 scripts/pixelate_gear_heart_textures.py
@@ -22,7 +22,7 @@ python3 scripts/pixelate_gear_heart_textures.py
 
 脚本依赖 Pillow；未安装时请使用隔离的虚拟环境安装，避免改写系统 Python。
 
-脚本输出到 `kubejs/assets/kubejs/textures/item/`，并生成 `docs/assets/gear_heart_states_preview.png` 放大预览。
+脚本输出到 `kubejs/assets/kubejs/textures/item/`，并生成 `docs/assets/gear_heart_states_preview.png` 与 `docs/assets/gear_heart_fragments_preview.png` 放大预览。
 
 ## 打包整合包
 
