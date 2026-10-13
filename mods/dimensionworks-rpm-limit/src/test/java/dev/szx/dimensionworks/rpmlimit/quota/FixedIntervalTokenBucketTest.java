@@ -28,6 +28,18 @@ class FixedIntervalTokenBucketTest {
     }
 
     @Test
+    void integerRateAccumulatesOnlyThroughOneWholeOperation() {
+        FixedIntervalTokenBucket bucket = new FixedIntervalTokenBucket();
+
+        assertFalse(bucket.tryTake(
+            owner, GearHeartQuotaType.AE_CRAFTING_JOBS, 1.0, 1.0, 0));
+        assertTrue(bucket.tryTake(
+            owner, GearHeartQuotaType.AE_CRAFTING_JOBS, 1.0, 1.0, 19));
+        assertFalse(bucket.tryTake(
+            owner, GearHeartQuotaType.AE_CRAFTING_JOBS, 1.0, 1.0, 19));
+    }
+
+    @Test
     void zeroRateRejectsPositiveRequestsAndNonPositiveRequestsPass() {
         FixedIntervalTokenBucket bucket = new FixedIntervalTokenBucket();
 

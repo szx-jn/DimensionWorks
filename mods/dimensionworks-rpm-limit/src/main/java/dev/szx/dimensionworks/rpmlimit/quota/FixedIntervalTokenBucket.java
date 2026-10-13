@@ -6,8 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Deterministic per-player rate quota. Each new tick receives at most one tick's
- * allowance, so idle time never banks an oversized burst.
+ * Deterministic per-player rate quota. Tokens refill from zero each time and are capped at the
+ * smaller of one tick's allowance and the current request, so idle time never banks arbitrary
+ * excess while low integer rates can still complete one whole operation.
  */
 public final class FixedIntervalTokenBucket {
     private static final long TICKS_PER_SECOND = 20L;
@@ -27,17 +28,22 @@ public final class FixedIntervalTokenBucket {
         }
 
         double perTick = perSecond / (double) TICKS_PER_SECOND;
+        double ceiling = Math.max(perTick, amount);
         Key key = new Key(owner, type);
         AtomicBoolean accepted = new AtomicBoolean(false);
         STATES.compute(key, (ignored, existing) -> {
-            State state = existing == null || existing.lastTick > tick
-                ? new State(tick, perTick)
-                : existing;
-            if (state.lastTick < tick) {
-                long elapsed = Math.min(tick - state.lastTick, TICKS_PER_SECOND);
-                double replenished = Math.min(perTick, state.tokens + perTick * (double) elapsed);
+            State state;
+            if (existing == null || existing.lastTick > tick) {
+                state = new State(tick, Math.min(ceiling, perTick));
+            } else if (existing.lastTick < tick) {
+                long elapsed = Math.min(tick - existing.lastTick, TICKS_PER_SECOND);
+                double replenished = Math.min(
+                    ceiling, existing.tokens + perTick * (double) elapsed);
                 state = new State(tick, replenished);
+            } else {
+                state = new State(tick, Math.min(existing.tokens, ceiling));
             }
+
             if (state.tokens + EPSILON < amount) {
                 return state;
             }
