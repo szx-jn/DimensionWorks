@@ -9,7 +9,7 @@ version = '0.3.4'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-def rpmLimitVersion = '0.4.4'
+def rpmLimitVersion = '0.4.5'
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
