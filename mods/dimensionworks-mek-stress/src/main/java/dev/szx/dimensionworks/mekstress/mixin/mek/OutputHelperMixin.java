@@ -1,6 +1,9 @@
 package dev.szx.dimensionworks.mekstress.mixin.mek;
 
 import dev.szx.dimensionworks.mekstress.core.MachineWorkContext;
+import dev.szx.dimensionworks.rpmlimit.quota.GearHeartOwnerResolver;
+import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
+import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
 import dev.szx.dimensionworks.mekstress.integration.mek.MachineOutputDelivery;
 import dev.szx.dimensionworks.mekstress.integration.mek.ScaledOutputHandler;
 import mekanism.api.Action;
@@ -15,6 +18,7 @@ import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import mekanism.api.recipes.outputs.OutputHelper;
 import net.minecraft.world.item.ItemStack;
+import java.util.UUID;
 import net.minecraftforge.fluids.FluidStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,7 +36,21 @@ public abstract class OutputHelperMixin {
     )
     private static void dimensionworks$scaleItemOutput(IInventorySlot slot, ItemStack toOutput, int operations,
                                                         CallbackInfo ci) {
-        if (!MachineWorkContext.scaling() || operations <= 0 || toOutput.isEmpty()) {
+        if (operations <= 0 || toOutput.isEmpty()) {
+            return;
+        }
+        MekProcessingContext.Context context = MekProcessingContext.current();
+        UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        long tick = context == null ? 0L : context.tick();
+        long gateAmount = MachineWorkContext.scaling()
+            ? MachineWorkContext.scaleOutput(toOutput.getCount(), operations)
+            : (long) toOutput.getCount() * operations;
+        if (!hasItemSpace(slot, toOutput, gateAmount)
+            || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
+            ci.cancel();
+            return;
+        }
+        if (!MachineWorkContext.scaling()) {
             return;
         }
         long count = MachineWorkContext.scaleOutput(toOutput.getCount(), operations);
@@ -53,7 +71,21 @@ public abstract class OutputHelperMixin {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void dimensionworks$scaleChemicalOutput(IChemicalTank tank, ChemicalStack toOutput, int operations,
                                                             CallbackInfo ci) {
-        if (!MachineWorkContext.scaling() || operations <= 0 || toOutput.isEmpty()) {
+        if (operations <= 0 || toOutput.isEmpty()) {
+            return;
+        }
+        MekProcessingContext.Context context = MekProcessingContext.current();
+        UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        long tick = context == null ? 0L : context.tick();
+        long gateAmount = MachineWorkContext.scaling()
+            ? MachineWorkContext.scaleOutput(toOutput.getAmount(), operations)
+            : saturatingMultiply(toOutput.getAmount(), operations);
+        if (!hasChemicalSpace(tank, toOutput, gateAmount)
+            || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
+            ci.cancel();
+            return;
+        }
+        if (!MachineWorkContext.scaling()) {
             return;
         }
         long amount = MachineWorkContext.scaleOutput(toOutput.getAmount(), operations);
@@ -73,7 +105,21 @@ public abstract class OutputHelperMixin {
     )
     private static void dimensionworks$scaleFluidOutput(IExtendedFluidTank tank, FluidStack toOutput, int operations,
                                                          CallbackInfo ci) {
-        if (!MachineWorkContext.scaling() || operations <= 0 || toOutput.isEmpty()) {
+        if (operations <= 0 || toOutput.isEmpty()) {
+            return;
+        }
+        MekProcessingContext.Context context = MekProcessingContext.current();
+        UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        long tick = context == null ? 0L : context.tick();
+        long gateAmount = MachineWorkContext.scaling()
+            ? MachineWorkContext.scaleOutput(toOutput.getAmount(), operations)
+            : saturatingMultiply(toOutput.getAmount(), operations);
+        if (!hasFluidSpace(tank, toOutput, gateAmount)
+            || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
+            ci.cancel();
+            return;
+        }
+        if (!MachineWorkContext.scaling()) {
             return;
         }
         long amount = MachineWorkContext.scaleOutput(toOutput.getAmount(), operations);
@@ -166,6 +212,51 @@ public abstract class OutputHelperMixin {
             }
         }
         ci.cancel();
+    }
+
+    private static long saturatingMultiply(long value, int operations) {
+        if (value <= 0L || operations <= 0) {
+            return 0L;
+        }
+        try {
+            return Math.multiplyExact(value, (long) operations);
+        } catch (ArithmeticException ignored) {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    private static boolean hasItemSpace(IInventorySlot slot, ItemStack toOutput, long amount) {
+        if (amount <= 0L) {
+            return true;
+        }
+        if (amount > Integer.MAX_VALUE) {
+            return false;
+        }
+        ItemStack remainder = slot.insertItem(
+            toOutput.copyWithCount((int) amount), Action.SIMULATE, AutomationType.INTERNAL);
+        return remainder.isEmpty();
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static boolean hasChemicalSpace(IChemicalTank tank, ChemicalStack toOutput, long amount) {
+        if (amount <= 0L) {
+            return true;
+        }
+        ChemicalStack request = tank.createStack(toOutput, amount);
+        ChemicalStack remainder = tank.insert(request, Action.SIMULATE, AutomationType.INTERNAL);
+        return remainder.isEmpty();
+    }
+
+    private static boolean hasFluidSpace(IExtendedFluidTank tank, FluidStack toOutput, long amount) {
+        if (amount <= 0L) {
+            return true;
+        }
+        if (amount > Integer.MAX_VALUE) {
+            return false;
+        }
+        FluidStack request = new FluidStack(toOutput, (int) amount);
+        FluidStack remainder = tank.insert(request, Action.SIMULATE, AutomationType.INTERNAL);
+        return remainder.isEmpty();
     }
 
     private static void dimensionworks$insertItems(IInventorySlot slot, ItemStack toOutput, long count) {

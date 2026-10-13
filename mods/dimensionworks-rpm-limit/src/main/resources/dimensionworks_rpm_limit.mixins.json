@@ -19,6 +19,8 @@
     "ae2.CraftingCpuLogicClusterAccessor",
     "BasinOperatingBlockEntityMixin",
     "MillstoneBlockEntityMixin",
+    "SawBlockEntityMixin",
+    "MechanicalPressBlockEntityMixin",
     "PressingBehaviourMixin",
     "BeltPressingCallbacksMixin"
   ],
