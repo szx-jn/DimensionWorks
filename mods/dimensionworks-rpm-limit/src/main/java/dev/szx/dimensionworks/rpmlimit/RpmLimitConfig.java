@@ -19,11 +19,19 @@ public final class RpmLimitConfig {
     public static final ForgeConfigSpec.IntValue OVERSPEED_DEFAULT_SATURATION;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> OVERSPEED_CLASS_WHITELIST;
 
-    public static final ForgeConfigSpec.DoubleValue GEAR_HEART_OUTPUT_FAILURE_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue GEAR_HEART_FREEZE_CHANCE;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_FREEZE_INTERVAL_MIN_SECONDS;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_FREEZE_INTERVAL_MAX_SECONDS;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_FREEZE_DURATION_TICKS;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_CURSED_RPM;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_REPAIRED_RPM;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_CREATE_CAPACITY_CURSED_SU;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_MEK_ORE_OPERATIONS_REPAIRED_PER_SECOND;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_AE_CRAFTING_JOBS_CURSED;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_AE_CRAFTING_JOBS_REPAIRED;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_CURSED_PER_SECOND;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_REPAIRED_PER_SECOND;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_CURSED;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_REPAIRED;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_FINAL_PRODUCTION_CURSED_PER_SECOND;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_FINAL_PRODUCTION_REPAIRED_PER_SECOND;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -68,18 +76,32 @@ public final class RpmLimitConfig {
         builder.pop();
 
         builder.push("gearHeart");
-        GEAR_HEART_OUTPUT_FAILURE_CHANCE = builder
-            .comment("Chance for a cursed gear heart owner's completed machine operation to fail output.")
-            .defineInRange("outputFailureChance", 0.35d, 0.0d, 1.0d);
-        GEAR_HEART_FREEZE_CHANCE = builder
-            .comment("Chance to freeze for the configured duration when a freeze interval elapses.")
-            .defineInRange("freezeChance", 0.75d, 0.0d, 1.0d);
-        GEAR_HEART_FREEZE_INTERVAL_MIN_SECONDS = builder
-            .defineInRange("freezeIntervalMinSeconds", 40, 1, 3600);
-        GEAR_HEART_FREEZE_INTERVAL_MAX_SECONDS = builder
-            .defineInRange("freezeIntervalMaxSeconds", 240, 1, 3600);
-        GEAR_HEART_FREEZE_DURATION_TICKS = builder
-            .defineInRange("freezeDurationTicks", 20, 1, 200);
+        GEAR_HEART_ROTATION_CURSED_RPM = builder
+            .defineInRange("rotationCursedRpm", 32, 1, 10240);
+        GEAR_HEART_ROTATION_REPAIRED_RPM = builder
+            .defineInRange("rotationRepairedRpm", 512, 1, 10240);
+        GEAR_HEART_CREATE_CAPACITY_CURSED_SU = builder
+            .defineInRange("createCapacityCursedSu", 4096, 1, Integer.MAX_VALUE);
+        GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND = builder
+            .defineInRange("mekOreOperationsCursedPerSecond", 8, 1, 1_000_000);
+        GEAR_HEART_MEK_ORE_OPERATIONS_REPAIRED_PER_SECOND = builder
+            .defineInRange("mekOreOperationsRepairedPerSecond", 64, 1, 1_000_000);
+        GEAR_HEART_AE_CRAFTING_JOBS_CURSED = builder
+            .defineInRange("aeCraftingJobsCursed", 1, 1, 1024);
+        GEAR_HEART_AE_CRAFTING_JOBS_REPAIRED = builder
+            .defineInRange("aeCraftingJobsRepaired", 80, 1, 1024);
+        GEAR_HEART_CROSS_PROCESS_CURSED_PER_SECOND = builder
+            .defineInRange("crossProcessItemsCursedPerSecond", 16, 1, 1_000_000);
+        GEAR_HEART_CROSS_PROCESS_REPAIRED_PER_SECOND = builder
+            .defineInRange("crossProcessItemsRepairedPerSecond", 128, 1, 1_000_000);
+        GEAR_HEART_ACTIVE_MACHINES_CURSED = builder
+            .defineInRange("activeMachinesCursed", 8, 1, 100_000);
+        GEAR_HEART_ACTIVE_MACHINES_REPAIRED = builder
+            .defineInRange("activeMachinesRepaired", 64, 1, 100_000);
+        GEAR_HEART_FINAL_PRODUCTION_CURSED_PER_SECOND = builder
+            .defineInRange("finalProductionItemsCursedPerSecond", 16, 1, 1_000_000);
+        GEAR_HEART_FINAL_PRODUCTION_REPAIRED_PER_SECOND = builder
+            .defineInRange("finalProductionItemsRepairedPerSecond", 128, 1, 1_000_000);
         builder.pop();
 
         SPEC = builder.build();
