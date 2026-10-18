@@ -491,6 +491,9 @@ stop_related_processes() {
     targets="$table.targets"; protected="$table.protected"; : > "$targets"; : > "$protected"
     cursor="$"
     while [[ "$cursor" =~ ^[0-9]+$ ]] && [[ "$cursor" -gt 1 ]]; do
+        local parent_line parent_cmd
+        parent_line="$(awk -v id="$cursor" '$1==id {sub(/^[[:space:]]*[0-9]+[[:space:]]+[0-9]+[[:space:]]+/, ""); print; exit}' "$table")"
+        case "$parent_line" in *java*|*javaw*) break ;; esac
         printf '%s\n' "$cursor" >> "$protected"
         cursor="$(awk -v id="$cursor" '$1==id {print $2; exit}' "$table")"
         [[ -n "$cursor" ]] || break
