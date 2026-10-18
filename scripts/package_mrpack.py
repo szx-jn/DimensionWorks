@@ -385,6 +385,7 @@ def build_pack(
 
     for relative in REPO_OVERRIDE_FILES:
         copied += copy_override_file(ROOT / relative, overrides, relative)
+    copied += copy_override_file(ROOT / "VERSION", overrides, Path("VERSION"))
 
     mods_override = overrides / "mods"
     mods_override.mkdir(parents=True, exist_ok=True)
