@@ -628,7 +628,6 @@ exit /b %DW_EXIT%
 ::PS          Fail '--release must be a v-prefixed x.x.x tag'
 ::PS      }
 ::PS 
-::PS      Stop-RelatedProcesses
 ::PS      [IO.Directory]::CreateDirectory($UpdateRoot) | Out-Null
 ::PS      if ((Get-Item -LiteralPath $UpdateRoot -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) {
 ::PS          Fail '.dimensionworks-update must not be a symbolic link'
@@ -637,6 +636,7 @@ exit /b %DW_EXIT%
 ::PS      try { New-Item -ItemType Directory -Path $Lock -ErrorAction Stop | Out-Null }
 ::PS      catch { Fail 'could not acquire the update lock' }
 ::PS      [IO.Directory]::CreateDirectory($Work) | Out-Null
+::PS      Stop-RelatedProcesses
 ::PS 
 ::PS      try {
 ::PS          $Script:CurrentState = Read-State
