@@ -638,9 +638,9 @@ exit /b %DW_EXIT%
 ::PS      try { New-Item -ItemType Directory -Path $Lock -ErrorAction Stop | Out-Null }
 ::PS      catch { Fail 'could not acquire the update lock' }
 ::PS      [IO.Directory]::CreateDirectory($Work) | Out-Null
-::PS      Stop-RelatedProcesses
 ::PS 
 ::PS      try {
+::PS          Stop-RelatedProcesses
 ::PS          $Script:CurrentState = Read-State
 ::PS          if (-not $Script:CurrentState) { $Script:CurrentState = New-BootstrapState }
 ::PS          $oldVersion = if ($Script:CurrentState) { $Script:CurrentState.Version } else { 'first installation' }
