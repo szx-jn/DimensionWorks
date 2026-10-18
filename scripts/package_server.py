@@ -407,6 +407,7 @@ bash start.sh
 
 def validate_server_tree(staging: Path, expected_mods: int) -> None:
     required_paths = (
+        Path("VERSION"),
         Path("start.sh"),
         Path("start.bat"),
         Path("run.sh"),
