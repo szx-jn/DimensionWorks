@@ -346,6 +346,7 @@ def install_forge(staging: Path, cache_dir: Path, java: str, *, verbose: bool) -
 
 
 def write_server_files(staging: Path, *, pack_version_value: str, servers_mods: int) -> None:
+    (staging / "VERSION").write_text(f"{pack_version_value}\n", encoding="utf-8")
     (staging / "server.properties").write_text(SERVER_PROPERTIES, encoding="utf-8")
     (staging / "eula.txt").write_text(
         "# Set eula=true only after you agree to the Minecraft EULA:\n"
