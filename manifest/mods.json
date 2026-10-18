@@ -1388,6 +1388,16 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/net-music"
+    },
+    {
+      "id": "dimensionworks_version_gate",
+      "name": "DimensionWorks Version Gate",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-version-gate",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks"
     }
   ]
 }
