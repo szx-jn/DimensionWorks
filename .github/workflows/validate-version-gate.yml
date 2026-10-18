@@ -1,0 +1,44 @@
+name: Validate DimensionWorks version gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature/version-gate-and-safe-updater
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+
+      - name: Validate updater shell syntax
+        run: |
+          bash -n release-updaters/update-dimensionworks-client.sh
+          bash -n release-updaters/update-dimensionworks-server.sh
+
+      - name: Validate Python and JSON
+        run: |
+          python3 -m json.tool manifest/mods.json >/dev/null
+          python3 -m py_compile scripts/package_mrpack.py scripts/package_server.py scripts/pack_manifest.py
+          python3 -m unittest discover -s release-updaters/tests -v
+
+      - name: Build version gate mod
+        working-directory: mods/dimensionworks-version-gate
+        run: gradle build --no-daemon
