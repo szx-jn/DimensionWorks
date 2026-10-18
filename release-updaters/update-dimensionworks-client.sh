@@ -408,10 +408,48 @@ download_to_stdout() {
     fi
 }
 
+stop_related_processes() {
+    printf '[第零步] 检查并关闭当前整合包相关进程...\n' >&2
+    local table targets protected changed pid ppid cmd cursor remaining=0
+    table="$(mktemp "${TMPDIR:-/tmp}/dw-processes.XXXXXX")" || die "无法创建进程检查临时文件"
+    ps -axo pid=,ppid=,command= > "$table" || { rm -f "$table"; die "无法枚举进程"; }
+    targets="$table.targets"; protected="$table.protected"; : > "$targets"; : > "$protected"
+    cursor="$"
+    while [[ "$cursor" =~ ^[0-9]+$ ]] && [[ "$cursor" -gt 1 ]]; do
+        printf '%s\n' "$cursor" >> "$protected"
+        cursor="$(awk -v id="$cursor" '$1==id {print $2; exit}' "$table")"
+        [[ -n "$cursor" ]] || break
+    done
+    while read -r pid ppid cmd; do
+        [[ "$pid" =~ ^[0-9]+$ ]] || continue
+        grep -qx "$pid" "$protected" && continue
+        case "$cmd" in *java*|*minecraft*|*Minecraft*) [[ "$cmd" == *"$ROOT_DIR"* ]] && printf '%s\n' "$pid" >> "$targets" ;; esac
+    done < "$table"
+    changed=1
+    while [[ "$changed" -eq 1 ]]; do
+        changed=0
+        while read -r pid ppid cmd; do
+            [[ "$pid" =~ ^[0-9]+$ ]] || continue
+            grep -qx "$pid" "$protected" && continue
+            grep -qx "$pid" "$targets" && continue
+            if grep -qx "$ppid" "$targets"; then printf '%s\n' "$pid" >> "$targets"; changed=1; fi
+        done < "$table"
+    done
+    if [[ ! -s "$targets" ]]; then printf '[第零步] 未发现可确认属于当前目录的 Minecraft/Java 进程。\n' >&2; rm -f "$table" "$targets" "$protected"; return; fi
+    while read -r pid; do kill -TERM "$pid" 2>/dev/null || true; done < "$targets"
+    sleep 2
+    while read -r pid; do kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true; done < "$targets"
+    while read -r pid; do kill -0 "$pid" 2>/dev/null && remaining=1 || true; done < "$targets"
+    rm -f "$table" "$targets" "$protected"
+    [[ "$remaining" -eq 0 ]] || die "仍有相关进程无法关闭，停止更新"
+    printf '[第零步] 相关进程已关闭。\n' >&2
+}
+
 main() {
     parse_args "$@"
     ROOT_DIR="$(cd "$(dirname "$0")" && pwd -P)" || die "无法确定实例根目录"
     cd "$ROOT_DIR" || die "无法进入实例根目录"
+    stop_related_processes
     [[ -d "$ROOT_DIR" ]] || die "实例根目录不存在"
     mkdir -p "$UPDATE_DIR" || die "无法创建更新目录"
     mkdir "$LOCK_DIR" 2>/dev/null || die "已有更新任务正在运行"
