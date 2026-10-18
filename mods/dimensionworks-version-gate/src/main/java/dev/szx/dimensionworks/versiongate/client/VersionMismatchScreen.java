@@ -30,7 +30,7 @@ public final class VersionMismatchScreen extends Screen {
         int gap = 8;
         int left = width / 2 - buttonWidth - gap / 2;
         int right = width / 2 + gap / 2;
-        int buttonY = height / 2 + 48;
+        int buttonY = height / 2 + 64;
         addRenderableWidget(Button.builder(Component.literal("立即更新"), button -> launchUpdater())
                 .bounds(left, buttonY, buttonWidth, 20).build());
         addRenderableWidget(Button.builder(Component.literal("暂不更新"), button -> {
@@ -52,7 +52,7 @@ public final class VersionMismatchScreen extends Screen {
         graphics.drawCenteredString(font, Component.literal("服务器版本： " + serverVersion), width / 2, top + 42, 0xFFFFFFFF);
         graphics.drawCenteredString(font, Component.literal("你的版本： " + localVersion), width / 2, top + 60, 0xFFFFFFFF);
         if (!status.isEmpty()) {
-            graphics.drawCenteredString(font, Component.literal(status), width / 2, top + boxHeight + 10, 0xFFFFAA00);
+            graphics.drawCenteredString(font, Component.literal(status), width / 2, top + boxHeight + 3, 0xFFFFAA00);
         }
         super.render(graphics, mouseX, mouseY, partialTick);
     }
