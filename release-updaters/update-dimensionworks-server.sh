@@ -501,7 +501,19 @@ stop_related_processes() {
     while read -r pid ppid cmd; do
         [[ "$pid" =~ ^[0-9]+$ ]] || continue
         grep -qx "$pid" "$protected" && continue
-        case "$cmd" in *java*|*minecraft*|*Minecraft*) [[ "$cmd" == *"$ROOT_DIR"* ]] && printf '%s\n' "$pid" >> "$targets" ;; esac
+        case "$cmd" in
+            *java*|*minecraft*|*Minecraft*)
+                if [[ "$cmd" == *"$ROOT_DIR"* ]]; then
+                    printf '%s\n' "$pid" >> "$targets"
+                elif [[ "$KIND" == "server" && "$cmd" == *"@libraries"* && "$cmd" == *"forge"* && "$cmd" == *"nogui"* ]] && command -v jcmd >/dev/null 2>&1; then
+                    local working
+                    working="$(jcmd "$pid" VM.system_properties 2>/dev/null | sed -n 's/^user.dir=//p' | head -n 1)"
+                    if [[ -n "$working" && "$(cd "$working" 2>/dev/null && pwd -P)" == "$ROOT_DIR" ]]; then
+                        printf '%s\n' "$pid" >> "$targets"
+                    fi
+                fi
+                ;;
+        esac
     done < "$table"
     changed=1
     while [[ "$changed" -eq 1 ]]; do
