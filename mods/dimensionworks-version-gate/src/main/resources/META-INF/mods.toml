@@ -1,0 +1,21 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="dimensionworks_version_gate"
+version="0.1.0"
+displayName="DimensionWorks Version Gate"
+authors="szx-jn"
+description='''Checks the DimensionWorks pack version during the login handshake and offers an in-game update screen.'''
+[[dependencies.dimensionworks_version_gate]]
+modId="forge"
+mandatory=true
+versionRange="[47.0,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.dimensionworks_version_gate]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
