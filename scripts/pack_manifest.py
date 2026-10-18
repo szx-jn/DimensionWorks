@@ -302,6 +302,8 @@ def make_client_manifest(
                 continue
             source = path.relative_to(staging_root).as_posix()
             target = path.relative_to(overrides_root).as_posix()
+            if target == "VERSION":
+                continue  # The updater manages VERSION transactionally as metadata.
             entries.append(
                 ManifestEntry(
                     action="archive",
@@ -339,8 +341,8 @@ def make_server_manifest(
         if not path.is_file():
             continue
         relative = path.relative_to(staging_root)
-        if relative.as_posix() == MANIFEST_NAME:
-            continue
+        if relative.as_posix() in (MANIFEST_NAME, "VERSION"):
+            continue  # VERSION is managed separately by the updater transaction.
         source = relative.as_posix()
         entries.append(
             ManifestEntry(
