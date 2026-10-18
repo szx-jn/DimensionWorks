@@ -6,6 +6,8 @@ import dev.szx.dimensionworks.versiongate.client.ClientVersionGate;
 import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -50,7 +52,8 @@ public final class VersionGateNetwork {
                 return;
             }
             if (local.compareTo(server) < 0) {
-                ClientVersionGate.setMismatch(localText, packet.serverVersion());
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                        () -> () -> ClientVersionGate.setMismatch(localText, packet.serverVersion()));
                 context.getNetworkManager().disconnect(Component.literal("DW_VERSION_TOO_OLD"));
             }
         });
