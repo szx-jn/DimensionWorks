@@ -118,14 +118,14 @@ START_SH = f"""\
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "${{BASH_SOURCE[0]}}")"
-exec java @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-{FORGE_VERSION}/unix_args.txt nogui "$@"
+exec java "-Ddimensionworks.instanceDir=$PWD" @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-{FORGE_VERSION}/unix_args.txt nogui "$@"
 """
 
 START_BAT = f"""\
 @echo off
 setlocal
 cd /d "%~dp0"
-java @user_jvm_args.txt @libraries\\net\\minecraftforge\\forge\\1.20.1-{FORGE_VERSION}\\win_args.txt nogui %*
+java "-Ddimensionworks.instanceDir=%CD%" @user_jvm_args.txt @libraries\\net\\minecraftforge\\forge\\1.20.1-{FORGE_VERSION}\\win_args.txt nogui %*
 """
 
 
