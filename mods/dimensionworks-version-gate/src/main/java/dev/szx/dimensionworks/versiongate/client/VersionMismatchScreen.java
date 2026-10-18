@@ -62,9 +62,13 @@ public final class VersionMismatchScreen extends Screen {
         status = "正在准备更新器...";
         CompletableFuture.runAsync(() -> {
             try {
-                Path updater = findUpdater(gameDir);
-                if (updater == null) {
+                Path updater;
+                try {
+                    // Prefer the updater shipped with the server's exact release.
                     updater = downloadUpdater(gameDir);
+                } catch (IOException downloadFailure) {
+                    updater = findUpdater(gameDir);
+                    if (updater == null) throw downloadFailure;
                 }
                 String tag = "v" + serverVersion;
                 ProcessBuilder process;
