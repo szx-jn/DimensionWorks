@@ -206,6 +206,9 @@ class MakeManifestTest(unittest.TestCase):
             index_data = b'{"formatVersion": 1}\n'
             override_data = b"client-config\n"
             (staging / "modrinth.index.json").write_bytes(index_data)
+            version_file = staging / "overrides" / "VERSION"
+            version_file.parent.mkdir(parents=True, exist_ok=True)
+            version_file.write_text("1.2.3\n", encoding="utf-8")
             override = staging / "overrides" / "config" / "example.cfg"
             override.parent.mkdir(parents=True)
             override.write_bytes(override_data)
@@ -273,6 +276,7 @@ class MakeManifestTest(unittest.TestCase):
                 "self",
                 encoding="utf-8",
             )
+            (staging / "VERSION").write_text("1.2.3\n", encoding="utf-8")
 
             manifest = pack_manifest.make_server_manifest(
                 staging,
