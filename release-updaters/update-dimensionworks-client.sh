@@ -449,7 +449,6 @@ main() {
     parse_args "$@"
     ROOT_DIR="$(cd "$(dirname "$0")" && pwd -P)" || die "无法确定实例根目录"
     cd "$ROOT_DIR" || die "无法进入实例根目录"
-    stop_related_processes
     [[ -d "$ROOT_DIR" ]] || die "实例根目录不存在"
     mkdir -p "$UPDATE_DIR" || die "无法创建更新目录"
     mkdir "$LOCK_DIR" 2>/dev/null || die "已有更新任务正在运行"
@@ -459,6 +458,7 @@ main() {
     PACKAGE_ROOT="$WORK_DIR/package"
     TARGET_MANIFEST="$WORK_DIR/target.tsv"
     mkdir "$PACKAGE_ROOT"
+    stop_related_processes
 
     resolve_sources
     if [[ -n "$MANIFEST_URL" ]]; then
