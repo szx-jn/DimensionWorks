@@ -1,8 +1,11 @@
 package dev.szx.dimensionworks.versiongate.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -56,25 +59,47 @@ public final class VersionMismatchScreen extends Screen {
 
     private void launchUpdater() {
         Path gameDir = FMLPaths.GAMEDIR.get().toAbsolutePath().normalize();
-        Path updater = findUpdater(gameDir);
-        if (updater == null) {
-            status = "未找到更新脚本，请将客户端更新脚本放入游戏目录。";
-            return;
-        }
-
-        String tag = "v" + serverVersion;
-        try {
-            ProcessBuilder process;
-            if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                process = new ProcessBuilder("cmd.exe", "/c", "start", "\"\"", "\"" + updater + "\"",
-                        "--release", tag);
-            } else {
-                process = new ProcessBuilder("bash", updater.toString(), "--release", tag);
+        status = "正在准备更新器...";
+        CompletableFuture.runAsync(() -> {
+            try {
+                Path updater = findUpdater(gameDir);
+                if (updater == null) {
+                    updater = downloadUpdater(gameDir);
+                }
+                String tag = "v" + serverVersion;
+                ProcessBuilder process;
+                if (isWindows()) {
+                    process = new ProcessBuilder("cmd.exe", "/c", "start", "\"\"", "\"" + updater + "\"",
+                            "--release", tag);
+                } else {
+                    process = new ProcessBuilder("bash", updater.toString(), "--release", tag);
+                }
+                process.directory(gameDir.toFile()).start();
+                Minecraft.getInstance().execute(() -> Minecraft.getInstance().stop());
+            } catch (IOException exception) {
+                Minecraft.getInstance().execute(() -> status = "启动更新失败：" + exception.getMessage());
             }
-            process.directory(gameDir.toFile()).start();
-            Minecraft.getInstance().stop();
+        });
+    }
+
+    private Path downloadUpdater(Path gameDir) throws IOException {
+        String extension = isWindows() ? "bat" : "sh";
+        String filename = "update-dimensionworks-client." + extension;
+        String url = "https://github.com/szx-jn/DimensionWorks/releases/download/v"
+                + serverVersion + "/" + filename;
+        Path destination = gameDir.resolve(filename);
+        Path temporary = gameDir.resolve(filename + ".download");
+        try (InputStream input = java.net.URI.create(url).toURL().openStream()) {
+            Files.copy(input, temporary, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exception) {
-            status = "无法启动更新脚本：" + exception.getMessage();
+            Files.deleteIfExists(temporary);
+            throw new IOException("无法从对应版本下载更新脚本", exception);
+        }
+        try {
+            return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+        } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+            return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
