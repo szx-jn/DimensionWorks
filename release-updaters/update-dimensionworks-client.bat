@@ -566,9 +566,11 @@ exit /b %DW_EXIT%
 ::PS     $all = @(Get-CimInstance Win32_Process -ErrorAction Stop)
 ::PS     $protected = [Collections.Generic.HashSet[int]]::new()
 ::PS     $cursor = $PID
-::PS     while ($cursor -gt 0 -and $protected.Add([int]$cursor)) {
+::PS     while ($cursor -gt 0) {
 ::PS         $parent = $all | Where-Object { $_.ProcessId -eq $cursor } | Select-Object -First 1
 ::PS         if (-not $parent) { break }
+::PS         if ($parent.Name -in @('java.exe','javaw.exe')) { break }
+::PS         if (-not $protected.Add([int]$cursor)) { break }
 ::PS         $cursor = [int]$parent.ParentProcessId
 ::PS     }
 ::PS     $root = [IO.Path]::GetFullPath($Root).TrimEnd('\')
