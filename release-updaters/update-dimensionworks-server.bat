@@ -579,7 +579,19 @@ exit /b %DW_EXIT%
 ::PS         if ($protected.Contains([int]$p.ProcessId)) { continue }
 ::PS         if ($p.Name -notin @('java.exe','javaw.exe')) { continue }
 ::PS         $cmd = [string]$p.CommandLine
-::PS         if ($cmd -and $cmd.IndexOf($root, [StringComparison]::OrdinalIgnoreCase) -ge 0) { [void]$targets.Add([int]$p.ProcessId) }
+::PS         if ($cmd -and $cmd.IndexOf($root, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+::PS             [void]$targets.Add([int]$p.ProcessId)
+::PS         } elseif ($Kind -eq 'server' -and $cmd -match '@libraries[\\/].*forge.*(win_args|unix_args)\\.txt' -and $p.ExecutablePath) {
+::PS             $jcmd = Join-Path ([IO.Path]::GetDirectoryName([string]$p.ExecutablePath)) 'jcmd.exe'
+::PS             if ([IO.File]::Exists($jcmd)) {
+::PS                 $properties = & $jcmd $p.ProcessId 'VM.system_properties' 2>$null
+::PS                 $working = ($properties | Where-Object { $_ -match '^user\\.dir=' } | Select-Object -First 1) -replace '^user\\.dir=', ''
+::PS                 if ($working) {
+::PS                     try { $working = [IO.Path]::GetFullPath($working).TrimEnd('\\') } catch { $working = '' }
+::PS                     if ($working -and $working.Equals($root, [StringComparison]::OrdinalIgnoreCase)) { [void]$targets.Add([int]$p.ProcessId) }
+::PS                 }
+::PS             }
+::PS         }
 ::PS     }
 ::PS     $changed = $true
 ::PS     while ($changed) {
