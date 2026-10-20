@@ -112,7 +112,11 @@ public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInpu
             }
             JsonObject resultJson = GsonHelper.getAsJsonObject(json, "result");
             ResourceLocation itemId = new ResourceLocation(GsonHelper.getAsString(resultJson, "item"));
-            ItemStack result = new ItemStack(ForgeRegistries.ITEMS.getValue(itemId));
+            net.minecraft.world.item.Item outputItem = ForgeRegistries.ITEMS.getValue(itemId);
+            if (outputItem == null || outputItem == net.minecraft.world.item.Items.AIR) {
+                throw new IllegalArgumentException("Unknown output item " + itemId);
+            }
+            ItemStack result = new ItemStack(outputItem);
             result.setCount(Math.max(1, GsonHelper.getAsInt(resultJson, "count", 1)));
             String moduleName = GsonHelper.getAsString(json, "required_module", "");
             FactoryModule module = null;
@@ -122,6 +126,9 @@ public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInpu
                         module = candidate;
                         break;
                     }
+                }
+                if (module == null) {
+                    throw new IllegalArgumentException("Unknown required module " + moduleName);
                 }
             }
             return new FluidStabilizationRecipe(
@@ -135,11 +142,24 @@ public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInpu
 
         @Override
         public FluidStabilizationRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-            net.minecraft.world.level.material.Fluid fluid =
-                ForgeRegistries.FLUIDS.getValue(buffer.readResourceLocation());
+            ResourceLocation fluidId = buffer.readResourceLocation();
+            net.minecraft.world.level.material.Fluid fluid = ForgeRegistries.FLUIDS.getValue(fluidId);
+            if (fluid == null || !CFFluids.isFactoryFluid(new FluidStack(fluid, 1))) {
+                throw new IllegalArgumentException("Unknown factory fluid " + fluidId);
+            }
             int amount = buffer.readVarInt();
             ItemStack result = buffer.readItem();
-            FactoryModule module = buffer.readBoolean() ? FactoryModule.values()[buffer.readVarInt()] : null;
+            FactoryModule module = null;
+            if (buffer.readBoolean()) {
+                int moduleIndex = buffer.readVarInt();
+                if (moduleIndex < 0 || moduleIndex >= FactoryModule.values().length) {
+                    throw new IllegalArgumentException("Unknown required module index " + moduleIndex);
+                }
+                module = FactoryModule.values()[moduleIndex];
+            }
+            if (result.isEmpty()) {
+                throw new IllegalArgumentException("Invalid fluid stabilization result item");
+            }
             return new FluidStabilizationRecipe(id, fluid, amount, result, module);
         }
 

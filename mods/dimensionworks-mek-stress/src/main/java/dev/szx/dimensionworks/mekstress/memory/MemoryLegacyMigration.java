@@ -96,8 +96,9 @@ public final class MemoryLegacyMigration {
             return;
         }
         for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-            if (hasItemStorage(blockEntity)) {
-                enqueue(GlobalPos.of(level.dimension(), blockEntity.getBlockPos().immutable()));
+            if (hasItemStorage(blockEntity)
+                && !enqueue(GlobalPos.of(level.dimension(), blockEntity.getBlockPos().immutable()))) {
+                clearBlockEntity(blockEntity);
             }
         }
     }
@@ -106,7 +107,10 @@ public final class MemoryLegacyMigration {
         if (event.getLevel().isClientSide || !hasItemStorage(event.getEntity())) {
             return;
         }
-        enqueue(new EntityRef(event.getLevel().dimension(), event.getEntity().getUUID()));
+        Entity entity = event.getEntity();
+        if (!enqueue(new EntityRef(event.getLevel().dimension(), entity.getUUID()))) {
+            clearEntity(entity);
+        }
     }
 
     public static void onEntityLeave(EntityLeaveLevelEvent event) {
@@ -278,21 +282,31 @@ public final class MemoryLegacyMigration {
             && provider.getCapability(ForgeCapabilities.ITEM_HANDLER, null).isPresent();
     }
 
-    private static void enqueue(GlobalPos pos) {
+    private static boolean enqueue(GlobalPos pos) {
         synchronized (QUEUE_LOCK) {
-            if (BLOCK_QUEUE.size() + ENTITY_QUEUE.size() >= MAX_QUEUED_INVENTORIES || !QUEUED_BLOCKS.add(pos)) {
-                return;
+            if (QUEUED_BLOCKS.contains(pos)) {
+                return true;
             }
+            if (BLOCK_QUEUE.size() + ENTITY_QUEUE.size() >= MAX_QUEUED_INVENTORIES) {
+                return false;
+            }
+            QUEUED_BLOCKS.add(pos);
             BLOCK_QUEUE.addLast(pos);
+            return true;
         }
     }
 
-    private static void enqueue(EntityRef ref) {
+    private static boolean enqueue(EntityRef ref) {
         synchronized (QUEUE_LOCK) {
-            if (BLOCK_QUEUE.size() + ENTITY_QUEUE.size() >= MAX_QUEUED_INVENTORIES || !QUEUED_ENTITIES.add(ref)) {
-                return;
+            if (QUEUED_ENTITIES.contains(ref)) {
+                return true;
             }
+            if (BLOCK_QUEUE.size() + ENTITY_QUEUE.size() >= MAX_QUEUED_INVENTORIES) {
+                return false;
+            }
+            QUEUED_ENTITIES.add(ref);
             ENTITY_QUEUE.addLast(ref);
+            return true;
         }
     }
 

@@ -3,6 +3,7 @@ package dev.szx.dimensionworks.cavefactory.blockentity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import dev.szx.dimensionworks.cavefactory.CaveFactoryConfig;
 import dev.szx.dimensionworks.cavefactory.block.FactoryControllerBlock;
+import dev.szx.dimensionworks.cavefactory.logic.AtomicOutputPlanner;
 import dev.szx.dimensionworks.cavefactory.logic.MachineCapability;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import dev.szx.dimensionworks.cavefactory.logic.FactoryPhase;
@@ -244,27 +245,8 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
     }
 
     private boolean canFitOutputs(CaveProcessingRecipe recipe) {
-        ItemStack[] simulated = new ItemStack[outputItems().getSlots()];
-        for (int slot = 0; slot < simulated.length; slot++) {
-            simulated[slot] = outputItems().getStackInSlot(slot).copy();
-        }
-        for (ItemStack output : recipe.itemOutputs()) {
-            ItemStack remaining = output.copy();
-            for (int slot = 0; slot < simulated.length && !remaining.isEmpty(); slot++) {
-                ItemStack existing = simulated[slot];
-                if (existing.isEmpty()) {
-                    simulated[slot] = remaining.copy();
-                    remaining = ItemStack.EMPTY;
-                } else if (ItemStack.isSameItemSameTags(existing, remaining)) {
-                    int room = existing.getMaxStackSize() - existing.getCount();
-                    int moved = Math.min(room, remaining.getCount());
-                    existing.grow(moved);
-                    remaining.shrink(moved);
-                }
-            }
-            if (!remaining.isEmpty()) {
-                return false;
-            }
+        if (!AtomicOutputPlanner.canFitOutputs(outputItems(), recipe.itemOutputs())) {
+            return false;
         }
         FluidStack fluidOutput = recipe.fluidOutput();
         if (!fluidOutput.isEmpty()) {
@@ -273,7 +255,7 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
                 return false;
             }
             int amount = current.isEmpty() ? 0 : current.getAmount();
-            if (amount + fluidOutput.getAmount() > outputTank().getCapacity()) {
+            if ((long) amount + fluidOutput.getAmount() > outputTank().getCapacity()) {
                 return false;
             }
         }

@@ -42,15 +42,17 @@ public final class TransferController {
     }
 
     private static boolean enterTransfer(ServerPlayer player) {
-        ReturnPointSavedData data = ReturnPointSavedData.get(player.server.overworld());
-        data.put(player.getUUID(), new ReturnPoint(
+        ReturnPoint point = new ReturnPoint(
                 player.level().dimension().location(),
                 player.getX(),
                 player.getY(),
                 player.getZ(),
                 player.getYRot(),
-                player.getXRot()));
-        TerritoryManager.sendToTransfer(player);
+                player.getXRot());
+        if (!TerritoryManager.sendToTransfer(player)) {
+            return false;
+        }
+        ReturnPointSavedData.get(player.server.overworld()).put(player.getUUID(), point);
         return true;
     }
 

@@ -5,13 +5,7 @@ import dev.szx.dimensionworks.cavefactory.logic.AmpouleState;
 import net.minecraft.world.item.ItemStack;
 
 public final class AmpouleExpiry {
-    public record Settlement(ItemStack stack, ItemStack residue, boolean expired) {
-        public AmpouleSettlementResult asResult() {
-            return new AmpouleSettlementResult(stack, residue, expired);
-        }
-    }
-
-    public record AmpouleSettlementResult(ItemStack stack, ItemStack residue, boolean expired) {}
+    public record Settlement(ItemStack stack, ItemStack residue, boolean expired) {}
 
     private AmpouleExpiry() {}
 

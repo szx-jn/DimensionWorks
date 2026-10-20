@@ -2,6 +2,9 @@ package dev.szx.dimensionworks.versiongate.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -62,14 +65,7 @@ public final class VersionMismatchScreen extends Screen {
         status = "正在准备更新器...";
         CompletableFuture.runAsync(() -> {
             try {
-                Path updater;
-                try {
-                    // Prefer the updater shipped with the server's exact release.
-                    updater = downloadUpdater(gameDir);
-                } catch (IOException downloadFailure) {
-                    updater = findUpdater(gameDir);
-                    if (updater == null) throw downloadFailure;
-                }
+                Path updater = downloadUpdater(gameDir);
                 String tag = "v" + serverVersion;
                 ProcessBuilder process;
                 if (isWindows()) {
@@ -89,30 +85,67 @@ public final class VersionMismatchScreen extends Screen {
     private Path downloadUpdater(Path gameDir) throws IOException {
         String extension = isWindows() ? "bat" : "sh";
         String filename = "update-dimensionworks-client." + extension;
-        String url = "https://github.com/szx-jn/DimensionWorks/releases/download/v"
-                + serverVersion + "/" + filename;
+        String baseUrl = "https://github.com/szx-jn/DimensionWorks/releases/download/v"
+                + serverVersion + "/";
         Path destination = gameDir.resolve(filename);
         Path temporary = gameDir.resolve(filename + ".download");
-        try (InputStream input = java.net.URI.create(url).toURL().openStream()) {
-            Files.copy(input, temporary, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException exception) {
-            Files.deleteIfExists(temporary);
-            throw new IOException("无法从对应版本下载更新脚本", exception);
-        }
+        Path checksums = gameDir.resolve("SHA256SUMS." + serverVersion + ".download");
         try {
-            return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-        } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
-            return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
+            download(baseUrl + "SHA256SUMS", checksums);
+            download(baseUrl + filename, temporary);
+            String expected = expectedChecksum(Files.readString(checksums), filename);
+            String actual = sha256(temporary);
+            if (!expected.equalsIgnoreCase(actual)) {
+                throw new IOException("更新脚本 SHA-256 校验失败，已拒绝执行。");
+            }
+            try {
+                return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+                return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+            Files.deleteIfExists(checksums);
         }
     }
 
-    private Path findUpdater(Path gameDir) {
-        Path rootScript = gameDir.resolve("update-dimensionworks-client." + (isWindows() ? "bat" : "sh"));
-        if (Files.isRegularFile(rootScript)) return rootScript;
-        Path nestedScript = gameDir.resolve("release-updaters")
-                .resolve("update-dimensionworks-client." + (isWindows() ? "bat" : "sh"));
-        return Files.isRegularFile(nestedScript) ? nestedScript : null;
+    private static void download(String url, Path destination) throws IOException {
+        java.net.URLConnection connection = java.net.URI.create(url).toURL().openConnection();
+        connection.setConnectTimeout(10_000);
+        connection.setReadTimeout(20_000);
+        try (InputStream input = connection.getInputStream()) {
+            Files.copy(input, destination, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException exception) {
+            Files.deleteIfExists(destination);
+            throw exception;
+        }
+    }
+
+    private static String expectedChecksum(String checksums, String filename) throws IOException {
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                "(?m)^([0-9a-fA-F]{64})\\s+\\*?" + java.util.regex.Pattern.quote(filename) + "$");
+        java.util.regex.Matcher matcher = pattern.matcher(checksums);
+        if (!matcher.find()) {
+            throw new IOException("SHA256SUMS 中没有对应更新脚本的校验值。");
+        }
+        return matcher.group(1);
+    }
+
+    private static String sha256(Path file) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream input = new BufferedInputStream(Files.newInputStream(file))) {
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = input.read(buffer)) != -1) {
+                    digest.update(buffer, 0, read);
+                }
+            }
+            return java.util.HexFormat.of().formatHex(digest.digest());
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("SHA-256 is not available", impossible);
+        }
     }
 
     private boolean isWindows() {

@@ -61,11 +61,21 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     private static final String OUTPUT_FLUID_KEY = "OutputFluid";
     private static final String PORT_MODES_KEY = "PortModes";
 
-    private final ItemStackHandler inputItems = new ItemStackHandler(4);
+    private final ItemStackHandler inputItems = new ItemStackHandler(4) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            onStorageContentsChanged();
+        }
+    };
     private final ItemStackHandler outputItems = new ItemStackHandler(4) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             return false;
+        }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            onStorageContentsChanged();
         }
     };
     private final ItemStackHandler residue = new ItemStackHandler(1) {
@@ -73,17 +83,32 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         public boolean isItemValid(int slot, ItemStack stack) {
             return false;
         }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            onStorageContentsChanged();
+        }
     };
     private final ItemStackHandler ampouleInput = new ItemStackHandler(1) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             return stack.getItem() instanceof FluidAmpouleItem ampoule && !ampoule.hasStoredFluid(stack);
         }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            onStorageContentsChanged();
+        }
     };
     private final ItemStackHandler ampouleOutput = new ItemStackHandler(1) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             return false;
+        }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            onStorageContentsChanged();
         }
     };
     private final ItemStackHandler modules = new ItemStackHandler(2) {
@@ -100,8 +125,18 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
             onModuleSlotsChanged();
         }
     };
-    private final FluidTank inputTank = new FluidTank(4_000);
-    private final FluidTank outputTank = new FluidTank(8_000);
+    private final FluidTank inputTank = new FluidTank(4_000) {
+        @Override
+        protected void onContentsChanged() {
+            onStorageContentsChanged();
+        }
+    };
+    private final FluidTank outputTank = new FluidTank(8_000) {
+        @Override
+        protected void onContentsChanged() {
+            onStorageContentsChanged();
+        }
+    };
     private final LazyOptional<IItemHandler> inputItemCapability = LazyOptional.of(() -> inputItems);
     private final LazyOptional<IItemHandler> outputItemCapability = LazyOptional.of(
         () -> new FactoryOutputItemHandler(outputItems, residue, ampouleOutput)
@@ -169,6 +204,11 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         redstoneLocked = level.hasNeighborSignal(worldPosition);
         expireAmpoulesInternal();
         processServerTick();
+    }
+
+    protected void onStorageContentsChanged() {
+        setChanged();
+        sendData();
     }
 
     protected abstract void processServerTick();

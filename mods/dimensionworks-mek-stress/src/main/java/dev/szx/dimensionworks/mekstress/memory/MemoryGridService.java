@@ -130,11 +130,7 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
         if (!tooMany) {
             for (MemoryDriveBlockEntity drive : drives) {
                 long driveCapacity = drive.capacitySu();
-                long driveStored = Math.min(drive.store().storedSu(), driveCapacity);
-                if (drive.store().storedSu() != driveStored) {
-                    drive.store().restore(driveStored);
-                    drive.setChanged();
-                }
+                long driveStored = drive.store().storedSu();
                 capacity = saturatedAdd(capacity, driveCapacity);
                 stored = saturatedAdd(stored, driveStored);
                 bandwidth = saturatedAdd(bandwidth, drive.bandwidthRpm());
@@ -285,7 +281,6 @@ public final class MemoryGridService implements IMemoryGridService, IStorageProv
         } else {
             stored = Math.max(0L, stored + delta);
         }
-        stored = Math.min(stored, lastSnapshot.capacitySu());
         long demandSu = lastSnapshot.demandSuPerTick();
         long demandRpm = lastSnapshot.demandRpm();
         boolean hasDemand = demandSu > 0L && demandRpm > 0L;

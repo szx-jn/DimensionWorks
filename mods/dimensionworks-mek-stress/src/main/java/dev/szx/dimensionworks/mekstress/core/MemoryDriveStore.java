@@ -33,7 +33,6 @@ public final class MemoryDriveStore {
         this.cardCount = Math.max(0, Math.min(cardCount, tier.slotsPerDrive()));
         this.capacitySu = Math.max(0L, capacitySu);
         this.bandwidthRpm = Math.max(0L, bandwidthRpm);
-        truncateToCapacity();
     }
 
     public long capacitySu() {
@@ -66,18 +65,7 @@ public final class MemoryDriveStore {
         return extracted;
     }
 
-    public long truncateToCapacity() {
-        long capacity = capacitySu();
-        if (storedSu <= capacity) {
-            return 0L;
-        }
-        long removed = storedSu - capacity;
-        storedSu = capacity;
-        return removed;
-    }
-
     public void restore(long amount) {
         storedSu = Math.max(0L, amount);
-        truncateToCapacity();
     }
 }

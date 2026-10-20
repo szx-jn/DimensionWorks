@@ -24,16 +24,17 @@ public final class TerritoryManager {
      * Used by the {@code /dwtransfer} command. The plot is claimed and floored before the
      * teleport happens, so the player never lands in unclaimed void.
      */
-    public static void sendToTransfer(ServerPlayer player) {
+    public static boolean sendToTransfer(ServerPlayer player) {
         ServerLevel transfer = player.server.getLevel(WDKeys.TRANSFER_LEVEL);
         if (transfer == null) {
             player.displayClientMessage(
                     Component.literal("The dw:transfer dimension is not loaded on this server."), false);
-            return;
+            return false;
         }
 
         Territory territory = prepare(player, transfer);
         teleportInto(player, transfer, territory);
+        return player.serverLevel() == transfer;
     }
 
     /** Called whenever a player arrives in the transfer dimension by any other route. */

@@ -49,6 +49,9 @@ public final class VersionGateNetwork {
             if (server.compareTo(PackVersion.UNKNOWN) <= 0) {
                 DimensionWorksVersionGate.LOGGER.warn(
                         "Server sent an invalid DimensionWorks version: {}", packet.serverVersion());
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                        () -> () -> ClientVersionGate.setMismatch(localText, packet.serverVersion()));
+                context.getNetworkManager().disconnect(Component.literal("DW_SERVER_VERSION_INVALID"));
                 return;
             }
             if (local.compareTo(server) < 0) {
