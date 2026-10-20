@@ -1,8 +1,5 @@
 package dev.szx.dimensionworks.cavefactory.logic;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraftforge.items.ItemStackHandler;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AtomicOutputPlannerTest {
-
     @Test
     void requiresEveryOutputToFit() {
         assertTrue(AtomicOutputPlanner.canFit(16, 16, 64));
@@ -32,10 +28,33 @@ class AtomicOutputPlannerTest {
 
     @Test
     void outputPlannerHonorsRealStackAndSlotCapacity() {
-        ItemStackHandler oneSlot = new ItemStackHandler(1);
-        assertFalse(AtomicOutputPlanner.canFitOutputs(oneSlot, List.of(new ItemStack(Items.STONE, 65))));
+        var oneSlot = List.of(new AtomicOutputPlanner.SlotState(null, 0, 64, 64));
+        var twoSlots = List.of(
+            new AtomicOutputPlanner.SlotState(null, 0, 64, 64),
+            new AtomicOutputPlanner.SlotState(null, 0, 64, 64)
+        );
+        var output = List.of(new AtomicOutputPlanner.OutputState("stone", 65, 64));
+        assertFalse(AtomicOutputPlanner.canFitStacks(oneSlot, output));
+        assertTrue(AtomicOutputPlanner.canFitStacks(twoSlots, output));
+    }
 
-        ItemStackHandler twoSlots = new ItemStackHandler(2);
-        assertTrue(AtomicOutputPlanner.canFitOutputs(twoSlots, List.of(new ItemStack(Items.STONE, 65))));
+    @Test
+    void mergesCompatibleStacksBeforeUsingEmptySlots() {
+        var slots = List.of(
+            new AtomicOutputPlanner.SlotState("stone", 60, 64, 64),
+            new AtomicOutputPlanner.SlotState(null, 0, 64, 64)
+        );
+        var output = List.of(new AtomicOutputPlanner.OutputState("stone", 8, 64));
+        assertTrue(AtomicOutputPlanner.canFitStacks(slots, output));
+    }
+
+    @Test
+    void rejectsOutputThatExceedsPerSlotLimit() {
+        var slots = List.of(
+            new AtomicOutputPlanner.SlotState(null, 0, 32, 64),
+            new AtomicOutputPlanner.SlotState(null, 0, 32, 64)
+        );
+        var output = List.of(new AtomicOutputPlanner.OutputState("stone", 65, 64));
+        assertFalse(AtomicOutputPlanner.canFitStacks(slots, output));
     }
 }
