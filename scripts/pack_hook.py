@@ -253,12 +253,12 @@ def check_json() -> CheckResult:
 def check_kubejs_syntax() -> CheckResult:
     node = shutil.which("node")
     files = sorted(
-        path for directory in RECIPE_SOURCE_DIRS for path in (ROOT / directory).glob("*.js")
+        path for directory in RECIPE_SOURCE_DIRS for path in (ROOT / directory).rglob("*.js")
     )
     if not files:
         return CheckResult("kubejs-syntax", True, "no scripts")
     if node is None:
-        return CheckResult("kubejs-syntax", True, f"skipped, node missing ({len(files)} scripts)")
+        return CheckResult("kubejs-syntax", False, "node is required to validate KubeJS syntax")
     problems: list[str] = []
     for path in files:
         code, output = run([node, "--check", str(path)], ROOT)
@@ -271,12 +271,44 @@ def check_self_propagation() -> CheckResult:
     """Re-run the cave self-propagation recipe rules against a stub Create API."""
     node = shutil.which("node")
     if node is None:
-        return CheckResult("self-propagation", True, "skipped, node missing")
+        return CheckResult("self-propagation", False, "node is required to run the self-propagation check")
     if not SELF_PROPAGATION_CHECK.is_file():
-        return CheckResult("self-propagation", True, "checker not present")
+        return CheckResult("self-propagation", False, f"checker missing: {SELF_PROPAGATION_CHECK.relative_to(ROOT)}")
     code, output = run([node, str(SELF_PROPAGATION_CHECK)], ROOT)
     detail = output[-1] if output else f"exit {code}"
     return CheckResult("self-propagation", code == 0, detail, output if code else [])
+
+
+def has_dependency_cycle(graph: dict[str, set[str]]) -> bool:
+    """Return whether a directed dependency graph contains a cycle."""
+    colour: dict[str, int] = {}
+    for start in graph:
+        if colour.get(start, 0) == 2:
+            continue
+        stack: list[tuple[str, bool]] = [(start, False)]
+        while stack:
+            current, exiting = stack.pop()
+            if exiting:
+                colour[current] = 2
+                continue
+
+            state = colour.get(current, 0)
+            if state == 1:
+                return True
+            if state == 2:
+                continue
+
+            colour[current] = 1
+            stack.append((current, True))
+            for dependency in sorted(graph.get(current, ()), reverse=True):
+                if dependency not in graph:
+                    continue
+                dependency_state = colour.get(dependency, 0)
+                if dependency_state == 1:
+                    return True
+                if dependency_state == 0:
+                    stack.append((dependency, False))
+    return False
 
 
 def check_quest_graph() -> CheckResult:
@@ -323,20 +355,8 @@ def check_quest_graph() -> CheckResult:
             if dependency not in quests:
                 problems.append(f"{quest_id}: missing dependency {dependency}")
 
-    colour: dict[str, int] = {}
-    for start in quests:
-        stack = [start]
-        while stack:
-            current = stack.pop()
-            state = colour.get(current, 0)
-            if state == 2:
-                continue
-            if state == 1:
-                problems.append(f"quest dependency cycle through {current}")
-                break
-            colour[current] = 1
-            stack.extend(quests.get(current, ()))
-            colour[current] = 2
+    if has_dependency_cycle(quests):
+        problems.append("quest dependency cycle detected")
 
     return CheckResult(
         "quest-graph", not problems, f"{len(chapters)} chapters, {len(quests)} quests", problems
@@ -362,7 +382,7 @@ def check_recipe_ids() -> CheckResult:
         base = ROOT / directory
         if not base.is_dir():
             continue
-        for path in sorted(base.glob("*.js")):
+        for path in sorted(base.rglob("*.js")):
             for _, identifier in pattern.findall(path.read_text(encoding="utf-8")):
                 count += 1
                 origin = identifiers.get(identifier)
