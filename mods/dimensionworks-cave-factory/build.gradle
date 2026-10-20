@@ -45,7 +45,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    compileOnly 'dev.szx.dimensionworks:dimensionworks-rpm-limit:0.4.5'
+    compileOnly fg.deobf(files('../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-0.4.5.jar'))
     compileOnly 'mezz.jei:jei-1.20.1-forge-api:15.20.0.115'
     compileOnly 'mezz.jei:jei-1.20.1-common-api:15.20.0.115'
     compileOnly 'maven.modrinth:jade:11.13.2+forge'
@@ -68,6 +68,11 @@ mixin {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':reobfJar')
+}
+
+tasks.named('test') {
+    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':reobfJar')
 }
 
 tasks.named('test') {
