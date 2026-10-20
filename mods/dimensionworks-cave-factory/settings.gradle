@@ -7,4 +7,9 @@ pluginManagement {
 }
 
 rootProject.name = 'dimensionworks-cave-factory'
-includeBuild('../dimensionworks-rpm-limit')
+includeBuild('../dimensionworks-rpm-limit') {
+    dependencySubstitution {
+        substitute(module('dev.szx.dimensionworks:dimensionworks_rpm_limit')).using(project(':'))
+        substitute(module('dev.szx.dimensionworks:dimensionworks-rpm-limit')).using(project(':'))
+    }
+}
