@@ -1,0 +1,52 @@
+name: Build self-owned Java mods
+
+on:
+  pull_request:
+    paths:
+      - 'mods/dimensionworks-*/**'
+      - '.github/workflows/build-java-mods.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mods/dimensionworks-*/**'
+      - '.github/workflows/build-java-mods.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - dimensionworks-cave-factory
+          - dimensionworks-localization
+          - dimensionworks-mek-stress
+          - dimensionworks-rpm-limit
+          - dimensionworks-transfer
+          - dimensionworks-version-gate
+          - dimensionworks-wrench-compat
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: mods/${{ matrix.module }}/**/*.gradle*
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+
+      - name: Build and test
+        working-directory: mods/${{ matrix.module }}
+        run: gradle build --no-daemon
