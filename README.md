@@ -16,8 +16,8 @@
 | `DimensionWorks-Server-版本号.zip` | 服务端整合包 |
 | `*-delta.zip` | 相对上一正式版本生成的增量更新包 |
 | `*-update-manifest.tsv` | 更新清单 |
-| `update-dimensionworks-client.*` | 客户端独立更新脚本 |
-| `update-dimensionworks-server.*` | 服务端独立更新脚本 |
+| `update-dimensionworks-client.sh` / `.exe` | 客户端独立更新器 |
+| `update-dimensionworks-server.sh` / `.exe` | 服务端独立更新器 |
 | `SHA256SUMS` | 发布文件 SHA-256 校验值 |
 
 增量包用于版本更新，不是完整整合包；首次安装请下载对应的完整客户端或服务端包。具体文件以每个 Release 实际提供的资产为准。
@@ -54,7 +54,8 @@ DimensionWorks/
 ├── kubejs/             # KubeJS 配方、脚本与数据
 ├── resourcepacks/      # 自定义资源包
 ├── scripts/            # 版本管理、打包及验证脚本
-├── release-updaters/   # 客户端与服务端独立更新脚本
+├── release-updaters/   # macOS/Linux Shell 更新器
+├── update-Windows/     # 原生 Go Windows 更新器与测试
 ├── server/             # 服务端相关配置与说明
 ├── docs/               # 设计文档与规划
 ├── VERSION             # 当前整合包版本
