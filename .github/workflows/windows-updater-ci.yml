@@ -34,17 +34,18 @@ jobs:
         run: go test -v ./...
 
       - name: Cross-compile client and server EXEs
+        working-directory: update-Windows
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p dist
+          mkdir -p ../dist
           for kind in client server; do
             GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
               -trimpath \
               -ldflags="-s -w -X main.defaultKind=${kind}" \
-              -o "dist/update-dimensionworks-${kind}.exe" \
-              ./update-Windows
-            file "dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
+              -o "../dist/update-dimensionworks-${kind}.exe" \
+              .
+            file "../dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
           done
 
       - name: Upload Windows updater builds
