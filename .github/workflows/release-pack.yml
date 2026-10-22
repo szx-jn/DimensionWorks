@@ -8,7 +8,6 @@ on:
     paths:
       - 'release-updaters/**'
       - 'update-Windows/**'
-      - '.github/workflows/**'
       - 'mods/dimensionworks-*/**'
       - 'manifest/mods.json'
       - 'scripts/package_mrpack.py'
