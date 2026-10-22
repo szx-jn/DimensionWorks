@@ -24,6 +24,8 @@ import (
 )
 
 var defaultKind string
+var diagnosticRoot string
+var consoleReader = bufio.NewReader(os.Stdin)
 
 const (
 	repository   = "szx-jn/DimensionWorks"
@@ -92,7 +94,11 @@ func main() {
 	}
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "更新失败：", err)
-	fmt.Fprintln(os.Stderr, "诊断日志（如已生成）位于实例目录的 .dimensionworks-update 中。")
+	if logPath := writeFailureLog(diagnosticRoot, err); logPath != "" {
+		fmt.Fprintln(os.Stderr, "诊断日志：", logPath)
+	} else {
+		fmt.Fprintln(os.Stderr, "当前错误未能写入日志；请先保存上方错误信息。")
+	}
 	fmt.Fprintln(os.Stderr, "请检查错误信息后按回车键关闭窗口。")
 	waitEnter()
 	os.Exit(1)
@@ -100,9 +106,69 @@ func main() {
 
 func waitEnter() {
 	fmt.Print("> ")
-	_, _ = bufio.NewReader(os.Stdin).ReadString('\n')
+	_, _ = consoleReader.ReadString('\n')
 }
 
+func validateInstanceRoot(root, kind string) error {
+	if kind != "client" && kind != "server" {
+		return fmt.Errorf("未知更新器类型：%s", kind)
+	}
+	modsInfo, err := os.Stat(filepath.Join(root, "mods"))
+	if err != nil || !modsInfo.IsDir() {
+		return fmt.Errorf("未在 %s 找到 mods/ 目录。请把 update-dimensionworks-%s.exe 放到对应客户端或服务端实例根目录后再运行；不要直接从下载目录运行", root, kind)
+	}
+	markers := []string{"VERSION", "config"}
+	if kind == "server" {
+		markers = []string{"VERSION", "libraries", "start.sh", "start.bat"}
+	}
+	found := false
+	for _, marker := range markers {
+		info, statErr := os.Stat(filepath.Join(root, marker))
+		if statErr == nil && ((marker == "config" || marker == "libraries") && info.IsDir() || (marker != "config" && marker != "libraries") && info.Mode().IsRegular()) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("目录 %s 缺少 %s 更新器所需的实例标记；请确认 EXE 已放入正确的实例根目录", root, kind)
+	}
+	return nil
+}
+
+func writeFailureLog(root string, cause error) string {
+	if root == "" {
+		return ""
+	}
+	rootInfo, err := os.Lstat(root)
+	if err != nil || !rootInfo.IsDir() || rootInfo.Mode()&os.ModeSymlink != 0 {
+		return ""
+	}
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if info, statErr := os.Lstat(updateRoot); statErr == nil {
+		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return ""
+		}
+	} else if os.IsNotExist(statErr) {
+		if os.Mkdir(updateRoot, 0755) != nil {
+			return ""
+		}
+	} else {
+		return ""
+	}
+	logDir := filepath.Join(updateRoot, "logs")
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		return ""
+	}
+	if info, err := os.Lstat(logDir); err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return ""
+	}
+	logPath := filepath.Join(logDir, "failed-"+time.Now().Format("20060102-150405")+"-"+fmt.Sprint(os.Getpid())+".log")
+	contents := fmt.Sprintf("time=%s\\nerror=%s\\n", time.Now().Format(time.RFC3339), cause)
+	if err := os.WriteFile(logPath, []byte(contents), 0644); err != nil {
+		return ""
+	}
+	return logPath
+}
 func run(kind string, args []string) error {
 	opts, err := parseOptions(args)
 	if err != nil {
@@ -129,6 +195,21 @@ func run(kind string, args []string) error {
 	if info, err := os.Lstat(root); err != nil || info.Mode()&os.ModeSymlink != 0 {
 		return errors.New("实例目录不存在或是符号链接")
 	}
+	if err := validateInstanceRoot(root, kind); err != nil {
+		return err
+	}
+	diagnosticRoot = root
+	fmt.Println("DimensionWorks", kind, "更新器")
+	fmt.Println("实例目录：", root)
+	fmt.Print("请确认该目录是正确的整合包根目录，且 Minecraft/服务端已退出。输入 Y 继续，其他输入取消：")
+	answer, readErr := consoleReader.ReadString('\n')
+	if readErr != nil && len(answer) == 0 {
+		return fmt.Errorf("无法读取确认输入：%w", readErr)
+	}
+	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
+		return errors.New("用户取消了更新")
+	}
+
 	updateRoot := filepath.Join(root, ".dimensionworks-update")
 	if err := os.MkdirAll(updateRoot, 0755); err != nil {
 		return fmt.Errorf("无法创建更新目录：%w", err)
@@ -148,9 +229,7 @@ func run(kind string, args []string) error {
 	_ = lock.Close()
 	defer os.Remove(lockPath)
 
-	fmt.Println("DimensionWorks", kind, "更新器")
-	fmt.Println("实例目录：", root)
-	fmt.Println("请先退出 Minecraft、启动器或服务端，再继续。")
+
 
 	work, err := os.MkdirTemp(updateRoot, "work-")
 	if err != nil {
@@ -662,7 +741,7 @@ func downloadArchiveWithManualFallback(source, destination string) error {
 		fmt.Println("直接按回车将取消本次更新。")
 		fmt.Println("下载错误：", err)
 		fmt.Print("完整包路径：")
-		line, readErr := bufio.NewReader(os.Stdin).ReadString('\n')
+		line, readErr := consoleReader.ReadString('\n')
 		if readErr != nil && len(line) == 0 {
 			return fmt.Errorf("自动下载失败且无法读取手动包路径：%w", err)
 		}
