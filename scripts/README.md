@@ -72,7 +72,7 @@ python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
 
 ## 独立增量更新器
 
-更新器是发布资产，不是 Python 工具，也不会进入 `.mrpack` 或服务端 ZIP。每个 Release 发布四个脚本：
+更新器是独立发布资产，不会进入 `.mrpack` 或服务端 ZIP。每个 Release 发布两个 Shell 脚本和两个 Windows EXE：
 
 - `update-dimensionworks-client.sh` / `.bat`
 - `update-dimensionworks-server.sh` / `.bat`
@@ -104,7 +104,7 @@ python3 scripts/pack_hook.py --skip-build
 - `quest-graph`：FTB 任务 ID 唯一、依赖存在、无循环、括号平衡。
 - `recipe-ids`：脚本中的配方 ID 不与数据包文件路径冲突。
 - `in-repo-build`：逐个执行 `gradle build --no-daemon`，并确认产物 jar 名与清单版本一致。
-- `update-assets`：确认四个独立 `.sh/.bat` 更新器存在、使用 LF、没有 Python 运行时依赖，并验证 TSV 清单校验器可用。
+- `update-assets`：确认两个独立 Shell 更新器存在、使用 LF，且 `update-Windows/` 的 Go 源码完整；Windows EXE 由 GitHub Actions 原生交叉编译和测试。
 
 输出约定：失败时打印 `PACK-HOOK FAIL` 加失败步骤与截断后的错误日志；成功时只打印一行 `PACK-HOOK OK: ...`。打包脚本会把钩子结果附在同一行成功信息里。
 
@@ -148,4 +148,4 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 ## GitHub Actions 发行
 
-手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、四个独立更新脚本和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
+手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、两个独立 Shell 更新器、两个 Windows EXE 和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
