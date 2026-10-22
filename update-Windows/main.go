@@ -1,0 +1,1450 @@
+package main
+
+import (
+	"archive/zip"
+	"bufio"
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"sort"
+	"strings"
+	"time"
+)
+
+var defaultKind string
+
+const (
+	repository   = "szx-jn/DimensionWorks"
+	manifestName = "dimensionworks-update-manifest.tsv"
+	stateName    = ".dimensionworks-update/state.tsv"
+)
+
+var versionRE = regexp.MustCompile("^[0-9]+\\.[0-9]+\\.[0-9]+$")
+var digestRE = regexp.MustCompile("^[0-9a-f]+$")
+
+type Entry struct {
+	Action    string
+	Path      string
+	Algorithm string
+	Value     string
+	Source    string
+}
+
+type Manifest struct {
+	Kind    string
+	Version string
+	Release string
+	Base    string
+	Entries []Entry
+	Bytes   []byte
+}
+
+type ReleaseInfo struct {
+	TagName string `json:"tag_name"`
+	Assets  []struct {
+		Name               string `json:"name"`
+		BrowserDownloadURL string `json:"browser_download_url"`
+	} `json:"assets"`
+}
+
+type Archive struct {
+	reader  *zip.ReadCloser
+	entries map[string]*zip.File
+}
+
+type Options struct {
+	Release string
+	Package string
+	URL     string
+	Help    bool
+}
+
+func main() {
+	enableUTF8Console()
+	kind := defaultKind
+	if kind == "" {
+		name := strings.ToLower(filepath.Base(os.Args[0]))
+		switch {
+		case strings.Contains(name, "client"):
+			kind = "client"
+		case strings.Contains(name, "server"):
+			kind = "server"
+		}
+	}
+	err := run(kind, os.Args[1:])
+	if err == nil {
+		fmt.Println()
+		fmt.Println("操作完成。按回车键关闭窗口。")
+		waitEnter()
+		return
+	}
+	fmt.Fprintln(os.Stderr, "")
+	fmt.Fprintln(os.Stderr, "更新失败：", err)
+	fmt.Fprintln(os.Stderr, "诊断日志（如已生成）位于实例目录的 .dimensionworks-update 中。")
+	fmt.Fprintln(os.Stderr, "请检查错误信息后按回车键关闭窗口。")
+	waitEnter()
+	os.Exit(1)
+}
+
+func waitEnter() {
+	fmt.Print("> ")
+	_, _ = bufio.NewReader(os.Stdin).ReadString('\n')
+}
+
+func run(kind string, args []string) error {
+	opts, err := parseOptions(args)
+	if err != nil {
+		return err
+	}
+	if opts.Help {
+		printUsage(kind)
+		return nil
+	}
+	if kind != "client" && kind != "server" {
+		return errors.New("该程序未指定 client/server 构建类型")
+	}
+	if runtime.GOOS != "windows" {
+		fmt.Println("提示：该更新器面向 Windows；当前平台为", runtime.GOOS)
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("无法定位更新程序：%w", err)
+	}
+	root, err := filepath.Abs(filepath.Dir(executable))
+	if err != nil {
+		return fmt.Errorf("无法定位实例目录：%w", err)
+	}
+	if info, err := os.Lstat(root); err != nil || info.Mode()&os.ModeSymlink != 0 {
+		return errors.New("实例目录不存在或是符号链接")
+	}
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if err := os.MkdirAll(updateRoot, 0755); err != nil {
+		return fmt.Errorf("无法创建更新目录：%w", err)
+	}
+	if info, err := os.Lstat(updateRoot); err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return errors.New(".dimensionworks-update 必须是普通目录，不能是符号链接")
+	}
+	lockPath := filepath.Join(updateRoot, "lock")
+	lock, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		if os.IsExist(err) {
+			return errors.New("检测到另一个更新任务，或上次更新留下了锁文件。请确认没有更新程序运行后，再删除 .dimensionworks-update/lock 重试")
+		}
+		return fmt.Errorf("无法创建更新锁：%w", err)
+	}
+	_, _ = fmt.Fprintf(lock, "pid=%d\ntime=%s\n", os.Getpid(), time.Now().Format(time.RFC3339))
+	_ = lock.Close()
+	defer os.Remove(lockPath)
+
+	fmt.Println("DimensionWorks", kind, "更新器")
+	fmt.Println("实例目录：", root)
+	fmt.Println("请先退出 Minecraft、启动器或服务端，再继续。")
+
+	work, err := os.MkdirTemp(updateRoot, "work-")
+	if err != nil {
+		return fmt.Errorf("无法创建事务目录：%w", err)
+	}
+	keepWork := false
+	defer func() {
+		if !keepWork {
+			_ = os.RemoveAll(work)
+		}
+	}()
+
+	var target *Manifest
+	var fullPackage *Archive
+	var fullPackageURL string
+	releaseTag := ""
+
+	switch {
+	case opts.Package != "":
+		packagePath, err := filepath.Abs(opts.Package)
+		if err != nil {
+			return fmt.Errorf("本地包路径无效：%w", err)
+		}
+		fullPackage, err = openArchive(packagePath)
+		if err != nil {
+			return fmt.Errorf("无法打开本地更新包：%w", err)
+		}
+		defer fullPackage.Close()
+		target, err = embeddedManifest(fullPackage, kind)
+		if err != nil {
+			return err
+		}
+		releaseTag = target.Release
+	case opts.URL != "":
+		fullPackageURL = opts.URL
+		manifestURL, err := manifestURLFromPackageURL(opts.URL)
+		if err != nil {
+			return err
+		}
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		if err != nil {
+			return fmt.Errorf("下载更新清单失败：%w；可重新运行并使用 --package 指定已下载的完整包", err)
+		}
+		target, err = parseManifest(manifestBytes, kind)
+		if err != nil {
+			return err
+		}
+		releaseTag = target.Release
+	case opts.Release != "":
+		releaseTag = opts.Release
+		if !validReleaseTag(releaseTag) {
+			return fmt.Errorf("发行标签格式无效：%s", releaseTag)
+		}
+		version := strings.TrimPrefix(releaseTag, "v")
+		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		if err != nil {
+			return fmt.Errorf("下载更新清单失败：%w", err)
+		}
+		target, err = parseManifest(manifestBytes, kind)
+		if err != nil {
+			return err
+		}
+		if target.Release != releaseTag {
+			return fmt.Errorf("清单发行标签 %s 与请求的 %s 不一致", target.Release, releaseTag)
+		}
+	default:
+		release, err := latestRelease()
+		if err != nil {
+			return err
+		}
+		releaseTag = release.TagName
+		version := strings.TrimPrefix(releaseTag, "v")
+		manifestAsset := manifestAssetName(kind, version)
+		var manifestURL string
+		for _, asset := range release.Assets {
+			if asset.Name == manifestAsset {
+				manifestURL = asset.BrowserDownloadURL
+				break
+			}
+		}
+		if manifestURL == "" {
+			manifestURL = assetURL(releaseTag, manifestAsset)
+		}
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		if err != nil {
+			return fmt.Errorf("下载最新版本清单失败：%w", err)
+		}
+		target, err = parseManifest(manifestBytes, kind)
+		if err != nil {
+			return err
+		}
+		if target.Release != releaseTag {
+			return fmt.Errorf("最新发行标签 %s 与清单 %s 不一致", releaseTag, target.Release)
+		}
+	}
+
+	if target.Kind != kind {
+		return fmt.Errorf("更新清单类型错误：需要 %s，实际为 %s", kind, target.Kind)
+	}
+	if fullPackage != nil {
+		pkgManifest, err := embeddedManifest(fullPackage, kind)
+		if err != nil {
+			return err
+		}
+		if pkgManifest.Version != target.Version || !bytes.Equal(pkgManifest.Bytes, target.Bytes) {
+			return errors.New("本地更新包中的清单与目标清单不一致")
+		}
+	}
+
+	statePath := filepath.Join(root, filepath.FromSlash(stateName))
+	current, err := readState(root, statePath, kind)
+	if err != nil {
+		return fmt.Errorf("现有更新状态无效：%w。请备份并检查 %s", err, statePath)
+	}
+	if current == nil {
+		current, err = bootstrapState(root, kind)
+		if err != nil {
+			return fmt.Errorf("无法初始化现有文件状态：%w", err)
+		}
+	}
+	fmt.Printf("当前版本：%s；目标版本：%s（%s）\n", current.Version, target.Version, target.Release)
+
+	selected, deletions, err := selectChanges(root, kind, current, target)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
+	stageRoot := filepath.Join(work, "stage")
+	if err := os.MkdirAll(stageRoot, 0755); err != nil {
+		return err
+	}
+
+	remoteEntries := make([]Entry, 0)
+	archiveEntries := make([]Entry, 0)
+	for _, entry := range selected {
+		if entry.Action == "remote" {
+			remoteEntries = append(remoteEntries, entry)
+		} else {
+			archiveEntries = append(archiveEntries, entry)
+		}
+	}
+	for i, entry := range remoteEntries {
+		fmt.Printf("[下载] 远程文件 %d/%d：%s\n", i+1, len(remoteEntries), entry.Path)
+		stage, err := stagePath(stageRoot, entry.Path)
+		if err != nil {
+			return err
+		}
+		if err := downloadVerified(entry.Source, stage, entry.Algorithm, entry.Value); err != nil {
+			return fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, err)
+		}
+	}
+
+	deltaUsed := false
+	if len(archiveEntries) > 0 && fullPackage == nil && releaseTag != "" &&
+		validReleaseTag(target.Base) && current.Release == target.Base {
+		deltaName := deltaAssetName(kind, target.Version)
+		deltaPath := filepath.Join(work, "delta.zip")
+		fmt.Println("[下载] 尝试差量更新包：", deltaName)
+		if _, err := downloadBytes(assetURL(releaseTag, deltaName), deltaPath, true); err == nil {
+			delta, openErr := openArchive(deltaPath)
+			if openErr == nil {
+				stageErr := stageArchiveEntries(delta, archiveEntries, stageRoot)
+				_ = delta.Close()
+				if stageErr == nil {
+					deltaUsed = true
+				} else {
+					clearStaged(stageRoot, archiveEntries)
+					fmt.Println("[回退] 差量包不完整或校验失败，将改用完整包：", stageErr)
+				}
+			} else {
+				fmt.Println("[回退] 差量包不可用：", openErr)
+			}
+		} else {
+			fmt.Println("[回退] 差量包下载失败，将尝试完整包：", err)
+		}
+	}
+
+	if len(archiveEntries) > 0 && !deltaUsed {
+		if fullPackage == nil {
+			if fullPackageURL == "" {
+				fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
+			}
+			packagePath := filepath.Join(work, "full-package.zip")
+			fmt.Println("[下载] 获取完整更新包：", filepath.Base(fullPackageURL))
+			if err := downloadArchiveWithManualFallback(fullPackageURL, packagePath); err != nil {
+				return err
+			}
+			fullPackage, err = openArchive(packagePath)
+			if err != nil {
+				return fmt.Errorf("完整更新包无效：%w", err)
+			}
+			defer fullPackage.Close()
+			pkgManifest, err := embeddedManifest(fullPackage, kind)
+			if err != nil {
+				return err
+			}
+			if pkgManifest.Version != target.Version || pkgManifest.Release != target.Release ||
+				!bytes.Equal(pkgManifest.Bytes, target.Bytes) {
+				return errors.New("完整更新包中的清单与目标清单不一致")
+			}
+		}
+		if err := stageArchiveEntries(fullPackage, archiveEntries, stageRoot); err != nil {
+			return fmt.Errorf("暂存完整更新包失败：%w", err)
+		}
+	}
+
+	changes := make([]Change, 0, len(selected)+len(deletions)+2)
+	for _, entry := range selected {
+		stage, err := stagePath(stageRoot, entry.Path)
+		if err != nil {
+			return err
+		}
+		if err := verifyDigest(stage, entry.Algorithm, entry.Value); err != nil {
+			return fmt.Errorf("暂存校验失败 %s：%w", entry.Path, err)
+		}
+		changes = append(changes, Change{Path: entry.Path, Staged: stage})
+	}
+	for _, stale := range deletions {
+		changes = append(changes, Change{Path: stale, Delete: true})
+	}
+	versionPath := filepath.Join(work, "VERSION")
+	if err := os.WriteFile(versionPath, []byte(target.Version+"\n"), 0644); err != nil {
+		return err
+	}
+	stateStage, err := stagePath(stageRoot, stateName)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(stateStage), 0755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(stateStage, target.Bytes, 0644); err != nil {
+		return err
+	}
+	changes = append(changes, Change{Path: "VERSION", Staged: versionPath})
+	changes = append(changes, Change{Path: stateName, Staged: stateStage})
+
+	if err := applyTransaction(root, work, changes); err != nil {
+		keepWork = true
+		logPath := filepath.Join(root, ".dimensionworks-update", "failed-"+time.Now().Format("20060102-150405")+".log")
+		_ = os.WriteFile(logPath, []byte(err.Error()+"\nRecovery data: "+work+"\n"), 0644)
+		return fmt.Errorf("%w；恢复数据保留在 %s", err, work)
+	}
+	fmt.Printf("更新成功：%s -> %s\n", current.Version, target.Version)
+	if deltaUsed {
+		fmt.Println("更新来源：已校验的差量包")
+	} else if len(archiveEntries) > 0 {
+		fmt.Println("更新来源：完整包")
+	}
+	return nil
+}
+
+func parseOptions(args []string) (Options, error) {
+	var out Options
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--help", "-h", "/?":
+			out.Help = true
+		case "--release":
+			if i+1 >= len(args) {
+				return out, errors.New("--release 后必须提供 vX.Y.Z 标签")
+			}
+			i++
+			out.Release = args[i]
+		case "--package":
+			if i+1 >= len(args) {
+				return out, errors.New("--package 后必须提供本地完整包路径")
+			}
+			i++
+			out.Package = args[i]
+		case "--url":
+			if i+1 >= len(args) {
+				return out, errors.New("--url 后必须提供完整包 URL")
+			}
+			i++
+			out.URL = args[i]
+		default:
+			return out, fmt.Errorf("未知参数：%s", args[i])
+		}
+	}
+	count := 0
+	for _, value := range []string{out.Release, out.Package, out.URL} {
+		if value != "" {
+			count++
+		}
+	}
+	if count > 1 {
+		return out, errors.New("--release、--package 和 --url 不能同时使用")
+	}
+	if out.Release != "" && !validReleaseTag(out.Release) {
+		return out, errors.New("--release 必须是 vX.Y.Z 格式")
+	}
+	if out.URL != "" {
+		parsed, err := url.Parse(out.URL)
+		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+			return out, errors.New("--url 必须是 HTTP 或 HTTPS 完整 URL")
+		}
+	}
+	return out, nil
+}
+
+func printUsage(kind string) {
+	fmt.Printf("DimensionWorks %s Windows 更新器\n\n", kind)
+	fmt.Println("用法：")
+	fmt.Println("  updater.exe                         更新到 GitHub 最新发行版")
+	fmt.Println("  updater.exe --release vX.Y.Z        更新到指定发行版")
+	fmt.Println("  updater.exe --package <完整包路径>  使用本地完整包")
+	fmt.Println("  updater.exe --url <完整包 URL>      从 URL 更新")
+	fmt.Println("  updater.exe --help                  显示帮助")
+	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
+}
+
+func validReleaseTag(tag string) bool {
+	return strings.HasPrefix(tag, "v") && versionRE.MatchString(strings.TrimPrefix(tag, "v"))
+}
+
+func manifestAssetName(kind, version string) string {
+	if kind == "server" {
+		return "DimensionWorks-Server-" + version + "-update-manifest.tsv"
+	}
+	return "DimensionWorks-" + version + "-update-manifest.tsv"
+}
+
+func fullPackageName(kind, version string) string {
+	if kind == "server" {
+		return "DimensionWorks-Server-" + version + ".zip"
+	}
+	return "DimensionWorks-" + version + ".mrpack"
+}
+
+func deltaAssetName(kind, version string) string {
+	if kind == "server" {
+		return "DimensionWorks-Server-" + version + "-delta.zip"
+	}
+	return "DimensionWorks-" + version + "-delta.zip"
+}
+
+func assetURL(tag, name string) string {
+	return "https://github.com/" + repository + "/releases/download/" + url.PathEscape(tag) + "/" + url.PathEscape(name)
+}
+
+func manifestURLFromPackageURL(raw string) (string, error) {
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return "", errors.New("--url 必须是 HTTP 或 HTTPS 完整包 URL")
+	}
+	base := filepath.Base(parsed.Path)
+	ext := filepath.Ext(base)
+	if ext != ".zip" && ext != ".mrpack" {
+		return "", errors.New("--url 的文件名必须以 .zip 或 .mrpack 结尾")
+	}
+	name := strings.TrimSuffix(base, ext) + "-update-manifest.tsv"
+	parsed.Path = strings.TrimSuffix(parsed.Path, base) + name
+	return parsed.String(), nil
+}
+
+func latestRelease() (ReleaseInfo, error) {
+	var result ReleaseInfo
+	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/"+repository+"/releases/latest", nil)
+	if err != nil {
+		return result, err
+	}
+	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("Accept", "application/vnd.github+json")
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return result, fmt.Errorf("无法查询 GitHub 最新发行版：%w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return result, fmt.Errorf("GitHub API 返回 HTTP %d", resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return result, fmt.Errorf("无法解析 GitHub 发行信息：%w", err)
+	}
+	if !validReleaseTag(result.TagName) {
+		return result, fmt.Errorf("GitHub 最新发行标签格式无效：%s", result.TagName)
+	}
+	return result, nil
+}
+
+func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
+	if err := downloadFile(source, destination, mirrors); err != nil {
+		return nil, err
+	}
+	return os.ReadFile(destination)
+}
+
+func downloadFile(source, destination string, mirrors bool) error {
+	parsed, err := url.Parse(source)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return fmt.Errorf("无效下载 URL：%s", source)
+	}
+	candidates := []string{source}
+	if mirrors && strings.HasPrefix(source, "https://github.com/") && strings.Contains(source, "/releases/download/") {
+		candidates = append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
+	}
+	var failures []string
+	for index, candidate := range candidates {
+		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), candidate)
+		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+		err := downloadOnce(ctx, candidate, destination)
+		cancel()
+		if err == nil {
+			return nil
+		}
+		failures = append(failures, fmt.Sprintf("%s: %v", candidate, err))
+	}
+	return errors.New(strings.Join(failures, "\n"))
+}
+
+func downloadOnce(ctx context.Context, source, destination string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	client := &http.Client{Timeout: 120 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return err
+	}
+	part := destination + ".part"
+	_ = os.Remove(part)
+	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	total := resp.ContentLength
+	writer := &downloadProgress{writer: file, total: total}
+	_, copyErr := io.Copy(writer, resp.Body)
+	closeErr := file.Close()
+	if copyErr != nil {
+		return copyErr
+	}
+	if closeErr != nil {
+		return closeErr
+	}
+	if total >= 0 && writer.written != total {
+		return fmt.Errorf("内容长度不符：收到 %d 字节，预期 %d 字节", writer.written, total)
+	}
+	_ = os.Remove(destination)
+	return os.Rename(part, destination)
+}
+
+type downloadProgress struct {
+	writer  io.Writer
+	total   int64
+	written int64
+	last    time.Time
+}
+
+func (w *downloadProgress) Write(data []byte) (int, error) {
+	n, err := w.writer.Write(data)
+	w.written += int64(n)
+	if time.Since(w.last) > 800*time.Millisecond {
+		if w.total > 0 {
+			fmt.Printf("\r[下载进度] %.1f%% (%s / %s)", 100*float64(w.written)/float64(w.total), humanSize(w.written), humanSize(w.total))
+		} else {
+			fmt.Printf("\r[下载进度] %s", humanSize(w.written))
+		}
+		w.last = time.Now()
+	}
+	return n, err
+}
+
+func humanSize(size int64) string {
+	const unit = 1024.0
+	if size < 1024 {
+		return fmt.Sprintf("%d B", size)
+	}
+	value := float64(size)
+	units := []string{"KB", "MB", "GB", "TB"}
+	for _, suffix := range units {
+		value /= unit
+		if value < unit || suffix == "TB" {
+			return fmt.Sprintf("%.1f %s", value, suffix)
+		}
+	}
+	return fmt.Sprintf("%d B", size)
+}
+
+func downloadVerified(source, destination, algorithm, expected string) error {
+	if err := downloadFile(source, destination, true); err != nil {
+		return err
+	}
+	if err := verifyDigest(destination, algorithm, expected); err != nil {
+		_ = os.Remove(destination)
+		return err
+	}
+	return nil
+}
+
+func downloadArchiveWithManualFallback(source, destination string) error {
+	if err := downloadFile(source, destination, true); err == nil {
+		return nil
+	} else {
+		fmt.Println()
+		fmt.Println("自动下载完整包失败。可以把完整包下载到本地后，输入文件路径继续。")
+		fmt.Println("直接按回车将取消本次更新。")
+		fmt.Println("下载错误：", err)
+		fmt.Print("完整包路径：")
+		line, readErr := bufio.NewReader(os.Stdin).ReadString('\n')
+		if readErr != nil && len(line) == 0 {
+			return fmt.Errorf("自动下载失败且无法读取手动包路径：%w", err)
+		}
+		local := strings.TrimSpace(line)
+		if local == "" {
+			return fmt.Errorf("完整包下载失败：%w", err)
+		}
+		info, statErr := os.Stat(local)
+		if statErr != nil || !info.Mode().IsRegular() {
+			return fmt.Errorf("手动指定的文件不存在或不是普通文件：%s", local)
+		}
+		return copyFile(local, destination, 0644)
+	}
+}
+
+func parseManifest(data []byte, expectedKind string) (*Manifest, error) {
+	if len(data) == 0 {
+		return nil, errors.New("更新清单为空")
+	}
+	if bytes.HasPrefix(data, []byte{0xef, 0xbb, 0xbf}) {
+		return nil, errors.New("更新清单不能包含 UTF-8 BOM")
+	}
+	if bytes.Contains(data, []byte("\r")) {
+		return nil, errors.New("更新清单必须使用 LF 换行符")
+	}
+	if !bytes.HasSuffix(data, []byte("\n")) {
+		return nil, errors.New("更新清单末尾缺少换行符")
+	}
+	text := string(data)
+	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
+	if len(lines) < 6 || lines[0] != "# DimensionWorks update manifest 1" {
+		return nil, errors.New("更新清单头部无效")
+	}
+	headers := map[string]string{}
+	for index := 1; index <= 4; index++ {
+		line := lines[index]
+		if !strings.HasPrefix(line, "# ") {
+			return nil, errors.New("更新清单头部格式无效")
+		}
+		key, value, ok := strings.Cut(strings.TrimPrefix(line, "# "), " ")
+		if !ok || value == "" || strings.Contains(value, " ") {
+			return nil, errors.New("更新清单头部格式无效")
+		}
+		if _, exists := headers[key]; exists {
+			return nil, fmt.Errorf("更新清单含重复头部：%s", key)
+		}
+		if key != "kind" && key != "version" && key != "release" && key != "base" {
+			return nil, fmt.Errorf("更新清单含未知头部：%s", key)
+		}
+		headers[key] = value
+	}
+	for _, key := range []string{"kind", "version", "release", "base"} {
+		if headers[key] == "" {
+			return nil, fmt.Errorf("更新清单缺少头部：%s", key)
+		}
+	}
+	if lines[5] != "action\tpath\talgorithm\tvalue\tsource" {
+		return nil, errors.New("更新清单列头无效")
+	}
+	manifest := &Manifest{Kind: headers["kind"], Version: headers["version"], Release: headers["release"], Base: headers["base"], Bytes: append([]byte(nil), data...)}
+	if manifest.Kind != "client" && manifest.Kind != "server" {
+		return nil, errors.New("更新清单 kind 必须是 client 或 server")
+	}
+	if expectedKind != "" && manifest.Kind != expectedKind {
+		return nil, fmt.Errorf("更新清单类型不匹配：需要 %s，实际为 %s", expectedKind, manifest.Kind)
+	}
+	if !versionRE.MatchString(manifest.Version) || manifest.Release != "v"+manifest.Version || !validReleaseTagOrNone(manifest.Base) {
+		return nil, errors.New("更新清单版本号或发行标签无效")
+	}
+	seen := map[string]bool{}
+	for lineIndex, line := range lines[6:] {
+		fields := strings.Split(line, "\t")
+		if len(fields) != 5 {
+			return nil, fmt.Errorf("更新清单第 %d 行必须包含 5 个字段", lineIndex+7)
+		}
+		entry := Entry{Action: fields[0], Path: fields[1], Algorithm: fields[2], Value: fields[3], Source: fields[4]}
+		if err := validateEntry(entry); err != nil {
+			return nil, fmt.Errorf("更新清单第 %d 行：%w", lineIndex+7, err)
+		}
+		key := strings.ToLower(entry.Path)
+		if seen[key] {
+			return nil, fmt.Errorf("更新清单存在重复路径：%s", entry.Path)
+		}
+		seen[key] = true
+		if reservedRelative(entry.Path) {
+			return nil, fmt.Errorf("更新清单试图覆盖更新器元数据：%s", entry.Path)
+		}
+		if manifest.Kind == "server" && entry.Action != "archive" {
+			return nil, fmt.Errorf("服务端清单只能包含 archive 条目：%s", entry.Path)
+		}
+		manifest.Entries = append(manifest.Entries, entry)
+	}
+	return manifest, nil
+}
+
+func validReleaseTagOrNone(tag string) bool {
+	return tag == "none" || validReleaseTag(tag)
+}
+
+func validateEntry(entry Entry) error {
+	if err := validateRelative(entry.Path); err != nil {
+		return fmt.Errorf("目标路径无效：%w", err)
+	}
+	if entry.Action == "remote" {
+		if entry.Algorithm != "sha512" || len(entry.Value) != 128 || !digestRE.MatchString(entry.Value) {
+			return errors.New("remote 条目必须提供小写 SHA-512")
+		}
+		parsed, err := url.Parse(entry.Source)
+		if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || strings.ContainsAny(entry.Source, " \t\r\n") {
+			return errors.New("remote source 必须是无空白的 HTTP(S) URL")
+		}
+		return nil
+	}
+	if entry.Action != "archive" {
+		return fmt.Errorf("未知操作：%s", entry.Action)
+	}
+	if entry.Algorithm != "sha256" || len(entry.Value) != 64 || !digestRE.MatchString(entry.Value) {
+		return errors.New("archive 条目必须提供小写 SHA-256")
+	}
+	if err := validateRelative(entry.Source); err != nil {
+		return fmt.Errorf("归档源路径无效：%w", err)
+	}
+	return nil
+}
+
+func validateRelative(value string) error {
+	if value == "" || value != strings.TrimSpace(value) || strings.Contains(value, "\\") || strings.HasPrefix(value, "/") || strings.Contains(value, ":") {
+		return fmt.Errorf("必须是规范相对 POSIX 路径：%q", value)
+	}
+	for _, r := range value {
+		if r < 32 || r == 127 {
+			return fmt.Errorf("路径包含控制字符：%q", value)
+		}
+	}
+	for _, part := range strings.Split(value, "/") {
+		if part == "" || part == "." || part == ".." {
+			return fmt.Errorf("路径包含不安全片段：%q", value)
+		}
+	}
+	return nil
+}
+
+func reservedRelative(rel string) bool {
+	normalized := strings.ToLower(strings.ReplaceAll(rel, "\\", "/"))
+	if normalized == "version" || normalized == stateName || strings.HasPrefix(normalized, ".dimensionworks-update/") {
+		return true
+	}
+	return isUpdaterName(filepath.Base(normalized))
+}
+
+func isUpdaterName(base string) bool {
+	switch strings.ToLower(base) {
+	case "update-dimensionworks-client.exe", "update-dimensionworks-server.exe",
+		"update-dimensionworks-client.bat", "update-dimensionworks-server.bat",
+		"update-dimensionworks-client.sh", "update-dimensionworks-server.sh":
+		return true
+	default:
+		return false
+	}
+}
+
+func openArchive(path string) (*Archive, error) {
+	reader, err := zip.OpenReader(path)
+	if err != nil {
+		return nil, err
+	}
+	archive := &Archive{reader: reader, entries: map[string]*zip.File{}}
+	for _, file := range reader.File {
+		name := strings.TrimSuffix(file.Name, "/")
+		if name == "" {
+			continue
+		}
+		if err := validateRelative(name); err != nil {
+			archive.Close()
+			return nil, fmt.Errorf("压缩包路径无效：%s：%w", file.Name, err)
+		}
+		if file.Mode()&os.ModeSymlink != 0 {
+			archive.Close()
+			return nil, fmt.Errorf("压缩包包含符号链接：%s", file.Name)
+		}
+		if file.FileInfo().IsDir() {
+			continue
+		}
+		if isUpdaterName(filepath.Base(name)) {
+			archive.Close()
+			return nil, fmt.Errorf("压缩包不允许包含更新器：%s", name)
+		}
+		key := strings.ToLower(name)
+		if _, exists := archive.entries[key]; exists {
+			archive.Close()
+			return nil, fmt.Errorf("压缩包含重复或大小写冲突的路径：%s", name)
+		}
+		archive.entries[key] = file
+	}
+	return archive, nil
+}
+
+func (a *Archive) Close() error {
+	if a == nil || a.reader == nil {
+		return nil
+	}
+	return a.reader.Close()
+}
+
+func embeddedManifest(archive *Archive, kind string) (*Manifest, error) {
+	file := archive.entries[strings.ToLower(manifestName)]
+	if file == nil {
+		return nil, errors.New("完整更新包缺少内嵌更新清单")
+	}
+	reader, err := file.Open()
+	if err != nil {
+		return nil, err
+	}
+	data, readErr := io.ReadAll(reader)
+	closeErr := reader.Close()
+	if readErr != nil {
+		return nil, readErr
+	}
+	if closeErr != nil {
+		return nil, closeErr
+	}
+	return parseManifest(data, kind)
+}
+
+func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) error {
+	if archive == nil {
+		return errors.New("没有可用的更新归档")
+	}
+	for _, entry := range entries {
+		if entry.Action != "archive" {
+			continue
+		}
+		file := archive.entries[strings.ToLower(entry.Source)]
+		if file == nil {
+			return fmt.Errorf("归档缺少文件：%s", entry.Source)
+		}
+		stage, err := stagePath(stageRoot, entry.Path)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(stage), 0755); err != nil {
+			return err
+		}
+		reader, err := file.Open()
+		if err != nil {
+			return err
+		}
+		output, err := os.OpenFile(stage, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		if err != nil {
+			_ = reader.Close()
+			return err
+		}
+		_, copyErr := io.Copy(output, reader)
+		closeErr := output.Close()
+		readerErr := reader.Close()
+		if copyErr != nil {
+			return copyErr
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+		if readerErr != nil {
+			return readerErr
+		}
+		if err := verifyDigest(stage, entry.Algorithm, entry.Value); err != nil {
+			return fmt.Errorf("归档文件摘要不匹配 %s：%w", entry.Path, err)
+		}
+	}
+	return nil
+}
+
+func clearStaged(stageRoot string, entries []Entry) {
+	for _, entry := range entries {
+		if entry.Action == "archive" {
+			path, err := stagePath(stageRoot, entry.Path)
+			if err == nil {
+				_ = os.Remove(path)
+			}
+		}
+	}
+}
+
+func stagePath(stageRoot, rel string) (string, error) {
+	if err := validateRelative(rel); err != nil {
+		return "", err
+	}
+	target := filepath.Join(stageRoot, filepath.FromSlash(rel))
+	base, err := filepath.Abs(stageRoot)
+	if err != nil {
+		return "", err
+	}
+	target, err = filepath.Abs(target)
+	if err != nil {
+		return "", err
+	}
+	relPath, err := filepath.Rel(base, target)
+	if err != nil || relPath == ".." || strings.HasPrefix(relPath, ".."+string(os.PathSeparator)) {
+		return "", fmt.Errorf("暂存路径越界：%s", rel)
+	}
+	return target, nil
+}
+
+func securePath(root, rel string) (string, bool, error) {
+	if err := validateRelative(rel); err != nil {
+		return "", false, err
+	}
+	if reservedRelative(rel) {
+		return "", false, fmt.Errorf("禁止操作保留路径：%s", rel)
+	}
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", false, err
+	}
+	target := filepath.Join(absRoot, filepath.FromSlash(rel))
+	target, err = filepath.Abs(target)
+	if err != nil {
+		return "", false, err
+	}
+	relative, err := filepath.Rel(absRoot, target)
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
+		return "", false, fmt.Errorf("目标路径越界：%s", rel)
+	}
+	current := absRoot
+	for _, segment := range strings.Split(filepath.ToSlash(relative), "/") {
+		current = filepath.Join(current, filepath.FromSlash(segment))
+		info, statErr := os.Lstat(current)
+		if statErr != nil {
+			if os.IsNotExist(statErr) {
+				return target, false, nil
+			}
+			return "", false, statErr
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return "", false, fmt.Errorf("目标路径包含符号链接：%s", rel)
+		}
+	}
+	info, statErr := os.Lstat(target)
+	if statErr != nil {
+		if os.IsNotExist(statErr) {
+			return target, false, nil
+		}
+		return "", false, statErr
+	}
+	if info.IsDir() {
+		return "", true, fmt.Errorf("目标文件路径已被目录占用：%s", rel)
+	}
+	return target, true, nil
+}
+
+func hashFile(path, algorithm string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	switch algorithm {
+	case "sha256":
+		hash := sha256.New()
+		if _, err := io.Copy(hash, file); err != nil {
+			return "", err
+		}
+		return hex.EncodeToString(hash.Sum(nil)), nil
+	case "sha512":
+		hash := sha512.New()
+		if _, err := io.Copy(hash, file); err != nil {
+			return "", err
+		}
+		return hex.EncodeToString(hash.Sum(nil)), nil
+	default:
+		return "", fmt.Errorf("不支持的摘要算法：%s", algorithm)
+	}
+}
+
+func verifyDigest(path, algorithm, expected string) error {
+	actual, err := hashFile(path, algorithm)
+	if err != nil {
+		return err
+	}
+	if actual != expected {
+		return fmt.Errorf("摘要不匹配：预期 %s，实际 %s", expected, actual)
+	}
+	return nil
+}
+
+func readState(root, path, kind string) (*Manifest, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+		return nil, errors.New("state.tsv 必须是普通文件")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return parseManifest(data, kind)
+}
+
+func bootstrapState(root, kind string) (*Manifest, error) {
+	roots := []string{"mods", "config", "defaultconfigs", "kubejs", "libraries"}
+	rootFiles := []string{"README.md", "start.sh", "start.bat", "run.sh", "run.bat"}
+	if kind == "client" {
+		roots = []string{"mods", "shaderpacks", "config", "defaultconfigs", "kubejs", "resourcepacks", "local"}
+		rootFiles = []string{"modrinth.index.json", "options.txt", "log4j2.xml", "rhino.local.properties", "CustomSkinLoader/CustomSkinLoader.json", "minemenu/menu.json"}
+	}
+	state := &Manifest{Kind: kind, Version: "0.0.0", Release: "v0.0.0", Base: "none"}
+	seen := map[string]bool{}
+	addFile := func(rel string) error {
+		if reservedRelative(rel) || preservePath(kind, rel) || strings.EqualFold(rel, "VERSION") {
+			return nil
+		}
+		path, exists, err := securePath(root, rel)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return nil
+		}
+		info, err := os.Stat(path)
+		if err != nil || !info.Mode().IsRegular() {
+			return nil
+		}
+		digest, err := hashFile(path, "sha256")
+		if err != nil {
+			return err
+		}
+		key := strings.ToLower(rel)
+		if !seen[key] {
+			seen[key] = true
+			state.Entries = append(state.Entries, Entry{Action: "archive", Path: rel, Algorithm: "sha256", Value: digest, Source: rel})
+		}
+		return nil
+	}
+	for _, rootName := range roots {
+		start := filepath.Join(root, rootName)
+		if _, err := os.Stat(start); os.IsNotExist(err) {
+			continue
+		}
+		err := filepath.WalkDir(start, func(path string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return nil
+			}
+			if entry.Type()&os.ModeSymlink != 0 {
+				if entry.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if entry.IsDir() {
+				return nil
+			}
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			if err := addFile(filepath.ToSlash(rel)); err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	for _, rel := range rootFiles {
+		if err := addFile(rel); err != nil {
+			return nil, err
+		}
+	}
+	sort.Slice(state.Entries, func(i, j int) bool { return state.Entries[i].Path < state.Entries[j].Path })
+	state.Bytes = renderManifest(state)
+	return state, nil
+}
+
+func renderManifest(manifest *Manifest) []byte {
+	lines := []string{
+		"# DimensionWorks update manifest 1",
+		"# kind " + manifest.Kind,
+		"# version " + manifest.Version,
+		"# release " + manifest.Release,
+		"# base " + manifest.Base,
+		"action\tpath\talgorithm\tvalue\tsource",
+	}
+	for _, entry := range manifest.Entries {
+		lines = append(lines, strings.Join([]string{entry.Action, entry.Path, entry.Algorithm, entry.Value, entry.Source}, "\t"))
+	}
+	return []byte(strings.Join(lines, "\n") + "\n")
+}
+
+func selectChanges(root, kind string, current, target *Manifest) ([]Entry, []string, error) {
+	currentEntries := map[string]Entry{}
+	targetEntries := map[string]Entry{}
+	for _, entry := range current.Entries {
+		currentEntries[strings.ToLower(entry.Path)] = entry
+	}
+	for _, entry := range target.Entries {
+		targetEntries[strings.ToLower(entry.Path)] = entry
+	}
+	selected := make([]Entry, 0)
+	for _, entry := range target.Entries {
+		path, exists, err := securePath(root, entry.Path)
+		if err != nil {
+			return nil, nil, err
+		}
+		if preserveExistingPath(kind, entry.Path, exists) {
+			continue
+		}
+		if exists {
+			digest, err := hashFile(path, entry.Algorithm)
+			if err != nil {
+				return nil, nil, err
+			}
+			if digest == entry.Value {
+				continue
+			}
+			if entry.Action == "archive" {
+				if previous, ok := currentEntries[strings.ToLower(entry.Path)]; ok && previous.Value == entry.Value {
+					// The package has not changed this file; preserve local edits.
+					continue
+				}
+			}
+		}
+		selected = append(selected, entry)
+	}
+	deletions := make([]string, 0)
+	for _, old := range current.Entries {
+		key := strings.ToLower(old.Path)
+		if _, exists := targetEntries[key]; exists || preservePath(kind, old.Path) {
+			continue
+		}
+		_, exists, err := securePath(root, old.Path)
+		if err != nil {
+			return nil, nil, err
+		}
+		if exists {
+			deletions = append(deletions, old.Path)
+		}
+	}
+	sort.Slice(selected, func(i, j int) bool { return selected[i].Path < selected[j].Path })
+	sort.Strings(deletions)
+	return selected, deletions, nil
+}
+
+func preservePath(kind, rel string) bool {
+	normalized := strings.ToLower(strings.ReplaceAll(rel, "\\", "/"))
+	parts := strings.Split(normalized, "/")
+	if len(parts) > 0 {
+		switch parts[0] {
+		case ".dimensionworks-update", "logs", "crash-reports", "screenshots", "world", "world_nether", "world_the_end":
+			return true
+		}
+		if kind == "client" && parts[0] == "saves" {
+			return true
+		}
+		if kind == "server" && parts[0] == "debug" {
+			return true
+		}
+	}
+	if kind == "client" {
+		return normalized == "dimensionworks.jar" || normalized == "dimensionworks.json"
+	}
+	if kind == "server" {
+		switch normalized {
+		case "eula.txt", "server.properties", "user_jvm_args.txt", "usercache.json", "ops.json", "whitelist.json", "banned-ips.json", "banned-players.json":
+			return true
+		}
+	}
+	return isUpdaterName(filepath.Base(normalized))
+}
+
+func preserveExistingPath(kind, rel string, exists bool) bool {
+	if !exists {
+		return false
+	}
+	if kind == "server" {
+		switch strings.ToLower(rel) {
+		case "eula.txt", "server.properties", "user_jvm_args.txt", "usercache.json", "ops.json", "whitelist.json", "banned-ips.json", "banned-players.json":
+			return true
+		}
+	}
+	return false
+}
+
+type Change struct {
+	Path   string
+	Staged string
+	Delete bool
+}
+
+type Applied struct {
+	Path       string
+	Backup     string
+	Existed    bool
+	TargetPath string
+}
+
+func applyTransaction(root, work string, changes []Change) error {
+	backupRoot := filepath.Join(work, "backup")
+	applied := make([]Applied, 0, len(changes))
+	createdDirs := make([]string, 0)
+	rollback := func() error {
+		var failures []string
+		for i := len(applied) - 1; i >= 0; i-- {
+			item := applied[i]
+			if item.Existed {
+				if err := os.MkdirAll(filepath.Dir(item.TargetPath), 0755); err != nil {
+					failures = append(failures, err.Error())
+					continue
+				}
+				if err := replaceFromFile(item.Backup, item.TargetPath); err != nil {
+					failures = append(failures, fmt.Sprintf("%s: %v", item.Path, err))
+				}
+			} else {
+				if err := os.Remove(item.TargetPath); err != nil && !os.IsNotExist(err) {
+					failures = append(failures, fmt.Sprintf("%s: %v", item.Path, err))
+				}
+			}
+		}
+		for i := len(createdDirs) - 1; i >= 0; i-- {
+			_ = os.Remove(createdDirs[i])
+		}
+		if len(failures) > 0 {
+			return fmt.Errorf("回滚未完全成功：%s", strings.Join(failures, "; "))
+		}
+		return nil
+	}
+
+	for _, change := range changes {
+		target, exists, err := securePathAllowMetadata(root, change.Path)
+		if err != nil {
+			if rollbackErr := rollback(); rollbackErr != nil {
+				return fmt.Errorf("应用 %s 失败：%v；%v", change.Path, err, rollbackErr)
+			}
+			return fmt.Errorf("应用 %s 失败，已回滚：%w", change.Path, err)
+		}
+		if exists {
+			info, err := os.Stat(target)
+			if err != nil || !info.Mode().IsRegular() {
+				if rollbackErr := rollback(); rollbackErr != nil {
+					return fmt.Errorf("目标 %s 不是普通文件；%v", change.Path, rollbackErr)
+				}
+				return fmt.Errorf("目标不是普通文件：%s", change.Path)
+			}
+		}
+		backup := filepath.Join(backupRoot, filepath.FromSlash(change.Path))
+		if exists {
+			if err := os.MkdirAll(filepath.Dir(backup), 0755); err != nil {
+				_ = rollback()
+				return err
+			}
+			if err := copyFile(target, backup, 0644); err != nil {
+				_ = rollback()
+				return fmt.Errorf("无法备份 %s：%w", change.Path, err)
+			}
+		}
+		applied = append(applied, Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target})
+
+		if change.Delete {
+			if exists {
+				if err := os.Remove(target); err != nil {
+					if rollbackErr := rollback(); rollbackErr != nil {
+						return fmt.Errorf("删除 %s 失败：%v；%v", change.Path, err, rollbackErr)
+					}
+					return fmt.Errorf("删除 %s 失败，已回滚：%w", change.Path, err)
+				}
+			}
+			continue
+		}
+		if err := ensureParentDirectories(root, target, &createdDirs); err != nil {
+			if rollbackErr := rollback(); rollbackErr != nil {
+				return fmt.Errorf("创建目标目录失败：%v；%v", err, rollbackErr)
+			}
+			return fmt.Errorf("创建目标目录失败，已回滚：%w", err)
+		}
+		if err := replaceFromFile(change.Staged, target); err != nil {
+			if rollbackErr := rollback(); rollbackErr != nil {
+				return fmt.Errorf("写入 %s 失败：%v；%v", change.Path, err, rollbackErr)
+			}
+			return fmt.Errorf("写入 %s 失败，已回滚：%w", change.Path, err)
+		}
+	}
+	return nil
+}
+
+func securePathAllowMetadata(root, rel string) (string, bool, error) {
+	if rel == "VERSION" || rel == stateName {
+		target := filepath.Join(root, filepath.FromSlash(rel))
+		parentInfo, parentErr := os.Lstat(filepath.Dir(target))
+		if parentErr == nil && (parentInfo.Mode()&os.ModeSymlink != 0 || !parentInfo.IsDir()) {
+			return "", false, fmt.Errorf("元数据父目录不安全：%s", filepath.Dir(target))
+		}
+		if parentErr != nil && !os.IsNotExist(parentErr) {
+			return "", false, parentErr
+		}
+		if info, err := os.Lstat(target); err == nil {
+			if info.Mode()&os.ModeSymlink != 0 || info.IsDir() {
+				return "", false, fmt.Errorf("元数据目标不是普通文件：%s", rel)
+			}
+			return target, true, nil
+		} else if !os.IsNotExist(err) {
+			return "", false, err
+		}
+		return target, false, nil
+	}
+	return securePath(root, rel)
+}
+
+func ensureParentDirectories(root, target string, created *[]string) error {
+	root, err := filepath.Abs(root)
+	if err != nil {
+		return err
+	}
+	parent := filepath.Dir(target)
+	relative, err := filepath.Rel(root, parent)
+	if err != nil {
+		return err
+	}
+	if relative == "." {
+		return nil
+	}
+	current := root
+	for _, part := range strings.Split(relative, string(os.PathSeparator)) {
+		current = filepath.Join(current, part)
+		info, statErr := os.Lstat(current)
+		if statErr == nil {
+			if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+				return fmt.Errorf("目标父目录不安全：%s", current)
+			}
+			continue
+		}
+		if !os.IsNotExist(statErr) {
+			return statErr
+		}
+		if err := os.Mkdir(current, 0755); err != nil {
+			return err
+		}
+		*created = append(*created, current)
+	}
+	return nil
+}
+
+func replaceFromFile(source, destination string) error {
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return err
+	}
+	temp := destination + fmt.Sprintf(".dw-new-%d", os.Getpid())
+	_ = os.Remove(temp)
+	if err := copyFile(source, temp, 0644); err != nil {
+		return err
+	}
+	if err := os.Remove(destination); err != nil && !os.IsNotExist(err) {
+		_ = os.Remove(temp)
+		return err
+	}
+	if err := os.Rename(temp, destination); err != nil {
+		_ = os.Remove(temp)
+		return err
+	}
+	return nil
+}
+
+func copyFile(source, destination string, mode os.FileMode) error {
+	input, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer input.Close()
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return err
+	}
+	output, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
+	if err != nil {
+		return err
+	}
+	_, copyErr := io.Copy(output, input)
+	closeErr := output.Close()
+	if copyErr != nil {
+		return copyErr
+	}
+	return closeErr
+}
