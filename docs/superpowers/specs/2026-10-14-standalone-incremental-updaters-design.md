@@ -2,7 +2,7 @@
 
 ## 目标
 
-为已有客户端实例与服务端目录提供可在实例根目录运行的独立增量更新器。更新器同时支持 Bash 与 Batch，不依赖 Python，不进入 `.mrpack` 或服务端 ZIP，并能把旧安装中的整合包受管内容同步到目标发行版。
+为已有客户端实例与服务端目录提供可在实例根目录运行的独立增量更新器。更新器使用 Bash（macOS/Linux）与原生 Go EXE（Windows），不依赖 Python、BAT 或 PowerShell，不进入 `.mrpack` 或服务端 ZIP，并能把旧安装中的整合包受管内容同步到目标发行版。
 
 更新成功后，受管文件与目标发行版逐项一致；世界、日志、崩溃报告、账号与开服运行数据保持不变。
 
@@ -27,12 +27,12 @@
 | `DimensionWorks-<version>-delta.zip` | 客户端相对上一发行版的差量文件 |
 | `DimensionWorks-Server-<version>-delta.zip` | 服务端相对上一发行版的差量文件 |
 | `update-dimensionworks-client.sh` | macOS/Linux 客户端更新器 |
-| `update-dimensionworks-client.bat` | Windows 客户端更新器 |
+| `update-dimensionworks-client.exe` | Windows 客户端更新器 |
 | `update-dimensionworks-server.sh` | macOS/Linux 服务端更新器 |
-| `update-dimensionworks-server.bat` | Windows 服务端更新器 |
+| `update-dimensionworks-server.exe` | Windows 服务端更新器 |
 | `SHA256SUMS` | 上述资产的 SHA-256 |
 
-四个更新器源文件保存在仓库 `release-updaters/`。打包器必须验证 `.mrpack` 与服务端完整 ZIP 中不存在这四个脚本。脚本只能作为独立 Release 资产发布，首次使用时由用户复制到对应实例或服务端根目录。
+两个 Shell 更新器源文件保存在仓库 `release-updaters/`；Windows 更新器的 Go 源码保存在根目录 `update-Windows/`，由 GitHub Actions 分别编译为客户端与服务端 EXE。打包器必须验证 `.mrpack` 与服务端完整 ZIP 中不存在 Shell 更新器、Windows EXE 或旧版 BAT 更新器。更新器只能作为独立 Release 资产发布，首次使用时由用户复制到对应实例或服务端根目录。
 
 ## 更新清单格式
 
@@ -117,7 +117,7 @@ archive	config/example.cfg	sha256	<hash>	overrides/config/example.cfg
 - `server.properties` 中 `level-name` 指定的世界目录
 - `usercache.json`、`ops.json`、`whitelist.json`
 - `banned-ips.json`、`banned-players.json`
-- 更新器自身的四个脚本
+- 更新器自身与旧版更新器文件
 - `.dimensionworks-update/`
 - 未列入旧状态清单或目标清单的其他运行与运维文件
 
@@ -153,7 +153,7 @@ archive	config/example.cfg	sha256	<hash>	overrides/config/example.cfg
 7. 对归档项计算当前摘要，与目标清单比较，确定需要复制的最小文件集合。
 8. 把所有旧状态中存在、目标状态中消失的受管文件移入事务备份并删除。
 9. 复制变化文件，校验所有目标摘要。
-10. 原子写入 `VERSION` 与新状态；失败时恢复备份并删除本次新增文件。Shell 与 Batch 在下载、检查、暂存、应用和删除阶段实时输出进度。
+10. 原子写入 `VERSION` 与新状态；失败时恢复备份并删除本次新增文件。Shell 与 Go Windows 更新器在下载、检查、暂存、应用和删除阶段实时输出进度。
 
 ## 服务端更新流程
 
@@ -193,14 +193,14 @@ DimensionWorks 更新完成：<old> -> <new>
 
 计划涉及：
 
-- 新建 `release-updaters/` 四个独立脚本。
+- `release-updaters/` 保留两个独立 Shell 更新器；Windows 原生更新器源码位于 `update-Windows/`。
 - 新建 `scripts/pack_manifest.py`，集中生成、解析、验证 TSV 清单。
 - 修改 `scripts/package_mrpack.py`，生成客户端清单并写入 `.mrpack`。
 - 修改 `scripts/package_server.py`，生成服务端清单并写入 ZIP。
 - 新建 `scripts/build_server_delta.py`，比较两个服务端 ZIP 并生成差量。
 - 修改 `scripts/pack_version.py`，加入本地版本与 GitHub 标签取较大值再递增补丁的纯函数。
 - 修改 `scripts/pack_hook.py`，检查脚本、清单格式、资产命名和禁止内嵌脚本。
-- 修改 `.github/workflows/release-pack.yml`，修正版本冲突、生成并发布清单/差量/独立脚本。
+- 修改 `.github/workflows/release-pack.yml`，修正版本冲突、生成并发布清单/差量/Shell 更新器与 Windows EXE；新增 Windows 更新器测试、交叉编译工作流。
 - 修改 `scripts/README.md` 与新增用户文档，说明部署、更新、回滚和保留范围。
 - 新增清单、版本、差量、打包输出和工作流静态测试。
 
@@ -210,13 +210,13 @@ DimensionWorks 更新完成：<old> -> <new>
 
 - TSV 正常解析，拒绝重复路径、绝对路径、`..`、未知 action、非法摘要和错误 kind。
 - 版本函数正确处理本地落后、相等、GitHub 标签落后与非法标签。
-- `.mrpack` 与服务端 ZIP 中不存在四个更新脚本。
+- `.mrpack` 与服务端 ZIP 中不存在当前 Shell 更新器、Windows EXE 或旧版 BAT 更新器。
 - 客户端与服务端完整包都包含有效包内清单，独立清单与包内清单一致。
 - 客户端 fixture 更新后，受管目录内容与目标清单一致，仅变化文件被复制。
 - 服务端 fixture 使用兼容差量成功增量更新。
 - 跨版本、无状态、差量缺文件和本地漂移时可靠回退完整 ZIP。
 - 保留的世界、日志、EULA、服务端设置与 JVM 参数在成功和失败回滚后均不改变。
-- Windows Batch 与 Bash 脚本通过语法/静态检查；Windows 运行验证在可用时执行，未执行时必须如实报告。
+- Go 更新器单元测试、Windows amd64 EXE 交叉编译、Shell 语法检查均通过；真实 Windows 运行验证如未执行必须如实报告。
 - 工作流结构、资产名称、校验和与 Release 发布规则通过静态测试。
 - 打包预检继续通过，并实际构建客户端与服务端包验证内容。
 
