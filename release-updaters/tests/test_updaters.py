@@ -21,9 +21,7 @@ import build_server_delta  # noqa: E402
 
 SCRIPT_NAMES = (
     "update-dimensionworks-client.sh",
-    "update-dimensionworks-client.bat",
     "update-dimensionworks-server.sh",
-    "update-dimensionworks-server.bat",
 )
 PRESERVED_TOKENS = {
     "client": ("saves", "logs", "crash-reports", "screenshots"),
@@ -54,7 +52,7 @@ def sha512(data: bytes) -> str:
 
 
 class UpdaterScriptContractTest(unittest.TestCase):
-    def test_four_standalone_scripts_exist_with_required_contract(self) -> None:
+    def test_shell_updaters_exist_with_required_contract(self) -> None:
         for name in SCRIPT_NAMES:
             with self.subTest(name=name):
                 path = UPDATERS / name
@@ -99,21 +97,13 @@ class UpdaterScriptContractTest(unittest.TestCase):
                 self.assertNotIn("powershell", text.lower())
                 self.assertNotIn("cmd.exe", text.lower())
 
-    def test_batch_scripts_delegate_to_powershell_without_external_python(self) -> None:
+    def test_legacy_windows_batch_scripts_removed(self) -> None:
         for name in (
             "update-dimensionworks-client.bat",
             "update-dimensionworks-server.bat",
         ):
             with self.subTest(name=name):
-                text = (UPDATERS / name).read_text(encoding="utf-8")
-                self.assertIn("powershell", text.lower())
-                self.assertIn("-NoProfile", text)
-                self.assertIn("-ExecutionPolicy", text)
-                self.assertIn("$ProgressPreference = 'Continue'", text)
-                self.assertIn("previous.Digest -eq $entry.Digest", text)
-                self.assertIn("VERSION write-back verification failed", text)
-                if name == "update-dimensionworks-server.bat":
-                    self.assertNotIn("$Script:CurrentState.Base -eq $manifest.Base", text)
+                self.assertFalse((UPDATERS / name).exists(), f"obsolete updater remains: {name}")
 
 
 class FixtureFactory:
