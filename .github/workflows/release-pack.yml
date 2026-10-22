@@ -188,6 +188,7 @@ jobs:
         run: go test -v ./...
 
       - name: Build Windows client and server updaters
+        working-directory: update-Windows
         shell: bash
         run: |
           set -euo pipefail
@@ -195,9 +196,9 @@ jobs:
             GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
               -trimpath \
               -ldflags="-s -w -X main.defaultKind=${kind}" \
-              -o "dist/update-dimensionworks-${kind}.exe" \
-              ./update-Windows
-            file "dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
+              -o "../dist/update-dimensionworks-${kind}.exe" \
+              .
+            file "../dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
           done
 
 
@@ -289,6 +290,8 @@ jobs:
             "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
             "dist/update-dimensionworks-client.sh"
             "dist/update-dimensionworks-server.sh"
+            "dist/update-dimensionworks-client.exe"
+            "dist/update-dimensionworks-server.exe"
             dist/SHA256SUMS
           )
           if gh release view "$TAG" >/dev/null 2>&1; then
