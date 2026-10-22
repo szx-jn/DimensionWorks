@@ -19,9 +19,9 @@ class ReleaseWorkflowTest(unittest.TestCase):
             "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv",
             "DimensionWorks-Server-${PACK_VERSION}-delta.zip",
             "update-dimensionworks-client.sh",
-            "update-dimensionworks-client.bat",
+            "update-dimensionworks-client.exe",
             "update-dimensionworks-server.sh",
-            "update-dimensionworks-server.bat",
+            "update-dimensionworks-server.exe",
             "SHA256SUMS",
             "git push origin",
         )
