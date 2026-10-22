@@ -312,8 +312,10 @@ class UpdaterScriptExclusionTest(unittest.TestCase):
         updater_names = (
             "update-dimensionworks-client.sh",
             "update-dimensionworks-client.bat",
+            "update-dimensionworks-client.exe",
             "update-dimensionworks-server.sh",
             "update-dimensionworks-server.bat",
+            "update-dimensionworks-server.exe",
         )
         for name in updater_names:
             with self.subTest(name=name):
