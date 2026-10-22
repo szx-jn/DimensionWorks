@@ -7,6 +7,8 @@ on:
       - main
     paths:
       - 'release-updaters/**'
+      - 'update-Windows/**'
+      - '.github/workflows/**'
       - 'mods/dimensionworks-*/**'
       - 'manifest/mods.json'
       - 'scripts/package_mrpack.py'
@@ -169,13 +171,35 @@ jobs:
               --empty
           fi
 
-      - name: Copy standalone update scripts
+      - name: Copy standalone Shell updaters
         run: |
           set -euo pipefail
           cp release-updaters/update-dimensionworks-client.sh dist/
-          cp release-updaters/update-dimensionworks-client.bat dist/
           cp release-updaters/update-dimensionworks-server.sh dist/
-          cp release-updaters/update-dimensionworks-server.bat dist/
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: update-Windows/go.mod
+
+      - name: Test Windows updater
+        working-directory: update-Windows
+        run: go test -v ./...
+
+      - name: Build Windows client and server updaters
+        shell: bash
+        run: |
+          set -euo pipefail
+          for kind in client server; do
+            GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
+              -trimpath \
+              -ldflags="-s -w -X main.defaultKind=${kind}" \
+              -o "dist/update-dimensionworks-${kind}.exe" \
+              ./update-Windows
+            file "dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
+          done
+
 
       - name: Verify release assets
         env:
@@ -195,6 +219,10 @@ jobs:
           [[ "$client_version" == "$PACK_VERSION" ]] || { echo "Client VERSION mismatch: $client_version != $PACK_VERSION" >&2; exit 1; }
           [[ "$server_version" == "$PACK_VERSION" ]] || { echo "Server VERSION mismatch: $server_version != $PACK_VERSION" >&2; exit 1; }
           echo "Client and server VERSION verified: $PACK_VERSION"
+          for exe in dist/update-dimensionworks-client.exe dist/update-dimensionworks-server.exe; do
+            [[ -s "$exe" ]] || { echo "Missing Windows updater: $exe" >&2; exit 1; }
+            file "$exe" | grep -q 'PE32+ executable'
+          done
           if [[ "$(wc -c < "dist/DimensionWorks-${PACK_VERSION}-delta.zip")" -gt 22 ]]; then
             unzip -t "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
           fi
@@ -206,16 +234,16 @@ jobs:
               <(unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" dimensionworks-update-manifest.tsv)
           cmp "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
               <(unzip -p "dist/DimensionWorks-Server-${PACK_VERSION}.zip" dimensionworks-update-manifest.tsv)
-          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*\.(sh|bat)$'; then
+          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*\.(sh|bat|exe)$'; then
             echo "Updater script embedded in client package" >&2
             exit 1
           fi
           if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}-delta.zip" 2>/dev/null |
-              grep -E '(^|/)update-dimensionworks-.*\.(sh|bat)$'; then
+              grep -E '(^|/)update-dimensionworks-.*\.(sh|bat|exe)$'; then
             echo "Updater script embedded in client delta" >&2
             exit 1
           fi
-          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*\.(sh|bat)$'; then
+          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*\.(sh|bat|exe)$'; then
             echo "Updater script embedded in server package" >&2
             exit 1
           fi
@@ -229,9 +257,9 @@ jobs:
               "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
               update-dimensionworks-client.sh \
-              update-dimensionworks-client.bat \
               update-dimensionworks-server.sh \
-              update-dimensionworks-server.bat \
+              update-dimensionworks-client.exe \
+              update-dimensionworks-server.exe \
               > SHA256SUMS
           )
 
@@ -251,7 +279,7 @@ jobs:
         run: |
           set -euo pipefail
           title="DimensionWorks ${PACK_VERSION}"
-          notes="Minecraft 1.20.1 Forge 客户端、服务端、独立更新器与增量资产。"
+          notes="Minecraft 1.20.1 Forge 客户端、服务端、Windows EXE 更新器、Shell 更新器与增量资产。"
           assets=(
             "dist/DimensionWorks-${PACK_VERSION}.mrpack"
             "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
@@ -260,9 +288,7 @@ jobs:
             "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"
             "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
             "dist/update-dimensionworks-client.sh"
-            "dist/update-dimensionworks-client.bat"
             "dist/update-dimensionworks-server.sh"
-            "dist/update-dimensionworks-server.bat"
             dist/SHA256SUMS
           )
           if gh release view "$TAG" >/dev/null 2>&1; then
