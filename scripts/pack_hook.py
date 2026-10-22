@@ -126,9 +126,9 @@ def check_update_assets() -> CheckResult:
             problems.append(f"missing standalone updater: {path.relative_to(ROOT)}")
             continue
         data = path.read_bytes()
-        if b"\\r" in data:
+        if b"\r" in data:
             problems.append(f"{name}: updater must use LF line endings")
-        if not data.startswith(b"#!/usr/bin/env bash\\n"):
+        if not data.startswith(b"#!/usr/bin/env bash\n"):
             problems.append(f"{name}: shell updater must start with #!/usr/bin/env bash")
 
     windows_dir = ROOT / "update-Windows"
