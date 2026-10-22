@@ -77,7 +77,7 @@ python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
 - `update-dimensionworks-client.sh` / `.bat`
 - `update-dimensionworks-server.sh` / `.bat`
 
-首次使用时把对应脚本复制到客户端实例根目录或服务端根目录执行。脚本默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取包内或 Release 侧的 `dimensionworks-update-manifest.tsv`，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
+首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。Shell 更新器用于 macOS/Linux；Windows 使用 `update-Windows/` 中编译的原生 Go EXE，不依赖 BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取包内或 Release 侧的 `dimensionworks-update-manifest.tsv`，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
 
 客户端保留存档、日志、截图和启动器私有数据；服务端保留世界、日志、`eula.txt`、`server.properties`、`user_jvm_args.txt`、白名单、封禁和运行数据。运行客户端前退出游戏，运行服务端前停止进程。服务端优先使用 `DimensionWorks-Server-<版本>-delta.zip`，差量缺失、跨版本或本地文件漂移时自动回退完整 ZIP。
 
