@@ -74,8 +74,8 @@ python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
 
 更新器是独立发布资产，不会进入 `.mrpack` 或服务端 ZIP。每个 Release 发布两个 Shell 脚本和两个 Windows EXE：
 
-- `update-dimensionworks-client.sh` / `.bat`
-- `update-dimensionworks-server.sh` / `.bat`
+- `update-dimensionworks-client.sh` / `update-dimensionworks-server.sh`
+- `update-dimensionworks-client.exe` / `update-dimensionworks-server.exe`
 
 首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。Shell 更新器用于 macOS/Linux；Windows 使用 `update-Windows/` 中编译的原生 Go EXE，不依赖 BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取包内或 Release 侧的 `dimensionworks-update-manifest.tsv`，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
 
