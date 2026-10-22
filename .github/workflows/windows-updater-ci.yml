@@ -1,0 +1,58 @@
+name: Windows Updater CI
+
+on:
+  push:
+    paths:
+      - 'update-Windows/**'
+      - '.github/workflows/windows-updater-ci.yml'
+  pull_request:
+    paths:
+      - 'update-Windows/**'
+      - '.github/workflows/windows-updater-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test and build Windows updaters
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: update-Windows/go.mod
+
+      - name: Test updater
+        working-directory: update-Windows
+        run: go test -v ./...
+
+      - name: Cross-compile client and server EXEs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for kind in client server; do
+            GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
+              -trimpath \
+              -ldflags="-s -w -X main.defaultKind=${kind}" \
+              -o "dist/update-dimensionworks-${kind}.exe" \
+              ./update-Windows
+            file "dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
+          done
+
+      - name: Upload Windows updater builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: dimensionworks-windows-updaters
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/update-dimensionworks-client.exe
+            dist/update-dimensionworks-server.exe
