@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"errors"
 	"crypto/sha256"
 	"encoding/hex"
 	"os"
@@ -203,6 +204,43 @@ func TestOpenArchiveRejectsTraversal(t *testing.T) {
 	}
 	if _, err := openArchive(path); err == nil {
 		t.Fatal("archive path traversal must be rejected")
+	}
+}
+
+func TestValidateInstanceRootRequiresAnInstalledInstance(t *testing.T) {
+	root := t.TempDir()
+	if err := validateInstanceRoot(root, "client"); err == nil {
+		t.Fatal("Downloads-like directory must not be accepted as a client instance")
+	}
+	if err := validateInstanceRoot(root, "server"); err == nil {
+		t.Fatal("Downloads-like directory must not be accepted as a server instance")
+	}
+	if err := os.Mkdir(filepath.Join(root, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "VERSION"), []byte("0.1.38\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := validateInstanceRoot(root, "client"); err != nil {
+		t.Fatalf("valid client instance markers rejected: %v", err)
+	}
+	if err := validateInstanceRoot(root, "server"); err != nil {
+		t.Fatalf("valid server instance markers rejected: %v", err)
+	}
+}
+
+func TestWriteFailureLogPersistsReadableDiagnostic(t *testing.T) {
+	root := t.TempDir()
+	logPath := writeFailureLog(root, errors.New("expected diagnostic"))
+	if logPath == "" {
+		t.Fatal("expected a diagnostic log to be written")
+	}
+	data, err := os.ReadFile(logPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "expected diagnostic") || !strings.Contains(string(data), "\nerror=") {
+		t.Fatalf("diagnostic log is not readable: %q", data)
 	}
 }
 
