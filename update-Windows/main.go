@@ -156,14 +156,19 @@ func writeFailureLog(root string, cause error) string {
 		return ""
 	}
 	logDir := filepath.Join(updateRoot, "logs")
-	if err := os.MkdirAll(logDir, 0755); err != nil {
-		return ""
-	}
-	if info, err := os.Lstat(logDir); err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+	if info, statErr := os.Lstat(logDir); statErr == nil {
+		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return ""
+		}
+	} else if os.IsNotExist(statErr) {
+		if err := os.Mkdir(logDir, 0755); err != nil {
+			return ""
+		}
+	} else {
 		return ""
 	}
 	logPath := filepath.Join(logDir, "failed-"+time.Now().Format("20060102-150405")+"-"+fmt.Sprint(os.Getpid())+".log")
-	contents := fmt.Sprintf("time=%s\\nerror=%s\\n", time.Now().Format(time.RFC3339), cause)
+	contents := fmt.Sprintf("time=%s\nerror=%s\n", time.Now().Format(time.RFC3339), cause)
 	if err := os.WriteFile(logPath, []byte(contents), 0644); err != nil {
 		return ""
 	}
