@@ -1,5 +1,8 @@
 # 独立增量更新器实现计划
 
+> 历史实施计划：本文记录最初的 Bash + Batch 方案。Windows Batch 更新器现已被 `update-Windows/` 中的原生 Go EXE 取代；当前设计以 `docs/superpowers/specs/2026-10-14-standalone-incremental-updaters-design.md` 为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 为 DimensionWorks 客户端与服务端提供独立发布、可回滚的 Bash/Batch 增量更新器，并让 GitHub Release 不再发生版本覆盖。
