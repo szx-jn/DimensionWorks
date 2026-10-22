@@ -116,19 +116,31 @@ def check_instance(instance_dir: Path) -> CheckResult:
 
 def check_update_assets() -> CheckResult:
     problems: list[str] = []
-    names = sorted(pack_manifest.UPDATER_SCRIPT_NAMES)
+    names = (
+        "update-dimensionworks-client.sh",
+        "update-dimensionworks-server.sh",
+    )
     for name in names:
         path = ROOT / "release-updaters" / name
         if not path.is_file():
             problems.append(f"missing standalone updater: {path.relative_to(ROOT)}")
             continue
         data = path.read_bytes()
-        if b"\r" in data:
+        if b"\\r" in data:
             problems.append(f"{name}: updater must use LF line endings")
-        if name.endswith(".sh") and not data.startswith(b"#!/usr/bin/env bash\n"):
+        if not data.startswith(b"#!/usr/bin/env bash\\n"):
             problems.append(f"{name}: shell updater must start with #!/usr/bin/env bash")
-        if name.endswith(".bat") and not data.lower().startswith(b"@echo off"):
-            problems.append(f"{name}: batch updater must start with @echo off")
+
+    windows_dir = ROOT / "update-Windows"
+    for name in ("go.mod", "main.go", "main_test.go", "console_windows.go", "console_other.go"):
+        if not (windows_dir / name).is_file():
+            problems.append(f"missing Go Windows updater source: update-Windows/{name}")
+    for legacy in (
+        "update-dimensionworks-client.bat",
+        "update-dimensionworks-server.bat",
+    ):
+        if (ROOT / "release-updaters" / legacy).exists():
+            problems.append(f"obsolete Windows batch updater must be removed: release-updaters/{legacy}")
 
     try:
         pack_manifest.render_manifest(
@@ -146,7 +158,7 @@ def check_update_assets() -> CheckResult:
     return CheckResult(
         "update-assets",
         not problems,
-        f"{len(names)} standalone updater scripts",
+        "2 Shell updaters + native Go Windows sources",
         problems,
     )
 
