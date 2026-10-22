@@ -249,8 +249,8 @@ validate_zip() {
         local name="${member%/}"
         name="${name##*/}"
         case "$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')" in
-            update-dimensionworks-client.sh|update-dimensionworks-client.bat|\
-            update-dimensionworks-server.sh|update-dimensionworks-server.bat)
+            update-dimensionworks-client.sh|update-dimensionworks-client.bat|update-dimensionworks-client.exe|\
+            update-dimensionworks-server.sh|update-dimensionworks-server.bat|update-dimensionworks-server.exe)
                 die "更新脚本不得打入整合包：$member"
                 ;;
         esac
