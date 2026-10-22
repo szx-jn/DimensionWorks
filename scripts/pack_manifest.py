@@ -27,9 +27,11 @@ ALGORITHMS_BY_ACTION = {
 UPDATER_SCRIPT_NAMES = frozenset(
     {
         "update-dimensionworks-client.sh",
-        "update-dimensionworks-client.bat",
+        "update-dimensionworks-client.bat",  # Reject obsolete assets if one leaks into a package.
         "update-dimensionworks-server.sh",
-        "update-dimensionworks-server.bat",
+        "update-dimensionworks-server.bat",  # Reject obsolete assets if one leaks into a package.
+        "update-dimensionworks-client.exe",
+        "update-dimensionworks-server.exe",
     }
 )
 DIGEST_PATTERN = re.compile(r"^[0-9a-f]+$")
