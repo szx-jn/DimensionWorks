@@ -1,5 +1,6 @@
-// DimensionWorks seeded mineral propagation: two production routes per target.
-// Residue-based recovery has been removed; each route consumes a finite mineral sample.
+// DimensionWorks seeded mineral propagation.
+// Iron now uses a serial Create -> Mekanism line; the other mineral lines remain provisional.
+// Generic residues and residue-recovery recipes are not used.
 const BASIC_MINERAL_RECIPES = 'dimensionworks_cave_factory:self_propagation/basic_minerals/'
 
 const BASIC_MINERAL_LINES = [
@@ -7,11 +8,10 @@ const BASIC_MINERAL_LINES = [
     "item": "minecraft:raw_iron",
     "path": "iron",
     "compactingInputs": [
-      "2x minecraft:cobblestone",
-      "minecraft:gravel"
+      "2x create:andesite_alloy"
     ],
-    "mekanismCarrier": "create:andesite_alloy",
-    "mekanismCarrierCount": 2
+    "mekanismCarrier": "mekanism:dust_iron",
+    "mekanismCarrierCount": 1
   },
   {
     "item": "minecraft:raw_copper",
@@ -73,26 +73,6 @@ const BASIC_MINERAL_LINES = [
       "minecraft:gravel"
     ],
     "mekanismCarrier": "minecraft:clay_ball",
-    "mekanismCarrierCount": 2
-  },
-  {
-    "item": "minecraft:quartz",
-    "path": "quartz",
-    "compactingInputs": [
-      "2x minecraft:netherrack",
-      "minecraft:soul_sand"
-    ],
-    "mekanismCarrier": "minecraft:soul_sand",
-    "mekanismCarrierCount": 2
-  },
-  {
-    "item": "minecraft:amethyst_shard",
-    "path": "amethyst",
-    "compactingInputs": [
-      "2x minecraft:calcite",
-      "2x minecraft:quartz"
-    ],
-    "mekanismCarrier": "minecraft:glowstone_dust",
     "mekanismCarrierCount": 2
   },
   {
@@ -161,25 +141,41 @@ function expandMineralIngredients(inputs) {
 }
 
 ServerEvents.recipes(event => {
+  // Raw iron already has a native Create Crushing Wheels recipe. Use the Millstone
+  // adapter for this extra probabilistic iron-dust recipe to avoid duplicate wheel recipes.
+  global.DimensionWorksCrushing.register(event, {
+    id: BASIC_MINERAL_RECIPES + 'iron/dust_from_raw_iron',
+    machine: 'create:milling',
+    input: 'minecraft:raw_iron',
+    outputs: [
+      { item: 'mekanism:dust_iron', count: 2 },
+      { item: 'mekanism:dust_iron', count: 1, chance: 0.7 }
+    ]
+  })
+
   BASIC_MINERAL_LINES.forEach(mineral => {
     const item = mineral.item
     const recipePath = mineral.path + '/'
+    const isIronLine = mineral.path === 'iron'
 
-    // Line 1 — Create mechanical compaction. No generic residue or universal byproduct is produced.
+    // Create mechanical compaction. Iron creates an intermediate that must go through Mekanism.
+    const compactingOutput = isIronLine ? 'kubejs:iron_concentrate' : '2x ' + item
     const compactingRecipe = event.recipes.create.compacting(
-      '2x ' + item,
+      compactingOutput,
       expandMineralIngredients([item].concat(mineral.compactingInputs))
     )
     mineralRecipe(compactingRecipe, recipePath + 'mechanical_growth')
 
-    // Line 2 — Mekanism Combiner. Use the KubeJS Mekanism integration so
-    // both input quantities are encoded as real ingredient-with-amount values.
+    // For iron, the Combiner consumes the Create intermediate plus iron dust.
+    // Other target lines retain their existing provisional standalone Combiner recipes.
+    const combiningInput = isIronLine ? 'kubejs:iron_concentrate' : item
     const combiningRecipe = event.recipes.mekanism.combining(
       '2x ' + item,
-      item,
+      combiningInput,
       mineral.mekanismCarrierCount + 'x ' + mineral.mekanismCarrier
     )
     mineralRecipe(combiningRecipe, recipePath + 'mekanism_combining')
   })
-  console.info('[DimensionWorks] BASIC_MINERAL_RECIPES_REGISTERED targets=' + BASIC_MINERAL_LINES.length + ' recipes=' + (BASIC_MINERAL_LINES.length * 2))
+
+  console.info('[DimensionWorks] BASIC_MINERAL_RECIPES_REGISTERED targets=' + BASIC_MINERAL_LINES.length + ' recipes=' + (BASIC_MINERAL_LINES.length * 2 + 1))
 })
