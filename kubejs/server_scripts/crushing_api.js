@@ -119,8 +119,8 @@
           : { item: recipe.input }
       ]
       if (recipe.fluidInput) {
+        // Create 6.0.8 processing recipes encode fluid ingredients as { fluid, amount }.
         ingredients.push({
-          type: 'forge:fluid_stack',
           amount: recipe.fluidInput.amount,
           fluid: recipe.fluidInput.fluid
         })
