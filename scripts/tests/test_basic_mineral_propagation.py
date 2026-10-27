@@ -55,7 +55,11 @@ class BasicMineralPropagationTest(unittest.TestCase):
         for line in self.lines:
             with self.subTest(item=line["item"]):
                 self.assertRegex(line["path"], r"^[a-z0-9_]+$")
-                self.assertTrue(line["compactingInputs"])
+                if line["item"] == "minecraft:raw_iron":
+                    self.assertEqual(line["pressingInput"], "mekanism:dust_iron")
+                    self.assertNotIn("compactingInputs", line)
+                else:
+                    self.assertTrue(line["compactingInputs"])
                 self.assertTrue(line["mekanismCarrier"])
                 self.assertGreater(int(line["mekanismCarrierCount"]), 0)
         for suffix in suffixes:
@@ -71,6 +75,9 @@ class BasicMineralPropagationTest(unittest.TestCase):
         self.assertIn("BASIC_MINERAL_RECIPES_REGISTERED", self.source)
         self.assertIn("BASIC_MINERAL_LINES.length * 2 + 1", self.source)
         self.assertIn("iron/dust_from_raw_iron", self.source)
+        self.assertIn("event.recipes.create.pressing(", self.source)
+        self.assertIn("mineral.pressingInput", self.source)
+        self.assertIn("'kubejs:iron_concentrate'", self.source)
 
     def test_high_value_targets_are_not_registered_yet(self) -> None:
         items = {line["item"] for line in self.lines}
