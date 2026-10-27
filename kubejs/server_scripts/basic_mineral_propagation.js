@@ -7,9 +7,7 @@ const BASIC_MINERAL_LINES = [
   {
     "item": "minecraft:raw_iron",
     "path": "iron",
-    "compactingInputs": [
-      "2x create:andesite_alloy"
-    ],
+    "pressingInput": "mekanism:dust_iron",
     "mekanismCarrier": "mekanism:dust_iron",
     "mekanismCarrierCount": 1
   },
@@ -178,15 +176,24 @@ ServerEvents.recipes(event => {
     const recipePath = mineral.path + '/'
     const isIronLine = mineral.path === 'iron'
 
-    // Create mechanical compaction. Iron creates an intermediate that must go through Mekanism.
-    const compactingOutput = isIronLine ? 'kubejs:iron_concentrate' : '2x ' + item
-    const compactingRecipe = event.recipes.create.compacting(
-      compactingOutput,
-      expandMineralIngredients([item].concat(mineral.compactingInputs))
-    )
-    mineralRecipe(compactingRecipe, recipePath + 'mechanical_growth')
+    // Iron uses a real Mechanical Press recipe: one iron dust becomes an intermediate.
+    // The iron dust is consumed again by the Mekanism Combiner, so both costs are explicit.
+    // Other minerals retain their provisional Create Compacting recipes for now.
+    if (isIronLine) {
+      const pressingRecipe = event.recipes.create.pressing(
+        'kubejs:iron_concentrate',
+        mineral.pressingInput
+      )
+      mineralRecipe(pressingRecipe, recipePath + 'mechanical_growth')
+    } else {
+      const compactingRecipe = event.recipes.create.compacting(
+        '2x ' + item,
+        expandMineralIngredients([item].concat(mineral.compactingInputs))
+      )
+      mineralRecipe(compactingRecipe, recipePath + 'mechanical_growth')
+    }
 
-    // For iron, the Combiner consumes the Create intermediate plus iron dust.
+    // Iron: pressed iron dust + another iron dust -> 2 raw iron.
     // Other target lines retain their existing provisional standalone Combiner recipes.
     const combiningInput = isIronLine ? 'kubejs:iron_concentrate' : item
     const combiningRecipe = event.recipes.mekanism.combining(
