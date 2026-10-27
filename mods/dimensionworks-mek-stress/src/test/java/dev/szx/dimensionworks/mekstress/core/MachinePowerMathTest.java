@@ -51,11 +51,13 @@ class MachinePowerMathTest {
     }
 
     @Test
-    void scalesProductionAboveTargetAndFloorsTheFinalOutput() {
+    void scalesEveryRecipeOutputAndRoundsFractionalAmountsUp() {
         assertEquals(1.0D, MachinePowerMath.productionMultiplier(8_192, 8_192), 1.0E-9D);
         assertEquals(1.5D, MachinePowerMath.productionMultiplier(12_288, 8_192), 1.0E-9D);
         assertEquals(9L, MachinePowerMath.scaledOutput(3L, 2, 1.5D));
-        assertEquals(1L, MachinePowerMath.scaledOutput(1L, 1, 1.99D));
+        assertEquals(2L, MachinePowerMath.scaledOutput(1L, 1, 1.25D));
+        assertEquals(3L, MachinePowerMath.scaledOutput(1L, 2, 1.25D));
+        assertEquals(2L, MachinePowerMath.scaledOutput(1L, 1, 1.99D));
     }
 
     @Test

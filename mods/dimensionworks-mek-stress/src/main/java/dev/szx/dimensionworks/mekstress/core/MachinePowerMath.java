@@ -66,7 +66,7 @@ public final class MachinePowerMath {
         return (double) actualRpm / (double) targetRpm;
     }
 
-    /** Applies a production multiplier to an output stack and floors the final amount. */
+    /** Applies a production multiplier to each recipe result, rounding fractional item amounts up. */
     public static long scaledOutput(long baseAmount, int operations, double multiplier) {
         if (baseAmount <= 0L || operations <= 0 || !Double.isFinite(multiplier) || multiplier <= 0.0D) {
             return 0L;
@@ -75,7 +75,7 @@ public final class MachinePowerMath {
         if (!Double.isFinite(scaled) || scaled <= 0.0D) {
             return 0L;
         }
-        return scaled >= (double) Long.MAX_VALUE ? Long.MAX_VALUE : (long) Math.floor(scaled);
+        return scaled >= (double) Long.MAX_VALUE ? Long.MAX_VALUE : (long) Math.ceil(scaled);
     }
 
     /** Finds the largest operation count whose scaled output still fits the available room. */
