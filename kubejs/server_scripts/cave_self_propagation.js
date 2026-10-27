@@ -168,7 +168,7 @@ ServerEvents.recipes(event => {
     'alexscaves:radrock'
   ]), 'toxic/acidic_radrock_recovery')
 
-  global.DimensionWorksCrushing.register(event, {
+  global.DimensionWorksGrinding.register(event, {
     id: SELF_PROPAGATION + 'toxic/uranium_shard_primary',
     machine: 'create:crushing',
     input: 'create:crushed_raw_uranium',
@@ -280,7 +280,7 @@ ServerEvents.recipes(event => {
     'minecraft:white_dye',
     Fluid.of('minecraft:water', 250)
   ]), 'candy/candy_cane')
-  global.DimensionWorksCrushing.register(event, {
+  global.DimensionWorksGrinding.register(event, {
     id: SELF_PROPAGATION + 'support/candy/peppermint_powder',
     machine: 'create:milling',
     input: 'alexscaves:candy_cane',
