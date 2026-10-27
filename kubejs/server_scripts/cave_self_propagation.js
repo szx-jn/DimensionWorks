@@ -34,8 +34,6 @@ function createRecipes(namespace) {
   return {
     mixing: (results, ingredients) => namespace.mixing(results, expandIngredients(ingredients)),
     compacting: (results, ingredients) => namespace.compacting(results, expandIngredients(ingredients)),
-    crushing: (results, ingredients) => namespace.crushing(results, expandIngredients(ingredients)),
-    milling: (results, ingredients) => namespace.milling(results, expandIngredients(ingredients)),
     filling: (results, ingredients) => namespace.filling(results, expandIngredients(ingredients)),
     haunting: (results, ingredients) => namespace.haunting(results, expandIngredients(ingredients))
   }
@@ -170,10 +168,15 @@ ServerEvents.recipes(event => {
     'alexscaves:radrock'
   ]), 'toxic/acidic_radrock_recovery')
 
-  selfRecipe(create.crushing([
-    '2x alexscaves:uranium_shard',
-    Item.of('alexscaves:uranium_shard').withChance(0.5)
-  ], 'create:crushed_raw_uranium'), 'toxic/uranium_shard_primary')
+  global.DimensionWorksCrushing.register(event, {
+    id: SELF_PROPAGATION + 'toxic/uranium_shard_primary',
+    machine: 'create:crushing',
+    input: 'create:crushed_raw_uranium',
+    outputs: [
+      { item: 'alexscaves:uranium_shard', count: 2 },
+      { item: 'alexscaves:uranium_shard', count: 1, chance: 0.5 }
+    ]
+  })
   selfRecipe(create.mixing('alexscaves:uranium_shard', [
     '2x dimensionworks_cave_factory:decay_residue',
     'alexscaves:acidic_radrock'
@@ -277,7 +280,14 @@ ServerEvents.recipes(event => {
     'minecraft:white_dye',
     Fluid.of('minecraft:water', 250)
   ]), 'candy/candy_cane')
-  supportRecipe(create.milling('2x alexscaves:peppermint_powder', 'alexscaves:candy_cane'), 'candy/peppermint_powder')
+  global.DimensionWorksCrushing.register(event, {
+    id: SELF_PROPAGATION + 'support/candy/peppermint_powder',
+    machine: 'create:milling',
+    input: 'alexscaves:candy_cane',
+    outputs: [
+      { item: 'alexscaves:peppermint_powder', count: 2 }
+    ]
+  })
 
   selfRecipe(create.compacting('4x alexscaves:rock_candy_white', [
     '4x minecraft:sugar',
