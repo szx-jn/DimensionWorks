@@ -1333,6 +1333,17 @@
       "url": "https://modrinth.com/mod/searchables"
     },
     {
+      "id": "shulkerboxtooltip",
+      "name": "Shulker Box Tooltip",
+      "source": "modrinth",
+      "project_id": "2M01OLQq",
+      "version": "4.0.4+1.20.1-forge",
+      "version_id": "QMp2SF1u",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/shulkerboxtooltip"
+    },
+    {
       "id": "sliceanddice",
       "name": "Create Slice & Dice",
       "source": "modrinth",
