@@ -151,47 +151,6 @@ const BASIC_MINERAL_LINES = [
     "heat": "heated"
   },
   {
-    "item": "minecraft:diamond",
-    "path": "diamond",
-    "compactingInputs": [
-      "4x minecraft:coal",
-      "2x minecraft:obsidian",
-      "2x minecraft:quartz"
-    ],
-    "mekanismCarrier": "minecraft:obsidian",
-    "mekanismCarrierCount": 4,
-    "residueCount": 6,
-    "recoveryInputs": [
-      "2x minecraft:obsidian",
-      "2x minecraft:quartz"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 1000,
-    "heat": "superheated"
-  },
-  {
-    "item": "minecraft:emerald",
-    "path": "emerald",
-    "compactingInputs": [
-      "4x minecraft:clay_ball",
-      "2x minecraft:bone_meal",
-      "2x minecraft:moss_block",
-      "minecraft:amethyst_shard"
-    ],
-    "mekanismCarrier": "minecraft:moss_block",
-    "mekanismCarrierCount": 4,
-    "residueCount": 6,
-    "recoveryInputs": [
-      "2x minecraft:clay_ball",
-      "2x minecraft:bone_meal",
-      "2x minecraft:moss_block",
-      "minecraft:amethyst_shard"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 1000,
-    "heat": "superheated"
-  },
-  {
     "item": "minecraft:amethyst_shard",
     "path": "amethyst",
     "compactingInputs": [
@@ -209,26 +168,6 @@ const BASIC_MINERAL_LINES = [
     "recoveryFluid": "minecraft:water",
     "fluidAmount": 500,
     "heat": "heated"
-  },
-  {
-    "item": "minecraft:ancient_debris",
-    "path": "ancient_debris",
-    "compactingInputs": [
-      "4x minecraft:netherrack",
-      "2x minecraft:basalt",
-      "2x minecraft:quartz"
-    ],
-    "mekanismCarrier": "minecraft:netherite_ingot",
-    "mekanismCarrierCount": 1,
-    "residueCount": 8,
-    "recoveryInputs": [
-      "2x minecraft:netherite_scrap",
-      "4x minecraft:netherrack",
-      "2x minecraft:basalt"
-    ],
-    "recoveryFluid": "minecraft:lava",
-    "fluidAmount": 1000,
-    "heat": "superheated"
   },
   {
     "item": "mekanism:raw_tin",
@@ -288,26 +227,6 @@ const BASIC_MINERAL_LINES = [
     "recoveryFluid": "minecraft:water",
     "fluidAmount": 500,
     "heat": "heated"
-  },
-  {
-    "item": "mekanism:raw_uranium",
-    "path": "uranium",
-    "compactingInputs": [
-      "2x minecraft:basalt",
-      "minecraft:gunpowder",
-      "minecraft:quartz"
-    ],
-    "mekanismCarrier": "minecraft:gunpowder",
-    "mekanismCarrierCount": 4,
-    "residueCount": 4,
-    "recoveryInputs": [
-      "minecraft:basalt",
-      "minecraft:gunpowder",
-      "minecraft:quartz"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 1000,
-    "heat": "superheated"
   },
   {
     "item": "mekanism:fluorite_gem",
