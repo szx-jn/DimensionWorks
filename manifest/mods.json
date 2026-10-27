@@ -304,6 +304,17 @@
       "url": "https://modrinth.com/mod/create-connected"
     },
     {
+      "id": "create_cyber_goggles",
+      "name": "Create: Cyber Goggles",
+      "source": "modrinth",
+      "project_id": "TlQAWQCY",
+      "version": "1.20.1-6.1.2+Forge",
+      "version_id": "vussbRo7",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/create-cyber-goggles"
+    },
+    {
       "id": "create_diesel_generators",
       "name": "Create: Diesel Generators",
       "source": "modrinth",
@@ -315,6 +326,18 @@
       "url": "https://modrinth.com/mod/create-diesel-generators"
     },
     {
+      "id": "create_dragons_plus",
+      "name": "Create: Dragons Plus",
+      "source": "curseforge",
+      "project_slug": "create-dragons-plus",
+      "file_id": 8937074,
+      "file_name": "CreateDragonsPlus-1.11.9.jar",
+      "version": "1.11.9",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/create-dragons-plus"
+    },
+    {
       "id": "create_enchantment_industry",
       "name": "Create: Enchantment Industry",
       "source": "modrinth",
@@ -324,6 +347,18 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/create-enchantment-industry"
+    },
+    {
+      "id": "create_integrated_farming",
+      "name": "Create: Integrated Farming [Unofficial]",
+      "source": "curseforge",
+      "project_slug": "create-integrated-farming-unofficial",
+      "file_id": 9017742,
+      "file_name": "create-integrated-farming-1.4.3.2-1.20.1.jar",
+      "version": "1.4.3.2",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/create-integrated-farming-unofficial"
     },
     {
       "id": "create_liquid_fuel",
@@ -708,17 +743,6 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/glodium"
-    },
-    {
-      "id": "goggleson",
-      "name": "Goggles On!",
-      "source": "modrinth",
-      "project_id": "St2vbaWx",
-      "version": "1.1.0",
-      "version_id": "mnGebfPs",
-      "required": true,
-      "environment": "client",
-      "url": "https://modrinth.com/mod/goggles-on"
     },
     {
       "id": "guideme",
@@ -1463,30 +1487,6 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/xaeros-world-map"
-    },
-    {
-      "id": "create_dragons_plus",
-      "name": "Create: Dragons Plus",
-      "source": "curseforge",
-      "project_slug": "create-dragons-plus",
-      "file_id": 8937074,
-      "file_name": "CreateDragonsPlus-1.11.9.jar",
-      "version": "1.11.9",
-      "required": true,
-      "environment": "both",
-      "url": "https://www.curseforge.com/minecraft/mc-mods/create-dragons-plus"
-    },
-    {
-      "id": "create_integrated_farming",
-      "name": "Create: Integrated Farming [Unofficial]",
-      "source": "curseforge",
-      "project_slug": "create-integrated-farming-unofficial",
-      "file_id": 9017742,
-      "file_name": "create-integrated-farming-1.4.3.2-1.20.1.jar",
-      "version": "1.4.3.2",
-      "required": true,
-      "environment": "both",
-      "url": "https://www.curseforge.com/minecraft/mc-mods/create-integrated-farming-unofficial"
     }
   ]
 }
