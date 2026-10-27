@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 import time
@@ -30,6 +31,7 @@ DEFAULT_INSTANCE_DIR = (
 )
 FORGE_VERSION = "47.4.23"
 USER_AGENT = "DimensionWorks-Packager/0.1"
+CF_API_KEY = os.environ.get("CF_API_KEY", "").strip()
 OVERRIDE_DIRS = ("defaultconfigs", "kubejs", "resourcepacks")
 VERBOSE = False
 REPO_CONFIG_OVERRIDE_DIRS = ("config",)
@@ -57,19 +59,26 @@ def request_json(url: str) -> Any:
 
 
 def download(url: str, destination: Path) -> None:
+    headers = {"User-Agent": USER_AGENT}
+    host = urllib.parse.urlparse(url).hostname or ""
+    if host.endswith("forgecdn.net") and CF_API_KEY:
+        headers["x-api-key"] = CF_API_KEY
+
+    last_error: Exception | None = None
     for attempt in range(4):
-        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        request = urllib.request.Request(url, headers=headers)
         try:
             with urllib.request.urlopen(request, timeout=180) as response:
                 with destination.open("wb") as output:
                     shutil.copyfileobj(response, output)
             return
         except (OSError, TimeoutError, urllib.error.URLError) as error:
+            last_error = error
             if attempt == 3:
                 raise
             time.sleep(2**attempt)
-            last_error = error
-    raise last_error
+    if last_error is not None:
+        raise last_error
 
 
 def hashes(path: Path) -> tuple[str, str, int]:
@@ -209,7 +218,7 @@ def resolve_modrinth(mod: dict[str, Any]) -> dict[str, Any]:
 def curseforge_url(mod: dict[str, Any]) -> str:
     file_id = int(mod["file_id"])
     return (
-        f"https://mediafilez.forgecdn.net/files/{file_id // 1000}/{file_id % 1000:03d}/"
+        f"https://edge.forgecdn.net/files/{file_id // 1000}/{file_id % 1000:03d}/"
         f"{urllib.parse.quote(mod['file_name'])}"
     )
 
