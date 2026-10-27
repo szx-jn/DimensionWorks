@@ -17,10 +17,13 @@
       fail('id must be a namespaced recipe id')
     }
     if (typeof recipe.machine !== 'string' || !recipe.machine) fail('machine is required')
-    if (!(typeof recipe.input === 'string' || Array.isArray(recipe.input))) {
-      fail('input must be an item id, tag, or ingredient array')
+    if (typeof recipe.input !== 'string' || !recipe.input) {
+      fail('input must be a single item id or tag string supported by the selected machine')
     }
-    if (typeof recipe.input === 'string' && !recipe.input) fail('input cannot be empty')
+    if (recipe.processingTime !== undefined &&
+        (!Number.isInteger(Number(recipe.processingTime)) || Number(recipe.processingTime) < 1)) {
+      fail('processingTime must be a positive integer')
+    }
     if (!Array.isArray(recipe.outputs) || recipe.outputs.length === 0) {
       fail('outputs must be a non-empty array')
     }
