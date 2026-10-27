@@ -39,6 +39,7 @@ Create 的粉碎轮/磨石通过 KubeJS Create 注册；Mekanism 粉碎机通过
 | create_dragons_plus / Create: Dragons Plus | 风扇处理、冻结、染色与表面打磨/抛光；未发现需要单独注册的粉碎配方类型。砂纸表面处理不等于把固体研成粉。 |
 | create_enchantment_industry | Mechanical Grindstone 的 grinding 类型独立适配；disenchanting 仍单独归类。 |
 | sliceanddice / Create Slice & Dice | Slicer 自动执行切菜板配方，属于切片/切割，而非粉碎。 |
+| appliedcreate / Applied Create | AE2 与 Create 的联动/物流集成；没有单独粉碎或研磨机器/配方类型，不新增适配器。 |
 | create_diesel_generators | 燃料精炼、发酵、成形和浇铸；不是粉碎类。 |
 | create_integrated_farming | 种植、收割和农作物集成；不是粉碎类。 |
 | creategearsandtavern | 酒馆、酒液及相关 Create 自动化；没有同语义的独立粉碎机。 |
@@ -57,7 +58,7 @@ Create 的粉碎轮/磨石通过 KubeJS Create 注册；Mekanism 粉碎机通过
 - 原版砂轮：其用途是修复耐久与拆除附魔，不会把材料磨成粉，因此排除。
 - AE2：按当前 1.20.1 安装版本核对，没有可注册的 Quartz Grindstone 配方类型；旧版 AE2 文档不作为当前版本适配依据。
 
-## 其余 100 个模组条目
+## 其余 99 个模组条目
 
 以下 ID 逐项与 manifest 对照过，没有识别到需要新增“固体粉碎/研磨”配方适配器的独立机器或配方类型；它们主要属于库、UI、地图、存储、权限、内容维度、自动化辅助等类别：
 
