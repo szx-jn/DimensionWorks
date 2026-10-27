@@ -6,12 +6,13 @@ import dev.szx.dimensionworks.mekstress.core.MachinePowerRouteScope;
 import dev.szx.dimensionworks.mekstress.memory.MachinePowerManager;
 import dev.szx.dimensionworks.mekstress.memory.StressRules;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = TileEntityMekanism.class, remap = false)
@@ -65,26 +66,30 @@ public abstract class TileEntityMekanismMixin {
         }
     }
 
-    @Redirect(
-        method = "tickServer",
-        at = @At(
-            value = "INVOKE",
-            target = "Lmekanism/common/tile/base/TileEntityMekanism;onUpdateServer()V"
-        ),
-        remap = false
-    )
-    private static void dimensionworks$wrapUpdateWithProductionContext(TileEntityMekanism tile) {
-        TileEntityMekanismInvoker invoker = (TileEntityMekanismInvoker) tile;
-        if (!StressRules.isEligible(tile)) {
-            invoker.dimensionworks$onUpdateServer();
-            return;
-        }
-
-        try (MachineWorkContext.Scope ignored = MachineWorkContext.push(
-            MachinePowerManager.productionMultiplier(tile))) {
-            invoker.dimensionworks$onUpdateServer();
-        }
+    /**
+     * Keep the production context active for the complete Mekanism tick.
+     *
+     * <p>The previous redirect only wrapped the direct onUpdateServer call site. Scoping the
+     * static tick entry also covers recipe handlers that execute elsewhere in the same tick
+     * and keeps the context independent of which machine subclass overrides onUpdateServer.
+     */
+    @Inject(method = "tickServer", at = @At("HEAD"), remap = false)
+    private static void dimensionworks$pushProductionContext(Level level, BlockPos pos,
+                                                              BlockState state, TileEntityMekanism tile,
+                                                              CallbackInfo ci) {
+        double multiplier = StressRules.isEligible(tile)
+            ? MachinePowerManager.productionMultiplier(tile)
+            : 1.0D;
+        MachineWorkContext.push(multiplier);
     }
+
+    @Inject(method = "tickServer", at = @At("RETURN"), remap = false)
+    private static void dimensionworks$popProductionContext(Level level, BlockPos pos,
+                                                             BlockState state, TileEntityMekanism tile,
+                                                             CallbackInfo ci) {
+        MachineWorkContext.pop();
+    }
+
     @Inject(method = "blockRemoved", at = @At("HEAD"), remap = false)
     private void dimensionworks$clearRemovedBlock(CallbackInfo ci) {
         MachinePowerManager.clearForRemoval((TileEntityMekanism) (Object) this);
