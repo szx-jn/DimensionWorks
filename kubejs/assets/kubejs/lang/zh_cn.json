@@ -46,7 +46,5 @@
   "message.kubejs.gear_heart.repair.no_target": "未找到已装备的破损齿轮之心，修复碎片未被消耗。",
   "message.kubejs.dimension_key.unlocked": "维度钥匙已经生效，中转维度现已永久解锁。",
   "message.kubejs.dimension_key.already_unlocked": "中转维度已经永久解锁。",
-  "message.kubejs.dimension_key.failed": "维度钥匙未能生效，请重试。",
-  "item.kubejs.mineral_residue": "矿物残渣",
-  "item.kubejs.mineral_residue.tooltip": "矿物机械处理的混合副产物，可作为样本载体通过加热混合回收基础矿物。"
+  "message.kubejs.dimension_key.failed": "维度钥匙未能生效，请重试。"
 }
