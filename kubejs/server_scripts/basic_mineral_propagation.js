@@ -1,5 +1,5 @@
-// DimensionWorks seeded mineral propagation: three distinct production styles per target.
-// First obtain one finite sample of each target; every route consumes its sample and returns two.
+// DimensionWorks seeded mineral propagation: two production routes per target.
+// Residue-based recovery has been removed; each route consumes a finite mineral sample.
 const BASIC_MINERAL_RECIPES = 'dimensionworks_cave_factory:self_propagation/basic_minerals/'
 
 const BASIC_MINERAL_LINES = [
@@ -11,15 +11,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:gravel"
     ],
     "mekanismCarrier": "create:andesite_alloy",
-    "mekanismCarrierCount": 2,
-    "residueCount": 2,
-    "recoveryInputs": [
-      "minecraft:iron_nugget",
-      "minecraft:gravel"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 250,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "minecraft:raw_copper",
@@ -29,15 +21,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:calcite"
     ],
     "mekanismCarrier": "minecraft:flint",
-    "mekanismCarrierCount": 2,
-    "residueCount": 2,
-    "recoveryInputs": [
-      "minecraft:copper_ingot",
-      "minecraft:gravel"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 250,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "create:raw_zinc",
@@ -47,15 +31,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:quartz"
     ],
     "mekanismCarrier": "create:brass_ingot",
-    "mekanismCarrierCount": 2,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "create:zinc_ingot",
-      "minecraft:gravel"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "minecraft:raw_gold",
@@ -65,15 +41,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:quartz"
     ],
     "mekanismCarrier": "minecraft:blaze_powder",
-    "mekanismCarrierCount": 3,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "minecraft:gold_nugget",
-      "minecraft:netherrack"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 3
   },
   {
     "item": "minecraft:coal",
@@ -83,15 +51,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:gravel"
     ],
     "mekanismCarrier": "minecraft:charcoal",
-    "mekanismCarrierCount": 2,
-    "residueCount": 2,
-    "recoveryInputs": [
-      "minecraft:charcoal",
-      "minecraft:gravel"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 250,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "minecraft:redstone",
@@ -102,15 +62,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:flint"
     ],
     "mekanismCarrier": "minecraft:glowstone_dust",
-    "mekanismCarrierCount": 2,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "minecraft:clay_ball",
-      "minecraft:flint"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 250,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "minecraft:lapis_lazuli",
@@ -121,16 +73,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:gravel"
     ],
     "mekanismCarrier": "minecraft:clay_ball",
-    "mekanismCarrierCount": 2,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "minecraft:clay_ball",
-      "minecraft:bone_meal",
-      "minecraft:gravel"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "minecraft:quartz",
@@ -140,15 +83,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:soul_sand"
     ],
     "mekanismCarrier": "minecraft:soul_sand",
-    "mekanismCarrierCount": 2,
-    "residueCount": 2,
-    "recoveryInputs": [
-      "minecraft:netherrack",
-      "minecraft:soul_sand"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 250,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "minecraft:amethyst_shard",
@@ -158,16 +93,7 @@ const BASIC_MINERAL_LINES = [
       "2x minecraft:quartz"
     ],
     "mekanismCarrier": "minecraft:glowstone_dust",
-    "mekanismCarrierCount": 2,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "minecraft:calcite",
-      "minecraft:quartz",
-      "minecraft:glowstone_dust"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "mekanism:raw_tin",
@@ -178,15 +104,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:copper_ingot"
     ],
     "mekanismCarrier": "minecraft:deepslate",
-    "mekanismCarrierCount": 2,
-    "residueCount": 2,
-    "recoveryInputs": [
-      "minecraft:copper_ingot",
-      "minecraft:cobblestone"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "mekanism:raw_lead",
@@ -197,16 +115,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:iron_ingot"
     ],
     "mekanismCarrier": "minecraft:flint",
-    "mekanismCarrierCount": 2,
-    "residueCount": 2,
-    "recoveryInputs": [
-      "minecraft:iron_ingot",
-      "minecraft:gravel",
-      "minecraft:flint"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "mekanism:raw_osmium",
@@ -217,16 +126,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:quartz"
     ],
     "mekanismCarrier": "create:brass_ingot",
-    "mekanismCarrierCount": 2,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "minecraft:iron_ingot",
-      "minecraft:deepslate",
-      "minecraft:quartz"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   },
   {
     "item": "mekanism:fluorite_gem",
@@ -237,15 +137,7 @@ const BASIC_MINERAL_LINES = [
       "minecraft:glowstone_dust"
     ],
     "mekanismCarrier": "minecraft:lapis_lazuli",
-    "mekanismCarrierCount": 2,
-    "residueCount": 3,
-    "recoveryInputs": [
-      "minecraft:calcite",
-      "minecraft:glowstone_dust"
-    ],
-    "recoveryFluid": "minecraft:water",
-    "fluidAmount": 500,
-    "heat": "heated"
+    "mekanismCarrierCount": 2
   }
 ]
 
@@ -273,9 +165,9 @@ ServerEvents.recipes(event => {
     const item = mineral.item
     const recipePath = mineral.path + '/'
 
-    // Line 1 — Create mechanical compaction. The output includes a guaranteed residue.
+    // Line 1 — Create mechanical compaction. No generic residue or universal byproduct is produced.
     const compactingRecipe = event.recipes.create.compacting(
-      ['2x ' + item, 'kubejs:mineral_residue'],
+      '2x ' + item,
       expandMineralIngredients([item].concat(mineral.compactingInputs))
     )
     mineralRecipe(compactingRecipe, recipePath + 'mechanical_growth')
@@ -288,22 +180,6 @@ ServerEvents.recipes(event => {
       mineral.mekanismCarrierCount + 'x ' + mineral.mekanismCarrier
     )
     mineralRecipe(combiningRecipe, recipePath + 'mekanism_combining')
-
-    // Line 3 — Create heated residue recovery. A mineral sample is still required:
-    // universal residue is a feedstock, not a bypass around the finite-sample start.
-    const recoveryInputs = [item, mineral.residueCount + 'x kubejs:mineral_residue']
-      .concat(mineral.recoveryInputs)
-    recoveryInputs.push(Fluid.of(mineral.recoveryFluid, mineral.fluidAmount))
-    const recoveryRecipe = event.recipes.create.mixing(
-      '2x ' + item,
-      expandMineralIngredients(recoveryInputs)
-    )
-    if (mineral.heat === 'superheated') {
-      recoveryRecipe.superheated()
-    } else {
-      recoveryRecipe.heated()
-    }
-    mineralRecipe(recoveryRecipe, recipePath + 'residue_recovery')
   })
-  console.info('[DimensionWorks] BASIC_MINERAL_RECIPES_REGISTERED targets=' + BASIC_MINERAL_LINES.length + ' recipes=' + (BASIC_MINERAL_LINES.length * 3))
+  console.info('[DimensionWorks] BASIC_MINERAL_RECIPES_REGISTERED targets=' + BASIC_MINERAL_LINES.length + ' recipes=' + (BASIC_MINERAL_LINES.length * 2))
 })
