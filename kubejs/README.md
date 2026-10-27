@@ -64,6 +64,10 @@ server_scripts/basic_mineral_propagation.js 为 16 种目标资源配置三条�
 
 `server_scripts/blaze_cake_redstone_cost.js` 统一替换所有产出 `create:blaze_cake_base` 的配方，要求鸡蛋、糖、灰烬粉（Create Cinder Flour）和 1 份红石粉经机械压制合成底料。原版将底料注入 250 mB 熔岩制成烈焰蛋糕的配方保留不变；这样附属模组若提供其他底料配方，也不会绕过红石成本。
 
+## 熔融金属与特殊材料
+
+`startup_scripts/molten_metals.js` 通过可复用的 `MoltenMetalFluidDefinition` 注册 21 种熔融金属、合金与特殊材料流体，使用 `dimensionworks:` 命名空间并提供中英文名称。该脚本只注册流体，不自动添加熔炼、浇注或材料加工配方；这些配方应在后续服务端脚本中按各机器的实际能力分别实现。
+
 ## 高中化学核心气体
 
 - `startup_scripts/chemistry_gases.js` 注册 Mekanism 原版未提供的核心化学品气体，使用独立的 `dimensionworks:` 命名空间，避免覆盖 Mekanism 原版气体。
