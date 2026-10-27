@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -44,6 +45,8 @@ class CrushingApiTest(unittest.TestCase):
         self.assertIn("recipe.fluidOutput", self.api)
         self.assertIn("up to four item outputs", self.api)
         self.assertIn("not both", self.api)
+        self.assertIn("amount: recipe.fluidInput.amount", self.api)
+        self.assertNotIn("forge:fluid_stack", self.api)
 
     def test_iron_yield_is_two_plus_seventy_percent_bonus(self) -> None:
         self.assertIn("machine: 'create:milling'", self.mineral)
@@ -67,7 +70,7 @@ class CrushingApiTest(unittest.TestCase):
             self.assertNotIn("event.recipes.create.milling(", source, path.name)
 
     def test_intermediate_item_is_registered_and_localized(self) -> None:
-        lang = __import__("json").loads(
+        lang = json.loads(
             (ROOT / "kubejs/assets/kubejs/lang/zh_cn.json").read_text(encoding="utf-8")
         )
         self.assertIn("event.create('iron_concentrate')", self.items)
@@ -81,12 +84,15 @@ class CrushingApiTest(unittest.TestCase):
             "mekanism",
             "kubejs_mekanism",
             "create_enchantment_industry",
+            "ae2",
             "laowu",
             "create_dragons_plus",
             "sliceanddice",
             "dimensionworks_cave_factory",
         ):
             self.assertIn(mod, self.audit)
+        self.assertIn("135 个模组条目", self.audit)
+        self.assertIn("其余 100 个模组条目", self.audit)
 
 
 if __name__ == "__main__":
