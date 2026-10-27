@@ -37,6 +37,7 @@ jobs:
         run: |
           python3 -m json.tool manifest/mods.json >/dev/null
           node --check kubejs/server_scripts/basic_mineral_propagation.js
+          node --check kubejs/server_scripts/cave_self_propagation.js
           node --check kubejs/server_scripts/crushing_api.js
           node --check kubejs/startup_scripts/mineral_processing_items.js
           python3 -m py_compile scripts/package_mrpack.py scripts/package_server.py scripts/pack_manifest.py
