@@ -2,13 +2,16 @@ package dev.szx.dimensionworks.mekstress.mixin.mek;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import mekanism.common.tile.base.TileEntityMekanism;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 class TileEntityMekanismMixinTest {
     @Test
@@ -29,29 +32,25 @@ class TileEntityMekanismMixinTest {
     }
 
     @Test
-    void scopesProductionMultiplierAcrossTheWholeServerTick() {
-        boolean pushAtHead = false;
-        boolean popAtReturn = false;
-
+    void schedulesVirtualMachineOverridesAtTheStaticTickBoundary() throws IOException {
+        boolean found = false;
         for (Method handler : TileEntityMekanismMixin.class.getDeclaredMethods()) {
-            Inject inject = handler.getAnnotation(Inject.class);
-            if (inject == null || Arrays.stream(inject.method()).noneMatch("tickServer"::equals)) {
+            Redirect redirect = handler.getAnnotation(Redirect.class);
+            if (redirect == null || Arrays.stream(redirect.method()).noneMatch("tickServer"::equals)) {
                 continue;
             }
 
-            assertTrue(Modifier.isStatic(handler.getModifiers()),
-                () -> "Static tickServer injection must be static: " + handler.getName());
-            boolean atHead = Arrays.stream(inject.at()).anyMatch(at -> "HEAD".equals(at.value()));
-            boolean atReturn = Arrays.stream(inject.at()).anyMatch(at -> "RETURN".equals(at.value()));
-            if ("dimensionworks$pushProductionContext".equals(handler.getName())) {
-                pushAtHead = atHead;
-            } else if ("dimensionworks$popProductionContext".equals(handler.getName())) {
-                popAtReturn = atReturn;
-            }
+            found = true;
+            assertTrue(Modifier.isStatic(handler.getModifiers()));
+            assertTrue(redirect.at().target().contains("TileEntityMekanism;onUpdateServer()V"));
         }
+        assertTrue(found, "Mechanical scheduling must wrap tickServer's virtual onUpdateServer call");
 
-        assertTrue(pushAtHead, "Production multiplier must be pushed at tickServer HEAD");
-        assertTrue(popAtReturn, "Production multiplier must be restored at tickServer RETURN");
+        String source = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/mekstress/mixin/mek/TileEntityMekanismMixin.java"));
+        assertTrue(source.contains("WorkScheduler.advance("));
+        assertTrue(source.contains("invoker.dimensionworks$onUpdateServer();"));
+        assertTrue(source.contains("MachineWorkContext.push("));
     }
 
     @Test
