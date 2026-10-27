@@ -65,7 +65,7 @@ class BasicMineralPropagationTest(unittest.TestCase):
         for suffix in suffixes:
             self.assertIn("recipePath + '" + suffix + "'", self.source)
         self.assertNotIn("residue_recovery", self.source)
-        self.assertEqual(self.source.count("recipePath + '"), 2)
+        self.assertEqual(self.source.count("recipePath + '"), 3)
 
     def test_mekanism_combiner_uses_counted_kubejs_integration_inputs(self) -> None:
         self.assertIn("event.recipes.mekanism.combining(", self.source)
