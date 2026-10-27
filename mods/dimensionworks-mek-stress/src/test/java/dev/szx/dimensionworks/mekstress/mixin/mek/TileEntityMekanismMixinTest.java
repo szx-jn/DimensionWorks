@@ -1,18 +1,19 @@
 package dev.szx.dimensionworks.mekstress.mixin.mek;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import mekanism.common.tile.base.TileEntityMekanism;
 import org.junit.jupiter.api.Test;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 class TileEntityMekanismMixinTest {
     @Test
     void everyInjectionTargetsADeclaredMekanismMethod() {
+        Method[] targets = TileEntityMekanism.class.getDeclaredMethods();
         for (Method handler : TileEntityMekanismMixin.class.getDeclaredMethods()) {
             Inject inject = handler.getAnnotation(Inject.class);
             if (inject == null) {
@@ -21,28 +22,36 @@ class TileEntityMekanismMixinTest {
 
             assertTrue(inject.method().length > 0, () -> "Mixin target must not be empty: " + handler.getName());
             for (String target : inject.method()) {
-                assertDoesNotThrow(
-                    () -> TileEntityMekanism.class.getDeclaredMethod(target),
-                    () -> "Mixin target must be declared by TileEntityMekanism: " + target
-                );
+                assertTrue(Arrays.stream(targets).anyMatch(method -> method.getName().equals(target)),
+                    () -> "Mixin target must be declared by TileEntityMekanism: " + target);
             }
         }
     }
 
     @Test
-    void wrapsTheFullServerUpdateCallWithTheProductionContext() {
-        boolean found = false;
+    void scopesProductionMultiplierAcrossTheWholeServerTick() {
+        boolean pushAtHead = false;
+        boolean popAtReturn = false;
+
         for (Method handler : TileEntityMekanismMixin.class.getDeclaredMethods()) {
-            Redirect redirect = handler.getAnnotation(Redirect.class);
-            if (redirect == null) {
+            Inject inject = handler.getAnnotation(Inject.class);
+            if (inject == null || Arrays.stream(inject.method()).noneMatch("tickServer"::equals)) {
                 continue;
             }
-            if (redirect.method().length == 1 && "tickServer".equals(redirect.method()[0])) {
-                found = true;
-                assertTrue(Modifier.isStatic(handler.getModifiers()));
+
+            assertTrue(Modifier.isStatic(handler.getModifiers()),
+                () -> "Static tickServer injection must be static: " + handler.getName());
+            boolean atHead = Arrays.stream(inject.at()).anyMatch(at -> "HEAD".equals(at.value()));
+            boolean atReturn = Arrays.stream(inject.at()).anyMatch(at -> "RETURN".equals(at.value()));
+            if ("dimensionworks$pushProductionContext".equals(handler.getName())) {
+                pushAtHead = atHead;
+            } else if ("dimensionworks$popProductionContext".equals(handler.getName())) {
+                popAtReturn = atReturn;
             }
         }
-        assertTrue(found, "tickServer must be wrapped at the onUpdateServer call site");
+
+        assertTrue(pushAtHead, "Production multiplier must be pushed at tickServer HEAD");
+        assertTrue(popAtReturn, "Production multiplier must be restored at tickServer RETURN");
     }
 
     @Test
