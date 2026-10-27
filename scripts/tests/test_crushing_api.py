@@ -92,7 +92,7 @@ class CrushingApiTest(unittest.TestCase):
         ):
             self.assertIn(mod, self.audit)
         self.assertIn("135 个模组条目", self.audit)
-        self.assertIn("其余 100 个模组条目", self.audit)
+        self.assertIn("其余 99 个模组条目", self.audit)
 
 
 if __name__ == "__main__":
