@@ -69,7 +69,8 @@ class BasicMineralPropagationTest(unittest.TestCase):
         self.assertIn("mineral.mekanismCarrierCount + 'x ' + mineral.mekanismCarrier", self.source)
         self.assertNotIn("event.custom(JsonIO.of({", self.source)
         self.assertIn("BASIC_MINERAL_RECIPES_REGISTERED", self.source)
-        self.assertIn("BASIC_MINERAL_LINES.length * 2", self.source)
+        self.assertIn("BASIC_MINERAL_LINES.length * 2 + 1", self.source)
+        self.assertIn("iron/dust_from_raw_iron", self.source)
 
     def test_high_value_targets_are_not_registered_yet(self) -> None:
         items = {line["item"] for line in self.lines}
