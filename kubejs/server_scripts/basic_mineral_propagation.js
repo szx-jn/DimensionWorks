@@ -163,7 +163,7 @@ function expandMineralIngredients(inputs) {
 ServerEvents.recipes(event => {
   // Raw iron already has a native Create Crushing Wheels recipe. Use the Millstone
   // adapter for this extra probabilistic iron-dust recipe to avoid duplicate wheel recipes.
-  global.DimensionWorksCrushing.register(event, {
+  global.DimensionWorksGrinding.register(event, {
     id: BASIC_MINERAL_RECIPES + 'iron/dust_from_raw_iron',
     machine: 'create:milling',
     input: 'minecraft:raw_iron',
