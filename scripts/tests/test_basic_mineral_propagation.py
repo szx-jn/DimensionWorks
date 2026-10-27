@@ -20,14 +20,10 @@ EXPECTED_ITEMS = (
     "minecraft:redstone",
     "minecraft:lapis_lazuli",
     "minecraft:quartz",
-    "minecraft:diamond",
-    "minecraft:emerald",
     "minecraft:amethyst_shard",
-    "minecraft:ancient_debris",
     "mekanism:raw_tin",
     "mekanism:raw_lead",
     "mekanism:raw_osmium",
-    "mekanism:raw_uranium",
     "mekanism:fluorite_gem",
 )
 
@@ -53,7 +49,7 @@ class BasicMineralPropagationTest(unittest.TestCase):
         items = tuple(line["item"] for line in self.lines)
         self.assertEqual(items, EXPECTED_ITEMS)
         self.assertEqual(len(items), len(set(items)))
-        self.assertEqual(len(self.lines), 17)
+        self.assertEqual(len(self.lines), 13)
 
     def test_every_target_declares_three_recipe_styles(self) -> None:
         suffixes = (
@@ -81,16 +77,16 @@ class BasicMineralPropagationTest(unittest.TestCase):
         self.assertNotIn("event.custom(JsonIO.of({", self.source)
         self.assertIn("BASIC_MINERAL_RECIPES_REGISTERED", self.source)
 
-    def test_high_value_targets_have_real_cost_escalation(self) -> None:
-        by_item = {line["item"]: line for line in self.lines}
-        self.assertGreaterEqual(by_item["minecraft:diamond"]["residueCount"], 6)
-        self.assertGreaterEqual(by_item["minecraft:emerald"]["residueCount"], 6)
-        self.assertEqual(by_item["minecraft:diamond"]["heat"], "superheated")
-        self.assertEqual(by_item["minecraft:emerald"]["heat"], "superheated")
-        debris = by_item["minecraft:ancient_debris"]
-        self.assertGreaterEqual(debris["residueCount"], 8)
-        self.assertEqual(debris["recoveryFluid"], "minecraft:lava")
-        self.assertEqual(debris["heat"], "superheated")
+    def test_high_value_targets_are_not_registered_yet(self) -> None:
+        items = {line["item"] for line in self.lines}
+        for item in (
+            "minecraft:diamond",
+            "minecraft:emerald",
+            "minecraft:ancient_debris",
+            "mekanism:raw_uranium",
+        ):
+            self.assertNotIn(item, items)
+
 
     def test_mekanism_raw_item_ids_are_used_as_targets(self) -> None:
         items = {line["item"] for line in self.lines}
