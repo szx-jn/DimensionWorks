@@ -76,6 +76,26 @@ const BASIC_MINERAL_LINES = [
     "mekanismCarrierCount": 2
   },
   {
+    "item": "minecraft:quartz",
+    "path": "quartz",
+    "compactingInputs": [
+      "2x minecraft:netherrack",
+      "minecraft:soul_sand"
+    ],
+    "mekanismCarrier": "minecraft:soul_sand",
+    "mekanismCarrierCount": 2
+  },
+  {
+    "item": "minecraft:amethyst_shard",
+    "path": "amethyst",
+    "compactingInputs": [
+      "2x minecraft:calcite",
+      "2x minecraft:quartz"
+    ],
+    "mekanismCarrier": "minecraft:glowstone_dust",
+    "mekanismCarrierCount": 2
+  },
+  {
     "item": "mekanism:raw_tin",
     "path": "tin",
     "compactingInputs": [
