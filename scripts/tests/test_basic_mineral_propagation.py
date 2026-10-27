@@ -29,7 +29,7 @@ EXPECTED_ITEMS = (
 def load_mineral_lines() -> tuple[str, list[dict[str, object]]]:
     source = SCRIPT.read_text(encoding="utf-8")
     match = re.search(
-        r"const BASIC_MINERAL_LINES = (\\[.*?^\\])\\n",
+        r"const BASIC_MINERAL_LINES = (\[.*?^\])\n",
         source,
         flags=re.MULTILINE | re.DOTALL,
     )
