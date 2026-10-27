@@ -2,7 +2,7 @@
 
 ## 目标
 
-把所有“把输入物品磨碎并产生产物”的配方注册统一到 **global.DimensionWorksCrushing.register(event, recipe)**。调用方只声明机器类型、输入与产物分布；底层适配器负责转换为各模组的真实配方。
+把所有“把输入物品磨碎并产生产物”的配方注册统一到 **global.DimensionWorksCrushing.register(event, recipe)**。调用方只声明机器类型、单个物品或标签输入与产物分布；底层适配器负责转换为各模组的真实配方。
 
 ## 当前适配器
 
