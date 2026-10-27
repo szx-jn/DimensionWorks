@@ -54,6 +54,9 @@ class CrushingApiTest(unittest.TestCase):
         self.assertIn("{ item: 'mekanism:dust_iron', count: 1, chance: 0.7 }", self.mineral)
         self.assertIn("'kubejs:iron_concentrate'", self.mineral)
         self.assertIn("'mekanism:dust_iron'", self.mineral)
+        self.assertIn("event.recipes.create.pressing(", self.mineral)
+        self.assertIn("mineral.pressingInput", self.mineral)
+        self.assertIn("machine: 'create:milling'", self.mineral)
 
     def test_existing_create_crushing_and_milling_calls_use_the_shared_api(self) -> None:
         self.assertIn("machine: 'create:crushing'", self.cave)
