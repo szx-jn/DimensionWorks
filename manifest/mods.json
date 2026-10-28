@@ -308,8 +308,8 @@
       "name": "Create: Cyber Goggles",
       "source": "modrinth",
       "project_id": "TlQAWQCY",
-      "version": "1.20.1-6.1.2+Forge",
-      "version_id": "vussbRo7",
+      "version": "1.20.1-7.2.3-Forge",
+      "version_id": "HaKiNUMI",
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/create-cyber-goggles"
