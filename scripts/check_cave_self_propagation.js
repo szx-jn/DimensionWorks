@@ -143,8 +143,8 @@ if (problems.length) {
   process.exit(1)
 }
 
-const primary = recipes.filter((recipe) => recipe.id.endsWith('_primary')).length
-const recovery = recipes.filter((recipe) => recipe.id.endsWith('_recovery')).length
+const primary = recipes.filter((recipe) => typeof recipe.id === 'string' && recipe.id.endsWith('_primary')).length
+const recovery = recipes.filter((recipe) => typeof recipe.id === 'string' && recipe.id.endsWith('_recovery')).length
 console.log(
   `SELF-PROPAGATION OK: ${recipes.length} recipes (${primary} primary, ${recovery} recovery, ${recipes.length - primary - recovery} support)`
 )
