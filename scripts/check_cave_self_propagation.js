@@ -54,9 +54,20 @@ for (const type of RECIPE_TYPES) {
   namespace[type] = (results, ingredients) => record(type, results, ingredients)
 }
 
+const event = { recipes: { create: namespace } }
 const sandbox = {
   console,
-  ServerEvents: { recipes: (callback) => callback({ recipes: { create: namespace } }) },
+  // KubeJS exposes this integration in-game. The checker must model it too,
+  // and record its recipes rather than silently ignoring grinding recipes.
+  global: {
+    DimensionWorksGrinding: {
+      register(_event, recipe) {
+        const entry = record(recipe.machine, recipe.outputs, [recipe.input])
+        entry.id = recipe.id
+      }
+    }
+  },
+  ServerEvents: { recipes: (callback) => callback(event) },
   Fluid: { of: (id, amount) => ({ fluid: id, amount }) },
   Item: { of: (id) => ({ item: id, withChance: (chance) => ({ item: id, chance }) }) }
 }
