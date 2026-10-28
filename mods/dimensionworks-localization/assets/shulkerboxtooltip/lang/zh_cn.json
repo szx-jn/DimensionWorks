@@ -1,0 +1,5 @@
+{
+  "shulkerboxtooltip.hint.lock": "按下锁定快捷键以锁定提示框",
+  "text.autoconfig.shulkerboxtooltip.option.controls.lockTooltipKey": "锁定提示框快捷键",
+  "text.autoconfig.shulkerboxtooltip.option.controls.lockTooltipKey.tooltip": "设置用于锁定提示框的快捷键"
+}
