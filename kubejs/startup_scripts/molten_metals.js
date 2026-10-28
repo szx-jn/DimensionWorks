@@ -2,19 +2,17 @@
 // Minecraft 1.20.1 Forge / KubeJS 6。
 // 本文件只负责注册流体；熔炼、浇注与加工配方放在 server_scripts 中。
 
-class MoltenMetalFluidDefinition {
-  constructor(id, displayName, color) {
-    this.id = id
-    this.displayName = displayName
-    this.color = color
-  }
+function MoltenMetalFluidDefinition(id, displayName, color) {
+  this.id = id
+  this.displayName = displayName
+  this.color = color
+}
 
-  register(event) {
-    return event.create(this.id)
-      .thickTexture(this.color)
-      .bucketColor(this.color)
-      .displayName(this.displayName)
-  }
+MoltenMetalFluidDefinition.prototype.register = function(event) {
+  return event.create(this.id)
+    .thickTexture(this.color)
+    .bucketColor(this.color)
+    .displayName(this.displayName)
 }
 
 const DW_MOLTEN_METALS = [
