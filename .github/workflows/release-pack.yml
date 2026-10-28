@@ -114,6 +114,8 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Prepare client validation instance
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
         run: |
           instance_dir="$RUNNER_TEMP/dimensionworks-instance"
           cache_dir="$RUNNER_TEMP/dimensionworks-pack-cache"
@@ -125,6 +127,7 @@ jobs:
 
       - name: Build and package server
         env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
           PACK_VERSION: ${{ steps.version.outputs.version }}
           LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
           DIMENSION_COMPLETE: ${{ inputs.dimension_complete }}
@@ -172,6 +175,7 @@ jobs:
 
       - name: Package client
         env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
           PACK_VERSION: ${{ steps.version.outputs.version }}
           LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
           DIMENSION_COMPLETE: ${{ inputs.dimension_complete }}
