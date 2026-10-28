@@ -1,4 +1,4 @@
-name: Windows Updater CI
+name: Windows 更新器构建与测试
 
 on:
   push:
@@ -16,24 +16,24 @@ permissions:
 
 jobs:
   build:
-    name: Test and build Windows updaters
+    name: 编译并测试更新器
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Check out repository
+      - name: 检出仓库代码
         uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: 配置 Go 环境
         uses: actions/setup-go@v5
         with:
           go-version: stable
           cache-dependency-path: update-Windows/go.mod
 
-      - name: Test updater
+      - name: 运行更新器测试
         working-directory: update-Windows
         run: go test -v ./...
 
-      - name: Cross-compile client and server EXEs
+      - name: 交叉编译 Windows 客户端与服务端更新器
         working-directory: update-Windows
         shell: bash
         run: |
@@ -48,7 +48,7 @@ jobs:
             file "../dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
           done
 
-      - name: Upload Windows updater builds
+      - name: 上传 Windows 更新器
         uses: actions/upload-artifact@v4
         with:
           name: dimensionworks-windows-updaters
@@ -59,24 +59,24 @@ jobs:
             dist/update-dimensionworks-server.exe
 
   windows-smoke:
-    name: Run updater tests on Windows
+    name: 在 Windows 环境验证更新器
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
-      - name: Check out repository
+      - name: 检出仓库代码
         uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: 配置 Go 环境
         uses: actions/setup-go@v5
         with:
           go-version: stable
           cache-dependency-path: update-Windows/go.mod
 
-      - name: Run Go tests on Windows
+      - name: 在 Windows 上运行测试
         working-directory: update-Windows
         run: go test -v ./...
 
-      - name: Build and smoke-test Windows executables
+      - name: 构建并冒烟测试 Windows 程序
         working-directory: update-Windows
         shell: pwsh
         run: |
@@ -85,7 +85,7 @@ jobs:
           foreach ($kind in @("client", "server")) {
             $exe = "../dist/update-dimensionworks-$kind.exe"
             go build -trimpath -ldflags="-s -w -X main.defaultKind=$kind" -o $exe .
-            if ($LASTEXITCODE -ne 0) { throw "Build failed for $kind updater" }
+            if ($LASTEXITCODE -ne 0) { throw "构建 $kind 更新器失败" }
             & $exe --help
-            if ($LASTEXITCODE -ne 0) { throw "Windows smoke test failed for $kind updater" }
+            if ($LASTEXITCODE -ne 0) { throw "$kind 更新器冒烟测试失败" }
           }
