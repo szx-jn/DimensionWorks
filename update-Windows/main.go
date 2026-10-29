@@ -277,7 +277,7 @@ func run(kind string, args []string) error {
 		if err != nil {
 			return err
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w；可重新运行并使用 --package 指定已下载的完整包", err)
 		}
@@ -293,7 +293,7 @@ func run(kind string, args []string) error {
 		}
 		version := strings.TrimPrefix(releaseTag, "v")
 		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w", err)
 		}
@@ -322,7 +322,7 @@ func run(kind string, args []string) error {
 		if manifestURL == "" {
 			manifestURL = assetURL(releaseTag, manifestAsset)
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
 		if err != nil {
 			return fmt.Errorf("下载最新版本清单失败：%w", err)
 		}
