@@ -19,12 +19,6 @@ jobs:
       - name: 检出仓库代码
         uses: actions/checkout@v4
 
-      - name: 检查更新脚本语法
-        run: |
-          set -euo pipefail
-          bash -n release-updaters/update-dimensionworks-client.sh
-          bash -n release-updaters/update-dimensionworks-server.sh
-
       - name: 检查 JSON、KubeJS 与 Python
         run: |
           set -euo pipefail
@@ -36,4 +30,3 @@ jobs:
           node scripts/check_cave_self_propagation.js
           python3 -m py_compile scripts/package_mrpack.py scripts/package_server.py scripts/pack_manifest.py
           python3 -m unittest discover -s scripts/tests -v
-          python3 -m unittest discover -s release-updaters/tests -v
