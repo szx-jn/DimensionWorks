@@ -767,6 +767,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 					continue
 				}
 				completed.Add(end-begin+1)
+				finished.Add(1)
 				printMu.Lock()
 				fmt.Printf("[下载进度] 分段完成 %d/%d（%s/%s）\n", finished.Load(), segments, humanSize(completed.Load()), humanSize(total))
 				printMu.Unlock()
