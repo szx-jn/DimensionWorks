@@ -26,13 +26,15 @@
 | `DimensionWorks-Server-<version>-update-manifest.tsv` | 服务端完整受管文件清单 |
 | `DimensionWorks-<version>-delta.zip` | 客户端相对上一发行版的差量文件 |
 | `DimensionWorks-Server-<version>-delta.zip` | 服务端相对上一发行版的差量文件 |
-| `update-dimensionworks-client.sh` | macOS/Linux 客户端更新器 |
-| `update-dimensionworks-client.exe` | Windows 客户端更新器 |
-| `update-dimensionworks-server.sh` | macOS/Linux 服务端更新器 |
-| `update-dimensionworks-server.exe` | Windows 服务端更新器 |
+| `update-dimensionworks-client-windows-amd64.exe` | Windows amd64 客户端更新器 |
+| `update-dimensionworks-server-windows-amd64.exe` | Windows amd64 服务端更新器 |
+| `update-dimensionworks-client-linux-amd64` | Linux amd64 客户端更新器 |
+| `update-dimensionworks-server-linux-amd64` | Linux amd64 服务端更新器 |
+| `update-dimensionworks-client-macos-arm64` | macOS arm64 客户端更新器 |
+| `update-dimensionworks-server-macos-arm64` | macOS arm64 服务端更新器 |
 | `SHA256SUMS` | 上述资产的 SHA-256 |
 
-两个 Shell 更新器源文件保存在仓库 `release-updaters/`；Windows 更新器的 Go 源码保存在根目录 `update-Windows/`，由 GitHub Actions 分别编译为客户端与服务端 EXE。打包器必须验证 `.mrpack` 与服务端完整 ZIP 中不存在 Shell 更新器、Windows EXE 或旧版 BAT 更新器。更新器只能作为独立 Release 资产发布，首次使用时由用户复制到对应实例或服务端根目录。
+所有平台的更新器共用仓库 `update-Windows/` 中的 Go 源码，由 GitHub Actions 交叉编译为 Windows amd64、Linux amd64 和 macOS arm64 的客户端/服务端原生二进制。打包器必须验证 `.mrpack` 与服务端完整 ZIP 中不存在 Shell 更新器、Windows EXE 或旧版 BAT 更新器。更新器只能作为独立 Release 资产发布，首次使用时由用户复制到对应实例或服务端根目录。
 
 ## 更新清单格式
 
@@ -153,7 +155,7 @@ archive	config/example.cfg	sha256	<hash>	overrides/config/example.cfg
 7. 对归档项计算当前摘要，与目标清单比较，确定需要复制的最小文件集合。
 8. 把所有旧状态中存在、目标状态中消失的受管文件移入事务备份并删除。
 9. 复制变化文件，校验所有目标摘要。
-10. 原子写入 `VERSION` 与新状态；失败时恢复备份并删除本次新增文件。Shell 与 Go Windows 更新器在下载、检查、暂存、应用和删除阶段实时输出进度。
+10. 原子写入 `VERSION` 与新状态；失败时恢复备份并删除本次新增文件。各平台 Go 更新器在下载、检查、暂存、应用和删除阶段实时输出进度。
 
 ## 服务端更新流程
 
@@ -193,7 +195,7 @@ DimensionWorks 更新完成：<old> -> <new>
 
 计划涉及：
 
-- `release-updaters/` 保留两个独立 Shell 更新器；Windows 原生更新器源码位于 `update-Windows/`。
+- `update-Windows/` 保存跨平台原生 Go 更新器源码；发布时交叉编译 Windows amd64、Linux amd64、macOS arm64 六个二进制。
 - 新建 `scripts/pack_manifest.py`，集中生成、解析、验证 TSV 清单。
 - 修改 `scripts/package_mrpack.py`，生成客户端清单并写入 `.mrpack`。
 - 修改 `scripts/package_server.py`，生成服务端清单并写入 ZIP。
@@ -216,7 +218,7 @@ DimensionWorks 更新完成：<old> -> <new>
 - 服务端 fixture 使用兼容差量成功增量更新。
 - 跨版本、无状态、差量缺文件和本地漂移时可靠回退完整 ZIP。
 - 保留的世界、日志、EULA、服务端设置与 JVM 参数在成功和失败回滚后均不改变。
-- Go 更新器单元测试、Windows amd64 EXE 交叉编译、Shell 语法检查均通过；真实 Windows 运行验证如未执行必须如实报告。
+- Go 更新器单元测试、Windows amd64 EXE 交叉编译、Go 源码测试与三平台交叉编译均通过；真实各平台运行验证如未执行必须如实报告。
 - 工作流结构、资产名称、校验和与 Release 发布规则通过静态测试。
 - 打包预检继续通过，并实际构建客户端与服务端包验证内容。
 
