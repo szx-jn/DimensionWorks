@@ -324,6 +324,12 @@ class UpdaterScriptExclusionTest(unittest.TestCase):
             "update-dimensionworks-server.sh",
             "update-dimensionworks-server.bat",
             "update-dimensionworks-server.exe",
+            "update-dimensionworks-client-windows-amd64.exe",
+            "update-dimensionworks-server-windows-amd64.exe",
+            "update-dimensionworks-client-linux-amd64",
+            "update-dimensionworks-server-linux-amd64",
+            "update-dimensionworks-client-macos-arm64",
+            "update-dimensionworks-server-macos-arm64",
         )
         for name in updater_names:
             with self.subTest(name=name):
