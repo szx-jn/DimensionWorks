@@ -32,6 +32,12 @@ UPDATER_SCRIPT_NAMES = frozenset(
         "update-dimensionworks-server.bat",  # Reject obsolete assets if one leaks into a package.
         "update-dimensionworks-client.exe",
         "update-dimensionworks-server.exe",
+        "update-dimensionworks-client-windows-amd64.exe",
+        "update-dimensionworks-server-windows-amd64.exe",
+        "update-dimensionworks-client-linux-amd64",
+        "update-dimensionworks-server-linux-amd64",
+        "update-dimensionworks-client-macos-arm64",
+        "update-dimensionworks-server-macos-arm64",
     }
 )
 DIGEST_PATTERN = re.compile(r"^[0-9a-f]+$")
