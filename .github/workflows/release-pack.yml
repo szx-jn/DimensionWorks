@@ -262,8 +262,6 @@ jobs:
           done <<'TARGETS'
           windows amd64
           linux amd64
-          linux arm64
-          darwin amd64
           darwin arm64
           TARGETS
 
@@ -280,7 +278,7 @@ jobs:
           [[ "$client_version" == "$PACK_VERSION" ]] || { echo "Client VERSION mismatch: $client_version != $PACK_VERSION" >&2; exit 1; }
           [[ "$server_version" == "$PACK_VERSION" ]] || { echo "Server VERSION mismatch: $server_version != $PACK_VERSION" >&2; exit 1; }
           echo "Client and server VERSION verified: $PACK_VERSION"
-          for target in windows-amd64.exe linux-amd64 linux-arm64 macos-amd64 macos-arm64; do
+          for target in windows-amd64.exe linux-amd64 macos-arm64; do
             case "$target" in
               windows-amd64.exe) expected='PE32+ executable' ;;
               linux-*) expected='ELF 64-bit' ;;
@@ -329,10 +327,6 @@ jobs:
               update-dimensionworks-server-windows-amd64.exe \
               update-dimensionworks-client-linux-amd64 \
               update-dimensionworks-server-linux-amd64 \
-              update-dimensionworks-client-linux-arm64 \
-              update-dimensionworks-server-linux-arm64 \
-              update-dimensionworks-client-macos-amd64 \
-              update-dimensionworks-server-macos-amd64 \
               update-dimensionworks-client-macos-arm64 \
               update-dimensionworks-server-macos-arm64 \
               > SHA256SUMS
@@ -391,10 +385,6 @@ jobs:
             "dist/update-dimensionworks-server-windows-amd64.exe"
             "dist/update-dimensionworks-client-linux-amd64"
             "dist/update-dimensionworks-server-linux-amd64"
-            "dist/update-dimensionworks-client-linux-arm64"
-            "dist/update-dimensionworks-server-linux-arm64"
-            "dist/update-dimensionworks-client-macos-amd64"
-            "dist/update-dimensionworks-server-macos-amd64"
             "dist/update-dimensionworks-client-macos-arm64"
             "dist/update-dimensionworks-server-macos-arm64"
             dist/SHA256SUMS
