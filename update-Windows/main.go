@@ -395,7 +395,7 @@ func run(kind string, args []string) error {
 					stage, stageErr := stagePath(stageRoot, entry.Path)
 					if stageErr != nil { errs <- stageErr; continue }
 					progressMu.Lock()
-					fmt.Printf("[下载] 远程文件：%s\\n", entry.Path)
+					fmt.Printf("[下载] 远程文件：%s\n", entry.Path)
 					progressMu.Unlock()
 					if downloadErr := downloadVerified(entry.Source, stage, entry.Algorithm, entry.Value); downloadErr != nil {
 						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
