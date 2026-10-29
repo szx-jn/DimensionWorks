@@ -223,7 +223,7 @@ jobs:
               --empty
           fi
 
-      - name: 复制独立更新脚本
+      - name: 复制旧版 Shell 更新脚本（兼容用途）
         run: |
           set -euo pipefail
           cp release-updaters/update-dimensionworks-client.sh dist/
@@ -239,19 +239,42 @@ jobs:
         working-directory: update-Windows
         run: go test -v ./...
 
-      - name: 构建 Windows 客户端与服务端更新器
+      - name: 构建 Windows、Linux、macOS Go 更新器
         working-directory: update-Windows
         shell: bash
         run: |
           set -euo pipefail
-          for kind in client server; do
-            GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
-              -trimpath \
-              -ldflags="-s -w -X main.defaultKind=${kind}" \
-              -o "../dist/update-dimensionworks-${kind}.exe" \
-              .
-            file "../dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
-          done
+          while read -r goos goarch; do
+            case "$goos" in
+              windows) platform="windows"; extension=".exe" ;;
+              linux) platform="linux"; extension="" ;;
+              darwin) platform="macos"; extension="" ;;
+              *) echo "Unsupported target: $goos" >&2; exit 1 ;;
+            esac
+            for kind in client server; do
+              output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
+              echo "Building ${output}"
+              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
+                -trimpath \
+                -ldflags="-s -w -X main.defaultKind=${kind}" \
+                -o "$output" .
+              test -s "$output"
+              case "$goos" in
+                windows) file "$output" | grep -q 'PE32+ executable' ;;
+                linux) file "$output" | grep -q 'ELF 64-bit' ;;
+                darwin) file "$output" | grep -q 'Mach-O 64-bit' ;;
+              esac
+              if [[ "$goos" == "windows" ]]; then
+                cp "$output" "../dist/update-dimensionworks-${kind}.exe"
+              fi
+            done
+          done <<'TARGETS'
+          windows amd64
+          linux amd64
+          linux arm64
+          darwin amd64
+          darwin arm64
+          TARGETS
 
 
       - name: 检查发布文件
@@ -275,6 +298,18 @@ jobs:
           for exe in dist/update-dimensionworks-client.exe dist/update-dimensionworks-server.exe; do
             [[ -s "$exe" ]] || { echo "Missing Windows updater: $exe" >&2; exit 1; }
             file "$exe" | grep -q 'PE32+ executable'
+          done
+          for target in windows-amd64.exe linux-amd64 linux-arm64 macos-amd64 macos-arm64; do
+            case "$target" in
+              windows-amd64.exe) expected='PE32+ executable' ;;
+              linux-*) expected='ELF 64-bit' ;;
+              macos-*) expected='Mach-O 64-bit' ;;
+            esac
+            for kind in client server; do
+              binary="dist/update-dimensionworks-${kind}-${target}"
+              [[ -s "$binary" ]] || { echo "Missing updater: $binary" >&2; exit 1; }
+              file "$binary" | grep -q "$expected" || { echo "Wrong binary format: $binary" >&2; exit 1; }
+            done
           done
           if [[ "$(wc -c < "dist/DimensionWorks-${PACK_VERSION}-delta.zip")" -gt 22 ]]; then
             unzip -t "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
@@ -313,6 +348,16 @@ jobs:
               update-dimensionworks-server.sh \
               update-dimensionworks-client.exe \
               update-dimensionworks-server.exe \
+              update-dimensionworks-client-windows-amd64.exe \
+              update-dimensionworks-server-windows-amd64.exe \
+              update-dimensionworks-client-linux-amd64 \
+              update-dimensionworks-server-linux-amd64 \
+              update-dimensionworks-client-linux-arm64 \
+              update-dimensionworks-server-linux-arm64 \
+              update-dimensionworks-client-macos-amd64 \
+              update-dimensionworks-server-macos-amd64 \
+              update-dimensionworks-client-macos-arm64 \
+              update-dimensionworks-server-macos-arm64 \
               > SHA256SUMS
           )
 
@@ -369,6 +414,16 @@ jobs:
             "dist/update-dimensionworks-server.sh"
             "dist/update-dimensionworks-client.exe"
             "dist/update-dimensionworks-server.exe"
+            "dist/update-dimensionworks-client-windows-amd64.exe"
+            "dist/update-dimensionworks-server-windows-amd64.exe"
+            "dist/update-dimensionworks-client-linux-amd64"
+            "dist/update-dimensionworks-server-linux-amd64"
+            "dist/update-dimensionworks-client-linux-arm64"
+            "dist/update-dimensionworks-server-linux-arm64"
+            "dist/update-dimensionworks-client-macos-amd64"
+            "dist/update-dimensionworks-server-macos-amd64"
+            "dist/update-dimensionworks-client-macos-arm64"
+            "dist/update-dimensionworks-server-macos-arm64"
             dist/SHA256SUMS
           )
           if gh release view "$TAG" >/dev/null 2>&1; then
