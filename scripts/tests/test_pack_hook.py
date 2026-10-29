@@ -2,7 +2,7 @@ import json
 import unittest
 from pathlib import Path
 
-from scripts.pack_hook import has_dependency_cycle, in_repo_mods
+from scripts.pack_hook import check_update_assets, has_dependency_cycle, in_repo_mods
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +31,13 @@ class QuestDependencyCycleTest(unittest.TestCase):
 
     def test_ignores_missing_nodes_for_cycle_detection(self) -> None:
         self.assertFalse(has_dependency_cycle({"a": {"missing"}}))
+
+
+class UpdaterAssetContractTest(unittest.TestCase):
+    def test_native_go_sources_are_sufficient_without_shell_updaters(self) -> None:
+        self.assertTrue(check_update_assets().ok)
+        self.assertFalse((ROOT / "release-updaters" / "update-dimensionworks-client.sh").exists())
+        self.assertFalse((ROOT / "release-updaters" / "update-dimensionworks-server.sh").exists())
 
 
 class InRepoModResourceContractTest(unittest.TestCase):
