@@ -421,6 +421,11 @@ func TestApplyTransactionRollsBackEarlierWrites(t *testing.T) {
 	if err := os.WriteFile(original, []byte("before"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if runtime.GOOS != "windows" {
+		if err := os.Chmod(original, 0751); err != nil {
+			t.Fatal(err)
+		}
+	}
 	work := filepath.Join(root, ".dimensionworks-update", "work-test")
 	stage := filepath.Join(work, "stage")
 	if err := os.MkdirAll(stage, 0755); err != nil {
@@ -443,6 +448,15 @@ func TestApplyTransactionRollsBackEarlierWrites(t *testing.T) {
 	}
 	if string(data) != "before" {
 		t.Fatalf("rollback did not restore original file: %q", data)
+	}
+	if runtime.GOOS != "windows" {
+		info, err := os.Stat(original)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := info.Mode().Perm(); got != 0751 {
+			t.Fatalf("rollback did not restore original permissions: got %04o, want 0751", got)
+		}
 	}
 }
 
