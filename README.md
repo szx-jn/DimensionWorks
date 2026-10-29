@@ -8,7 +8,7 @@
 
 ## 下载
 
-请前往 **[GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases/latest)** 获取最新版本。正式发布包含客户端整合包、服务端整合包、增量更新文件、更新清单、Windows/Linux/macOS Go 更新器及 SHA-256 校验文件。旧版 Shell 更新脚本暂时保留作为兼容选项。
+请前往 **[GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases/latest)** 获取最新版本。正式发布包含客户端整合包、服务端整合包、增量更新文件、更新清单、Windows/Linux/macOS Go 更新器及 SHA-256 校验文件。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -20,7 +20,6 @@
 | `update-dimensionworks-server-windows-amd64.exe` | Windows 服务端更新器 |
 | `update-dimensionworks-{client,server}-linux-{amd64,arm64}` | Linux 更新器 |
 | `update-dimensionworks-{client,server}-macos-{amd64,arm64}` | macOS 更新器 |
-| `update-dimensionworks-client.sh` / `update-dimensionworks-server.sh` | 旧版 Shell 兼容更新器 |
 | `SHA256SUMS` | 发布文件 SHA-256 校验值 |
 
 增量包用于版本更新，不是完整整合包；首次安装请下载对应的完整客户端或服务端包。具体文件以每个 Release 实际提供的资产为准。
@@ -58,7 +57,7 @@
 
 ## 当前开发状态
 
-项目已建立可重复的客户端与服务端打包发布流程。发布工作流会生成完整包、增量包、更新清单、校验文件，以及 Windows amd64、Linux amd64/arm64、macOS amd64/arm64 的 Go 更新器，并在发布前验证二进制格式、归档结构及清单一致性。旧版 Shell 更新器暂时保留用于兼容。
+项目已建立可重复的客户端与服务端打包发布流程。发布工作流会生成完整包、增量包、更新清单、校验文件，以及 Windows amd64、Linux amd64/arm64、macOS amd64/arm64 的 Go 更新器，并在发布前验证二进制格式、归档结构及清单一致性。
 
 **当前仍处于持续开发阶段。** Mod 组合、配方、科技进度、维度规划和配置可能随版本变化；版本号代表发布版本，不意味着所有设计目标均已完成。
 
@@ -78,7 +77,6 @@ DimensionWorks/
 ├── kubejs/             # KubeJS 配方、脚本与数据
 ├── resourcepacks/      # 自定义资源包
 ├── scripts/            # 版本管理、打包及验证脚本
-├── release-updaters/   # 旧版 Shell 兼容更新器
 ├── update-Windows/     # 跨平台 Go 更新器与测试（目录名沿用历史命名）
 ├── server/             # 服务端相关配置与说明
 ├── docs/               # 设计文档与规划
