@@ -117,7 +117,7 @@ public final class VersionMismatchScreen extends Screen {
             if (!arch.equals("amd64") && !arch.equals("x86_64")) {
                 throw new IOException("当前 Windows 架构暂不支持自动更新：" + architecture);
             }
-            platform = "windows";
+            platform = "windows-amd64";
             suffix = ".exe";
         } else if (os.contains("mac") || os.contains("darwin")) {
             if (!arch.equals("arm64") && !arch.equals("aarch64")) {
