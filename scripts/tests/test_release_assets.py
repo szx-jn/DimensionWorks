@@ -34,6 +34,11 @@ class ReleaseWorkflowTest(unittest.TestCase):
             with self.subTest(fragment=fragment):
                 self.assertIn(fragment, text)
 
+    def test_workflow_does_not_watch_removed_shell_updater_directory(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertNotIn("release-updaters/**", text)
+        self.assertIn("'scripts/pack_manifest.py'", text)
+
     def test_workflow_keeps_updater_scripts_out_of_packages(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("Updater script embedded in client package", text)
