@@ -223,12 +223,6 @@ jobs:
               --empty
           fi
 
-      - name: 复制旧版 Shell 更新脚本（兼容用途）
-        run: |
-          set -euo pipefail
-          cp release-updaters/update-dimensionworks-client.sh dist/
-          cp release-updaters/update-dimensionworks-server.sh dist/
-
       - name: 配置 Go 环境
         uses: actions/setup-go@v5
         with:
@@ -265,7 +259,6 @@ jobs:
                 darwin) file "$output" | grep -q 'Mach-O 64-bit' ;;
               esac
               if [[ "$goos" == "windows" ]]; then
-                cp "$output" "../dist/update-dimensionworks-${kind}.exe"
               fi
             done
           done <<'TARGETS'
@@ -282,12 +275,6 @@ jobs:
           PACK_VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          for script in dist/update-dimensionworks-client.sh dist/update-dimensionworks-server.sh; do
-            [[ -s "$script" ]] || { echo "Missing or empty updater: $script" >&2; exit 1; }
-            IFS= read -r first_line < "$script"
-            [[ "$first_line" == "#!/usr/bin/env bash" ]] || { echo "Invalid updater header: $script" >&2; exit 1; }
-            bash -n "$script"
-          done
           unzip -t "dist/DimensionWorks-${PACK_VERSION}.mrpack"
           unzip -t "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
           client_version="$(unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" overrides/VERSION | tr -d '\r\n')"
@@ -295,10 +282,6 @@ jobs:
           [[ "$client_version" == "$PACK_VERSION" ]] || { echo "Client VERSION mismatch: $client_version != $PACK_VERSION" >&2; exit 1; }
           [[ "$server_version" == "$PACK_VERSION" ]] || { echo "Server VERSION mismatch: $server_version != $PACK_VERSION" >&2; exit 1; }
           echo "Client and server VERSION verified: $PACK_VERSION"
-          for exe in dist/update-dimensionworks-client.exe dist/update-dimensionworks-server.exe; do
-            [[ -s "$exe" ]] || { echo "Missing Windows updater: $exe" >&2; exit 1; }
-            file "$exe" | grep -q 'PE32+ executable'
-          done
           for target in windows-amd64.exe linux-amd64 linux-arm64 macos-amd64 macos-arm64; do
             case "$target" in
               windows-amd64.exe) expected='PE32+ executable' ;;
@@ -344,10 +327,6 @@ jobs:
               "DimensionWorks-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
-              update-dimensionworks-client.sh \
-              update-dimensionworks-server.sh \
-              update-dimensionworks-client.exe \
-              update-dimensionworks-server.exe \
               update-dimensionworks-client-windows-amd64.exe \
               update-dimensionworks-server-windows-amd64.exe \
               update-dimensionworks-client-linux-amd64 \
@@ -410,10 +389,6 @@ jobs:
             "dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv"
             "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"
             "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
-            "dist/update-dimensionworks-client.sh"
-            "dist/update-dimensionworks-server.sh"
-            "dist/update-dimensionworks-client.exe"
-            "dist/update-dimensionworks-server.exe"
             "dist/update-dimensionworks-client-windows-amd64.exe"
             "dist/update-dimensionworks-server-windows-amd64.exe"
             "dist/update-dimensionworks-client-linux-amd64"
