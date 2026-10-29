@@ -1148,7 +1148,7 @@ func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) er
 		if err != nil {
 			return err
 		}
-		mode := file.Mode().Perm()
+		mode := file.Mode().Perm() & 0755
 		if mode == 0 {
 			mode = 0644
 		}
