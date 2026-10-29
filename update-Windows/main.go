@@ -1573,6 +1573,7 @@ func applyTransaction(root, work string, changes []Change) error {
 			}
 			return fmt.Errorf("应用 %s 失败，已回滚：%w", change.Path, err)
 		}
+		targetMode := os.FileMode(0644)
 		if exists {
 			info, err := os.Stat(target)
 			if err != nil || !info.Mode().IsRegular() {
@@ -1581,6 +1582,7 @@ func applyTransaction(root, work string, changes []Change) error {
 				}
 				return fmt.Errorf("目标不是普通文件：%s", change.Path)
 			}
+			targetMode = info.Mode().Perm()
 		}
 		backup := filepath.Join(backupRoot, filepath.FromSlash(change.Path))
 		if exists {
@@ -1588,7 +1590,7 @@ func applyTransaction(root, work string, changes []Change) error {
 				_ = rollback()
 				return err
 			}
-			if err := copyFile(target, backup, 0644); err != nil {
+			if err := copyFile(target, backup, targetMode); err != nil {
 				_ = rollback()
 				return fmt.Errorf("无法备份 %s：%w", change.Path, err)
 			}
