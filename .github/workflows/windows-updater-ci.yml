@@ -1,4 +1,4 @@
-name: Windows 更新器构建与测试
+name: Go 跨平台更新器构建与测试
 
 on:
   push:
@@ -33,30 +33,43 @@ jobs:
         working-directory: update-Windows
         run: go test -v ./...
 
-      - name: 交叉编译 Windows 客户端与服务端更新器
+      - name: 交叉编译 Windows、Linux、macOS 更新器
         working-directory: update-Windows
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p ../dist
-          for kind in client server; do
-            GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
-              -trimpath \
-              -ldflags="-s -w -X main.defaultKind=${kind}" \
-              -o "../dist/update-dimensionworks-${kind}.exe" \
-              .
-            file "../dist/update-dimensionworks-${kind}.exe" | grep -q 'PE32+ executable'
-          done
+          while read -r goos goarch; do
+            case "$goos" in
+              windows) platform=windows; extension=.exe; expected='PE32+ executable' ;;
+              linux) platform=linux; extension=; expected='ELF 64-bit' ;;
+              darwin) platform=macos; extension=; expected='Mach-O 64-bit' ;;
+              *) exit 1 ;;
+            esac
+            for kind in client server; do
+              output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
+              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
+                -trimpath -ldflags="-s -w -X main.defaultKind=${kind}" -o "$output" .
+              file "$output" | grep -q "$expected"
+              if [[ "$goos" == windows ]]; then
+                cp "$output" "../dist/update-dimensionworks-${kind}.exe"
+              fi
+            done
+          done <<'TARGETS'
+          windows amd64
+          linux amd64
+          linux arm64
+          darwin amd64
+          darwin arm64
+          TARGETS
 
-      - name: 上传 Windows 更新器
+      - name: 上传跨平台更新器
         uses: actions/upload-artifact@v4
         with:
-          name: dimensionworks-windows-updaters
+          name: dimensionworks-go-updaters
           if-no-files-found: error
           retention-days: 14
-          path: |
-            dist/update-dimensionworks-client.exe
-            dist/update-dimensionworks-server.exe
+          path: dist/update-dimensionworks-*
 
   windows-smoke:
     name: 在 Windows 环境验证更新器
@@ -89,3 +102,34 @@ jobs:
             & $exe --help
             if ($LASTEXITCODE -ne 0) { throw "$kind 更新器冒烟测试失败" }
           }
+
+  macos-smoke:
+    name: 在 macOS 环境验证更新器
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Go 环境
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: update-Windows/go.mod
+
+      - name: 在 macOS 上运行测试
+        working-directory: update-Windows
+        run: go test -v ./...
+
+      - name: 构建并冒烟测试 macOS 程序
+        working-directory: update-Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist
+          for kind in client server; do
+            binary="../dist/update-dimensionworks-$kind-macos-$(go env GOARCH)"
+            CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.defaultKind=$kind" -o "$binary" .
+            test -x "$binary"
+            "$binary" --help
+          done

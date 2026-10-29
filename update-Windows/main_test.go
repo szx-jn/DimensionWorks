@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -217,6 +218,41 @@ func TestParseManifestRejectsUnsafeAndMalformedData(t *testing.T) {
 	}
 }
 
+func TestReplaceFromFilePreservesExecutableMode(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix executable permission bits are not meaningful on Windows")
+	}
+	dir := t.TempDir()
+	source := filepath.Join(dir, "source.sh")
+	destination := filepath.Join(dir, "destination.sh")
+	if err := os.WriteFile(source, []byte("#!/bin/sh\necho safe\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(source, 0751); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(destination, []byte("old"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := replaceFromFile(source, destination); err != nil {
+		t.Fatalf("replaceFromFile failed: %v", err)
+	}
+	info, err := os.Stat(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := info.Mode().Perm(); got != 0751 {
+		t.Fatalf("expected executable mode 0751 to be preserved, got %04o", got)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "#!/bin/sh\necho safe\n" {
+		t.Fatalf("unexpected replacement content: %q", got)
+	}
+}
+
 func TestValidateRelativePath(t *testing.T) {
 	valid := []string{"mods/example.jar", "config/中文配置.toml", "a b/file.txt"}
 	for _, path := range valid {
@@ -385,6 +421,11 @@ func TestApplyTransactionRollsBackEarlierWrites(t *testing.T) {
 	if err := os.WriteFile(original, []byte("before"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if runtime.GOOS != "windows" {
+		if err := os.Chmod(original, 0751); err != nil {
+			t.Fatal(err)
+		}
+	}
 	work := filepath.Join(root, ".dimensionworks-update", "work-test")
 	stage := filepath.Join(work, "stage")
 	if err := os.MkdirAll(stage, 0755); err != nil {
@@ -407,6 +448,15 @@ func TestApplyTransactionRollsBackEarlierWrites(t *testing.T) {
 	}
 	if string(data) != "before" {
 		t.Fatalf("rollback did not restore original file: %q", data)
+	}
+	if runtime.GOOS != "windows" {
+		info, err := os.Stat(original)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := info.Mode().Perm(); got != 0751 {
+			t.Fatalf("rollback did not restore original permissions: got %04o, want 0751", got)
+		}
 	}
 }
 

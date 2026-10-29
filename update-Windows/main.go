@@ -190,7 +190,7 @@ func run(kind string, args []string) error {
 		return errors.New("该程序未指定 client/server 构建类型")
 	}
 	if runtime.GOOS != "windows" {
-		fmt.Println("提示：该更新器面向 Windows；当前平台为", runtime.GOOS)
+		fmt.Println("运行平台：", runtime.GOOS)
 	}
 	executable, err := os.Executable()
 	if err != nil {
@@ -277,7 +277,7 @@ func run(kind string, args []string) error {
 		if err != nil {
 			return err
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w；可重新运行并使用 --package 指定已下载的完整包", err)
 		}
@@ -293,7 +293,7 @@ func run(kind string, args []string) error {
 		}
 		version := strings.TrimPrefix(releaseTag, "v")
 		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w", err)
 		}
@@ -322,7 +322,7 @@ func run(kind string, args []string) error {
 		if manifestURL == "" {
 			manifestURL = assetURL(releaseTag, manifestAsset)
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
 		if err != nil {
 			return fmt.Errorf("下载最新版本清单失败：%w", err)
 		}
@@ -561,13 +561,13 @@ func parseOptions(args []string) (Options, error) {
 }
 
 func printUsage(kind string) {
-	fmt.Printf("DimensionWorks %s Windows 更新器\n\n", kind)
+	fmt.Printf("DimensionWorks %s 跨平台更新器（%s/%s）\n\n", kind, runtime.GOOS, runtime.GOARCH)
 	fmt.Println("用法：")
-	fmt.Println("  updater.exe                         更新到 GitHub 最新发行版")
-	fmt.Println("  updater.exe --release vX.Y.Z        更新到指定发行版")
-	fmt.Println("  updater.exe --package <完整包路径>  使用本地完整包")
-	fmt.Println("  updater.exe --url <完整包 URL>      从 URL 更新")
-	fmt.Println("  updater.exe --help                  显示帮助")
+	fmt.Println("  updater                            更新到 GitHub 最新发行版")
+	fmt.Println("  updater --release vX.Y.Z           更新到指定发行版")
+	fmt.Println("  updater --package <完整包路径>     使用本地完整包")
+	fmt.Println("  updater --url <完整包 URL>         从 URL 更新")
+	fmt.Println("  updater --help                     显示帮助")
 	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
 }
 
@@ -621,7 +621,7 @@ func latestRelease() (ReleaseInfo, error) {
 	if err != nil {
 		return result, err
 	}
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Accept", "application/vnd.github+json")
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
@@ -691,7 +691,7 @@ func downloadOnce(ctx context.Context, source, destination string) error {
 func downloadSequential(ctx context.Context, source, destination string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	client := &http.Client{Timeout: 120 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil { return err }
@@ -724,7 +724,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	defer cancel()
 	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", "bytes=0-0")
 	resp, err := (&http.Client{Timeout: 20*time.Second}).Do(req)
 	if err != nil { return err }
@@ -767,6 +767,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 					continue
 				}
 				completed.Add(end-begin+1)
+				finished.Add(1)
 				printMu.Lock()
 				fmt.Printf("[下载进度] 分段完成 %d/%d（%s/%s）\n", finished.Load(), segments, humanSize(completed.Load()), humanSize(total))
 				printMu.Unlock()
@@ -808,7 +809,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 func downloadRangeSegment(ctx context.Context, source, destination string, begin, end, total int64) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
 	resp, err := (&http.Client{Timeout: 120*time.Second}).Do(req)
 	if err != nil { return err }
@@ -1049,7 +1050,12 @@ func isUpdaterName(base string) bool {
 	switch strings.ToLower(base) {
 	case "update-dimensionworks-client.exe", "update-dimensionworks-server.exe",
 		"update-dimensionworks-client.bat", "update-dimensionworks-server.bat",
-		"update-dimensionworks-client.sh", "update-dimensionworks-server.sh":
+		"update-dimensionworks-client.sh", "update-dimensionworks-server.sh",
+		"update-dimensionworks-client-linux-amd64", "update-dimensionworks-server-linux-amd64",
+		"update-dimensionworks-client-linux-arm64", "update-dimensionworks-server-linux-arm64",
+		"update-dimensionworks-client-macos-amd64", "update-dimensionworks-server-macos-amd64",
+		"update-dimensionworks-client-macos-arm64", "update-dimensionworks-server-macos-arm64",
+		"update-dimensionworks-client-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.exe":
 		return true
 	default:
 		return false
@@ -1142,7 +1148,11 @@ func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) er
 		if err != nil {
 			return err
 		}
-		output, err := os.OpenFile(stage, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		mode := file.Mode().Perm() & 0755
+		if mode == 0 {
+			mode = 0644
+		}
+		output, err := os.OpenFile(stage, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 		if err != nil {
 			_ = reader.Close()
 			return err
@@ -1523,6 +1533,7 @@ type Applied struct {
 	Backup     string
 	Existed    bool
 	TargetPath string
+	Mode       os.FileMode
 }
 
 func applyTransaction(root, work string, changes []Change) error {
@@ -1540,6 +1551,10 @@ func applyTransaction(root, work string, changes []Change) error {
 				}
 				if err := replaceFromFile(item.Backup, item.TargetPath); err != nil {
 					failures = append(failures, fmt.Sprintf("%s: %v", item.Path, err))
+					continue
+				}
+				if err := os.Chmod(item.TargetPath, item.Mode); err != nil {
+					failures = append(failures, fmt.Sprintf("%s 权限恢复失败：%v", item.Path, err))
 				}
 			} else {
 				if err := os.Remove(item.TargetPath); err != nil && !os.IsNotExist(err) {
@@ -1564,6 +1579,7 @@ func applyTransaction(root, work string, changes []Change) error {
 			}
 			return fmt.Errorf("应用 %s 失败，已回滚：%w", change.Path, err)
 		}
+		targetMode := os.FileMode(0644)
 		if exists {
 			info, err := os.Stat(target)
 			if err != nil || !info.Mode().IsRegular() {
@@ -1572,6 +1588,7 @@ func applyTransaction(root, work string, changes []Change) error {
 				}
 				return fmt.Errorf("目标不是普通文件：%s", change.Path)
 			}
+			targetMode = info.Mode().Perm()
 		}
 		backup := filepath.Join(backupRoot, filepath.FromSlash(change.Path))
 		if exists {
@@ -1579,12 +1596,12 @@ func applyTransaction(root, work string, changes []Change) error {
 				_ = rollback()
 				return err
 			}
-			if err := copyFile(target, backup, 0644); err != nil {
+			if err := copyFile(target, backup, 0600); err != nil {
 				_ = rollback()
 				return fmt.Errorf("无法备份 %s：%w", change.Path, err)
 			}
 		}
-		applied = append(applied, Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target})
+		applied = append(applied, Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target, Mode: targetMode})
 
 		if change.Delete {
 			if exists {
@@ -1674,17 +1691,41 @@ func replaceFromFile(source, destination string) error {
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
-	temp := destination + fmt.Sprintf(".dw-new-%d", os.Getpid())
-	_ = os.Remove(temp)
-	if err := copyFile(source, temp, 0644); err != nil {
+	sourceInfo, err := os.Stat(source)
+	if err != nil {
+		return err
+	}
+	if !sourceInfo.Mode().IsRegular() {
+		return fmt.Errorf("替换源不是普通文件：%s", source)
+	}
+	input, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer input.Close()
+
+	tempFile, err := os.CreateTemp(filepath.Dir(destination), ".dw-new-*")
+	if err != nil {
+		return err
+	}
+	temp := tempFile.Name()
+	defer os.Remove(temp)
+
+	if _, err := io.Copy(tempFile, input); err != nil {
+		_ = tempFile.Close()
+		return err
+	}
+	if err := tempFile.Chmod(sourceInfo.Mode().Perm()); err != nil {
+		_ = tempFile.Close()
+		return err
+	}
+	if err := tempFile.Close(); err != nil {
 		return err
 	}
 	if err := os.Remove(destination); err != nil && !os.IsNotExist(err) {
-		_ = os.Remove(temp)
 		return err
 	}
 	if err := os.Rename(temp, destination); err != nil {
-		_ = os.Remove(temp)
 		return err
 	}
 	return nil

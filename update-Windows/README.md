@@ -1,40 +1,50 @@
-# Windows 原生更新器
+# Go 跨平台更新器
 
-本目录包含 DimensionWorks 客户端与服务端的 Windows 原生更新器。实现使用 Go 标准库，不调用 BAT、PowerShell、Python 或 Java。
+本目录包含 DimensionWorks 客户端与服务端的统一 Go 更新器。目录名沿用历史命名；同一份源码可构建为 Windows、Linux 与 macOS 原生程序。核心实现只依赖 Go 标准库，不要求玩家安装 aria2、curl、wget、Python 或 Java 来运行更新器。
 
-## 本地检查与构建
+## 本地测试
 
-在本目录执行：
-
-```powershell
+~~~sh
 go test ./...
-```
+~~~
 
-编译客户端与服务端（需要 Go 工具链）：
+## 交叉编译
 
-```powershell
-$env:GOOS = "windows"
-$env:GOARCH = "amd64"
-$env:CGO_ENABLED = "0"
-go build -trimpath -ldflags="-s -w -X main.defaultKind=client" -o ..\dist\update-dimensionworks-client.exe .
-go build -trimpath -ldflags="-s -w -X main.defaultKind=server" -o ..\dist\update-dimensionworks-server.exe .
-```
+在本目录执行，示例以 Linux/macOS shell 为例：
 
-正式构建由 `.github/workflows/windows-updater-ci.yml` 与 `.github/workflows/release-pack.yml` 自动完成。前者运行单元测试、交叉编译并保存短期构建产物；后者把两个 EXE 与 Shell 更新器一起发布到 DimensionWorks Release。
+~~~sh
+mkdir -p ../dist
+for target in "windows amd64" "linux amd64" "linux arm64" "darwin amd64" "darwin arm64"; do
+  read -r goos goarch <<EOF
+$target
+EOF
+  case "$goos" in
+    windows) platform=windows; extension=.exe ;;
+    linux) platform=linux; extension= ;;
+    darwin) platform=macos; extension= ;;
+  esac
+  for kind in client server; do
+    GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
+      -trimpath -ldflags="-s -w -X main.defaultKind=$kind" \
+      -o "../dist/update-dimensionworks-$kind-$platform-$goarch$extension" .
+  done
+done
+~~~
 
-## 使用方式
+正式发布由 .github/workflows/release-pack.yml 构建并发布所有目标；.github/workflows/windows-updater-ci.yml 负责单元测试、跨平台交叉编译和 Windows 环境冒烟测试。
 
-下载对应 EXE 后，必须先复制到目标客户端实例根目录或服务端根目录，再运行。更新器会检查 `mods/` 与实例标记，拒绝从常见下载目录误启动；开始前需要输入 `Y` 确认游戏、启动器和服务端已退出。
+## 发布资产与使用
 
-不带参数时更新到 GitHub Latest Release，也可使用：
+- Windows amd64：update-dimensionworks-{client,server}-windows-amd64.exe
+- Linux amd64 / arm64：update-dimensionworks-{client,server}-linux-{amd64,arm64}
+- macOS Intel / Apple Silicon：update-dimensionworks-{client,server}-macos-{amd64,arm64}
 
-- `--release vX.Y.Z`
-- `--package <本地完整包路径>`
-- `--url <完整包 URL>`
-- `--help`
+将对应的更新器放入目标实例根目录，再运行。Linux/macOS 下载后如文件没有可执行权限，先执行 chmod +x ./update-dimensionworks-<kind>-<platform>-<arch>。更新器会检查实例标记并要求确认游戏、启动器或服务端已退出。
 
-更新器读取包内/独立 TSV 清单，校验目标路径和文件摘要；兼容时优先使用差量包，失败则回退完整包。大于 8 MiB 且服务器正确支持 HTTP Range 的下载会自动使用最多 8 路分段并发；每段都校验 HTTP 206、Content-Range 和实际字节数，合并后仍执行清单摘要校验。服务器/镜像不支持分段时自动回退单连接下载。写入前会暂存文件并备份旧文件，应用失败会尝试回滚。错误显示在控制台，诊断日志写入 `.dimensionworks-update/logs/`（如果实例目录可写）。世界、客户端存档、日志以及服务端的 EULA、`server.properties`、JVM 参数、白名单和封禁信息都应保留。
+不带参数时更新到 GitHub Latest Release，也可使用 --release vX.Y.Z、--package <本地完整包路径>、--url <完整包 URL> 或 --help。
 
-## 边界
+## 安全与数据保护
 
-当前 CI 已验证 Go 单元测试与 Windows amd64 EXE 编译格式；CI 无法完全代替真实 Windows 游戏实例测试。对正式发布的 EXE 仍应在真实客户端与服务端目录中验证一次更新、失败回滚以及日志落盘。
+更新器校验更新清单、相对路径与文件摘要，拒绝压缩包路径穿越、符号链接、重复或大小写冲突路径，并在写入前暂存和备份文件；应用失败时尝试回滚。大于 8 MiB 且服务器支持 HTTP Range 的文件可使用最多 8 路并发分段下载；分段响应、Content-Range、字节数和最终摘要均需校验，服务器不支持 Range 时回退单连接下载。替换文件时使用同目录随机临时文件，避免使用可预测临时路径，并在 macOS/Linux 上保留归档文件的可执行权限。
+
+客户端存档与服务端运行数据遵循清单中的保留规则。跨平台构建与自动化测试不能完全替代真实实例验证；发布前仍应检查各平台的实际更新、失败回滚、权限与日志行为。
