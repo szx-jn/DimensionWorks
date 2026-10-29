@@ -2,7 +2,7 @@
 
 ## 目标
 
-为已有客户端实例与服务端目录提供可在实例根目录运行的独立增量更新器。更新器使用 Bash（macOS/Linux）与原生 Go EXE（Windows），不依赖 Python、BAT 或 PowerShell，不进入 `.mrpack` 或服务端 ZIP，并能把旧安装中的整合包受管内容同步到目标发行版。
+为已有客户端实例与服务端目录提供可在实例根目录运行的独立增量更新器。更新器在 Windows amd64、Linux amd64 和 macOS arm64 上均使用同一套 Go 源码编译出的原生二进制，不依赖 Shell、BAT、PowerShell 或 Python，不进入 `.mrpack` 或服务端 ZIP，并能把旧安装中的整合包受管内容同步到目标发行版。
 
 更新成功后，受管文件与目标发行版逐项一致；世界、日志、崩溃报告、账号与开服运行数据保持不变。
 
@@ -34,7 +34,7 @@
 | `update-dimensionworks-server-macos-arm64` | macOS arm64 服务端更新器 |
 | `SHA256SUMS` | 上述资产的 SHA-256 |
 
-所有平台的更新器共用仓库 `update-Windows/` 中的 Go 源码，由 GitHub Actions 交叉编译为 Windows amd64、Linux amd64 和 macOS arm64 的客户端/服务端原生二进制。打包器必须验证 `.mrpack` 与服务端完整 ZIP 中不存在 Shell 更新器、Windows EXE 或旧版 BAT 更新器。更新器只能作为独立 Release 资产发布，首次使用时由用户复制到对应实例或服务端根目录。
+所有平台的更新器共用仓库 `update-Windows/` 中的 Go 源码，由 GitHub Actions 交叉编译为 Windows amd64、Linux amd64 和 macOS arm64 的客户端/服务端原生二进制。打包器必须验证 `.mrpack` 与服务端完整 ZIP 中不存在任何平台的原生更新器二进制，也不得包含历史 Shell、Batch 更新器。更新器只能作为独立 Release 资产发布，首次使用时由用户复制到对应实例或服务端根目录。
 
 ## 更新清单格式
 
@@ -202,7 +202,7 @@ DimensionWorks 更新完成：<old> -> <new>
 - 新建 `scripts/build_server_delta.py`，比较两个服务端 ZIP 并生成差量。
 - 修改 `scripts/pack_version.py`，加入本地版本与 GitHub 标签取较大值再递增补丁的纯函数。
 - 修改 `scripts/pack_hook.py`，检查脚本、清单格式、资产命名和禁止内嵌脚本。
-- 修改 `.github/workflows/release-pack.yml`，修正版本冲突、生成并发布清单/差量/Shell 更新器与 Windows EXE；新增 Windows 更新器测试、交叉编译工作流。
+- 修改 `.github/workflows/release-pack.yml`，修正版本冲突、生成并发布清单/差量与六个跨平台 Go 原生更新器；新增 Windows 更新器测试、交叉编译工作流。
 - 修改 `scripts/README.md` 与新增用户文档，说明部署、更新、回滚和保留范围。
 - 新增清单、版本、差量、打包输出和工作流静态测试。
 
