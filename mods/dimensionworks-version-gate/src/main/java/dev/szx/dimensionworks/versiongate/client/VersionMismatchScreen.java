@@ -68,8 +68,10 @@ public final class VersionMismatchScreen extends Screen {
             try {
                 Path updater = downloadUpdater(gameDir);
                 String tag = "v" + serverVersion;
-                ProcessBuilder process = new ProcessBuilder(
-                        updaterCommand(updater, tag, isWindows()));
+                ProcessBuilder process = new ProcessBuilder(updaterCommand(updater, tag));
+                if (!isWindows() && !updater.toFile().setExecutable(true)) {
+                    throw new IOException("无法设置更新器执行权限。");
+                }
                 process.directory(gameDir.toFile()).start();
                 Minecraft.getInstance().execute(() -> Minecraft.getInstance().stop());
             } catch (IOException exception) {
@@ -79,7 +81,7 @@ public final class VersionMismatchScreen extends Screen {
     }
 
     private Path downloadUpdater(Path gameDir) throws IOException {
-        String filename = updaterFilename(isWindows());
+        String filename = updaterFilename(System.getProperty("os.name"), System.getProperty("os.arch"));
         String baseUrl = "https://github.com/szx-jn/DimensionWorks/releases/download/v"
                 + serverVersion + "/";
         Path destination = gameDir.resolve(filename);
@@ -105,15 +107,37 @@ public final class VersionMismatchScreen extends Screen {
         }
     }
 
-    static String updaterFilename(boolean windows) {
-        return "update-dimensionworks-client." + (windows ? "exe" : "sh");
+    static String updaterFilename(String osName, String architecture) throws IOException {
+        String os = osName.toLowerCase(java.util.Locale.ROOT);
+        String arch = architecture.toLowerCase(java.util.Locale.ROOT);
+        String platform;
+        String suffix = "";
+
+        if (os.contains("win")) {
+            if (!arch.equals("amd64") && !arch.equals("x86_64")) {
+                throw new IOException("当前 Windows 架构暂不支持自动更新：" + architecture);
+            }
+            platform = "windows";
+            suffix = ".exe";
+        } else if (os.contains("mac") || os.contains("darwin")) {
+            if (!arch.equals("arm64") && !arch.equals("aarch64")) {
+                throw new IOException("当前 macOS 架构暂不支持自动更新：" + architecture);
+            }
+            platform = "macos-arm64";
+        } else if (os.contains("linux")) {
+            if (!arch.equals("amd64") && !arch.equals("x86_64")) {
+                throw new IOException("当前 Linux 架构暂不支持自动更新：" + architecture);
+            }
+            platform = "linux-amd64";
+        } else {
+            throw new IOException("当前操作系统暂不支持自动更新：" + osName);
+        }
+
+        return "update-dimensionworks-client-" + platform + suffix;
     }
 
-    static List<String> updaterCommand(Path updater, String tag, boolean windows) {
-        if (windows) {
-            return List.of(updater.toString(), "--release", tag);
-        }
-        return List.of("bash", updater.toString(), "--release", tag);
+    static List<String> updaterCommand(Path updater, String tag) {
+        return List.of(updater.toString(), "--release", tag);
     }
 
     private static void download(String url, Path destination) throws IOException {
