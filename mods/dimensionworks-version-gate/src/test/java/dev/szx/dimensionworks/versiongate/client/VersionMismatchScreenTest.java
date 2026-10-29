@@ -12,12 +12,12 @@ class VersionMismatchScreenTest {
     @Test
     void windowsUsesNativeExeReleaseAsset() throws IOException {
         assertEquals(
-            "update-dimensionworks-client-windows.exe",
+            "update-dimensionworks-client-windows-amd64.exe",
             VersionMismatchScreen.updaterFilename("Windows 11", "amd64"));
         assertEquals(
-            List.of("C:\\mods\\update-dimensionworks-client-windows.exe", "--release", "v0.2.0"),
+            List.of("C:\\mods\\update-dimensionworks-client-windows-amd64.exe", "--release", "v0.2.0"),
             VersionMismatchScreen.updaterCommand(
-                Path.of("C:\\mods\\update-dimensionworks-client-windows.exe"), "v0.2.0"));
+                Path.of("C:\\mods\\update-dimensionworks-client-windows-amd64.exe"), "v0.2.0"));
     }
 
     @Test
