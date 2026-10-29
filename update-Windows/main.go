@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -670,45 +671,167 @@ func downloadFile(source, destination string, mirrors bool) error {
 	return errors.New(strings.Join(failures, "\n"))
 }
 
+const (
+	parallelDownloadThreshold int64 = 8 << 20
+	parallelDownloadWorkers = 8
+)
+
 func downloadOnce(ctx context.Context, source, destination string) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
-	if err != nil {
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
+	if err := downloadRanged(ctx, source, destination); err == nil {
+		return nil
+	} else {
+		fmt.Printf("[下载] 分段下载不可用，自动回退为单连接：%v\n", err)
+	}
+	return downloadSequential(ctx, source, destination)
+}
+
+func downloadSequential(ctx context.Context, source, destination string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
 	client := &http.Client{Timeout: 120 * time.Second}
 	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("HTTP %d", resp.StatusCode)
 	}
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
-		return err
-	}
 	part := destination + ".part"
 	_ = os.Remove(part)
 	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	total := resp.ContentLength
 	writer := &downloadProgress{writer: file, total: total}
 	_, copyErr := io.Copy(writer, resp.Body)
 	closeErr := file.Close()
-	if copyErr != nil {
-		return copyErr
-	}
-	if closeErr != nil {
-		return closeErr
-	}
+	if copyErr != nil { _ = os.Remove(part); return copyErr }
+	if closeErr != nil { _ = os.Remove(part); return closeErr }
 	if total >= 0 && writer.written != total {
+		_ = os.Remove(part)
 		return fmt.Errorf("内容长度不符：收到 %d 字节，预期 %d 字节", writer.written, total)
 	}
 	_ = os.Remove(destination)
 	return os.Rename(part, destination)
+}
+
+// downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
+// Every segment is written to a separate temporary file and validated before assembly.
+func downloadRanged(ctx context.Context, source, destination string) error {
+	probeCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
+	if err != nil { return err }
+	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("Range", "bytes=0-0")
+	resp, err := (&http.Client{Timeout: 20*time.Second}).Do(req)
+	if err != nil { return err }
+	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2))
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusPartialContent {
+		return fmt.Errorf("服务器不支持 HTTP Range（状态码 %d）", resp.StatusCode)
+	}
+	var total int64
+	if _, err := fmt.Sscanf(resp.Header.Get("Content-Range"), "bytes 0-0/%d", &total); err != nil || total <= 0 {
+		return errors.New("服务器返回无效的 Content-Range")
+	}
+	if total < parallelDownloadThreshold {
+		return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total))
+	}
+	segments := int64(parallelDownloadWorkers)
+	if total < segments { segments = total }
+	chunkSize := (total + segments - 1) / segments
+	partPaths := make([]string, 0, segments)
+	cleanup := func() { for _, path := range partPaths { _ = os.Remove(path) } }
+	jobs := make(chan int64)
+	errs := make(chan error, segments)
+	var wg sync.WaitGroup
+	var completed atomic.Int64
+	var printMu sync.Mutex
+	workers := int(segments)
+	fmt.Printf("[下载] 启用 %d 路分段并发，总大小 %s\n", workers, humanSize(total))
+	for i := int64(0); i < segments; i++ { partPaths = append(partPaths, fmt.Sprintf("%s.segment-%02d", destination, i)) }
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for index := range jobs {
+				begin := index * chunkSize
+				end := begin + chunkSize - 1
+				if end >= total { end = total - 1 }
+				if err := downloadRangeSegment(ctx, source, partPaths[index], begin, end, total); err != nil {
+					errs <- fmt.Errorf("分段 %d：%w", index+1, err)
+					continue
+				}
+				completed.Add(end-begin+1)
+				printMu.Lock()
+				fmt.Printf("[下载进度] 分段完成 %d/%d（%s/%s）\n", completed.Load()/(chunkSize)+1, segments, humanSize(completed.Load()), humanSize(total))
+				printMu.Unlock()
+			}
+		}()
+	}
+	for i := int64(0); i < segments; i++ { jobs <- i }
+	close(jobs)
+	wg.Wait()
+	close(errs)
+	for segmentErr := range errs {
+		if segmentErr != nil { cleanup(); return segmentErr }
+	}
+	if completed.Load() != total { cleanup(); return fmt.Errorf("分段总长度不符：%d/%d", completed.Load(), total) }
+	assembled := destination + ".assembled"
+	_ = os.Remove(assembled)
+	out, err := os.OpenFile(assembled, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil { cleanup(); return err }
+	var copied int64
+	for _, path := range partPaths {
+		in, openErr := os.Open(path)
+		if openErr != nil { _ = out.Close(); _ = os.Remove(assembled); cleanup(); return openErr }
+		n, copyErr := io.Copy(out, in)
+		closeErr := in.Close()
+		copied += n
+		if copyErr != nil || closeErr != nil {
+			_ = out.Close(); _ = os.Remove(assembled); cleanup()
+			if copyErr != nil { return copyErr }; return closeErr
+		}
+	}
+	if err := out.Close(); err != nil { _ = os.Remove(assembled); cleanup(); return err }
+	cleanup()
+	if copied != total { _ = os.Remove(assembled); return fmt.Errorf("合并后长度不符：%d/%d", copied, total) }
+	_ = os.Remove(destination)
+	if err := os.Rename(assembled, destination); err != nil { _ = os.Remove(assembled); return err }
+	return nil
+}
+
+func downloadRangeSegment(ctx context.Context, source, destination string, begin, end, total int64) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	if err != nil { return err }
+	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
+	resp, err := (&http.Client{Timeout: 120*time.Second}).Do(req)
+	if err != nil { return err }
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusPartialContent {
+		return fmt.Errorf("HTTP %d，预期 206 Partial Content", resp.StatusCode)
+	}
+	var gotBegin, gotEnd, gotTotal int64
+	if _, err := fmt.Sscanf(resp.Header.Get("Content-Range"), "bytes %d-%d/%d", &gotBegin, &gotEnd, &gotTotal); err != nil ||
+		gotBegin != begin || gotEnd != end || gotTotal != total {
+		return fmt.Errorf("Content-Range 不匹配：%q", resp.Header.Get("Content-Range"))
+	}
+	expected := end-begin+1
+	if resp.ContentLength >= 0 && resp.ContentLength != expected {
+		return fmt.Errorf("分段长度声明不匹配：%d/%d", resp.ContentLength, expected)
+	}
+	file, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil { return err }
+	n, copyErr := io.Copy(file, io.LimitReader(resp.Body, expected+1))
+	closeErr := file.Close()
+	if copyErr != nil { _ = os.Remove(destination); return copyErr }
+	if closeErr != nil { _ = os.Remove(destination); return closeErr }
+	if n != expected { _ = os.Remove(destination); return fmt.Errorf("分段实际长度不匹配：%d/%d", n, expected) }
+	return nil
 }
 
 type downloadProgress struct {
