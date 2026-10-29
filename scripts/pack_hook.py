@@ -127,6 +127,41 @@ def check_update_assets() -> CheckResult:
         if (ROOT / "release-updaters" / legacy).exists():
             problems.append(f"obsolete Windows batch updater must be removed: release-updaters/{legacy}")
 
+    release_workflow = ROOT / ".github" / "workflows" / "release-pack.yml"
+    version_gate = (
+        ROOT
+        / "mods"
+        / "dimensionworks-version-gate"
+        / "src"
+        / "main"
+        / "java"
+        / "dev"
+        / "szx"
+        / "dimensionworks"
+        / "versiongate"
+        / "client"
+        / "VersionMismatchScreen.java"
+    )
+    expected_assets = (
+        "update-dimensionworks-client-windows-amd64.exe",
+        "update-dimensionworks-server-windows-amd64.exe",
+        "update-dimensionworks-client-linux-amd64",
+        "update-dimensionworks-server-linux-amd64",
+        "update-dimensionworks-client-macos-arm64",
+        "update-dimensionworks-server-macos-arm64",
+    )
+    try:
+        workflow_text = release_workflow.read_text(encoding="utf-8")
+        for asset in expected_assets:
+            if asset not in workflow_text:
+                problems.append(f"release workflow is missing updater asset: {asset}")
+        gate_text = version_gate.read_text(encoding="utf-8")
+        for platform in ("windows-amd64", "linux-amd64", "macos-arm64"):
+            if platform not in gate_text:
+                problems.append(f"version gate does not select updater platform: {platform}")
+    except OSError as error:
+        problems.append(f"cannot validate updater release integration: {error}")
+
     try:
         pack_manifest.render_manifest(
             pack_manifest.UpdateManifest(
@@ -143,7 +178,7 @@ def check_update_assets() -> CheckResult:
     return CheckResult(
         "update-assets",
         not problems,
-        "native Go updater sources for Windows, Linux and macOS",
+        "native Go sources and consistent Windows amd64, Linux amd64, macOS arm64 release assets",
         problems,
     )
 
