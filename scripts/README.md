@@ -77,9 +77,9 @@ python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
 - `update-dimensionworks-client.sh` / `update-dimensionworks-server.sh`
 - `update-dimensionworks-client.exe` / `update-dimensionworks-server.exe`
 
-首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。Shell 更新器用于 macOS/Linux；Windows 使用 `update-Windows/` 中编译的原生 Go EXE，不依赖 BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取包内或 Release 侧的 `dimensionworks-update-manifest.tsv`，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
+首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。所有平台均使用 `update-Windows/` 中同一套 Go 源码交叉编译，不依赖 Shell、BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取包内或 Release 侧的 `dimensionworks-update-manifest.tsv`，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
 
-客户端保留存档、日志、截图和启动器私有数据；服务端保留世界（含 `server.properties` 指定的自定义世界名）、`config/`、`defaultconfigs/`、LuckPerms 配置与数据库、日志、`eula.txt`、`server.properties`、`user_jvm_args.txt`、白名单、封禁和运行数据。已有配置只在缺失时从新包补齐，不覆盖现存配置。Shell 更新器等待服务端正常退出，最多 180 秒；超时即中止，不强制杀进程，以免世界规则或权限数据未落盘。运行客户端前退出游戏，更新前建议先手动停止服务端。服务端优先使用 `DimensionWorks-Server-<版本>-delta.zip`，差量缺失、跨版本或本地文件漂移时自动回退完整 ZIP。
+客户端保留存档、日志、截图和启动器私有数据；服务端保留世界（含 `server.properties` 指定的自定义世界名）、`config/`、`defaultconfigs/`、LuckPerms 配置与数据库、日志、`eula.txt`、`server.properties`、`user_jvm_args.txt`、白名单、封禁和运行数据。已有配置只在缺失时从新包补齐，不覆盖现存配置。更新器等待服务端正常退出，最多 180 秒；超时即中止，不强制杀进程，以免世界规则或权限数据未落盘。运行客户端前退出游戏，更新前建议先手动停止服务端。服务端优先使用 `DimensionWorks-Server-<版本>-delta.zip`，差量缺失、跨版本或本地文件漂移时自动回退完整 ZIP。
 
 ## 打包前钩子
 
@@ -104,7 +104,7 @@ python3 scripts/pack_hook.py --skip-build
 - `quest-graph`：FTB 任务 ID 唯一、依赖存在、无循环、括号平衡。
 - `recipe-ids`：脚本中的配方 ID 不与数据包文件路径冲突。
 - `in-repo-build`：逐个执行 `gradle build --no-daemon`，并确认产物 jar 名与清单版本一致。
-- `update-assets`：确认两个独立 Shell 更新器存在、使用 LF，且 `update-Windows/` 的 Go 源码完整；Windows EXE 由 GitHub Actions 原生交叉编译和测试。
+- `update-assets`：确认 `update-Windows/` 的 Go 源码完整；GitHub Actions 会测试并交叉编译 Windows amd64、Linux amd64、macOS arm64 更新器。
 
 输出约定：失败时打印 `PACK-HOOK FAIL` 加失败步骤与截断后的错误日志；成功时只打印一行 `PACK-HOOK OK: ...`。打包脚本会把钩子结果附在同一行成功信息里。
 
@@ -148,4 +148,4 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 ## GitHub Actions 发行
 
-手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、两个独立 Shell 更新器、两个 Windows EXE 和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
+手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、六个原生 Go 更新器和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
