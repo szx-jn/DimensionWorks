@@ -10,6 +10,9 @@ import tempfile
 import threading
 import unittest
 import zipfile
+
+# Keep regression fixtures deterministic when aria2c is installed on CI hosts.
+os.environ.setdefault("DW_UPDATER_DISABLE_ARIA2", "1")
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
