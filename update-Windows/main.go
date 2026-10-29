@@ -563,11 +563,11 @@ func parseOptions(args []string) (Options, error) {
 func printUsage(kind string) {
 	fmt.Printf("DimensionWorks %s 跨平台更新器（%s/%s）\n\n", kind, runtime.GOOS, runtime.GOARCH)
 	fmt.Println("用法：")
-	fmt.Println("  updater.exe                         更新到 GitHub 最新发行版")
-	fmt.Println("  updater.exe --release vX.Y.Z        更新到指定发行版")
-	fmt.Println("  updater.exe --package <完整包路径>  使用本地完整包")
-	fmt.Println("  updater.exe --url <完整包 URL>      从 URL 更新")
-	fmt.Println("  updater.exe --help                  显示帮助")
+	fmt.Println("  updater                            更新到 GitHub 最新发行版")
+	fmt.Println("  updater --release vX.Y.Z           更新到指定发行版")
+	fmt.Println("  updater --package <完整包路径>     使用本地完整包")
+	fmt.Println("  updater --url <完整包 URL>         从 URL 更新")
+	fmt.Println("  updater --help                     显示帮助")
 	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
 }
 
@@ -691,7 +691,7 @@ func downloadOnce(ctx context.Context, source, destination string) error {
 func downloadSequential(ctx context.Context, source, destination string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	client := &http.Client{Timeout: 120 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil { return err }
@@ -724,7 +724,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	defer cancel()
 	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", "bytes=0-0")
 	resp, err := (&http.Client{Timeout: 20*time.Second}).Do(req)
 	if err != nil { return err }
@@ -808,7 +808,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 func downloadRangeSegment(ctx context.Context, source, destination string, begin, end, total int64) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
 	resp, err := (&http.Client{Timeout: 120*time.Second}).Do(req)
 	if err != nil { return err }
