@@ -85,3 +85,11 @@ server_scripts/basic_mineral_propagation.js 为 16 种目标资源配置三条�
 - 工作盆上方可见天空时，每 20 游戏刻随机损失 100–200 mB；封闭工作盆不损失。该规则只作用于工作盆产出的气体，不影响液体，也不允许管道向工作盆灌入气体。
 
 其他气体配方可复用同一输出物品，将 `Gas` 改为对应注册 ID、`Amount` 改为 mB 数量。工作盆缓冲同一时间只存一种气体；切换气体前先用 Mekanism 管道抽空。
+
+## Create 烈焰人燃烧室柴油动力燃料
+
+`data/dimensionworks/blaze_burner_fuel/` 为 Create: Liquid Fuel 注册 Create: Diesel Generators 的四种有效发动机燃料：柴油、生物柴油、汽油和乙醇。柴油、生物柴油与乙醇提供普通加热；汽油提供超级加热。
+
+燃料定义使用 Create: Liquid Fuel 2.2.0 的 `fluid`、`burnTime`、`superHeat` 和 `amountConsumedPerTick` 字段。当前平衡值分别为柴油 32、生物柴油 24、汽油 24、乙醇 16，均每 tick 消耗 1 mB；这些是整合包自定义燃烧参数，不是柴油动力引擎 SU 参数的直接换算。
+
+原油与植物油未加入：当前柴油动力版本没有为它们注册对应的发动机 FuelType，避免将原料油误作可直接驱动发动机的成品燃料。
