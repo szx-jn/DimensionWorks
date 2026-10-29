@@ -1,0 +1,37 @@
+name: 清理旧版更新器发行资产
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cleanup-legacy-updaters.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: 删除旧 Shell 与重复更新器资产
+    runs-on: ubuntu-latest
+    steps:
+      - name: 清理所有正式发行版中的旧资产
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/${GH_REPO}/releases" --jq '.[].id' |
+          while read -r release_id; do
+            [[ -n "${release_id}" ]] || continue
+            gh api --paginate "repos/${GH_REPO}/releases/${release_id}/assets" \
+              --jq '.[] | select(.name == "update-dimensionworks-client.sh" or .name == "update-dimensionworks-server.sh" or .name == "update-dimensionworks-client.exe" or .name == "update-dimensionworks-server.exe") | [.id, .name] | @tsv' |
+            while IFS=$'\t' read -r asset_id asset_name; do
+              [[ -n "${asset_id}" ]] || continue
+              echo "删除旧资产：release=${release_id}, asset=${asset_name} (${asset_id})"
+              gh api --method DELETE "repos/${GH_REPO}/releases/assets/${asset_id}"
+            done
+          done
+          echo "旧版更新器资产清理完成。"
