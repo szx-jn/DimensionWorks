@@ -749,6 +749,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	errs := make(chan error, segments)
 	var wg sync.WaitGroup
 	var completed atomic.Int64
+	var finished atomic.Int64
 	var printMu sync.Mutex
 	workers := int(segments)
 	fmt.Printf("[下载] 启用 %d 路分段并发，总大小 %s\n", workers, humanSize(total))
