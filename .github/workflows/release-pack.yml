@@ -258,8 +258,6 @@ jobs:
                 linux) file "$output" | grep -q 'ELF 64-bit' ;;
                 darwin) file "$output" | grep -q 'Mach-O 64-bit' ;;
               esac
-              if [[ "$goos" == "windows" ]]; then
-              fi
             done
           done <<'TARGETS'
           windows amd64
