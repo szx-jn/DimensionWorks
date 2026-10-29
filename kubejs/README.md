@@ -92,4 +92,4 @@ server_scripts/basic_mineral_propagation.js 为 16 种目标资源配置三条�
 
 燃料定义使用 Create: Liquid Fuel 2.2.0 的 `fluid`、`burnTime`、`superHeat` 和 `amountConsumedPerTick` 字段。当前平衡值分别为柴油 32、生物柴油 24、汽油 24、乙醇 16，均每 tick 消耗 1 mB；这些是整合包自定义燃烧参数，不是柴油动力引擎 SU 参数的直接换算。
 
-原油与植物油未加入：当前柴油动力版本没有为它们注册对应的发动机 FuelType，避免将原料油误作可直接驱动发动机的成品燃料。
+原油与植物油未加入：当前柴油动力版本没有为它们注册对应的发动机 FuelType，避免将原料油误作可直接驱动发动机的成品燃料。这些数据只影响 Create 烈焰人燃烧室，不会改变柴油动力引擎自身的燃料倍率或燃烧器规则。
