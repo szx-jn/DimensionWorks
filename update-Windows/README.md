@@ -33,7 +33,7 @@ go build -trimpath -ldflags="-s -w -X main.defaultKind=server" -o ..\dist\update
 - `--url <完整包 URL>`
 - `--help`
 
-更新器读取包内/独立 TSV 清单，校验目标路径和文件摘要；兼容时优先使用差量包，失败则回退完整包。写入前会暂存文件并备份旧文件，应用失败会尝试回滚。错误显示在控制台，诊断日志写入 `.dimensionworks-update/logs/`（如果实例目录可写）。世界、客户端存档、日志以及服务端的 EULA、`server.properties`、JVM 参数、白名单和封禁信息都应保留。
+更新器读取包内/独立 TSV 清单，校验目标路径和文件摘要；兼容时优先使用差量包，失败则回退完整包。大于 8 MiB 且服务器正确支持 HTTP Range 的下载会自动使用最多 8 路分段并发；每段都校验 HTTP 206、Content-Range 和实际字节数，合并后仍执行清单摘要校验。服务器/镜像不支持分段时自动回退单连接下载。写入前会暂存文件并备份旧文件，应用失败会尝试回滚。错误显示在控制台，诊断日志写入 `.dimensionworks-update/logs/`（如果实例目录可写）。世界、客户端存档、日志以及服务端的 EULA、`server.properties`、JVM 参数、白名单和封禁信息都应保留。
 
 ## 边界
 

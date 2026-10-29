@@ -10,6 +10,9 @@ import tempfile
 import threading
 import unittest
 import zipfile
+
+# Keep regression fixtures deterministic when aria2c is installed on CI hosts.
+os.environ.setdefault("DW_UPDATER_DISABLE_ARIA2", "1")
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -74,6 +77,10 @@ class UpdaterScriptContractTest(unittest.TestCase):
                 self.assertIn("state.tsv", text)
                 self.assertIn("VERSION", text)
                 self.assertIn("download_forever", text)
+                self.assertIn("aria2c", text)
+                self.assertIn("--max-connection-per-server=8", text)
+                self.assertIn("--split=8", text)
+                self.assertIn("--min-split-size=1M", text)
                 self.assertIn('download_forever "$candidate"', text)
                 forever_block = text.split("download_forever()", 1)[1].split("download_forever_full()", 1)[0]
                 self.assertNotIn("--max-time", forever_block)
