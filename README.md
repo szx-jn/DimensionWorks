@@ -18,8 +18,8 @@
 | `*-update-manifest.tsv` | 更新清单 |
 | `update-dimensionworks-client-windows-amd64.exe` | Windows 客户端更新器 |
 | `update-dimensionworks-server-windows-amd64.exe` | Windows 服务端更新器 |
-| `update-dimensionworks-{client,server}-linux-{amd64,arm64}` | Linux 更新器 |
-| `update-dimensionworks-{client,server}-macos-{amd64,arm64}` | macOS 更新器 |
+| `update-dimensionworks-{client,server}-linux-amd64` | Linux x86-64 更新器 |
+| `update-dimensionworks-{client,server}-macos-arm64` | macOS Apple 芯片更新器 |
 | `SHA256SUMS` | 发布文件 SHA-256 校验值 |
 
 增量包用于版本更新，不是完整整合包；首次安装请下载对应的完整客户端或服务端包。具体文件以每个 Release 实际提供的资产为准。
