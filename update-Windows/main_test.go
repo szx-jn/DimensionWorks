@@ -2,13 +2,20 @@ package main
 
 import (
 	"archive/zip"
+	"context"
+	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"errors"
 	"crypto/sha256"
 	"encoding/hex"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func sha256Text(text string) string {
@@ -21,6 +28,75 @@ func manifestBytes(kind, version, base string, entries []Entry) []byte {
 		Kind: kind, Version: version, Release: "v" + version, Base: base, Entries: entries,
 	}
 	return renderManifest(m)
+}
+
+
+func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
+	data := bytes.Repeat([]byte("DimensionWorks-parallel-download-check\x00"), (9<<20)/39+1)
+	data = data[:9<<20]
+	var active, peak atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rangeHeader := r.Header.Get("Range")
+		if rangeHeader == "" {
+			w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+			_, _ = w.Write(data)
+			return
+		}
+		var begin, end int
+		if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-%d", &begin, &end); err != nil || begin < 0 || end < begin || end >= len(data) {
+			http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+		current := active.Add(1)
+		for {
+			old := peak.Load()
+			if current <= old || peak.CompareAndSwap(old, current) { break }
+		}
+		defer active.Add(-1)
+		time.Sleep(15 * time.Millisecond)
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin, end, len(data)))
+		w.Header().Set("Content-Length", fmt.Sprint(end-begin+1))
+		w.WriteHeader(http.StatusPartialContent)
+		_, _ = w.Write(data[begin : end+1])
+	}))
+	defer server.Close()
+
+	destination := filepath.Join(t.TempDir(), "download.bin")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := downloadOnce(ctx, server.URL, destination); err != nil {
+		t.Fatalf("downloadOnce failed: %v", err)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil { t.Fatal(err) }
+	if !bytes.Equal(got, data) { t.Fatal("downloaded content differs from source") }
+	if peak.Load() < 2 { t.Fatalf("expected concurrent range requests, peak concurrency=%d", peak.Load()) }
+	matches, err := filepath.Glob(destination + ".segment-*")
+	if err != nil { t.Fatal(err) }
+	if len(matches) != 0 { t.Fatalf("temporary segment files were not cleaned: %v", matches) }
+}
+
+func TestDownloadRangedFallsBackWhenServerIgnoresRange(t *testing.T) {
+	data := bytes.Repeat([]byte("fallback"), (9<<20)/8)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Simulate a server or mirror that ignores Range and always returns 200.
+		w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+		_, _ = w.Write(data)
+	}))
+	defer server.Close()
+
+	destination := filepath.Join(t.TempDir(), "fallback.bin")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := downloadOnce(ctx, server.URL, destination); err != nil {
+		t.Fatalf("download should fall back to a single connection: %v", err)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil { t.Fatal(err) }
+	if !bytes.Equal(got, data) { t.Fatal("fallback content differs from source") }
+	matches, err := filepath.Glob(destination + ".segment-*")
+	if err != nil { t.Fatal(err) }
+	if len(matches) != 0 { t.Fatalf("fallback left temporary segments: %v", matches) }
 }
 
 func TestParseManifestValidClientAndServer(t *testing.T) {
