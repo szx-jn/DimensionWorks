@@ -68,7 +68,14 @@ download_once() {
     local url="$1" destination="$2" timeout_seconds="$3"
     rm -f -- "$destination"
     printf '[下载] 本源限时 %s 秒：%s\n' "$timeout_seconds" "$url" >&2
-    if command -v curl >/dev/null 2>&1; then
+    # 优先使用 aria2（Motrix 同系下载引擎），以分段并发方式下载单个大文件。
+    if command -v aria2c >/dev/null 2>&1; then
+        aria2c --no-conf --allow-overwrite=true --auto-file-renaming=false \\
+            --max-connection-per-server=8 --split=8 --min-split-size=1M \\
+            --file-allocation=none --connect-timeout=10 --timeout="$timeout_seconds" \\
+            --max-tries=1 --summary-interval=1 --console-log-level=notice \\
+            --dir="$(dirname "$destination")" --out="$(basename "$destination")" "$url"
+    elif command -v curl >/dev/null 2>&1; then
         curl --fail --location --progress-bar --show-error \
             --connect-timeout 10 --max-time "$timeout_seconds" \
             --output "$destination" "$url"
