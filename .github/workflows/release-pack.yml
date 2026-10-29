@@ -322,16 +322,16 @@ jobs:
               <(unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" dimensionworks-update-manifest.tsv)
           cmp "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
               <(unzip -p "dist/DimensionWorks-Server-${PACK_VERSION}.zip" dimensionworks-update-manifest.tsv)
-          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*\.(sh|bat|exe)$'; then
+          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
             echo "Updater script embedded in client package" >&2
             exit 1
           fi
           if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}-delta.zip" 2>/dev/null |
-              grep -E '(^|/)update-dimensionworks-.*\.(sh|bat|exe)$'; then
+              grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
             echo "Updater script embedded in client delta" >&2
             exit 1
           fi
-          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*\.(sh|bat|exe)$'; then
+          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
             echo "Updater script embedded in server package" >&2
             exit 1
           fi
