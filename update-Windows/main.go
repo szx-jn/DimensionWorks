@@ -1683,17 +1683,41 @@ func replaceFromFile(source, destination string) error {
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
-	temp := destination + fmt.Sprintf(".dw-new-%d", os.Getpid())
-	_ = os.Remove(temp)
-	if err := copyFile(source, temp, 0644); err != nil {
+	sourceInfo, err := os.Stat(source)
+	if err != nil {
+		return err
+	}
+	if !sourceInfo.Mode().IsRegular() {
+		return fmt.Errorf("替换源不是普通文件：%s", source)
+	}
+	input, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer input.Close()
+
+	tempFile, err := os.CreateTemp(filepath.Dir(destination), ".dw-new-*")
+	if err != nil {
+		return err
+	}
+	temp := tempFile.Name()
+	defer os.Remove(temp)
+
+	if _, err := io.Copy(tempFile, input); err != nil {
+		_ = tempFile.Close()
+		return err
+	}
+	if err := tempFile.Chmod(sourceInfo.Mode().Perm()); err != nil {
+		_ = tempFile.Close()
+		return err
+	}
+	if err := tempFile.Close(); err != nil {
 		return err
 	}
 	if err := os.Remove(destination); err != nil && !os.IsNotExist(err) {
-		_ = os.Remove(temp)
 		return err
 	}
 	if err := os.Rename(temp, destination); err != nil {
-		_ = os.Remove(temp)
 		return err
 	}
 	return nil
