@@ -20,12 +20,14 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
 var defaultKind string
 var diagnosticRoot string
 var consoleReader = bufio.NewReader(os.Stdin)
+var progressMu sync.Mutex
 
 const (
 	repository   = "szx-jn/DimensionWorks"
@@ -377,15 +379,35 @@ func run(kind string, args []string) error {
 			archiveEntries = append(archiveEntries, entry)
 		}
 	}
-	for i, entry := range remoteEntries {
-		fmt.Printf("[下载] 远程文件 %d/%d：%s\n", i+1, len(remoteEntries), entry.Path)
-		stage, err := stagePath(stageRoot, entry.Path)
-		if err != nil {
-			return err
+	// 多线程下载远程文件，限制并发数以避免源站限流。
+	if len(remoteEntries) > 0 {
+		const maxConcurrentDownloads = 4
+		workers := maxConcurrentDownloads
+		if len(remoteEntries) < workers { workers = len(remoteEntries) }
+		jobs := make(chan Entry)
+		errs := make(chan error, len(remoteEntries))
+		var wg sync.WaitGroup
+		for i := 0; i < workers; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				for entry := range jobs {
+					stage, stageErr := stagePath(stageRoot, entry.Path)
+					if stageErr != nil { errs <- stageErr; continue }
+					progressMu.Lock()
+					fmt.Printf("[下载] 远程文件：%s\\n", entry.Path)
+					progressMu.Unlock()
+					if downloadErr := downloadVerified(entry.Source, stage, entry.Algorithm, entry.Value); downloadErr != nil {
+						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
+					}
+				}
+			}()
 		}
-		if err := downloadVerified(entry.Source, stage, entry.Algorithm, entry.Value); err != nil {
-			return fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, err)
-		}
+		for _, entry := range remoteEntries { jobs <- entry }
+		close(jobs)
+		wg.Wait()
+		close(errs)
+		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
 	}
 
 	deltaUsed := false
@@ -505,7 +527,7 @@ func parseOptions(args []string) (Options, error) {
 				return out, errors.New("--package 后必须提供本地完整包路径")
 			}
 			i++
-			out.Package = args[i]
+			out.Package = strings.Trim(strings.TrimSpace(args[i]), "\"")
 		case "--url":
 			if i+1 >= len(args) {
 				return out, errors.New("--url 后必须提供完整包 URL")
@@ -700,6 +722,8 @@ func (w *downloadProgress) Write(data []byte) (int, error) {
 	n, err := w.writer.Write(data)
 	w.written += int64(n)
 	if time.Since(w.last) > 800*time.Millisecond {
+		progressMu.Lock()
+		defer progressMu.Unlock()
 		if w.total > 0 {
 			fmt.Printf("\r[下载进度] %.1f%% (%s / %s)", 100*float64(w.written)/float64(w.total), humanSize(w.written), humanSize(w.total))
 		} else {
@@ -750,7 +774,7 @@ func downloadArchiveWithManualFallback(source, destination string) error {
 		if readErr != nil && len(line) == 0 {
 			return fmt.Errorf("自动下载失败且无法读取手动包路径：%w", err)
 		}
-		local := strings.TrimSpace(line)
+		local := strings.Trim(strings.TrimSpace(line), "\"")
 		if local == "" {
 			return fmt.Errorf("完整包下载失败：%w", err)
 		}
