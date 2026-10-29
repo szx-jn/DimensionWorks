@@ -1147,7 +1147,11 @@ func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) er
 		if err != nil {
 			return err
 		}
-		output, err := os.OpenFile(stage, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		mode := file.Mode().Perm()
+		if mode == 0 {
+			mode = 0644
+		}
+		output, err := os.OpenFile(stage, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 		if err != nil {
 			_ = reader.Close()
 			return err
