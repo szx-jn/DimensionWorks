@@ -1533,6 +1533,7 @@ type Applied struct {
 	Backup     string
 	Existed    bool
 	TargetPath string
+	Mode       os.FileMode
 }
 
 func applyTransaction(root, work string, changes []Change) error {
@@ -1550,6 +1551,10 @@ func applyTransaction(root, work string, changes []Change) error {
 				}
 				if err := replaceFromFile(item.Backup, item.TargetPath); err != nil {
 					failures = append(failures, fmt.Sprintf("%s: %v", item.Path, err))
+					continue
+				}
+				if err := os.Chmod(item.TargetPath, item.Mode); err != nil {
+					failures = append(failures, fmt.Sprintf("%s 权限恢复失败：%v", item.Path, err))
 				}
 			} else {
 				if err := os.Remove(item.TargetPath); err != nil && !os.IsNotExist(err) {
@@ -1591,12 +1596,12 @@ func applyTransaction(root, work string, changes []Change) error {
 				_ = rollback()
 				return err
 			}
-			if err := copyFile(target, backup, targetMode); err != nil {
+			if err := copyFile(target, backup, 0600); err != nil {
 				_ = rollback()
 				return fmt.Errorf("无法备份 %s：%w", change.Path, err)
 			}
 		}
-		applied = append(applied, Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target})
+		applied = append(applied, Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target, Mode: targetMode})
 
 		if change.Delete {
 			if exists {
