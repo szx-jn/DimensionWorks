@@ -190,7 +190,7 @@ func run(kind string, args []string) error {
 		return errors.New("该程序未指定 client/server 构建类型")
 	}
 	if runtime.GOOS != "windows" {
-		fmt.Println("提示：该更新器面向 Windows；当前平台为", runtime.GOOS)
+		fmt.Println("运行平台：", runtime.GOOS)
 	}
 	executable, err := os.Executable()
 	if err != nil {
@@ -561,7 +561,7 @@ func parseOptions(args []string) (Options, error) {
 }
 
 func printUsage(kind string) {
-	fmt.Printf("DimensionWorks %s Windows 更新器\n\n", kind)
+	fmt.Printf("DimensionWorks %s 跨平台更新器（%s/%s）\n\n", kind, runtime.GOOS, runtime.GOARCH)
 	fmt.Println("用法：")
 	fmt.Println("  updater.exe                         更新到 GitHub 最新发行版")
 	fmt.Println("  updater.exe --release vX.Y.Z        更新到指定发行版")
@@ -621,7 +621,7 @@ func latestRelease() (ReleaseInfo, error) {
 	if err != nil {
 		return result, err
 	}
-	req.Header.Set("User-Agent", "DimensionWorks-Windows-Updater/1.0")
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Accept", "application/vnd.github+json")
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
@@ -1049,7 +1049,12 @@ func isUpdaterName(base string) bool {
 	switch strings.ToLower(base) {
 	case "update-dimensionworks-client.exe", "update-dimensionworks-server.exe",
 		"update-dimensionworks-client.bat", "update-dimensionworks-server.bat",
-		"update-dimensionworks-client.sh", "update-dimensionworks-server.sh":
+		"update-dimensionworks-client.sh", "update-dimensionworks-server.sh",
+		"update-dimensionworks-client-linux-amd64", "update-dimensionworks-server-linux-amd64",
+		"update-dimensionworks-client-linux-arm64", "update-dimensionworks-server-linux-arm64",
+		"update-dimensionworks-client-macos-amd64", "update-dimensionworks-server-macos-amd64",
+		"update-dimensionworks-client-macos-arm64", "update-dimensionworks-server-macos-arm64",
+		"update-dimensionworks-client-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.exe":
 		return true
 	default:
 		return false
