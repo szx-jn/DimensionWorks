@@ -76,6 +76,79 @@ func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
 	if len(matches) != 0 { t.Fatalf("temporary segment files were not cleaned: %v", matches) }
 }
 
+
+func TestDownloadRangedFallsBackOnInvalidContentRange(t *testing.T) {
+	data := bytes.Repeat([]byte("invalid-range-fallback"), (9<<20)/22+1)
+	data = data[:9<<20]
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rangeHeader := r.Header.Get("Range")
+		if rangeHeader == "" {
+			w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+			_, _ = w.Write(data)
+			return
+		}
+		var begin, end int
+		if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-%d", &begin, &end); err != nil || end >= len(data) {
+			http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+		w.Header().Set("Content-Length", fmt.Sprint(end-begin+1))
+		if begin == 0 && end == 0 {
+			w.Header().Set("Content-Range", fmt.Sprintf("bytes 0-0/%d", len(data)))
+		} else {
+			// The probe succeeds, but segment headers lie about the requested byte offsets.
+			w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin+1, end+1, len(data)))
+		}
+		w.WriteHeader(http.StatusPartialContent)
+		_, _ = w.Write(data[begin : end+1])
+	}))
+	defer server.Close()
+
+	destination := filepath.Join(t.TempDir(), "invalid-range.bin")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := downloadOnce(ctx, server.URL, destination); err != nil {
+		t.Fatalf("download should fall back after invalid Content-Range: %v", err)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil { t.Fatal(err) }
+	if !bytes.Equal(got, data) { t.Fatal("fallback content differs from source") }
+	matches, err := filepath.Glob(destination + ".segment-*")
+	if err != nil { t.Fatal(err) }
+	if len(matches) != 0 { t.Fatalf("invalid segments were not cleaned: %v", matches) }
+}
+
+func TestDownloadVerifiedRejectsDigestMismatchAfterDownload(t *testing.T) {
+	data := bytes.Repeat([]byte("integrity-check"), (9<<20)/15+1)
+	data = data[:9<<20]
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rangeHeader := r.Header.Get("Range")
+		if rangeHeader == "" {
+			w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+			_, _ = w.Write(data)
+			return
+		}
+		var begin, end int
+		if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-%d", &begin, &end); err != nil || begin < 0 || end < begin || end >= len(data) {
+			http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin, end, len(data)))
+		w.Header().Set("Content-Length", fmt.Sprint(end-begin+1))
+		w.WriteHeader(http.StatusPartialContent)
+		_, _ = w.Write(data[begin : end+1])
+	}))
+	defer server.Close()
+
+	destination := filepath.Join(t.TempDir(), "digest-mismatch.bin")
+	if err := downloadVerified(server.URL, destination, "sha256", sha256Text("not the downloaded payload")); err == nil {
+		t.Fatal("expected digest mismatch to reject the downloaded file")
+	}
+	if _, err := os.Stat(destination); !os.IsNotExist(err) {
+		t.Fatalf("rejected download must be removed, stat error=%v", err)
+	}
+}
+
 func TestDownloadRangedFallsBackWhenServerIgnoresRange(t *testing.T) {
 	data := bytes.Repeat([]byte("fallback"), (9<<20)/8)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
