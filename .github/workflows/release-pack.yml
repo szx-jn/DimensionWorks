@@ -39,6 +39,7 @@ on:
       - 'scripts/package_mrpack.py'
       - 'scripts/package_server.py'
       - 'scripts/pack_hook.py'
+      - 'scripts/pack_manifest.py'
 
 permissions:
   contents: write
