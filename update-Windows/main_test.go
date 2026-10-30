@@ -2,6 +2,7 @@
 package main
 
 import (
+	"encoding/json"
 	"crypto/hmac"
 	"io"
 	"bufio"
@@ -325,6 +326,27 @@ func TestDownloadDiagnosticsRedactURLSecrets(t *testing.T) {
 	for _, secret := range []string{"user", "password", "secret", "fragment"} {
 		if strings.Contains(message, secret) { t.Fatalf("error secret %q leaked in %q", secret, message) }
 	}
+}
+
+func TestTransactionJournalAppendRepairsTruncatedTail(t *testing.T) {
+	work := t.TempDir()
+	first := Applied{Path: "a.txt", Existed: false}
+	second := Applied{Path: "b.txt", Existed: false}
+	if err := appendTransactionJournal(work, first); err != nil { t.Fatal(err) }
+	journal := filepath.Join(work, "transaction.jsonl")
+	file, err := os.OpenFile(journal, os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil { t.Fatal(err) }
+	if _, err := file.Write([]byte("{\"Path\":")); err != nil { t.Fatal(err) }
+	if err := file.Close(); err != nil { t.Fatal(err) }
+	if err := appendTransactionJournal(work, second); err != nil { t.Fatal(err) }
+	data, err := os.ReadFile(journal)
+	if err != nil { t.Fatal(err) }
+	lines := bytes.Split(bytes.TrimSpace(data), []byte{'\n'})
+	if len(lines) != 2 { t.Fatalf("expected 2 valid journal records, got %d: %q", len(lines), data) }
+	var gotFirst, gotSecond Applied
+	if err := json.Unmarshal(lines[0], &gotFirst); err != nil { t.Fatal(err) }
+	if err := json.Unmarshal(lines[1], &gotSecond); err != nil { t.Fatal(err) }
+	if gotFirst.Path != first.Path || gotSecond.Path != second.Path { t.Fatalf("journal order/content mismatch: %#v %#v", gotFirst, gotSecond) }
 }
 
 func TestCompareVersions(t *testing.T) {
