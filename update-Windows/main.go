@@ -845,8 +845,9 @@ func downloadRangeSegment(ctx context.Context, source, destination string, begin
 }
 
 type downloadProgress struct {
-	writer io.Writer
-	key    string
+	writer  io.Writer
+	key     string
+	written int64
 }
 
 type progressFile struct {
@@ -907,7 +908,15 @@ func (p *progressTracker) finish(key string, success bool) {
 		if success && file.total > 0 { file.written = file.total }
 		file.active = false
 		p.renderLocked(true)
-		delete(p.files, key)
+		anyActive := false
+		for _, current := range p.files {
+			if current.active { anyActive = true; break }
+		}
+		if !anyActive {
+			p.files = make(map[string]*progressFile)
+			p.lastBytes = 0
+			p.lastRefresh = time.Time{}
+		}
 	}
 	p.mu.Unlock()
 }
@@ -966,6 +975,7 @@ func progressFinish(key string, success bool) { downloadProgressUI.finish(key, s
 
 func (w *downloadProgress) Write(data []byte) (int, error) {
 	n, err := w.writer.Write(data)
+	w.written += int64(n)
 	downloadProgressUI.add(w.key, int64(n))
 	return n, err
 }
