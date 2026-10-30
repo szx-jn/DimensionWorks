@@ -532,3 +532,28 @@ func TestOptionsRejectConflictsAndInvalidTags(t *testing.T) {
 		t.Fatalf("help should parse: opts=%+v err=%v", opts, err)
 	}
 }
+
+
+func TestProgressTrackerTracksParallelTransfersAndRetries(t *testing.T) {
+	tracker := newProgressTracker()
+	tracker.begin("a", "a.jar")
+	tracker.begin("b", "b.jar")
+	tracker.setTotal("a", 100)
+	tracker.setTotal("b", 200)
+	tracker.add("a", 40)
+	tracker.add("b", 60)
+	tracker.reset("a")
+	tracker.add("a", 25)
+
+	tracker.mu.Lock()
+	defer tracker.mu.Unlock()
+	if got := tracker.files["a"].written; got != 25 {
+		t.Fatalf("retry should reset prior bytes, got %d", got)
+	}
+	if got := tracker.files["b"].written; got != 60 {
+		t.Fatalf("parallel transfer bytes were lost, got %d", got)
+	}
+	if got := tracker.files["a"].total; got != 0 {
+		t.Fatalf("retry should reset attempt total, got %d", got)
+	}
+}
