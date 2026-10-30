@@ -32,9 +32,15 @@ var progressMu sync.Mutex
 var downloadProgressUI = newProgressTracker()
 
 const (
-	repository   = "szx-jn/DimensionWorks"
-	manifestName = "dimensionworks-update-manifest.tsv"
-	stateName    = ".dimensionworks-update/state.tsv"
+	repository          = "szx-jn/DimensionWorks"
+	manifestName        = "dimensionworks-update-manifest.tsv"
+	stateName           = ".dimensionworks-update/state.tsv"
+	maxManifestBytes    = 16 << 20
+	maxManifestEntries  = 100000
+	maxArchiveEntries   = 100000
+	maxArchiveFileBytes = uint64(4 << 30)
+	maxArchiveTotalBytes = uint64(16 << 30)
+	maxDownloadBytes    = int64(8 << 30)
 )
 
 var versionRE = regexp.MustCompile("^[0-9]+\\.[0-9]+\\.[0-9]+$")
@@ -717,12 +723,21 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
 	total := resp.ContentLength
+	if total > maxDownloadBytes {
+		_ = file.Close()
+		_ = os.Remove(part)
+		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total))
+	}
 	progressSetTotal(destination, total)
 	writer := &downloadProgress{writer: file, key: destination}
-	_, copyErr := io.Copy(writer, resp.Body)
+	_, copyErr := io.Copy(writer, io.LimitReader(resp.Body, maxDownloadBytes+1))
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(part); return copyErr }
 	if closeErr != nil { _ = os.Remove(part); return closeErr }
+	if writer.written > maxDownloadBytes {
+		_ = os.Remove(part)
+		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(writer.written))
+	}
 	if total >= 0 && writer.written != total {
 		_ = os.Remove(part)
 		return fmt.Errorf("内容长度不符：收到 %d 字节，预期 %d 字节", writer.written, total)
@@ -742,14 +757,780 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	req.Header.Set("Range", "bytes=0-0")
 	resp, err := (&http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 20 * time.Second}}).Do(req)
 	if err != nil { return err }
-	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2))
+	probeBody, bodyErr := io.ReadAll(io.LimitReader(resp.Body, 2))
 	resp.Body.Close()
+	if bodyErr != nil {
+		return fmt.Errorf("读取 Range 探测响应失败：%w", bodyErr)
+	}
 	if resp.StatusCode != http.StatusPartialContent {
 		return fmt.Errorf("服务器不支持 HTTP Range（状态码 %d）", resp.StatusCode)
 	}
+	matches := regexp.MustCompile(`^bytes 0-0/([0-9]+)package main
+
+import (
+	"archive/zip"
+	"bufio"
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"sort"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
+var defaultKind string
+var diagnosticRoot string
+var consoleReader = bufio.NewReader(os.Stdin)
+var progressMu sync.Mutex
+var downloadProgressUI = newProgressTracker()
+
+const (
+	repository          = "szx-jn/DimensionWorks"
+	manifestName        = "dimensionworks-update-manifest.tsv"
+	stateName           = ".dimensionworks-update/state.tsv"
+	maxManifestBytes    = 16 << 20
+	maxManifestEntries  = 100000
+	maxArchiveEntries   = 100000
+	maxArchiveFileBytes = uint64(4 << 30)
+	maxArchiveTotalBytes = uint64(16 << 30)
+	maxDownloadBytes    = int64(8 << 30)
+)
+
+var versionRE = regexp.MustCompile("^[0-9]+\\.[0-9]+\\.[0-9]+$")
+var digestRE = regexp.MustCompile("^[0-9a-f]+$")
+
+type Entry struct {
+	Action    string
+	Path      string
+	Algorithm string
+	Value     string
+	Source    string
+}
+
+type Manifest struct {
+	Kind    string
+	Version string
+	Release string
+	Base    string
+	Entries []Entry
+	Bytes   []byte
+}
+
+type ReleaseInfo struct {
+	TagName string `json:"tag_name"`
+	Assets  []struct {
+		Name               string `json:"name"`
+		BrowserDownloadURL string `json:"browser_download_url"`
+	} `json:"assets"`
+}
+
+type Archive struct {
+	reader  *zip.ReadCloser
+	entries map[string]*zip.File
+}
+
+type Options struct {
+	Release string
+	Package string
+	URL     string
+	Help    bool
+}
+
+func main() {
+	enableUTF8Console()
+	kind := defaultKind
+	if kind == "" {
+		name := strings.ToLower(filepath.Base(os.Args[0]))
+		switch {
+		case strings.Contains(name, "client"):
+			kind = "client"
+		case strings.Contains(name, "server"):
+			kind = "server"
+		}
+	}
+	err := run(kind, os.Args[1:])
+	if err == nil {
+		fmt.Println()
+		fmt.Println("操作完成。按回车键关闭窗口。")
+		waitEnter()
+		return
+	}
+	fmt.Fprintln(os.Stderr, "")
+	fmt.Fprintln(os.Stderr, "更新失败：", err)
+	if logPath := writeFailureLog(diagnosticRoot, err); logPath != "" {
+		fmt.Fprintln(os.Stderr, "诊断日志：", logPath)
+	} else {
+		fmt.Fprintln(os.Stderr, "当前错误未能写入日志；请先保存上方错误信息。")
+	}
+	fmt.Fprintln(os.Stderr, "请检查错误信息后按回车键关闭窗口。")
+	waitEnter()
+	os.Exit(1)
+}
+
+func waitEnter() {
+	fmt.Print("> ")
+	_, _ = consoleReader.ReadString('\n')
+}
+
+func validateInstanceRoot(root, kind string) error {
+	if kind != "client" && kind != "server" {
+		return fmt.Errorf("未知更新器类型：%s", kind)
+	}
+	modsInfo, err := os.Stat(filepath.Join(root, "mods"))
+	if err != nil || !modsInfo.IsDir() {
+		return fmt.Errorf("未在 %s 找到 mods/ 目录。请把 update-dimensionworks-%s.exe 放到对应客户端或服务端实例根目录后再运行；不要直接从下载目录运行", root, kind)
+	}
+	markers := []string{"VERSION", "config"}
+	if kind == "server" {
+		markers = []string{"VERSION", "libraries", "start.sh", "start.bat"}
+	}
+	found := false
+	for _, marker := range markers {
+		info, statErr := os.Stat(filepath.Join(root, marker))
+		if statErr == nil && ((marker == "config" || marker == "libraries") && info.IsDir() || (marker != "config" && marker != "libraries") && info.Mode().IsRegular()) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("目录 %s 缺少 %s 更新器所需的实例标记；请确认 EXE 已放入正确的实例根目录", root, kind)
+	}
+	return nil
+}
+
+func writeFailureLog(root string, cause error) string {
+	if root == "" {
+		return ""
+	}
+	rootInfo, err := os.Lstat(root)
+	if err != nil || !rootInfo.IsDir() || rootInfo.Mode()&os.ModeSymlink != 0 {
+		return ""
+	}
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if info, statErr := os.Lstat(updateRoot); statErr == nil {
+		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return ""
+		}
+	} else if os.IsNotExist(statErr) {
+		if os.Mkdir(updateRoot, 0755) != nil {
+			return ""
+		}
+	} else {
+		return ""
+	}
+	logDir := filepath.Join(updateRoot, "logs")
+	if info, statErr := os.Lstat(logDir); statErr == nil {
+		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return ""
+		}
+	} else if os.IsNotExist(statErr) {
+		if err := os.Mkdir(logDir, 0755); err != nil {
+			return ""
+		}
+	} else {
+		return ""
+	}
+	logPath := filepath.Join(logDir, "failed-"+time.Now().Format("20060102-150405")+"-"+fmt.Sprint(os.Getpid())+".log")
+	contents := fmt.Sprintf("time=%s\nerror=%s\n", time.Now().Format(time.RFC3339), cause)
+	if err := os.WriteFile(logPath, []byte(contents), 0644); err != nil {
+		return ""
+	}
+	return logPath
+}
+func run(kind string, args []string) error {
+	opts, err := parseOptions(args)
+	if err != nil {
+		return err
+	}
+	if opts.Help {
+		printUsage(kind)
+		return nil
+	}
+	if kind != "client" && kind != "server" {
+		return errors.New("该程序未指定 client/server 构建类型")
+	}
+	if runtime.GOOS != "windows" {
+		fmt.Println("运行平台：", runtime.GOOS)
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("无法定位更新程序：%w", err)
+	}
+	root, err := filepath.Abs(filepath.Dir(executable))
+	if err != nil {
+		return fmt.Errorf("无法定位实例目录：%w", err)
+	}
+	if info, err := os.Lstat(root); err != nil || info.Mode()&os.ModeSymlink != 0 {
+		return errors.New("实例目录不存在或是符号链接")
+	}
+	if err := validateInstanceRoot(root, kind); err != nil {
+		return err
+	}
+	diagnosticRoot = root
+	fmt.Println("DimensionWorks", kind, "更新器")
+	fmt.Println("实例目录：", root)
+	fmt.Print("请确认该目录是正确的整合包根目录，且 Minecraft/服务端已退出。输入 Y 继续，其他输入取消：")
+	answer, readErr := consoleReader.ReadString('\n')
+	if readErr != nil && len(answer) == 0 {
+		return fmt.Errorf("无法读取确认输入：%w", readErr)
+	}
+	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
+		return errors.New("用户取消了更新")
+	}
+
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if err := os.MkdirAll(updateRoot, 0755); err != nil {
+		return fmt.Errorf("无法创建更新目录：%w", err)
+	}
+	if info, err := os.Lstat(updateRoot); err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return errors.New(".dimensionworks-update 必须是普通目录，不能是符号链接")
+	}
+	lockPath := filepath.Join(updateRoot, "lock")
+	lock, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		if os.IsExist(err) {
+			return errors.New("检测到另一个更新任务，或上次更新留下了锁文件。请确认没有更新程序运行后，再删除 .dimensionworks-update/lock 重试")
+		}
+		return fmt.Errorf("无法创建更新锁：%w", err)
+	}
+	_, _ = fmt.Fprintf(lock, "pid=%d\ntime=%s\n", os.Getpid(), time.Now().Format(time.RFC3339))
+	_ = lock.Close()
+	defer os.Remove(lockPath)
+
+
+
+	work, err := os.MkdirTemp(updateRoot, "work-")
+	if err != nil {
+		return fmt.Errorf("无法创建事务目录：%w", err)
+	}
+	keepWork := false
+	defer func() {
+		if !keepWork {
+			_ = os.RemoveAll(work)
+		}
+	}()
+
+	var target *Manifest
+	var fullPackage *Archive
+	var fullPackageURL string
+	releaseTag := ""
+
+	switch {
+	case opts.Package != "":
+		packagePath, err := filepath.Abs(opts.Package)
+		if err != nil {
+			return fmt.Errorf("本地包路径无效：%w", err)
+		}
+		fullPackage, err = openArchive(packagePath)
+		if err != nil {
+			return fmt.Errorf("无法打开本地更新包：%w", err)
+		}
+		defer fullPackage.Close()
+		target, err = embeddedManifest(fullPackage, kind)
+		if err != nil {
+			return err
+		}
+		releaseTag = target.Release
+	case opts.URL != "":
+		fullPackageURL = opts.URL
+		manifestURL, err := manifestURLFromPackageURL(opts.URL)
+		if err != nil {
+			return err
+		}
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
+		if err != nil {
+			return fmt.Errorf("下载更新清单失败：%w；可重新运行并使用 --package 指定已下载的完整包", err)
+		}
+		target, err = parseManifest(manifestBytes, kind)
+		if err != nil {
+			return err
+		}
+		releaseTag = target.Release
+	case opts.Release != "":
+		releaseTag = opts.Release
+		if !validReleaseTag(releaseTag) {
+			return fmt.Errorf("发行标签格式无效：%s", releaseTag)
+		}
+		version := strings.TrimPrefix(releaseTag, "v")
+		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
+		if err != nil {
+			return fmt.Errorf("下载更新清单失败：%w", err)
+		}
+		target, err = parseManifest(manifestBytes, kind)
+		if err != nil {
+			return err
+		}
+		if target.Release != releaseTag {
+			return fmt.Errorf("清单发行标签 %s 与请求的 %s 不一致", target.Release, releaseTag)
+		}
+	default:
+		release, err := latestRelease()
+		if err != nil {
+			return err
+		}
+		releaseTag = release.TagName
+		version := strings.TrimPrefix(releaseTag, "v")
+		manifestAsset := manifestAssetName(kind, version)
+		var manifestURL string
+		for _, asset := range release.Assets {
+			if asset.Name == manifestAsset {
+				manifestURL = asset.BrowserDownloadURL
+				break
+			}
+		}
+		if manifestURL == "" {
+			manifestURL = assetURL(releaseTag, manifestAsset)
+		}
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
+		if err != nil {
+			return fmt.Errorf("下载最新版本清单失败：%w", err)
+		}
+		target, err = parseManifest(manifestBytes, kind)
+		if err != nil {
+			return err
+		}
+		if target.Release != releaseTag {
+			return fmt.Errorf("最新发行标签 %s 与清单 %s 不一致", releaseTag, target.Release)
+		}
+	}
+
+	if target.Kind != kind {
+		return fmt.Errorf("更新清单类型错误：需要 %s，实际为 %s", kind, target.Kind)
+	}
+	if fullPackage != nil {
+		pkgManifest, err := embeddedManifest(fullPackage, kind)
+		if err != nil {
+			return err
+		}
+		if pkgManifest.Version != target.Version || !bytes.Equal(pkgManifest.Bytes, target.Bytes) {
+			return errors.New("本地更新包中的清单与目标清单不一致")
+		}
+	}
+
+	statePath := filepath.Join(root, filepath.FromSlash(stateName))
+	current, err := readState(root, statePath, kind)
+	if err != nil {
+		return fmt.Errorf("现有更新状态无效：%w。请备份并检查 %s", err, statePath)
+	}
+	if current == nil {
+		current, err = bootstrapState(root, kind)
+		if err != nil {
+			return fmt.Errorf("无法初始化现有文件状态：%w", err)
+		}
+	}
+	fmt.Printf("当前版本：%s；目标版本：%s（%s）\n", current.Version, target.Version, target.Release)
+
+	selected, deletions, err := selectChanges(root, kind, current, target)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
+	stageRoot := filepath.Join(work, "stage")
+	if err := os.MkdirAll(stageRoot, 0755); err != nil {
+		return err
+	}
+
+	remoteEntries := make([]Entry, 0)
+	archiveEntries := make([]Entry, 0)
+	for _, entry := range selected {
+		if entry.Action == "remote" {
+			remoteEntries = append(remoteEntries, entry)
+		} else {
+			archiveEntries = append(archiveEntries, entry)
+		}
+	}
+	// 多线程下载远程文件，限制并发数以避免源站限流。
+	if len(remoteEntries) > 0 {
+		const maxConcurrentDownloads = 4
+		workers := maxConcurrentDownloads
+		if len(remoteEntries) < workers { workers = len(remoteEntries) }
+		jobs := make(chan Entry)
+		errs := make(chan error, len(remoteEntries))
+		var wg sync.WaitGroup
+		for i := 0; i < workers; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				for entry := range jobs {
+					stage, stageErr := stagePath(stageRoot, entry.Path)
+					if stageErr != nil { errs <- stageErr; continue }
+					progressMu.Lock()
+					fmt.Printf("[下载] 远程文件：%s\n", entry.Path)
+					progressMu.Unlock()
+					if downloadErr := downloadVerified(entry.Source, stage, entry.Algorithm, entry.Value); downloadErr != nil {
+						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
+					}
+				}
+			}()
+		}
+		for _, entry := range remoteEntries { jobs <- entry }
+		close(jobs)
+		wg.Wait()
+		close(errs)
+		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
+	}
+
+	deltaUsed := false
+	if len(archiveEntries) > 0 && fullPackage == nil && releaseTag != "" &&
+		validReleaseTag(target.Base) && current.Release == target.Base {
+		deltaName := deltaAssetName(kind, target.Version)
+		deltaPath := filepath.Join(work, "delta.zip")
+		fmt.Println("[下载] 尝试差量更新包：", deltaName)
+		if _, err := downloadBytes(assetURL(releaseTag, deltaName), deltaPath, true); err == nil {
+			delta, openErr := openArchive(deltaPath)
+			if openErr == nil {
+				stageErr := stageArchiveEntries(delta, archiveEntries, stageRoot)
+				_ = delta.Close()
+				if stageErr == nil {
+					deltaUsed = true
+				} else {
+					clearStaged(stageRoot, archiveEntries)
+					fmt.Println("[回退] 差量包不完整或校验失败，将改用完整包：", stageErr)
+				}
+			} else {
+				fmt.Println("[回退] 差量包不可用：", openErr)
+			}
+		} else {
+			fmt.Println("[回退] 差量包下载失败，将尝试完整包：", err)
+		}
+	}
+
+	if len(archiveEntries) > 0 && !deltaUsed {
+		if fullPackage == nil {
+			if fullPackageURL == "" {
+				fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
+			}
+			packagePath := filepath.Join(work, "full-package.zip")
+			fmt.Println("[下载] 获取完整更新包：", filepath.Base(fullPackageURL))
+			if err := downloadArchiveWithManualFallback(fullPackageURL, packagePath); err != nil {
+				return err
+			}
+			fullPackage, err = openArchive(packagePath)
+			if err != nil {
+				return fmt.Errorf("完整更新包无效：%w", err)
+			}
+			defer fullPackage.Close()
+			pkgManifest, err := embeddedManifest(fullPackage, kind)
+			if err != nil {
+				return err
+			}
+			if pkgManifest.Version != target.Version || pkgManifest.Release != target.Release ||
+				!bytes.Equal(pkgManifest.Bytes, target.Bytes) {
+				return errors.New("完整更新包中的清单与目标清单不一致")
+			}
+		}
+		if err := stageArchiveEntries(fullPackage, archiveEntries, stageRoot); err != nil {
+			return fmt.Errorf("暂存完整更新包失败：%w", err)
+		}
+	}
+
+	changes := make([]Change, 0, len(selected)+len(deletions)+2)
+	for _, entry := range selected {
+		stage, err := stagePath(stageRoot, entry.Path)
+		if err != nil {
+			return err
+		}
+		if err := verifyDigest(stage, entry.Algorithm, entry.Value); err != nil {
+			return fmt.Errorf("暂存校验失败 %s：%w", entry.Path, err)
+		}
+		changes = append(changes, Change{Path: entry.Path, Staged: stage})
+	}
+	for _, stale := range deletions {
+		changes = append(changes, Change{Path: stale, Delete: true})
+	}
+	versionPath := filepath.Join(work, "VERSION")
+	if err := os.WriteFile(versionPath, []byte(target.Version+"\n"), 0644); err != nil {
+		return err
+	}
+	stateStage, err := stagePath(stageRoot, stateName)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(stateStage), 0755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(stateStage, target.Bytes, 0644); err != nil {
+		return err
+	}
+	changes = append(changes, Change{Path: "VERSION", Staged: versionPath})
+	changes = append(changes, Change{Path: stateName, Staged: stateStage})
+
+	if err := applyTransaction(root, work, changes); err != nil {
+		keepWork = true
+		logPath := filepath.Join(root, ".dimensionworks-update", "failed-"+time.Now().Format("20060102-150405")+".log")
+		_ = os.WriteFile(logPath, []byte(err.Error()+"\nRecovery data: "+work+"\n"), 0644)
+		return fmt.Errorf("%w；恢复数据保留在 %s", err, work)
+	}
+	fmt.Printf("更新成功：%s -> %s\n", current.Version, target.Version)
+	if deltaUsed {
+		fmt.Println("更新来源：已校验的差量包")
+	} else if len(archiveEntries) > 0 {
+		fmt.Println("更新来源：完整包")
+	}
+	return nil
+}
+
+func parseOptions(args []string) (Options, error) {
+	var out Options
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--help", "-h", "/?":
+			out.Help = true
+		case "--release":
+			if i+1 >= len(args) {
+				return out, errors.New("--release 后必须提供 vX.Y.Z 标签")
+			}
+			i++
+			out.Release = args[i]
+		case "--package":
+			if i+1 >= len(args) {
+				return out, errors.New("--package 后必须提供本地完整包路径")
+			}
+			i++
+			out.Package = strings.Trim(strings.TrimSpace(args[i]), "\"")
+		case "--url":
+			if i+1 >= len(args) {
+				return out, errors.New("--url 后必须提供完整包 URL")
+			}
+			i++
+			out.URL = args[i]
+		default:
+			return out, fmt.Errorf("未知参数：%s", args[i])
+		}
+	}
+	count := 0
+	for _, value := range []string{out.Release, out.Package, out.URL} {
+		if value != "" {
+			count++
+		}
+	}
+	if count > 1 {
+		return out, errors.New("--release、--package 和 --url 不能同时使用")
+	}
+	if out.Release != "" && !validReleaseTag(out.Release) {
+		return out, errors.New("--release 必须是 vX.Y.Z 格式")
+	}
+	if out.URL != "" {
+		parsed, err := url.Parse(out.URL)
+		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+			return out, errors.New("--url 必须是 HTTP 或 HTTPS 完整 URL")
+		}
+	}
+	return out, nil
+}
+
+func printUsage(kind string) {
+	fmt.Printf("DimensionWorks %s 跨平台更新器（%s/%s）\n\n", kind, runtime.GOOS, runtime.GOARCH)
+	fmt.Println("用法：")
+	fmt.Println("  updater                            更新到 GitHub 最新发行版")
+	fmt.Println("  updater --release vX.Y.Z           更新到指定发行版")
+	fmt.Println("  updater --package <完整包路径>     使用本地完整包")
+	fmt.Println("  updater --url <完整包 URL>         从 URL 更新")
+	fmt.Println("  updater --help                     显示帮助")
+	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
+}
+
+func validReleaseTag(tag string) bool {
+	return strings.HasPrefix(tag, "v") && versionRE.MatchString(strings.TrimPrefix(tag, "v"))
+}
+
+func manifestAssetName(kind, version string) string {
+	if kind == "server" {
+		return "DimensionWorks-Server-" + version + "-update-manifest.tsv"
+	}
+	return "DimensionWorks-" + version + "-update-manifest.tsv"
+}
+
+func fullPackageName(kind, version string) string {
+	if kind == "server" {
+		return "DimensionWorks-Server-" + version + ".zip"
+	}
+	return "DimensionWorks-" + version + ".mrpack"
+}
+
+func deltaAssetName(kind, version string) string {
+	if kind == "server" {
+		return "DimensionWorks-Server-" + version + "-delta.zip"
+	}
+	return "DimensionWorks-" + version + "-delta.zip"
+}
+
+func assetURL(tag, name string) string {
+	return "https://github.com/" + repository + "/releases/download/" + url.PathEscape(tag) + "/" + url.PathEscape(name)
+}
+
+func manifestURLFromPackageURL(raw string) (string, error) {
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return "", errors.New("--url 必须是 HTTP 或 HTTPS 完整包 URL")
+	}
+	base := filepath.Base(parsed.Path)
+	ext := filepath.Ext(base)
+	if ext != ".zip" && ext != ".mrpack" {
+		return "", errors.New("--url 的文件名必须以 .zip 或 .mrpack 结尾")
+	}
+	name := strings.TrimSuffix(base, ext) + "-update-manifest.tsv"
+	parsed.Path = strings.TrimSuffix(parsed.Path, base) + name
+	return parsed.String(), nil
+}
+
+func latestRelease() (ReleaseInfo, error) {
+	var result ReleaseInfo
+	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/"+repository+"/releases/latest", nil)
+	if err != nil {
+		return result, err
+	}
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("Accept", "application/vnd.github+json")
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return result, fmt.Errorf("无法查询 GitHub 最新发行版：%w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return result, fmt.Errorf("GitHub API 返回 HTTP %d", resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return result, fmt.Errorf("无法解析 GitHub 发行信息：%w", err)
+	}
+	if !validReleaseTag(result.TagName) {
+		return result, fmt.Errorf("GitHub 最新发行标签格式无效：%s", result.TagName)
+	}
+	return result, nil
+}
+
+func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
+	if err := downloadFile(source, destination, mirrors); err != nil {
+		return nil, err
+	}
+	return os.ReadFile(destination)
+}
+
+func downloadFile(source, destination string, mirrors bool) (resultErr error) {
+	progressBegin(destination, filepath.Base(destination))
+	defer func() { progressFinish(destination, resultErr == nil) }()
+	parsed, err := url.Parse(source)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return fmt.Errorf("无效下载 URL：%s", source)
+	}
+	candidates := []string{source}
+	if mirrors && strings.HasPrefix(source, "https://github.com/") && strings.Contains(source, "/releases/download/") {
+		candidates = append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
+	}
+	var failures []string
+	for index, candidate := range candidates {
+		progressReset(destination)
+		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), candidate)
+		if err := downloadOnce(candidate, destination); err == nil {
+			return nil
+		} else {
+			failures = append(failures, fmt.Sprintf("%s: %v", candidate, err))
+		}
+	}
+	return errors.New(strings.Join(failures, "\n"))
+}
+
+const (
+	parallelDownloadThreshold int64 = 8 << 20
+	parallelDownloadWorkers = 8
+)
+
+const downloadAttemptTimeout = 15 * time.Minute
+
+func downloadOnce(source, destination string) error {
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return err
+	}
+
+	// Range 与单连接回退使用独立 Context，避免 Range 超时后
+	// 把已经过期的 Context 继续传给单连接请求。
+	rangeCtx, cancelRange := context.WithTimeout(context.Background(), downloadAttemptTimeout)
+	rangeErr := downloadRanged(rangeCtx, source, destination)
+	cancelRange()
+	if rangeErr == nil {
+		return nil
+	}
+	fmt.Printf("[下载] 分段下载失败，清理分段并使用独立连接重试：%v\n", rangeErr)
+
+	progressReset(destination)
+	sequentialCtx, cancelSequential := context.WithTimeout(context.Background(), downloadAttemptTimeout)
+	defer cancelSequential()
+	return downloadSequential(sequentialCtx, source, destination)
+}
+
+func downloadSequential(ctx context.Context, source, destination string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	if err != nil { return err }
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 30 * time.Second}}
+	resp, err := client.Do(req)
+	if err != nil { return err }
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+	part := destination + ".part"
+	_ = os.Remove(part)
+	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil { return err }
+	total := resp.ContentLength
+	if total > maxDownloadBytes {
+		_ = file.Close()
+		_ = os.Remove(part)
+		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total))
+	}
+	progressSetTotal(destination, total)
+	writer := &downloadProgress{writer: file, key: destination}
+	_, copyErr := io.Copy(writer, io.LimitReader(resp.Body, maxDownloadBytes+1))
+	closeErr := file.Close()
+	if copyErr != nil { _ = os.Remove(part); return copyErr }
+	if closeErr != nil { _ = os.Remove(part); return closeErr }
+	if writer.written > maxDownloadBytes {
+		_ = os.Remove(part)
+		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(writer.written))
+	}
+	if total >= 0 && writer.written != total {
+		_ = os.Remove(part)
+		return fmt.Errorf("内容长度不符：收到 %d 字节，预期 %d 字节", writer.written, total)
+	}
+	_ = os.Remove(destination)
+	return os.Rename(part, destination)
+}
+
+// downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
+// Every segment is written to a separate temporary file and validated before assembly.
+func downloadRanged(ctx context.Context, source, destination string) error {
+	probeCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
+	if err != nil { return err }
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("Range", "bytes=0-0")
+	resp, err := (&http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 20 * time.Second}}).Do(req)
+	if err != nil { return err }
+).FindStringSubmatch(resp.Header.Get("Content-Range"))
+	if len(matches) != 2 || len(probeBody) != 1 {
+		return errors.New("服务器返回无效的 Range 探测响应")
+	}
 	var total int64
-	if _, err := fmt.Sscanf(resp.Header.Get("Content-Range"), "bytes 0-0/%d", &total); err != nil || total <= 0 {
-		return errors.New("服务器返回无效的 Content-Range")
+	if _, err := fmt.Sscanf(matches[1], "%d", &total); err != nil || total <= 0 || total > maxDownloadBytes {
+		return errors.New("服务器返回无效或超限的 Content-Range")
 	}
 	progressSetTotal(destination, total)
 	if total < parallelDownloadThreshold {
@@ -1065,6 +1846,9 @@ func parseManifest(data []byte, expectedKind string) (*Manifest, error) {
 	if len(data) == 0 {
 		return nil, errors.New("更新清单为空")
 	}
+	if len(data) > maxManifestBytes {
+		return nil, fmt.Errorf("更新清单超过大小限制：%s", humanSize(int64(len(data))))
+	}
 	if bytes.HasPrefix(data, []byte{0xef, 0xbb, 0xbf}) {
 		return nil, errors.New("更新清单不能包含 UTF-8 BOM")
 	}
@@ -1114,6 +1898,9 @@ func parseManifest(data []byte, expectedKind string) (*Manifest, error) {
 	}
 	if !versionRE.MatchString(manifest.Version) || manifest.Release != "v"+manifest.Version || !validReleaseTagOrNone(manifest.Base) {
 		return nil, errors.New("更新清单版本号或发行标签无效")
+	}
+	if len(lines)-6 > maxManifestEntries {
+		return nil, fmt.Errorf("更新清单条目超过上限：%d", maxManifestEntries)
 	}
 	seen := map[string]bool{}
 	for lineIndex, line := range lines[6:] {
@@ -1218,6 +2005,11 @@ func openArchive(path string) (*Archive, error) {
 		return nil, err
 	}
 	archive := &Archive{reader: reader, entries: map[string]*zip.File{}}
+	var totalUncompressed uint64
+	if len(reader.File) > maxArchiveEntries {
+		archive.Close()
+		return nil, fmt.Errorf("压缩包条目数量超过上限：%d", maxArchiveEntries)
+	}
 	for _, file := range reader.File {
 		name := strings.TrimSuffix(file.Name, "/")
 		if name == "" {
@@ -1234,6 +2026,15 @@ func openArchive(path string) (*Archive, error) {
 		if file.FileInfo().IsDir() {
 			continue
 		}
+		if file.UncompressedSize64 > maxArchiveFileBytes {
+			archive.Close()
+			return nil, fmt.Errorf("压缩包单文件展开大小超过上限：%s", name)
+		}
+		if totalUncompressed > maxArchiveTotalBytes-file.UncompressedSize64 {
+			archive.Close()
+			return nil, fmt.Errorf("压缩包总展开大小超过上限：%s", name)
+		}
+		totalUncompressed += file.UncompressedSize64
 		if isUpdaterName(filepath.Base(name)) {
 			archive.Close()
 			return nil, fmt.Errorf("压缩包不允许包含更新器：%s", name)
@@ -1548,6 +2349,10 @@ func renderManifest(manifest *Manifest) []byte {
 	return []byte(strings.Join(lines, "\n") + "\n")
 }
 
+func pathForRoot(root, rel string) string {
+	return filepath.Join(root, filepath.FromSlash(rel))
+}
+
 func selectChanges(root, kind string, current, target *Manifest) ([]Entry, []string, error) {
 	currentEntries := map[string]Entry{}
 	targetEntries := map[string]Entry{}
@@ -1594,6 +2399,14 @@ func selectChanges(root, kind string, current, target *Manifest) ([]Entry, []str
 			return nil, nil, err
 		}
 		if exists {
+			digest, hashErr := hashFile(pathForRoot(root, old.Path), old.Algorithm)
+			if hashErr != nil {
+				return nil, nil, fmt.Errorf("检查待删除文件 %s 失败：%w", old.Path, hashErr)
+			}
+			if digest != old.Value {
+				fmt.Printf("[保护] 文件已被本地修改，跳过自动删除：%s\n", old.Path)
+				continue
+			}
 			deletions = append(deletions, old.Path)
 		}
 	}
