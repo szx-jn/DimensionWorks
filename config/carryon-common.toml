@@ -3,7 +3,7 @@
 	#General Settings
 	#Maximum distance from where Blocks and Entities can be picked up
 	#Range: 0.0 ~ 1.7976931348623157E308
-	maxDistance = 2.5
+	maxDistance = 4.0
 	#Max width of entities that can be picked up in survival mode
 	#Range: 0.0 ~ 10.0
 	maxEntityWidth = 1.5
@@ -22,11 +22,11 @@
 	#More complex Tile Entities slow down the player more
 	heavyTiles = true
 	#Allow all blocks to be picked up, not just Tile Entites. White/Blacklist will still be respected.
-	pickupAllBlocks = false
+	pickupAllBlocks = true
 	#Whether Blocks and Entities slow the creative player down when carried
 	slownessInCreative = true
 	#Whether hostile mobs should be able to picked up in survival mode
-	pickupHostileMobs = false
+	pickupHostileMobs = true
 	#Larger Entities slow down the player more
 	heavyEntities = true
 	#Allow babies to be carried even when adult mob is blacklisted (or not whitelisted)
