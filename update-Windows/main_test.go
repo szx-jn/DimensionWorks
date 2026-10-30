@@ -24,7 +24,7 @@ func TestAcquireUpdateLockPromptsAndRefusesOnNo(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "lock")
 	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
 	var output bytes.Buffer
-	if _, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("n\\n")), &output); err == nil {
+	if _, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("n\n")), &output); err == nil {
 		t.Fatal("expected N to reject the update")
 	}
 	data, err := os.ReadFile(path)
@@ -37,7 +37,7 @@ func TestAcquireUpdateLockYReplacesExistingLock(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "lock")
 	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
 	var output bytes.Buffer
-	release, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("Y\\n")), &output)
+	release, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("Y\n")), &output)
 	if err != nil { t.Fatalf("Y should clear the old lock and continue: %v", err) }
 	data, err := os.ReadFile(path)
 	if err != nil { t.Fatal(err) }
