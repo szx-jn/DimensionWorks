@@ -302,6 +302,19 @@ func TestRecoverInterruptedTransactionsCleansUncommittedWorkDirectories(t *testi
 	if _, err := os.Stat(work); !os.IsNotExist(err) { t.Fatalf("uncommitted work directory was not removed: %v", err) }
 }
 
+func TestCleanupDownloadCacheRemovesOnlyExpiredRegularFiles(t *testing.T) {
+	root := t.TempDir()
+	oldPath := filepath.Join(root, "old.part")
+	newPath := filepath.Join(root, "new.part")
+	if err := os.WriteFile(oldPath, []byte("old"), 0600); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(newPath, []byte("new"), 0600); err != nil { t.Fatal(err) }
+	old := time.Now().Add(-40 * 24 * time.Hour)
+	if err := os.Chtimes(oldPath, old, old); err != nil { t.Fatal(err) }
+	if err := cleanupDownloadCache(root, 30*24*time.Hour); err != nil { t.Fatal(err) }
+	if _, err := os.Stat(oldPath); !os.IsNotExist(err) { t.Fatalf("expired cache was not removed: %v", err) }
+	if _, err := os.Stat(newPath); err != nil { t.Fatalf("recent cache was removed: %v", err) }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
