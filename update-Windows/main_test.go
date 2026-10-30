@@ -1,7 +1,7 @@
 
 package main
 
-import (
+import (\n\t"bufio"
 	"archive/zip"
 	"context"
 	"bytes"
@@ -19,6 +19,49 @@ import (
 	"testing"
 	"time"
 )
+func TestAcquireUpdateLockPromptsAndRefusesOnNo(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "lock")
+	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
+	var output bytes.Buffer
+	if _, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("n\\n")), &output); err == nil {
+		t.Fatal("expected N to reject the update")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil { t.Fatal(err) }
+	if string(data) != "old-lock" { t.Fatalf("N must preserve the existing lock, got %q", data) }
+	if !strings.Contains(output.String(), "输入 Y") { t.Fatalf("missing lock confirmation prompt: %s", output.String()) }
+}
+
+func TestAcquireUpdateLockYReplacesExistingLock(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "lock")
+	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
+	var output bytes.Buffer
+	release, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("Y\\n")), &output)
+	if err != nil { t.Fatalf("Y should clear the old lock and continue: %v", err) }
+	data, err := os.ReadFile(path)
+	if err != nil { t.Fatal(err) }
+	if string(data) == "old-lock" || !strings.Contains(string(data), "token=") { t.Fatalf("new lock was not created: %q", data) }
+	release()
+	if _, err := os.Stat(path); !os.IsNotExist(err) { t.Fatalf("owned lock was not removed: %v", err) }
+}
+
+func TestOldLockOwnerCannotRemoveReplacementLock(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "lock")
+	firstRelease, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("")), &bytes.Buffer{})
+	if err != nil { t.Fatal(err) }
+	old, err := os.ReadFile(path)
+	if err != nil { t.Fatal(err) }
+	if err := os.Remove(path); err != nil { t.Fatal(err) }
+	secondRelease, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("")), &bytes.Buffer{})
+	if err != nil { t.Fatal(err) }
+	firstRelease()
+	current, err := os.ReadFile(path)
+	if err != nil { t.Fatal(err) }
+	if bytes.Equal(old, current) { t.Fatal("replacement lock unexpectedly reused the old token") }
+	secondRelease()
+	if _, err := os.Stat(path); !os.IsNotExist(err) { t.Fatalf("replacement lock was not released: %v", err) }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
