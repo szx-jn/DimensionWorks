@@ -49,7 +49,6 @@ public abstract class TileEntityMekanismMixin {
         MachinePowerManager.DirectSource route = MachinePowerManager.powerRoute(tile);
         try (MachinePowerRouteScope.Scope ignored = MachinePowerRouteScope.push(tile, route)) {
             MachinePowerManager.updateDirectStress(tile, route);
-            MachinePowerManager.updateMechanicalEnergy(tile, route);
 
             double workRate = MachinePowerManager.workRate(tile, route);
             WorkScheduler.Advance advance = WorkScheduler.advance(

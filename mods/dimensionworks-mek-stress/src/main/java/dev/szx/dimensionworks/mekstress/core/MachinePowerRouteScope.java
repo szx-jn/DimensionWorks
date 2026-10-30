@@ -22,6 +22,12 @@ public final class MachinePowerRouteScope {
         return entry != null && entry.tile() == tile ? entry.route() : null;
     }
 
+    /** Distinguishes a scoped lookup that found no route from a lookup outside the scope. */
+    public static boolean contains(TileEntityMekanism tile) {
+        Entry entry = CURRENT.get();
+        return entry != null && entry.tile() == tile;
+    }
+
     public static final class Scope implements AutoCloseable {
         private final Entry entry;
         private final Entry previous;

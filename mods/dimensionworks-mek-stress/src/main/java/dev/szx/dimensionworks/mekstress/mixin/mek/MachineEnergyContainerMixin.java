@@ -7,6 +7,7 @@ import mekanism.api.AutomationType;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,6 +31,15 @@ public abstract class MachineEnergyContainerMixin {
         TileEntityMekanism tile = dimensionworks$serverMachineTile();
         if (tile != null && StressRules.isEligible(tile)) {
             cir.setReturnValue(!MachinePowerManager.hasMechanicalPower(tile));
+        }
+    }
+
+    @Inject(method = "serializeNBT", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$doNotPersistMechanicalEnergy(CallbackInfoReturnable<CompoundTag> cir) {
+        TileEntityMekanism tile = dimensionworks$serverMachineTile();
+        if (tile != null && StressRules.isEligible(tile)) {
+            // Mechanical power is derived from the live Create route and is never stored as FE.
+            cir.setReturnValue(new CompoundTag());
         }
     }
 

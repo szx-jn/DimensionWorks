@@ -9,14 +9,10 @@ import dev.szx.dimensionworks.mekstress.core.MachinePowerMath;
 import dev.szx.dimensionworks.mekstress.core.MachineFootprint;
 import dev.szx.dimensionworks.mekstress.core.MachineTier;
 import dev.szx.dimensionworks.mekstress.core.PowerRouteSafety;
-import dev.szx.dimensionworks.mekstress.core.MechanicalCharge;
 import dev.szx.dimensionworks.mekstress.core.MachinePowerRouteScope;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import java.util.List;
 import java.util.Map;
-import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.math.FloatingLong;
-import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeHasBounding;
@@ -107,9 +103,8 @@ public final class MachinePowerManager {
         if (level == null || level.isClientSide) {
             return null;
         }
-        DirectSource scoped = MachinePowerRouteScope.current(tile);
-        if (scoped != null) {
-            return scoped;
+        if (MachinePowerRouteScope.contains(tile)) {
+            return MachinePowerRouteScope.current(tile);
         }
 
         DirectSource best = null;
@@ -159,23 +154,6 @@ public final class MachinePowerManager {
 
     public static void clearForRemoval(TileEntityMekanism tile) {
         MachineKineticRegistry.detach(tile);
-    }
-
-    /** Keeps real MachineEnergyContainer storage in sync with the virtual mechanical contract. */
-    public static void updateMechanicalEnergy(TileEntityMekanism tile, @Nullable DirectSource route) {
-        Level level = tile.getLevel();
-        if (level == null || level.isClientSide) {
-            return;
-        }
-        boolean powered = hasMechanicalPower(route);
-        for (IEnergyContainer container : tile.getEnergyContainers(null)) {
-            if (container instanceof MachineEnergyContainer<?> machineContainer) {
-                FloatingLong target = powered
-                    ? MechanicalCharge.rechargeOneTick(machineContainer.getEnergy(), machineContainer.getMaxEnergy())
-                    : FloatingLong.ZERO;
-                machineContainer.setEnergy(target);
-            }
-        }
     }
 
     @Nullable

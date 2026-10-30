@@ -46,6 +46,34 @@ class MachinePowerRouteContractTest {
     }
 
     @Test
+    void virtualMechanicalEnergyIsDynamicAndNeverWrittenIntoContainerStorage() throws IOException {
+        String energyMixin = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/mekstress/mixin/mek/MachineEnergyContainerMixin.java"));
+        String manager = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/mekstress/memory/MachinePowerManager.java"));
+        String tileMixin = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/mekstress/mixin/mek/TileEntityMekanismMixin.java"));
+
+        assertTrue(energyMixin.contains("MachinePowerManager.hasMechanicalPower(tile)"));
+        assertTrue(energyMixin.contains("method = \"serializeNBT\""));
+        assertTrue(energyMixin.contains("cir.setReturnValue(new CompoundTag())"));
+        assertFalse(manager.contains("updateMechanicalEnergy"));
+        assertFalse(manager.contains("setEnergy(target)"));
+        assertFalse(tileMixin.contains("updateMechanicalEnergy"));
+    }
+
+    @Test
+    void scopedNullRouteDoesNotTriggerRepeatedNetworkSearches() throws IOException {
+        String scope = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/mekstress/core/MachinePowerRouteScope.java"));
+        String manager = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/mekstress/memory/MachinePowerManager.java"));
+
+        assertTrue(scope.contains("boolean contains(TileEntityMekanism tile)"));
+        assertTrue(manager.contains("if (MachinePowerRouteScope.contains(tile))"));
+    }
+
+    @Test
     void jadeReportsTheCombinedThroughputMultiplier() throws IOException {
         String jade = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/integration/jade/MemoryJadePlugin.java"));
