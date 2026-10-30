@@ -646,8 +646,6 @@ func run(kind string, args []string) error {
 
 	if err := applyTransaction(root, work, changes); err != nil {
 		keepWork = true
-		logPath := filepath.Join(root, ".dimensionworks-update", "failed-"+time.Now().Format("20060102-150405")+".log")
-		_ = os.WriteFile(logPath, []byte(err.Error()+"\nRecovery data: "+work+"\n"), 0644)
 		return fmt.Errorf("%w；恢复数据保留在 %s", err, work)
 	}
 	fmt.Printf("更新成功：%s -> %s\n", current.Version, target.Version)
