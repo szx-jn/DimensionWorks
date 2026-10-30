@@ -1223,13 +1223,19 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 						select { case errs <- fmt.Errorf("缓存分段不是普通文件：%s", partPaths[index]): default: }
 						cancelRange(); return
 					}
-					if cachedInfo.Size() == expected {
+					checksumPath := partPaths[index] + ".sha256"
+					checksumInfo, checksumErr := os.Lstat(checksumPath)
+					checksumOK := false
+					if checksumErr == nil && checksumInfo.Mode().IsRegular() && checksumInfo.Mode()&os.ModeSymlink == 0 && checksumInfo.Size() == 64 {
+						checksumBytes, readErr := os.ReadFile(checksumPath)
+						checksumOK = readErr == nil && verifyDigest(partPaths[index], "sha256", string(checksumBytes)) == nil
+					}
+					if cachedInfo.Size() == expected && checksumOK {
 						completed.Add(expected); finished.Add(1); downloadProgressUI.add(destination, expected)
 						continue
 					}
-					if err := os.Remove(partPaths[index]); err != nil {
-						select { case errs <- err: default: }; cancelRange(); return
-					}
+					_ = os.Remove(partPaths[index])
+					_ = os.Remove(checksumPath)
 				} else if !os.IsNotExist(cacheErr) {
 					select { case errs <- cacheErr: default: }; cancelRange(); return
 				}
@@ -1274,8 +1280,20 @@ sendJobs:
 	if err := out.Close(); err != nil { _ = os.Remove(assembled); return err }
 	if copied != total { _ = os.Remove(assembled); return fmt.Errorf("合并后长度不符：%d/%d", copied, total) }
 	if err := replaceExistingFile(assembled, destination); err != nil { _ = os.Remove(assembled); return err }
-	for _, path := range partPaths { _ = os.Remove(path) }
+	for _, path := range partPaths { _ = os.Remove(path); _ = os.Remove(path + ".sha256") }
 	return nil
+}
+
+func writeSmallFileAtomic(path string, data []byte, mode os.FileMode) error {
+	temp, err := os.CreateTemp(filepath.Dir(path), ".dw-meta-*")
+	if err != nil { return err }
+	tempPath := temp.Name()
+	defer os.Remove(tempPath)
+	if _, err := temp.Write(data); err != nil { _ = temp.Close(); return err }
+	if err := temp.Sync(); err != nil { _ = temp.Close(); return err }
+	if err := temp.Chmod(mode); err != nil { _ = temp.Close(); return err }
+	if err := temp.Close(); err != nil { return err }
+	return replaceExistingFile(tempPath, path)
 }
 
 func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64, validator string) error {
@@ -1316,10 +1334,15 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	if err != nil { return err }
 	progressWriter := &downloadProgress{writer: file, key: progressKey}
 	n, copyErr := io.Copy(progressWriter, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, expected+1))
+	syncErr := file.Sync()
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(destination); return copyErr }
+	if syncErr != nil { _ = os.Remove(destination); return syncErr }
 	if closeErr != nil { _ = os.Remove(destination); return closeErr }
 	if n != expected { _ = os.Remove(destination); return fmt.Errorf("分段实际长度不匹配：%d/%d", n, expected) }
+	digest, err := hashFile(destination, "sha256")
+	if err != nil { _ = os.Remove(destination); return err }
+	if err := writeSmallFileAtomic(destination+".sha256", []byte(digest), 0600); err != nil { _ = os.Remove(destination); return err }
 	return nil
 }
 
