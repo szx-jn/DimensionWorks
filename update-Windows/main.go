@@ -656,16 +656,34 @@ func estimateExistingBytes(root string, entries []Entry) (uint64, error) {
 }
 
 func remoteContentLength(source string) (int64, error) {
+	client := newHTTPClient(10*time.Second, 5*time.Second)
 	req, err := http.NewRequest(http.MethodHead, source, nil)
+	if err == nil {
+		req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+		if resp, headErr := client.Do(req); headErr == nil {
+			resp.Body.Close()
+			if resp.StatusCode >= 200 && resp.StatusCode < 300 && resp.ContentLength >= 0 {
+				return resp.ContentLength, nil
+			}
+		}
+	}
+	probe, err := http.NewRequest(http.MethodGet, source, nil)
 	if err != nil { return 0, err }
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	resp, err := newHTTPClient(10*time.Second, 5*time.Second).Do(req)
+	probe.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	probe.Header.Set("Range", "bytes=0-0")
+	resp, err := client.Do(probe)
 	if err != nil { return 0, err }
 	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 || resp.ContentLength < 0 {
-		return 0, fmt.Errorf("HEAD 无法确定文件大小（HTTP %d）", resp.StatusCode)
+	if resp.StatusCode == http.StatusPartialContent {
+		matches := regexp.MustCompile("^bytes 0-0/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
+		if len(matches) == 2 {
+			if total, parseErr := strconv.ParseInt(matches[1], 10, 64); parseErr == nil && total > 0 {
+				_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2))
+				return total, nil
+			}
+		}
 	}
-	return resp.ContentLength, nil
+	return 0, fmt.Errorf("HEAD 与 Range 探测均无法确定文件大小（HTTP %d）", resp.StatusCode)
 }
 
 func ensureDiskSpace(path string, required uint64) error {
