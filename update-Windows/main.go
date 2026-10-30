@@ -939,7 +939,7 @@ func safeURLForLog(raw string) string {
 
 func safeErrorForLog(err error) string {
 	if err == nil { return "" }
-	urlPattern := regexp.MustCompile(`https?://[^"'\\s]+`)
+	urlPattern := regexp.MustCompile(`https?://[^"'\s]+`)
 	return urlPattern.ReplaceAllStringFunc(err.Error(), func(raw string) string {
 		trimmed := strings.TrimRight(raw, ".,);]")
 		suffix := raw[len(trimmed):]
