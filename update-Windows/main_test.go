@@ -273,6 +273,25 @@ func TestLoadOrCreateStateKeyPersistsStableKey(t *testing.T) {
 	if len(first) != 32 || !bytes.Equal(first, second) { t.Fatal("state key was not stable across reads") }
 }
 
+func TestLegacyStateMigrationBacksUpPreviouslyUntrackedTargets(t *testing.T) {
+	root := t.TempDir()
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if err := os.MkdirAll(updateRoot, 0700); err != nil { t.Fatal(err) }
+	rel := "config/user-settings.cfg"
+	target := filepath.Join(root, filepath.FromSlash(rel))
+	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(target, []byte("user-owned-settings"), 0644); err != nil { t.Fatal(err) }
+	current, err := parseManifest(manifestBytes("client", "0.0.0", "v0.0.0", nil), "client")
+	if err != nil { t.Fatal(err) }
+	selected := []Entry{{Action: "archive", Path: rel, Algorithm: "sha256", Value: sha256Text("new-pack-default"), Source: rel}}
+	backupDir, err := backupModifiedFiles(root, updateRoot, current, selected, true)
+	if err != nil { t.Fatal(err) }
+	if backupDir == "" { t.Fatal("legacy migration should back up an existing target not present in old state") }
+	backup, err := os.ReadFile(filepath.Join(backupDir, filepath.FromSlash(rel)))
+	if err != nil { t.Fatal(err) }
+	if string(backup) != "user-owned-settings" { t.Fatalf("legacy backup content mismatch: %q", backup) }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
