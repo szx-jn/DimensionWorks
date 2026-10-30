@@ -33,18 +33,52 @@ TYPES={
 
 def drive(level):
     c=Canvas(); a=DDR_ACCENTS[level-1]
-    # Slightly recessed, beveled casing modeled after the approved concept.
+    # AE2-like metal chassis with ten narrow cell windows; the BE renderer
+    # overlays the type-colored light only when a card is installed.
     c.rect(2,0,13,0,NAVY); c.rect(1,1,14,1,EDGE); c.rect(0,2,15,13,EDGE)
     c.rect(1,2,14,2,METAL); c.rect(1,3,14,12,SHADOW); c.rect(2,3,13,11,METAL)
     c.rect(2,3,13,3,LIGHT); c.rect(2,11,13,12,SHADOW); c.rect(1,13,14,14,NAVY); c.rect(2,14,13,14,EDGE); c.rect(3,15,12,15,NAVY)
-    # top status slit and the inset 4-wide activity window
+    c.rect(4,3,11,12,NAVY); c.rect(5,4,10,11,EDGE)
+    for row in range(5):
+        y=4+row*2
+        for x in (5,9):
+            c.rect(x,y,x+1,y,SHADOW)
     c.rect(6,1,9,1,NAVY); c.rect(7,1,8,1,a)
-    c.rect(3,5,12,10,NAVY); c.rect(4,6,11,9,EDGE); c.rect(4,6,11,6,SHADOW)
-    for x in (4,6,8,10):
-        c.rect(x,7,x+1,8,CYAN); c.px(x,7,GLOW)
-    # small generation marker pixels at casing corners
-    for x in (1,14):
-        c.px(x,4,a); c.px(x,11,a)
+    for x in (1,14): c.px(x,4,a); c.px(x,11,a)
+    return c
+
+def drive_gui():
+    c=Canvas(176,199,(198,198,198,255))
+    # Classic AE2 bevel frame and header strip.
+    c.rect(0,0,175,0,(255,255,255)); c.rect(0,0,0,198,(255,255,255))
+    c.rect(175,1,175,198,(55,55,55)); c.rect(1,198,174,198,(55,55,55))
+    c.rect(2,2,173,2,(151,151,151)); c.rect(2,3,173,19,(190,190,190))
+    c.rect(3,20,172,20,(85,85,85)); c.rect(3,21,172,21,(255,255,255))
+    # Main storage bay and compact network status panel.
+    c.rect(4,23,83,105,(139,139,139)); c.rect(5,24,82,104,(198,198,198))
+    c.rect(86,23,171,105,(139,139,139)); c.rect(87,24,170,104,(198,198,198))
+    for y in (35,49,63,77,97):
+        c.rect(90,y,168,y,(151,151,151))
+    # Four by five storage slots, with the same 18px pitch as the menu.
+    for row in range(5):
+        for col in range(4):
+            x=8+col*18; y=14+row*18
+            c.rect(x-1,y-1,x+16,y+16,(55,55,55))
+            c.rect(x,y,x+15,y+15,(139,139,139))
+            c.rect(x,y,x+14,y+1,(255,255,255)); c.rect(x,y+2,x+1,y+14,(210,210,210))
+            c.rect(x+2,y+2,x+14,y+14,(139,139,139))
+    # Inventory and hotbar bays, including all 36 vanilla slot wells.
+    c.rect(4,109,171,194,(139,139,139)); c.rect(5,110,170,193,(198,198,198))
+    c.rect(4,113,171,113,(85,85,85)); c.rect(5,114,170,114,(255,255,255))
+    for row in range(3):
+        for col in range(9):
+            x=8+col*18; y=117+row*18
+            c.rect(x-1,y-1,x+16,y+16,(55,55,55)); c.rect(x,y,x+15,y+15,(139,139,139))
+            c.rect(x,y,x+14,y+1,(255,255,255)); c.rect(x,y+2,x+1,y+14,(210,210,210)); c.rect(x+2,y+2,x+14,y+14,(139,139,139))
+    for col in range(9):
+        x=8+col*18; y=175
+        c.rect(x-1,y-1,x+16,y+16,(55,55,55)); c.rect(x,y,x+15,y+15,(139,139,139))
+        c.rect(x,y,x+14,y+1,(255,255,255)); c.rect(x,y+2,x+1,y+14,(210,210,210)); c.rect(x+2,y+2,x+14,y+14,(139,139,139))
     return c
 
 def card(ddr, kind):
@@ -99,6 +133,7 @@ def main():
             # chip, dark body, gold contacts, and most silver bevel pixels.
             subprocess.run(["magick",str(concept),"-crop",f"220x300+{x}+495","+repage","-resize","48x64!","-background","none","-gravity","center","-extent","64x64","(","+clone","-fx",'(((r+g+b)/3)>0.68 && (max(r,max(g,b))-min(r,min(g,b)))<0.18)?0:1',")","-compose","CopyOpacity","-composite","-fill",f"rgb({DDR_ACCENTS[d-1][0]},{DDR_ACCENTS[d-1][1]},{DDR_ACCENTS[d-1][2]})","-draw","rectangle 31,2 32,3",str(target)],check=True)
             (models/"item"/f"memory_card_ddr{d}_{kind}.json").write_text(json.dumps({"parent":"minecraft:item/generated","textures":{"layer0":f"dimensionworks_mek_stress:item/memory_card_ddr{d}_{kind}"}},indent=2)+"\n")
+    drive_gui().save(ASSET/"textures/gui/memory_drive.png")
     print("Cropped 30 combined 64x64 memory-card textures from the approved concept and drew 20 16x16 drive-face textures; updated 35 item/block models.")
 
 if __name__ == "__main__": main()

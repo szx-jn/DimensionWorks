@@ -1,7 +1,6 @@
 package dev.szx.dimensionworks.mekstress.client;
 
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
-import appeng.client.gui.Icon;
 import dev.szx.dimensionworks.mekstress.core.MemoryDrivePaging;
 import dev.szx.dimensionworks.mekstress.memory.MemoryDriveMenu;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,14 +12,9 @@ import net.minecraft.world.entity.player.Inventory;
 
 public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDriveMenu> {
     private static final ResourceLocation DRIVE_TEXTURE =
-        new ResourceLocation("ae2", "textures/guis/drive.png");
+        new ResourceLocation("dimensionworks_mek_stress", "textures/gui/memory_drive.png");
     private static final int STORAGE_X = 8;
     private static final int STORAGE_Y = 14;
-    private static final int LEGACY_SLOT_MASK_X = 70;
-    private static final int LEGACY_SLOT_MASK_Y = 13;
-    private static final int LEGACY_SLOT_MASK_WIDTH = 37;
-    private static final int LEGACY_SLOT_MASK_HEIGHT = 93;
-
     private int localPage;
     private Button previousButton;
     private Button nextButton;
@@ -70,16 +64,12 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(DRIVE_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-        graphics.fill(leftPos + LEGACY_SLOT_MASK_X, topPos + LEGACY_SLOT_MASK_Y,
-            leftPos + LEGACY_SLOT_MASK_X + LEGACY_SLOT_MASK_WIDTH,
-            topPos + LEGACY_SLOT_MASK_Y + LEGACY_SLOT_MASK_HEIGHT, 0xFFC6C6C6);
         for (int slot = 0; slot < MemoryDrivePaging.SLOTS_PER_PAGE; slot++) {
-            int x = leftPos + STORAGE_X + MemoryDrivePaging.slotX(slot);
-            int y = topPos + STORAGE_Y + MemoryDrivePaging.slotY(slot);
-            Icon.SLOT_BACKGROUND.getBlitter()
-                .dest(x - 1, y - 1)
-                .opacity(menu.isPageSlotActive(slot) ? 1.0F : 0.4F)
-                .blit(graphics);
+            if (!menu.isPageSlotActive(slot)) {
+                int x = leftPos + STORAGE_X + MemoryDrivePaging.slotX(slot);
+                int y = topPos + STORAGE_Y + MemoryDrivePaging.slotY(slot);
+                graphics.fill(x, y, x + 16, y + 16, 0x80606060);
+            }
         }
     }
 

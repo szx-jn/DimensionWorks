@@ -64,7 +64,8 @@ ME Gearbox EXPORT 向 Create 网络宣告的容量严格等于本次实际扣除
 
 ## 工程接口
 
-- `memory_drive_ddr1..5`：使用 AE2 驱动器背景，每页 4 列 × 5 行共 20 槽，按 DDR 等级只接受同等级 Memory Card。
+- `memory_drive_ddr1..5`：使用 AE2 风格驱动器界面，每页 4 列 × 5 行共 20 槽，按 DDR 等级只接受同等级 Memory Card。
+- 驱动器方块以 AE2 两列五灯为状态窗，最多点亮前十个已安装卡槽，并按卡型显示对应颜色；打开界面使用独立 AE2 风格背景，展示 4×5 分页卡槽与网络状态。
 - `memory_card_ddrN_{economy,balanced,high_speed,high_storage,defective,final}`：影响所在驱动器容量、有效带宽，并向所在 ME 网络贡献输入应力扣除比例。
 - 正常卡配方每次固定产出 4 张；每张独立有 25% 概率变为同 DDR 劣质卡，自动合成假玩家跳过该判定。
 - 快速移动合成时，只有成功从玩家背包扣除的正常卡才会转换为劣质卡；无法扣除的部分不会额外生成副产物。
