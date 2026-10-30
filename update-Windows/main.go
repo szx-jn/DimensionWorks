@@ -2163,23 +2163,15 @@ func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []
 	}
 	backupDir := ""
 	for _, entry := range selected {
-		previous, ok := managed[strings.ToLower(entry.Path)]
-		if !ok {
-			continue
-		}
+		previous, managedBefore := managed[strings.ToLower(entry.Path)]
+		if !managedBefore && !force { continue }
 		source, exists, err := securePath(root, entry.Path)
-		if err != nil {
-			return backupDir, err
-		}
-		if !exists {
-			continue
-		}
-		actual, err := hashFile(source, previous.Algorithm)
-		if err != nil {
-			return backupDir, fmt.Errorf("检查 %s 失败：%w", entry.Path, err)
-		}
-		if actual == previous.Value && !force {
-			continue
+		if err != nil { return backupDir, err }
+		if !exists { continue }
+		if managedBefore {
+			actual, err := hashFile(source, previous.Algorithm)
+			if err != nil { return backupDir, fmt.Errorf("检查 %s 失败：%w", entry.Path, err) }
+			if actual == previous.Value && !force { continue }
 		}
 		if backupDir == "" {
 			backupDir, err = os.MkdirTemp(updateRoot, "user-backups-")
