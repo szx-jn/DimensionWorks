@@ -1033,7 +1033,7 @@ func loadResumeMetadata(path, source string) (*resumeMetadata, error) {
 	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() > 4096 {
 		return nil, errors.New("断点续传元数据不安全或超过大小限制")
 	}
-	data, err := os.ReadFile(path)
+	data, err := readRegularFile(path, 4096)
 	if err != nil { return nil, err }
 	var meta resumeMetadata
 	if err := json.Unmarshal(data, &meta); err != nil { return nil, err }
@@ -1985,6 +1985,29 @@ func verifyDigest(path, algorithm, expected string) error {
 	return nil
 }
 
+func readRegularFile(path string, maxBytes int64) ([]byte, error) {
+	info, err := os.Lstat(path)
+	if err != nil { return nil, err }
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("文件不是普通文件：%s", path)
+	}
+	if maxBytes >= 0 && info.Size() > maxBytes {
+		return nil, fmt.Errorf("文件超过大小限制：%s", path)
+	}
+	file, err := os.Open(path)
+	if err != nil { return nil, err }
+	defer file.Close()
+	openedInfo, err := file.Stat()
+	if err != nil { return nil, err }
+	if !os.SameFile(info, openedInfo) { return nil, fmt.Errorf("文件在打开期间发生变化：%s", path) }
+	limit := int64(^uint64(0) >> 1)
+	if maxBytes >= 0 { limit = maxBytes+1 }
+	data, err := io.ReadAll(io.LimitReader(file, limit))
+	if err != nil { return nil, err }
+	if maxBytes >= 0 && int64(len(data)) > maxBytes { return nil, fmt.Errorf("文件超过大小限制：%s", path) }
+	return data, nil
+}
+
 func readState(root, path, kind string) (*Manifest, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
@@ -2013,15 +2036,15 @@ func readState(root, path, kind string) (*Manifest, error) {
 	if keyInfo.Mode()&os.ModeSymlink != 0 || !keyInfo.Mode().IsRegular() || keyInfo.Size() != 32 {
 		return nil, errors.New("状态签名密钥文件不安全或长度无效")
 	}
-	key, err := os.ReadFile(keyPath)
+	key, err := readRegularFile(keyPath, 32)
 	if err != nil { return nil, err }
-	signature, err := os.ReadFile(signaturePath)
+	signature, err := readRegularFile(signaturePath, 128)
 	if err != nil { return nil, err }
 	provided, err := hex.DecodeString(strings.TrimSpace(string(signature)))
 	if err != nil || len(provided) != sha256.Size {
 		return nil, errors.New("state.tsv.hmac 签名格式无效")
 	}
-	data, err := os.ReadFile(path)
+	data, err := readRegularFile(path, maxManifestBytes)
 	if err != nil { return nil, err }
 	mac := hmac.New(sha256.New, key)
 	_, _ = mac.Write(data)
@@ -2384,7 +2407,7 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 		if journalInfo.Size() > maxManifestBytes {
 			return fmt.Errorf("事务日志超过大小限制：%s", journal)
 		}
-		data, err := os.ReadFile(journal)
+		data, err := readRegularFile(journal, maxManifestBytes)
 		if err != nil { return err }
 		completeLength := len(data)
 		if completeLength > 0 && data[completeLength-1] != '\n' {
