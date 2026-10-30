@@ -29,6 +29,7 @@ var defaultKind string
 var diagnosticRoot string
 var consoleReader = bufio.NewReader(os.Stdin)
 var progressMu sync.Mutex
+var downloadProgressUI = newProgressTracker()
 
 const (
 	repository   = "szx-jn/DimensionWorks"
@@ -648,7 +649,9 @@ func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
 	return os.ReadFile(destination)
 }
 
-func downloadFile(source, destination string, mirrors bool) error {
+func downloadFile(source, destination string, mirrors bool) (resultErr error) {
+	progressBegin(destination, filepath.Base(destination))
+	defer func() { progressFinish(destination, resultErr == nil) }()
 	parsed, err := url.Parse(source)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
 		return fmt.Errorf("无效下载 URL：%s", source)
@@ -659,6 +662,7 @@ func downloadFile(source, destination string, mirrors bool) error {
 	}
 	var failures []string
 	for index, candidate := range candidates {
+		progressReset(destination)
 		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), candidate)
 		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 		err := downloadOnce(ctx, candidate, destination)
@@ -685,6 +689,7 @@ func downloadOnce(ctx context.Context, source, destination string) error {
 	} else {
 		fmt.Printf("[下载] 分段下载不可用，自动回退为单连接：%v\n", err)
 	}
+	progressReset(destination)
 	return downloadSequential(ctx, source, destination)
 }
 
@@ -704,7 +709,8 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
 	total := resp.ContentLength
-	writer := &downloadProgress{writer: file, total: total}
+	progressSetTotal(destination, total)
+	writer := &downloadProgress{writer: file, key: destination}
 	_, copyErr := io.Copy(writer, resp.Body)
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(part); return copyErr }
@@ -737,6 +743,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	if _, err := fmt.Sscanf(resp.Header.Get("Content-Range"), "bytes 0-0/%d", &total); err != nil || total <= 0 {
 		return errors.New("服务器返回无效的 Content-Range")
 	}
+	progressSetTotal(destination, total)
 	if total < parallelDownloadThreshold {
 		return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total))
 	}
@@ -828,7 +835,8 @@ func downloadRangeSegment(ctx context.Context, source, destination string, begin
 	}
 	file, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
-	n, copyErr := io.Copy(file, io.LimitReader(resp.Body, expected+1))
+	progressWriter := &downloadProgress{writer: file, key: destination}
+	n, copyErr := io.Copy(progressWriter, io.LimitReader(resp.Body, expected+1))
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(destination); return copyErr }
 	if closeErr != nil { _ = os.Remove(destination); return closeErr }
@@ -837,25 +845,128 @@ func downloadRangeSegment(ctx context.Context, source, destination string, begin
 }
 
 type downloadProgress struct {
-	writer  io.Writer
+	writer io.Writer
+	key    string
+}
+
+type progressFile struct {
+	name    string
 	total   int64
 	written int64
-	last    time.Time
+	active  bool
 }
+
+type progressTracker struct {
+	mu          sync.Mutex
+	files       map[string]*progressFile
+	lastRefresh time.Time
+	lastBytes   int64
+	lastSpeed   float64
+}
+
+func newProgressTracker() *progressTracker {
+	return &progressTracker{files: make(map[string]*progressFile)}
+}
+
+func (p *progressTracker) begin(key, name string) {
+	p.mu.Lock()
+	p.files[key] = &progressFile{name: name, active: true}
+	p.mu.Unlock()
+}
+
+func (p *progressTracker) reset(key string) {
+	p.mu.Lock()
+	if file := p.files[key]; file != nil {
+		file.total = 0
+		file.written = 0
+	}
+	p.mu.Unlock()
+}
+
+func (p *progressTracker) setTotal(key string, total int64) {
+	p.mu.Lock()
+	if file := p.files[key]; file != nil && total >= 0 {
+		file.total = total
+	}
+	p.mu.Unlock()
+}
+
+func (p *progressTracker) add(key string, count int64) {
+	if count <= 0 { return }
+	p.mu.Lock()
+	if file := p.files[key]; file != nil {
+		file.written += count
+		p.renderLocked(false)
+	}
+	p.mu.Unlock()
+}
+
+func (p *progressTracker) finish(key string, success bool) {
+	p.mu.Lock()
+	if file := p.files[key]; file != nil {
+		if success && file.total > 0 { file.written = file.total }
+		file.active = false
+		p.renderLocked(true)
+		delete(p.files, key)
+	}
+	p.mu.Unlock()
+}
+
+func (p *progressTracker) renderLocked(force bool) {
+	now := time.Now()
+	if !force && now.Sub(p.lastRefresh) < 500*time.Millisecond { return }
+	var total, downloaded int64
+	active := 0
+	current := make([]string, 0, 3)
+	for _, file := range p.files {
+		total += file.total
+		downloaded += file.written
+		if file.active {
+			active++
+			if len(current) < 3 { current = append(current, file.name) }
+		}
+	}
+	elapsed := now.Sub(p.lastRefresh).Seconds()
+	if p.lastRefresh.IsZero() { elapsed = 0 }
+	speed := float64(0)
+	if elapsed > 0 { speed = float64(downloaded-p.lastBytes) / elapsed }
+	if speed >= 0 { p.lastSpeed = speed }
+	p.lastRefresh, p.lastBytes = now, downloaded
+	percent := "未知"
+	remaining := "未知"
+	if total > 0 {
+		value := float64(downloaded) / float64(total) * 100
+		if value > 100 { value = 100 }
+		percent = fmt.Sprintf("%.1f%%", value)
+		if p.lastSpeed > 0 && downloaded < total {
+			remaining = (time.Duration(float64(total-downloaded)/p.lastSpeed*float64(time.Second))).Round(time.Second).String()
+		} else if downloaded >= total {
+			remaining = "即将完成"
+		}
+	}
+	bar := "────────────────────"
+	if total > 0 {
+		filled := int(float64(downloaded) / float64(total) * 20)
+		if filled > 20 { filled = 20 }
+		bar = strings.Repeat("█", filled) + strings.Repeat("░", 20-filled)
+	}
+	name := "—"
+	if len(current) > 0 { name = strings.Join(current, "、") }
+	progressMu.Lock()
+	fmt.Printf("\r[更新下载] %s %s | %s/%s | %s/s | 剩余 %s | 活跃 %d | %s",
+		bar, percent, humanSize(downloaded), humanSize(total), humanSize(int64(p.lastSpeed)), remaining, active, name)
+	if force && active == 0 { fmt.Println() }
+	progressMu.Unlock()
+}
+
+func progressBegin(key, name string) { downloadProgressUI.begin(key, name) }
+func progressReset(key string) { downloadProgressUI.reset(key) }
+func progressSetTotal(key string, total int64) { downloadProgressUI.setTotal(key, total) }
+func progressFinish(key string, success bool) { downloadProgressUI.finish(key, success) }
 
 func (w *downloadProgress) Write(data []byte) (int, error) {
 	n, err := w.writer.Write(data)
-	w.written += int64(n)
-	if time.Since(w.last) > 800*time.Millisecond {
-		progressMu.Lock()
-		defer progressMu.Unlock()
-		if w.total > 0 {
-			fmt.Printf("\r[下载进度] %.1f%% (%s / %s)", 100*float64(w.written)/float64(w.total), humanSize(w.written), humanSize(w.total))
-		} else {
-			fmt.Printf("\r[下载进度] %s", humanSize(w.written))
-		}
-		w.last = time.Now()
-	}
+	downloadProgressUI.add(w.key, int64(n))
 	return n, err
 }
 
