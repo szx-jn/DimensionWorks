@@ -471,6 +471,9 @@ func run(kind string, args []string) error {
 	}
 	backupBytes, err := estimateExistingBytes(root, selected)
 	if err != nil { return fmt.Errorf("估算本地备份空间失败：%w", err) }
+	deletionBackupBytes, err := estimateExistingBytes(root, deletions)
+	if err != nil { return fmt.Errorf("估算待删除文件备份空间失败：%w", err) }
+	backupBytes = saturatingAdd(backupBytes, deletionBackupBytes)
 	remoteBytes := uint64(0)
 	for _, entry := range selected {
 		if entry.Action == "remote" {
@@ -683,7 +686,7 @@ func remoteContentLength(source string) (int64, error) {
 		req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 		if resp, headErr := client.Do(req); headErr == nil {
 			resp.Body.Close()
-			if resp.StatusCode >= 200 && resp.StatusCode < 300 && resp.ContentLength >= 0 {
+			if resp.StatusCode >= 200 && resp.StatusCode < 300 && resp.ContentLength > 0 {
 				return resp.ContentLength, nil
 			}
 		}
