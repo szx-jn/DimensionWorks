@@ -2,6 +2,7 @@ package dev.szx.dimensionworks.rpmlimit.controller;
 
 import com.simibubi.create.content.kinetics.speedController.SpeedControllerBlock;
 import com.simibubi.create.content.kinetics.speedController.SpeedControllerBlockEntity;
+import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,10 +30,11 @@ public final class AdvancedControllerBlock extends SpeedControllerBlock {
         if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof AdvancedControllerEntity entity) {
             int target = entity.targetSpeed.getValue();
             int limit = AdvancedControllerEntity.maximumTarget();
+            int effectiveLimit = (int) Math.abs(RpmLimitManager.clamp(entity, limit));
             NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
-                (id, inventory, p) -> new AdvancedControllerMenu(id, inventory, pos, target, limit),
+                (id, inventory, p) -> new AdvancedControllerMenu(id, inventory, pos, target, limit, effectiveLimit),
                 Component.translatable("block.dimensionworks_rpm_limit.advanced_speed_controller")),
-                data -> { data.writeBlockPos(pos); data.writeInt(target); data.writeInt(limit); });
+                data -> { data.writeBlockPos(pos); data.writeInt(target); data.writeInt(limit); data.writeInt(effectiveLimit); });
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

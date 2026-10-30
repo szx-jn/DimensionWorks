@@ -129,7 +129,12 @@ public final class RpmForgeEvents {
                             int limit = IntegerArgumentType.getInteger(c, "limit");
                             RpmLimitManager.setLimit(target, limit);
                             c.getSource().sendSuccess(
-                                () -> Component.literal("Set " + target.getGameProfile().getName() + " RPM limit to " + limit + "."),
+                                () -> Component.translatable("commands.dimensionworks_rpm_limit.limit",
+                                    target.getGameProfile().getName(), RpmLimitManager.getLimit(target.getUUID()),
+                                    RpmLimitManager.getEffectiveLimit(target.getUUID()))
+                                    .append(RpmLimitManager.getEffectiveLimit(target.getUUID()) < limit
+                                        ? Component.translatable("commands.dimensionworks_rpm_limit.external_limit")
+                                        : Component.empty()),
                                 true
                             );
                             return 1;

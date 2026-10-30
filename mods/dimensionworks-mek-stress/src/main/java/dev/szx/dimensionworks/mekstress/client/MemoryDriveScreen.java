@@ -44,6 +44,7 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
             return;
         }
         localPage = page;
+        menu.page = page;
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, page);
         }
@@ -56,6 +57,15 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     }
 
     @Override
+    protected void containerTick() {
+        super.containerTick();
+        if (localPage != menu.page) {
+            localPage = menu.page;
+            updatePageButtons();
+        }
+    }
+
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -64,7 +74,9 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(DRIVE_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        // This texture is 176x215, not the 256x256 atlas assumed by the short overload.
+        graphics.blit(DRIVE_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight,
+            imageWidth, imageHeight);
         for (int slot = 0; slot < MemoryDrivePaging.SLOTS_PER_PAGE; slot++) {
             if (!menu.isPageSlotActive(slot)) {
                 int x = leftPos + STORAGE_X + MemoryDrivePaging.slotX(slot);
@@ -76,9 +88,9 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        drawSmallString(graphics, title, 8, 5, 0xFFFFFF);
+        drawSmallString(graphics, title, 8, 7, 0x404040);
         drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.page",
-            localPage + 1, menu.pageCount()), 116, 8, 0xCCCCCC);
+            localPage + 1, menu.pageCount()), 116, 8, 0x404040);
         drawMetric(graphics, "metric.drives", Component.literal(menu.driveCount() + "/2"), 90, 28, 90, 38, 0xFFFFFF);
         drawMetric(graphics, "metric.cards", Component.literal(Integer.toString(menu.cardCount())),
             132, 28, 132, 38, 0xFFFFFF);
@@ -99,19 +111,33 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     private void drawMetric(GuiGraphics graphics, String key, Component value,
                             int labelX, int labelY, int valueX, int valueY, int color) {
         drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress." + key), labelX, labelY, 0x555555);
-        drawSmallString(graphics, value, valueX, valueY, color);
+        drawScaledString(graphics, value, valueX, valueY, color,
+            Math.min(0.75F, 35.0F / Math.max(1, font.width(value))));
     }
 
     private static String compact(long value) {
-        if (value >= 1_000_000L) return Math.round(value / 1_000_000.0D) + "M";
-        if (value >= 1_000L) return Math.round(value / 1_000.0D) + "k";
-        return Long.toString(value);
+        String[] units = {"", "k", "M", "G", "T", "P", "E"};
+        double scaled = value;
+        int unit = 0;
+        while (scaled >= 1000 && unit + 1 < units.length) {
+            scaled /= 1000;
+            unit++;
+        }
+        if (Math.round(scaled) >= 1000 && unit + 1 < units.length) {
+            scaled /= 1000;
+            unit++;
+        }
+        return unit == 0 ? Long.toString(value) : Math.round(scaled) + units[unit];
     }
 
     private void drawSmallString(GuiGraphics graphics, Component text, int x, int y, int color) {
+        drawScaledString(graphics, text, x, y, color, 0.75F);
+    }
+
+    private void drawScaledString(GuiGraphics graphics, Component text, int x, int y, int color, float scale) {
         graphics.pose().pushPose();
-        graphics.pose().scale(0.75F, 0.75F, 1.0F);
-        graphics.drawString(font, text, Math.round(x / 0.75F), Math.round(y / 0.75F), color, false);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.drawString(font, text, Math.round(x / scale), Math.round(y / scale), color, false);
         graphics.pose().popPose();
     }
 }

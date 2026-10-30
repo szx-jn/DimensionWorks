@@ -190,6 +190,8 @@ Values are clamped to 1..10240. This API changes the player's stored limit immed
 
 ## 高级转速控制器（0.4.9）
 
+0.4.11 起，控制器界面额外显示设备所有者的实际生效上限；`/dw rpm <player> <limit>` 的反馈同时显示基础值与生效值。指令修改基础上限，最终仍取基础上限与外部限制的较小值：例如第一阶段修复后的齿轮之心限制为 512 RPM，即使基础上限设置成 10240，实际仍为 512 RPM。完全解放齿轮之心后，该外部限制才移除。界面中的生效值在打开时读取。
+
 新增 `dimensionworks_rpm_limit:advanced_speed_controller`，继承 Create 转速控制器的传动行为，直接引用其外观资源。右键输入整数后回车或 Esc 退出即应用；负数反转，0 停止，非法输入保留旧值。默认目标范围 ±10,240 RPM，实际输出继续受所有者齿轮之心上限约束。原滚动数值框隐藏。
 
 KubeJS 配方 `dimensionworks:advanced_speed_controller` 使用 25 个动力合成器，中心为原版转速控制器。材料与第二项诅咒的软门槛见[设计文档](../../docs/design/advanced-speed-controller.md)。不使用配方解锁或诅咒状态检查。

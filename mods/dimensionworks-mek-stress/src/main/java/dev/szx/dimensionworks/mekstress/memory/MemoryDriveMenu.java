@@ -5,6 +5,7 @@ import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
 import dev.szx.dimensionworks.mekstress.core.MemoryDrivePaging;
+import dev.szx.dimensionworks.mekstress.core.MemoryDriveData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -22,6 +23,8 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
     private final MemoryDriveBlockEntity drive;
     private final Player player;
     private final ContainerData syncData;
+    // Slot packets describe the 20 visible slots, not the drive's absolute backing indices.
+    private final Container clientSlots = new SimpleContainer(SLOTS_PER_PAGE);
     public int page;
 
     public MemoryDriveMenu(int containerId, Inventory inventory, FriendlyByteBuf buffer) {
@@ -45,31 +48,38 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(inventory, col, 8 + col * 18, 193));
         }
+        boolean clientSide = inventory.player.level().isClientSide;
+        int[] received = new int[MemoryDriveData.SIZE];
         syncData = new ContainerData() {
             @Override
             public int get(int index) {
+                if (clientSide) return received[index];
+                if (index >= MemoryDriveData.CAPACITY && index < MemoryDriveData.STORED)
+                    return MemoryDriveData.word(drive.networkCapacitySu(), index - MemoryDriveData.CAPACITY);
+                if (index >= MemoryDriveData.STORED && index < MemoryDriveData.BANDWIDTH)
+                    return MemoryDriveData.word(drive.networkStoredSu(), index - MemoryDriveData.STORED);
+                if (index >= MemoryDriveData.BANDWIDTH && index < MemoryDriveData.STATUS)
+                    return MemoryDriveData.word(drive.networkBandwidthRpm(), index - MemoryDriveData.BANDWIDTH);
                 return switch (index) {
                     case 0 -> drive.networkDriveCount();
-                    case 1 -> (int) (drive.networkCapacitySu() >>> 32);
-                    case 2 -> (int) drive.networkCapacitySu();
-                    case 3 -> (int) (drive.networkStoredSu() >>> 32);
-                    case 4 -> (int) drive.networkStoredSu();
-                    case 5 -> (int) (drive.networkBandwidthRpm() >>> 32);
-                    case 6 -> (int) drive.networkBandwidthRpm();
-                    case 7 -> drive.networkStatus().ordinal();
-                    case 8 -> drive.cardCount();
-                    case 9 -> 0;
+                    case MemoryDriveData.STATUS -> drive.networkStatus().ordinal();
+                    case MemoryDriveData.CARDS -> drive.cardCount();
+                    case MemoryDriveData.PAGE -> page;
                     default -> 0;
                 };
             }
 
             @Override
             public void set(int index, int value) {
+                if (clientSide) {
+                    received[index] = value & 0xffff;
+                    if (index == MemoryDriveData.PAGE) page = Math.min(received[index], pageCount() - 1);
+                }
             }
 
             @Override
             public int getCount() {
-                return 10;
+                return MemoryDriveData.SIZE;
             }
         };
         addDataSlots(syncData);
@@ -84,24 +94,24 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
     }
 
     public long networkCapacitySu() {
-        return ((long) syncData.get(1) << 32) | (syncData.get(2) & 0xffffffffL);
+        return MemoryDriveData.read(syncData::get, MemoryDriveData.CAPACITY);
     }
 
     public long networkStoredSu() {
-        return ((long) syncData.get(3) << 32) | (syncData.get(4) & 0xffffffffL);
+        return MemoryDriveData.read(syncData::get, MemoryDriveData.STORED);
     }
 
     public long networkBandwidthRpm() {
-        return ((long) syncData.get(5) << 32) | (syncData.get(6) & 0xffffffffL);
+        return MemoryDriveData.read(syncData::get, MemoryDriveData.BANDWIDTH);
     }
 
     public MemoryNetworkStatus status() {
-        int ordinal = Math.max(0, Math.min(syncData.get(7), MemoryNetworkStatus.values().length - 1));
+        int ordinal = Math.max(0, Math.min(syncData.get(MemoryDriveData.STATUS), MemoryNetworkStatus.values().length - 1));
         return MemoryNetworkStatus.values()[ordinal];
     }
 
     public int cardCount() {
-        return syncData.get(8);
+        return syncData.get(MemoryDriveData.CARDS);
     }
 
     public int pageOffset() {
@@ -122,7 +132,8 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
             return false;
         }
         page = id;
-        broadcastChanges();
+        // Refresh every visible slot, including empty slots, when changing the backing page.
+        broadcastFullState();
         return true;
     }
 
@@ -171,12 +182,11 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
     }
 
     private static final class PagedDriveSlot extends Slot {
-        private static final Container EMPTY = new SimpleContainer(MemoryDriveBlockEntity.TOTAL_SLOTS);
         private final MemoryDriveMenu menu;
         private final int pageSlot;
 
         private PagedDriveSlot(MemoryDriveMenu menu, int pageSlot, int x, int y) {
-            super(EMPTY, pageSlot, x, y);
+            super(menu.clientSlots, pageSlot, x, y);
             this.menu = menu;
             this.pageSlot = pageSlot;
         }
@@ -194,11 +204,17 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
             if (!isActive()) {
                 return ItemStack.EMPTY;
             }
-            return inventory().getStackInSlot(inventorySlot());
+            return menu.player.level().isClientSide
+                ? menu.clientSlots.getItem(pageSlot) : inventory().getStackInSlot(inventorySlot());
         }
 
         @Override
         public void set(ItemStack stack) {
+            if (menu.player.level().isClientSide) {
+                // Accept authoritative slot content even if the page data packet follows it.
+                menu.clientSlots.setItem(pageSlot, stack);
+                return;
+            }
             if (!isActive()) {
                 return;
             }
@@ -211,7 +227,7 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
 
         @Override
         public void setChanged() {
-            menu.drive.setChanged();
+            if (!menu.player.level().isClientSide) menu.drive.setChanged();
         }
 
         @Override

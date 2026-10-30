@@ -13,7 +13,7 @@ public final class ControllerScreen extends AbstractContainerScreen<AdvancedCont
     public ControllerScreen(AdvancedControllerMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 248;
-        imageHeight = 146;
+        imageHeight = 170;
     }
     @Override protected void init() {
         super.init();
@@ -55,15 +55,15 @@ public final class ControllerScreen extends AbstractContainerScreen<AdvancedCont
     @Override protected void containerTick() { speed.tick(); }
     @Override protected void renderBg(GuiGraphics g, float partialTicks, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
-        g.fill(x-2, y-2, x+250, y+148, 0xff342d25);
-        g.fill(x, y, x+248, y+146, 0xffb88a4c);
-        g.fill(x+3, y+3, x+245, y+143, 0xffede0c6);
-        g.fill(x+7, y+7, x+241, y+139, 0xff665f51);
-        g.fill(x+9, y+9, x+239, y+137, 0xff9b9688);
+        g.fill(x-2, y-2, x+250, y+imageHeight+2, 0xff342d25);
+        g.fill(x, y, x+248, y+imageHeight, 0xffb88a4c);
+        g.fill(x+3, y+3, x+245, y+imageHeight-3, 0xffede0c6);
+        g.fill(x+7, y+7, x+241, y+imageHeight-7, 0xff665f51);
+        g.fill(x+9, y+9, x+239, y+imageHeight-9, 0xff9b9688);
         g.fill(x+9, y+9, x+239, y+31, 0xff484b43);
         g.fill(x+25, y+50, x+223, y+94, 0xff3e372b);
         g.fill(x+28, y+53, x+220, y+91, 0xff222c27);
-        for (int dx : new int[]{4, 239}) for (int dy : new int[]{4, 137}) {
+        for (int dx : new int[]{4, 239}) for (int dy : new int[]{4, imageHeight-9}) {
             g.fill(x+dx, y+dy, x+dx+5, y+dy+5, 0xff4a4235);
             g.fill(x+dx+1, y+dy+1, x+dx+4, y+dy+2, 0xffd9c392);
         }
@@ -75,6 +75,11 @@ public final class ControllerScreen extends AbstractContainerScreen<AdvancedCont
         boolean valid = parsed() != null;
         g.drawCenteredString(font, Component.translatable("gui.dimensionworks_rpm_limit.range", menu.maximum, menu.maximum), 124, 102, valid ? 0xff303c30 : 0xff8f2420);
         g.drawCenteredString(font, Component.translatable(valid ? "gui.dimensionworks_rpm_limit.save_on_close" : "gui.dimensionworks_rpm_limit.invalid"), 124, 119, valid ? 0xff34372f : 0xff8f2420);
+        g.drawCenteredString(font, Component.translatable("gui.dimensionworks_rpm_limit.effective_limit",
+            menu.effectiveMaximum), 124, 135, 0xff34372f);
+        if (menu.effectiveMaximum < menu.maximum)
+            g.drawCenteredString(font, Component.translatable("gui.dimensionworks_rpm_limit.external_limit"),
+                124, 148, 0xff7b331c);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
         renderBackground(g);

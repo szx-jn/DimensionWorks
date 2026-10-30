@@ -26,7 +26,7 @@ public final class AdvancedController {
         () -> BlockEntityType.Builder.<SpeedControllerBlockEntity>of(AdvancedControllerEntity::new, BLOCK.get()).build(null));
     public static final RegistryObject<MenuType<AdvancedControllerMenu>> MENU = MENUS.register(ID,
         () -> IForgeMenuType.create((id, inventory, data) -> new AdvancedControllerMenu(id, inventory,
-            data.readBlockPos(), data.readInt(), data.readInt())));
+            data.readBlockPos(), data.readInt(), data.readInt(), data.readInt())));
 
     public static void register(IEventBus bus) {
         BLOCKS.register(bus);

@@ -34,6 +34,15 @@ public final class ControllerPropagationGameTests {
     public static void advancedZeroTarget(GameTestHelper helper) { check(helper, true, true, 0, 512, 0); }
 
     @GameTest(template = "empty", timeoutTicks = 100)
+    public static void advancedPackCeiling(GameTestHelper helper) { check(helper, true, true, 10240, 10240, 10240); }
+
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void advancedReversePackCeiling(GameTestHelper helper) { check(helper, true, true, -10240, 10240, -10240); }
+
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void advancedStageCapAtPackCeiling(GameTestHelper helper) { check(helper, true, true, 10240, 512, 512); }
+
+    @GameTest(template = "empty", timeoutTicks = 100)
     public static void vanillaOverLimit(GameTestHelper helper) { check(helper, false, true, 256, 32, 32); }
 
     private static BlockState createBlock(String id) {

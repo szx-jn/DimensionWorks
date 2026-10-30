@@ -10,14 +10,17 @@ public final class AdvancedControllerMenu extends AbstractContainerMenu {
     public final BlockPos pos;
     public final int target;
     public final int maximum;
+    public final int effectiveMaximum;
     private final net.minecraft.world.level.Level level;
 
-    public AdvancedControllerMenu(int id, Inventory inventory, BlockPos pos, int target, int maximum) {
+    public AdvancedControllerMenu(int id, Inventory inventory, BlockPos pos, int target, int maximum,
+                                  int effectiveMaximum) {
         super(AdvancedController.MENU.get(), id);
         this.level = inventory.player.level();
         this.pos = pos.immutable();
         this.target = target;
         this.maximum = maximum;
+        this.effectiveMaximum = effectiveMaximum;
     }
 
     @Override public ItemStack quickMoveStack(Player player, int slot) { return ItemStack.EMPTY; }

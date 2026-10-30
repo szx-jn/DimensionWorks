@@ -4,5 +4,9 @@
   "gui.dimensionworks_rpm_limit.target_speed": "Target output speed",
   "gui.dimensionworks_rpm_limit.range": "Range: -%s to %s RPM",
   "gui.dimensionworks_rpm_limit.save_on_close": "Enter / Esc to apply · Negative reverses",
-  "gui.dimensionworks_rpm_limit.invalid": "Invalid input; previous setting will be kept"
+  "gui.dimensionworks_rpm_limit.invalid": "Invalid input; previous setting will be kept",
+  "gui.dimensionworks_rpm_limit.effective_limit": "Owner effective limit: %s RPM",
+  "gui.dimensionworks_rpm_limit.external_limit": "Gear Heart / external caps still limit output",
+  "commands.dimensionworks_rpm_limit.limit": "Set %s base RPM limit to %s; effective limit: %s RPM.",
+  "commands.dimensionworks_rpm_limit.external_limit": " Gear Heart / external caps still apply."
 }
