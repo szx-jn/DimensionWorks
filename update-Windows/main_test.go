@@ -204,6 +204,32 @@ func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
 	if !bytes.Equal(got, data) { t.Fatal("resumed archive content does not match source") }
 }
 
+func TestCopyFileAtomicPreservesDestinationOnLimitFailure(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source.bin")
+	destination := filepath.Join(root, "destination.bin")
+	if err := os.WriteFile(source, []byte("source-content"), 0600); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(destination, []byte("original-destination"), 0600); err != nil { t.Fatal(err) }
+	if err := copyFileLimited(source, destination, 0600, 4); err == nil {
+		t.Fatal("expected limited copy to reject an oversized source")
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil { t.Fatal(err) }
+	if string(got) != "original-destination" { t.Fatalf("failed copy damaged destination: %q", got) }
+}
+
+func TestCopyFileAtomicRejectsSymlinkSource(t *testing.T) {
+	if runtime.GOOS == "windows" { t.Skip("Windows symlink creation may require elevated privileges") }
+	root := t.TempDir()
+	target := filepath.Join(root, "outside.txt")
+	link := filepath.Join(root, "source-link")
+	if err := os.WriteFile(target, []byte("outside"), 0600); err != nil { t.Fatal(err) }
+	if err := os.Symlink(target, link); err != nil { t.Fatal(err) }
+	if err := copyFile(link, filepath.Join(root, "copy.txt"), 0600); err == nil {
+		t.Fatal("symlink source must be rejected")
+	}
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
