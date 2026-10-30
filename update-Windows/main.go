@@ -211,13 +211,9 @@ func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (
 	if !os.IsExist(err) { return nil, fmt.Errorf("无法创建更新锁：%w", err) }
 
 	guardPath := lockPath + ".confirm"
-	guard, guardErr := os.OpenFile(guardPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
-	if guardErr != nil {
-		if os.IsExist(guardErr) { return nil, errors.New("另一个更新器正在处理更新锁，本次更新已取消") }
-		return nil, fmt.Errorf("无法取得更新锁确认权：%w", guardErr)
-	}
-	_ = guard.Close()
-	defer os.Remove(guardPath)
+	releaseGuard, guardErr := acquireConfirmationGuard(guardPath)
+	if guardErr != nil { return nil, guardErr }
+	defer releaseGuard()
 
 	initialInfo, statErr := os.Lstat(lockPath)
 	if statErr != nil { return nil, fmt.Errorf("读取现有更新锁失败：%w", statErr) }
