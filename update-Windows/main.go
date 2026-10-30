@@ -2397,8 +2397,19 @@ func applyTransaction(root, work string, changes []Change) error {
 					failures = append(failures, fmt.Sprintf("%s 权限恢复失败：%v", item.Path, err))
 				}
 			} else {
-				if err := os.Remove(item.TargetPath); err != nil && !os.IsNotExist(err) {
-					failures = append(failures, fmt.Sprintf("%s: %v", item.Path, err))
+				rollbackPath, exists, pathErr := securePathAllowMetadata(root, item.Path)
+				if pathErr != nil {
+					failures = append(failures, fmt.Sprintf("%s 回滚路径不安全：%v", item.Path, pathErr))
+					continue
+				}
+				if exists {
+					if rollbackPath != item.TargetPath {
+						failures = append(failures, fmt.Sprintf("%s 回滚目标发生变化", item.Path))
+						continue
+					}
+					if err := os.Remove(rollbackPath); err != nil {
+						failures = append(failures, fmt.Sprintf("%s: %v", item.Path, err))
+					}
 				}
 			}
 		}
