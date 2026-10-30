@@ -2401,7 +2401,12 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() { return fmt.Errorf("事务目录不安全：%s", work) }
 		journal := filepath.Join(work, "transaction.jsonl")
 		journalInfo, err := os.Lstat(journal)
-		if os.IsNotExist(err) { continue }
+		if os.IsNotExist(err) {
+			// No journal means no target mutation could have started; downloads
+			// that can resume live outside work-* and are not removed here.
+			if err := os.RemoveAll(work); err != nil { return fmt.Errorf("清理未提交的临时目录失败：%w", err) }
+			continue
+		}
 		if err != nil { return err }
 		if journalInfo.Mode()&os.ModeSymlink != 0 || !journalInfo.Mode().IsRegular() { return fmt.Errorf("事务日志不是普通文件：%s", journal) }
 		if journalInfo.Size() > maxManifestBytes {
