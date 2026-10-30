@@ -705,7 +705,7 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	client := &http.Client{Transport: &http.Transport{ResponseHeaderTimeout: 30 * time.Second}}
+	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 30 * time.Second}}
 	resp, err := client.Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
@@ -740,7 +740,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", "bytes=0-0")
-	resp, err := (&http.Client{Transport: &http.Transport{ResponseHeaderTimeout: 20 * time.Second}}).Do(req)
+	resp, err := (&http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 20 * time.Second}}).Do(req)
 	if err != nil { return err }
 	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2))
 	resp.Body.Close()
@@ -847,7 +847,7 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
-	resp, err := (&http.Client{Transport: &http.Transport{ResponseHeaderTimeout: 30 * time.Second}}).Do(req)
+	resp, err := (&http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 30 * time.Second}}).Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusPartialContent {
