@@ -1023,10 +1023,18 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	if resp.StatusCode != http.StatusPartialContent {
 		return fmt.Errorf("HTTP %d，预期 206 Partial Content", resp.StatusCode)
 	}
-	var gotBegin, gotEnd, gotTotal int64
-	if _, err := fmt.Sscanf(resp.Header.Get("Content-Range"), "bytes %d-%d/%d", &gotBegin, &gotEnd, &gotTotal); err != nil ||
-		gotBegin != begin || gotEnd != end || gotTotal != total {
+	contentRange := regexp.MustCompile("^bytes ([0-9]+)-([0-9]+)/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
+	if len(contentRange) != 4 {
+		return fmt.Errorf("Content-Range 格式无效：%q", resp.Header.Get("Content-Range"))
+	}
+	gotBegin, err1 := strconv.ParseInt(contentRange[1], 10, 64)
+	gotEnd, err2 := strconv.ParseInt(contentRange[2], 10, 64)
+	gotTotal, err3 := strconv.ParseInt(contentRange[3], 10, 64)
+	if err1 != nil || err2 != nil || err3 != nil || gotBegin != begin || gotEnd != end || gotTotal != total {
 		return fmt.Errorf("Content-Range 不匹配：%q", resp.Header.Get("Content-Range"))
+	}
+	if encoding := strings.TrimSpace(resp.Header.Get("Content-Encoding")); encoding != "" && !strings.EqualFold(encoding, "identity") {
+		return fmt.Errorf("Range 响应使用了不支持的内容编码：%s", encoding)
 	}
 	expected := end-begin+1
 	if resp.ContentLength >= 0 && resp.ContentLength != expected {
