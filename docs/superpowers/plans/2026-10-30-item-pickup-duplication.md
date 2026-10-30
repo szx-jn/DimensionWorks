@@ -4,7 +4,7 @@
 - [x] 添加 ItemEntity#getItem() 的最小 Mixin：实体 removed 时返回 ItemStack.EMPTY。
 - [x] 配置 Mixin refmap、mods.toml、Mod 主类与 README。
 - [x] 将新 Mod 作为 in-repo、both 环境条目加入 manifest/mods.json。
-- [ ] 运行 Gradle build，检查 reobfJar 与最终 JAR 中的 Mixin 配置。
+- [x] 配置 ForgeGradle / Mixin 插件仓库；GitHub Actions 的 Gradle build 成功，reobfJar 完成，已检查产物包含 Mixin 类、配置、refmap 与 manifest 注册。
 - [ ] 运行整合包预检与打包；检查服务端包确实包含新 Mod。
 - [ ] 在实际服务器验证 Create 与背包竞争、单独吸取及部分堆叠场景。
 - [ ] 通过后更新版本并发布 GitHub Release；不发布到 CurseForge。
