@@ -12,4 +12,10 @@ Build:
 gradle build --no-daemon
 ```
 
+## 0.1.0
+
+- Add a Mixin guard that hides the stack of an already-removed ItemEntity.
+- Keep Create and Sophisticated Backpacks pickup behavior enabled.
+- Preserve the remainder of partially transferred stacks.
+
 Actual in-game acceptance is still required for the simultaneous Create/backpack scenario.
