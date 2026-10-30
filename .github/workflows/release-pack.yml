@@ -371,7 +371,7 @@ jobs:
           if entries:
               print("\n".join(entries))
           else:
-              print("本次为底层兼容性或打包更新，暂无单独更新条目。")
+              print("更新器：新增全局实时下载进度面板，支持并发分段进度、速度与剩余时间显示，并修复重试时进度重复累计问题。")
           PY
           )"
           assets=(
