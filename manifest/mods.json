@@ -387,12 +387,12 @@
       "name": "Create Mobile Packages — DimensionWorks",
       "source": "github-release",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "release": "1.20.1-0.6.1-dimensionworks.3",
-      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.3.jar",
-      "version": "0.6.1-dimensionworks.3",
+      "release": "1.20.1-0.6.1-dimensionworks.4",
+      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.4.jar",
+      "version": "0.6.1-dimensionworks.4",
       "required": true,
       "environment": "both",
-      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.3"
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.4"
     },
     {
       "id": "create-ultimine",
