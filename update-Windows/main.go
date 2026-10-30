@@ -1975,14 +1975,27 @@ type Applied struct {
 
 func appendTransactionJournal(work string, item Applied) error {
 	path := filepath.Join(work, "transaction.jsonl")
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil { return err }
-	encodeErr := json.NewEncoder(file).Encode(item)
-	syncErr := file.Sync()
-	closeErr := file.Close()
-	if encodeErr != nil { return encodeErr }
-	if syncErr != nil { return syncErr }
-	return closeErr
+	defer file.Close()
+	start, err := file.Seek(0, io.SeekEnd)
+	if err != nil { return err }
+	payload, err := json.Marshal(item)
+	if err != nil { return err }
+	payload = append(payload, '\\n')
+	n, writeErr := file.Write(payload)
+	if writeErr != nil || n != len(payload) {
+		_ = file.Truncate(start)
+		_ = file.Sync()
+		if writeErr != nil { return writeErr }
+		return io.ErrShortWrite
+	}
+	if err := file.Sync(); err != nil {
+		_ = file.Truncate(start)
+		_ = file.Sync()
+		return err
+	}
+	return nil
 }
 
 func recoverInterruptedTransactions(root, updateRoot string) error {
@@ -1999,23 +2012,29 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 		if os.IsNotExist(err) { continue }
 		if err != nil { return err }
 		if journalInfo.Mode()&os.ModeSymlink != 0 || !journalInfo.Mode().IsRegular() { return fmt.Errorf("事务日志不是普通文件：%s", journal) }
-		file, err := os.Open(journal)
+		if journalInfo.Size() > maxManifestBytes {
+			return fmt.Errorf("事务日志超过大小限制：%s", journal)
+		}
+		data, err := os.ReadFile(journal)
 		if err != nil { return err }
-		scanner := bufio.NewScanner(file)
-		scanner.Buffer(make([]byte, 4096), 1<<20)
+		completeLength := len(data)
+		if completeLength > 0 && data[completeLength-1] != '\\n' {
+			if last := bytes.LastIndexByte(data, '\\n'); last < 0 { completeLength = 0 } else { completeLength = last+1 }
+		}
 		var records []Applied
 		done := false
-		for scanner.Scan() {
+		for _, line := range bytes.Split(data[:completeLength], []byte{'\\n'}) {
+			if len(line) == 0 { continue }
 			var item Applied
-			if err := json.Unmarshal(scanner.Bytes(), &item); err != nil { _ = file.Close(); return fmt.Errorf("事务日志格式损坏：%s：%w", journal, err) }
+			if err := json.Unmarshal(line, &item); err != nil {
+				return fmt.Errorf("事务日志格式损坏：%s：%w", journal, err)
+			}
 			if item.Done { done = true; break }
 			records = append(records, item)
-			if len(records) > maxManifestEntries { _ = file.Close(); return fmt.Errorf("事务日志条目超过上限：%s", journal) }
+			if len(records) > maxManifestEntries {
+				return fmt.Errorf("事务日志条目超过上限：%s", journal)
+			}
 		}
-		scanErr := scanner.Err()
-		closeErr := file.Close()
-		if scanErr != nil { return scanErr }
-		if closeErr != nil { return closeErr }
 		if !done {
 			fmt.Println("[恢复] 检测到上次未完成的更新事务，正在恢复原文件")
 			for i := len(records)-1; i >= 0; i-- {
