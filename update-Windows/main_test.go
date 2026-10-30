@@ -306,6 +306,44 @@ func TestManifestURLFromPackageURL(t *testing.T) {
 	}
 }
 
+
+func TestSelectChangesPreservesModifiedManagedFileOnRemoval(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "mods", "locally-modified.jar")
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(path, []byte("user-modified"), 0644); err != nil { t.Fatal(err) }
+	old := Entry{Action: "archive", Path: "mods/locally-modified.jar", Algorithm: "sha256", Value: sha256Text("original-pack-file"), Source: "mods/locally-modified.jar"}
+	current, err := parseManifest(manifestBytes("client", "0.2.3", "v0.2.2", []Entry{old}), "client")
+	if err != nil { t.Fatal(err) }
+	target, err := parseManifest(manifestBytes("client", "0.2.4", "v0.2.3", nil), "client")
+	if err != nil { t.Fatal(err) }
+	_, deleted, err := selectChanges(root, "client", current, target)
+	if err != nil { t.Fatal(err) }
+	if len(deleted) != 0 { t.Fatalf("modified user file must not be deleted: %v", deleted) }
+	got, err := os.ReadFile(path)
+	if err != nil || string(got) != "user-modified" { t.Fatalf("user file was changed: %q, %v", got, err) }
+}
+
+func TestParseManifestRejectsOversizedInput(t *testing.T) {
+	data := bytes.Repeat([]byte("x"), maxManifestBytes+1)
+	if _, err := parseManifest(data, "client"); err == nil { t.Fatal("expected oversized manifest to be rejected") }
+}
+
+func TestOpenArchiveRejectsOversizedEntryCount(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "many.zip")
+	file, err := os.Create(path)
+	if err != nil { t.Fatal(err) }
+	writer := zip.NewWriter(file)
+	for i := 0; i <= maxArchiveEntries; i++ {
+		entry, createErr := writer.Create(fmt.Sprintf("entry-%06d.txt", i))
+		if createErr != nil { t.Fatal(createErr) }
+		if _, writeErr := entry.Write([]byte("x")); writeErr != nil { t.Fatal(writeErr) }
+	}
+	if err := writer.Close(); err != nil { t.Fatal(err) }
+	if err := file.Close(); err != nil { t.Fatal(err) }
+	if _, err := openArchive(path); err == nil { t.Fatal("expected archive entry limit to be enforced") }
+}
+
 func TestSelectChangesPreservesUnchangedUserModifiedClientConfig(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "config", "custom.cfg")
