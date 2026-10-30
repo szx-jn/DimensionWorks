@@ -32,20 +32,19 @@ public final class GearHeartCommands {
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("dw")
             .requires(source -> source.hasPermission(2))
-            .then(Commands.literal("seelevel")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .executes(context -> showLevel(
-                        context.getSource(), EntityArgument.getPlayer(context, "player"))))));
-
-        event.getDispatcher().register(Commands.literal("de")
-            .requires(source -> source.hasPermission(2))
-            .then(Commands.literal("clear")
-                .then(Commands.argument("player", EntityArgument.player())
-                    .then(Commands.argument("curseIndex", IntegerArgumentType.integer(1, 7))
-                        .executes(context -> clearCurse(
-                            context.getSource(),
-                            EntityArgument.getPlayer(context, "player"),
-                            IntegerArgumentType.getInteger(context, "curseIndex")))))));
+            .then(Commands.literal("gearheart")
+                .then(Commands.literal("status")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> showLevel(
+                            context.getSource(), EntityArgument.getPlayer(context, "player")))))
+                .then(Commands.literal("curse")
+                    .then(Commands.literal("clear")
+                        .then(Commands.argument("player", EntityArgument.player())
+                            .then(Commands.argument("curseIndex", IntegerArgumentType.integer(1, 7))
+                                .executes(context -> clearCurse(
+                                    context.getSource(),
+                                    EntityArgument.getPlayer(context, "player"),
+                                    IntegerArgumentType.getInteger(context, "curseIndex")))))))));
     }
 
     private static int showLevel(net.minecraft.commands.CommandSourceStack source, ServerPlayer target) {
