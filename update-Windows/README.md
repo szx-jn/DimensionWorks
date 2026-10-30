@@ -43,7 +43,7 @@ done
 
 不带参数时更新到 GitHub Latest Release，也可使用 --release vX.Y.Z、--package <本地完整包路径>、--url <完整包 URL> 或 --help。
 
-下载 GitHub Release 资产时会先直连 GitHub；直连失败后自动依次尝试 `ghproxy.net` 与 `gh-proxy.com`。该回退覆盖最新版本清单、指定版本清单、差量包及完整包，其他域名的 URL 不会经过这些镜像。
+查询 GitHub Latest Release 信息时会先直连 GitHub API；直连失败后自动通过 `gh-proxy.com` 重试。下载 GitHub Release 资产时会先直连 GitHub；直连失败后自动依次尝试 `ghproxy.net` 与 `gh-proxy.com`。该回退覆盖最新版本清单、指定版本清单、差量包及完整包，其他域名的 URL 不会经过这些镜像。
 
 ## 安全与数据保护
 

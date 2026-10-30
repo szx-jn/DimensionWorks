@@ -898,32 +898,54 @@ func newHTTPClient(timeout, responseHeaderTimeout time.Duration) *http.Client {
 }
 
 func latestRelease() (ReleaseInfo, error) {
-	var result ReleaseInfo
-	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/"+repository+"/releases/latest", nil)
-	if err != nil {
-		return result, err
-	}
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	req.Header.Set("Accept", "application/vnd.github+json")
+	apiURL := "https://api.github.com/repos/" + repository + "/releases/latest"
 	client := newHTTPClient(30*time.Second, 10*time.Second)
-	resp, err := client.Do(req)
-	if err != nil {
-		return result, fmt.Errorf("无法查询 GitHub 最新发行版：%w", err)
+	return latestReleaseFrom(client, []string{apiURL, "https://gh-proxy.com/" + apiURL})
+}
+
+func latestReleaseFrom(client *http.Client, sources []string) (ReleaseInfo, error) {
+	var result ReleaseInfo
+	var failures []string
+	for _, source := range sources {
+		req, err := http.NewRequest(http.MethodGet, source, nil)
+		if err != nil {
+			failures = append(failures, fmt.Sprintf("%s: %v", safeURLForLog(source), err))
+			continue
+		}
+		req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+		req.Header.Set("Accept", "application/vnd.github+json")
+		resp, err := client.Do(req)
+		if err != nil {
+			failures = append(failures, fmt.Sprintf("%s: %v", safeURLForLog(source), err))
+			continue
+		}
+		if resp.StatusCode != http.StatusOK {
+			failures = append(failures, fmt.Sprintf("%s: HTTP %d", safeURLForLog(source), resp.StatusCode))
+			_ = resp.Body.Close()
+			continue
+		}
+		data, readErr := io.ReadAll(io.LimitReader(resp.Body, 4<<20+1))
+		_ = resp.Body.Close()
+		if readErr != nil {
+			failures = append(failures, fmt.Sprintf("%s: 读取发行信息失败：%v", safeURLForLog(source), readErr))
+			continue
+		}
+		if len(data) > 4<<20 {
+			failures = append(failures, fmt.Sprintf("%s: 发行信息超过 4 MiB 限制", safeURLForLog(source)))
+			continue
+		}
+		var candidate ReleaseInfo
+		if err := json.Unmarshal(data, &candidate); err != nil {
+			failures = append(failures, fmt.Sprintf("%s: 无法解析发行信息：%v", safeURLForLog(source), err))
+			continue
+		}
+		if !validReleaseTag(candidate.TagName) {
+			failures = append(failures, fmt.Sprintf("%s: 最新发行标签格式无效：%s", safeURLForLog(source), candidate.TagName))
+			continue
+		}
+		return candidate, nil
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return result, fmt.Errorf("GitHub API 返回 HTTP %d", resp.StatusCode)
-	}
-	data, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20+1))
-	if err != nil { return result, fmt.Errorf("读取 GitHub 发行信息失败：%w", err) }
-	if len(data) > 4<<20 { return result, errors.New("GitHub 发行信息超过 4 MiB 限制") }
-	if err := json.Unmarshal(data, &result); err != nil {
-		return result, fmt.Errorf("无法解析 GitHub 发行信息：%w", err)
-	}
-	if !validReleaseTag(result.TagName) {
-		return result, fmt.Errorf("GitHub 最新发行标签格式无效：%s", result.TagName)
-	}
-	return result, nil
+	return result, fmt.Errorf("无法查询 GitHub 最新发行版：%s", strings.Join(failures, "; "))
 }
 
 func downloadBytes(source, destination string) ([]byte, error) {

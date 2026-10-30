@@ -23,6 +23,35 @@ import (
 	"testing"
 	"time"
 )
+
+func TestLatestReleaseFallsBackWhenGitHubAPIUnavailable(t *testing.T) {
+	var primaryCalls, mirrorCalls int
+	primary := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		primaryCalls++
+		http.Error(w, "temporarily unavailable", http.StatusBadGateway)
+	}))
+	defer primary.Close()
+	mirror := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mirrorCalls++
+		if got := r.Header.Get("Accept"); got != "application/vnd.github+json" {
+			t.Errorf("unexpected Accept header %q", got)
+		}
+		_, _ = io.WriteString(w, `{"tag_name":"v0.2.21","assets":[]}`)
+	}))
+	defer mirror.Close()
+
+	release, err := latestReleaseFrom(mirror.Client(), []string{primary.URL, mirror.URL})
+	if err != nil {
+		t.Fatalf("latest release fallback failed: %v", err)
+	}
+	if release.TagName != "v0.2.21" {
+		t.Fatalf("expected v0.2.21, got %q", release.TagName)
+	}
+	if primaryCalls != 1 || mirrorCalls != 1 {
+		t.Fatalf("expected one request to each source, got primary=%d mirror=%d", primaryCalls, mirrorCalls)
+	}
+}
+
 func TestAcquireUpdateLockSerializesConcurrentConfirmation(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "lock")
 	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
