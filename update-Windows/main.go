@@ -181,7 +181,7 @@ func writeFailureLog(root string, cause error) string {
 			return ""
 		}
 	} else if os.IsNotExist(statErr) {
-		if err := os.Mkdir(logDir, 0755); err != nil {
+		if err := os.Mkdir(logDir, 0700); err != nil {
 			return ""
 		}
 	} else {
