@@ -582,7 +582,11 @@ func TestRecoverInterruptedTransactionRestoresOriginalFile(t *testing.T) {
 	if err := os.WriteFile(backup, []byte("before-crash"), 0600); err != nil { t.Fatal(err) }
 	if err := os.WriteFile(target, []byte("partially-updated"), 0644); err != nil { t.Fatal(err) }
 	if err := appendTransactionJournal(work, Applied{Path: "config/value.cfg", Backup: backup, Existed: true, Mode: 0644}); err != nil { t.Fatal(err) }
-	if err := recoverInterruptedTransactions(root, updateRoot); err != nil { t.Fatalf("recovery failed: %v", err) }
+	journal, err := os.OpenFile(filepath.Join(work, "transaction.jsonl"), os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil { t.Fatal(err) }
+	if _, err := journal.Write([]byte("{\"Path\":")); err != nil { t.Fatal(err) }
+	if err := journal.Close(); err != nil { t.Fatal(err) }
+	if err := recoverInterruptedTransactions(root, updateRoot); err != nil { t.Fatalf("recovery failed with a truncated journal tail: %v", err) }
 	got, err := os.ReadFile(target)
 	if err != nil { t.Fatal(err) }
 	if string(got) != "before-crash" { t.Fatalf("recovery did not restore original file: %q", got) }
