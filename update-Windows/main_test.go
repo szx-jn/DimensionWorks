@@ -139,6 +139,7 @@ func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
 		}
 		segmentRequests.Add(1)
 		if failed.CompareAndSwap(false, true) {
+			time.Sleep(100 * time.Millisecond)
 			w.WriteHeader(http.StatusBadGateway)
 			return
 		}
