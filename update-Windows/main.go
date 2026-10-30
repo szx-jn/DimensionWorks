@@ -2335,6 +2335,15 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 	return nil
 }
 
+func revalidateTransactionTarget(root, rel, expectedPath string, expectedExists bool) error {
+	path, exists, err := securePathAllowMetadata(root, rel)
+	if err != nil { return err }
+	if path != expectedPath || exists != expectedExists {
+		return fmt.Errorf("更新目标在事务期间发生变化：%s", rel)
+	}
+	return nil
+}
+
 func applyTransaction(root, work string, changes []Change) error {
 	backupRoot := filepath.Join(work, "backup")
 	applied := make([]Applied, 0, len(changes))
@@ -2416,6 +2425,10 @@ func applyTransaction(root, work string, changes []Change) error {
 		applied = append(applied, item)
 
 		if change.Delete {
+			if err := revalidateTransactionTarget(root, change.Path, target, exists); err != nil {
+				if rollbackErr := rollback(); rollbackErr != nil { return fmt.Errorf("删除前路径复核失败：%v；%v", err, rollbackErr) }
+				return fmt.Errorf("删除前路径复核失败，已回滚：%w", err)
+			}
 			if exists {
 				if err := os.Remove(target); err != nil {
 					if rollbackErr := rollback(); rollbackErr != nil {
@@ -2431,6 +2444,10 @@ func applyTransaction(root, work string, changes []Change) error {
 				return fmt.Errorf("创建目标目录失败：%v；%v", err, rollbackErr)
 			}
 			return fmt.Errorf("创建目标目录失败，已回滚：%w", err)
+		}
+		if err := revalidateTransactionTarget(root, change.Path, target, exists); err != nil {
+			if rollbackErr := rollback(); rollbackErr != nil { return fmt.Errorf("写入前路径复核失败：%v；%v", err, rollbackErr) }
+			return fmt.Errorf("写入前路径复核失败，已回滚：%w", err)
 		}
 		if err := replaceFromFile(change.Staged, target); err != nil {
 			if rollbackErr := rollback(); rollbackErr != nil {
