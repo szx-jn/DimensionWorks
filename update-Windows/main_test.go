@@ -2,6 +2,7 @@
 package main
 
 import (
+	"io"
 	"bufio"
 	"archive/zip"
 	"context"
@@ -20,6 +21,31 @@ import (
 	"testing"
 	"time"
 )
+func TestAcquireUpdateLockSerializesConcurrentConfirmation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "lock")
+	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
+	reader, writer := io.Pipe()
+	firstResult := make(chan error, 1)
+	go func() {
+		_, err := acquireUpdateLock(path, bufio.NewReader(reader), &bytes.Buffer{})
+		firstResult <- err
+	}()
+	guard := path + ".confirm"
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		if _, err := os.Stat(guard); err == nil { break }
+		if time.Now().After(deadline) { t.Fatal("first updater did not acquire confirmation guard") }
+		time.Sleep(10 * time.Millisecond)
+	}
+	if _, err := acquireUpdateLock(path, bufio.NewReader(strings.NewReader("Y\\n")), &bytes.Buffer{}); err == nil || !strings.Contains(err.Error(), "另一个更新器") {
+		t.Fatalf("second updater should not enter simultaneous lock confirmation: %v", err)
+	}
+	_, _ = writer.Write([]byte("N\n"))
+	_ = writer.Close()
+	if err := <-firstResult; err == nil { t.Fatal("first updater should cancel on N") }
+	if _, err := os.Stat(guard); !os.IsNotExist(err) { t.Fatalf("confirmation guard was not released: %v", err) }
+}
+
 func TestAcquireUpdateLockPromptsAndRefusesOnNo(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "lock")
 	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }
