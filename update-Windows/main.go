@@ -779,8 +779,10 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 	progressSetTotal(destination, total)
 	writer := &downloadProgress{writer: file, key: destination}
 	_, copyErr := io.Copy(writer, io.LimitReader(resp.Body, maxDownloadBytes+1))
+	syncErr := file.Sync()
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(part); return copyErr }
+	if syncErr != nil { _ = os.Remove(part); return syncErr }
 	if closeErr != nil { _ = os.Remove(part); return closeErr }
 	if writer.written > maxDownloadBytes {
 		_ = os.Remove(part)
@@ -903,6 +905,7 @@ sendJobs:
 			if copyErr != nil { return copyErr }; return closeErr
 		}
 	}
+	if err := out.Sync(); err != nil { _ = out.Close(); _ = os.Remove(assembled); cleanup(); return err }
 	if err := out.Close(); err != nil { _ = os.Remove(assembled); cleanup(); return err }
 	cleanup()
 	if copied != total { _ = os.Remove(assembled); return fmt.Errorf("合并后长度不符：%d/%d", copied, total) }
@@ -1406,10 +1409,14 @@ func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) er
 			return err
 		}
 		_, copyErr := io.Copy(output, reader)
+		syncErr := output.Sync()
 		closeErr := output.Close()
 		readerErr := reader.Close()
 		if copyErr != nil {
 			return copyErr
+		}
+		if syncErr != nil {
+			return syncErr
 		}
 		if closeErr != nil {
 			return closeErr
@@ -2024,6 +2031,10 @@ func replaceFromFile(source, destination string) error {
 		_ = tempFile.Close()
 		return err
 	}
+	if err := tempFile.Sync(); err != nil {
+		_ = tempFile.Close()
+		return err
+	}
 	if err := tempFile.Chmod(sourceInfo.Mode().Perm()); err != nil {
 		_ = tempFile.Close()
 		return err
@@ -2051,9 +2062,13 @@ func copyFile(source, destination string, mode os.FileMode) error {
 		return err
 	}
 	_, copyErr := io.Copy(output, input)
+	syncErr := output.Sync()
 	closeErr := output.Close()
 	if copyErr != nil {
 		return copyErr
+	}
+	if syncErr != nil {
+		return syncErr
 	}
 	return closeErr
 }
