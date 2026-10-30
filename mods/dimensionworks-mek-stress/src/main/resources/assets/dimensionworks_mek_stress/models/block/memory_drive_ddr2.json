@@ -1,4 +1,44 @@
 {
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "dimensionworks_mek_stress:block/memory_drive_ddr2" }
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "dimensionworks_mek_stress:block/memory_drive_ddr2_side",
+    "front": "dimensionworks_mek_stress:block/memory_drive_ddr2_front",
+    "side": "dimensionworks_mek_stress:block/memory_drive_ddr2_side",
+    "top": "dimensionworks_mek_stress:block/memory_drive_ddr2_top",
+    "bottom": "dimensionworks_mek_stress:block/memory_drive_ddr2_bottom"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        16,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#bottom"
+        }
+      }
+    }
+  ]
 }
