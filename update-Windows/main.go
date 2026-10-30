@@ -611,17 +611,20 @@ func run(kind string, args []string) error {
 		return err
 	}
 	stateStage, err := stagePath(stageRoot, stateName)
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(stateStage), 0755); err != nil {
-		return err
-	}
-	if err := os.WriteFile(stateStage, target.Bytes, 0644); err != nil {
-		return err
-	}
+	if err != nil { return err }
+	if err := os.MkdirAll(filepath.Dir(stateStage), 0755); err != nil { return err }
+	if err := os.WriteFile(stateStage, target.Bytes, 0644); err != nil { return err }
+	stateKey, err := loadOrCreateStateKey(updateRoot)
+	if err != nil { return fmt.Errorf("无法创建本地状态签名密钥：%w", err) }
+	stateMAC := hmac.New(sha256.New, stateKey)
+	_, _ = stateMAC.Write(target.Bytes)
+	stateSignature := []byte(hex.EncodeToString(stateMAC.Sum(nil)) + "\n")
+	signatureStage, err := stagePath(stageRoot, stateSignatureName)
+	if err != nil { return err }
+	if err := os.WriteFile(signatureStage, stateSignature, 0600); err != nil { return err }
 	changes = append(changes, Change{Path: "VERSION", Staged: versionPath})
 	changes = append(changes, Change{Path: stateName, Staged: stateStage})
+	changes = append(changes, Change{Path: stateSignatureName, Staged: signatureStage})
 
 	if err := applyTransaction(root, work, changes); err != nil {
 		keepWork = true
