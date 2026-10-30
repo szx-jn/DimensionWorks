@@ -2619,20 +2619,48 @@ func replaceFromFile(source, destination string) error {
 }
 
 func copyFileLimited(source, destination string, mode os.FileMode, maxBytes int64) error {
+	if maxBytes <= 0 { return errors.New("文件复制大小限制无效") }
+	return copyFileAtomic(source, destination, mode, maxBytes)
+}
+
+func copyFile(source, destination string, mode os.FileMode) error {
+	return copyFileAtomic(source, destination, mode, 0)
+}
+
+func copyFileAtomic(source, destination string, mode os.FileMode, maxBytes int64) error {
+	sourceInfo, err := os.Lstat(source)
+	if err != nil { return err }
+	if sourceInfo.Mode()&os.ModeSymlink != 0 || !sourceInfo.Mode().IsRegular() {
+		return fmt.Errorf("复制源不是普通文件：%s", source)
+	}
 	input, err := os.Open(source)
 	if err != nil { return err }
 	defer input.Close()
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil { return err }
-	output, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
+	openedInfo, err := input.Stat()
 	if err != nil { return err }
-	written, copyErr := io.Copy(output, io.LimitReader(input, maxBytes+1))
-	syncErr := output.Sync()
-	closeErr := output.Close()
-	if copyErr != nil { _ = os.Remove(destination); return copyErr }
-	if written > maxBytes { _ = os.Remove(destination); return fmt.Errorf("文件超过大小限制：%s", humanSize(written)) }
-	if syncErr != nil { _ = os.Remove(destination); return syncErr }
-	if closeErr != nil { _ = os.Remove(destination); return closeErr }
-	return nil
+	if !os.SameFile(sourceInfo, openedInfo) { return errors.New("复制源在打开期间发生变化") }
+
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil { return err }
+	parentInfo, err := os.Lstat(filepath.Dir(destination))
+	if err != nil || parentInfo.Mode()&os.ModeSymlink != 0 || !parentInfo.IsDir() {
+		return fmt.Errorf("复制目标父目录不安全：%s", filepath.Dir(destination))
+	}
+	temp, err := os.CreateTemp(filepath.Dir(destination), ".dw-copy-*")
+	if err != nil { return err }
+	tempPath := temp.Name()
+	defer os.Remove(tempPath)
+	var written int64
+	if maxBytes > 0 {
+		written, err = io.Copy(temp, io.LimitReader(input, maxBytes+1))
+	} else {
+		written, err = io.Copy(temp, input)
+	}
+	if err != nil { _ = temp.Close(); return err }
+	if maxBytes > 0 && written > maxBytes { _ = temp.Close(); return fmt.Errorf("文件超过大小限制：%s", humanSize(written)) }
+	if err := temp.Sync(); err != nil { _ = temp.Close(); return err }
+	if err := temp.Chmod(mode); err != nil { _ = temp.Close(); return err }
+	if err := temp.Close(); err != nil { return err }
+	return replaceExistingFile(tempPath, destination)
 }
 
 func copyFile(source, destination string, mode os.FileMode) error {
