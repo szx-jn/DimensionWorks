@@ -1,0 +1,35 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": false,
+  "pattern": [
+    "BPCPB",
+    "PWEWP",
+    "CEREC",
+    "PWEWP",
+    "BPCPB"
+  ],
+  "key": {
+    "B": {
+      "item": "create:brass_casing"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "C": {
+      "item": "create:sturdy_sheet"
+    },
+    "W": {
+      "item": "create:crushing_wheel"
+    },
+    "E": {
+      "item": "create:electron_tube"
+    },
+    "R": {
+      "item": "create:rotation_speed_controller"
+    }
+  },
+  "result": {
+    "item": "dimensionworks_rpm_limit:advanced_speed_controller",
+    "count": 1
+  }
+}

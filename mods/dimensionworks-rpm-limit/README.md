@@ -187,3 +187,11 @@ Values are clamped to 1..10240. This API changes the player's stored limit immed
 - 动力锯受单个输入槽限制，原版在饱和转速附近已经达到每 tick 一个堆栈的处理上限；超速不会额外复制输入。
 - 倍数使用玩家上限后的有效转速，但直接读取原始理论转速再封顶，避免过载时掉回 1× 造成应力抖动。
 - 视觉转速上限只影响渲染器，不参与配方、应力或网络速度计算。
+
+## 高级转速控制器（0.4.9）
+
+新增 `dimensionworks_rpm_limit:advanced_speed_controller`，继承 Create 转速控制器的传动行为，直接引用其外观资源。右键输入整数后回车或 Esc 退出即应用；负数反转，0 停止，非法输入保留旧值。默认目标范围 ±10,240 RPM，实际输出继续受所有者齿轮之心上限约束。原滚动数值框隐藏。
+
+KubeJS 配方 `dimensionworks:advanced_speed_controller` 使用 25 个动力合成器，中心为原版转速控制器。材料与第二项诅咒的软门槛见[设计文档](../../docs/design/advanced-speed-controller.md)。不使用配方解锁或诅咒状态检查。
+
+服务端检查菜单、操作距离、区块状态和数值范围，不强加载区块，不增加常驻扫描。尚未进入游戏验证 UI、渲染、传动及多人行为。

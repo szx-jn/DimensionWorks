@@ -1,3 +1,8 @@
 {
-  "create.gui.stressometer.overspeed_batch": "超速并行 ×%s"
+  "create.gui.stressometer.overspeed_batch": "超速并行 ×%s",
+  "block.dimensionworks_rpm_limit.advanced_speed_controller": "高级转速控制器",
+  "gui.dimensionworks_rpm_limit.target_speed": "目标输出转速",
+  "gui.dimensionworks_rpm_limit.range": "范围：-%s ～ %s RPM",
+  "gui.dimensionworks_rpm_limit.save_on_close": "回车 / Esc 关闭并应用 · 负数反转",
+  "gui.dimensionworks_rpm_limit.invalid": "输入无效，关闭时保留原设置"
 }

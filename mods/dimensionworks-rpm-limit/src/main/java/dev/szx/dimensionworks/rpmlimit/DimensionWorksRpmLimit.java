@@ -18,6 +18,7 @@ public final class DimensionWorksRpmLimit {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public DimensionWorksRpmLimit() {
+        dev.szx.dimensionworks.rpmlimit.controller.AdvancedController.register(FMLJavaModLoadingContext.get().getModEventBus());
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, RpmLimitConfig.SPEC);
         MinecraftForge.EVENT_BUS.register(RpmForgeEvents.class);
         MinecraftForge.EVENT_BUS.register(GearHeartForgeEvents.class);

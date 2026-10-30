@@ -1,3 +1,8 @@
 {
-  "create.gui.stressometer.overspeed_batch": "Overspeed batch x%s"
+  "create.gui.stressometer.overspeed_batch": "Overspeed batch x%s",
+  "block.dimensionworks_rpm_limit.advanced_speed_controller": "Advanced Rotation Speed Controller",
+  "gui.dimensionworks_rpm_limit.target_speed": "Target output speed",
+  "gui.dimensionworks_rpm_limit.range": "Range: -%s to %s RPM",
+  "gui.dimensionworks_rpm_limit.save_on_close": "Enter / Esc to apply · Negative reverses",
+  "gui.dimensionworks_rpm_limit.invalid": "Invalid input; previous setting will be kept"
 }

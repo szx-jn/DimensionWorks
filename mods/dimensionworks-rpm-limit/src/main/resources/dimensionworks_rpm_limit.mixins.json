@@ -24,7 +24,8 @@
     "MechanicalPressBlockEntityMixin",
     "PressingBehaviourMixin",
     "BeltPressingCallbacksMixin",
-    "minecraft.KineticBlockEntityLifecycleMixin"
+    "minecraft.KineticBlockEntityLifecycleMixin",
+    "RotationPropagatorMixin"
   ],
   "client": [
     "client.KineticBlockEntityRendererMixin",
