@@ -219,7 +219,7 @@ func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (
 
 	fmt.Fprintln(output, "检测到更新锁 .dimensionworks-update/lock。")
 	fmt.Fprint(output, "请确认上一个更新进程是否仍在运行。输入 Y 清理锁并继续更新，输入 N 取消更新：")
-	answer, readErr := input.ReadString('\\n')
+	answer, readErr := input.ReadString('\n')
 	if readErr != nil && len(answer) == 0 {
 		return nil, fmt.Errorf("无法读取更新锁确认：%w", readErr)
 	}
@@ -250,7 +250,7 @@ func lockReleaseFunc(lockPath, token string) func() {
 	return func() {
 		data, err := os.ReadFile(lockPath)
 		if err != nil { return }
-		if !strings.Contains(string(data), "token="+token+"\\n") { return }
+		if !strings.Contains(string(data), "token="+token+"\n") { return }
 		_ = os.Remove(lockPath)
 	}
 }
