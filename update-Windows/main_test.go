@@ -47,6 +47,22 @@ func manifestBytes(kind, version, base string, entries []Entry) []byte {
 }
 
 
+func TestProgressResetClearsStaleSpeedBaseline(t *testing.T) {
+	tracker := newProgressTracker()
+	tracker.begin("file", "file.zip")
+	tracker.setTotal("file", 100)
+	tracker.add("file", 50)
+	tracker.mu.Lock()
+	tracker.lastSpeed = 12345
+	tracker.mu.Unlock()
+	tracker.reset("file")
+	tracker.mu.Lock()
+	defer tracker.mu.Unlock()
+	if tracker.lastSpeed != 0 { t.Fatalf("stale speed remained after reset: %f", tracker.lastSpeed) }
+	if tracker.lastBytes != 0 { t.Fatalf("speed baseline should reset to zero, got %d", tracker.lastBytes) }
+	if tracker.files["file"].written != 0 { t.Fatalf("written bytes should reset, got %d", tracker.files["file"].written) }
+}
+
 func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
 	data := bytes.Repeat([]byte("DimensionWorks-parallel-download-check\x00"), (9<<20)/39+1)
 	data = data[:9<<20]
