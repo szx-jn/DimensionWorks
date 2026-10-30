@@ -767,7 +767,7 @@ func parseOptions(args []string) (Options, error) {
 	}
 	if out.URL != "" {
 		parsed, err := url.Parse(out.URL)
-		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" || parsed.User != nil || parsed.Fragment != "" {
 			return out, errors.New("--url 必须是 HTTP 或 HTTPS 完整 URL")
 		}
 	}
@@ -1709,7 +1709,7 @@ func validateEntry(entry Entry) error {
 			return errors.New("remote 条目必须提供小写 SHA-512")
 		}
 		parsed, err := url.Parse(entry.Source)
-		if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || strings.ContainsAny(entry.Source, " \t\r\n") {
+		if err != nil || parsed.Host == "" || parsed.User != nil || parsed.Fragment != "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || strings.ContainsAny(entry.Source, " \t\r\n") {
 			return errors.New("remote source 必须是无空白的 HTTP(S) URL")
 		}
 		return nil
