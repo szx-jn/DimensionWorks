@@ -1982,7 +1982,7 @@ func appendTransactionJournal(work string, item Applied) error {
 	if err != nil { return err }
 	payload, err := json.Marshal(item)
 	if err != nil { return err }
-	payload = append(payload, '\\n')
+	payload = append(payload, '\n')
 	n, writeErr := file.Write(payload)
 	if writeErr != nil || n != len(payload) {
 		_ = file.Truncate(start)
@@ -2018,12 +2018,12 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 		data, err := os.ReadFile(journal)
 		if err != nil { return err }
 		completeLength := len(data)
-		if completeLength > 0 && data[completeLength-1] != '\\n' {
-			if last := bytes.LastIndexByte(data, '\\n'); last < 0 { completeLength = 0 } else { completeLength = last+1 }
+		if completeLength > 0 && data[completeLength-1] != '\n' {
+			if last := bytes.LastIndexByte(data, '\n'); last < 0 { completeLength = 0 } else { completeLength = last+1 }
 		}
 		var records []Applied
 		done := false
-		for _, line := range bytes.Split(data[:completeLength], []byte{'\\n'}) {
+		for _, line := range bytes.Split(data[:completeLength], []byte{'\n'}) {
 			if len(line) == 0 { continue }
 			var item Applied
 			if err := json.Unmarshal(line, &item); err != nil {
