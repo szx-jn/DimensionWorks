@@ -43,5 +43,15 @@ ServerEvents.recipes(event => {
     recipe.id('dimensionworks:molten_metals/' + entry.fluid.split(':')[1] + '_from_ingot')
   })
 
+  // 工作盆中的常温混合配方会按 Create 的盆配方机制接受冷却流体，
+  // 不额外要求燃烧器热量；90 mB 与单锭熔融量一一对应。
+  DW_MOLTEN_INGOT_RECIPES.forEach(entry => {
+    event.recipes.create.mixing(
+      entry.input,
+      [Fluid.of(entry.fluid, DW_MOLTEN_INGOT_AMOUNT)]
+    ).id('dimensionworks:molten_metals/' + entry.fluid.split(':')[1] + '_cooled_to_ingot')
+  })
+
   console.info('[DimensionWorks] molten ingot recipes registered=' + DW_MOLTEN_INGOT_RECIPES.length)
+  console.info('[DimensionWorks] molten cooling recipes registered=' + DW_MOLTEN_INGOT_RECIPES.length)
 })
