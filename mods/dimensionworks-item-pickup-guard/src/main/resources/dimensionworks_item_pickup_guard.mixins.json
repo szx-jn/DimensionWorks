@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.szx.dimensionworks.itempickupguard.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "dimensionworks_item_pickup_guard.refmap.json",
+  "mixins": [
+    "ItemEntityPickupGuardMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
