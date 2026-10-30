@@ -5,7 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"crypto/sha256"
+	"crypto/rand"\n	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -186,6 +186,74 @@ func writeFailureLog(root string, cause error) string {
 	}
 	return logPath
 }
+func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (func(), error) {
+	create := func() (string, error) {
+		var nonce [16]byte
+		if _, err := rand.Read(nonce[:]); err != nil {
+			return "", fmt.Errorf("生成更新锁标识失败：%w", err)
+		}
+		token := hex.EncodeToString(nonce[:])
+		file, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+		if err != nil {
+			return "", err
+		}
+		_, writeErr := fmt.Fprintf(file, "token=%s\npid=%d\ntime=%s\n", token, os.Getpid(), time.Now().Format(time.RFC3339))
+		syncErr := file.Sync()
+		closeErr := file.Close()
+		if writeErr != nil || syncErr != nil || closeErr != nil {
+			_ = os.Remove(lockPath)
+			if writeErr != nil { return "", writeErr }
+			if syncErr != nil { return "", syncErr }
+			return "", closeErr
+		}
+		return token, nil
+	}
+	token, err := create()
+	if err == nil {
+		return lockReleaseFunc(lockPath, token), nil
+	}
+	if !os.IsExist(err) {
+		return nil, fmt.Errorf("无法创建更新锁：%w", err)
+	}
+
+	fmt.Fprintln(output, "检测到更新锁 .dimensionworks-update/lock。")
+	fmt.Fprint(output, "请确认上一个更新进程是否仍在运行。输入 Y 清理锁并继续更新，输入 N 取消更新：")
+	answer, readErr := input.ReadString('\\n')
+	if readErr != nil && len(answer) == 0 {
+		return nil, fmt.Errorf("无法读取更新锁确认：%w", readErr)
+	}
+	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
+		return nil, errors.New("用户选择不清理更新锁，已拒绝更新")
+	}
+	info, statErr := os.Lstat(lockPath)
+	if statErr != nil {
+		return nil, fmt.Errorf("读取更新锁失败：%w", statErr)
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+		return nil, errors.New("更新锁不是普通文件，拒绝自动删除")
+	}
+	if err := os.Remove(lockPath); err != nil {
+		return nil, fmt.Errorf("清理旧更新锁失败：%w", err)
+	}
+	token, err = create()
+	if err != nil {
+		if os.IsExist(err) {
+			return nil, errors.New("更新锁已被另一个更新进程重新创建，本次更新已取消")
+		}
+		return nil, fmt.Errorf("清理旧锁后无法创建新更新锁：%w", err)
+	}
+	return lockReleaseFunc(lockPath, token), nil
+}
+
+func lockReleaseFunc(lockPath, token string) func() {
+	return func() {
+		data, err := os.ReadFile(lockPath)
+		if err != nil { return }
+		if !strings.Contains(string(data), "token="+token+"\\n") { return }
+		_ = os.Remove(lockPath)
+	}
+}
+
 func run(kind string, args []string) error {
 	opts, err := parseOptions(args)
 	if err != nil {
@@ -235,16 +303,11 @@ func run(kind string, args []string) error {
 		return errors.New(".dimensionworks-update 必须是普通目录，不能是符号链接")
 	}
 	lockPath := filepath.Join(updateRoot, "lock")
-	lock, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	releaseLock, err := acquireUpdateLock(lockPath, consoleReader, os.Stdout)
 	if err != nil {
-		if os.IsExist(err) {
-			return errors.New("检测到另一个更新任务，或上次更新留下了锁文件。请确认没有更新程序运行后，再删除 .dimensionworks-update/lock 重试")
-		}
-		return fmt.Errorf("无法创建更新锁：%w", err)
+		return err
 	}
-	_, _ = fmt.Fprintf(lock, "pid=%d\ntime=%s\n", os.Getpid(), time.Now().Format(time.RFC3339))
-	_ = lock.Close()
-	defer os.Remove(lockPath)
+	defer releaseLock()
 
 	if err := recoverInterruptedTransactions(root, updateRoot); err != nil {
 		return fmt.Errorf("发现未完成的更新事务，自动恢复失败：%w。请勿删除 .dimensionworks-update 下的恢复数据", err)
