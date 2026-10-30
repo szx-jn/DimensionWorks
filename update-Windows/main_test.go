@@ -94,6 +94,37 @@ func TestOldLockOwnerCannotRemoveReplacementLock(t *testing.T) {
 	if _, err := os.Stat(path); !os.IsNotExist(err) { t.Fatalf("replacement lock was not released: %v", err) }
 }
 
+func TestDownloadCandidatesUseMirrorsForGitHubReleaseAssets(t *testing.T) {
+	source := "https://github.com/szx-jn/DimensionWorks/releases/download/v0.2.20/DimensionWorks-Server-0.2.20-update-manifest.tsv"
+	want := []string{
+		source,
+		"https://ghproxy.net/" + source,
+		"https://gh-proxy.com/" + source,
+	}
+	got := downloadCandidates(source)
+	if len(got) != len(want) {
+		t.Fatalf("expected direct URL and two mirror fallbacks, got %v", got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("candidate %d = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
+func TestDownloadCandidatesDoNotMirrorNonReleaseURLs(t *testing.T) {
+	for _, source := range []string{
+		"https://api.github.com/repos/szx-jn/DimensionWorks/releases/latest",
+		"http://github.com/szx-jn/DimensionWorks/releases/download/v0.2.20/asset.zip",
+		"https://example.com/szx-jn/DimensionWorks/releases/download/v0.2.20/asset.zip",
+	} {
+		got := downloadCandidates(source)
+		if len(got) != 1 || got[0] != source {
+			t.Errorf("non-release URL unexpectedly gained mirror candidates: %v", got)
+		}
+	}
+}
+
 func TestDownloadLimitStopsOversizedBody(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -101,7 +132,7 @@ func TestDownloadLimitStopsOversizedBody(t *testing.T) {
 	}))
 	defer server.Close()
 	destination := filepath.Join(t.TempDir(), "manifest.tsv")
-	if err := downloadFileWithLimit(server.URL, destination, false, 4); err == nil {
+	if err := downloadFileWithLimit(server.URL, destination, 4); err == nil {
 		t.Fatal("expected oversized response to be rejected during transfer")
 	}
 	if _, err := os.Stat(destination); !os.IsNotExist(err) {

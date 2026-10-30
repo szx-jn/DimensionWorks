@@ -371,7 +371,7 @@ func run(kind string, args []string) error {
 		if err != nil {
 			return err
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"))
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w；可重新运行并使用 --package 指定已下载的完整包", err)
 		}
@@ -387,7 +387,7 @@ func run(kind string, args []string) error {
 		}
 		version := strings.TrimPrefix(releaseTag, "v")
 		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"))
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w", err)
 		}
@@ -416,7 +416,7 @@ func run(kind string, args []string) error {
 		if manifestURL == "" {
 			manifestURL = assetURL(releaseTag, manifestAsset)
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"))
 		if err != nil {
 			return fmt.Errorf("下载最新版本清单失败：%w", err)
 		}
@@ -554,7 +554,7 @@ func run(kind string, args []string) error {
 		deltaName := deltaAssetName(kind, target.Version)
 		deltaPath := filepath.Join(work, "delta.zip")
 		fmt.Println("[下载] 尝试差量更新包：", deltaName)
-		if err := downloadFile(assetURL(releaseTag, deltaName), deltaPath, true); err == nil {
+		if err := downloadFile(assetURL(releaseTag, deltaName), deltaPath); err == nil {
 			delta, openErr := openArchive(deltaPath)
 			if openErr == nil {
 				unpackedBytes, sizeErr := estimateArchiveBytes(delta, archiveEntries)
@@ -926,8 +926,8 @@ func latestRelease() (ReleaseInfo, error) {
 	return result, nil
 }
 
-func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
-	if err := downloadFileWithLimit(source, destination, mirrors, maxManifestBytes); err != nil {
+func downloadBytes(source, destination string) ([]byte, error) {
+	if err := downloadFileWithLimit(source, destination, maxManifestBytes); err != nil {
 		return nil, err
 	}
 	info, err := os.Stat(destination)
@@ -941,8 +941,17 @@ func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
 	return os.ReadFile(destination)
 }
 
-func downloadFile(source, destination string, mirrors bool) error {
-	return downloadFileWithLimit(source, destination, mirrors, maxDownloadBytes)
+func downloadFile(source, destination string) error {
+	return downloadFileWithLimit(source, destination, maxDownloadBytes)
+}
+
+func downloadCandidates(source string) []string {
+	candidates := []string{source}
+	parsed, err := url.Parse(source)
+	if err != nil || parsed.Scheme != "https" || parsed.Host != "github.com" || !strings.Contains(parsed.Path, "/releases/download/") {
+		return candidates
+	}
+	return append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
 }
 
 func safeURLForLog(raw string) string {
@@ -964,7 +973,7 @@ func safeErrorForLog(err error) string {
 	})
 }
 
-func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes int64) (resultErr error) {
+func downloadFileWithLimit(source, destination string, maxBytes int64) (resultErr error) {
 	if maxBytes <= 0 || maxBytes > maxDownloadBytes {
 		return fmt.Errorf("下载大小限制无效：%d", maxBytes)
 	}
@@ -974,10 +983,7 @@ func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes in
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
 		return fmt.Errorf("无效下载 URL：%s", source)
 	}
-	candidates := []string{source}
-	if mirrors && strings.HasPrefix(source, "https://github.com/") && strings.Contains(source, "/releases/download/") {
-		candidates = append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
-	}
+	candidates := downloadCandidates(source)
 	var failures []string
 	for index, candidate := range candidates {
 		progressReset(destination)
@@ -1611,7 +1617,7 @@ func humanSize(size int64) string {
 }
 
 func downloadVerified(source, destination, algorithm, expected string) error {
-	if err := downloadFile(source, destination, true); err != nil {
+	if err := downloadFile(source, destination); err != nil {
 		return err
 	}
 	if err := verifyDigest(destination, algorithm, expected); err != nil {
@@ -1622,7 +1628,7 @@ func downloadVerified(source, destination, algorithm, expected string) error {
 }
 
 func downloadArchiveWithManualFallback(source, destination string) error {
-	if err := downloadFile(source, destination, true); err == nil {
+	if err := downloadFile(source, destination); err == nil {
 		return nil
 	} else {
 		fmt.Println()
