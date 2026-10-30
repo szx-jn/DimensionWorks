@@ -307,6 +307,29 @@ func TestManifestURLFromPackageURL(t *testing.T) {
 }
 
 
+
+func TestBackupModifiedFilesBeforeOverwrite(t *testing.T) {
+	root := t.TempDir()
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if err := os.MkdirAll(updateRoot, 0700); err != nil { t.Fatal(err) }
+	rel := "mods/custom.jar"
+	path := filepath.Join(root, filepath.FromSlash(rel))
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(path, []byte("user-patched-content"), 0644); err != nil { t.Fatal(err) }
+	previous := Entry{Action: "archive", Path: rel, Algorithm: "sha256", Value: sha256Text("original-content"), Source: rel}
+	current, err := parseManifest(manifestBytes("client", "0.2.3", "v0.2.2", []Entry{previous}), "client")
+	if err != nil { t.Fatal(err) }
+	selected := []Entry{{Action: "archive", Path: rel, Algorithm: "sha256", Value: sha256Text("new-release-content"), Source: rel}}
+	backupDir, err := backupModifiedFiles(root, updateRoot, current, selected)
+	if err != nil { t.Fatal(err) }
+	if backupDir == "" { t.Fatal("expected a persistent backup directory") }
+	backup, err := os.ReadFile(filepath.Join(backupDir, filepath.FromSlash(rel)))
+	if err != nil { t.Fatal(err) }
+	if string(backup) != "user-patched-content" { t.Fatalf("backup content mismatch: %q", backup) }
+	original, err := os.ReadFile(path)
+	if err != nil || string(original) != "user-patched-content" { t.Fatalf("source changed during backup: %q, %v", original, err) }
+}
+
 func TestSelectChangesPreservesModifiedManagedFileOnRemoval(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "mods", "locally-modified.jar")
