@@ -2423,11 +2423,36 @@ type Applied struct {
 	Done       bool
 }
 
+func truncateIncompleteJournalTail(file *os.File) error {
+	end, err := file.Seek(0, io.SeekEnd)
+	if err != nil || end == 0 { return err }
+	var last [1]byte
+	if _, err := file.ReadAt(last[:], end-1); err != nil { return err }
+	if last[0] == '\n' { return nil }
+	position := end
+	for position > 0 {
+		start := position - 4096
+		if start < 0 { start = 0 }
+		chunk := make([]byte, position-start)
+		if _, err := file.ReadAt(chunk, start); err != nil { return err }
+		if index := bytes.LastIndexByte(chunk, '\n'); index >= 0 {
+			if err := file.Truncate(start+int64(index)+1); err != nil { return err }
+			_, err := file.Seek(0, io.SeekEnd)
+			return err
+		}
+		position = start
+	}
+	if err := file.Truncate(0); err != nil { return err }
+	_, err = file.Seek(0, io.SeekEnd)
+	return err
+}
+
 func appendTransactionJournal(work string, item Applied) error {
 	path := filepath.Join(work, "transaction.jsonl")
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil { return err }
 	defer file.Close()
+	if err := truncateIncompleteJournalTail(file); err != nil { return err }
 	start, err := file.Seek(0, io.SeekEnd)
 	if err != nil { return err }
 	payload, err := json.Marshal(item)
