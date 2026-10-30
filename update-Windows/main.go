@@ -2344,7 +2344,8 @@ func applyTransaction(root, work string, changes []Change) error {
 		for i := len(applied) - 1; i >= 0; i-- {
 			item := applied[i]
 			if item.Existed {
-				if err := os.MkdirAll(filepath.Dir(item.TargetPath), 0755); err != nil {
+				var recoveryDirs []string
+				if err := ensureParentDirectories(root, item.TargetPath, &recoveryDirs); err != nil {
 					failures = append(failures, err.Error())
 					continue
 				}
@@ -2505,10 +2506,19 @@ func ensureParentDirectories(root, target string, created *[]string) error {
 }
 
 func replaceFromFile(source, destination string) error {
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+	parentInfo, err := os.Lstat(filepath.Dir(destination))
+	if err != nil { return fmt.Errorf("替换目标父目录不可用：%w", err) }
+	if parentInfo.Mode()&os.ModeSymlink != 0 || !parentInfo.IsDir() {
+		return fmt.Errorf("替换目标父目录不安全：%s", filepath.Dir(destination))
+	}
+	if targetInfo, err := os.Lstat(destination); err == nil {
+		if targetInfo.Mode()&os.ModeSymlink != 0 || !targetInfo.Mode().IsRegular() {
+			return fmt.Errorf("替换目标不是普通文件：%s", destination)
+		}
+	} else if !os.IsNotExist(err) {
 		return err
 	}
-	sourceInfo, err := os.Stat(source)
+	sourceInfo, err := os.Lstat(source)
 	if err != nil {
 		return err
 	}
