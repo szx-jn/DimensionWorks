@@ -1025,14 +1025,14 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 
 // downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
 // Every segment is written to a separate temporary file and validated before assembly.
-func rangePartPath(source, destination string, total, index int64) (string, error) {
+func rangePartPath(source, destination, validator string, total, index int64) (string, error) {
 	base := destination
-	if downloadCacheRoot != "" {
+	if downloadCacheRoot != "" && validator != "" {
 		info, err := os.Lstat(downloadCacheRoot)
 		if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 			return "", errors.New("分段下载缓存目录不安全")
 		}
-		sum := sha256.Sum256([]byte(source))
+		sum := sha256.Sum256([]byte(source+"\\n"+validator))
 		base = filepath.Join(downloadCacheRoot, hex.EncodeToString(sum[:]))
 	}
 	return fmt.Sprintf("%s.range-%d-%02d.part", base, total, index), nil
@@ -1062,6 +1062,8 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	}
 	total, err := strconv.ParseInt(matches[1], 10, 64)
 	if err != nil || total <= 0 || total > maxBytes { return errors.New("服务器返回无效或超限的 Content-Range") }
+	validator := resp.Header.Get("ETag")
+	if validator == "" { validator = resp.Header.Get("Last-Modified") }
 	progressSetTotal(destination, total)
 	if total < parallelDownloadThreshold { return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total)) }
 
@@ -1070,7 +1072,7 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	chunkSize := (total + segments - 1) / segments
 	partPaths := make([]string, 0, segments)
 	for i := int64(0); i < segments; i++ {
-		path, err := rangePartPath(source, destination, total, i)
+		path, err := rangePartPath(source, destination, validator, total, i)
 		if err != nil { return err }
 		partPaths = append(partPaths, path)
 	}
@@ -1115,7 +1117,7 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 				} else if !os.IsNotExist(cacheErr) {
 					select { case errs <- cacheErr: default: }; cancelRange(); return
 				}
-				if err := downloadRangeSegment(rangeCtx, source, partPaths[index], destination, begin, end, total); err != nil {
+				if err := downloadRangeSegment(rangeCtx, source, partPaths[index], destination, begin, end, total, validator); err != nil {
 					select { case errs <- fmt.Errorf("分段 %d：%w", index+1, err): default: }
 					cancelRange(); return
 				}
@@ -1160,18 +1162,22 @@ sendJobs:
 	return nil
 }
 
-func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64) error {
+func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64, validator string) error {
 	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(end-begin+1))
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
+	if validator != "" { req.Header.Set("If-Range", validator) }
 	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusPartialContent {
 		return fmt.Errorf("HTTP %d，预期 206 Partial Content", resp.StatusCode)
+	}
+	if validator != "" && resp.Header.Get("ETag") != validator && resp.Header.Get("Last-Modified") != validator {
+		return errors.New("分段资源校验标识变化，拒绝混合不同版本文件")
 	}
 	contentRange := regexp.MustCompile("^bytes ([0-9]+)-([0-9]+)/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
 	if len(contentRange) != 4 {
