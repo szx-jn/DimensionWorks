@@ -1025,6 +1025,19 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 
 // downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
 // Every segment is written to a separate temporary file and validated before assembly.
+func rangePartPath(source, destination string, total, index int64) (string, error) {
+	base := destination
+	if downloadCacheRoot != "" {
+		info, err := os.Lstat(downloadCacheRoot)
+		if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return "", errors.New("分段下载缓存目录不安全")
+		}
+		sum := sha256.Sum256([]byte(source))
+		base = filepath.Join(downloadCacheRoot, hex.EncodeToString(sum[:]))
+	}
+	return fmt.Sprintf("%s.range-%d-%02d.part", base, total, index), nil
+}
+
 func downloadRanged(ctx context.Context, source, destination string, maxBytes int64) error {
 	probeParent, cancelProbe := context.WithTimeout(ctx, 20*time.Second)
 	defer cancelProbe()
@@ -1038,29 +1051,29 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	if err != nil { return err }
 	probeBody, bodyErr := io.ReadAll(io.LimitReader(activityReader{reader: resp.Body, touch: touchProbe}, 2))
 	resp.Body.Close()
-	if bodyErr != nil {
-		return fmt.Errorf("读取 Range 探测响应失败：%w", bodyErr)
-	}
-	if resp.StatusCode != http.StatusPartialContent {
-		return fmt.Errorf("服务器不支持 HTTP Range（状态码 %d）", resp.StatusCode)
-	}
+	if bodyErr != nil { return fmt.Errorf("读取 Range 探测响应失败：%w", bodyErr) }
+	if resp.StatusCode != http.StatusPartialContent { return fmt.Errorf("服务器不支持 HTTP Range（状态码 %d）", resp.StatusCode) }
 	matches := regexp.MustCompile("^bytes 0-0/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
-	if len(matches) != 2 || len(probeBody) != 1 {
+	if len(matches) != 2 || len(probeBody) != 1 || (resp.ContentLength >= 0 && resp.ContentLength != 1) {
 		return errors.New("服务器返回无效的 Range 探测响应")
 	}
-	var total int64
-	if _, err := fmt.Sscanf(matches[1], "%d", &total); err != nil || total <= 0 || total > maxBytes {
-		return errors.New("服务器返回无效或超限的 Content-Range")
+	if encoding := strings.TrimSpace(resp.Header.Get("Content-Encoding")); encoding != "" && !strings.EqualFold(encoding, "identity") {
+		return fmt.Errorf("Range 探测响应使用了不支持的内容编码：%s", encoding)
 	}
+	total, err := strconv.ParseInt(matches[1], 10, 64)
+	if err != nil || total <= 0 || total > maxBytes { return errors.New("服务器返回无效或超限的 Content-Range") }
 	progressSetTotal(destination, total)
-	if total < parallelDownloadThreshold {
-		return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total))
-	}
+	if total < parallelDownloadThreshold { return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total)) }
+
 	segments := int64(parallelDownloadWorkers)
 	if total < segments { segments = total }
 	chunkSize := (total + segments - 1) / segments
 	partPaths := make([]string, 0, segments)
-	cleanup := func() { for _, path := range partPaths { _ = os.Remove(path) } }
+	for i := int64(0); i < segments; i++ {
+		path, err := rangePartPath(source, destination, total, i)
+		if err != nil { return err }
+		partPaths = append(partPaths, path)
+	}
 	jobs := make(chan int64)
 	errs := make(chan error, segments)
 	rangeCtx, cancelRange := context.WithCancel(ctx)
@@ -1071,7 +1084,6 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	var printMu sync.Mutex
 	workers := int(segments)
 	fmt.Printf("[下载] 启用 %d 路分段并发，总大小 %s\n", workers, humanSize(total))
-	for i := int64(0); i < segments; i++ { partPaths = append(partPaths, fmt.Sprintf("%s.segment-%02d", destination, i)) }
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
 		go func() {
@@ -1080,24 +1092,34 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 				var index int64
 				var ok bool
 				select {
-				case <-rangeCtx.Done():
-					return
-				case index, ok = <-jobs:
-					if !ok { return }
+				case <-rangeCtx.Done(): return
+				case index, ok = <-jobs: if !ok { return }
 				}
 				begin := index * chunkSize
 				end := begin + chunkSize - 1
 				if end >= total { end = total - 1 }
-				if err := downloadRangeSegment(rangeCtx, source, partPaths[index], destination, begin, end, total); err != nil {
-					select {
-					case errs <- fmt.Errorf("分段 %d：%w", index+1, err):
-					default:
+				expected := end-begin+1
+				cachedInfo, cacheErr := os.Lstat(partPaths[index])
+				if cacheErr == nil {
+					if cachedInfo.Mode()&os.ModeSymlink != 0 || !cachedInfo.Mode().IsRegular() {
+						select { case errs <- fmt.Errorf("缓存分段不是普通文件：%s", partPaths[index]): default: }
+						cancelRange(); return
 					}
-					cancelRange()
-					return
+					if cachedInfo.Size() == expected {
+						completed.Add(expected); finished.Add(1); downloadProgressUI.add(destination, expected)
+						continue
+					}
+					if err := os.Remove(partPaths[index]); err != nil {
+						select { case errs <- err: default: }; cancelRange(); return
+					}
+				} else if !os.IsNotExist(cacheErr) {
+					select { case errs <- cacheErr: default: }; cancelRange(); return
 				}
-				completed.Add(end-begin+1)
-				finished.Add(1)
+				if err := downloadRangeSegment(rangeCtx, source, partPaths[index], destination, begin, end, total); err != nil {
+					select { case errs <- fmt.Errorf("分段 %d：%w", index+1, err): default: }
+					cancelRange(); return
+				}
+				completed.Add(expected); finished.Add(1)
 				printMu.Lock()
 				fmt.Printf("[下载进度] 分段完成 %d/%d（%s/%s）\n", finished.Load(), segments, humanSize(completed.Load()), humanSize(total))
 				printMu.Unlock()
@@ -1106,40 +1128,35 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	}
 sendJobs:
 	for i := int64(0); i < segments; i++ {
-		select {
-		case jobs <- i:
-		case <-rangeCtx.Done():
-			break sendJobs
-		}
+		select { case jobs <- i: case <-rangeCtx.Done(): break sendJobs }
 	}
 	close(jobs)
 	wg.Wait()
 	close(errs)
-	for segmentErr := range errs {
-		if segmentErr != nil { cleanup(); return segmentErr }
-	}
-	if completed.Load() != total { cleanup(); return fmt.Errorf("分段总长度不符：%d/%d", completed.Load(), total) }
+	for segmentErr := range errs { if segmentErr != nil { return segmentErr } }
+	if completed.Load() != total { return fmt.Errorf("分段总长度不符：%d/%d", completed.Load(), total) }
+
 	assembled := destination + ".assembled"
 	_ = os.Remove(assembled)
 	out, err := os.OpenFile(assembled, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil { cleanup(); return err }
+	if err != nil { return err }
 	var copied int64
 	for _, path := range partPaths {
 		in, openErr := os.Open(path)
-		if openErr != nil { _ = out.Close(); _ = os.Remove(assembled); cleanup(); return openErr }
+		if openErr != nil { _ = out.Close(); _ = os.Remove(assembled); return openErr }
 		n, copyErr := io.Copy(out, in)
 		closeErr := in.Close()
 		copied += n
 		if copyErr != nil || closeErr != nil {
-			_ = out.Close(); _ = os.Remove(assembled); cleanup()
+			_ = out.Close(); _ = os.Remove(assembled)
 			if copyErr != nil { return copyErr }; return closeErr
 		}
 	}
-	if err := out.Sync(); err != nil { _ = out.Close(); _ = os.Remove(assembled); cleanup(); return err }
-	if err := out.Close(); err != nil { _ = os.Remove(assembled); cleanup(); return err }
-	cleanup()
+	if err := out.Sync(); err != nil { _ = out.Close(); _ = os.Remove(assembled); return err }
+	if err := out.Close(); err != nil { _ = os.Remove(assembled); return err }
 	if copied != total { _ = os.Remove(assembled); return fmt.Errorf("合并后长度不符：%d/%d", copied, total) }
 	if err := replaceExistingFile(assembled, destination); err != nil { _ = os.Remove(assembled); return err }
+	for _, path := range partPaths { _ = os.Remove(path) }
 	return nil
 }
 
