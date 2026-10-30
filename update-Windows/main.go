@@ -231,7 +231,7 @@ func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (
 	initialInfo, statErr := os.Lstat(lockPath)
 	if statErr != nil { return nil, fmt.Errorf("读取现有更新锁失败：%w", statErr) }
 	fmt.Fprintln(output, "检测到更新锁 .dimensionworks-update/lock。")
-	fmt.Fprint(output, "请确认上一个更新进程是否仍在运行。输入 Y 清理锁并继续更新，输入 N 取消更新：")
+	fmt.Fprint(output, "上一个更新进程是否仍在运行？只有确认它已经退出时才输入 Y（清理残留锁并继续更新）；输入 N 取消更新：")
 	answer, readErr := input.ReadString('\n')
 	if readErr != nil && len(answer) == 0 { return nil, fmt.Errorf("无法读取更新锁确认：%w", readErr) }
 	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
