@@ -63,6 +63,22 @@ func TestProgressResetClearsStaleSpeedBaseline(t *testing.T) {
 	if tracker.files["file"].written != 0 { t.Fatalf("written bytes should reset, got %d", tracker.files["file"].written) }
 }
 
+func TestHTTPClientRejectsHTTPSDowngradeRedirect(t *testing.T) {
+	plain := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("should-not-be-requested"))
+	}))
+	defer plain.Close()
+	secure := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, plain.URL, http.StatusFound)
+	}))
+	defer secure.Close()
+	client := newHTTPClient(5*time.Second, 5*time.Second)
+	client.Transport = secure.Client().Transport
+	resp, err := client.Get(secure.URL)
+	if resp != nil { resp.Body.Close() }
+	if err == nil { t.Fatal("expected HTTPS-to-HTTP redirect to be rejected") }
+}
+
 func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
 	data := bytes.Repeat([]byte("DimensionWorks-parallel-download-check\x00"), (9<<20)/39+1)
 	data = data[:9<<20]
