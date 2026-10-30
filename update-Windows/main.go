@@ -957,6 +957,11 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 			meta = nil
 		}
 	}
+	if meta != nil && offset == meta.Total && offset > 0 {
+		if err := replaceExistingFile(part, destination); err != nil { return err }
+		_ = os.Remove(metaPath)
+		return nil
+	}
 	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(maxBytes))
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
@@ -996,6 +1001,11 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 		} else if err := saveResumeMetadata(metaPath, *meta); err != nil {
 			return fmt.Errorf("保存断点续传元数据失败：%w", err)
 		}
+	} else if resp.StatusCode == http.StatusRequestedRangeNotSatisfiable && offset > 0 {
+		_ = resp.Body.Close()
+		_ = os.Remove(part)
+		_ = os.Remove(metaPath)
+		return downloadSequential(ctx, source, destination, maxBytes)
 	} else {
 		return fmt.Errorf("HTTP %d，续传请求未获得可用响应", resp.StatusCode)
 	}
