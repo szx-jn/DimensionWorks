@@ -1,7 +1,8 @@
 
 package main
 
-import (\n\t"bufio"
+import (
+	"bufio"
 	"archive/zip"
 	"context"
 	"bytes"
