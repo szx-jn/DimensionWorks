@@ -372,6 +372,13 @@ func run(kind string, args []string) error {
 	if err != nil {
 		return err
 	}
+	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected)
+	if err != nil {
+		return fmt.Errorf("无法备份用户修改文件，已中止更新：%w", err)
+	}
+	if userBackup != "" {
+		fmt.Println("[保护] 已备份被更新覆盖的本地修改：", userBackup)
+	}
 	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
 	stageRoot := filepath.Join(work, "stage")
 	if err := os.MkdirAll(stageRoot, 0755); err != nil {
@@ -1586,6 +1593,56 @@ func renderManifest(manifest *Manifest) []byte {
 		lines = append(lines, strings.Join([]string{entry.Action, entry.Path, entry.Algorithm, entry.Value, entry.Source}, "\t"))
 	}
 	return []byte(strings.Join(lines, "\n") + "\n")
+}
+
+func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []Entry) (string, error) {
+	if current == nil || len(selected) == 0 {
+		return "", nil
+	}
+	managed := make(map[string]Entry, len(current.Entries))
+	for _, entry := range current.Entries {
+		managed[strings.ToLower(entry.Path)] = entry
+	}
+	backupDir := ""
+	for _, entry := range selected {
+		previous, ok := managed[strings.ToLower(entry.Path)]
+		if !ok {
+			continue
+		}
+		source, exists, err := securePath(root, entry.Path)
+		if err != nil {
+			return backupDir, err
+		}
+		if !exists {
+			continue
+		}
+		actual, err := hashFile(source, previous.Algorithm)
+		if err != nil {
+			return backupDir, fmt.Errorf("检查 %s 失败：%w", entry.Path, err)
+		}
+		if actual == previous.Value {
+			continue
+		}
+		if backupDir == "" {
+			backupDir, err = os.MkdirTemp(updateRoot, "user-backups-")
+			if err != nil {
+				return "", err
+			}
+		}
+		destination := filepath.Join(backupDir, filepath.FromSlash(entry.Path))
+		if err := os.MkdirAll(filepath.Dir(destination), 0700); err != nil {
+			return backupDir, err
+		}
+		info, err := os.Stat(source)
+		if err != nil {
+			return backupDir, err
+		}
+		if err := copyFile(source, destination, info.Mode().Perm()); err != nil {
+			return backupDir, fmt.Errorf("备份 %s 失败：%w", entry.Path, err)
+		}
+		fmt.Printf("[保护] 本地修改将在更新前备份：%s\n", entry.Path)
+	}
+	return backupDir, nil
 }
 
 func selectChanges(root, kind string, current, target *Manifest) ([]Entry, []string, error) {
