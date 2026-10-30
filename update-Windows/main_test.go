@@ -78,6 +78,51 @@ func TestDownloadLimitStopsOversizedBody(t *testing.T) {
 	}
 }
 
+func TestSequentialDownloadResumesFromSavedRange(t *testing.T) {
+	var first atomic.Bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("ETag", "\"stable-v1\"")
+		if r.Header.Get("Range") == "bytes=4-" {
+			w.Header().Set("Content-Range", "bytes 4-9/10")
+			w.Header().Set("Content-Length", "6")
+			w.WriteHeader(http.StatusPartialContent)
+			_, _ = w.Write([]byte("ghijkl"))
+			return
+		}
+		first.Store(true)
+		w.Header().Set("Content-Length", "10")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("abcd"))
+		if flusher, ok := w.(http.Flusher); ok { flusher.Flush() }
+		<-r.Context().Done()
+	}))
+	defer server.Close()
+	cache := t.TempDir()
+	oldCache := downloadCacheRoot
+	downloadCacheRoot = cache
+	defer func(){ downloadCacheRoot = oldCache }()
+	destination := filepath.Join(t.TempDir(), "payload.bin")
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	if err := downloadSequential(ctx, server.URL, destination, 1024); err == nil {
+		t.Fatal("first transfer should stop after its context expires")
+	}
+	if !first.Load() { t.Fatal("initial full download request was not made") }
+	part, metaPath, err := downloadResumePaths(server.URL, destination)
+	if err != nil { t.Fatal(err) }
+	info, err := os.Stat(part)
+	if err != nil { t.Fatalf("partial data was not retained: %v", err) }
+	if info.Size() != 4 { t.Fatalf("expected 4 retained bytes, got %d", info.Size()) }
+	if _, err := os.Stat(metaPath); err != nil { t.Fatalf("resume metadata was not retained: %v", err) }
+	if err := downloadSequential(context.Background(), server.URL, destination, 1024); err != nil {
+		t.Fatalf("resume failed: %v", err)
+	}
+	data, err := os.ReadFile(destination)
+	if err != nil { t.Fatal(err) }
+	if string(data) != "abcdghijkl" { t.Fatalf("resumed content mismatch: %q", data) }
+	if _, err := os.Stat(metaPath); !os.IsNotExist(err) { t.Fatalf("resume metadata should be removed after success: %v", err) }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
