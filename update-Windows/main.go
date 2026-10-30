@@ -33,6 +33,7 @@ var consoleReader = bufio.NewReader(os.Stdin)
 var progressMu sync.Mutex
 var downloadProgressUI = newProgressTracker()
 var downloadCacheRoot string
+var parallelDownloadLimit atomic.Int64
 
 const (
 	repository          = "szx-jn/DimensionWorks"
@@ -495,6 +496,7 @@ func run(kind string, args []string) error {
 		const maxConcurrentDownloads = 4
 		workers := maxConcurrentDownloads
 		if len(remoteEntries) < workers { workers = len(remoteEntries) }
+		parallelDownloadLimit.Store(int64(parallelDownloadWorkers / workers))
 		jobs := make(chan Entry)
 		errs := make(chan error, len(remoteEntries))
 		var wg sync.WaitGroup
@@ -517,6 +519,7 @@ func run(kind string, args []string) error {
 		for _, entry := range remoteEntries { jobs <- entry }
 		close(jobs)
 		wg.Wait()
+		parallelDownloadLimit.Store(parallelDownloadWorkers)
 		close(errs)
 		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
 	}
@@ -1195,7 +1198,14 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	progressSetTotal(destination, total)
 	if total < parallelDownloadThreshold { return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total)) }
 
-	segments := int64(parallelDownloadWorkers)
+	segmentBudget := int64(parallelDownloadWorkers)
+	if configured := parallelDownloadLimit.Load(); configured > 0 && configured < segmentBudget {
+		segmentBudget = configured
+	}
+	// Small assets use fewer connections; large assets can use the full budget.
+	segments := (total + (16<<20) - 1) / (16 << 20)
+	if segments < 2 { segments = 2 }
+	if segments > segmentBudget { segments = segmentBudget }
 	if total < segments { segments = total }
 	chunkSize := (total + segments - 1) / segments
 	partPaths := make([]string, 0, segments)
