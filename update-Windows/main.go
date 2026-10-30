@@ -2349,10 +2349,6 @@ func renderManifest(manifest *Manifest) []byte {
 	return []byte(strings.Join(lines, "\n") + "\n")
 }
 
-func pathForRoot(root, rel string) string {
-	return filepath.Join(root, filepath.FromSlash(rel))
-}
-
 func selectChanges(root, kind string, current, target *Manifest) ([]Entry, []string, error) {
 	currentEntries := map[string]Entry{}
 	targetEntries := map[string]Entry{}
@@ -2394,12 +2390,12 @@ func selectChanges(root, kind string, current, target *Manifest) ([]Entry, []str
 		if _, exists := targetEntries[key]; exists || preservePath(root, kind, old.Path) {
 			continue
 		}
-		_, exists, err := securePath(root, old.Path)
+		path, exists, err := securePath(root, old.Path)
 		if err != nil {
 			return nil, nil, err
 		}
 		if exists {
-			digest, hashErr := hashFile(pathForRoot(root, old.Path), old.Algorithm)
+			digest, hashErr := hashFile(path, old.Algorithm)
 			if hashErr != nil {
 				return nil, nil, fmt.Errorf("检查待删除文件 %s 失败：%w", old.Path, hashErr)
 			}
