@@ -30,6 +30,7 @@ import (
 
 var defaultKind string
 var diagnosticRoot string
+var diagnosticKind string
 var consoleReader = bufio.NewReader(os.Stdin)
 var progressMu sync.Mutex
 var downloadProgressUI = newProgressTracker()
@@ -186,9 +187,16 @@ func writeFailureLog(root string, cause error) string {
 	} else {
 		return ""
 	}
-	logPath := filepath.Join(logDir, "failed-"+time.Now().Format("20060102-150405")+"-"+fmt.Sprint(os.Getpid())+".log")
-	contents := fmt.Sprintf("time=%s\nerror=%s\n", time.Now().Format(time.RFC3339), cause)
-	if err := os.WriteFile(logPath, []byte(contents), 0644); err != nil {
+	logPath := filepath.Join(logDir, "failed-"+time.Now().Format("20060102-150405.000000000")+"-"+fmt.Sprint(os.Getpid())+".log")
+	contents := fmt.Sprintf("time=%s\nplatform=%s/%s\nkind=%s\ninstance=%s\nerror=%s\n",
+		time.Now().Format(time.RFC3339), runtime.GOOS, runtime.GOARCH, diagnosticKind, root, cause)
+	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if err != nil { return "" }
+	_, writeErr := file.Write([]byte(contents))
+	syncErr := file.Sync()
+	closeErr := file.Close()
+	if writeErr != nil || syncErr != nil || closeErr != nil {
+		_ = os.Remove(logPath)
 		return ""
 	}
 	return logPath
@@ -285,6 +293,7 @@ func run(kind string, args []string) error {
 		return err
 	}
 	diagnosticRoot = root
+	diagnosticKind = kind
 	fmt.Println("DimensionWorks", kind, "更新器")
 	fmt.Println("实例目录：", root)
 	fmt.Print("请确认该目录是正确的整合包根目录，且 Minecraft/服务端已退出。输入 Y 继续，其他输入取消：")
