@@ -471,7 +471,7 @@ func run(kind string, args []string) error {
 	}
 	backupBytes, err := estimateExistingBytes(root, selected)
 	if err != nil { return fmt.Errorf("估算本地备份空间失败：%w", err) }
-	deletionBackupBytes, err := estimateExistingBytes(root, deletions)
+	deletionBackupBytes, err := estimateDeletionBytes(root, deletions)
 	if err != nil { return fmt.Errorf("估算待删除文件备份空间失败：%w", err) }
 	backupBytes = saturatingAdd(backupBytes, deletionBackupBytes)
 	remoteBytes := uint64(0)
@@ -674,6 +674,20 @@ func estimateExistingBytes(root string, entries []Entry) (uint64, error) {
 		info, err := os.Lstat(path)
 		if err != nil { return 0, err }
 		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() { return 0, fmt.Errorf("目标不是普通文件：%s", entry.Path) }
+		if info.Size() > 0 { total = saturatingAdd(total, uint64(info.Size())) }
+	}
+	return total, nil
+}
+
+func estimateDeletionBytes(root string, paths []string) (uint64, error) {
+	var total uint64
+	for _, rel := range paths {
+		path, exists, err := securePath(root, rel)
+		if err != nil { return 0, err }
+		if !exists { continue }
+		info, err := os.Lstat(path)
+		if err != nil { return 0, err }
+		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() { return 0, fmt.Errorf("待删除目标不是普通文件：%s", rel) }
 		if info.Size() > 0 { total = saturatingAdd(total, uint64(info.Size())) }
 	}
 	return total, nil
