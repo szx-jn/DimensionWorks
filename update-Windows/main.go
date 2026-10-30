@@ -1069,20 +1069,28 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
+	restartFresh := func(reason string) error {
+		_ = resp.Body.Close()
+		_ = os.Remove(part)
+		_ = os.Remove(metaPath)
+		if reason != "" { fmt.Println("[续传] ", reason, "，将从头下载") }
+		return downloadSequential(ctx, source, destination, maxBytes)
+	}
 
 	appendMode := false
 	total := resp.ContentLength
 	if offset > 0 && meta != nil && resp.StatusCode == http.StatusPartialContent {
 		matches := regexp.MustCompile("^bytes ([0-9]+)-([0-9]+)/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
-		if len(matches) != 4 { return fmt.Errorf("续传响应 Content-Range 无效：%q", resp.Header.Get("Content-Range")) }
+		if len(matches) != 4 { return restartFresh("续传响应范围无效") }
 		begin, e1 := strconv.ParseInt(matches[1], 10, 64)
 		end, e2 := strconv.ParseInt(matches[2], 10, 64)
 		declaredTotal, e3 := strconv.ParseInt(matches[3], 10, 64)
 		if e1 != nil || e2 != nil || e3 != nil || begin != offset || declaredTotal != meta.Total || end < begin || end >= declaredTotal {
-			return errors.New("续传响应范围与已保存的下载状态不匹配")
+			return restartFresh("续传响应与已保存的文件长度不匹配")
 		}
-		if meta.ETag != "" && resp.Header.Get("ETag") != meta.ETag { return errors.New("续传资源 ETag 已变化，拒绝拼接不同版本文件") }
-		if meta.ETag == "" && resp.Header.Get("Last-Modified") != meta.LastModified { return errors.New("续传资源 Last-Modified 已变化，拒绝拼接不同版本文件") }
+		if meta.ETag != "" && resp.Header.Get("ETag") != meta.ETag { return restartFresh("续传资源 ETag 已变化") }
+		if meta.ETag == "" && resp.Header.Get("Last-Modified") != meta.LastModified { return restartFresh("续传资源 Last-Modified 已变化") }
+		if encoding := strings.TrimSpace(resp.Header.Get("Content-Encoding")); encoding != "" && !strings.EqualFold(encoding, "identity") { return restartFresh("续传响应使用了压缩编码") }
 		total = declaredTotal
 		appendMode = true
 	} else if resp.StatusCode == http.StatusOK {
@@ -1109,7 +1117,7 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	}
 	if total > maxBytes { _ = os.Remove(part); _ = os.Remove(metaPath); return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total)) }
 	if resp.ContentLength >= 0 && appendMode && resp.ContentLength != total-offset {
-		return fmt.Errorf("续传响应长度不匹配：%d/%d", resp.ContentLength, total-offset)
+		return restartFresh("续传响应长度不匹配")
 	}
 	if offset > 0 { downloadProgressUI.add(destination, offset) }
 	progressSetTotal(destination, total)
