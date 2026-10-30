@@ -1498,6 +1498,16 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/xaeros-world-map"
+    },
+    {
+      "id": "dimensionworks_item_pickup_guard",
+      "name": "DimensionWorks Item Pickup Guard",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-item-pickup-guard",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-item-pickup-guard"
     }
   ]
 }

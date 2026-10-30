@@ -1,0 +1,51 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+    id 'eclipse'
+    id 'idea'
+}
+
+version = '0.1.0'
+group = 'dev.szx.dimensionworks'
+base.archivesName = 'dimensionworks_item_pickup_guard'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            mods {
+                dimensionworks_item_pickup_guard {
+                    source sourceSets.main
+                }
+            }
+        }
+        client {}
+        server { args '--nogui' }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.23'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, 'dimensionworks_item_pickup_guard.refmap.json'
+    config 'dimensionworks_item_pickup_guard.mixins.json'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    manifest.attributes(['MixinConfigs': 'dimensionworks_item_pickup_guard.mixins.json'])
+    finalizedBy 'reobfJar'
+}
