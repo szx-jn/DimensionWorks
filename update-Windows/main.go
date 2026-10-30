@@ -286,7 +286,7 @@ func run(kind string, args []string) error {
 		if err != nil {
 			return err
 		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w；可重新运行并使用 --package 指定已下载的完整包", err)
 		}
@@ -302,7 +302,7 @@ func run(kind string, args []string) error {
 		}
 		version := strings.TrimPrefix(releaseTag, "v")
 		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), false)
+		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"), true)
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w", err)
 		}
@@ -969,6 +969,13 @@ func (p *progressTracker) reset(key string) {
 	if file := p.files[key]; file != nil {
 		file.total = 0
 		file.written = 0
+		var currentBytes int64
+		for _, current := range p.files {
+			currentBytes += current.written
+		}
+		p.lastBytes = currentBytes
+		p.lastRefresh = time.Now()
+		p.lastSpeed = 0
 	}
 	p.mu.Unlock()
 }
