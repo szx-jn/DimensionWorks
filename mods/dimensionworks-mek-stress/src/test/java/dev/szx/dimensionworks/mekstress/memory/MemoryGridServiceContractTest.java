@@ -13,7 +13,7 @@ class MemoryGridServiceContractTest {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/memory/MemoryGridService.java"));
         long activeChecks = source.lines()
-            .filter(line -> line.contains("if (!node.isActive())"))
+            .filter(line -> line.contains("node.isActive()"))
             .count();
 
         assertTrue(activeChecks >= 2L, "both node scans must ignore offline or channel-less nodes");

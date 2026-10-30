@@ -39,7 +39,8 @@ class MemoryCardPackContractTest {
     @Test
     void declaresTwentyNormalRecipesAtExactlyFourCardsEach() throws IOException {
         String recipes = Files.readString(Path.of("..", "..", "kubejs", "server_scripts", "me_memory.js"));
-        Matcher matcher = Pattern.compile("4x dimensionworks_mek_stress:memory_card_ddr").matcher(recipes);
+        Matcher matcher = Pattern.compile("4x dimensionworks_mek_stress:memory_card_ddr").matcher(
+            recipes.replace("memory_card_ddr${tier}_${kind}", "upgraded_card"));
         int count = 0;
         while (matcher.find()) {
             count++;
@@ -92,7 +93,7 @@ class MemoryCardPackContractTest {
     void exposesSixConfigGroupsAndTheDefectiveChance() throws IOException {
         String config = Files.readString(Path.of("src/main/java/dev/szx/dimensionworks/mekstress/MekStressConfig.java"));
         assertEquals(6, TYPES.length);
-        assertTrue(config.contains("storageExponent"));
+        assertFalse(config.contains("storageExponent"));
         assertTrue(config.contains("speedExponent"));
         assertTrue(config.contains("defectiveChance"));
         assertTrue(config.contains("0.25D"));
@@ -122,8 +123,8 @@ class MemoryCardPackContractTest {
             }
         }
         assertFalse(lang.contains("\"item.dimensionworks_mek_stress.memory_card_ddr1\":"));
-        assertTrue(lang.contains("tooltip.dimensionworks_mek_stress.memory_card_capacity"));
+        assertFalse(lang.contains("tooltip.dimensionworks_mek_stress.memory_card_capacity"));
         assertTrue(lang.contains("tooltip.dimensionworks_mek_stress.memory_card_bandwidth"));
-        assertTrue(lang.contains("tooltip.dimensionworks_mek_stress.memory_card_full_drive"));
+        assertFalse(lang.contains("tooltip.dimensionworks_mek_stress.memory_card_full_drive"));
     }
 }

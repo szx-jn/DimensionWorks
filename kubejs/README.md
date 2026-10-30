@@ -10,6 +10,12 @@
 - `data/`
 - `assets/`
 
+## ME 动力路线配方
+
+`server_scripts/me_memory.js` 提供 20 种正常卡配方、16 种四卡逐级升级配方和五代驱动器配方。DDR1 使用工程处理器与强化合金；后续驱动器用一台前代驱动器、四个对应电路和四个合金升级。升级回调保留原驱动器的内存卡 NBT 并删除旧 `StoredSu`；保留的旧代卡须另行升级至同代才生效。普通 DDR5 卡不再使用反物质。
+
+`data/dimensionworks/recipes/advanced_speed_controller.json` 保留 5×5 动力合成图案，将原四个粉碎轮和四个电子管分别换为四个工程处理器、四个强化合金，使两条路线共用中后期工业材料。实时 SU/RPM 规则见 [`../docs/design/me-live-stress-network.md`](../docs/design/me-live-stress-network.md)。
+
 ## 天境装备规则
 
 `server_scripts/aether_equipment_lock.js` 禁用天境装备的制作、修复和正常获取流程，保留流程功能物。

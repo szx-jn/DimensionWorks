@@ -94,13 +94,14 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
         drawMetric(graphics, "metric.drives", Component.literal(menu.driveCount() + "/2"), 90, 28, 90, 38, 0xFFFFFF);
         drawMetric(graphics, "metric.cards", Component.literal(Integer.toString(menu.cardCount())),
             132, 28, 132, 38, 0xFFFFFF);
-        drawMetric(graphics, "metric.stored", Component.literal(compact(menu.networkStoredSu()) + "/"
-            + compact(menu.networkCapacitySu())), 90, 53, 90, 63, 0xFFD166);
-        drawMetric(graphics, "metric.bandwidth", Component.literal(compact(menu.networkBandwidthRpm())),
+        drawMetric(graphics, "metric.total", Component.literal(compact(menu.networkCapacitySu())),
+            90, 53, 90, 63, 0xFFD166);
+        drawMetric(graphics, "metric.allocated", Component.literal(compact(menu.networkAllocatedSu())),
             132, 53, 132, 63, 0x7EC8E3);
-        drawMetric(graphics, "metric.tier", Component.literal("DDR" + menu.drive().tier().index()),
+        drawMetric(graphics, "metric.remaining", Component.literal(compact(menu.networkAvailableSu()) + "/"
+            + compact(menu.networkEffectiveCapacitySu())),
             90, 78, 90, 88, 0xFFFFFF);
-        drawMetric(graphics, "metric.slots", Component.literal(Integer.toString(menu.drive().tier().slotsPerDrive())),
+        drawMetric(graphics, "metric.bandwidth", Component.literal(compact(menu.networkBandwidthRpm())),
             132, 78, 132, 88, 0xFFFFFF);
         int statusColor = menu.status() == MemoryNetworkStatus.OK ? 0x286B39 : 0xAA3333;
         drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.status_short."

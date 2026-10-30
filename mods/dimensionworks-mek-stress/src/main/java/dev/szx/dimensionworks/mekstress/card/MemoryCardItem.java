@@ -34,20 +34,14 @@ public final class MemoryCardItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        long capacitySu = MemoryDriveMath.cardCapacitySu(
-            MekStressConfig.cardCapacitySu(tier), MekStressConfig.storageExponent(type));
-        long bandwidthDeltaRpm = MemoryDriveMath.bandwidthDeltaRpm(
-            MekStressConfig.driveBandwidthRpm(tier), MekStressConfig.speedExponent(type), tier.slotsPerDrive());
-        double fullDriveMultiplier = Math.scalb(1.0D, MekStressConfig.speedExponent(type));
+        long bandwidthRpm = MemoryDriveMath.scaleByPowerOfTwo(
+            MekStressConfig.cardBandwidthRpm(tier), MekStressConfig.speedExponent(type));
         tooltip.add(Component.translatable(typeTranslationKey()).withStyle(typeColor()));
         tooltip.add(Component.translatable("tooltip.dimensionworks_mek_stress.memory_card_input_reduction",
-            percentage(type.inputReductionBasisPoints())).withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.dimensionworks_mek_stress.memory_card_capacity",
-            capacitySu).withStyle(ChatFormatting.GRAY));
+            percentage(type.inputReductionBasisPoints()), percentage(MekStressConfig.maximumInputLossBasisPoints()))
+            .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.dimensionworks_mek_stress.memory_card_bandwidth",
-            signed(bandwidthDeltaRpm)).withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.dimensionworks_mek_stress.memory_card_full_drive",
-            multiplier(fullDriveMultiplier)).withStyle(ChatFormatting.GRAY));
+            signed(bandwidthRpm)).withStyle(ChatFormatting.GRAY));
     }
 
     public String typeTranslationKey() {

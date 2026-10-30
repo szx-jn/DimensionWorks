@@ -1,102 +1,66 @@
 # DimensionWorks ME Mechanical Power
 
-把 Create 机械动力、Mekanism 机器和 AE2 内存网络连接成两条明确边界：
+Minecraft 1.20.1 / Forge / Java 17。通过自研 Mixin 接入 Create、AE2、Applied Create 与 Mekanism，不修改第三方模组源码。
 
-- AE 侧库存由 Memory Drive 与 Memory Card 提供。Gearbox IMPORT 把 Create 应力存入网络，Gearbox EXPORT 从网络扣除 SU 后输出应力。
-- Create 侧动力可由相邻动力网络中的任意有效动力源提供；ME Gearbox EXPORT 是其中一种源，普通传动杆、齿轮组和其他有源 Create 网络也能直接接入。
-- 机器能量采用二元供能：每次能量接口读取时动态检查当前 Create 应力路线；路线存在、当前 RPM 有效且网络未过载时虚拟返回满能量，否则返回零。虚拟能量不写入 Mekanism 的真实 `MachineEnergyContainer`，并在序列化时输出空能量 NBT；世界保存不会将机械动力伪装成可持久化的 FE。单台机器在正常服务端 tick 中复用该 tick 已计算的路线。充能器也属于合格机器，按基础档 `1024 RPM` 接入。RPM 低于机器目标时保留满能量契约，但按 `min(1, 有效 RPM / 目标 RPM)` 降低工作速度。RPM 高于目标时，生产倍率按 `有效 RPM / 目标 RPM` 提升，并在 Mekanism 输出边界统一作用于物品、气体、流体、复合输出和随机副产物；每个逻辑产物先按该 tick 的实际操作次数求和，再乘倍率并向下取整，避免概率副产物被重复放大。
-- 合格 Mekanism 机器会检查主机与全部 Mekanism 包围方块的外表面；任意相邻 `KineticBlockEntity` 只要其轴朝向其中一面就可以接通。机器作为虚拟成员加入实际的 `KineticNetwork.members`，因此它按 Create 已传播的网络转速幅值计算 `abs(RPM) × 8` 应力并直接计入网络总量与过载判定，不再只是显示值；空闲机器也保留零速虚拟成员。机器拒绝一切 FE 输入。
-- MEK 直接动力与 ME Gearbox EXPORT 在读取 Create 已传播的网络转速后，先按 `abs(RPM)` 取速度幅值，再经过玩家的有效 RPM 上限，最后受 `directMaxRpm` 收口。顺时针与逆时针的等幅转速获得相同的有效 RPM 和应力计费，零转速仍无动力。原始转向只用于 Create 网络传播；MEK 消费、Jade 显示与虚拟成员负载都使用收口后的非负有效转速，因此玩家上限降低后，MEK 不会继续按旧的高速运行。
-- 四档目标 RPM 分别为基础 `1024`、高级 `2048`、精英 `4096`、终极 `8192`。每台机器向所在 Create 网络施加 `abs(当前 RPM) × 8` 的应力需求，不区分正转和反转；网络应力不足时由 Create 规则判定过载。
+## 0.3.12：实时应力额度
 
-本 Mod 不分发或替换 Applied Create、AE2、Mekanism、Create 的源码；兼容通过自研 Mod 与运行时 Mixin 完成。Applied Create 原有的应力存储 Cell、组件、外壳和创造 Cell 全部退役，不能继续挂载、读写或供应 `StressKey`。
-Mekanism 的能量立方、能量平板、感应 Cell 与感应 Provider 由 KubeJS 退役：移除配方、移出创造栏、隐藏 JEI、阻止拾取和使用，并清除玩家库存。为避免配置器、碎星者、激光器等非储能配方失去材料，残留配方中的 `mekanism:energy_tablet` 输入会替换为物品标签 `#mekanism:alloys/infused`。感应外壳与感应端口不属于储能元件，继续保留；没有 Cell 与 Provider 后无法组成可储能的感应矩阵。
+ME 应力不再是可积累的能源库存。内存卡和驱动器均不提供任何 SU 容量，旧存档 StoredSu 不再读取、写入或恢复供能；旧 StressKey 存储服务不再挂载。
 
-KubeJS 会把 `memory_drive_ddr1..5` 和 DDR1～5 × 六形态共 30 个 `memory_card_ddrN_*` 加入创造标签；`stress_output_card` 及其配方、资源、总线逻辑和 Jade 显示已全部删除。
+- 原始上限 = 当前有效 IMPORT 齿轮箱的应力之和。Applied Create 面板的应力参数是 SU/RPM 系数，因此贡献为该系数乘当前有效机械转速。
+- 有效上限 = 原始上限 × (1 - 输入扣除比例)。各卡的扣除贡献累加，默认全网最多扣除 15%，可配置为 0～100%。扣除只修正实时上限一次，不按时间累计。
+- 输出占额 = 每台在线 EXPORT 的设定 SU/RPM 系数 × 经玩家上限约束后的设定 RPM。多台输出的占额相加；这是固定占用，不是 SU/t 扣费。设定为零、拆除或离网即释放占额。
+- 剩余额度 = max(有效上限 - 输出占额总和, 0)。所有输出刚好用满时仍正常运行。
+- 有效上限为零，或者输出占额总和超过有效上限：全部 ME 输出停机，驱动器界面、Jade 与齿轮箱工程师护目镜提示“应力输出过载”。
+- 输出转速总和超过全网 RPM 上限：全部输出停机，提示“输出转速过载”。不按比例降速，也不让先 tick 的设备抢走额度。恢复足额配置或供给后自动恢复。
+- 下游 Create 负载超过某台 EXPORT 宣告的容量，仍由 Create 原生过载机制处理。AE 的物品、流体等其他服务不因应力过载停止。
+- IMPORT 必须有有效机械动力且 Create 网络未过载，同时 AE 节点供电、有频道、已加载。停机、改值、拆除与离网实时重新计算；不依赖旧的十 tick 需求扫描。
+- 禁止 ME 输出回灌为新输入，包括不同 AE 网络之间的回灌：输入所在的机械网络有 ME EXPORT 源时不计入输入。
 
-## Memory 参数
+齿轮箱保留 Applied Create 的模式与设置面板。ME 输出不再调用按流量插入、提取 StressKey 的旧方法；AE 自身仍需正常供电与频道。
 
-| DDR | 每 Drive 槽位 | 基础单卡容量 `C_d` | 基础驱动带宽 `B_d` |
+## RPM 驱动器与卡
+
+每个逻辑 AE 网络最多两台有效驱动器。驱动器只提供基础 RPM，卡只提供额外 RPM 并扣除输入应力上限。
+
+| DDR | 槽位 | 驱动器基础 RPM | 每张均衡卡增加 RPM |
 |---|---:|---:|---:|
-| DDR1 | 4 | 8,192 SU | 8,192 RPM |
-| DDR2 | 8 | 9,216 SU | 16,384 RPM |
-| DDR3 | 16 | 10,240 SU | 32,768 RPM |
-| DDR4 | 32 | 12,288 SU | 65,536 RPM |
-| DDR5 | 64 | 16,384 SU | 131,072 RPM |
+| DDR1 | 4 | 256 | 256 |
+| DDR2 | 8 | 512 | 512 |
+| DDR3 | 16 | 1024 | 1024 |
+| DDR4 | 32 | 2048 | 2048 |
+| DDR5 | 64 | 4096 | 4096 |
 
-每种卡用二维二进制指数 `(a,v)` 描述：劣质 `(-2,-2)`、经济 `(-1,-1)`、均衡 `(0,0)`、高速 `(-1,+1)`、高存储 `(+1,-1)`、最终 `(+2,+2)`。单卡容量 `C(d,t)=C_d×2^a`；驱动器有效带宽 `B=max(0,B_d+Σ round(B_d×(2^v-1)/S_d))`。空驱动器保留基础速度，均衡满盘保持原标定。
+卡型 RPM 系数：劣质 0.25×、经济 0.5×、均衡 1×、高速 2×、低损耗 0.5×、最终 4×。例如 DDR1 装四张均衡卡时上限 1280 RPM，装四张高速卡时上限 2304 RPM；两台驱动器贡献相加。
 
-## 输入应力扣除
+每卡输入扣除：劣质 20%、经济 2%、均衡 1.5%、高速 1.75%、低损耗 0.75%、最终 0%。默认网络总扣除封顶 15%，不会因为装满普通卡而损耗到 100%。原 high_storage 注册 ID 保留，显示名改为“低损耗型”，不再声称提供储存容量。正常卡手工制造仍有 25% 劣质概率，AE 自动合成假玩家继续豁免。
 
-同一 ME 网络中所有已安装内存卡的扣除贡献相加，并统一封顶为 100%。每张卡的贡献为：劣质型 20%、经济型 2%、均衡型 1.5%、高速型 1.75%、高存储型 0.75%、最终型 0%。网络有效输入应力为 `原始输入总应力 × (1 - min(总扣除比例, 100%))`；因此即使扣除比例之和超过 100%，有效应力也不会为负。计算使用整数基点并跨分次输入累计小数余量，避免不同齿轮箱分开输入时因逐次舍入产生偏差。
+共同制作门槛为 AE 工程处理器与 Mekanism 强化合金。高级控制器保留 Create 精密构件与坚固板配套；驱动器升级只消耗一台前级驱动器，普通 DDR5 卡取消反物质。四种正常卡均可四张同类型前级卡加新材料升级，保留旧投入；最终卡仍没有毕业配方。
 
-每个逻辑 AE 网络最多统计两台 Drive。第三台会使网络容量、带宽和输出归零，但 Drive 内已有 Card 与 SU 不会丢失；移除多余 Drive 后自动恢复。
+驱动器升级保留物品中的内存卡数据并清除旧 `StoredSu`。旧代卡会保留在升级后的驱动器中供取出；卡仍须与驱动器同代才提供贡献，需要另行升级。
 
-## 应力守恒
+## 界面与接口
 
-```text
-idleLoad       = effectiveRpm * 8
-fullLoad       = max(idleLoad, Create 网络完整应力负载)
-requestedSu    = ceil(fullLoad)
-rpmQ           = min(1, bandwidthRpm / requestedRpm)
-requiredSu     = ceil(requestedSu * rpmQ)
-stockQ         = storedSu >= requiredSu ? 1 : 0
-q              = min(stockQ, rpmQ)
-outputRpm      = round(effectiveRpm * q)
-chargedSu      = requiredSu
-perRpmCapacity = chargedSu / outputRpm
-```
+- 驱动器仍为每页 4×5 卡槽，背景按实际 176×215 纹理采样；标签和数值位于同一个等宽信息框。显示原始输入、输出占额、剩余/有效上限与 RPM 上限。DDR5 最后一页只有四个有效槽位。
+- 客户端容器数据使用四个 16 位字传输每个 long；页码和可见槽内容同步，快速翻页不修改客户端方块实体的绝对卡槽。
+- Jade 显示网格即时分配；每台齿轮箱也显示原始输入、全网占额/有效上限及总输出 RPM/上限。
+- /dw memory 查询附近已加载驱动器的实时分配，不加载新区块。
+- IMemoryGridService.snapshot 返回 capacitySu（原始输入）、effectiveCapacitySu（扣除后）、allocatedSu（占额）、availableSu（剩余）、demandRpm 与 bandwidthRpm；旧 insertSu/extractSu/reportGearboxExport 接口已移除。
+- 内存卡保留 64×64 透明纹理。原稿位于 scripts/assets/memory_cards_reference.png；使用 scripts/requirements-memory-assets.txt 环境运行 scripts/draw_memory_assets.py 可重建。
 
-空载 EXPORT 齿轮箱的基础负载仍为 `有效 RPM × 8`；Mekanism 机器本身按 `有效 RPM × 256` 计费。接入下游机器时取“基础负载”与“实际完整应力负载”的较大值，因此单台标准机器仍保持原有 `RPM × 256` 标定，多台机器会继续按总负载增长。
+## MEK 机械动力
 
-ME Gearbox EXPORT 只有在有效 RPM、实际输出 RPM、实际扣费和 `q > 0` 全部有效时才运行；任一条件缺失都会同时清除输出速度与宣告容量。`storedSu < requiredSu` 时整台齿轮箱无能量输出，不允许用库存比例赊速；RPM 带宽不足时则按比例输出转速。没有下游机器时，齿轮箱仍按基础负载运行。
+合格加工机器继续只接受相邻 Create 动力网络；ME EXPORT 是可选供能源之一。有效 RPM 受玩家/齿轮之心与 directMaxRpm 限制；基础、高级、精英、终极目标转速分别为 1024/2048/4096/8192。当前应力系数以 MachinePowerMath.SU_PER_RPM=256 为准，正反转等价。
 
-RPM 需求以每台 EXPORT 齿轮箱为一个占用单位，同一 AE 网络内求和；下游机器只放大该齿轮箱的 SU 应力需求，不重复占用 RPM。齿轮箱不需要等待下游机器出现才开始运行，因此不会形成“机器等齿轮箱、齿轮箱等负载”的死锁。
+机器作为虚拟成员加入真实 Create 应力网络。低于目标时按 RPM 比例减速，超过目标时按比例放大配方吞吐，输出边界仍检查容量和最终产物额度。FE/J 供能和旧储能元件保持退役，Jade 隐藏 Mekanism 原生能量条。虚拟能量不写入 NBT；动力路线仅检查已加载区块并在单台机器当前 tick 内复用，避免存档时递归触发区块读取。
 
-ME Gearbox EXPORT 向 Create 网络宣告的容量严格等于本次实际扣除的 SU。下游机器在 `outputRpm` 下最多只能消费 `chargedSu`；超出部分触发 Create 原有应力过载，不能无中生有。
+## 性能与配置
 
-## Jade
+AE 服务只跟踪驱动器和齿轮箱参与节点，每次实时读取只检查这些已加载对象，复杂度 O(参与端口数)；不再反复扫描输出端全部下游机器。状态变化时才刷新 Create 来源及缓存，重入保护防止传播递归。新增内容不创建实体，不强加载区块，不逐 tick 写入应力库存。
 
-- 所有 Mekanism 方块的 Mekanism FE/J 元素，以及 Jade 通用 FE/J provider 对 Mekanism 方块的显示，都被移除。
-- 本 Mod 的 MEK Jade 条目显示当前有效 RPM、`RPM × 256` 的 SU/t 占用和当前工作倍率。
-- MEK Jade 的“生产倍率”显示端到端吞吐倍率：低于目标时小于 `1x`，达到目标为 `1x`，高于目标时按比例大于 `1x`；配方内部仍不会在低转速时重复放大产出，避免二次取产。
-- 非加工 MEK 设备仍不会出现本 Mod 的机械动力条目。
+配置在 config/ 与 defaultconfigs/ 的 dimensionworks_mek_stress-common.toml。更新已有实例时需要同步基础 RPM、卡 RPM 与 maximumInputLossBasisPoints；旧容量及 storageExponent、efficiencyExponent 配置已停用。客户端、服务端需要同时更新此版本的菜单协议。
 
-## 工程接口
+## 构建与验证
 
-0.3.11 修复驱动器背景把 176×215 图片当作 256×256 纹理采样造成的缩放、裁切与槽位错位。卡槽中心、物品栏和热键栏继续使用菜单的 18 像素间距。卡图保留原稿细节，64×64 画布的留白使用真正透明的 Alpha；生成器先移除与外缘连通的棋盘背景，再缩放和补透明边，不再覆盖透明边的 Alpha。原稿保存在 `scripts/assets/memory_cards_reference.png`；安装 `scripts/requirements-memory-assets.txt` 后运行 `python3 scripts/draw_memory_assets.py` 可重新生成。
+在本目录执行 gradle build --no-daemon。组合构建会生成 RPM Limit 的 devJar 用于官方映射开发环境，生产服使用其常规 reobf JAR，禁止把 -dev.jar 放入实例。
 
-界面网络状态由服务端同步到客户端，容量、存量、带宽各拆成四个 16 位字，避免 65536、131072 等值通过容器数据包时被截断。页码也同步；DDR5 的最后一页只激活实际存在的 4 个卡槽。
-
-翻页时重新发送完整容器状态，即使相邻两页的同一位置装着相同卡也能正确刷新。此数据布局需要客户端和服务端同时更新；新增同步只发生在已打开的菜单及主动翻页时，不增加区块加载或常驻机器扫描。
-
-- `memory_drive_ddr1..5`：使用 AE2 风格驱动器界面，每页 4 列 × 5 行共 20 槽，按 DDR 等级只接受同等级 Memory Card。
-- 驱动器方块以 AE2 两列五灯为状态窗，最多点亮前十个已安装卡槽，并按卡型显示对应颜色；打开界面使用独立 AE2 风格背景，展示 4×5 分页卡槽与网络状态。
-- `memory_card_ddrN_{economy,balanced,high_speed,high_storage,defective,final}`：影响所在驱动器容量、有效带宽，并向所在 ME 网络贡献输入应力扣除比例。
-- 正常卡配方每次固定产出 4 张；每张独立有 25% 概率变为同 DDR 劣质卡，自动合成假玩家跳过该判定。
-- 快速移动合成时，只有成功从玩家背包扣除的正常卡才会转换为劣质卡；无法扣除的部分不会额外生成副产物。
-- 经济型、均衡型、高速型、高存储型可合成；劣质型只作副产物，最终型仅注册，毕业配方待定。
-- `appliedcreate:me_gearbox`：IMPORT 输入应力到 AE，EXPORT 从 AE 输出应力并执行 SU 守恒。
-- `/dw memory`：读取附近已连接 Drive 所在逻辑网格的状态快照。
-
-容量、带宽、机器转速等平衡值位于 COMMON 配置 `dimensionworks_mek_stress-common.toml`；内存卡输入应力扣除比例由卡型固定定义。槽数、结构规则、两台 Drive 上限、100% 扣除上限和齿轮箱守恒边界不可配置。
-
-## Create 动力网络统计缓存
-
-0.3.6 起，虚拟 Mekanism 机器参与同一套可失效的应力总账。网络成员变化时缓存立即失效；重算仍会检查虚拟成员有效性，避免区块卸载或设备移除后继续计入过期负载。发电机更新的批处理和增量统计由依赖的 `dimensionworks-rpm-limit` 提供。
-
-兼容性运行边界：
-
-- Mekanism 调度器只在连续、同转速的 tick 上累积小数工作量；停机、区块重载或变速后不会补执行历史 tick。
-- AE2 Memory Drive 与 ME Gearbox 只在节点 `isActive()`（供电、启动且满足频道）时参与容量、带宽和导出。
-- Mek 虚拟成员在 `setRemoved` 时解除；官方映射 refmap 已验证为 `m_7651_()`。
-- 能量容器机械供能契约只在服务端生效，客户端继续显示 Mekanism 原始能量状态。
-- 同一台机器的服务端 tick 内复用一次动力路线（包括无路线结果），避免能量读取重复扫描多方块脚印与 Create 网络；路线检查只读取已加载区块，绝不因寻找相邻轴系而同步加载新区块；能量 NBT 序列化直接写空标签，不会触发虚拟能量路线查找。
-- 多台 Mek 机器引起的变化按网络标记，服务器 tick 末每张网络最多全量刷新一次。
-- 超速缩放后的物品、流体和化学品在容量检查阶段申请第七项最终产物额度；额度不足时不开始该批操作。
-
-## 构建
-
-```sh
-gradle build --no-daemon
-```
+独立运行 gradle runGameTestServer --no-daemon -x downloadAssets 验证真实 AE 节点、齿轮箱分配、应力与 RPM 全网过载、卡插拔、零供给和恢复。测试源和世界不进入发布 JAR。

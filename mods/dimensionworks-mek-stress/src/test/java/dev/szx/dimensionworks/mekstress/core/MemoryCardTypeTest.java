@@ -39,7 +39,6 @@ class MemoryCardTypeTest {
     }
 
     private static void assertExponents(MemoryCardType type, int storageExponent, int speedExponent) {
-        assertEquals(storageExponent, type.defaultStorageExponent());
         assertEquals(speedExponent, type.defaultSpeedExponent());
     }
 }

@@ -13,6 +13,6 @@ class MEGearboxBlockEntityMixinTest {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/mixin/appliedcreate/MEGearboxBlockEntityMixin.java"));
 
-        assertTrue(source.contains("if (!self.getMainNode().isActive())"));
+        assertTrue(source.contains("!self.getMainNode().isActive()"));
     }
 }

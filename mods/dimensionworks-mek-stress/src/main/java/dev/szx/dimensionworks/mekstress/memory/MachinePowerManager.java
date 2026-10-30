@@ -162,20 +162,6 @@ public final class MachinePowerManager {
         MachineKineticRegistry.detach(tile);
     }
 
-    @Nullable
-    public static GearboxDemand inspectGearbox(MEGearboxBlockEntity gearbox) {
-        if (gearbox.getLevel() == null || gearbox.getLevel().isClientSide
-            || gearbox.getMode() != MEGearboxBlockEntity.Mode.EXPORT) {
-            return null;
-        }
-        int effectiveRpm = effectiveGearboxRpm(gearbox);
-        if (effectiveRpm <= 0) {
-            return new GearboxDemand(0, 0L, 0.0D);
-        }
-        double fullSpeedLoad = MachinePowerMath.gearboxLoad(downstreamLoad(gearbox), effectiveRpm);
-        return new GearboxDemand(effectiveRpm, (long) Math.ceil(fullSpeedLoad), fullSpeedLoad);
-    }
-
     public static int effectiveGearboxRpm(MEGearboxBlockEntity gearbox) {
         int configuredRpm = Math.abs(gearbox.getConfiguredSpeed());
         if (configuredRpm <= 0) {
@@ -216,21 +202,6 @@ public final class MachinePowerManager {
         return candidate.networkRpm() > current.networkRpm();
     }
 
-    private static double downstreamLoad(MEGearboxBlockEntity gearbox) {
-        if (!gearbox.hasNetwork()) {
-            return 0.0D;
-        }
-        KineticNetwork network = gearbox.getOrCreateNetwork();
-        if (network == null) {
-            return 0.0D;
-        }
-        double load = 0.0D;
-        for (KineticBlockEntity member : network.members.keySet()) {
-            load += Math.max(0.0D, network.getActualStressOf(member));
-        }
-        return load;
-    }
-
     private static boolean shaftFacesMachine(Level level, KineticBlockEntity kinetic, Direction machineToKinetic) {
         if (!(kinetic.getBlockState().getBlock() instanceof IRotate rotate)) {
             return false;
@@ -258,6 +229,4 @@ public final class MachinePowerManager {
     ) {
     }
 
-    public record GearboxDemand(int requestedRpm, long requestedSuPerTick, double fullSpeedLoad) {
-    }
 }

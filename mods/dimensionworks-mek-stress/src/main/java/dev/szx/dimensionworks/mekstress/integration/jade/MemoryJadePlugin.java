@@ -2,6 +2,7 @@ package dev.szx.dimensionworks.mekstress.integration.jade;
 
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
+import com.loliball.appliedcreate.energy.MEGearboxBlockEntity;
 import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkSnapshot;
@@ -30,6 +31,7 @@ import snownee.jade.api.config.IPluginConfig;
 public final class MemoryJadePlugin implements IWailaPlugin {
     private static final String DRIVE_KEY = "dw_memory_drive";
     private static final String MACHINE_KEY = "dw_mek_machine";
+    private static final String GEARBOX_KEY = "dw_me_gearbox";
     private static final ResourceLocation DRIVE_UID = id("memory_drive");
     private static final ResourceLocation MACHINE_UID = id("mek_machine");
 
@@ -37,16 +39,51 @@ public final class MemoryJadePlugin implements IWailaPlugin {
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(DriveDataProvider.INSTANCE, MemoryDriveBlockEntity.class);
         registration.registerBlockDataProvider(MachineDataProvider.INSTANCE, TileEntityMekanism.class);
+        registration.registerBlockDataProvider(GearboxDataProvider.INSTANCE, MEGearboxBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(DriveComponent.INSTANCE, MemoryDriveBlock.class);
         registration.registerBlockComponent(MachineComponent.INSTANCE, Block.class);
+        registration.registerBlockComponent(GearboxComponent.INSTANCE, Block.class);
     }
 
     private static ResourceLocation id(String path) {
         return new ResourceLocation(DimensionWorksMekStress.MOD_ID, path);
+    }
+
+    private static final class GearboxDataProvider implements IServerDataProvider<BlockAccessor> {
+        private static final GearboxDataProvider INSTANCE = new GearboxDataProvider();
+        @Override public void appendServerData(CompoundTag data, BlockAccessor accessor) {
+            if (!(accessor.getBlockEntity() instanceof MEGearboxBlockEntity gearbox)
+                || gearbox.getMainNode().getGrid() == null || gearbox.getLevel() == null) return;
+            IMemoryGridService service = gearbox.getMainNode().getGrid().getService(IMemoryGridService.class);
+            if (service == null) return;
+            var snapshot = service.snapshot(gearbox.getLevel().getGameTime());
+            data.putBoolean(GEARBOX_KEY, true);
+            data.putString("dwStressStatus", snapshot.status().name());
+            data.putLong("dwRawSu", snapshot.capacitySu());
+            data.putLong("dwAllocatedSu", snapshot.allocatedSu());
+            data.putLong("dwEffectiveSu", snapshot.effectiveCapacitySu());
+            data.putLong("dwRpm", snapshot.demandRpm());
+            data.putLong("dwRpmLimit", snapshot.bandwidthRpm());
+        }
+        @Override public ResourceLocation getUid() { return id("gearbox_live_stress"); }
+    }
+
+    private static final class GearboxComponent implements IBlockComponentProvider {
+        private static final GearboxComponent INSTANCE = new GearboxComponent();
+        @Override public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            CompoundTag data = accessor.getServerData();
+            if (!data.getBoolean(GEARBOX_KEY)) return;
+            tooltip.add(Component.translatable("jade.dimensionworks_mek_stress.live_stress",
+                data.getLong("dwRawSu"), data.getLong("dwAllocatedSu"), data.getLong("dwEffectiveSu")));
+            tooltip.add(Component.translatable("jade.dimensionworks_mek_stress.live_rpm",
+                data.getLong("dwRpm"), data.getLong("dwRpmLimit")));
+            appendStatus(tooltip, data.getString("dwStressStatus"));
+        }
+        @Override public ResourceLocation getUid() { return id("gearbox_live_stress"); }
     }
 
     private static final class DriveDataProvider implements IServerDataProvider<BlockAccessor> {
@@ -66,12 +103,11 @@ public final class MemoryJadePlugin implements IWailaPlugin {
             data.putBoolean(DRIVE_KEY, true);
             data.putInt("driveCount", snapshot.driveCount());
             data.putLong("capacitySu", snapshot.capacitySu());
-            data.putLong("storedSu", snapshot.storedSu());
+            data.putLong("storedSu", snapshot.availableSu());
+            data.putLong("effectiveSu", snapshot.effectiveCapacitySu());
             data.putLong("bandwidthRpm", snapshot.bandwidthRpm());
             data.putLong("demandRpm", snapshot.demandRpm());
-            data.putLong("demandSu", snapshot.demandSuPerTick());
-            data.putDouble("stockQ", snapshot.stockQ());
-            data.putDouble("bandwidthQ", snapshot.bandwidthQ());
+            data.putLong("demandSu", snapshot.allocatedSu());
             data.putDouble("finalQ", snapshot.finalQ());
             data.putString("status", snapshot.status().name());
             data.putInt("cards", drive.cardCount());
@@ -126,8 +162,7 @@ public final class MemoryJadePlugin implements IWailaPlugin {
                 data.getLong("bandwidthRpm")));
             tooltip.add(Component.translatable("jade.dimensionworks_mek_stress.demand",
                 data.getLong("demandRpm"), data.getLong("demandSu")));
-            tooltip.add(Component.translatable("jade.dimensionworks_mek_stress.q",
-                data.getDouble("stockQ"), data.getDouble("bandwidthQ"), data.getDouble("finalQ")));
+            tooltip.add(Component.translatable("jade.dimensionworks_mek_stress.effective_su", data.getLong("effectiveSu")));
             appendStatus(tooltip, data.getString("status"));
         }
 

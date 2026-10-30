@@ -1,422 +1,126 @@
 package dev.szx.dimensionworks.mekstress.memory;
 
-import appeng.api.config.Actionable;
 import appeng.api.networking.GridServices;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
-import appeng.api.networking.storage.IStorageService;
-import appeng.api.stacks.AEKey;
-import appeng.api.stacks.KeyCounter;
-import appeng.api.storage.IStorageMounts;
-import appeng.api.storage.IStorageProvider;
-import appeng.api.storage.MEStorage;
 import com.loliball.appliedcreate.energy.MEGearboxBlockEntity;
-import com.loliball.appliedcreate.storage.StressKey;
+import dev.szx.dimensionworks.mekstress.MekStressConfig;
+import dev.szx.dimensionworks.mekstress.api.IMEGearboxExportState;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkSnapshot;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
 import dev.szx.dimensionworks.mekstress.core.InputStressMath;
+import dev.szx.dimensionworks.mekstress.core.LiveStressBudget;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
-import dev.szx.dimensionworks.mekstress.core.NetworkMath;
+import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.nbt.CompoundTag;
 
-/** One ME Memory service per logical AE2 grid. */
-public final class MemoryGridService implements IMemoryGridService, IStorageProvider {
-    private static final long GEARBOX_SCAN_INTERVAL_TICKS = 10L;
-    private static final long CONSUMER_TIMEOUT_TICKS = 3L;
-
+/** Live allocations for one AE grid. No StressKey inventory and no SU/t debit. */
+public final class MemoryGridService implements IMemoryGridService {
     private final IGrid grid;
-    private final Map<GlobalPos, GearboxDemand> gearboxDemands = new HashMap<>();
-    private boolean mounted;
-    private long lastComputedTick = Long.MIN_VALUE;
-    private long lastGearboxScanTick = Long.MIN_VALUE;
-    private long inputStressRemainderNumerator;
+    private final Set<IGridNode> participants = new LinkedHashSet<>();
+    private boolean initialized;
+    private boolean refreshing;
     private MemoryNetworkSnapshot lastSnapshot = MemoryNetworkSnapshot.empty(MemoryNetworkStatus.NO_DRIVE);
 
-    private final MEStorage storage = new MEStorage() {
-        @Override
-        public long insert(AEKey what, long amount, Actionable mode, appeng.api.networking.security.IActionSource source) {
-            if (what != StressKey.Companion.getINSTANCE()) {
-                return 0L;
-            }
-            long accepted = insertSu(amount, mode, currentTick());
-            if (mode == Actionable.MODULATE && accepted > 0L) {
-                invalidateStorage();
-            }
-            return accepted;
+    public MemoryGridService(IGrid grid) { this.grid = grid; }
+
+    public static void register() { GridServices.register(IMemoryGridService.class, MemoryGridService.class); }
+
+    @Override public void addNode(IGridNode node, CompoundTag savedData) { track(node); }
+
+    @Override public void removeNode(IGridNode node) {
+        participants.remove(node);
+        boolean previous = refreshing;
+        refreshing = true;
+        try {
+            if (node.getOwner() instanceof IMEGearboxExportState gearbox)
+                gearbox.dimensionworks$applyExportState(false, 0, 0, true);
+        } finally {
+            refreshing = previous;
         }
+    }
 
-        @Override
-        public long extract(AEKey what, long amount, Actionable mode, appeng.api.networking.security.IActionSource source) {
-            if (what != StressKey.Companion.getINSTANCE()) {
-                return 0L;
+    @Override public void onServerStartTick() { snapshot(0); }
+    @Override public void onServerEndTick() { snapshot(0); }
+
+    private void track(IGridNode node) {
+        if (node.getOwner() instanceof MEGearboxBlockEntity || node.getOwner() instanceof MemoryDriveBlockEntity)
+            participants.add(node);
+    }
+
+    @Override public MemoryNetworkSnapshot snapshot(long gameTick) {
+        if (refreshing) return lastSnapshot;
+        refreshing = true;
+        try {
+            if (!initialized) {
+                for (IGridNode node : grid.getNodes()) track(node);
+                initialized = true;
             }
-            long extracted = extractSu(amount, mode, currentTick());
-            if (mode == Actionable.MODULATE && extracted > 0L) {
-                invalidateStorage();
+            var budget = new LiveStressBudget<GlobalPos>();
+            List<MemoryDriveBlockEntity> drives = new ArrayList<>();
+            List<Export> exports = new ArrayList<>();
+            long bandwidth = 0;
+            long requestedRpm = 0;
+            long reduction = 0;
+            for (IGridNode node : List.copyOf(participants)) {
+                Object owner = node.getOwner();
+                if (owner instanceof MemoryDriveBlockEntity drive) {
+                    if (!node.isActive() || drive.isRemoved() || drive.getLevel() == null) continue;
+                    drives.add(drive);
+                    bandwidth = add(bandwidth, drive.bandwidthRpm());
+                    reduction = add(reduction, drive.inputReductionBasisPoints());
+                } else if (owner instanceof MEGearboxBlockEntity gearbox) {
+                    if (gearbox.getLevel() == null || gearbox.isRemoved()) continue;
+                    GlobalPos key = GlobalPos.of(gearbox.getLevel().dimension(), gearbox.getBlockPos());
+                    if (gearbox.getMode() == MEGearboxBlockEntity.Mode.EXPORT) {
+                        int rpm = node.isActive() ? MachinePowerManager.effectiveGearboxRpm(gearbox) : 0;
+                        long reserved = LiveStressBudget.stress(gearbox.getConfiguredStress(), rpm);
+                        budget.output(key, reserved);
+                        requestedRpm = add(requestedRpm, reserved > 0 ? rpm : 0);
+                        exports.add(new Export(gearbox, rpm, reserved));
+                    } else if (node.isActive()) budget.input(key, inputCapacity(gearbox));
+                }
             }
-            return extracted;
-        }
-
-        @Override
-        public void getAvailableStacks(KeyCounter out) {
-            long stored = snapshot(currentTick()).storedSu();
-            if (stored > 0L) {
-                out.add(StressKey.Companion.getINSTANCE(), stored);
+            int loss = Math.min(MekStressConfig.maximumInputLossBasisPoints(),
+                InputStressMath.cappedReductionBasisPoints(reduction));
+            LiveStressBudget.Snapshot allocation = budget.snapshot(loss);
+            MemoryNetworkStatus status = drives.isEmpty() ? MemoryNetworkStatus.NO_DRIVE
+                : drives.size() > MemoryTier.MAX_DRIVES_PER_NETWORK ? MemoryNetworkStatus.TOO_MANY_DRIVES
+                : allocation.overloaded() ? MemoryNetworkStatus.OUTPUT_OVERLOAD
+                : requestedRpm > bandwidth ? MemoryNetworkStatus.BANDWIDTH_OVERLOAD : MemoryNetworkStatus.OK;
+            lastSnapshot = new MemoryNetworkSnapshot(drives.size(), allocation.rawSu(), allocation.effectiveSu(),
+                allocation.reservedSu(), bandwidth, requestedRpm, status);
+            for (Export output : exports) {
+                boolean running = status == MemoryNetworkStatus.OK && output.rpm > 0 && output.reserved > 0;
+                ((IMEGearboxExportState) (Object) output.gearbox).dimensionworks$applyExportState(
+                    running, output.rpm, output.reserved, status != MemoryNetworkStatus.OK);
             }
-        }
-
-        @Override
-        public Component getDescription() {
-            return Component.translatable("gui.dimensionworks_mek_stress.memory_storage");
-        }
-    };
-
-    public MemoryGridService(IGrid grid) {
-        this.grid = grid;
-    }
-
-    public static void register() {
-        GridServices.register(IMemoryGridService.class, MemoryGridService.class);
-    }
-
-    @Override
-    public void onServerStartTick() {
-        ensureMounted();
-        snapshot(currentTick());
-    }
-
-    @Override
-    public void onJoin(appeng.api.networking.IGridStorage storage) {
-        ensureMounted();
-        invalidateSnapshot();
-    }
-
-    @Override
-    public void onSplit(appeng.api.networking.IGridStorage storage) {
-        ensureMounted();
-        invalidateSnapshot();
-    }
-
-    @Override
-    public void mountInventories(IStorageMounts mounts) {
-        mounts.mount(storage);
-    }
-
-    @Override
-    public MemoryNetworkSnapshot snapshot(long gameTick) {
-        long tick = normalizedTick(gameTick);
-        if (lastComputedTick == tick) {
+            for (MemoryDriveBlockEntity drive : drives) drive.applyNetworkSnapshot(lastSnapshot);
             return lastSnapshot;
-        }
-        expire(tick);
-        refreshGearboxDemands(tick);
-        List<MemoryDriveBlockEntity> drives = findDrives();
-        boolean tooMany = drives.size() > MemoryTier.MAX_DRIVES_PER_NETWORK;
-        MemoryNetworkStatus status = drives.isEmpty()
-            ? MemoryNetworkStatus.NO_DRIVE
-            : tooMany ? MemoryNetworkStatus.TOO_MANY_DRIVES : MemoryNetworkStatus.OK;
-
-        long capacity = 0L;
-        long stored = 0L;
-        long bandwidth = 0L;
-        if (!tooMany) {
-            for (MemoryDriveBlockEntity drive : drives) {
-                long driveCapacity = drive.capacitySu();
-                long driveStored = drive.store().storedSu();
-                capacity = saturatedAdd(capacity, driveCapacity);
-                stored = saturatedAdd(stored, driveStored);
-                bandwidth = saturatedAdd(bandwidth, drive.bandwidthRpm());
-            }
-        }
-
-        long demandRpm = 0L;
-        long demandSu = 0L;
-        for (GearboxDemand demand : gearboxDemands.values()) {
-            demandRpm = saturatedAdd(demandRpm, demand.requestedRpm);
-            demandSu = saturatedAdd(demandSu, demand.requestedSuPerTick);
-        }
-
-        boolean poweredStatus = status == MemoryNetworkStatus.OK;
-        boolean hasDemand = demandSu > 0L && demandRpm > 0L;
-        long requiredSu = hasDemand
-            ? NetworkMath.requiredSuForRpm(demandSu, bandwidth, demandRpm)
-            : 0L;
-        double stockQ = poweredStatus && hasDemand
-            ? NetworkMath.suGate(stored, requiredSu)
-            : 0.0D;
-        double bandwidthQ = poweredStatus && hasDemand
-            ? NetworkMath.rpmQ(bandwidth, demandRpm)
-            : 0.0D;
-        double q = poweredStatus
-            ? NetworkMath.availableQ(stored, demandSu, bandwidth, demandRpm)
-            : 0.0D;
-
-        MemoryNetworkSnapshot snapshot = new MemoryNetworkSnapshot(
-            drives.size(), capacity, stored, bandwidth, demandRpm, demandSu, stockQ, bandwidthQ, q, status);
-        lastSnapshot = snapshot;
-        lastComputedTick = tick;
-        for (MemoryDriveBlockEntity drive : drives) {
-            drive.applyNetworkSnapshot(snapshot);
-        }
-        return snapshot;
+        } finally { refreshing = false; }
     }
 
-    @Override
-    public long insertSu(long amount, Actionable mode, long gameTick) {
-        if (amount <= 0L) {
-            return 0L;
-        }
-        MemoryNetworkSnapshot snapshot = snapshot(gameTick);
-        if (snapshot.status() != MemoryNetworkStatus.OK) {
-            return 0L;
-        }
-
-        List<MemoryDriveBlockEntity> drives = findDrives();
-        long totalReductionBasisPoints = 0L;
-        for (MemoryDriveBlockEntity drive : drives) {
-            totalReductionBasisPoints = saturatedAdd(
-                totalReductionBasisPoints, drive.inputReductionBasisPoints());
-        }
-        int reductionBasisPoints = InputStressMath.cappedReductionBasisPoints(totalReductionBasisPoints);
-        InputStressMath.Conversion conversion = InputStressMath.convert(
-            amount, reductionBasisPoints, inputStressRemainderNumerator);
-        long effectiveAmount = conversion.effectiveSu();
-
-        if (effectiveAmount <= 0L) {
-            if (mode == Actionable.MODULATE) {
-                inputStressRemainderNumerator = conversion.remainderNumerator();
-            }
-            return 0L;
-        }
-
-        long remaining = effectiveAmount;
-        long accepted = 0L;
-        for (MemoryDriveBlockEntity drive : drives) {
-            long capacity = drive.capacitySu();
-            long room = Math.max(0L, capacity - drive.store().storedSu());
-            long amountForDrive = Math.min(room, remaining);
-            if (amountForDrive <= 0L) {
-                continue;
-            }
-            if (mode == Actionable.MODULATE) {
-                long inserted = drive.store().insert(amountForDrive);
-                if (inserted > 0L) {
-                    drive.setChanged();
-                }
-                accepted = saturatedAdd(accepted, inserted);
-                remaining -= inserted;
-            } else {
-                accepted = saturatedAdd(accepted, amountForDrive);
-                remaining -= amountForDrive;
-            }
-            if (remaining <= 0L) {
-                break;
-            }
-        }
-
-        if (mode == Actionable.MODULATE) {
-            // Only carry fractional SU when the whole converted amount fit; overflow is discarded.
-            if (accepted == effectiveAmount) {
-                inputStressRemainderNumerator = conversion.remainderNumerator();
-            }
-            if (accepted > 0L) {
-                updateSnapshotStorage(accepted);
-            }
-        }
-        return accepted;
+    private static long inputCapacity(MEGearboxBlockEntity gearbox) {
+        if (!gearbox.hasSource() || gearbox.isOverStressed()) return 0;
+        var network = gearbox.getOrCreateNetwork();
+        // ME output must not be recycled as a fresh input, even through a second AE grid.
+        if (network == null || network.sources.keySet().stream().anyMatch(source ->
+            source instanceof MEGearboxBlockEntity me && me.getMode() == MEGearboxBlockEntity.Mode.EXPORT)) return 0;
+        float rpm = RpmLimitManager.clamp(gearbox, gearbox.getTheoreticalSpeed());
+        rpm = Math.min(Math.abs(rpm), MekStressConfig.directMaxRpm());
+        return LiveStressBudget.stress(gearbox.getConfiguredStress(), rpm);
     }
 
-    @Override
-    public long extractSu(long amount, Actionable mode, long gameTick) {
-        if (amount <= 0L) {
-            return 0L;
-        }
-        MemoryNetworkSnapshot snapshot = snapshot(gameTick);
-        if (snapshot.status() != MemoryNetworkStatus.OK) {
-            return 0L;
-        }
-        long remaining = amount;
-        long extracted = 0L;
-        for (MemoryDriveBlockEntity drive : findDrives()) {
-            long available = drive.store().storedSu();
-            long amountForDrive = Math.min(available, remaining);
-            if (amountForDrive <= 0L) {
-                continue;
-            }
-            if (mode == Actionable.MODULATE) {
-                long taken = drive.store().extract(amountForDrive);
-                if (taken > 0L) {
-                    drive.setChanged();
-                }
-                extracted = saturatedAdd(extracted, taken);
-                remaining -= taken;
-            } else {
-                extracted = saturatedAdd(extracted, amountForDrive);
-                remaining -= amountForDrive;
-            }
-            if (remaining <= 0L) {
-                break;
-            }
-        }
-        if (mode == Actionable.MODULATE && extracted > 0L) {
-            updateSnapshotStorage(-extracted);
-        }
-        return extracted;
-    }
+    @Override public double finalQ(long gameTick) { return snapshot(gameTick).finalQ(); }
+    @Override public void invalidateSnapshot() { if (!refreshing) snapshot(0); }
 
-    @Override
-    public void reportGearboxExport(GlobalPos gearboxPos, int requestedRpm, long requestedSuPerTick, long gameTick) {
-        long tick = normalizedTick(gameTick);
-        int rpm = Math.max(0, requestedRpm);
-        long suPerTick = Math.max(0L, requestedSuPerTick);
-        GearboxDemand previous = gearboxDemands.get(gearboxPos);
-        boolean changed = previous == null || previous.lastSeenTick < tick - CONSUMER_TIMEOUT_TICKS
-            || previous.requestedRpm != rpm || previous.requestedSuPerTick != suPerTick;
-        gearboxDemands.put(gearboxPos, new GearboxDemand(rpm, suPerTick, tick));
-        if (changed) {
-            lastComputedTick = Long.MIN_VALUE;
-        }
-    }
-
-    @Override
-    public double finalQ(long gameTick) {
-        return snapshot(gameTick).finalQ();
-    }
-
-    @Override
-    public void invalidateSnapshot() {
-        lastComputedTick = Long.MIN_VALUE;
-        lastGearboxScanTick = Long.MIN_VALUE;
-    }
-
-    private void updateSnapshotStorage(long delta) {
-        if (lastComputedTick == Long.MIN_VALUE || lastSnapshot.status() != MemoryNetworkStatus.OK) {
-            return;
-        }
-        long stored = lastSnapshot.storedSu();
-        if (delta >= 0L) {
-            stored = saturatedAdd(stored, delta);
-        } else {
-            stored = Math.max(0L, stored + delta);
-        }
-        long demandSu = lastSnapshot.demandSuPerTick();
-        long demandRpm = lastSnapshot.demandRpm();
-        boolean hasDemand = demandSu > 0L && demandRpm > 0L;
-        long requiredSu = hasDemand
-            ? NetworkMath.requiredSuForRpm(demandSu, lastSnapshot.bandwidthRpm(), demandRpm)
-            : 0L;
-        double stockQ = hasDemand ? NetworkMath.suGate(stored, requiredSu) : 0.0D;
-        double bandwidthQ = hasDemand ? NetworkMath.rpmQ(lastSnapshot.bandwidthRpm(), demandRpm) : 0.0D;
-        double q = lastSnapshot.status() == MemoryNetworkStatus.OK
-            ? NetworkMath.availableQ(stored, demandSu, lastSnapshot.bandwidthRpm(), demandRpm)
-            : 0.0D;
-        lastSnapshot = new MemoryNetworkSnapshot(
-            lastSnapshot.driveCount(), lastSnapshot.capacitySu(), stored, lastSnapshot.bandwidthRpm(),
-            lastSnapshot.demandRpm(), lastSnapshot.demandSuPerTick(), stockQ, bandwidthQ, q, lastSnapshot.status());
-    }
-
-    private void ensureMounted() {
-        if (mounted) {
-            return;
-        }
-        IStorageService storageService = grid.getStorageService();
-        if (storageService != null) {
-            storageService.addGlobalStorageProvider(this);
-            mounted = true;
-        }
-    }
-
-    private void invalidateStorage() {
-        IStorageService storageService = grid.getStorageService();
-        if (storageService != null) {
-            storageService.invalidateCache();
-        }
-    }
-
-    private long currentTick() {
-        IGridNode pivot = grid.getPivot();
-        if (pivot != null && pivot.getLevel() != null) {
-            return pivot.getLevel().getGameTime();
-        }
-        return lastComputedTick == Long.MIN_VALUE ? 0L : lastComputedTick;
-    }
-
-    private long normalizedTick(long gameTick) {
-        return gameTick == Long.MIN_VALUE ? currentTick() : gameTick;
-    }
-
-    private void expire(long gameTick) {
-        gearboxDemands.values().removeIf(demand -> gameTick - demand.lastSeenTick > CONSUMER_TIMEOUT_TICKS);
-    }
-
-    private void refreshGearboxDemands(long tick) {
-        if (lastGearboxScanTick != Long.MIN_VALUE
-            && tick - lastGearboxScanTick < GEARBOX_SCAN_INTERVAL_TICKS) {
-            return;
-        }
-        lastGearboxScanTick = tick;
-        Map<GlobalPos, GearboxDemand> scanned = new LinkedHashMap<>();
-        for (IGridNode node : grid.getNodes()) {
-            if (!node.isActive()) {
-                continue;
-            }
-            Object owner = node.getOwner();
-            if (!(owner instanceof MEGearboxBlockEntity gearbox)
-                || gearbox.getLevel() == null || gearbox.getLevel().isClientSide
-                || gearbox.getMode() != MEGearboxBlockEntity.Mode.EXPORT) {
-                continue;
-            }
-            MachinePowerManager.GearboxDemand demand = MachinePowerManager.inspectGearbox(gearbox);
-            int rpm = demand == null ? 0 : demand.requestedRpm();
-            long su = demand == null ? 0L : demand.requestedSuPerTick();
-            GlobalPos pos = GlobalPos.of(gearbox.getLevel().dimension(), gearbox.getBlockPos());
-            scanned.put(pos, new GearboxDemand(rpm, su, tick));
-        }
-        gearboxDemands.clear();
-        gearboxDemands.putAll(scanned);
-        lastComputedTick = Long.MIN_VALUE;
-    }
-
-    private List<MemoryDriveBlockEntity> findDrives() {
-        Map<GlobalPos, MemoryDriveBlockEntity> drives = new LinkedHashMap<>();
-        for (IGridNode node : grid.getNodes()) {
-            if (!node.isActive()) {
-                continue;
-            }
-            Object owner = node.getOwner();
-            if (!(owner instanceof MemoryDriveBlockEntity drive)
-                || drive.getLevel() == null || drive.getLevel().isClientSide) {
-                continue;
-            }
-            GlobalPos globalPos = GlobalPos.of(drive.getLevel().dimension(), drive.getBlockPos());
-            drives.put(globalPos, drive);
-        }
-        List<MemoryDriveBlockEntity> result = new ArrayList<>(drives.values());
-        result.sort(Comparator
-            .comparing((MemoryDriveBlockEntity drive) -> drive.getLevel().dimension().location().toString())
-            .thenComparingInt(drive -> drive.getBlockPos().getX())
-            .thenComparingInt(drive -> drive.getBlockPos().getY())
-            .thenComparingInt(drive -> drive.getBlockPos().getZ()));
-        return result;
-    }
-
-    private static long saturatedAdd(long a, long b) {
-        if (b > 0L && a > Long.MAX_VALUE - b) {
-            return Long.MAX_VALUE;
-        }
-        return a + b;
-    }
-
-    private record GearboxDemand(int requestedRpm, long requestedSuPerTick, long lastSeenTick) {
-    }
+    private static long add(long a, long b) { return a > Long.MAX_VALUE - b ? Long.MAX_VALUE : a + b; }
+    private record Export(MEGearboxBlockEntity gearbox, int rpm, long reserved) {}
 }

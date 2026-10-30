@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.3.11'
+version = '0.3.12'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -15,7 +15,7 @@ if (!rpmLimitVersionMatch.find()) {
     throw new GradleException('Could not determine the RPM limit project version')
 }
 def rpmLimitVersion = rpmLimitVersionMatch.group(1)
-def rpmLimitJar = files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}.jar")
+def rpmLimitJar = files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}-dev.jar")
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
@@ -79,12 +79,12 @@ mixin {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':reobfJar')
+    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':devJar')
 }
 
 tasks.named('test') {
     useJUnitPlatform()
-    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':reobfJar')
+    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':devJar')
 }
 
 jar {
@@ -92,4 +92,22 @@ jar {
         'MixinConfigs': 'dimensionworks_mek_stress.mixins.json'
     ])
     finalizedBy 'reobfJar'
+}
+
+sourceSets {
+    gameTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+minecraft.runs {
+    gameTestServer {
+        workingDirectory project.file('run-gametest')
+        property 'forge.enabledGameTestNamespaces', 'dimensionworks_mek_stress'
+        mods {
+            dimensionworks_mek_stress {
+                sources = [sourceSets.main, sourceSets.gameTest]
+            }
+        }
+    }
 }

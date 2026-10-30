@@ -19,10 +19,10 @@
       "item": "create:sturdy_sheet"
     },
     "W": {
-      "item": "create:crushing_wheel"
+      "item": "ae2:engineering_processor"
     },
     "E": {
-      "item": "create:electron_tube"
+      "item": "mekanism:alloy_reinforced"
     },
     "R": {
       "item": "create:rotation_speed_controller"

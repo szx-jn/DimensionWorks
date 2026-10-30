@@ -1,9 +1,9 @@
 const memoryTiers = [
-  { tier: 1, plate: 'ae2:logic_processor', alloy: 'mekanism:alloy_infused', circuit: 'mekanism:basic_control_circuit', storage: 'ae2:cell_component_1k' },
-  { tier: 2, plate: 'ae2:calculation_processor', alloy: 'mekanism:alloy_reinforced', circuit: 'mekanism:advanced_control_circuit', storage: 'ae2:cell_component_4k' },
-  { tier: 3, plate: 'ae2:engineering_processor', alloy: 'mekanism:alloy_reinforced', circuit: 'mekanism:elite_control_circuit', storage: 'ae2:cell_component_16k' },
+  { tier: 1, plate: 'ae2:engineering_processor', alloy: 'mekanism:alloy_reinforced', circuit: 'mekanism:advanced_control_circuit', storage: 'ae2:cell_component_1k' },
+  { tier: 2, plate: 'ae2:engineering_processor', alloy: 'mekanism:alloy_reinforced', circuit: 'mekanism:elite_control_circuit', storage: 'ae2:cell_component_4k' },
+  { tier: 3, plate: 'ae2:engineering_processor', alloy: 'mekanism:alloy_atomic', circuit: 'mekanism:elite_control_circuit', storage: 'ae2:cell_component_16k' },
   { tier: 4, plate: 'ae2:engineering_processor', alloy: 'mekanism:alloy_atomic', circuit: 'mekanism:ultimate_control_circuit', storage: 'ae2:cell_component_64k' },
-  { tier: 5, plate: 'ae2:engineering_processor', alloy: 'mekanism:pellet_antimatter', circuit: 'mekanism:ultimate_control_circuit', storage: 'ae2:cell_component_256k' }
+  { tier: 5, plate: 'ae2:engineering_processor', alloy: 'mekanism:alloy_atomic', circuit: 'mekanism:ultimate_control_circuit', storage: 'ae2:cell_component_256k' }
 ]
 
 const retiredAppliedCreateItems = [
@@ -91,6 +91,15 @@ ServerEvents.recipes(event => {
       A: definition.alloy,
       C: definition.storage
     }).id(`dimensionworks_mek_stress:memory_card_ddr${tier}_high_storage`)
+
+    if (tier > 1) {
+      ['economy', 'balanced', 'high_speed', 'high_storage'].forEach(kind => {
+        const oldCard = `dimensionworks_mek_stress:memory_card_ddr${tier - 1}_${kind}`
+        event.shapeless(`4x dimensionworks_mek_stress:memory_card_ddr${tier}_${kind}`, [
+          oldCard, oldCard, oldCard, oldCard, definition.plate, definition.alloy, definition.circuit
+        ]).id(`dimensionworks_mek_stress:upgrade_memory_card_ddr${tier}_${kind}`)
+      })
+    }
   })
 
   for (let tier = 1; tier <= 5; tier++) {
@@ -103,9 +112,9 @@ ServerEvents.recipes(event => {
     'SCS'
   ], {
     S: 'mekanism:ingot_steel',
-    A: 'mekanism:alloy_infused',
+    A: 'mekanism:alloy_reinforced',
     D: 'ae2:drive',
-    C: 'mekanism:basic_control_circuit'
+    C: 'ae2:engineering_processor'
   })
 
   for (let tier = 2; tier <= 5; tier++) {
@@ -114,10 +123,20 @@ ServerEvents.recipes(event => {
       'ADA',
       'PAP'
     ], {
-      P: `dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`,
+      P: memoryTiers[tier - 1].circuit,
       A: memoryTiers[tier - 1].alloy,
-      D: memoryTiers[tier - 1].plate
-    })
+      D: `dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`
+    }).modifyResult((grid, result) => {
+      // Drive drops contain installed cards; preserve them before consuming the old drive.
+      const previous = grid.find(`dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`)
+      const saved = previous.getTagElement('BlockEntityTag')
+      if (saved != null) {
+        const copied = saved.copy()
+        copied.remove('StoredSu')
+        result.addTagElement('BlockEntityTag', copied)
+      }
+      return result
+    }).id(`dimensionworks_mek_stress:upgrade_memory_drive_ddr${tier}`)
   }
 
   retiredAppliedCreateItems.forEach(id => event.remove({ output: id }))

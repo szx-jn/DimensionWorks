@@ -55,11 +55,11 @@ public final class MemoryCommand {
         source.sendSuccess(() -> Component.translatable("command.dimensionworks_mek_stress.memory.status",
             snapshot.status().name(),
             snapshot.driveCount(),
-            snapshot.storedSu(),
+            snapshot.availableSu(),
             snapshot.capacitySu(),
             snapshot.bandwidthRpm(),
             snapshot.demandRpm(),
-            snapshot.demandSuPerTick(),
+            snapshot.allocatedSu(),
             String.format("%.4f", snapshot.finalQ())), false);
         return 1;
     }

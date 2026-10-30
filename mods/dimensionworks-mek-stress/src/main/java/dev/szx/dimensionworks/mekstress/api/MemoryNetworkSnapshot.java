@@ -1,18 +1,12 @@
 package dev.szx.dimensionworks.mekstress.api;
 
-public record MemoryNetworkSnapshot(
-    int driveCount,
-    long capacitySu,
-    long storedSu,
-    long bandwidthRpm,
-    long demandRpm,
-    long demandSuPerTick,
-    double stockQ,
-    double bandwidthQ,
-    double finalQ,
-    MemoryNetworkStatus status
-) {
+/** Instantaneous mechanical capacity, not a persistent energy inventory. */
+public record MemoryNetworkSnapshot(int driveCount, long capacitySu, long effectiveCapacitySu,
+                                    long allocatedSu, long bandwidthRpm, long demandRpm,
+                                    MemoryNetworkStatus status) {
+    public long availableSu() { return Math.max(0, effectiveCapacitySu - allocatedSu); }
+    public double finalQ() { return status == MemoryNetworkStatus.OK ? 1.0 : 0.0; }
     public static MemoryNetworkSnapshot empty(MemoryNetworkStatus status) {
-        return new MemoryNetworkSnapshot(0, 0L, 0L, 0L, 0L, 0L, 0.0D, 0.0D, 0.0D, status);
+        return new MemoryNetworkSnapshot(0, 0, 0, 0, 0, 0, status);
     }
 }

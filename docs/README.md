@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/me-live-stress-network.md`](design/me-live-stress-network.md)：ME 实时应力额度、RPM 总量过载与两条供能路线造价
+
 - [`design/advanced-speed-controller.md`](design/advanced-speed-controller.md)：高级转速控制器配方、数字面板与进度边界
 
 - [`gameplay/industrial-assessment.md`](gameplay/industrial-assessment.md)：以高中化学课程标准为参考的工业能力考核体系、任务设计规则与绕过审查

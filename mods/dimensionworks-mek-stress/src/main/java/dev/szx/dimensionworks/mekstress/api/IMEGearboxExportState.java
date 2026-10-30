@@ -6,5 +6,9 @@ public interface IMEGearboxExportState {
 
     int dimensionworks$getExportOutputRpm();
 
-    long dimensionworks$getExportChargedSu();
+    long dimensionworks$getExportReservedSu();
+
+    boolean dimensionworks$isStressOverloaded();
+
+    void dimensionworks$applyExportState(boolean running, int rpm, long reservedSu, boolean overloaded);
 }

@@ -74,6 +74,14 @@ jar {
     finalizedBy 'reobfJar'
 }
 
+// Composite-build consumers run in official mappings, so they must not load the SRG release jar.
+tasks.register('devJar', Jar) {
+    dependsOn tasks.named('classes')
+    archiveClassifier = 'dev'
+    from sourceSets.main.output
+    manifest.attributes(['MixinConfigs': 'dimensionworks_rpm_limit.mixins.json'])
+}
+
 // Headless integration checks live outside the published mod jar.
 sourceSets {
     gameTest {

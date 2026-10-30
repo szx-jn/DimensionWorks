@@ -54,10 +54,12 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
             @Override
             public int get(int index) {
                 if (clientSide) return received[index];
-                if (index >= MemoryDriveData.CAPACITY && index < MemoryDriveData.STORED)
+                if (index >= MemoryDriveData.CAPACITY && index < MemoryDriveData.EFFECTIVE)
                     return MemoryDriveData.word(drive.networkCapacitySu(), index - MemoryDriveData.CAPACITY);
-                if (index >= MemoryDriveData.STORED && index < MemoryDriveData.BANDWIDTH)
-                    return MemoryDriveData.word(drive.networkStoredSu(), index - MemoryDriveData.STORED);
+                if (index >= MemoryDriveData.EFFECTIVE && index < MemoryDriveData.ALLOCATED)
+                    return MemoryDriveData.word(drive.networkEffectiveCapacitySu(), index - MemoryDriveData.EFFECTIVE);
+                if (index >= MemoryDriveData.ALLOCATED && index < MemoryDriveData.BANDWIDTH)
+                    return MemoryDriveData.word(drive.networkAllocatedSu(), index - MemoryDriveData.ALLOCATED);
                 if (index >= MemoryDriveData.BANDWIDTH && index < MemoryDriveData.STATUS)
                     return MemoryDriveData.word(drive.networkBandwidthRpm(), index - MemoryDriveData.BANDWIDTH);
                 return switch (index) {
@@ -97,9 +99,9 @@ public final class MemoryDriveMenu extends AbstractContainerMenu {
         return MemoryDriveData.read(syncData::get, MemoryDriveData.CAPACITY);
     }
 
-    public long networkStoredSu() {
-        return MemoryDriveData.read(syncData::get, MemoryDriveData.STORED);
-    }
+    public long networkEffectiveCapacitySu() { return MemoryDriveData.read(syncData::get, MemoryDriveData.EFFECTIVE); }
+    public long networkAllocatedSu() { return MemoryDriveData.read(syncData::get, MemoryDriveData.ALLOCATED); }
+    public long networkAvailableSu() { return Math.max(0, networkEffectiveCapacitySu() - networkAllocatedSu()); }
 
     public long networkBandwidthRpm() {
         return MemoryDriveData.read(syncData::get, MemoryDriveData.BANDWIDTH);

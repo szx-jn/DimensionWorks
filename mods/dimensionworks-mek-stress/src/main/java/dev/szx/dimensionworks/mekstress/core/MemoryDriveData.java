@@ -5,12 +5,13 @@ import java.util.function.IntUnaryOperator;
 /** Container data packets carry signed 16-bit values; never send a long as two ints. */
 public final class MemoryDriveData {
     public static final int CAPACITY = 1;
-    public static final int STORED = 5;
-    public static final int BANDWIDTH = 9;
-    public static final int STATUS = 13;
-    public static final int CARDS = 14;
-    public static final int PAGE = 15;
-    public static final int SIZE = 16;
+    public static final int EFFECTIVE = 5;
+    public static final int ALLOCATED = 9;
+    public static final int BANDWIDTH = 13;
+    public static final int STATUS = 17;
+    public static final int CARDS = 18;
+    public static final int PAGE = 19;
+    public static final int SIZE = 20;
 
     private MemoryDriveData() {}
 

@@ -1,5 +1,7 @@
 # DimensionWorks RPM Limit API
 
+组合开发环境使用 `devJar` 任务生成官方映射开发 JAR；生产服使用普通构建 JAR，不安装 `-dev.jar`。ME 动力模组的 GameTest 会自动使用此开发变体。
+
 ## Default
 New players start at **32 RPM**. The hard maximum is **10240 RPM**.
 The mod declares Create as a `BEFORE` dependency and its Mixin configuration is required, so the Create kinetic hooks are applied before Create's content is loaded.
