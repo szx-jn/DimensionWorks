@@ -434,6 +434,7 @@ func run(kind string, args []string) error {
 	if err != nil {
 		return fmt.Errorf("现有更新状态无效：%w。请备份并检查 %s", err, statePath)
 	}
+	legacyState := current == nil
 	if current == nil {
 		current, err = bootstrapState(root, kind)
 		if err != nil {
@@ -450,6 +451,10 @@ func run(kind string, args []string) error {
 	selected, deletions, err := selectChanges(root, kind, current, target)
 	if err != nil {
 		return err
+	}
+	if legacyState && len(deletions) > 0 {
+		fmt.Println("[保护] 首次建立签名状态时跳过旧文件清理，避免误删无法验证归属的本地文件")
+		deletions = nil
 	}
 	backupBytes, err := estimateExistingBytes(root, selected)
 	if err != nil { return fmt.Errorf("估算本地备份空间失败：%w", err) }
@@ -472,7 +477,7 @@ func run(kind string, args []string) error {
 	if err := ensureDiskSpace(root, saturatingAdd(saturatingAdd(saturatingAdd(backupBytes, backupBytes), remoteBytes), 256<<20)); err != nil {
 		return fmt.Errorf("磁盘空间预检失败：%w", err)
 	}
-	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected)
+	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected, legacyState)
 	if err != nil {
 		return fmt.Errorf("无法备份用户修改文件，已中止更新：%w", err)
 	}
@@ -2147,7 +2152,8 @@ func renderManifest(manifest *Manifest) []byte {
 	return []byte(strings.Join(lines, "\n") + "\n")
 }
 
-func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []Entry) (string, error) {
+func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []Entry, forceBackup ...bool) (string, error) {
+	force := len(forceBackup) > 0 && forceBackup[0]
 	if current == nil || len(selected) == 0 {
 		return "", nil
 	}
@@ -2172,7 +2178,7 @@ func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []
 		if err != nil {
 			return backupDir, fmt.Errorf("检查 %s 失败：%w", entry.Path, err)
 		}
-		if actual == previous.Value {
+		if actual == previous.Value && !force {
 			continue
 		}
 		if backupDir == "" {
