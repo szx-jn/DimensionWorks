@@ -89,15 +89,9 @@ public final class RpmLimitManager {
         }
     }
 
-    /**
-     * Caps the effective rotation a machine uses for work, movement and rendering.
-     *
-     * <p>This intentionally must not be used by Create's rotation propagation. Create compares
-     * theoretical speeds while building a network, and changing that value makes a valid source
-     * chain look inconsistent. The raw network speed stays intact; only consumers read this cap.
-     */
+    /** Caps a machine's effective speed and the value Create stores during network propagation. */
     public static float clamp(KineticBlockEntity k, float requested) {
-        if (requested == 0)
+        if (!Float.isFinite(requested) || requested == 0)
             return 0;
         if (k instanceof IPreclampedKineticSpeed)
             return requested;
@@ -106,6 +100,8 @@ public final class RpmLimitManager {
 
     /** Ratio from an unscaled network speed to the player-limited effective speed. */
     public static float effectiveScale(KineticBlockEntity k, float raw) {
+        if (!Float.isFinite(raw))
+            return 0;
         if (raw == 0)
             return 1;
         float effective = clamp(k, raw);

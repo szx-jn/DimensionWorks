@@ -6,7 +6,7 @@ public final class RpmLimitMath {
     private RpmLimitMath() {}
 
     public static float cap(float speed, int limit) {
-        if (speed == 0)
+        if (!Float.isFinite(speed) || speed == 0)
             return 0;
         float absoluteLimit = Math.max(1, limit);
         return Math.abs(speed) > absoluteLimit ? Math.copySign(absoluteLimit, speed) : speed;

@@ -16,4 +16,16 @@ class RpmLimitManagerContractTest {
         assertTrue(source.contains("return owner == null ? RpmLimitConfig.DEFAULT_RPM.get()"));
         assertTrue(source.contains("instanceof IPreclampedKineticSpeed"));
     }
+
+    @Test
+    void clampsSpeedsWhenCreateStoresThemAndRepairsLoadedMembers() throws IOException {
+        String mixin = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/KineticBlockEntityMixin.java"));
+        String manager = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/RpmLimitManager.java"));
+
+        assertTrue(mixin.contains("@ModifyVariable(method = \"setSpeed\""));
+        assertTrue(manager.contains("float cappedSpeed = RpmLimitMath.cap(currentSpeed, value)"));
+        assertTrue(manager.contains("player == null ? storedMachineLimit(k) : getEffectiveLimit(direct)"));
+    }
 }

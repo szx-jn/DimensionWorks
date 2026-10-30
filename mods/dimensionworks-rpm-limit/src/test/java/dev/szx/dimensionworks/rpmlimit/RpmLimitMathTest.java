@@ -22,6 +22,25 @@ class RpmLimitMathTest {
     }
 
     @Test
+    void preservesSpeedsExactlyAtTheLimit() {
+        assertEquals(512.0F, RpmLimitMath.cap(512.0F, 512), 0.0F);
+        assertEquals(-512.0F, RpmLimitMath.cap(-512.0F, 512), 0.0F);
+    }
+
+    @Test
+    void mapsNonFiniteSpeedsToZero() {
+        assertEquals(0.0F, RpmLimitMath.cap(Float.NaN, 512), 0.0F);
+        assertEquals(0.0F, RpmLimitMath.cap(Float.POSITIVE_INFINITY, 512), 0.0F);
+        assertEquals(0.0F, RpmLimitMath.cap(Float.NEGATIVE_INFINITY, 512), 0.0F);
+    }
+
+    @Test
+    void clampsInvalidLimitsToOneRpm() {
+        assertEquals(1.0F, RpmLimitMath.cap(16.0F, 0), 0.0F);
+        assertEquals(-1.0F, RpmLimitMath.cap(-16.0F, -8), 0.0F);
+    }
+
+    @Test
     void usesTheLowestActiveOwnerLimitOnSharedNetworks() {
         assertEquals(128, RpmLimitMath.lowestLimit(10240, 0, 128));
     }
