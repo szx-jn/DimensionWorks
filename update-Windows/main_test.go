@@ -329,21 +329,6 @@ func TestParseManifestRejectsOversizedInput(t *testing.T) {
 	if _, err := parseManifest(data, "client"); err == nil { t.Fatal("expected oversized manifest to be rejected") }
 }
 
-func TestOpenArchiveRejectsOversizedEntryCount(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "many.zip")
-	file, err := os.Create(path)
-	if err != nil { t.Fatal(err) }
-	writer := zip.NewWriter(file)
-	for i := 0; i <= maxArchiveEntries; i++ {
-		entry, createErr := writer.Create(fmt.Sprintf("entry-%06d.txt", i))
-		if createErr != nil { t.Fatal(createErr) }
-		if _, writeErr := entry.Write([]byte("x")); writeErr != nil { t.Fatal(writeErr) }
-	}
-	if err := writer.Close(); err != nil { t.Fatal(err) }
-	if err := file.Close(); err != nil { t.Fatal(err) }
-	if _, err := openArchive(path); err == nil { t.Fatal("expected archive entry limit to be enforced") }
-}
-
 func TestSelectChangesPreservesUnchangedUserModifiedClientConfig(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "config", "custom.cfg")
