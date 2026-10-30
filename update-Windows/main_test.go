@@ -292,6 +292,16 @@ func TestLegacyStateMigrationBacksUpPreviouslyUntrackedTargets(t *testing.T) {
 	if string(backup) != "user-owned-settings" { t.Fatalf("legacy backup content mismatch: %q", backup) }
 }
 
+func TestRecoverInterruptedTransactionsCleansUncommittedWorkDirectories(t *testing.T) {
+	root := t.TempDir()
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	work := filepath.Join(updateRoot, "work-abandoned")
+	if err := os.MkdirAll(filepath.Join(work, "stage"), 0700); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(filepath.Join(work, "stage", "partial.bin"), []byte("partial"), 0600); err != nil { t.Fatal(err) }
+	if err := recoverInterruptedTransactions(root, updateRoot); err != nil { t.Fatal(err) }
+	if _, err := os.Stat(work); !os.IsNotExist(err) { t.Fatalf("uncommitted work directory was not removed: %v", err) }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
