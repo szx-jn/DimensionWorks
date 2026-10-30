@@ -1,18 +1,4 @@
 
-func TestCompareVersions(t *testing.T) {
-	cases := []struct { left, right string; want int }{
-		{"0.2.10", "0.2.9", 1},
-		{"1.0.0", "1.0.0", 0},
-		{"0.1.99", "0.2.0", -1},
-	}
-	for _, tc := range cases {
-		got, err := compareVersions(tc.left, tc.right)
-		if err != nil { t.Fatalf("%s vs %s: %v", tc.left, tc.right, err) }
-		if got != tc.want { t.Errorf("%s vs %s: got %d, want %d", tc.left, tc.right, got, tc.want) }
-	}
-	if _, err := compareVersions("1.0", "1.0.0"); err == nil { t.Fatal("expected malformed version to fail") }
-}
-
 package main
 
 import (
@@ -33,6 +19,20 @@ import (
 	"testing"
 	"time"
 )
+func TestCompareVersions(t *testing.T) {
+	cases := []struct { left, right string; want int }{
+		{"0.2.10", "0.2.9", 1},
+		{"1.0.0", "1.0.0", 0},
+		{"0.1.99", "0.2.0", -1},
+	}
+	for _, tc := range cases {
+		got, err := compareVersions(tc.left, tc.right)
+		if err != nil { t.Fatalf("%s vs %s: %v", tc.left, tc.right, err) }
+		if got != tc.want { t.Errorf("%s vs %s: got %d, want %d", tc.left, tc.right, got, tc.want) }
+	}
+	if _, err := compareVersions("1.0", "1.0.0"); err == nil { t.Fatal("expected malformed version to fail") }
+}
+
 
 func sha256Text(text string) string {
 	sum := sha256.Sum256([]byte(text))
