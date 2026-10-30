@@ -662,6 +662,26 @@ func manifestURLFromPackageURL(raw string) (string, error) {
 	return parsed.String(), nil
 }
 
+func newHTTPClient(timeout, responseHeaderTimeout time.Duration) *http.Client {
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		ResponseHeaderTimeout: responseHeaderTimeout,
+	}
+	return &http.Client{
+		Transport: transport,
+		Timeout: timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 5 {
+				return errors.New("HTTP 重定向次数超过限制")
+			}
+			if len(via) > 0 && via[len(via)-1].URL.Scheme == "https" && req.URL.Scheme != "https" {
+				return errors.New("拒绝 HTTPS 下载重定向到不安全的 HTTP")
+			}
+			return nil
+		},
+	}
+}
+
 func latestRelease() (ReleaseInfo, error) {
 	var result ReleaseInfo
 	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/"+repository+"/releases/latest", nil)
@@ -670,7 +690,7 @@ func latestRelease() (ReleaseInfo, error) {
 	}
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Accept", "application/vnd.github+json")
-	client := &http.Client{Timeout: 30 * time.Second}
+	client := newHTTPClient(30*time.Second, 10*time.Second)
 	resp, err := client.Do(req)
 	if err != nil {
 		return result, fmt.Errorf("无法查询 GitHub 最新发行版：%w", err)
@@ -759,7 +779,7 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 30 * time.Second}}
+	client := newHTTPClient(0, 30*time.Second)
 	resp, err := client.Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
@@ -804,7 +824,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", "bytes=0-0")
-	resp, err := (&http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 20 * time.Second}}).Do(req)
+	resp, err := newHTTPClient(0, 20*time.Second).Do(req)
 	if err != nil { return err }
 	probeBody, bodyErr := io.ReadAll(io.LimitReader(resp.Body, 2))
 	resp.Body.Close()
@@ -918,7 +938,7 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
-	resp, err := (&http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment, ResponseHeaderTimeout: 30 * time.Second}}).Do(req)
+	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusPartialContent {
