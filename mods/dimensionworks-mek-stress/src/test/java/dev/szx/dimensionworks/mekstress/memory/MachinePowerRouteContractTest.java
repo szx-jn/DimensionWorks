@@ -17,6 +17,7 @@ class MachinePowerRouteContractTest {
         assertTrue(source.contains("MachineFootprint.kineticCandidates("));
         assertTrue(source.contains("AttributeHasBounding"));
         assertTrue(source.contains("bounding.getPositions("));
+        assertTrue(source.contains("if (!level.hasChunkAt(entry.getKey()))"));
         assertTrue(source.contains("KineticNetwork network = kinetic.getOrCreateNetwork();"));
         assertTrue(source.contains("if (network == null)"));
         assertTrue(source.contains("new DirectSource(kinetic, network,"));

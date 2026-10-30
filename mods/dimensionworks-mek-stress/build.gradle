@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.3.9'
+version = '0.3.10'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -15,7 +15,7 @@ if (!rpmLimitVersionMatch.find()) {
     throw new GradleException('Could not determine the RPM limit project version')
 }
 def rpmLimitVersion = rpmLimitVersionMatch.group(1)
-def rpmLimitJar = files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}.jar")
+def rpmLimitJar = files('/tmp/dw-mekstress-rpm-api-test/rpm_limit_dev.jar')
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'

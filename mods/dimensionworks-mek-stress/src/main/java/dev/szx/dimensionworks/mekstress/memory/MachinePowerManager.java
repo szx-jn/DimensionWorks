@@ -111,6 +111,12 @@ public final class MachinePowerManager {
         Map<BlockPos, List<Direction>> candidates = MachineFootprint.kineticCandidates(
             tile.getBlockPos(), boundingPositions(tile));
         for (Map.Entry<BlockPos, List<Direction>> entry : candidates.entrySet()) {
+            // Route discovery must never synchronously load a neighboring chunk. Besides
+            // causing surprise chunk work during normal ticks, doing so during serialization
+            // can recurse into ChunkSerializer through Mekanism's energy container hooks.
+            if (!level.hasChunkAt(entry.getKey())) {
+                continue;
+            }
             BlockEntity blockEntity = level.getBlockEntity(entry.getKey());
             if (!(blockEntity instanceof KineticBlockEntity kinetic) || !facesMachine(level, kinetic, entry.getValue())) {
                 continue;
