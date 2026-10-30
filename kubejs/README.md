@@ -68,6 +68,8 @@ server_scripts/basic_mineral_propagation.js 为 16 种目标资源配置三条�
 
 `startup_scripts/molten_metals.js` 通过可复用的 `MoltenMetalFluidDefinition` 注册 21 种熔融金属、合金与特殊材料流体，使用 `dimensionworks:` 命名空间并提供中英文名称。该脚本只注册流体，不自动添加熔炼、浇注或材料加工配方；这些配方应在后续服务端脚本中按各机器的实际能力分别实现。
 
+`server_scripts/molten_metal_recipes.js` 将对应锭熔成 90 mB 流体，并定义黄铜、青铜熔融混合配方。21 种熔融流体的冷却配方位于 `data/create_dragons_plus/recipes/freezing/`：使用 Create: Connected 冷冻触媒和 Create: Dragons Plus 鼓风冷冻类型处理熔融流体桶，输出空桶与 11 个对应锭。桶容量为 1,000 mB，按 90 mB/锭折算输出 990 mB 等价锭材，余 10 mB 为桶装比例误差。
+
 ## 高中化学核心气体
 
 - `startup_scripts/chemistry_gases.js` 注册 Mekanism 原版未提供的核心化学品气体，使用独立的 `dimensionworks:` 命名空间，避免覆盖 Mekanism 原版气体。

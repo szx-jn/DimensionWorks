@@ -1,0 +1,17 @@
+{
+  "type": "create_dragons_plus:freezing",
+  "ingredients": [
+    {
+      "item": "dimensionworks:molten_totemic_gold_bucket"
+    }
+  ],
+  "results": [
+    {
+      "item": "minecraft:bucket"
+    },
+    {
+      "item": "l2complements:totemic_gold_ingot",
+      "count": 11
+    }
+  ]
+}

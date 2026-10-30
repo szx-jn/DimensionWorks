@@ -1,0 +1,17 @@
+{
+  "type": "create_dragons_plus:freezing",
+  "ingredients": [
+    {
+      "item": "dimensionworks:molten_zinc_bucket"
+    }
+  ],
+  "results": [
+    {
+      "item": "minecraft:bucket"
+    },
+    {
+      "item": "create:zinc_ingot",
+      "count": 11
+    }
+  ]
+}

@@ -64,15 +64,5 @@ ServerEvents.recipes(event => {
     ]
   ).heated().id('dimensionworks:molten_metals/bronze_from_molten_metals')
 
-  // 冷却配方同样使用 Create mixing：必须由机械动力搅拌器在工作盆上执行，
-  // 工作盆用于承接流体输入与锭输出；不要求燃烧器热量，90 mB 对应一锭。
-  DW_MOLTEN_INGOT_RECIPES.forEach(entry => {
-    event.recipes.create.mixing(
-      entry.input,
-      [Fluid.of(entry.fluid, DW_MOLTEN_INGOT_AMOUNT)]
-    ).id('dimensionworks:molten_metals/' + entry.fluid.split(':')[1] + '_cooled_to_ingot')
-  })
-
   console.info('[DimensionWorks] molten ingot recipes registered=' + DW_MOLTEN_INGOT_RECIPES.length)
-  console.info('[DimensionWorks] molten cooling recipes registered=' + DW_MOLTEN_INGOT_RECIPES.length)
 })
