@@ -527,6 +527,24 @@ func TestSelectChangesPreservesServerConfigsAndConfiguredWorld(t *testing.T) {
 	}
 }
 
+func TestRecoverInterruptedTransactionRestoresOriginalFile(t *testing.T) {
+	root := t.TempDir()
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	work := filepath.Join(updateRoot, "work-interrupted")
+	backup := filepath.Join(work, "backup", "config", "value.cfg")
+	target := filepath.Join(root, "config", "value.cfg")
+	if err := os.MkdirAll(filepath.Dir(backup), 0700); err != nil { t.Fatal(err) }
+	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(backup, []byte("before-crash"), 0600); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(target, []byte("partially-updated"), 0644); err != nil { t.Fatal(err) }
+	if err := appendTransactionJournal(work, Applied{Path: "config/value.cfg", Backup: backup, Existed: true, Mode: 0644}); err != nil { t.Fatal(err) }
+	if err := recoverInterruptedTransactions(root, updateRoot); err != nil { t.Fatalf("recovery failed: %v", err) }
+	got, err := os.ReadFile(target)
+	if err != nil { t.Fatal(err) }
+	if string(got) != "before-crash" { t.Fatalf("recovery did not restore original file: %q", got) }
+	if _, err := os.Stat(work); !os.IsNotExist(err) { t.Fatalf("recovered work directory was not removed: %v", err) }
+}
+
 func TestApplyTransactionRollsBackEarlierWrites(t *testing.T) {
 	root := t.TempDir()
 	original := filepath.Join(root, "config", "value.cfg")
