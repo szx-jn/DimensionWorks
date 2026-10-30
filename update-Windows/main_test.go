@@ -335,7 +335,7 @@ func TestDownloadRangeSegmentReportsProgressAgainstParentFile(t *testing.T) {
 	progressSetTotal(key, int64(len(data)))
 	defer progressFinish(key, false)
 
-	if err := downloadRangeSegment(context.Background(), server.URL, segment, key, 0, int64(len(data)-1), int64(len(data))); err != nil {
+	if err := downloadRangeSegment(context.Background(), server.URL, segment, key, 0, int64(len(data)-1), int64(len(data)), ""); err != nil {
 		t.Fatalf("downloadRangeSegment failed: %v", err)
 	}
 	downloadProgressUI.mu.Lock()
