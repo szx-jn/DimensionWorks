@@ -125,8 +125,8 @@ func validateInstanceRoot(root, kind string) error {
 	if kind != "client" && kind != "server" {
 		return fmt.Errorf("未知更新器类型：%s", kind)
 	}
-	modsInfo, err := os.Stat(filepath.Join(root, "mods"))
-	if err != nil || !modsInfo.IsDir() {
+	modsInfo, err := os.Lstat(filepath.Join(root, "mods"))
+	if err != nil || modsInfo.Mode()&os.ModeSymlink != 0 || !modsInfo.IsDir() {
 		return fmt.Errorf("未在 %s 找到 mods/ 目录。请把 update-dimensionworks-%s.exe 放到对应客户端或服务端实例根目录后再运行；不要直接从下载目录运行", root, kind)
 	}
 	markers := []string{"VERSION", "config"}
@@ -135,8 +135,8 @@ func validateInstanceRoot(root, kind string) error {
 	}
 	found := false
 	for _, marker := range markers {
-		info, statErr := os.Stat(filepath.Join(root, marker))
-		if statErr == nil && ((marker == "config" || marker == "libraries") && info.IsDir() || (marker != "config" && marker != "libraries") && info.Mode().IsRegular()) {
+		info, statErr := os.Lstat(filepath.Join(root, marker))
+		if statErr == nil && info.Mode()&os.ModeSymlink == 0 && ((marker == "config" || marker == "libraries") && info.IsDir() || (marker != "config" && marker != "libraries") && info.Mode().IsRegular()) {
 			found = true
 			break
 		}
@@ -1708,6 +1708,9 @@ func bootstrapState(root, kind string) (*Manifest, error) {
 		}
 		key := strings.ToLower(rel)
 		if !seen[key] {
+			if len(state.Entries) >= maxManifestEntries {
+				return fmt.Errorf("本地文件数量超过更新清单上限：%d", maxManifestEntries)
+			}
 			seen[key] = true
 			state.Entries = append(state.Entries, Entry{Action: "archive", Path: rel, Algorithm: "sha256", Value: digest, Source: rel})
 		}
@@ -1715,12 +1718,15 @@ func bootstrapState(root, kind string) (*Manifest, error) {
 	}
 	for _, rootName := range roots {
 		start := filepath.Join(root, rootName)
-		if _, err := os.Stat(start); os.IsNotExist(err) {
-			continue
+		startInfo, statErr := os.Lstat(start)
+		if os.IsNotExist(statErr) { continue }
+		if statErr != nil { return nil, fmt.Errorf("检查实例目录 %s 失败：%w", rootName, statErr) }
+		if startInfo.Mode()&os.ModeSymlink != 0 || !startInfo.IsDir() {
+			return nil, fmt.Errorf("实例目录 %s 不是普通目录", rootName)
 		}
 		err := filepath.WalkDir(start, func(path string, entry os.DirEntry, walkErr error) error {
 			if walkErr != nil {
-				return nil
+				return fmt.Errorf("扫描实例文件 %s 失败：%w", path, walkErr)
 			}
 			if entry.Type()&os.ModeSymlink != 0 {
 				if entry.IsDir() {
