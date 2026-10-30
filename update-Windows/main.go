@@ -438,7 +438,7 @@ func run(kind string, args []string) error {
 		deltaName := deltaAssetName(kind, target.Version)
 		deltaPath := filepath.Join(work, "delta.zip")
 		fmt.Println("[下载] 尝试差量更新包：", deltaName)
-		if _, err := downloadBytes(assetURL(releaseTag, deltaName), deltaPath, true); err == nil {
+		if err := downloadFile(assetURL(releaseTag, deltaName), deltaPath, true); err == nil {
 			delta, openErr := openArchive(deltaPath)
 			if openErr == nil {
 				stageErr := stageArchiveEntries(delta, archiveEntries, stageRoot)
@@ -691,6 +691,14 @@ func latestRelease() (ReleaseInfo, error) {
 func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
 	if err := downloadFile(source, destination, mirrors); err != nil {
 		return nil, err
+	}
+	info, err := os.Stat(destination)
+	if err != nil {
+		return nil, err
+	}
+	if info.Size() > maxManifestBytes {
+		_ = os.Remove(destination)
+		return nil, fmt.Errorf("清单文件超过大小限制：%s", humanSize(info.Size()))
 	}
 	return os.ReadFile(destination)
 }
@@ -1347,11 +1355,14 @@ func embeddedManifest(archive *Archive, kind string) (*Manifest, error) {
 	if file == nil {
 		return nil, errors.New("完整更新包缺少内嵌更新清单")
 	}
+	if file.UncompressedSize64 > maxManifestBytes {
+		return nil, fmt.Errorf("完整包内的更新清单超过大小限制：%s", humanSize(int64(file.UncompressedSize64)))
+	}
 	reader, err := file.Open()
 	if err != nil {
 		return nil, err
 	}
-	data, readErr := io.ReadAll(reader)
+	data, readErr := io.ReadAll(io.LimitReader(reader, maxManifestBytes+1))
 	closeErr := reader.Close()
 	if readErr != nil {
 		return nil, readErr
@@ -1536,6 +1547,9 @@ func readState(root, path, kind string) (*Manifest, error) {
 	}
 	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
 		return nil, errors.New("state.tsv 必须是普通文件")
+	}
+	if info.Size() > maxManifestBytes {
+		return nil, fmt.Errorf("state.tsv 超过大小限制：%s", humanSize(info.Size()))
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
