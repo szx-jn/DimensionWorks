@@ -2036,6 +2036,11 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 			}
 		}
 		if !done {
+			journalFile, err := os.OpenFile(journal, os.O_WRONLY, 0600)
+			if err != nil { return err }
+			if err := journalFile.Truncate(int64(completeLength)); err != nil { _ = journalFile.Close(); return err }
+			if err := journalFile.Sync(); err != nil { _ = journalFile.Close(); return err }
+			if err := journalFile.Close(); err != nil { return err }
 			fmt.Println("[恢复] 检测到上次未完成的更新事务，正在恢复原文件")
 			for i := len(records)-1; i >= 0; i-- {
 				item := records[i]
