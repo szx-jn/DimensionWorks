@@ -30,6 +30,7 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     @Override
     protected void init() {
         super.init();
+        localPage = menu.page;
         previousButton = addRenderableWidget(Button.builder(Component.literal("<"), button -> changePage(-1))
             .bounds(leftPos + 140, topPos + 4, 16, 16).build());
         nextButton = addRenderableWidget(Button.builder(Component.literal(">"), button -> changePage(1))
