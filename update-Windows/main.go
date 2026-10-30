@@ -43,6 +43,7 @@ const (
 	stateSignatureName  = ".dimensionworks-update/state.tsv.hmac"
 	stateKeyName        = ".dimensionworks-update/state.key"
 	maxManifestBytes    = 16 << 20
+	maxTransactionJournalBytes = 64 << 20
 	maxManifestEntries  = 100000
 	maxArchiveEntries   = 100000
 	maxArchiveFileBytes = uint64(4 << 30)
@@ -2398,6 +2399,7 @@ func appendTransactionJournal(work string, item Applied) error {
 	payload, err := json.Marshal(item)
 	if err != nil { return err }
 	payload = append(payload, '\n')
+	if start+int64(len(payload)) > maxTransactionJournalBytes { return errors.New("事务日志超过大小限制") }
 	n, writeErr := file.Write(payload)
 	if writeErr != nil || n != len(payload) {
 		_ = file.Truncate(start)
@@ -2432,10 +2434,10 @@ func recoverInterruptedTransactions(root, updateRoot string) error {
 		}
 		if err != nil { return err }
 		if journalInfo.Mode()&os.ModeSymlink != 0 || !journalInfo.Mode().IsRegular() { return fmt.Errorf("事务日志不是普通文件：%s", journal) }
-		if journalInfo.Size() > maxManifestBytes {
+		if journalInfo.Size() > maxTransactionJournalBytes {
 			return fmt.Errorf("事务日志超过大小限制：%s", journal)
 		}
-		data, err := readRegularFile(journal, maxManifestBytes)
+		data, err := readRegularFile(journal, maxTransactionJournalBytes)
 		if err != nil { return err }
 		completeLength := len(data)
 		if completeLength > 0 && data[completeLength-1] != '\n' {
