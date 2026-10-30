@@ -43,7 +43,10 @@ func TestAcquireUpdateLockSerializesConcurrentConfirmation(t *testing.T) {
 	_, _ = writer.Write([]byte("N\n"))
 	_ = writer.Close()
 	if err := <-firstResult; err == nil { t.Fatal("first updater should cancel on N") }
-	if _, err := os.Stat(guard); !os.IsNotExist(err) { t.Fatalf("confirmation guard was not released: %v", err) }
+	if _, err := os.Stat(guard); err != nil { t.Fatalf("persistent confirmation guard file should remain: %v", err) }
+	releaseGuard, err := acquireConfirmationGuard(guard)
+	if err != nil { t.Fatalf("confirmation guard was not unlocked: %v", err) }
+	releaseGuard()
 }
 
 func TestAcquireUpdateLockPromptsAndRefusesOnNo(t *testing.T) {
