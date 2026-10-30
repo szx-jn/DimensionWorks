@@ -471,7 +471,7 @@ func run(kind string, args []string) error {
 			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
 		}
 	}
-	if err := ensureDiskSpace(root, saturatingAdd(saturatingAdd(backupBytes, remoteBytes), 256<<20)); err != nil {
+	if err := ensureDiskSpace(root, saturatingAdd(saturatingAdd(saturatingAdd(backupBytes, backupBytes), remoteBytes), 256<<20)); err != nil {
 		return fmt.Errorf("磁盘空间预检失败：%w", err)
 	}
 	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected)
@@ -538,7 +538,7 @@ func run(kind string, args []string) error {
 			if openErr == nil {
 				unpackedBytes, sizeErr := estimateArchiveBytes(delta, archiveEntries)
 				if sizeErr != nil { _ = delta.Close(); return sizeErr }
-				if spaceErr := ensureDiskSpace(root, saturatingAdd(saturatingAdd(backupBytes, unpackedBytes), 256<<20)); spaceErr != nil {
+				if spaceErr := ensureDiskSpace(root, saturatingAdd(saturatingAdd(saturatingAdd(backupBytes, backupBytes), unpackedBytes), 256<<20)); spaceErr != nil {
 					_ = delta.Close()
 					return fmt.Errorf("差量包展开前磁盘空间不足：%w", spaceErr)
 				}
