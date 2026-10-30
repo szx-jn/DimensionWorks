@@ -124,7 +124,7 @@ func TestSequentialDownloadResumesFromSavedRange(t *testing.T) {
 }
 
 func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
-	data := bytes.Repeat([]byte("dimensionworks"), (parallelDownloadThreshold+4096)/14+1)
+	data := bytes.Repeat([]byte("dimensionworks"), int((parallelDownloadThreshold+4096)/14+1))
 	var failed atomic.Bool
 	var segmentRequests atomic.Int64
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
