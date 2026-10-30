@@ -31,7 +31,8 @@ var defaultKind string
 var diagnosticRoot string
 var consoleReader = bufio.NewReader(os.Stdin)
 var progressMu sync.Mutex
-var downloadProgressUI = newProgressTracker()\nvar downloadCacheRoot string
+var downloadProgressUI = newProgressTracker()
+var downloadCacheRoot string
 
 const (
 	repository          = "szx-jn/DimensionWorks"
