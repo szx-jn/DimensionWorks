@@ -195,3 +195,11 @@ Values are clamped to 1..10240. This API changes the player's stored limit immed
 KubeJS 配方 `dimensionworks:advanced_speed_controller` 使用 25 个动力合成器，中心为原版转速控制器。材料与第二项诅咒的软门槛见[设计文档](../../docs/design/advanced-speed-controller.md)。不使用配方解锁或诅咒状态检查。
 
 服务端检查菜单、操作距离、区块状态和数值范围，不强加载区块，不增加常驻扫描。尚未进入游戏验证 UI、渲染、传动及多人行为。
+
+### 0.4.10：动力传播限幅一致性
+
+修复高级转速控制器目标值超过接收方 RPM 上限时，接入动力会造成 `StackOverflowError` 的问题。Create 在 `RotationPropagator.propagateNewSource:261` 使用未限幅的传播预测反复尝试提高转速，但 `setSpeed` 每次都将存储值压回玩家上限，因而无法收敛。现在在 `getConveyedSpeed` 返回处使用与写入网络速度相同的接收方限幅规则，使正反向传播预测与实际存储值一致。原版转速控制器及超限齿轮传动也受同一规则保护。目标值仍可保留为更高数值，实际速度继续遵守齿轮之心限制，不清除世界或设备数据。
+
+独立 Forge GameTest 源集位于 `src/gameTest/`，不会包含在发布 JAR 内。运行 `gradle runGameTestServer --no-daemon -x downloadAssets` 可验证大齿轮输入、传动轴输入、正反转、零速、上限内调速及原版控制器超限。`downloadAssets` 是无界面服务器不需要的客户端资源准备步骤。开发运行时补齐整合包已有的 GuideME 依赖，未向整合包新增模组。
+
+验证：修复前 Forge GameTest 复现了服务器相同位置的 `StackOverflowError`；修复后六项游戏测试全部通过，结果见设计文档。尚未在生产服应用此次修复。
