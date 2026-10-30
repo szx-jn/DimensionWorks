@@ -19,6 +19,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -77,10 +78,11 @@ type Archive struct {
 }
 
 type Options struct {
-	Release string
-	Package string
-	URL     string
-	Help    bool
+	Release        string
+	Package        string
+	URL            string
+	AllowDowngrade bool
+	Help           bool
 }
 
 func main() {
@@ -367,6 +369,11 @@ func run(kind string, args []string) error {
 		}
 	}
 	fmt.Printf("当前版本：%s；目标版本：%s（%s）\n", current.Version, target.Version, target.Release)
+	if comparison, compareErr := compareVersions(target.Version, current.Version); compareErr != nil {
+		return fmt.Errorf("无法比较版本号：%w", compareErr)
+	} else if comparison < 0 && !opts.AllowDowngrade {
+		return fmt.Errorf("拒绝将版本从 %s 降级到 %s；如确认需要降级，请显式添加 --allow-downgrade", current.Version, target.Version)
+	}
 
 	selected, deletions, err := selectChanges(root, kind, current, target)
 	if err != nil {
@@ -531,6 +538,8 @@ func parseOptions(args []string) (Options, error) {
 		switch args[i] {
 		case "--help", "-h", "/?":
 			out.Help = true
+		case "--allow-downgrade":
+			out.AllowDowngrade = true
 		case "--release":
 			if i+1 >= len(args) {
 				return out, errors.New("--release 后必须提供 vX.Y.Z 标签")
@@ -581,8 +590,32 @@ func printUsage(kind string) {
 	fmt.Println("  updater --release vX.Y.Z           更新到指定发行版")
 	fmt.Println("  updater --package <完整包路径>     使用本地完整包")
 	fmt.Println("  updater --url <完整包 URL>         从 URL 更新")
+	fmt.Println("  updater --allow-downgrade          允许安装低于当前版本的发行版")
 	fmt.Println("  updater --help                     显示帮助")
 	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
+}
+
+func compareVersions(left, right string) (int, error) {
+	parse := func(value string) ([3]int, error) {
+		var result [3]int
+		parts := strings.Split(value, ".")
+		if len(parts) != 3 { return result, fmt.Errorf("无效版本号：%s", value) }
+		for i, part := range parts {
+			number, err := strconv.Atoi(part)
+			if err != nil || number < 0 { return result, fmt.Errorf("无效版本号：%s", value) }
+			result[i] = number
+		}
+		return result, nil
+	}
+	a, err := parse(left)
+	if err != nil { return 0, err }
+	b, err := parse(right)
+	if err != nil { return 0, err }
+	for i := range a {
+		if a[i] < b[i] { return -1, nil }
+		if a[i] > b[i] { return 1, nil }
+	}
+	return 0, nil
 }
 
 func validReleaseTag(tag string) bool {
