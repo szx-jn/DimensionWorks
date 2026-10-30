@@ -463,7 +463,9 @@ func run(kind string, args []string) error {
 			}
 		}
 	}
-	if fullPackage == nil && len(selected) > 0 {
+	hasArchiveChanges := false
+	for _, entry := range selected { if entry.Action == "archive" { hasArchiveChanges = true; break } }
+	if fullPackage == nil && hasArchiveChanges {
 		if fullPackageURL == "" { fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version)) }
 		if size, sizeErr := remoteContentLength(fullPackageURL); sizeErr == nil && size > 0 {
 			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
@@ -534,6 +536,12 @@ func run(kind string, args []string) error {
 		if err := downloadFile(assetURL(releaseTag, deltaName), deltaPath, true); err == nil {
 			delta, openErr := openArchive(deltaPath)
 			if openErr == nil {
+				unpackedBytes, sizeErr := estimateArchiveBytes(delta, archiveEntries)
+				if sizeErr != nil { _ = delta.Close(); return sizeErr }
+				if spaceErr := ensureDiskSpace(root, saturatingAdd(saturatingAdd(backupBytes, unpackedBytes), 256<<20)); spaceErr != nil {
+					_ = delta.Close()
+					return fmt.Errorf("差量包展开前磁盘空间不足：%w", spaceErr)
+				}
 				stageErr := stageArchiveEntries(delta, archiveEntries, stageRoot)
 				_ = delta.Close()
 				if stageErr == nil {
@@ -573,6 +581,11 @@ func run(kind string, args []string) error {
 				!bytes.Equal(pkgManifest.Bytes, target.Bytes) {
 				return errors.New("完整更新包中的清单与目标清单不一致")
 			}
+		}
+		unpackedBytes, sizeErr := estimateArchiveBytes(fullPackage, archiveEntries)
+		if sizeErr != nil { return sizeErr }
+		if spaceErr := ensureDiskSpace(root, saturatingAdd(saturatingAdd(backupBytes, unpackedBytes), 256<<20)); spaceErr != nil {
+			return fmt.Errorf("完整包展开前磁盘空间不足：%w", spaceErr)
 		}
 		if err := stageArchiveEntries(fullPackage, archiveEntries, stageRoot); err != nil {
 			return fmt.Errorf("暂存完整更新包失败：%w", err)
