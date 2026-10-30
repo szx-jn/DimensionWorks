@@ -664,13 +664,11 @@ func downloadFile(source, destination string, mirrors bool) (resultErr error) {
 	for index, candidate := range candidates {
 		progressReset(destination)
 		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), candidate)
-		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-		err := downloadOnce(ctx, candidate, destination)
-		cancel()
-		if err == nil {
+		if err := downloadOnce(candidate, destination); err == nil {
 			return nil
+		} else {
+			failures = append(failures, fmt.Sprintf("%s: %v", candidate, err))
 		}
-		failures = append(failures, fmt.Sprintf("%s: %v", candidate, err))
 	}
 	return errors.New(strings.Join(failures, "\n"))
 }
@@ -680,24 +678,34 @@ const (
 	parallelDownloadWorkers = 8
 )
 
-func downloadOnce(ctx context.Context, source, destination string) error {
+const downloadAttemptTimeout = 15 * time.Minute
+
+func downloadOnce(source, destination string) error {
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
-	if err := downloadRanged(ctx, source, destination); err == nil {
+
+	// Range 与单连接回退使用独立 Context，避免 Range 超时后
+	// 把已经过期的 Context 继续传给单连接请求。
+	rangeCtx, cancelRange := context.WithTimeout(context.Background(), downloadAttemptTimeout)
+	rangeErr := downloadRanged(rangeCtx, source, destination)
+	cancelRange()
+	if rangeErr == nil {
 		return nil
-	} else {
-		fmt.Printf("[下载] 分段下载不可用，自动回退为单连接：%v\n", err)
 	}
+	fmt.Printf("[下载] 分段下载失败，清理分段并使用独立连接重试：%v\n", rangeErr)
+
 	progressReset(destination)
-	return downloadSequential(ctx, source, destination)
+	sequentialCtx, cancelSequential := context.WithTimeout(context.Background(), downloadAttemptTimeout)
+	defer cancelSequential()
+	return downloadSequential(sequentialCtx, source, destination)
 }
 
 func downloadSequential(ctx context.Context, source, destination string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	client := &http.Client{Timeout: 120 * time.Second}
+	client := &http.Client{Transport: &http.Transport{ResponseHeaderTimeout: 30 * time.Second}}
 	resp, err := client.Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
@@ -732,7 +740,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", "bytes=0-0")
-	resp, err := (&http.Client{Timeout: 20*time.Second}).Do(req)
+	resp, err := (&http.Client{Transport: &http.Transport{ResponseHeaderTimeout: 20 * time.Second}}).Do(req)
 	if err != nil { return err }
 	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2))
 	resp.Body.Close()
@@ -769,7 +777,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 				begin := index * chunkSize
 				end := begin + chunkSize - 1
 				if end >= total { end = total - 1 }
-				if err := downloadRangeSegment(ctx, source, partPaths[index], begin, end, total); err != nil {
+				if err := downloadRangeSegment(ctx, source, partPaths[index], destination, begin, end, total); err != nil {
 					errs <- fmt.Errorf("分段 %d：%w", index+1, err)
 					continue
 				}
@@ -813,12 +821,12 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	return nil
 }
 
-func downloadRangeSegment(ctx context.Context, source, destination string, begin, end, total int64) error {
+func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
-	resp, err := (&http.Client{Timeout: 120*time.Second}).Do(req)
+	resp, err := (&http.Client{Transport: &http.Transport{ResponseHeaderTimeout: 30 * time.Second}}).Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusPartialContent {
@@ -835,7 +843,7 @@ func downloadRangeSegment(ctx context.Context, source, destination string, begin
 	}
 	file, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
-	progressWriter := &downloadProgress{writer: file, key: destination}
+	progressWriter := &downloadProgress{writer: file, key: progressKey}
 	n, copyErr := io.Copy(progressWriter, io.LimitReader(resp.Body, expected+1))
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(destination); return copyErr }
