@@ -31,7 +31,7 @@ var defaultKind string
 var diagnosticRoot string
 var consoleReader = bufio.NewReader(os.Stdin)
 var progressMu sync.Mutex
-var downloadProgressUI = newProgressTracker()
+var downloadProgressUI = newProgressTracker()\nvar downloadCacheRoot string
 
 const (
 	repository          = "szx-jn/DimensionWorks"
@@ -302,6 +302,13 @@ func run(kind string, args []string) error {
 	}
 	if info, err := os.Lstat(updateRoot); err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 		return errors.New(".dimensionworks-update 必须是普通目录，不能是符号链接")
+	}
+	downloadCacheRoot = filepath.Join(updateRoot, "downloads")
+	if err := os.MkdirAll(downloadCacheRoot, 0700); err != nil {
+		return fmt.Errorf("无法创建断点续传目录：%w", err)
+	}
+	if info, err := os.Lstat(downloadCacheRoot); err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return errors.New("下载缓存目录不安全")
 	}
 	lockPath := filepath.Join(updateRoot, "lock")
 	releaseLock, err := acquireUpdateLock(lockPath, consoleReader, os.Stdout)
@@ -884,46 +891,136 @@ func downloadIdleTimeout(expectedBytes int64) time.Duration {
 	return idle
 }
 
+type resumeMetadata struct {
+	Source string `json:"source"`
+	ETag string `json:"etag"`
+	LastModified string `json:"last_modified"`
+	Total int64 `json:"total"`
+}
+
+func downloadResumePaths(source, destination string) (string, string, error) {
+	if downloadCacheRoot == "" {
+		part := destination + ".part"
+		return part, part + ".json", nil
+	}
+	info, err := os.Lstat(downloadCacheRoot)
+	if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return "", "", errors.New("断点续传缓存目录不安全")
+	}
+	sum := sha256.Sum256([]byte(source))
+	base := filepath.Join(downloadCacheRoot, hex.EncodeToString(sum[:]))
+	return base + ".part", base + ".json", nil
+}
+
+func loadResumeMetadata(path, source string) (*resumeMetadata, error) {
+	info, err := os.Lstat(path)
+	if os.IsNotExist(err) { return nil, nil }
+	if err != nil { return nil, err }
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() > 4096 {
+		return nil, errors.New("断点续传元数据不安全或超过大小限制")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil { return nil, err }
+	var meta resumeMetadata
+	if err := json.Unmarshal(data, &meta); err != nil { return nil, err }
+	if meta.Source != source || meta.Total < 0 || (meta.ETag == "" && meta.LastModified == "") {
+		return nil, nil
+	}
+	return &meta, nil
+}
+
+func saveResumeMetadata(path string, meta resumeMetadata) error {
+	data, err := json.Marshal(meta)
+	if err != nil { return err }
+	temp, err := os.CreateTemp(filepath.Dir(path), ".resume-meta-*")
+	if err != nil { return err }
+	tempPath := temp.Name()
+	defer os.Remove(tempPath)
+	if _, err := temp.Write(data); err != nil { _ = temp.Close(); return err }
+	if err := temp.Sync(); err != nil { _ = temp.Close(); return err }
+	if err := temp.Close(); err != nil { return err }
+	return replaceExistingFile(tempPath, path)
+}
+
 func downloadSequential(ctx context.Context, source, destination string, maxBytes int64) error {
+	part, metaPath, err := downloadResumePaths(source, destination)
+	if err != nil { return err }
+	meta, err := loadResumeMetadata(metaPath, source)
+	if err != nil { _ = os.Remove(metaPath); meta = nil }
+	offset := int64(0)
+	if meta != nil {
+		if info, statErr := os.Lstat(part); statErr == nil && info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0 && info.Size() <= meta.Total {
+			offset = info.Size()
+		} else {
+			_ = os.Remove(part)
+			_ = os.Remove(metaPath)
+			meta = nil
+		}
+	}
 	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(maxBytes))
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	client := newHTTPClient(0, 30*time.Second)
-	resp, err := client.Do(req)
+	if offset > 0 && meta != nil {
+		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", offset))
+		if meta.ETag != "" { req.Header.Set("If-Range", meta.ETag) } else { req.Header.Set("If-Range", meta.LastModified) }
+	}
+	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
 	if err != nil { return err }
 	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("HTTP %d", resp.StatusCode)
-	}
-	part := destination + ".part"
-	_ = os.Remove(part)
-	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil { return err }
+
+	appendMode := false
 	total := resp.ContentLength
-	if total > maxBytes {
-		_ = file.Close()
-		_ = os.Remove(part)
-		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total))
+	if offset > 0 && meta != nil && resp.StatusCode == http.StatusPartialContent {
+		matches := regexp.MustCompile("^bytes ([0-9]+)-([0-9]+)/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
+		if len(matches) != 4 { return fmt.Errorf("续传响应 Content-Range 无效：%q", resp.Header.Get("Content-Range")) }
+		begin, e1 := strconv.ParseInt(matches[1], 10, 64)
+		end, e2 := strconv.ParseInt(matches[2], 10, 64)
+		declaredTotal, e3 := strconv.ParseInt(matches[3], 10, 64)
+		if e1 != nil || e2 != nil || e3 != nil || begin != offset || declaredTotal != meta.Total || end < begin || end >= declaredTotal {
+			return errors.New("续传响应范围与已保存的下载状态不匹配")
+		}
+		if meta.ETag != "" && resp.Header.Get("ETag") != meta.ETag { return errors.New("续传资源 ETag 已变化，拒绝拼接不同版本文件") }
+		if meta.ETag == "" && resp.Header.Get("Last-Modified") != meta.LastModified { return errors.New("续传资源 Last-Modified 已变化，拒绝拼接不同版本文件") }
+		total = declaredTotal
+		appendMode = true
+	} else if resp.StatusCode == http.StatusOK {
+		offset = 0
+		if total < 0 { return errors.New("服务器未提供文件总长度，无法安全断点续传") }
+		meta = &resumeMetadata{Source: source, ETag: resp.Header.Get("ETag"), LastModified: resp.Header.Get("Last-Modified"), Total: total}
+		if meta.ETag == "" && meta.LastModified == "" {
+			_ = os.Remove(part)
+			_ = os.Remove(metaPath)
+			meta = nil
+		} else if err := saveResumeMetadata(metaPath, *meta); err != nil {
+			return fmt.Errorf("保存断点续传元数据失败：%w", err)
+		}
+	} else {
+		return fmt.Errorf("HTTP %d，续传请求未获得可用响应", resp.StatusCode)
 	}
+	if total < 0 || total > maxBytes { _ = os.Remove(part); _ = os.Remove(metaPath); return fmt.Errorf("下载文件大小无效或超过限制：%s", humanSize(total)) }
+	if resp.ContentLength >= 0 && appendMode && resp.ContentLength != total-offset {
+		return fmt.Errorf("续传响应长度不匹配：%d/%d", resp.ContentLength, total-offset)
+	}
+	if offset > 0 { downloadProgressUI.add(destination, offset) }
 	progressSetTotal(destination, total)
+	flags := os.O_CREATE|os.O_WRONLY
+	if appendMode { flags |= os.O_APPEND } else { flags |= os.O_TRUNC }
+	file, err := os.OpenFile(part, flags, 0644)
+	if err != nil { return err }
 	writer := &downloadProgress{writer: file, key: destination}
-	_, copyErr := io.Copy(writer, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, maxBytes+1))
+	written, copyErr := io.Copy(writer, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, maxBytes-offset+1))
 	syncErr := file.Sync()
 	closeErr := file.Close()
-	if copyErr != nil { _ = os.Remove(part); return copyErr }
-	if syncErr != nil { _ = os.Remove(part); return syncErr }
-	if closeErr != nil { _ = os.Remove(part); return closeErr }
-	if writer.written > maxBytes {
-		_ = os.Remove(part)
-		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(writer.written))
-	}
-	if total >= 0 && writer.written != total {
-		_ = os.Remove(part)
-		return fmt.Errorf("内容长度不符：收到 %d 字节，预期 %d 字节", writer.written, total)
-	}
-	return replaceExistingFile(part, destination)
+	if copyErr != nil { return copyErr }
+	if syncErr != nil { return syncErr }
+	if closeErr != nil { return closeErr }
+	if written > maxBytes-offset { return fmt.Errorf("下载文件超过大小限制：%s", humanSize(offset+written)) }
+	if offset+written != total { return fmt.Errorf("下载未完成，已保存 %d/%d 字节；再次运行可继续下载", offset+written, total) }
+	if err := replaceExistingFile(part, destination); err != nil { return err }
+	_ = os.Remove(metaPath)
+	return nil
 }
 
 // downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
