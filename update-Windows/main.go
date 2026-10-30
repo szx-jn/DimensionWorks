@@ -2661,27 +2661,3 @@ func copyFileAtomic(source, destination string, mode os.FileMode, maxBytes int64
 	return replaceExistingFile(tempPath, destination)
 }
 
-func copyFile(source, destination string, mode os.FileMode) error {
-	input, err := os.Open(source)
-	if err != nil {
-		return err
-	}
-	defer input.Close()
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
-		return err
-	}
-	output, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
-	if err != nil {
-		return err
-	}
-	_, copyErr := io.Copy(output, input)
-	syncErr := output.Sync()
-	closeErr := output.Close()
-	if copyErr != nil {
-		return copyErr
-	}
-	if syncErr != nil {
-		return syncErr
-	}
-	return closeErr
-}
