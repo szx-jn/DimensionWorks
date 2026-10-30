@@ -937,6 +937,16 @@ func safeURLForLog(raw string) string {
 	return parsed.String()
 }
 
+func safeErrorForLog(err error) string {
+	if err == nil { return "" }
+	urlPattern := regexp.MustCompile(`https?://[^"'\\s]+`)
+	return urlPattern.ReplaceAllStringFunc(err.Error(), func(raw string) string {
+		trimmed := strings.TrimRight(raw, ".,);]")
+		suffix := raw[len(trimmed):]
+		return safeURLForLog(trimmed) + suffix
+	})
+}
+
 func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes int64) (resultErr error) {
 	if maxBytes <= 0 || maxBytes > maxDownloadBytes {
 		return fmt.Errorf("下载大小限制无效：%d", maxBytes)
@@ -958,7 +968,7 @@ func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes in
 		if err := downloadOnceLimited(candidate, destination, maxBytes); err == nil {
 			return nil
 		} else {
-			failures = append(failures, fmt.Sprintf("%s: %v", safeURLForLog(candidate), err))
+			failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(candidate), safeErrorForLog(err)))
 		}
 	}
 	return errors.New(strings.Join(failures, "\n"))
