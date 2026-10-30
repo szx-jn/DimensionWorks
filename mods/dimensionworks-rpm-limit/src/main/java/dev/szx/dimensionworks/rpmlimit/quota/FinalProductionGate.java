@@ -94,6 +94,7 @@ public final class FinalProductionGate {
     }
 
     private static boolean consume(UUID owner, long amount, long tick) {
+        owner = GearHeartOwnerResolver.normalize(owner);
         if (!GearHeartEffects.hasQuota(owner) && !owner.equals(GearHeartOwnerResolver.SHARED_OWNER)) {
             return true;
         }

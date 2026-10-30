@@ -27,5 +27,9 @@ class RpmLimitManagerContractTest {
         assertTrue(mixin.contains("@ModifyVariable(method = \"setSpeed\""));
         assertTrue(manager.contains("float cappedSpeed = RpmLimitMath.cap(currentSpeed, value)"));
         assertTrue(manager.contains("player == null ? storedMachineLimit(k) : getEffectiveLimit(direct)"));
+
+        String outputGate = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/quota/FinalProductionGate.java"));
+        assertTrue(outputGate.contains("owner = GearHeartOwnerResolver.normalize(owner)"));
     }
 }

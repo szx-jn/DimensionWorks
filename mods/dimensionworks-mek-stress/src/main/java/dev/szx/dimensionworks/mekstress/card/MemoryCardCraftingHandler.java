@@ -76,11 +76,11 @@ public final class MemoryCardCraftingHandler {
         if (remainingDefects <= 0) {
             return;
         }
-        removeNormalCards(player, pending.card, remainingDefects);
-        giveDefective(player, pending.card, remainingDefects);
+        int converted = removeNormalCards(player, pending.card, remainingDefects);
+        giveDefective(player, pending.card, converted);
     }
 
-    private static void removeNormalCards(Player player, MemoryCardItem card, int count) {
+    private static int removeNormalCards(Player player, MemoryCardItem card, int count) {
         Inventory inventory = player.getInventory();
         int remaining = count;
         for (int slot = 0; slot < inventory.getContainerSize() && remaining > 0; slot++) {
@@ -91,6 +91,7 @@ public final class MemoryCardCraftingHandler {
             ItemStack removed = inventory.removeItem(slot, remaining);
             remaining -= removed.getCount();
         }
+        return count - remaining;
     }
 
     private static void giveDefective(Player player, MemoryCardItem normalCard, int count) {

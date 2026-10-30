@@ -79,6 +79,9 @@ class MemoryCardPackContractTest {
         assertTrue(migrationLogic.contains("MemoryCardType.BALANCED"));
         assertTrue(crafting.contains("player instanceof FakePlayer"));
         assertTrue(crafting.contains("player.drop(stack, false)"));
+        assertTrue(crafting.contains("int converted = removeNormalCards(player, pending.card, remainingDefects)"));
+        assertTrue(crafting.contains("giveDefective(player, pending.card, converted)"));
+        assertTrue(crafting.contains("return count - remaining;"));
         assertTrue(craftingMenuMixin.contains("CallbackInfoReturnable<ItemStack>"));
         assertTrue(inventoryMenuMixin.contains("CallbackInfoReturnable<ItemStack>"));
         assertFalse(craftingMenuMixin.contains("CallbackInfo callback"));

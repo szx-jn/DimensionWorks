@@ -515,7 +515,7 @@
       "name": "DimensionWorks ME Mechanical Power",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-mek-stress",
-      "version": "0.3.7",
+      "version": "0.3.8",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
@@ -525,7 +525,7 @@
       "name": "DimensionWorks RPM Limit",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-rpm-limit",
-      "version": "0.4.7",
+      "version": "0.4.8",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-rpm-limit"

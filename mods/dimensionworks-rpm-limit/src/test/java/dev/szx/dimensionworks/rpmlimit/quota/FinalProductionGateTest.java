@@ -26,6 +26,11 @@ class FinalProductionGateTest {
             GearHeartStateBits.ALL, 16, 128));
     }
 
+    @Test
+    void unownedProductionUsesTheSharedOwnerInsteadOfDereferencingNull() {
+        assertEquals(GearHeartOwnerResolver.SHARED_OWNER, GearHeartOwnerResolver.normalize(null));
+    }
+
     private static final class GearHeartStateBits {
         private static final int FINAL_PRODUCTION = 1 << 6;
         private static final int ALL = 0b1111111;
