@@ -123,6 +123,60 @@ func TestSequentialDownloadResumesFromSavedRange(t *testing.T) {
 	if _, err := os.Stat(metaPath); !os.IsNotExist(err) { t.Fatalf("resume metadata should be removed after success: %v", err) }
 }
 
+func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
+	data := bytes.Repeat([]byte("dimensionworks"), (parallelDownloadThreshold+4096)/14+1)
+	var failed atomic.Bool
+	var segmentRequests atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("ETag", "\"range-v1\"")
+		rangeValue := r.Header.Get("Range")
+		if rangeValue == "bytes=0-0" {
+			w.Header().Set("Content-Range", fmt.Sprintf("bytes 0-0/%d", len(data)))
+			w.Header().Set("Content-Length", "1")
+			w.WriteHeader(http.StatusPartialContent)
+			_, _ = w.Write(data[:1])
+			return
+		}
+		segmentRequests.Add(1)
+		if failed.CompareAndSwap(false, true) {
+			w.WriteHeader(http.StatusBadGateway)
+			return
+		}
+		var begin, end int
+		if _, err := fmt.Sscanf(rangeValue, "bytes=%d-%d", &begin, &end); err != nil || begin < 0 || end >= len(data) || begin > end {
+			http.Error(w, "bad range", http.StatusBadRequest)
+			return
+		}
+		body := data[begin:end+1]
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin, end, len(data)))
+		w.Header().Set("Content-Length", fmt.Sprint(len(body)))
+		w.WriteHeader(http.StatusPartialContent)
+		_, _ = w.Write(body)
+	}))
+	defer server.Close()
+	cache := t.TempDir()
+	oldCache := downloadCacheRoot
+	downloadCacheRoot = cache
+	defer func(){ downloadCacheRoot = oldCache }()
+	destination := filepath.Join(t.TempDir(), "package.zip")
+	if err := downloadRanged(context.Background(), server.URL, destination, int64(len(data))); err == nil {
+		t.Fatal("first ranged attempt should fail once")
+	}
+	cached, err := filepath.Glob(filepath.Join(cache, "*.part"))
+	if err != nil { t.Fatal(err) }
+	if len(cached) == 0 { t.Fatal("completed segments were not persisted") }
+	before := segmentRequests.Load()
+	if err := downloadRanged(context.Background(), server.URL, destination, int64(len(data))); err != nil {
+		t.Fatalf("second ranged attempt should resume: %v", err)
+	}
+	if segmentRequests.Load()-before >= int64(parallelDownloadWorkers) {
+		t.Fatal("resume redownloaded every segment instead of reusing completed ones")
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil { t.Fatal(err) }
+	if !bytes.Equal(got, data) { t.Fatal("resumed archive content does not match source") }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
