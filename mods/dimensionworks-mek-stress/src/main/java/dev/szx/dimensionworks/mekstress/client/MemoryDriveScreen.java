@@ -14,7 +14,7 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     private static final ResourceLocation DRIVE_TEXTURE =
         new ResourceLocation("dimensionworks_mek_stress", "textures/gui/memory_drive.png");
     private static final int STORAGE_X = 8;
-    private static final int STORAGE_Y = 14;
+    private static final int STORAGE_Y = 26;
     private int localPage;
     private Button previousButton;
     private Button nextButton;
@@ -22,9 +22,9 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     public MemoryDriveScreen(MemoryDriveMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 176;
-        imageHeight = 199;
+        imageHeight = 215;
         inventoryLabelX = 8;
-        inventoryLabelY = 106;
+        inventoryLabelY = 122;
     }
 
     @Override
@@ -77,20 +77,34 @@ public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDrive
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         drawSmallString(graphics, title, 8, 5, 0xFFFFFF);
         drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.page",
-            localPage + 1, menu.pageCount()), 108, 8, 0xCCCCCC);
-        drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.drives",
-            menu.driveCount()), 90, 24, 0xAAAAAA);
-        drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.stored",
-            menu.networkStoredSu(), menu.networkCapacitySu()), 90, 38, 0xFFD166);
-        drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.bandwidth",
-            menu.networkBandwidthRpm()), 90, 52, 0x7EC8E3);
-        drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.cards",
-            menu.cardCount()), 90, 66, 0xAAAAAA);
-        if (menu.status() != MemoryNetworkStatus.OK) {
-            drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.status."
-                + menu.status().name().toLowerCase()), 90, 84, 0xFF5555);
-        }
+            localPage + 1, menu.pageCount()), 116, 8, 0xCCCCCC);
+        drawMetric(graphics, "metric.drives", Component.literal(menu.driveCount() + "/2"), 90, 28, 90, 38, 0xFFFFFF);
+        drawMetric(graphics, "metric.cards", Component.literal(Integer.toString(menu.cardCount())),
+            132, 28, 132, 38, 0xFFFFFF);
+        drawMetric(graphics, "metric.stored", Component.literal(compact(menu.networkStoredSu()) + "/"
+            + compact(menu.networkCapacitySu())), 90, 53, 90, 63, 0xFFD166);
+        drawMetric(graphics, "metric.bandwidth", Component.literal(compact(menu.networkBandwidthRpm())),
+            132, 53, 132, 63, 0x7EC8E3);
+        drawMetric(graphics, "metric.tier", Component.literal("DDR" + menu.drive().tier().index()),
+            90, 78, 90, 88, 0xFFFFFF);
+        drawMetric(graphics, "metric.slots", Component.literal(Integer.toString(menu.drive().tier().slotsPerDrive())),
+            132, 78, 132, 88, 0xFFFFFF);
+        int statusColor = menu.status() == MemoryNetworkStatus.OK ? 0x286B39 : 0xAA3333;
+        drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress.status_short."
+            + menu.status().name().toLowerCase()), 91, 105, statusColor);
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
+    }
+
+    private void drawMetric(GuiGraphics graphics, String key, Component value,
+                            int labelX, int labelY, int valueX, int valueY, int color) {
+        drawSmallString(graphics, Component.translatable("gui.dimensionworks_mek_stress." + key), labelX, labelY, 0x555555);
+        drawSmallString(graphics, value, valueX, valueY, color);
+    }
+
+    private static String compact(long value) {
+        if (value >= 1_000_000L) return Math.round(value / 1_000_000.0D) + "M";
+        if (value >= 1_000L) return Math.round(value / 1_000.0D) + "k";
+        return Long.toString(value);
     }
 
     private void drawSmallString(GuiGraphics graphics, Component text, int x, int y, int color) {
