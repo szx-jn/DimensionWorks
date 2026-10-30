@@ -453,6 +453,25 @@ func run(kind string, args []string) error {
 	if err != nil {
 		return err
 	}
+	backupBytes, err := estimateExistingBytes(root, selected)
+	if err != nil { return fmt.Errorf("估算本地备份空间失败：%w", err) }
+	remoteBytes := uint64(0)
+	for _, entry := range selected {
+		if entry.Action == "remote" {
+			if size, sizeErr := remoteContentLength(entry.Source); sizeErr == nil && size > 0 {
+				remoteBytes = saturatingAdd(remoteBytes, uint64(size))
+			}
+		}
+	}
+	if fullPackage == nil && len(selected) > 0 {
+		if fullPackageURL == "" { fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version)) }
+		if size, sizeErr := remoteContentLength(fullPackageURL); sizeErr == nil && size > 0 {
+			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
+		}
+	}
+	if err := ensureDiskSpace(root, saturatingAdd(saturatingAdd(backupBytes, remoteBytes), 256<<20)); err != nil {
+		return fmt.Errorf("磁盘空间预检失败：%w", err)
+	}
 	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected)
 	if err != nil {
 		return fmt.Errorf("无法备份用户修改文件，已中止更新：%w", err)
@@ -604,6 +623,61 @@ func run(kind string, args []string) error {
 		fmt.Println("更新来源：完整包")
 	}
 	return nil
+}
+
+func saturatingAdd(a, b uint64) uint64 {
+	if ^uint64(0)-a < b { return ^uint64(0) }
+	return a+b
+}
+
+func estimateExistingBytes(root string, entries []Entry) (uint64, error) {
+	var total uint64
+	for _, entry := range entries {
+		path, exists, err := securePath(root, entry.Path)
+		if err != nil { return 0, err }
+		if !exists { continue }
+		info, err := os.Lstat(path)
+		if err != nil { return 0, err }
+		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() { return 0, fmt.Errorf("目标不是普通文件：%s", entry.Path) }
+		if info.Size() > 0 { total = saturatingAdd(total, uint64(info.Size())) }
+	}
+	return total, nil
+}
+
+func remoteContentLength(source string) (int64, error) {
+	req, err := http.NewRequest(http.MethodHead, source, nil)
+	if err != nil { return 0, err }
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	resp, err := newHTTPClient(10*time.Second, 5*time.Second).Do(req)
+	if err != nil { return 0, err }
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 || resp.ContentLength < 0 {
+		return 0, fmt.Errorf("HEAD 无法确定文件大小（HTTP %d）", resp.StatusCode)
+	}
+	return resp.ContentLength, nil
+}
+
+func ensureDiskSpace(path string, required uint64) error {
+	available, err := availableDiskSpace(path)
+	if err != nil { return fmt.Errorf("无法读取可用磁盘空间：%w", err) }
+	if available < required {
+		return fmt.Errorf("可用空间不足：当前 %s，需要至少 %s（含 256 MiB 安全余量）", humanSize(int64(minUint64(available, uint64(^uint64(0)>>1)))), humanSize(int64(minUint64(required, uint64(^uint64(0)>>1)))))
+	}
+	return nil
+}
+
+func minUint64(a, b uint64) uint64 { if a < b { return a }; return b }
+
+func estimateArchiveBytes(archive *Archive, entries []Entry) (uint64, error) {
+	if archive == nil { return 0, errors.New("更新归档为空") }
+	var total uint64
+	for _, entry := range entries {
+		if entry.Action != "archive" { continue }
+		file := archive.entries[strings.ToLower(entry.Source)]
+		if file == nil { return 0, fmt.Errorf("归档缺少文件：%s", entry.Source) }
+		total = saturatingAdd(total, file.UncompressedSize64)
+	}
+	return total, nil
 }
 
 func parseOptions(args []string) (Options, error) {
