@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -39,6 +40,8 @@ const (
 	repository          = "szx-jn/DimensionWorks"
 	manifestName        = "dimensionworks-update-manifest.tsv"
 	stateName           = ".dimensionworks-update/state.tsv"
+	stateSignatureName  = ".dimensionworks-update/state.tsv.hmac"
+	stateKeyName        = ".dimensionworks-update/state.key"
 	maxManifestBytes    = 16 << 20
 	maxManifestEntries  = 100000
 	maxArchiveEntries   = 100000
@@ -1701,7 +1704,7 @@ func validateRelative(value string) error {
 
 func reservedRelative(rel string) bool {
 	normalized := strings.ToLower(strings.ReplaceAll(rel, "\\", "/"))
-	if normalized == "version" || normalized == stateName || strings.HasPrefix(normalized, ".dimensionworks-update/") {
+	if normalized == "version" || normalized == stateName || normalized == stateSignatureName || strings.HasPrefix(normalized, ".dimensionworks-update/") {
 		return true
 	}
 	return isUpdaterName(filepath.Base(normalized))
@@ -1977,9 +1980,7 @@ func verifyDigest(path, algorithm, expected string) error {
 func readState(root, path, kind string) (*Manifest, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
+		if os.IsNotExist(err) { return nil, nil }
 		return nil, err
 	}
 	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
@@ -1988,11 +1989,62 @@ func readState(root, path, kind string) (*Manifest, error) {
 	if info.Size() > maxManifestBytes {
 		return nil, fmt.Errorf("state.tsv 超过大小限制：%s", humanSize(info.Size()))
 	}
+	signaturePath := filepath.Join(root, filepath.FromSlash(stateSignatureName))
+	signatureInfo, err := os.Lstat(signaturePath)
+	if os.IsNotExist(err) {
+		fmt.Println("[保护] 检测到旧版未签名状态文件，将重新扫描本地文件，不信任旧删除记录")
+		return nil, nil
+	}
+	if err != nil { return nil, err }
+	if signatureInfo.Mode()&os.ModeSymlink != 0 || !signatureInfo.Mode().IsRegular() || signatureInfo.Size() > 128 {
+		return nil, errors.New("state.tsv.hmac 不安全或格式无效")
+	}
+	keyPath := filepath.Join(root, filepath.FromSlash(stateKeyName))
+	keyInfo, err := os.Lstat(keyPath)
+	if err != nil { return nil, fmt.Errorf("状态签名密钥不可用：%w", err) }
+	if keyInfo.Mode()&os.ModeSymlink != 0 || !keyInfo.Mode().IsRegular() || keyInfo.Size() != 32 {
+		return nil, errors.New("状态签名密钥文件不安全或长度无效")
+	}
+	key, err := os.ReadFile(keyPath)
+	if err != nil { return nil, err }
+	signature, err := os.ReadFile(signaturePath)
+	if err != nil { return nil, err }
+	provided, err := hex.DecodeString(strings.TrimSpace(string(signature)))
+	if err != nil || len(provided) != sha256.Size {
+		return nil, errors.New("state.tsv.hmac 签名格式无效")
+	}
 	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+	if err != nil { return nil, err }
+	mac := hmac.New(sha256.New, key)
+	_, _ = mac.Write(data)
+	if !hmac.Equal(provided, mac.Sum(nil)) {
+		return nil, errors.New("本地更新状态签名校验失败；状态文件可能被修改，请先备份 .dimensionworks-update 后再修复")
 	}
 	return parseManifest(data, kind)
+}
+
+func loadOrCreateStateKey(updateRoot string) ([]byte, error) {
+	path := filepath.Join(updateRoot, "state.key")
+	if info, err := os.Lstat(path); err == nil {
+		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() != 32 {
+			return nil, errors.New("状态签名密钥文件不安全或长度无效")
+		}
+		return os.ReadFile(path)
+	} else if !os.IsNotExist(err) {
+		return nil, err
+	}
+	key := make([]byte, 32)
+	if _, err := rand.Read(key); err != nil { return nil, err }
+	temp, err := os.CreateTemp(updateRoot, ".state-key-*")
+	if err != nil { return nil, err }
+	tempPath := temp.Name()
+	defer os.Remove(tempPath)
+	if _, err := temp.Write(key); err != nil { _ = temp.Close(); return nil, err }
+	if err := temp.Sync(); err != nil { _ = temp.Close(); return nil, err }
+	if err := temp.Chmod(0600); err != nil { _ = temp.Close(); return nil, err }
+	if err := temp.Close(); err != nil { return nil, err }
+	if err := replaceExistingFile(tempPath, path); err != nil { return nil, err }
+	return key, nil
 }
 
 func bootstrapState(root, kind string) (*Manifest, error) {
@@ -2530,7 +2582,7 @@ func applyTransaction(root, work string, changes []Change) error {
 }
 
 func securePathAllowMetadata(root, rel string) (string, bool, error) {
-	if rel == "VERSION" || rel == stateName {
+	if rel == "VERSION" || rel == stateName || rel == stateSignatureName {
 		target := filepath.Join(root, filepath.FromSlash(rel))
 		parentInfo, parentErr := os.Lstat(filepath.Dir(target))
 		if parentErr == nil && (parentInfo.Mode()&os.ModeSymlink != 0 || !parentInfo.IsDir()) {
