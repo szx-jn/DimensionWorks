@@ -855,8 +855,39 @@ func downloadOnceLimited(source, destination string, maxBytes int64) error {
 	return downloadSequential(sequentialCtx, source, destination, maxBytes)
 }
 
+type activityReader struct {
+	reader io.Reader
+	touch func()
+}
+
+func (r activityReader) Read(buffer []byte) (int, error) {
+	n, err := r.reader.Read(buffer)
+	if n > 0 { r.touch() }
+	return n, err
+}
+
+func newIdleTimeoutContext(parent context.Context, idle time.Duration) (context.Context, func(), func()) {
+	ctx, cancel := context.WithCancel(parent)
+	timer := time.AfterFunc(idle, cancel)
+	touch := func() { timer.Reset(idle) }
+	stop := func() { timer.Stop(); cancel() }
+	return ctx, stop, touch
+}
+
+func downloadIdleTimeout(expectedBytes int64) time.Duration {
+	const minimum = 2 * time.Minute
+	const maximum = 10 * time.Minute
+	if expectedBytes <= 0 { return 3 * time.Minute }
+	extra := time.Duration(expectedBytes/(512*1024)) * time.Second
+	idle := minimum + extra
+	if idle > maximum { return maximum }
+	return idle
+}
+
 func downloadSequential(ctx context.Context, source, destination string, maxBytes int64) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(maxBytes))
+	defer stopIdle()
+	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	client := newHTTPClient(0, 30*time.Second)
@@ -878,7 +909,7 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	}
 	progressSetTotal(destination, total)
 	writer := &downloadProgress{writer: file, key: destination}
-	_, copyErr := io.Copy(writer, io.LimitReader(resp.Body, maxBytes+1))
+	_, copyErr := io.Copy(writer, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, maxBytes+1))
 	syncErr := file.Sync()
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(part); return copyErr }
@@ -898,15 +929,17 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 // downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
 // Every segment is written to a separate temporary file and validated before assembly.
 func downloadRanged(ctx context.Context, source, destination string, maxBytes int64) error {
-	probeCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
+	probeParent, cancelProbe := context.WithTimeout(ctx, 20*time.Second)
+	defer cancelProbe()
+	probeCtx, stopIdle, touchProbe := newIdleTimeoutContext(probeParent, 2*time.Minute)
+	defer stopIdle()
 	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", "bytes=0-0")
 	resp, err := newHTTPClient(0, 20*time.Second).Do(req)
 	if err != nil { return err }
-	probeBody, bodyErr := io.ReadAll(io.LimitReader(resp.Body, 2))
+	probeBody, bodyErr := io.ReadAll(io.LimitReader(activityReader{reader: resp.Body, touch: touchProbe}, 2))
 	resp.Body.Close()
 	if bodyErr != nil {
 		return fmt.Errorf("读取 Range 探测响应失败：%w", bodyErr)
@@ -1014,7 +1047,9 @@ sendJobs:
 }
 
 func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
+	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(end-begin+1))
+	defer stopIdle()
+	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
@@ -1044,7 +1079,7 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	file, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
 	progressWriter := &downloadProgress{writer: file, key: progressKey}
-	n, copyErr := io.Copy(progressWriter, io.LimitReader(resp.Body, expected+1))
+	n, copyErr := io.Copy(progressWriter, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, expected+1))
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(destination); return copyErr }
 	if closeErr != nil { _ = os.Remove(destination); return closeErr }
