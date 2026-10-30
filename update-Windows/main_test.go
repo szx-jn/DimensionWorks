@@ -63,9 +63,7 @@ func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
 	defer server.Close()
 
 	destination := filepath.Join(t.TempDir(), "download.bin")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := downloadOnce(ctx, server.URL, destination); err != nil {
+	if err := downloadOnce(server.URL, destination); err != nil {
 		t.Fatalf("downloadOnce failed: %v", err)
 	}
 	got, err := os.ReadFile(destination)
@@ -106,9 +104,7 @@ func TestDownloadRangedFallsBackOnInvalidContentRange(t *testing.T) {
 	defer server.Close()
 
 	destination := filepath.Join(t.TempDir(), "invalid-range.bin")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := downloadOnce(ctx, server.URL, destination); err != nil {
+	if err := downloadOnce(server.URL, destination); err != nil {
 		t.Fatalf("download should fall back after invalid Content-Range: %v", err)
 	}
 	got, err := os.ReadFile(destination)
@@ -160,9 +156,7 @@ func TestDownloadRangedFallsBackWhenServerIgnoresRange(t *testing.T) {
 	defer server.Close()
 
 	destination := filepath.Join(t.TempDir(), "fallback.bin")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := downloadOnce(ctx, server.URL, destination); err != nil {
+	if err := downloadOnce(server.URL, destination); err != nil {
 		t.Fatalf("download should fall back to a single connection: %v", err)
 	}
 	got, err := os.ReadFile(destination)
@@ -171,6 +165,34 @@ func TestDownloadRangedFallsBackWhenServerIgnoresRange(t *testing.T) {
 	matches, err := filepath.Glob(destination + ".segment-*")
 	if err != nil { t.Fatal(err) }
 	if len(matches) != 0 { t.Fatalf("fallback left temporary segments: %v", matches) }
+}
+
+
+func TestDownloadRangeSegmentReportsProgressAgainstParentFile(t *testing.T) {
+	data := []byte("segment-progress")
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes 0-%d/%d", len(data)-1, len(data)))
+		w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+		w.WriteHeader(http.StatusPartialContent)
+		_, _ = w.Write(data)
+	}))
+	defer server.Close()
+
+	key := filepath.Join(t.TempDir(), "archive.zip")
+	segment := key + ".segment-00"
+	progressBegin(key, "archive.zip")
+	progressSetTotal(key, int64(len(data)))
+	defer progressFinish(key, false)
+
+	if err := downloadRangeSegment(context.Background(), server.URL, segment, key, 0, int64(len(data)-1), int64(len(data))); err != nil {
+		t.Fatalf("downloadRangeSegment failed: %v", err)
+	}
+	downloadProgressUI.mu.Lock()
+	got := downloadProgressUI.files[key].written
+	downloadProgressUI.mu.Unlock()
+	if got != int64(len(data)) {
+		t.Fatalf("parent progress should count segment bytes: got %d, want %d", got, len(data))
+	}
 }
 
 func TestParseManifestValidClientAndServer(t *testing.T) {
