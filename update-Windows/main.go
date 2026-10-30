@@ -246,7 +246,9 @@ func run(kind string, args []string) error {
 	_ = lock.Close()
 	defer os.Remove(lockPath)
 
-
+	if err := recoverInterruptedTransactions(root, updateRoot); err != nil {
+		return fmt.Errorf("发现未完成的更新事务，自动恢复失败：%w。请勿删除 .dimensionworks-update 下的恢复数据", err)
+	}
 
 	work, err := os.MkdirTemp(updateRoot, "work-")
 	if err != nil {
@@ -1870,6 +1872,82 @@ type Applied struct {
 	Existed    bool
 	TargetPath string
 	Mode       os.FileMode
+	Done       bool
+}
+
+func appendTransactionJournal(work string, item Applied) error {
+	path := filepath.Join(work, "transaction.jsonl")
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil { return err }
+	encodeErr := json.NewEncoder(file).Encode(item)
+	syncErr := file.Sync()
+	closeErr := file.Close()
+	if encodeErr != nil { return encodeErr }
+	if syncErr != nil { return syncErr }
+	return closeErr
+}
+
+func recoverInterruptedTransactions(root, updateRoot string) error {
+	entries, err := os.ReadDir(updateRoot)
+	if err != nil { return err }
+	for _, entry := range entries {
+		if !entry.IsDir() || !strings.HasPrefix(entry.Name(), "work-") { continue }
+		work := filepath.Join(updateRoot, entry.Name())
+		info, err := os.Lstat(work)
+		if err != nil { return err }
+		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() { return fmt.Errorf("事务目录不安全：%s", work) }
+		journal := filepath.Join(work, "transaction.jsonl")
+		journalInfo, err := os.Lstat(journal)
+		if os.IsNotExist(err) { continue }
+		if err != nil { return err }
+		if journalInfo.Mode()&os.ModeSymlink != 0 || !journalInfo.Mode().IsRegular() { return fmt.Errorf("事务日志不是普通文件：%s", journal) }
+		file, err := os.Open(journal)
+		if err != nil { return err }
+		scanner := bufio.NewScanner(file)
+		scanner.Buffer(make([]byte, 4096), 1<<20)
+		var records []Applied
+		done := false
+		for scanner.Scan() {
+			var item Applied
+			if err := json.Unmarshal(scanner.Bytes(), &item); err != nil { _ = file.Close(); return fmt.Errorf("事务日志格式损坏：%s：%w", journal, err) }
+			if item.Done { done = true; break }
+			records = append(records, item)
+			if len(records) > maxManifestEntries { _ = file.Close(); return fmt.Errorf("事务日志条目超过上限：%s", journal) }
+		}
+		scanErr := scanner.Err()
+		closeErr := file.Close()
+		if scanErr != nil { return scanErr }
+		if closeErr != nil { return closeErr }
+		if !done {
+			fmt.Println("[恢复] 检测到上次未完成的更新事务，正在恢复原文件")
+			for i := len(records)-1; i >= 0; i-- {
+				item := records[i]
+				target, exists, err := securePathAllowMetadata(root, item.Path)
+				if err != nil { return fmt.Errorf("恢复目标 %s 不安全：%w", item.Path, err) }
+				if item.Existed {
+					backupRoot := filepath.Join(work, "backup")
+					backupAbs, err := filepath.Abs(item.Backup)
+					if err != nil { return err }
+					baseAbs, err := filepath.Abs(backupRoot)
+					if err != nil { return err }
+					rel, err := filepath.Rel(baseAbs, backupAbs)
+					if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) { return fmt.Errorf("事务备份路径越界：%s", item.Path) }
+					backupInfo, err := os.Lstat(backupAbs)
+					if err != nil { return fmt.Errorf("事务备份缺失 %s：%w", item.Path, err) }
+					if backupInfo.Mode()&os.ModeSymlink != 0 || !backupInfo.Mode().IsRegular() { return fmt.Errorf("事务备份不是普通文件：%s", item.Path) }
+					var created []string
+					if err := ensureParentDirectories(root, target, &created); err != nil { return err }
+					if err := replaceFromFile(backupAbs, target); err != nil { return fmt.Errorf("恢复 %s 失败：%w", item.Path, err) }
+					if err := os.Chmod(target, item.Mode); err != nil { return fmt.Errorf("恢复 %s 权限失败：%w", item.Path, err) }
+				} else if exists {
+					if err := os.Remove(target); err != nil { return fmt.Errorf("清理新文件 %s 失败：%w", item.Path, err) }
+				}
+			}
+			if err := appendTransactionJournal(work, Applied{Done: true}); err != nil { return err }
+		}
+		if err := os.RemoveAll(work); err != nil { return fmt.Errorf("清理已恢复事务目录失败：%w", err) }
+	}
+	return nil
 }
 
 func applyTransaction(root, work string, changes []Change) error {
@@ -1900,6 +1978,11 @@ func applyTransaction(root, work string, changes []Change) error {
 		}
 		for i := len(createdDirs) - 1; i >= 0; i-- {
 			_ = os.Remove(createdDirs[i])
+		}
+		if len(failures) == 0 {
+			if err := appendTransactionJournal(work, Applied{Done: true}); err != nil {
+				failures = append(failures, "写入回滚完成标记失败："+err.Error())
+			}
 		}
 		if len(failures) > 0 {
 			return fmt.Errorf("回滚未完全成功：%s", strings.Join(failures, "; "))
@@ -1937,7 +2020,14 @@ func applyTransaction(root, work string, changes []Change) error {
 				return fmt.Errorf("无法备份 %s：%w", change.Path, err)
 			}
 		}
-		applied = append(applied, Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target, Mode: targetMode})
+		item := Applied{Path: change.Path, Backup: backup, Existed: exists, TargetPath: target, Mode: targetMode}
+		if err := appendTransactionJournal(work, item); err != nil {
+			if rollbackErr := rollback(); rollbackErr != nil {
+				return fmt.Errorf("记录事务日志失败：%v；%v", err, rollbackErr)
+			}
+			return fmt.Errorf("记录事务日志失败，已回滚：%w", err)
+		}
+		applied = append(applied, item)
 
 		if change.Delete {
 			if exists {
@@ -1962,6 +2052,12 @@ func applyTransaction(root, work string, changes []Change) error {
 			}
 			return fmt.Errorf("写入 %s 失败，已回滚：%w", change.Path, err)
 		}
+	}
+	if err := appendTransactionJournal(work, Applied{Done: true}); err != nil {
+		if rollbackErr := rollback(); rollbackErr != nil {
+			return fmt.Errorf("提交事务标记失败：%v；%v", err, rollbackErr)
+		}
+		return fmt.Errorf("提交事务标记失败，已回滚：%w", err)
 	}
 	return nil
 }
