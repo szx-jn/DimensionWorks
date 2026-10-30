@@ -101,10 +101,10 @@ This changes the target player's RPM limit for Create kinetic networks they own.
 模组会立即扫描所有已加载维度中该玩家直接放置的动能方块，更新机器上限并同步给客户端；
 未加载区块会在下次加载时读取玩家最新上限。
 
-齿轮、大齿轮和速度控制器仍使用 Create 原生倍率计算；所有对外读取得到的理论转速、机器加工
-速度和位移统一在 `KineticBlockEntity#getSpeed()` 处按拥有者上限封顶。Create 的
-`getTheoreticalSpeed()`、`Source`、`Network` 和 `RotationPropagator` 全部保持原样，因此齿轮链
-可以正常传递和重算，消费者实际获得的 RPM 仍不超过该玩家上限。
+齿轮、大齿轮和速度控制器仍使用 Create 原生倍率计算，但每次 Create 写入动能方块转速时，都会
+按该方块所有者的个人上限封顶。因此齿轮链的每一级存储转速、理论转速及消费者实际转速都不会
+超过其所有者上限；齿轮倍率不能继续叠加出超限转速。修改个人上限时，已加载的自有动能方块会
+立即重新收口，未加载区块在加载时收口。不同玩家混合的网络按每台方块的直接所有者分别限速。
 应力容量与应力消耗也按同一个有效转速缩放，避免只看原始网络速度时把限速后的机器误判为过载。
 
 ## KubeJS
@@ -120,7 +120,7 @@ const limit = RpmLimitApi.getLimit(player)
 const limit2 = RpmLimitApi.getLimit(player.uuid.toString())
 ```
 
-Values are clamped to 1..10240. This API changes the player's stored limit immediately and refreshes all currently loaded machines owned by that player. Create's raw kinetic network is left untouched.
+Values are clamped to 1..10240. This API changes the player's stored limit immediately and refreshes all currently loaded machines owned by that player, including their stored network speeds.
 
 ## 超速并行（Overspeed Batch）
 

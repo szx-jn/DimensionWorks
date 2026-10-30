@@ -152,10 +152,10 @@ public final class RpmLimitManager {
         if (server == null || direct == null)
             return;
         ServerPlayer player = server.getPlayerList().getPlayer(direct);
-        if (player == null)
+        int limit = player == null ? storedMachineLimit(k) : getEffectiveLimit(direct);
+        if (limit <= 0)
             return;
 
-        int limit = getEffectiveLimit(direct);
         boolean changed = setMachineLimit(k, limit);
         if (!changed)
             return;
@@ -246,13 +246,23 @@ public final class RpmLimitManager {
     private static boolean setMachineLimit(KineticBlockEntity k, int limit) {
         int value = sanitize(limit);
         CompoundTag data = k.getPersistentData();
-        if (data.getInt(MACHINE_LIMIT_KEY) == value)
-            return false;
-        data.putInt(MACHINE_LIMIT_KEY, value);
-        k.setChanged();
-        // Cached stress/capacity depend on the effective RPM limit, not only Create's raw speed.
-        KineticNetworkOptimizer.invalidateAndRefreshFor(k);
-        return true;
+        boolean changed = data.getInt(MACHINE_LIMIT_KEY) != value;
+        if (changed) {
+            data.putInt(MACHINE_LIMIT_KEY, value);
+            k.setChanged();
+            // Cached stress/capacity depend on the effective RPM limit, not only Create's raw speed.
+            KineticNetworkOptimizer.invalidateAndRefreshFor(k);
+        }
+
+        float currentSpeed = k.getTheoreticalSpeed();
+        float cappedSpeed = RpmLimitMath.cap(currentSpeed, value);
+        if (currentSpeed != cappedSpeed) {
+            k.setSpeed(cappedSpeed);
+            k.setChanged();
+            k.sendData();
+            changed = true;
+        }
+        return changed;
     }
 
     public static void writeSyncData(KineticBlockEntity k, CompoundTag compound) {

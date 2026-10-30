@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -35,6 +36,17 @@ public abstract class KineticBlockEntityMixin {
     private void dimensionworks$capEffectiveSpeed(CallbackInfoReturnable<Float> cir) {
         KineticBlockEntity self = (KineticBlockEntity) (Object) this;
         cir.setReturnValue(RpmLimitManager.clamp(self, cir.getReturnValueF()));
+    }
+
+    /**
+     * Keep Create's stored network speed inside this machine's owner's limit. Capping only
+     * getSpeed() leaves the raw speed available to gears and downstream propagation, allowing
+     * every gear stage to multiply an otherwise hidden over-limit value.
+     */
+    @ModifyVariable(method = "setSpeed", at = @At("HEAD"), argsOnly = true, remap = false)
+    private float dimensionworks$capNetworkSpeed(float requested) {
+        KineticBlockEntity self = (KineticBlockEntity) (Object) this;
+        return RpmLimitManager.clamp(self, requested);
     }
 
     @Inject(method = "initialize", at = @At("TAIL"), remap = false)
