@@ -191,14 +191,10 @@ func writeFailureLog(root string, cause error) string {
 func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (func(), error) {
 	create := func() (string, error) {
 		var nonce [16]byte
-		if _, err := rand.Read(nonce[:]); err != nil {
-			return "", fmt.Errorf("生成更新锁标识失败：%w", err)
-		}
+		if _, err := rand.Read(nonce[:]); err != nil { return "", fmt.Errorf("生成更新锁标识失败：%w", err) }
 		token := hex.EncodeToString(nonce[:])
 		file, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
-		if err != nil {
-			return "", err
-		}
+		if err != nil { return "", err }
 		_, writeErr := fmt.Fprintf(file, "token=%s\npid=%d\ntime=%s\n", token, os.Getpid(), time.Now().Format(time.RFC3339))
 		syncErr := file.Sync()
 		closeErr := file.Close()
@@ -211,37 +207,39 @@ func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (
 		return token, nil
 	}
 	token, err := create()
-	if err == nil {
-		return lockReleaseFunc(lockPath, token), nil
-	}
-	if !os.IsExist(err) {
-		return nil, fmt.Errorf("无法创建更新锁：%w", err)
-	}
+	if err == nil { return lockReleaseFunc(lockPath, token), nil }
+	if !os.IsExist(err) { return nil, fmt.Errorf("无法创建更新锁：%w", err) }
 
+	guardPath := lockPath + ".confirm"
+	guard, guardErr := os.OpenFile(guardPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if guardErr != nil {
+		if os.IsExist(guardErr) { return nil, errors.New("另一个更新器正在处理更新锁，本次更新已取消") }
+		return nil, fmt.Errorf("无法取得更新锁确认权：%w", guardErr)
+	}
+	_ = guard.Close()
+	defer os.Remove(guardPath)
+
+	initialInfo, statErr := os.Lstat(lockPath)
+	if statErr != nil { return nil, fmt.Errorf("读取现有更新锁失败：%w", statErr) }
 	fmt.Fprintln(output, "检测到更新锁 .dimensionworks-update/lock。")
 	fmt.Fprint(output, "请确认上一个更新进程是否仍在运行。输入 Y 清理锁并继续更新，输入 N 取消更新：")
 	answer, readErr := input.ReadString('\n')
-	if readErr != nil && len(answer) == 0 {
-		return nil, fmt.Errorf("无法读取更新锁确认：%w", readErr)
-	}
+	if readErr != nil && len(answer) == 0 { return nil, fmt.Errorf("无法读取更新锁确认：%w", readErr) }
 	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
 		return nil, errors.New("用户选择不清理更新锁，已拒绝更新")
 	}
-	info, statErr := os.Lstat(lockPath)
-	if statErr != nil {
-		return nil, fmt.Errorf("读取更新锁失败：%w", statErr)
+	currentInfo, statErr := os.Lstat(lockPath)
+	if statErr != nil { return nil, fmt.Errorf("读取更新锁失败：%w", statErr) }
+	if !os.SameFile(initialInfo, currentInfo) {
+		return nil, errors.New("更新锁在确认期间已被替换，拒绝删除新锁")
 	}
-	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+	if currentInfo.Mode()&os.ModeSymlink != 0 || !currentInfo.Mode().IsRegular() {
 		return nil, errors.New("更新锁不是普通文件，拒绝自动删除")
 	}
-	if err := os.Remove(lockPath); err != nil {
-		return nil, fmt.Errorf("清理旧更新锁失败：%w", err)
-	}
+	if err := os.Remove(lockPath); err != nil { return nil, fmt.Errorf("清理旧更新锁失败：%w", err) }
 	token, err = create()
 	if err != nil {
-		if os.IsExist(err) {
-			return nil, errors.New("更新锁已被另一个更新进程重新创建，本次更新已取消")
-		}
+		if os.IsExist(err) { return nil, errors.New("更新锁已被另一个更新进程重新创建，本次更新已取消") }
 		return nil, fmt.Errorf("清理旧锁后无法创建新更新锁：%w", err)
 	}
 	return lockReleaseFunc(lockPath, token), nil
