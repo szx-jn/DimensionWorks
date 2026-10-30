@@ -742,8 +742,7 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 		_ = os.Remove(part)
 		return fmt.Errorf("内容长度不符：收到 %d 字节，预期 %d 字节", writer.written, total)
 	}
-	_ = os.Remove(destination)
-	return os.Rename(part, destination)
+	return replaceExistingFile(part, destination)
 }
 
 // downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
@@ -1618,8 +1617,7 @@ sendJobs:
 	if err := out.Close(); err != nil { _ = os.Remove(assembled); cleanup(); return err }
 	cleanup()
 	if copied != total { _ = os.Remove(assembled); return fmt.Errorf("合并后长度不符：%d/%d", copied, total) }
-	_ = os.Remove(destination)
-	if err := os.Rename(assembled, destination); err != nil { _ = os.Remove(assembled); return err }
+	if err := replaceExistingFile(assembled, destination); err != nil { _ = os.Remove(assembled); return err }
 	return nil
 }
 
@@ -2681,10 +2679,7 @@ func replaceFromFile(source, destination string) error {
 	if err := tempFile.Close(); err != nil {
 		return err
 	}
-	if err := os.Remove(destination); err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err := os.Rename(temp, destination); err != nil {
+	if err := replaceExistingFile(temp, destination); err != nil {
 		return err
 	}
 	return nil
