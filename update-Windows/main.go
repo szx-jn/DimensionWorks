@@ -764,7 +764,10 @@ func latestRelease() (ReleaseInfo, error) {
 	if resp.StatusCode != http.StatusOK {
 		return result, fmt.Errorf("GitHub API 返回 HTTP %d", resp.StatusCode)
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	data, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20+1))
+	if err != nil { return result, fmt.Errorf("读取 GitHub 发行信息失败：%w", err) }
+	if len(data) > 4<<20 { return result, errors.New("GitHub 发行信息超过 4 MiB 限制") }
+	if err := json.Unmarshal(data, &result); err != nil {
 		return result, fmt.Errorf("无法解析 GitHub 发行信息：%w", err)
 	}
 	if !validReleaseTag(result.TagName) {
@@ -1227,11 +1230,14 @@ func downloadArchiveWithManualFallback(source, destination string) error {
 		if local == "" {
 			return fmt.Errorf("完整包下载失败：%w", err)
 		}
-		info, statErr := os.Stat(local)
-		if statErr != nil || !info.Mode().IsRegular() {
-			return fmt.Errorf("手动指定的文件不存在或不是普通文件：%s", local)
+		info, statErr := os.Lstat(local)
+		if statErr != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("手动指定的文件不存在、不是普通文件或是符号链接：%s", local)
 		}
-		return copyFile(local, destination, 0644)
+		if info.Size() > maxDownloadBytes {
+			return fmt.Errorf("手动指定的完整包超过大小限制：%s", humanSize(info.Size()))
+		}
+		return copyFileLimited(local, destination, 0644, maxDownloadBytes)
 	}
 }
 
@@ -1504,12 +1510,15 @@ func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) er
 			_ = reader.Close()
 			return err
 		}
-		_, copyErr := io.Copy(output, reader)
+		written, copyErr := io.Copy(output, io.LimitReader(reader, int64(file.UncompressedSize64)+1))
 		syncErr := output.Sync()
 		closeErr := output.Close()
 		readerErr := reader.Close()
 		if copyErr != nil {
 			return copyErr
+		}
+		if uint64(written) != file.UncompressedSize64 {
+			return fmt.Errorf("归档文件实际展开长度不匹配 %s：%d/%d", entry.Path, written, file.UncompressedSize64)
 		}
 		if syncErr != nil {
 			return syncErr
@@ -2235,6 +2244,23 @@ func replaceFromFile(source, destination string) error {
 	if err := replaceExistingFile(temp, destination); err != nil {
 		return err
 	}
+	return nil
+}
+
+func copyFileLimited(source, destination string, mode os.FileMode, maxBytes int64) error {
+	input, err := os.Open(source)
+	if err != nil { return err }
+	defer input.Close()
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil { return err }
+	output, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
+	if err != nil { return err }
+	written, copyErr := io.Copy(output, io.LimitReader(input, maxBytes+1))
+	syncErr := output.Sync()
+	closeErr := output.Close()
+	if copyErr != nil { _ = os.Remove(destination); return copyErr }
+	if written > maxBytes { _ = os.Remove(destination); return fmt.Errorf("文件超过大小限制：%s", humanSize(written)) }
+	if syncErr != nil { _ = os.Remove(destination); return syncErr }
+	if closeErr != nil { _ = os.Remove(destination); return closeErr }
 	return nil
 }
 
