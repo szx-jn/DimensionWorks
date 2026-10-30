@@ -9,6 +9,12 @@ version = '0.1.1'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_cave_factory'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+def rpmLimitBuild = file('../dimensionworks-rpm-limit/build.gradle').getText('UTF-8')
+def rpmLimitVersionMatch = rpmLimitBuild =~ /(?m)^version = '([^']+)'$/
+if (!rpmLimitVersionMatch.find()) {
+    throw new GradleException('Could not determine the RPM limit project version')
+}
+def rpmLimitVersion = rpmLimitVersionMatch.group(1)
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
@@ -45,7 +51,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    compileOnly fg.deobf(files('../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-0.4.6.jar'))
+    compileOnly fg.deobf(files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}.jar"))
     compileOnly 'mezz.jei:jei-1.20.1-forge-api:15.20.0.115'
     compileOnly 'mezz.jei:jei-1.20.1-common-api:15.20.0.115'
     compileOnly 'maven.modrinth:jade:11.13.2+forge'

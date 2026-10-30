@@ -9,7 +9,12 @@ version = '0.3.8'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-def rpmLimitVersion = '0.4.6'
+def rpmLimitBuild = file('../dimensionworks-rpm-limit/build.gradle').getText('UTF-8')
+def rpmLimitVersionMatch = rpmLimitBuild =~ /(?m)^version = '([^']+)'$/
+if (!rpmLimitVersionMatch.find()) {
+    throw new GradleException('Could not determine the RPM limit project version')
+}
+def rpmLimitVersion = rpmLimitVersionMatch.group(1)
 def rpmLimitJar = files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}.jar")
 
 minecraft {
