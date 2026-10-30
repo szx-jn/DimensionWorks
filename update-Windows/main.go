@@ -774,7 +774,7 @@ func latestRelease() (ReleaseInfo, error) {
 }
 
 func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
-	if err := downloadFile(source, destination, mirrors); err != nil {
+	if err := downloadFileWithLimit(source, destination, mirrors, maxManifestBytes); err != nil {
 		return nil, err
 	}
 	info, err := os.Stat(destination)
@@ -788,7 +788,14 @@ func downloadBytes(source, destination string, mirrors bool) ([]byte, error) {
 	return os.ReadFile(destination)
 }
 
-func downloadFile(source, destination string, mirrors bool) (resultErr error) {
+func downloadFile(source, destination string, mirrors bool) error {
+	return downloadFileWithLimit(source, destination, mirrors, maxDownloadBytes)
+}
+
+func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes int64) (resultErr error) {
+	if maxBytes <= 0 || maxBytes > maxDownloadBytes {
+		return fmt.Errorf("下载大小限制无效：%d", maxBytes)
+	}
 	progressBegin(destination, filepath.Base(destination))
 	defer func() { progressFinish(destination, resultErr == nil) }()
 	parsed, err := url.Parse(source)
@@ -803,7 +810,7 @@ func downloadFile(source, destination string, mirrors bool) (resultErr error) {
 	for index, candidate := range candidates {
 		progressReset(destination)
 		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), candidate)
-		if err := downloadOnce(candidate, destination); err == nil {
+		if err := downloadOnceLimited(candidate, destination, maxBytes); err == nil {
 			return nil
 		} else {
 			failures = append(failures, fmt.Sprintf("%s: %v", candidate, err))
@@ -820,6 +827,10 @@ const (
 const downloadAttemptTimeout = 15 * time.Minute
 
 func downloadOnce(source, destination string) error {
+	return downloadOnceLimited(source, destination, maxDownloadBytes)
+}
+
+func downloadOnceLimited(source, destination string, maxBytes int64) error {
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
@@ -827,7 +838,7 @@ func downloadOnce(source, destination string) error {
 	// Range 与单连接回退使用独立 Context，避免 Range 超时后
 	// 把已经过期的 Context 继续传给单连接请求。
 	rangeCtx, cancelRange := context.WithTimeout(context.Background(), downloadAttemptTimeout)
-	rangeErr := downloadRanged(rangeCtx, source, destination)
+	rangeErr := downloadRanged(rangeCtx, source, destination, maxBytes)
 	cancelRange()
 	if rangeErr == nil {
 		return nil
@@ -837,10 +848,10 @@ func downloadOnce(source, destination string) error {
 	progressReset(destination)
 	sequentialCtx, cancelSequential := context.WithTimeout(context.Background(), downloadAttemptTimeout)
 	defer cancelSequential()
-	return downloadSequential(sequentialCtx, source, destination)
+	return downloadSequential(sequentialCtx, source, destination, maxBytes)
 }
 
-func downloadSequential(ctx context.Context, source, destination string) error {
+func downloadSequential(ctx context.Context, source, destination string, maxBytes int64) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
@@ -856,20 +867,20 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 	file, err := os.OpenFile(part, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
 	total := resp.ContentLength
-	if total > maxDownloadBytes {
+	if total > maxBytes {
 		_ = file.Close()
 		_ = os.Remove(part)
 		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total))
 	}
 	progressSetTotal(destination, total)
 	writer := &downloadProgress{writer: file, key: destination}
-	_, copyErr := io.Copy(writer, io.LimitReader(resp.Body, maxDownloadBytes+1))
+	_, copyErr := io.Copy(writer, io.LimitReader(resp.Body, maxBytes+1))
 	syncErr := file.Sync()
 	closeErr := file.Close()
 	if copyErr != nil { _ = os.Remove(part); return copyErr }
 	if syncErr != nil { _ = os.Remove(part); return syncErr }
 	if closeErr != nil { _ = os.Remove(part); return closeErr }
-	if writer.written > maxDownloadBytes {
+	if writer.written > maxBytes {
 		_ = os.Remove(part)
 		return fmt.Errorf("下载文件超过大小限制：%s", humanSize(writer.written))
 	}
@@ -882,7 +893,7 @@ func downloadSequential(ctx context.Context, source, destination string) error {
 
 // downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
 // Every segment is written to a separate temporary file and validated before assembly.
-func downloadRanged(ctx context.Context, source, destination string) error {
+func downloadRanged(ctx context.Context, source, destination string, maxBytes int64) error {
 	probeCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
@@ -904,7 +915,7 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 		return errors.New("服务器返回无效的 Range 探测响应")
 	}
 	var total int64
-	if _, err := fmt.Sscanf(matches[1], "%d", &total); err != nil || total <= 0 || total > maxDownloadBytes {
+	if _, err := fmt.Sscanf(matches[1], "%d", &total); err != nil || total <= 0 || total > maxBytes {
 		return errors.New("服务器返回无效或超限的 Content-Range")
 	}
 	progressSetTotal(destination, total)
