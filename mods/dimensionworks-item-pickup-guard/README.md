@@ -18,4 +18,6 @@ gradle build --no-daemon
 - Keep Create and Sophisticated Backpacks pickup behavior enabled.
 - Preserve the remainder of partially transferred stacks.
 
+Build verification: GitHub Actions successfully ran `gradle build --no-daemon` with Java 17 and Gradle 8.8. The resulting JAR contains the compiled Mixin, its refmap, the Mixin configuration, and the `MixinConfigs` manifest entry.
+
 Actual in-game acceptance is still required for the simultaneous Create/backpack scenario.
