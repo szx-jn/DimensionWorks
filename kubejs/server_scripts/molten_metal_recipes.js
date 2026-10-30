@@ -16,11 +16,13 @@ const DW_MOLTEN_INGOT_RECIPES = [
   { input: 'mekanism:ingot_bronze', fluid: 'dimensionworks:molten_bronze', heat: 'heated' },
   { input: 'mekanism:ingot_uranium', fluid: 'dimensionworks:molten_uranium', heat: 'heated' },
 
-  // 超级加热：高熔点金属、耐火合金与特殊材料
-  { input: 'minecraft:iron_ingot', fluid: 'dimensionworks:molten_iron', heat: 'superheated' },
+  // 普通加热：铁、锇与钢在本整合包采用普通加热熔融
+  { input: 'minecraft:iron_ingot', fluid: 'dimensionworks:molten_iron', heat: 'heated' },
+  { input: 'mekanism:ingot_osmium', fluid: 'dimensionworks:molten_osmium', heat: 'heated' },
+  { input: 'mekanism:ingot_steel', fluid: 'dimensionworks:molten_steel', heat: 'heated' },
+
+  // 超级加热：下界合金、强化材料与特殊金属
   { input: 'minecraft:netherite_ingot', fluid: 'dimensionworks:molten_netherite', heat: 'superheated' },
-  { input: 'mekanism:ingot_osmium', fluid: 'dimensionworks:molten_osmium', heat: 'superheated' },
-  { input: 'mekanism:ingot_steel', fluid: 'dimensionworks:molten_steel', heat: 'superheated' },
   { input: 'mekanism:ingot_refined_obsidian', fluid: 'dimensionworks:molten_refined_obsidian', heat: 'superheated' },
   { input: 'mekanism:ingot_refined_glowstone', fluid: 'dimensionworks:molten_refined_glowstone', heat: 'superheated' },
   { input: 'alexscaves:scarlet_neodymium_ingot', fluid: 'dimensionworks:molten_scarlet_neodymium', heat: 'superheated' },
@@ -42,6 +44,25 @@ ServerEvents.recipes(event => {
     recipe = entry.heat === 'superheated' ? recipe.superheated() : recipe.heated()
     recipe.id('dimensionworks:molten_metals/' + entry.fluid.split(':')[1] + '_from_ingot')
   })
+
+  // 按 Create 6.0.8 原配方 1 铜锭 + 1 锌锭 -> 2 黄铜锭等量迁移。
+  event.recipes.create.mixing(
+    Fluid.of('dimensionworks:molten_brass', 2 * DW_MOLTEN_INGOT_AMOUNT),
+    [
+      Fluid.of('dimensionworks:molten_copper', DW_MOLTEN_INGOT_AMOUNT),
+      Fluid.of('dimensionworks:molten_zinc', DW_MOLTEN_INGOT_AMOUNT)
+    ]
+  ).heated().id('dimensionworks:molten_metals/brass_from_molten_metals')
+
+  // Mekanism 原配方为 3 铜锭 + 10 mB 锡化学品 -> 4 青铜锭；
+  // 熔融配方将锡化学品投入改为 1 个等锭量熔融锡，保持 3:1 金属配比及总量。
+  event.recipes.create.mixing(
+    Fluid.of('dimensionworks:molten_bronze', 4 * DW_MOLTEN_INGOT_AMOUNT),
+    [
+      Fluid.of('dimensionworks:molten_copper', 3 * DW_MOLTEN_INGOT_AMOUNT),
+      Fluid.of('dimensionworks:molten_tin', DW_MOLTEN_INGOT_AMOUNT)
+    ]
+  ).heated().id('dimensionworks:molten_metals/bronze_from_molten_metals')
 
   // 工作盆中的常温混合配方会按 Create 的盆配方机制接受冷却流体，
   // 不额外要求燃烧器热量；90 mB 与单锭熔融量一一对应。
