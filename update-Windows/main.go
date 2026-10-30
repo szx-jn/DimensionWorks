@@ -1000,14 +1000,17 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 		appendMode = true
 	} else if resp.StatusCode == http.StatusOK {
 		offset = 0
-		if total < 0 { return errors.New("服务器未提供文件总长度，无法安全断点续传") }
-		meta = &resumeMetadata{Source: source, ETag: resp.Header.Get("ETag"), LastModified: resp.Header.Get("Last-Modified"), Total: total}
-		if meta.ETag == "" && meta.LastModified == "" {
-			_ = os.Remove(part)
-			_ = os.Remove(metaPath)
+		if total < 0 {
 			meta = nil
-		} else if err := saveResumeMetadata(metaPath, *meta); err != nil {
-			return fmt.Errorf("保存断点续传元数据失败：%w", err)
+			_ = os.Remove(metaPath)
+		} else {
+			meta = &resumeMetadata{Source: source, ETag: resp.Header.Get("ETag"), LastModified: resp.Header.Get("Last-Modified"), Total: total}
+			if meta.ETag == "" && meta.LastModified == "" {
+				_ = os.Remove(metaPath)
+				meta = nil
+			} else if err := saveResumeMetadata(metaPath, *meta); err != nil {
+				return fmt.Errorf("保存断点续传元数据失败：%w", err)
+			}
 		}
 	} else if resp.StatusCode == http.StatusRequestedRangeNotSatisfiable && offset > 0 {
 		_ = resp.Body.Close()
@@ -1017,7 +1020,7 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	} else {
 		return fmt.Errorf("HTTP %d，续传请求未获得可用响应", resp.StatusCode)
 	}
-	if total < 0 || total > maxBytes { _ = os.Remove(part); _ = os.Remove(metaPath); return fmt.Errorf("下载文件大小无效或超过限制：%s", humanSize(total)) }
+	if total > maxBytes { _ = os.Remove(part); _ = os.Remove(metaPath); return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total)) }
 	if resp.ContentLength >= 0 && appendMode && resp.ContentLength != total-offset {
 		return fmt.Errorf("续传响应长度不匹配：%d/%d", resp.ContentLength, total-offset)
 	}
@@ -1035,7 +1038,7 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	if syncErr != nil { return syncErr }
 	if closeErr != nil { return closeErr }
 	if written > maxBytes-offset { return fmt.Errorf("下载文件超过大小限制：%s", humanSize(offset+written)) }
-	if offset+written != total { return fmt.Errorf("下载未完成，已保存 %d/%d 字节；再次运行可继续下载", offset+written, total) }
+	if total >= 0 && offset+written != total { return fmt.Errorf("下载未完成，已保存 %d/%d 字节；再次运行可继续下载", offset+written, total) }
 	if err := replaceExistingFile(part, destination); err != nil { return err }
 	_ = os.Remove(metaPath)
 	return nil
