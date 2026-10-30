@@ -2426,6 +2426,7 @@ type Applied struct {
 func truncateIncompleteJournalTail(file *os.File) error {
 	end, err := file.Seek(0, io.SeekEnd)
 	if err != nil || end == 0 { return err }
+	if end > maxTransactionJournalBytes { return errors.New("事务日志超过大小限制") }
 	var last [1]byte
 	if _, err := file.ReadAt(last[:], end-1); err != nil { return err }
 	if last[0] == '\n' { return nil }
