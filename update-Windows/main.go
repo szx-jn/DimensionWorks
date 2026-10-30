@@ -2060,7 +2060,7 @@ func loadOrCreateStateKey(updateRoot string) ([]byte, error) {
 		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() != 32 {
 			return nil, errors.New("状态签名密钥文件不安全或长度无效")
 		}
-		return os.ReadFile(path)
+		return readRegularFile(path, 32)
 	} else if !os.IsNotExist(err) {
 		return nil, err
 	}
@@ -2687,6 +2687,9 @@ func replaceFromFile(source, destination string) error {
 		return err
 	}
 	defer input.Close()
+	openedInfo, err := input.Stat()
+	if err != nil { return err }
+	if !os.SameFile(sourceInfo, openedInfo) { return errors.New("替换源在打开期间发生变化") }
 
 	tempFile, err := os.CreateTemp(filepath.Dir(destination), ".dw-new-*")
 	if err != nil {
