@@ -921,6 +921,15 @@ func downloadFile(source, destination string, mirrors bool) error {
 	return downloadFileWithLimit(source, destination, mirrors, maxDownloadBytes)
 }
 
+func safeURLForLog(raw string) string {
+	parsed, err := url.Parse(raw)
+	if err != nil { return "<invalid-url>" }
+	parsed.User = nil
+	if parsed.RawQuery != "" { parsed.RawQuery = "redacted" }
+	parsed.Fragment = ""
+	return parsed.String()
+}
+
 func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes int64) (resultErr error) {
 	if maxBytes <= 0 || maxBytes > maxDownloadBytes {
 		return fmt.Errorf("下载大小限制无效：%d", maxBytes)
@@ -938,11 +947,11 @@ func downloadFileWithLimit(source, destination string, mirrors bool, maxBytes in
 	var failures []string
 	for index, candidate := range candidates {
 		progressReset(destination)
-		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), candidate)
+		fmt.Printf("[下载] 来源 %d/%d：%s\n", index+1, len(candidates), safeURLForLog(candidate))
 		if err := downloadOnceLimited(candidate, destination, maxBytes); err == nil {
 			return nil
 		} else {
-			failures = append(failures, fmt.Sprintf("%s: %v", candidate, err))
+			failures = append(failures, fmt.Sprintf("%s: %v", safeURLForLog(candidate), err))
 		}
 	}
 	return errors.New(strings.Join(failures, "\n"))
