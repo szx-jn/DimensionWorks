@@ -54,8 +54,23 @@ REPO_OVERRIDE_FILES = (Path("options.txt"),)
 
 def request_json(url: str) -> Any:
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=60) as response:
-        return json.load(response)
+    last_error: Exception | None = None
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            if not 500 <= error.code < 600 or attempt == 3:
+                raise
+            last_error = error
+        except (OSError, TimeoutError, urllib.error.URLError) as error:
+            if attempt == 3:
+                raise
+            last_error = error
+        time.sleep(2**attempt)
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Unable to fetch JSON from {url}")
 
 
 def download(url: str, destination: Path) -> None:
