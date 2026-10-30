@@ -315,6 +315,18 @@ func TestCleanupDownloadCacheRemovesOnlyExpiredRegularFiles(t *testing.T) {
 	if _, err := os.Stat(newPath); err != nil { t.Fatalf("recent cache was removed: %v", err) }
 }
 
+func TestDownloadDiagnosticsRedactURLSecrets(t *testing.T) {
+	url := "https://user:password@example.com/file.zip?token=secret#fragment"
+	redacted := safeURLForLog(url)
+	for _, secret := range []string{"user", "password", "secret", "fragment"} {
+		if strings.Contains(redacted, secret) { t.Fatalf("URL secret %q leaked in %q", secret, redacted) }
+	}
+	message := safeErrorForLog(fmt.Errorf("Get %q: context deadline exceeded", url))
+	for _, secret := range []string{"user", "password", "secret", "fragment"} {
+		if strings.Contains(message, secret) { t.Fatalf("error secret %q leaked in %q", secret, message) }
+	}
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
