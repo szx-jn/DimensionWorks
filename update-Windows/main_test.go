@@ -2,6 +2,7 @@
 package main
 
 import (
+	"crypto/hmac"
 	"io"
 	"bufio"
 	"archive/zip"
@@ -231,6 +232,45 @@ func TestCopyFileAtomicRejectsSymlinkSource(t *testing.T) {
 	if err := copyFile(link, filepath.Join(root, "copy.txt"), 0600); err == nil {
 		t.Fatal("symlink source must be rejected")
 	}
+}
+
+func TestReadStateRejectsTampering(t *testing.T) {
+	root := t.TempDir()
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if err := os.MkdirAll(updateRoot, 0700); err != nil { t.Fatal(err) }
+	key := bytes.Repeat([]byte{0x5a}, 32)
+	if err := os.WriteFile(filepath.Join(updateRoot, "state.key"), key, 0600); err != nil { t.Fatal(err) }
+	data := manifestBytes("client", "0.2.1", "v0.2.0", nil)
+	statePath := filepath.Join(updateRoot, "state.tsv")
+	if err := os.WriteFile(statePath, data, 0600); err != nil { t.Fatal(err) }
+	mac := hmac.New(sha256.New, key)
+	_, _ = mac.Write(data)
+	if err := os.WriteFile(statePath+".hmac", []byte(hex.EncodeToString(mac.Sum(nil))+"\n"), 0600); err != nil { t.Fatal(err) }
+	if _, err := readState(root, statePath, "client"); err != nil { t.Fatalf("valid signed state rejected: %v", err) }
+	if err := os.WriteFile(statePath, manifestBytes("client", "0.2.2", "v0.2.1", nil), 0600); err != nil { t.Fatal(err) }
+	if _, err := readState(root, statePath, "client"); err == nil || !strings.Contains(err.Error(), "签名校验失败") {
+		t.Fatalf("tampered state must be rejected: %v", err)
+	}
+}
+
+func TestReadStateLegacyManifestFallsBackToRescan(t *testing.T) {
+	root := t.TempDir()
+	updateRoot := filepath.Join(root, ".dimensionworks-update")
+	if err := os.MkdirAll(updateRoot, 0700); err != nil { t.Fatal(err) }
+	statePath := filepath.Join(updateRoot, "state.tsv")
+	if err := os.WriteFile(statePath, manifestBytes("client", "0.2.1", "v0.2.0", nil), 0600); err != nil { t.Fatal(err) }
+	state, err := readState(root, statePath, "client")
+	if err != nil { t.Fatal(err) }
+	if state != nil { t.Fatal("unsigned legacy state must be ignored and rebuilt from local files") }
+}
+
+func TestLoadOrCreateStateKeyPersistsStableKey(t *testing.T) {
+	root := t.TempDir()
+	first, err := loadOrCreateStateKey(root)
+	if err != nil { t.Fatal(err) }
+	second, err := loadOrCreateStateKey(root)
+	if err != nil { t.Fatal(err) }
+	if len(first) != 32 || !bytes.Equal(first, second) { t.Fatal("state key was not stable across reads") }
 }
 
 func TestCompareVersions(t *testing.T) {
