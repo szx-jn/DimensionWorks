@@ -762,6 +762,8 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 	cleanup := func() { for _, path := range partPaths { _ = os.Remove(path) } }
 	jobs := make(chan int64)
 	errs := make(chan error, segments)
+	rangeCtx, cancelRange := context.WithCancel(ctx)
+	defer cancelRange()
 	var wg sync.WaitGroup
 	var completed atomic.Int64
 	var finished atomic.Int64
@@ -773,13 +775,25 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for index := range jobs {
+			for {
+				var index int64
+				var ok bool
+				select {
+				case <-rangeCtx.Done():
+					return
+				case index, ok = <-jobs:
+					if !ok { return }
+				}
 				begin := index * chunkSize
 				end := begin + chunkSize - 1
 				if end >= total { end = total - 1 }
-				if err := downloadRangeSegment(ctx, source, partPaths[index], destination, begin, end, total); err != nil {
-					errs <- fmt.Errorf("分段 %d：%w", index+1, err)
-					continue
+				if err := downloadRangeSegment(rangeCtx, source, partPaths[index], destination, begin, end, total); err != nil {
+					select {
+					case errs <- fmt.Errorf("分段 %d：%w", index+1, err):
+					default:
+					}
+					cancelRange()
+					return
 				}
 				completed.Add(end-begin+1)
 				finished.Add(1)
@@ -789,7 +803,14 @@ func downloadRanged(ctx context.Context, source, destination string) error {
 			}
 		}()
 	}
-	for i := int64(0); i < segments; i++ { jobs <- i }
+sendJobs:
+	for i := int64(0); i < segments; i++ {
+		select {
+		case jobs <- i:
+		case <-rangeCtx.Done():
+			break sendJobs
+		}
+	}
 	close(jobs)
 	wg.Wait()
 	close(errs)
