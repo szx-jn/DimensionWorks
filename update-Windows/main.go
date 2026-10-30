@@ -828,7 +828,7 @@ const (
 	parallelDownloadWorkers = 8
 )
 
-const downloadAttemptTimeout = 15 * time.Minute
+const downloadAttemptTimeout = 6 * time.Hour
 
 func downloadOnce(source, destination string) error {
 	return downloadOnceLimited(source, destination, maxDownloadBytes)
