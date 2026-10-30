@@ -64,8 +64,8 @@ ServerEvents.recipes(event => {
     ]
   ).heated().id('dimensionworks:molten_metals/bronze_from_molten_metals')
 
-  // 工作盆中的常温混合配方会按 Create 的盆配方机制接受冷却流体，
-  // 不额外要求燃烧器热量；90 mB 与单锭熔融量一一对应。
+  // 冷却配方同样使用 Create mixing：必须由机械动力搅拌器在工作盆上执行，
+  // 工作盆用于承接流体输入与锭输出；不要求燃烧器热量，90 mB 对应一锭。
   DW_MOLTEN_INGOT_RECIPES.forEach(entry => {
     event.recipes.create.mixing(
       entry.input,
