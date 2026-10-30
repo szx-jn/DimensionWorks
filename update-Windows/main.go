@@ -316,6 +316,9 @@ func run(kind string, args []string) error {
 	}
 	defer releaseLock()
 
+	if err := cleanupDownloadCache(downloadCacheRoot, 30*24*time.Hour); err != nil {
+		return fmt.Errorf("清理过期下载缓存失败：%w", err)
+	}
 	if err := recoverInterruptedTransactions(root, updateRoot); err != nil {
 		return fmt.Errorf("发现未完成的更新事务，自动恢复失败：%w。请勿删除 .dimensionworks-update 下的恢复数据", err)
 	}
@@ -1010,6 +1013,26 @@ type resumeMetadata struct {
 	ETag string `json:"etag"`
 	LastModified string `json:"last_modified"`
 	Total int64 `json:"total"`
+}
+
+func cleanupDownloadCache(cacheRoot string, maxAge time.Duration) error {
+	info, err := os.Lstat(cacheRoot)
+	if err != nil { return err }
+	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() { return errors.New("下载缓存目录不安全") }
+	entries, err := os.ReadDir(cacheRoot)
+	if err != nil { return err }
+	cutoff := time.Now().Add(-maxAge)
+	for _, entry := range entries {
+		path := filepath.Join(cacheRoot, entry.Name())
+		fileInfo, err := os.Lstat(path)
+		if err != nil { return err }
+		if fileInfo.Mode()&os.ModeSymlink != 0 { return fmt.Errorf("下载缓存包含符号链接：%s", path) }
+		if !fileInfo.Mode().IsRegular() { return fmt.Errorf("下载缓存包含非普通文件：%s", path) }
+		if fileInfo.ModTime().Before(cutoff) {
+			if err := os.Remove(path); err != nil { return err }
+		}
+	}
+	return nil
 }
 
 func downloadResumePaths(source, destination string) (string, string, error) {
