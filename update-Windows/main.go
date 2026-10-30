@@ -948,6 +948,13 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	if err != nil { return err }
 	meta, err := loadResumeMetadata(metaPath, source)
 	if err != nil { _ = os.Remove(metaPath); meta = nil }
+	if partInfo, partErr := os.Lstat(part); partErr == nil {
+		if partInfo.Mode()&os.ModeSymlink != 0 || !partInfo.Mode().IsRegular() {
+			return errors.New("断点续传临时文件不是普通文件")
+		}
+	} else if !os.IsNotExist(partErr) {
+		return partErr
+	}
 	offset := int64(0)
 	if meta != nil {
 		if info, statErr := os.Lstat(part); statErr == nil && info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0 && info.Size() <= meta.Total {
