@@ -63,6 +63,21 @@ func TestOldLockOwnerCannotRemoveReplacementLock(t *testing.T) {
 	if _, err := os.Stat(path); !os.IsNotExist(err) { t.Fatalf("replacement lock was not released: %v", err) }
 }
 
+func TestDownloadLimitStopsOversizedBody(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("123456789"))
+	}))
+	defer server.Close()
+	destination := filepath.Join(t.TempDir(), "manifest.tsv")
+	if err := downloadFileWithLimit(server.URL, destination, false, 4); err == nil {
+		t.Fatal("expected oversized response to be rejected during transfer")
+	}
+	if _, err := os.Stat(destination); !os.IsNotExist(err) {
+		t.Fatalf("oversized destination should not remain: %v", err)
+	}
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
