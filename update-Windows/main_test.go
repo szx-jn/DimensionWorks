@@ -349,6 +349,21 @@ func TestTransactionJournalAppendRepairsTruncatedTail(t *testing.T) {
 	if gotFirst.Path != first.Path || gotSecond.Path != second.Path { t.Fatalf("journal order/content mismatch: %#v %#v", gotFirst, gotSecond) }
 }
 
+func TestReplaceFromFileRejectsSymlinkDestination(t *testing.T) {
+	if runtime.GOOS == "windows" { t.Skip("Windows symlink creation may require elevated privileges") }
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	target := filepath.Join(root, "target-link")
+	outside := filepath.Join(root, "outside")
+	if err := os.WriteFile(source, []byte("replacement"), 0600); err != nil { t.Fatal(err) }
+	if err := os.WriteFile(outside, []byte("keep"), 0600); err != nil { t.Fatal(err) }
+	if err := os.Symlink(outside, target); err != nil { t.Fatal(err) }
+	if err := replaceFromFile(source, target); err == nil { t.Fatal("symlink destination must be rejected") }
+	got, err := os.ReadFile(outside)
+	if err != nil { t.Fatal(err) }
+	if string(got) != "keep" { t.Fatalf("outside target was modified: %q", got) }
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct { left, right string; want int }{
 		{"0.2.10", "0.2.9", 1},
