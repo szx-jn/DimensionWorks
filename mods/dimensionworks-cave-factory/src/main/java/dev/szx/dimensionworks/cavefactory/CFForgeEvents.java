@@ -69,14 +69,12 @@ public final class CFForgeEvents {
     @SubscribeEvent
     public static void blockRestrictedDimensionTravel(EntityTravelToDimensionEvent event) {
         if (!CaveFactoryConfig.blockAetherAndAlexCaves()
-            || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer)
+            || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
             || !BLOCKED_DIMENSIONS.contains(event.getDimension().location())) {
             return;
         }
         event.setCanceled(true);
-        event.getEntity().displayClientMessage(
-            Component.literal("该维度暂未开放。"), true
-        );
+        player.displayClientMessage(Component.literal("该维度暂未开放。"), true);
     }
 
     @SubscribeEvent
