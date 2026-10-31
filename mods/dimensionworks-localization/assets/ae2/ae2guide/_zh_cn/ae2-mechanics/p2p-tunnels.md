@@ -7,4 +7,4 @@ navigation:
 
 # P2P 隧道
 
-见见[P2P 隧道](../items-blocks-machines/p2p_tunnels.md)
+关于 P2P 隧道的用途、配对方式和网络连接规则，请阅读[P2P 隧道详解](../items-blocks-machines/p2p_tunnels.md)。
