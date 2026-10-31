@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 存储电池
+  title: 存储元件
   icon: item_storage_cell_1k
   position: 410
 categories:
@@ -26,7 +26,7 @@ item_ids:
 - ae2:fluid_storage_cell_256k
 ---
 
-# 存储电池
+# 存储元件
 
 <Column>
   <Row>
@@ -61,11 +61,11 @@ item_ids:
 
 如果单元格空,可按左转右键单击,用手边的单元格来移动存储组件,则可以从房屋中移除存储部件。
 
-## 具有不同类型计数的存储容量
+## 不同物品类型数量下的容量
 
-[类型预付费用](../ae2-mechanics/bytes-and-types.md)1 型号的牢房可以持有 2x 和所有 63 型使用的 2X。
+由于每种物品类型都要占用额外存储字节，只存放一种物品时，实际容量通常接近存满 63 种物品时的两倍。
 
-| 单元格                                     | 使用 1 类使用的细胞总容量 | 63 种使用类型细胞的总容量 |
+| 存储元件                                     | 仅存 1 种物品时的容量 | 存满 63 种物品时的容量 |
 | ---------------------------------------- | ----------------------------------------: | ------------------------------------------: |
 | <ItemLink id="item_storage_cell_1k" />   |                                     8,128 |                                       4,160 |
 | <ItemLink id="item_storage_cell_4k" />   |                                    32,512 |                                      16,640 |
@@ -74,31 +74,29 @@ item_ids:
 | <ItemLink id="item_storage_cell_256k" /> |                                 2,080,768 |                                   1,064,960 |
 
 
-## 分割
+## 存储元件分区
 
-单元格只能过滤到只接受某些物品,类似<ItemLink id="storage_bus" />Ses 可以过滤。这是
-在一个<ItemLink id="cell_workbench" />.
+通过<ItemLink id="cell_workbench" />设置分区，可以限制存储元件允许存入的物品或流体种类。其作用类似<ItemLink id="storage_bus" />的过滤规则。
 
-可从 JEI 即使你没有那东西
+即使背包中没有目标物品，也可以直接从 JEI 拖入图标来设置分区。
 
-## 升级
+## 升级卡
 
-存储单元格支持以下[升级](upgrade_cards.md),插入到<ItemLink id="cell_workbench" />:
+存储元件可以通过<ItemLink id="cell_workbench" />安装[升级卡](upgrade_cards.md)：
 
-*   <ItemLink id="fuzzy_card" />(流体单元格不可用)让单元格被损坏水平和/或忽略项分隔 NBT
-*   <ItemLink id="inverter_card" />将过滤器从白色列表切换为黑名单
-*   <ItemLink id="equal_distribution_card" />将相同数量的单元格字节面积分配到每类的单元格位数,因此,一种类型无法填充整个单元格
-*   <ItemLink id="void_card" />如果单元格是满空的,则插入物品(或特定类型在
-    平等分发卡的情况)防止农场倒水,小心分割!
-*   可接受便携细胞<ItemLink id="energy_card" />以便增加电池的电池容量
+* <ItemLink id="fuzzy_card" />：对物品存储元件启用模糊匹配，忽略部分耐久或 NBT 差异；流体元件不支持此卡。
+* <ItemLink id="inverter_card" />：将允许列表改成排除列表。
+* <ItemLink id="equal_distribution_card" />：为各种类型平均分配存储容量，防止一种物品占满元件。
+* <ItemLink id="void_card" />：当存储已满时销毁继续存入的多余资源。**请谨慎使用**，避免误删重要材料。
+* <ItemLink id="energy_card" />：可以安装在便携式元件中，提高其内部能源容量。
 
-## 颜色
+## 染色
 
-便携式物品和液体电池可以与皮革盔甲相似的颜色,与染料一起制成。
+便携式存储元件可以像皮革盔甲一样使用染料更改颜色。
 
-# 住房
+## 存储外壳
 
-电池可以配有存储部件和住房,也可以配以存储组件的住房配方:
+存储元件由外壳和内部存储组件组成。可通过以下配方组装完整元件，或只制作外壳，再与已有组件组合。
 
 <Row>
   <Recipe id="network/cells/item_storage_cell_1k" />
@@ -106,7 +104,7 @@ item_ids:
   <Recipe id="network/cells/item_storage_cell_1k_storage" />
 </Row>
 
-住房本身的建造方式如下:
+外壳的合成配方如下：
 
 <Row>
   <RecipeFor id="item_cell_housing" />
@@ -114,10 +112,9 @@ item_ids:
   <RecipeFor id="fluid_cell_housing" />
 </Row>
 
-# 存储部件
+## 存储组件
 
-存储组件是所有部件的核心 AE2 每一层次都提高能力
-4x 和费用 3 上一级。
+存储组件决定元件的容量。每提升一个等级，容量通常增长为之前的 4 倍，同时需要更多材料。
 
 <Column>
   <Row>
@@ -135,9 +132,9 @@ item_ids:
   </Row>
 </Column>
 
-# 物品存储单元格
+## 物品存储元件
 
-物品存储槽可容纳 63 种不同种类的物品,并且可以按所有标准容量提供。
+普通物品存储元件最多可容纳 63 种物品，有 1K、4K、16K、64K 和 256K 等容量等级。
 
 <Column>
   <Row>
@@ -155,14 +152,11 @@ item_ids:
   </Row>
 </Column>
 
-## 便携式物品存储
+### 便携式物品存储元件
 
-这些就像个小小的<ItemLink id="chest" />或像背包一样。<ItemLink id="charger" />
+便携式元件可以随身使用，功能类似迷你<ItemLink id="chest" />。它们需要能量维持工作，可以使用<ItemLink id="charger" />充能。
 
-与标准存储电池不同,这些实际上*减少*其字字节能力增加时,其型号能力在每字段容量增加,占
-字节总容量。
-
-除了升级卡卡外,所有细胞可以接收的卡片也都接受<ItemLink id="energy_card" />升级内部电池。
+它们的容量分配方式与普通存储元件略有不同，高容量型号的字节容量会更多地用于存储物品类型。安装<ItemLink id="energy_card" />可提高内部电池容量。
 
 <Column>
   <Row>
@@ -180,9 +174,9 @@ item_ids:
   </Row>
 </Column>
 
-# 流流储槽
+## 流体存储元件
 
-流体存储槽可容纳 5 种不同类型的液体,并且能以所有标准容量提供。
+流体存储元件最多可以保存 5 种不同流体，也提供各个标准容量等级。
 
 <Column>
   <Row>
@@ -200,14 +194,9 @@ item_ids:
   </Row>
 </Column>
 
-## 便携式液体存储
+### 便携式流体存储元件
 
-这些就像个小小的<ItemLink id="chest" />或像背包一样。<ItemLink id="charger" />
-
-与标准存储电池不同,这些实际上*减少*其字字节能力增加时,其型号能力在每字段容量增加,占
-字节总容量。
-
-除了升级卡卡外,所有细胞可以接收的卡片也都接受<ItemLink id="energy_card" />升级内部电池。
+便携式流体元件可以随身访问流体存储，类似小型<ItemLink id="chest" />，可以通过<ItemLink id="charger" />补充能量，并通过<ItemLink id="energy_card" />扩充内部储能。
 
 <Column>
   <Row>
@@ -225,7 +214,7 @@ item_ids:
   </Row>
 </Column>
 
-# 创意物品和流体单元格
+## 创造模式存储元件
 
 <Row>
   <ItemImage id="creative_item_cell" scale="2" />
@@ -233,5 +222,4 @@ item_ids:
   <ItemImage id="creative_fluid_cell" scale="2" />
 </Row>
 
-创意物品和流动电池**不提供无限存储**相反,它们作为任何来源和汇的无限源和吸收汇的作用
-或流水的项,[分区](cell_workbench.md)他们。
+创造模式物品元件和流体元件**不是普通意义上的无限容量仓库**。它们更像无限资源的输入源与销毁端，只会对通过[分区设置](cell_workbench.md)允许的资源生效。
