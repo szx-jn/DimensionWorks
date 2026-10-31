@@ -1,15 +1,15 @@
 ---
 navigation:
   parent: example-setups/example-setups-index.md
-  title: 物品与流体物流子网
+  title: 物品与流体管道子网
   icon: storage_bus
 ---
 
-# 物品与流体物流子网
+# 物品与流体管道子网
 
-ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.md)构建类似管道的自动物流系统。只需使用少量输入总线、输出总线和存储总线，就能把物品或流体从一个容器送往另一个容器，例如把加工产物送回<ItemLink id="pattern_provider" />。
+AE2 的[设备](../ae2-mechanics/devices.md)可以组成小型独立网络，充当物品管道或流体管道。这样既能传送原料，也能把加工完成的物品送回<ItemLink id="pattern_provider" />。
 
-下面介绍几种常用结构。
+常见方案有以下两种。
 
 ## 输入总线 → 存储总线
 
@@ -21,8 +21,7 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 0 0" max="1.3 1 1">
-        (2)存储总线:可设置筛选条件。这个(和您想要成为目标容器的其他存储总线)
-        必须是唯一存储在网络上的存储。
+        （2）存储总线：可设置过滤规则。该子网中只能保留需要作为输出目标的存储设备。
   </BoxAnnotation>
 
 <DiamondAnnotation pos="4.5 0.5 0.5" color="#00ff00">
@@ -36,11 +35,11 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-<ItemLink id="import_bus" />（1）从来源容器抽取物品或流体，然后尝试存入子网的[网络存储](../ae2-mechanics/import-export-storage.md)。
+<ItemLink id="import_bus" />从来源容器抽取资源并尝试存入[网络存储](../ae2-mechanics/import-export-storage.md)。由于这个子网的唯一存储入口是<ItemLink id="storage_bus" />，资源只能进入存储总线所连接的目标容器。
 
-因为子网唯一的存储目标是<ItemLink id="storage_bus" />（2）连接的目标容器，资源就会直接转移过去。可利用<ItemLink id="quartz_fiber" />从主网络共享能源，但不会把两个网络合并。
+可以使用<ItemLink id="quartz_fiber" />从主网共享能源，而不让两个网络直接合并。
 
-两种总线都可以设置筛选条件，默认则处理所有可访问的资源。这种结构也支持多个输入端和多个目标容器。
+输入总线和存储总线都能设置过滤规则。也可以使用多个输入总线或多个目标存储总线，搭建一对多传输系统。
 
 ## 存储总线 → 输出总线
 
@@ -48,7 +47,7 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   <ImportStructure src="../assets/assemblies/storage_export_pipe.snbt" />
 
 <BoxAnnotation color="#dddddd" min="3.7 0 0" max="4 1 1">
-        (1)存储总线:可设置筛选条件。此存储总线（以及其他指向原料容器的存储总线）必须是子网内唯一的存储方式。
+        （1）存储总线：可设置过滤规则。该子网应只包含需要作为物品来源的存储设备。
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 0 0" max="1.3 1 1">
@@ -66,11 +65,11 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-<ItemLink id="storage_bus" />（1）把来源容器中的物品视作子网的存储资源，<ItemLink id="export_bus" />（2）再将符合条件的资源送往目标容器。
+<ItemLink id="export_bus" />从[网络存储](../ae2-mechanics/import-export-storage.md)提取资源。这个子网唯一的存储来源是<ItemLink id="storage_bus" />连接的容器，因此输出总线会从该容器取出指定物品。
 
-**输出总线必须配置筛选物品**，否则不会主动输出。这种结构同样支持多个源容器和多个输出端口。
+输出总线**必须设置过滤规则**才能工作。也可以用<ItemLink id="quartz_fiber" />共享能源，并根据需要增加更多来源或输出端。
 
-## 无效结构：输入总线 → 输出总线
+## 错误示例：输入总线 → 输出总线
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../assets/assemblies/import_export_pipe.snbt" />
@@ -94,13 +93,11 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-如果子网只有输入总线与输出总线，而没有任何存储设备，那么两者都无法工作：输入总线没有存储目标，输出总线也没有资源来源。
+仅把输入总线与输出总线相连，**不会形成有效管道**。输入总线需要一个存储目标才能存入物品，输出总线也需要一个存储来源才能提取物品；如果网络中完全没有存储设备，两端都无法运行。
 
-因此，要让物流子网正常运转，至少需要一个充当存储连接点的<ItemLink id="storage_bus" />或其他存储设备。
+## 对同一台机器输入并回收产物
 
-## 同一个方块面同时输入与输出
-
-有些机器可以在同一侧接收原料并输出成品，例如<ItemLink id="charger" />。可以将上述两类物流子网组合使用：一条负责送入原料，另一条负责取出结果。
+像<ItemLink id="charger" />这样通过同一个面接受输入与输出的机器，可以组合上述两种管道子网，让原料自动进入，成品自动离开。
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../assets/assemblies/import_storage_export_pipe.snbt" />
@@ -110,8 +107,7 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="2 1 1" max="3 1.3 2">
-        (2)存储总线:可设置筛选条件。这个(和您想要推动和拉动的物品的其他存储总线)
-        必须是唯一存储在网络上的存储。
+        （2）存储总线：负责访问机器内部库存，是子网中的唯一资源存储入口。
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="2 0 1" max="3 1 2">
@@ -133,13 +129,11 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-## 使用 ME 接口作为中转站
+## 使用 ME 接口
 
-<ItemLink id="interface" />也能充当子网与外部容器之间的中转点。
+除了输入、输出总线，<ItemLink id="interface" />也能与[网络存储](../ae2-mechanics/import-export-storage.md)交换物品。
 
-没有设置常备库存的接口会尝试把外部输入的物品送入网络存储，因此可以替代“输入总线 → 存储总线”方案中的输入端。
-
-反过来，在接口中设置需要保持的物品数量，它就会从网络存储中补充物品，借助存储总线可以将这些物品提供给其他设备。
+接口未配置目标库存时，可以接收物品并将其送回网络；设置库存目标后，则可以主动从网络提取并准备指定物品。将接口与存储总线配合，就能灵活设计双向资源交换流程。
 
 <GameScene zoom="6" background="transparent">
 <ImportStructure src="../assets/assemblies/interface_pipes.snbt" />
@@ -163,9 +157,9 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
 <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-## 一对多与多对多传输
+## 一对多、多对一与多对多
 
-子网并不要求只有一个<ItemLink id="import_bus" />、<ItemLink id="export_bus" />或<ItemLink id="storage_bus" />。按照实际需求增加多个输入和输出端点，可以搭建更复杂的物流分配网络。
+并不要求每个管道子网只有一台<ItemLink id="import_bus" />、<ItemLink id="export_bus" />或<ItemLink id="storage_bus" />。根据需求可以组合多个来源和目标，利用过滤和优先级控制流向。
 
 <GameScene zoom="3" background="transparent">
 <ImportStructure src="../assets/assemblies/many_to_many_pipe.snbt" />
@@ -173,13 +167,13 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
 <IsometricCamera yaw="185" pitch="30" />
 </GameScene>
 
-## 一份样板原料分送到多个位置
+## 把一份样板的材料分发到多个位置
 
-有时<ItemLink id="pattern_provider" />需要将一份配方原料送到不同机器，或同一台机器的不同输入面。样板供应器在开始加工时会直接向相邻容器**推出**材料，不会先把材料保存在自身库存中。
+样板供应器<ItemLink id="pattern_provider" />通常直接向相邻容器输出材料，并不长期存储原料。因此，不能把它直接当作普通箱子连接到管道子网。
 
-因此，这里需要一台相邻的<ItemLink id="interface" />接收样板供应器的原料，再通过存储总线把材料送往多个加工位置。
+可以使用<ItemLink id="interface" />作为中间连接点，让样板供应器把整批原料送入子网，再由多个存储总线把不同原料分配到不同机器或一台机器的不同输入面。
 
-注意接口和样板供应器的实际连接方式：如果要阻止两个 ME 网络意外合并，应使用合适朝向的**平面附属部件形式**，而不是随意连接两个完整方块设备。
+要确保定向样板供应器和扁平接口没有意外把两个 ME 网络合并。
 
 <GameScene zoom="6" background="transparent">
 <ImportStructure src="../assets/assemblies/provider_interface_storage.snbt" />
@@ -198,4 +192,3 @@ ME 网络不仅能存储物品，还能利用[设备](../ae2-mechanics/devices.m
 
 <IsometricCamera yaw="185" pitch="30" />
 </GameScene>
-
