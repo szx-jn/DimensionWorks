@@ -11,14 +11,12 @@ navigation:
   <ImportStructure src="../assets/assemblies/meteor_interior.snbt" />
 </GameScene>
 
-陨石是使用陨石的起点 AE2 它们提供关键材料:[赛特斯石英母岩](../items-blocks-machines/budding_certus.md)
-各类和不同种类的<ItemLink id="mysterious_cube" />在中间。
+陨石是开启 AE2 工业的关键地点。陨石内部能够找到不同品质的[赛特斯石英母岩](../items-blocks-machines/budding_certus.md)，中心还有藏着压印模板的<ItemLink id="mysterious_cube" />。
 
-[开始](../getting-started.md)一旦你找到一个,将提供有关该做什么的信息。
+找到陨石之后，可以按照[入门教程](../getting-started.md)的步骤收集材料。
 
-## 寻找陨石
+## 如何寻找陨石
 
-陨石人相当常见,在地下留下巨大的洞穴,所以你可能已经发现了几个。如果不是,一个。
-<ItemLink id="meteorite_compass" />指向最近的神秘方块
+陨石比较常见，坠落时会在地表留下明显的撞击坑。如果一直没有找到，可以制作<ItemLink id="meteorite_compass" />，让它指向最近的神秘方块。
 
-![流星板](../assets/assemblies/meteorite-crater.png)
+![陨石撞击坑](../assets/assemblies/meteorite-crater.png)
