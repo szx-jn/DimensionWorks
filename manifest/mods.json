@@ -1541,6 +1541,30 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/draconic-evolution"
+    },
+    {
+      "id": "ldlib",
+      "name": "LDLib",
+      "source": "curseforge",
+      "project_slug": "ldlib",
+      "file_id": 8830518,
+      "file_name": "ldlib-forge-1.20.1-1.0.52.a.jar",
+      "version": "1.20.1-1.0.52.a-forge",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ldlib"
+    },
+    {
+      "id": "neoecoae",
+      "name": "Neo ECO AE Extension",
+      "source": "curseforge",
+      "project_slug": "neo-eco-ae-extension",
+      "file_id": 8739989,
+      "file_name": "neoecoae-20.4.2.jar",
+      "version": "20.4.2",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/neo-eco-ae-extension"
     }
   ]
 }
