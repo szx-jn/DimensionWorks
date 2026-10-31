@@ -19,7 +19,7 @@ navigation:
 <BoxAnnotation color="#dddddd" min="2 0 1" max="3 1 2">
         （1）样板供应器：安装水中加工的处理样板，保持默认设置。
 
-        ![福鲁伊克斯模式](../assets/diagrams/fluix_pattern_small.png)![易闪闪烧模式](../assets/diagrams/flawed_budding_pattern_small.png)
+        ![福鲁伊克斯水晶处理样板](../assets/diagrams/fluix_pattern_small.png)![有瑕母岩处理样板](../assets/diagrams/flawed_budding_pattern_small.png)
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1.7 0 1" max="2 1 2">
