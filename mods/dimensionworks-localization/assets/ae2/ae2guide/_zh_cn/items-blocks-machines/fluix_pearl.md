@@ -14,9 +14,8 @@ item_ids:
 
 <ItemImage id="fluix_pearl" scale="4" />
 
-披在其中的珍珠,<ItemLink id="fluix_crystal" />用于生产
-数个 AE2 组成部分。
+福鲁伊克斯珍珠由末影珍珠和<ItemLink id="fluix_crystal" />等材料制作，可用于合成多种 AE2 部件。
 
-## 用途
+## 合成与用途
 
 <RecipeFor id="fluix_pearl" />
