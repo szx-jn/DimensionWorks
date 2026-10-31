@@ -16,6 +16,7 @@
 - 普通语言键：`assets/<命名空间>/lang/zh_cn.json`
 - GuideME 页面：`assets/<命名空间>/<指南目录>/_zh_cn/`
 - Patchouli 页面：`assets/<命名空间>/patchouli_books/<书>/zh_cn/`
+- `optional-namespaces.json` 列出的语言覆盖面向未随整合包分发的可选模组；模组未安装时不做源键匹配，安装后会按实际英文键进行校验。
 
 Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通过本 Mod 补充的语言键解析。车万女仆当前版本已经提供这些语言键，因此不重复翻译其正文。
 
@@ -51,6 +52,8 @@ python3 scripts/check_localization.py
 - 是否出现无源键、重复 JSON 键、占位符变化。
 - 是否缺页或覆盖了第三方后来已经补齐的条目。
 - 是否存在没有对应英文页面或已被第三方补齐的手册覆盖。
+
+可选模组命名空间必须显式列入 `optional-namespaces.json`，避免拼写错误被当作有效覆盖；如果对应模组已安装，仍会完整检查源键、重复键和占位符。
 
 `scripts/pack_hook.py` 会在打包预检时运行同一套校验；`--skip-build` 不会跳过汉化校验。
 

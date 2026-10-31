@@ -19,6 +19,7 @@ DEFAULT_INSTANCE_DIR = (
 )
 DEFAULT_OVERRIDE_ROOT = ROOT / "mods" / "dimensionworks-localization"
 LOCALIZATION_JAR_PREFIX = "dimensionworks_localization-"
+OPTIONAL_NAMESPACE_FILE = "optional-namespaces.json"
 PLACEHOLDER = re.compile(r"%(?:\d+\$)?[sdf]|%%")
 LANG_FILE = re.compile(r"assets/([^/]+)/lang/(en_us|zh_cn)\.json")
 GUIDEME_PAGE = re.compile(r"assets/([^/]+)/([^/]+)/(.+\.md)")
@@ -147,6 +148,23 @@ def _read_override_lang_files(
     return overrides, duplicates, errors
 
 
+def _read_optional_namespaces(override_root: Path) -> tuple[set[str], list[str]]:
+    path = override_root / OPTIONAL_NAMESPACE_FILE
+    if not path.exists():
+        return set(), []
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        return set(), [f"{path.relative_to(override_root)}: {error}"]
+    if not isinstance(value, list) or any(
+        not isinstance(namespace, str) or not namespace for namespace in value
+    ):
+        return set(), [f"{path.relative_to(override_root)}: expected a list of namespace strings"]
+    if len(value) != len(set(value)):
+        return set(), [f"{path.relative_to(override_root)}: duplicate namespace"]
+    return set(value), []
+
+
 def _guideme_sets(names: list[str]) -> dict[tuple[str, str], dict[str, set[str]]]:
     guides: dict[tuple[str, str], dict[str, set[str]]] = defaultdict(
         lambda: defaultdict(set)
@@ -232,14 +250,18 @@ def build_report(instance_dir: Path, override_root: Path) -> LocalizationReport:
             report.json_errors.append(f"{jar}: {error}")
 
     overrides, duplicate_keys, override_errors = _read_override_lang_files(override_root)
+    optional_namespaces, optional_errors = _read_optional_namespaces(override_root)
     report.duplicate_override_keys.extend(duplicate_keys)
     report.json_errors.extend(override_errors)
+    report.json_errors.extend(optional_errors)
     report.namespace_count = len(overrides)
 
     for namespace in sorted(set(source_en) | set(overrides)):
         english = source_en.get(namespace, {})
         existing = source_zh.get(namespace, {})
         override = overrides.get(namespace, {})
+        if namespace in optional_namespaces and not english and not existing:
+            continue
         for key in sorted(set(override) - set(english)):
             report.unknown_override_keys.append((namespace, key))
         for key in sorted(set(override) & set(existing)):
