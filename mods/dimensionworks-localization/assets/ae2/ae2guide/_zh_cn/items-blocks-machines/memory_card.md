@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 内存卡
+  title: 记忆卡
   icon: memory_card
   position: 410
 categories:
@@ -14,12 +14,11 @@ item_ids:
 
 <ItemImage id="memory_card" scale="4" />
 
-内存卡用于复制和粘贴设置 AE2[设备](../ae2-mechanics/devices.md)链接
-[P2P 隧道](p2p_tunnels.md)也可以粘贴[升级卡卡](upgrade_cards.md)进入设备。
+记忆卡用于复制、保存和恢复 AE2 [设备](../ae2-mechanics/devices.md)的设置，也能配对[P2P 隧道](p2p_tunnels.md)，以及将[升级卡](upgrade_cards.md)配置复制到其他设备。
 
-- 点击 Shift- right 即单击 Shik- 右键以复制设置或生成新的 P2P 连接频率。
-- 单击右键粘贴设置、升级卡片或连接频率。
+* **潜行并右键**设备：复制其设置，或者为 P2P 隧道建立新的连接频率。
+* **右键**另一台设备：粘贴设置、升级卡配置或 P2P 连接频率。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="memory_card" />
