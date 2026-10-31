@@ -31,7 +31,7 @@ final class ReactorInputRegistry {
                 member = null;
             }
             if (member == null) {
-                member = new ReactorInputMember(injector);
+                member = new ReactorInputMember(core, injector);
                 MEMBERS.put(core, member);
             }
 
