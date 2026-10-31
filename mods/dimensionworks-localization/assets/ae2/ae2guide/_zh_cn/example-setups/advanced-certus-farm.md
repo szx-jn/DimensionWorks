@@ -18,11 +18,11 @@ navigation:
   <ImportStructure src="../assets/assemblies/advanced_certus_farm.snbt" />
 
   <BoxAnnotation color="#ddaaaa" min="3.7 2 1" max="4 3 2">
-        (1)（1）破坏面板 1：可附魔时运，用于收割成熟晶簇。
+        （1）破坏面板 1：可附魔时运，用于收割成熟晶簇。
   </BoxAnnotation>
 
   <BoxAnnotation color="#ddaaaa" min="2 2 1.7" max="3 3 2">
-        (2)（2）存储总线 1：筛选赛特斯石英水晶。
+        （2）存储总线 1：筛选赛特斯石英水晶。
         <ItemImage id="certus_quartz_crystal" scale="2" />
   </BoxAnnotation>
 
@@ -31,11 +31,11 @@ navigation:
   </DiamondAnnotation>
 
   <BoxAnnotation color="#aaddaa" min="3.7 1 1" max="4 2 2">
-        (3)（3）破坏面板 2：必须附魔精准采集，取回退化的母岩。
+        （3）破坏面板 2：必须附魔精准采集，取回退化的母岩。
   </BoxAnnotation>
 
   <BoxAnnotation color="#aaddaa" min="2 1 1.7" max="3 2 2">
-        (4)（4）存储总线 2：筛选赛特斯石英块。
+        （4）存储总线 2：筛选赛特斯石英块。
         <BlockImage id="quartz_block" scale="2" />
   </BoxAnnotation>
 
@@ -44,11 +44,11 @@ navigation:
   </DiamondAnnotation>
 
   <BoxAnnotation color="#ffddaa" min="4 0.7 1" max="5 1 2">
-        (5)（5）成型面板：默认配置，负责放置补充的母岩。
+        （5）成型面板：默认配置，负责放置补充的母岩。
   </BoxAnnotation>
 
   <BoxAnnotation color="#ffddaa" min="2 0.7 2" max="3 1 3">
-        (6)（6）输入总线：筛选有瑕赛特斯石英母岩。
+        （6）输入总线：筛选有瑕赛特斯石英母岩。
         <BlockImage id="flawed_budding_quartz" scale="2" />
   </BoxAnnotation>
 
@@ -57,12 +57,12 @@ navigation:
   </DiamondAnnotation>
 
   <BoxAnnotation color="#aaaadd" min="1.7 2 2" max="2 3 3">
-        (7)（7）存储总线 3：筛选赛特斯石英水晶，优先级高于主网。
+        （7）存储总线 3：筛选赛特斯石英水晶，优先级高于主网。
         <ItemImage id="certus_quartz_crystal" scale="2" />
   </BoxAnnotation>
 
   <BoxAnnotation color="#aaaadd" min="2 1 2" max="3 2 3">
-        (8)（8）ME 接口：始终保持至少 1 个有瑕赛特斯石英母岩，安装合成卡以自动补充。
+        （8）ME 接口：始终保持至少 1 个有瑕赛特斯石英母岩，安装合成卡以自动补充。
         <Row><BlockImage id="flawed_budding_quartz" scale="2" /><ItemImage id="crafting_card" scale="2" /></Row>
   </BoxAnnotation>
 
