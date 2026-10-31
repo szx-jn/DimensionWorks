@@ -24,9 +24,8 @@ import org.jetbrains.annotations.Nullable;
  * operating variable; only its *generated* energy is discarded in place of FE export.
  */
 public final class ReactorPowerBridge {
-    public static final float OUTPUT_RPM = 256.0F;
-    public static final float INPUT_STRESS_PER_RPM = 256.0F;
-    private static final double SU_PER_FE_T = 2.0D;
+    public static final float OUTPUT_RPM = ReactorPowerMath.OUTPUT_RPM;
+    public static final float INPUT_STRESS_PER_RPM = ReactorPowerMath.INPUT_STRESS_PER_RPM;
     private static final double SHIELD_TARGET = 0.95D;
 
     private ReactorPowerBridge() {
@@ -34,8 +33,7 @@ public final class ReactorPowerBridge {
 
     public record Output(TileReactorCore core, int connectedPorts, double generationPerTick) {
         public float stressPerRpm() {
-            double stress = generationPerTick * SU_PER_FE_T / (OUTPUT_RPM * connectedPorts);
-            return (float) Math.min(Float.MAX_VALUE / 1024.0D, Math.max(0.0D, stress));
+            return ReactorPowerMath.stressPerRpm(generationPerTick, connectedPorts);
         }
     }
 
@@ -174,12 +172,10 @@ public final class ReactorPowerBridge {
             // Equivalent to the original stabilizers extracting this tick's FE.
             // Without draining generated energy, saturation would rapidly become full,
             // and generationRate would fall to zero even with a Create shaft attached.
-            double generated = core.generationRate.get();
-            if (Double.isFinite(generated) && generated > 0) {
-                long drain = Math.min(core.saturation.get(), (long) Math.floor(generated));
-                if (drain > 0) {
-                    core.saturation.subtract(drain);
-                }
+            long drain = ReactorPowerMath.drainGenerated(core.generationRate.get(),
+                core.saturation.get());
+            if (drain > 0) {
+                core.saturation.subtract(drain);
             }
         }
 
