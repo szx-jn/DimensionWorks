@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: 延长压印器
+    title: 扩展压印器
     icon: expatternprovider:ex_inscriber
 categories:
 - extended devices
@@ -9,16 +9,14 @@ item_ids:
 - expatternprovider:ex_inscriber
 ---
 
-# 延长压印器
+# 扩展压印器
 
 <Row gap="20">
 <BlockImage id="expatternprovider:ex_inscriber" scale="8"></BlockImage>
 </Row>
 
-延长压印器高级<ItemLink id="ae2:inscriber" />.
+扩展压印器是<ItemLink id="ae2:inscriber" />的升级版本，**可以同时执行 4 个压印任务**。
 
-它可以同时运行 4 个打字工作。
+你可以通过界面按钮调整内部物品槽允许的最大堆叠数量。
 
-有按钮可以让您更改其库存的最大堆叠大小, 像正常的一样。
-
-建议使用时将堆叠大小设置为 1<ItemLink id="ae2:pattern_provider" />避免可能出现的问题。
+与<ItemLink id="ae2:pattern_provider" />配合使用时，建议将堆叠数量设置为 **1**，以免不同批次的加工原料相互干扰。
