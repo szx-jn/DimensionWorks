@@ -15,6 +15,6 @@ item_ids:
   <ImportStructure src="../structure/cable_precise_storage_bus.snbt"></ImportStructure>
 </GameScene>
 
-ME 精确存储总线是 a<ItemLink id="ae2:storage_bus" />中可用数字过滤,但只能插入不超过此限制的物品。
+ME 精确存储总线是<ItemLink id="ae2:storage_bus" />的特殊版本。你可以为每种物品设置数量上限，**只允许存入不超过指定上限的物品**，适合定量库存管理。
 
-![GUI](../pic/pre_storage_bus.png)
+![精确存储设置](../pic/pre_storage_bus.png)
