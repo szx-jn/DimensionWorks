@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: ME 内源缓冲
+    title: ME 原料缓冲器
     icon: expatternprovider:ingredient_buffer
 categories:
 - extended devices
@@ -9,8 +9,8 @@ item_ids:
 - expatternprovider:ingredient_buffer
 ---
 
-# ME 内源缓冲
+# ME 原料缓冲器
 
 <BlockImage id="expatternprovider:ingredient_buffer" scale="8"></BlockImage>
 
-存储区可以容纳 36 种种类的任何东西 从物品到液体
+原料缓冲器最多可容纳 **36 种不同类型的资源**，包括物品和流体。适合用作多种材料之间的中转储存。
