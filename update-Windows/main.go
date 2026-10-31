@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -74,10 +75,13 @@ type Manifest struct {
 
 type ReleaseInfo struct {
 	TagName string `json:"tag_name"`
-	Assets  []struct {
-		Name               string `json:"name"`
-		BrowserDownloadURL string `json:"browser_download_url"`
-	} `json:"assets"`
+	Assets  []ReleaseAsset `json:"assets"`
+}
+
+type ReleaseAsset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+	Size               int64  `json:"size"`
 }
 
 type Archive struct {
@@ -347,6 +351,7 @@ func run(kind string, args []string) error {
 	var target *Manifest
 	var fullPackage *Archive
 	var fullPackageURL string
+	var releaseInfo *ReleaseInfo
 	releaseTag := ""
 
 	switch {
@@ -404,6 +409,7 @@ func run(kind string, args []string) error {
 			return err
 		}
 		releaseTag = release.TagName
+		releaseInfo = &release
 		version := strings.TrimPrefix(releaseTag, "v")
 		manifestAsset := manifestAssetName(kind, version)
 		var manifestURL string
@@ -484,11 +490,16 @@ func run(kind string, args []string) error {
 	}
 	hasArchiveChanges := false
 	for _, entry := range selected { if entry.Action == "archive" { hasArchiveChanges = true; break } }
+	transferPlan := TransferPlan{}
 	if fullPackage == nil && hasArchiveChanges {
-		if fullPackageURL == "" { fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version)) }
-		if size, sizeErr := remoteContentLength(fullPackageURL); sizeErr == nil && size > 0 {
-			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
+		transferPlan = planTransfer(kind, current, target, releaseInfo, fullPackageURL, work)
+		fullPackageURL = transferPlan.FullPackageURL
+		printTransferPlan(current, target, transferPlan)
+		packageDiskBytes := transferPlan.FullPackageSize
+		if transferPlan.UseIncrementals {
+			packageDiskBytes = largestIncrementalSize(transferPlan.Incrementals)
 		}
+		remoteBytes = saturatingAdd(remoteBytes, packageDiskBytes)
 	}
 	if err := ensureDiskSpace(root, saturatingAdd(saturatingAdd(saturatingAdd(backupBytes, backupBytes), remoteBytes), 256<<20)); err != nil {
 		return fmt.Errorf("磁盘空间预检失败：%w", err)
@@ -549,33 +560,14 @@ func run(kind string, args []string) error {
 	}
 
 	deltaUsed := false
-	if len(archiveEntries) > 0 && fullPackage == nil && releaseTag != "" &&
-		validReleaseTag(target.Base) && current.Release == target.Base {
-		deltaName := deltaAssetName(kind, target.Version)
-		deltaPath := filepath.Join(work, "delta.zip")
-		fmt.Println("[下载] 尝试差量更新包：", deltaName)
-		if err := downloadFile(assetURL(releaseTag, deltaName), deltaPath); err == nil {
-			delta, openErr := openArchive(deltaPath)
-			if openErr == nil {
-				unpackedBytes, sizeErr := estimateArchiveBytes(delta, archiveEntries)
-				if sizeErr != nil { _ = delta.Close(); return sizeErr }
-				if spaceErr := ensureDiskSpace(root, saturatingAdd(saturatingAdd(saturatingAdd(backupBytes, backupBytes), unpackedBytes), 256<<20)); spaceErr != nil {
-					_ = delta.Close()
-					return fmt.Errorf("差量包展开前磁盘空间不足：%w", spaceErr)
-				}
-				stageErr := stageArchiveEntries(delta, archiveEntries, stageRoot)
-				_ = delta.Close()
-				if stageErr == nil {
-					deltaUsed = true
-				} else {
-					clearStaged(stageRoot, archiveEntries)
-					fmt.Println("[回退] 差量包不完整或校验失败，将改用完整包：", stageErr)
-				}
-			} else {
-				fmt.Println("[回退] 差量包不可用：", openErr)
-			}
+	if len(archiveEntries) > 0 && fullPackage == nil && transferPlan.UseIncrementals {
+		fmt.Printf("[下载] 开始获取 %d 个增量包，总计 %s\n", len(transferPlan.Incrementals), humanSize(int64(transferPlan.IncrementalSize)))
+		if err := stageIncrementalPackages(root, work, stageRoot, transferPlan.Incrementals, archiveEntries, backupBytes); err == nil {
+			deltaUsed = true
 		} else {
-			fmt.Println("[回退] 差量包下载失败，将尝试完整包：", err)
+			clearStaged(stageRoot, archiveEntries)
+			_ = os.RemoveAll(filepath.Join(work, "incremental-downloads"))
+			fmt.Println("[回退] 增量包链不可用或校验失败，将改用完整包：", err)
 		}
 	}
 
@@ -653,7 +645,7 @@ func run(kind string, args []string) error {
 	}
 	fmt.Printf("更新成功：%s -> %s\n", current.Version, target.Version)
 	if deltaUsed {
-		fmt.Println("更新来源：已校验的差量包")
+		fmt.Printf("更新来源：已校验的 %d 个增量包（%s）\n", len(transferPlan.Incrementals), humanSize(int64(transferPlan.IncrementalSize)))
 	} else if len(archiveEntries) > 0 {
 		fmt.Println("更新来源：完整包")
 	}
@@ -694,6 +686,18 @@ func estimateDeletionBytes(root string, paths []string) (uint64, error) {
 }
 
 func remoteContentLength(source string) (int64, error) {
+	var failures []string
+	for _, candidate := range downloadCandidates(source) {
+		size, err := remoteContentLengthFrom(candidate)
+		if err == nil {
+			return size, nil
+		}
+		failures = append(failures, fmt.Sprintf("%s: %v", safeURLForLog(candidate), safeErrorForLog(err)))
+	}
+	return 0, errors.New(strings.Join(failures, "; "))
+}
+
+func remoteContentLengthFrom(source string) (int64, error) {
 	client := newHTTPClient(10*time.Second, 5*time.Second)
 	req, err := http.NewRequest(http.MethodHead, source, nil)
 	if err == nil {
@@ -880,6 +884,8 @@ func manifestURLFromPackageURL(raw string) (string, error) {
 func newHTTPClient(timeout, responseHeaderTimeout time.Duration) *http.Client {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{Timeout: 8 * time.Second, KeepAlive: 30 * time.Second}).DialContext,
+		TLSHandshakeTimeout: 8 * time.Second,
 		ResponseHeaderTimeout: responseHeaderTimeout,
 	}
 	return &http.Client{
@@ -945,7 +951,7 @@ func latestReleaseFrom(client *http.Client, sources []string) (ReleaseInfo, erro
 		}
 		return candidate, nil
 	}
-	return result, fmt.Errorf("无法查询 GitHub 最新发行版：%s", strings.Join(failures, "; "))
+	return result, fmt.Errorf("无法查询 GitHub 发行版：%s", strings.Join(failures, "; "))
 }
 
 func downloadBytes(source, destination string) ([]byte, error) {

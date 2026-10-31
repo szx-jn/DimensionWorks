@@ -43,7 +43,9 @@ done
 
 不带参数时更新到 GitHub Latest Release，也可使用 --release vX.Y.Z、--package <本地完整包路径>、--url <完整包 URL> 或 --help。
 
-查询 GitHub Latest Release 信息时会先直连 GitHub API；直连失败后自动通过 `gh-proxy.com` 重试。下载 GitHub Release 资产时会先直连 GitHub；直连失败后自动依次尝试 `ghproxy.net` 与 `gh-proxy.com`。该回退覆盖最新版本清单、指定版本清单、差量包及完整包，其他域名的 URL 不会经过这些镜像。
+自动更新时会读取当前版本与目标版本之间的发布清单，沿 `base` 关系统计可用的增量包数量和每个包的大小，再与目标完整包大小比较，选择传输总量较小的方案。版本链不完整、增量包缺失或增量包校验失败时，更新器会改用完整包。跨多个版本应用增量包时，会按版本顺序暂存并校验最终文件摘要；用过的增量 ZIP 与本次分段缓存会在应用前清理，整个事务结束后临时目录也会删除。
+
+查询 GitHub Latest Release 信息时会先直连 GitHub API；直连失败后自动通过 `gh-proxy.com` 重试。下载 GitHub Release 资产时会先直连 GitHub；直连失败后自动依次尝试 `ghproxy.net` 与 `gh-proxy.com`。更新器会为每次连接设置有限的连接与 TLS 握手超时，失败时及时切换镜像。该回退覆盖最新版本清单、指定版本清单、增量包及完整包，其他域名的 URL 不会经过这些镜像。
 
 ## 安全与数据保护
 
