@@ -15,11 +15,10 @@ item_ids:
 <BlockImage id="expatternprovider:wireless_hub" scale="6"></BlockImage>
 </Row>
 
-ME 无线枢纽的功能和<ItemLink id="expatternprovider:wireless_connect" />,但它可以连接到 8 个中枢/连接器
-同时。
+ME 无线枢纽的功能类似<ItemLink id="expatternprovider:wireless_connect" />，但它可以**同时连接最多 8 个无线枢纽或无线连接器**。
 
-## 连接配置
+## 连接设置
 
-有 8 个港口 ME 无线枢纽。它会自动找到可用的端口, 当您连接到它时<ItemLink id="expatternprovider:wireless_tool" />.
+无线枢纽共有 8 个连接端口。使用<ItemLink id="expatternprovider:wireless_tool" />建立连接时，会自动选择可用端口。
 
-但是,当所有港口都被占用时,您需要手动断开,单击“ X” 按钮来设置新的连接。
+如果所有端口都已占用，需要先点击对应连接旁的“X”断开旧连接，再添加新连接。
