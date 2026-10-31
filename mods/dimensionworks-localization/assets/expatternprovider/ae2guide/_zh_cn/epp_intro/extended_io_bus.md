@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: ME 扩展导出/输入总线
+    title: ME 扩展输入／输出总线
     icon: expatternprovider:ex_import_bus_part
 categories:
 - extended devices
@@ -10,7 +10,7 @@ item_ids:
 - expatternprovider:ex_export_bus_part
 ---
 
-# ME 扩展导入/输出总线
+# ME 扩展输入／输出总线
 
 <Row gap="20">
 <GameScene zoom="8" background="transparent">
@@ -21,8 +21,6 @@ item_ids:
 </GameScene>
 </Row>
 
-ME 扩展导入/输出总线工作速度超过正常<ItemLink id="ae2:import_bus" />/<ItemLink id="ae2:export_bus" />
-(默认速度乘数为 8。它是可配置的).
+ME 扩展输入／输出总线的工作速度高于普通<ItemLink id="ae2:import_bus" />和<ItemLink id="ae2:export_bus" />，默认传输速度为普通版本的 **8 倍**，具体倍率可在配置中调整。
 
-与正常的换代相比,他们也有更多的升级档。
-
+扩展版本还提供了更多升级槽位，适合需要高吞吐量的物流网络。
