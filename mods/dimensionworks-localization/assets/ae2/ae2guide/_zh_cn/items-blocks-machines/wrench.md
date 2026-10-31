@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 战区
+  title: 石英扳手
   icon: certus_quartz_wrench
   position: 410
 categories:
@@ -11,7 +11,7 @@ item_ids:
 - ae2:nether_quartz_wrench
 ---
 
-# 战区
+# 石英扳手
 
 <Row>
   <ItemImage id="certus_quartz_wrench" scale="4" />
@@ -19,13 +19,13 @@ item_ids:
   <ItemImage id="nether_quartz_wrench" scale="4" />
 </Row>
 
-旋转 Ae2 设备时使用 wrenches 来旋转(右单击右键),和拆解的 Ae2 区块(Shi- 右单击).
-[分区](../ae2-mechanics/cable-subparts.md)可以在不破坏电缆上的一切的前提下从电缆中移除
-(或电缆可以在不打破分部分的情况下被移走。)
+石英扳手可用于调整 AE2 设备的朝向：**右键**旋转，**潜行并右键**拆卸。
 
-许多 e2 区块可以旋转, 所以仅仅因为这个向导没有说 你可以旋转的东西 并不意味着你不能。
+对于安装在线缆上的[附属部件](../ae2-mechanics/cable-subparts.md)，扳手能够单独拆除某个部件，而不影响同一方块空间内的其他组件。
 
-## 食食权
+许多 AE2 方块都支持旋转。即使指南没有逐一写明，也不妨试试扳手。
+
+## 合成配方
 
 <Row>
   <RecipeFor id="certus_quartz_wrench" />
