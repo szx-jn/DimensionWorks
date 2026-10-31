@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: 电路剪切器
+    title: 电路切割机
     icon: expatternprovider:circuit_cutter
 categories:
 - extended devices
@@ -9,14 +9,12 @@ item_ids:
 - expatternprovider:circuit_cutter
 ---
 
-# 电路剪切器
+# 电路切割机
 
 <Row gap="20">
 <BlockImage id="expatternprovider:circuit_cutter" scale="8"></BlockImage>
 </Row>
 
-无法忍受慢速度压印器现在我们有了电路剪刀 他们可以把材料块切成处理器
-直直打印, 所以它们比压印器在最长时间。
+嫌传统压印器生产处理器太慢？电路切割机可以将材料批量切割并直接加工成处理器，适合高吞吐量的处理器生产线。
 
-**注意:没有港口的玻璃面孔无法连接到网络。**
-
+**注意：**没有接口的玻璃面不能连接 ME 网络。
