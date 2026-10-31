@@ -2,6 +2,7 @@ import React from "react";
 import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {Caption, Gear, Landscape, palette, ramp, Scene} from "./Cinema";
 import {MoltenChemistry, PowerConnections} from "./Mechanisms";
+import {Steve} from "./Steve";
 
 const Heart: React.FC<{damaged?: boolean; size?: number; opacity?: number; scale?: number}> = ({damaged = true, size = 210, opacity = 1, scale = 1}) => <Img src={staticFile(damaged ? "gear_heart_damaged.png" : "gear_heart_normal.png")} style={{width: size, height: size, objectFit: "contain", imageRendering: "pixelated", opacity, scale: String(scale), filter: "drop-shadow(0 0 26px #cf786344)"}}/>;
 
@@ -49,8 +50,8 @@ const FallingGear: React.FC = () => {
   return <Scene duration={6} label="一瞬之间">
     <Landscape time={t} night={.5}/>
     <svg width="1920" height="1080" viewBox="0 0 1920 1080" style={{position: "absolute", inset: 0}}>
-      <g opacity={1 - ramp(t, 3.8, 4.2)}><rect x="916" y="590" width="88" height="160" fill="#17292f"/><rect x="909" y="510" width="102" height="100" fill="#203138"/><rect x="886" y="610" width="30" height="116" fill="#263d43"/><rect x="1004" y="610" width="30" height="116" fill="#263d43"/></g>
-      <Gear x={960} y={-160 + fall * 690} radius={100} angle={fall * 260}/>
+      <g opacity={1 - ramp(t, 3.85, 4.55)}><Steve x={960} y={480} time={t} tilt={ramp(t, 3.65, 4.4) * 72}/></g>
+      <Gear x={960} y={-160 + fall * 525} radius={100} angle={fall * 260}/>
     </svg>
     <AbsoluteFill style={{background: "#fff1d8", opacity: impact * .65}}/>
     <AbsoluteFill style={{background: "#090f13", opacity: ramp(t, 3.95, 4.8)}}/>
@@ -59,27 +60,41 @@ const FallingGear: React.FC = () => {
 
 const TimePassing: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const progress = ramp(t, 0, 10.5);
-  const night = Math.pow((1 + Math.sin(t * 2.7)) / 2, 2) * .58 * (1 - ramp(t, 8, 10.5));
-  return <Scene duration={12} label="漫长的沉寂">
+  const progress = ramp(t, 0, 5.6);
+  const night = Math.pow((1 + Math.sin(t * 3.8)) / 2, 2) * .58 * (1 - ramp(t, 4.8, 6));
+  return <Scene duration={7} label="漫长的沉寂">
     <Landscape time={t * 5} growth={.45 + progress * .55} night={night}/>
-    <div style={{position: "absolute", top: 290, width: "100%", textAlign: "center", color: "#edf0dc", textShadow: "0 3px 25px #15282b88", fontSize: 83, letterSpacing: 12, opacity: ramp(t, .5, 1.2)}}>{t < 10.5 ? Math.floor(progress * 30000).toLocaleString("en-US") : "30,000"}<span style={{fontSize: 25, marginLeft: 22}}>年</span></div>
-    <Caption start={3} end={11.6}>三万年过去。草木已看不出那一天的痕迹。</Caption>
+    <div style={{position: "absolute", top: 290, width: "100%", textAlign: "center", color: "#edf0dc", textShadow: "0 3px 25px #15282b88", fontSize: 83, letterSpacing: 12, opacity: ramp(t, .3, .8)}}>{t < 5.6 ? Math.floor(progress * 30000).toLocaleString("en-US") : "30,000"}<span style={{fontSize: 25, marginLeft: 22}}>年</span></div>
+    <Caption start={.9} end={6.6}>三万年过去。草木已看不出那一天的痕迹。</Caption>
   </Scene>;
 };
 
 const Awakening: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
   const panel = ramp(t, 2, 3);
-  return <Scene duration={9} label="苏醒">
+  const effects = ramp(t, 5, 6);
+  return <Scene duration={14} label="苏醒">
     <Landscape time={t * .2}/>
     <AbsoluteFill style={{background: "#102126", opacity: panel * .6}}/>
-    <div style={{position: "absolute", left: 960, top: 460, translate: "-50% -50%", width: 660, height: 380, opacity: panel, border: "1px solid #b4b7a461", background: "linear-gradient(135deg,#1c3037ee,#13242bf5)", padding: "46px 50px", display: "flex", alignItems: "center", gap: 45, boxShadow: "0 30px 100px #09141877"}}>
+    <div style={{position: "absolute", left: 960 - effects * 350, top: 460, translate: "-50% -50%", width: 660 - effects * 100, height: 380, opacity: panel, border: "1px solid #b4b7a461", background: "linear-gradient(135deg,#1c3037ee,#13242bf5)", padding: "46px 50px", display: "flex", alignItems: "center", gap: 35, boxShadow: "0 30px 100px #09141877"}}>
       <div style={{border: "2px solid #9d9980", padding: 13, background: "#354443"}}><Heart size={170}/></div>
       <div><div style={{color: palette.muted, letterSpacing: 6, fontSize: 18, marginBottom: 19}}>饰品</div><div style={{fontSize: 36, letterSpacing: 5}}>齿轮之心</div><div style={{fontSize: 23, color: "#d59b85", marginTop: 23}}>破损 · 无法取下</div><div style={{fontSize: 19, color: palette.muted, marginTop: 20}}>微弱的搏动仍在继续。</div></div>
     </div>
+    <div style={{position: "absolute", left: 1035, top: 245, width: 560, opacity: effects}}>
+      <div style={{fontSize: 24, letterSpacing: 5, color: palette.paper, marginBottom: 22}}>心脏仍在影响着你</div>
+      {[
+        {name: "交互距离 +2", detail: "更远地触及方块与实体", symbol: "↗", color: palette.teal},
+        {name: "急迫 II", detail: "挖掘速度提升", symbol: "⛏", color: "#dac77a"},
+        {name: "虚弱 I", detail: "近战攻击伤害降低", symbol: "↓", color: "#d79f96"},
+        {name: "夜视 I", detail: "在黑暗中看清世界", symbol: "☾", color: "#a4b9db"},
+      ].map((effect, i) => <div key={effect.name} style={{display: "flex", gap: 22, alignItems: "center", padding: "15px 20px", marginBottom: 12, background: "#152a31ed", border: `1px solid ${effect.color}55`, opacity: ramp(t, 5.5 + i * .55, 6.1 + i * .55), translate: `${(1 - ramp(t, 5.5 + i * .55, 6.1 + i * .55)) * 24}px 0`}}>
+        <div style={{width: 52, textAlign: "center", fontSize: 38, color: effect.color}}>{effect.symbol}</div>
+        <div><div style={{fontSize: 27, color: effect.color}}>{effect.name}</div><div style={{fontSize: 19, marginTop: 6, color: palette.muted}}>{effect.detail}</div></div>
+      </div>)}
+    </div>
     <AbsoluteFill style={{background: "#080f12", opacity: (1 - ramp(t, 0, 1.3)) * .95}}/>
-    <Caption start={4} end={8.6}>眼前的世界，似乎仍然熟悉。</Caption>
+    <Caption start={2} end={5}>眼前的世界，似乎仍然熟悉。</Caption>
+    <Caption start={8.3} end={13.6}>残存的力量，与它留下的代价，一同苏醒。</Caption>
   </Scene>;
 };
 
@@ -116,8 +131,8 @@ export const Intro: React.FC = () => {
     <Sequence name="天地异变" from={0} durationInFrames={10 * fps} premountFor={fps}><Anomaly/></Sequence>
     <Sequence name="心脏改写" from={10 * fps} durationInFrames={11 * fps} premountFor={fps}><HeartChange/></Sequence>
     <Sequence name="齿轮坠落" from={21 * fps} durationInFrames={6 * fps} premountFor={fps}><FallingGear/></Sequence>
-    <Sequence name="三万年" from={27 * fps} durationInFrames={12 * fps} premountFor={fps}><TimePassing/></Sequence>
-    <Sequence name="苏醒" from={39 * fps} durationInFrames={9 * fps} premountFor={fps}><Awakening/></Sequence>
+    <Sequence name="三万年" from={27 * fps} durationInFrames={7 * fps} premountFor={fps}><TimePassing/></Sequence>
+    <Sequence name="苏醒与饰品效果" from={34 * fps} durationInFrames={14 * fps} premountFor={fps}><Awakening/></Sequence>
     <Sequence name="动力与应用机动" from={48 * fps} durationInFrames={13 * fps} premountFor={fps}><PowerConnections/></Sequence>
     <Sequence name="熔融金属与空气" from={61 * fps} durationInFrames={18 * fps} premountFor={fps}><MoltenChemistry/></Sequence>
     <Sequence name="回到世界" from={79 * fps} durationInFrames={5 * fps} premountFor={fps}><ReturnToWorld/></Sequence>

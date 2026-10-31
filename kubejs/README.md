@@ -38,7 +38,7 @@
 右键已装备的破损齿轮之心必须按 1 到 7 的顺序破除七条工业瓶颈。
 
 `data/curios/` 新增专属 `gear_heart` 槽，只接受齿轮之心；装备后由 RPM Limit 模组拦截
-手动取下并设为死亡保留。物品提供交互距离 +2、急迫 II 和幸运 I，工业额度运行效果与
+手动取下并设为死亡保留。物品提供交互距离 +2、急迫 II、虚弱 I 和夜视 I，工业额度运行效果与
 破除位写入同一模组，详见 `mods/dimensionworks-rpm-limit/README.md`。
 
 贴图生成流程见 `scripts/README.md`。

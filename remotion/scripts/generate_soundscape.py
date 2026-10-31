@@ -50,7 +50,7 @@ def generate():
         if bird_phase < 0.23:
             value += sin(2 * pi * (1700 * bird_phase + 1200 * bird_phase**2)) * sin(pi * bird_phase / 0.23)**2 * 0.025 * nature
         value += heartbeat(t, 10, 21, 0.19)
-        value += heartbeat(t, 40, 48, 0.12)
+        value += heartbeat(t, 35, 48, 0.12)
         value += heartbeat(t, 79, 83, 0.12)
         value += heartbeat(t, 87, 88, 0.17)
         # Dimensional disturbance, falling gear and a single restrained impact.

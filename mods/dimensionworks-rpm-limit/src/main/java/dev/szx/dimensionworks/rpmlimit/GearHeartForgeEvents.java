@@ -98,7 +98,9 @@ public final class GearHeartForgeEvents {
             .withStyle(ChatFormatting.GREEN));
         event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.haste")
             .withStyle(ChatFormatting.GREEN));
-        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.luck")
+        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.weakness")
+            .withStyle(ChatFormatting.RED));
+        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.night_vision")
             .withStyle(ChatFormatting.GREEN));
 
         if (GearHeartState.isBlessed(stack)) {

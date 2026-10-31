@@ -32,6 +32,8 @@ public final class GearHeartEffects {
 
     private static final String RPM_SOURCE = "gear_heart:rpm";
     private static final String BONUS_STATE_KEY = "dimensionworks_gear_heart_bonuses";
+    private static final String BONUS_VERSION_KEY = "dimensionworks_gear_heart_bonus_version";
+    private static final int BONUS_VERSION = 2;
     private static final FixedIntervalTokenBucket TOKEN_BUCKET = new FixedIntervalTokenBucket();
     private static final Map<UUID, Integer> ACTIVE_QUOTA_MASKS = new ConcurrentHashMap<>();
 
@@ -238,7 +240,14 @@ public final class GearHeartEffects {
     }
 
     private static void applyBaseBonuses(ServerPlayer player) {
+        // Previous releases supplied infinite Luck I. Migrate once, without clearing
+        // finite potion effects or stronger effects supplied by another source.
+        if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)
+            && player.getPersistentData().getInt(BONUS_VERSION_KEY) < BONUS_VERSION) {
+            removeHeartEffect(player, MobEffects.LUCK, 0);
+        }
         player.getPersistentData().putBoolean(BONUS_STATE_KEY, true);
+        player.getPersistentData().putInt(BONUS_VERSION_KEY, BONUS_VERSION);
         addModifier(player, ForgeMod.BLOCK_REACH.get(), BLOCK_REACH_ID, "Gear Heart Block Reach", 2.0d);
         addModifier(player, ForgeMod.ENTITY_REACH.get(), ENTITY_REACH_ID, "Gear Heart Entity Reach", 2.0d);
 
@@ -248,9 +257,15 @@ public final class GearHeartEffects {
                 false, false, true
             ));
         }
-        if (!hasInfiniteEffect(player, MobEffects.LUCK, 0)) {
+        if (!hasInfiniteEffect(player, MobEffects.WEAKNESS, 0)) {
             player.addEffect(new MobEffectInstance(
-                MobEffects.LUCK, MobEffectInstance.INFINITE_DURATION, 0,
+                MobEffects.WEAKNESS, MobEffectInstance.INFINITE_DURATION, 0,
+                false, false, true
+            ));
+        }
+        if (!hasInfiniteEffect(player, MobEffects.NIGHT_VISION, 0)) {
+            player.addEffect(new MobEffectInstance(
+                MobEffects.NIGHT_VISION, MobEffectInstance.INFINITE_DURATION, 0,
                 false, false, true
             ));
         }
@@ -267,8 +282,24 @@ public final class GearHeartEffects {
         }
 
         if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)) {
-            player.removeEffect(MobEffects.DIG_SPEED);
-            player.removeEffect(MobEffects.LUCK);
+            removeHeartEffect(player, MobEffects.DIG_SPEED, 1);
+            removeHeartEffect(player, MobEffects.WEAKNESS, 0);
+            removeHeartEffect(player, MobEffects.NIGHT_VISION, 0);
+            if (player.getPersistentData().getInt(BONUS_VERSION_KEY) < BONUS_VERSION) {
+                removeHeartEffect(player, MobEffects.LUCK, 0);
+            }
+            player.getPersistentData().remove(BONUS_STATE_KEY);
+            player.getPersistentData().remove(BONUS_VERSION_KEY);
+        }
+    }
+
+    private static void removeHeartEffect(ServerPlayer player, net.minecraft.world.effect.MobEffect effect,
+                                          int amplifier) {
+        MobEffectInstance instance = player.getEffect(effect);
+        if (instance != null && instance.getAmplifier() == amplifier
+            && instance.getDuration() == MobEffectInstance.INFINITE_DURATION
+            && !instance.isAmbient() && !instance.isVisible() && instance.showIcon()) {
+            player.removeEffect(effect);
         }
     }
 
