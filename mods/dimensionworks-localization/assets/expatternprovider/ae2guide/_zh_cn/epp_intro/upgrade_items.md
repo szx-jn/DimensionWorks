@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: ME 设备升级
+    title: ME 设备升级组件
     icon: expatternprovider:pattern_provider_upgrade
 categories:
 - extended items
@@ -13,9 +13,9 @@ item_ids:
 - expatternprovider:drive_upgrade
 ---
 
-# ME 设备升级
+# ME 设备升级组件
 
-这些升级允许您替换正常 ME 其扩展版本的装置不折断它们。
+使用升级组件，可以直接把普通 ME 设备升级为扩展版本，无需先破坏或拆卸设备。
 
 <Row>
 <ItemImage id="expatternprovider:pattern_provider_upgrade" scale="4"></ItemImage>
@@ -25,24 +25,23 @@ item_ids:
 <ItemImage id="expatternprovider:drive_upgrade" scale="4"></ItemImage>
 </Row>
 
-溜入 + 鼠标右键点击这些设备, 它们将被转换为扩展版本。所有设备设置和目录
-将予以保留。
+手持相应升级组件，**潜行并右键点击**支持的设备，即可原地完成升级。设备原有的设置、样板和存储内容都会保留。
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../structure/upgrade_show_1.snbt"></ImportStructure>
   <BoxAnnotation color="#ffffff" min="1 0 0" max="4 1 1">
-        普通样板供应器。您可以通过样板供应器升级。
+        普通样板供应器。使用样板供应器升级组件即可升级。
         <ItemImage id="expatternprovider:pattern_provider_upgrade" scale="2"></ItemImage>
   </BoxAnnotation>
 </GameScene>
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../structure/upgrade_show_2.snbt"></ImportStructure>
   <BoxAnnotation color="#ffffff" min="1 0 0" max="4 1 1">
-        扩展型样样板供应器保留了来源地的所有设置和模式库存
+        扩展样板供应器会保留普通版本的全部设置和样板库存。
   </BoxAnnotation>
 </GameScene>
 
-## 更新列表
+## 可升级设备列表
 
 |                                      升级                                      |                           普通设备                            |                                  扩展设备                                  |
 |:---------------------------------------------------------------------------------:|:------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|
