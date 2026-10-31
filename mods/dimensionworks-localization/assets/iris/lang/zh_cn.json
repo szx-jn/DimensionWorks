@@ -1,7 +1,7 @@
 {
-  "iris.load.failure.shader": "阴影软件包装入失败! 请向阴影开发者报告错误 。",
-  "iris.load.failure.generic": "Oculus 遇到一个试图加载阴影的问题; 请向 Oculs 开发者报告 。",
-  "iris.keybind.wireframe": "线性框架(仅SP)",
+  "iris.load.failure.shader": "光影包加载失败！请向光影包作者报告此错误。",
+  "iris.load.failure.generic": "Oculus 加载光影时发生错误，请向 Oculus 开发者报告。",
+  "iris.keybind.wireframe": "线框模式（仅单人游戏）",
   "options.iris.colorSpace": "色彩空间",
-  "options.iris.colorSpace.sodium_tooltip": "将屏幕转换为 。 在阴影包顶部工作, 如果不确定, 请使用 SRGB 的颜色空间。"
+  "options.iris.colorSpace.sodium_tooltip": "调整画面的色彩空间。此设置也会作用于光影包；不确定时建议使用 sRGB。"
 }
