@@ -13,7 +13,7 @@ class TopologyEdgesTest {
     void virtualChildrenKeepTheirSourceEdges() {
         BlockPos parent = new BlockPos(1, 2, 3);
         NetworkSnapshot.Node virtualChild = new NetworkSnapshot.Node(
-            new BlockPos(2, 2, 3), parent, "create:test", net.minecraft.world.item.ItemStack.EMPTY,
+            new BlockPos(2, 2, 3), parent, "create:test", null,
             16.0F, 16.0F, 32, 0.0F, 0.0F, false, true);
 
         TopologyEdges.Summary summary = TopologyEdges.summarize(List.of(virtualChild));
@@ -27,10 +27,10 @@ class TopologyEdgesTest {
     void parentsInsideTheSnapshotAreResolvable() {
         BlockPos parent = new BlockPos(1, 2, 3);
         NetworkSnapshot.Node root = new NetworkSnapshot.Node(
-            parent, null, "create:root", net.minecraft.world.item.ItemStack.EMPTY,
+            parent, null, "create:root", null,
             16.0F, 16.0F, 32, 0.0F, 1.0F, false, false);
         NetworkSnapshot.Node child = new NetworkSnapshot.Node(
-            new BlockPos(2, 2, 3), parent, "create:child", net.minecraft.world.item.ItemStack.EMPTY,
+            new BlockPos(2, 2, 3), parent, "create:child", null,
             16.0F, 16.0F, 32, 0.0F, 0.0F, false, true);
 
         TopologyEdges.Summary summary = TopologyEdges.summarize(List.of(root, child));
@@ -44,7 +44,7 @@ class TopologyEdgesTest {
     void virtualNodesRemainInThePositionIndexUsedByTheGraph() {
         BlockPos childPos = new BlockPos(2, 2, 3);
         NetworkSnapshot.Node virtualChild = new NetworkSnapshot.Node(
-            childPos, new BlockPos(1, 2, 3), "create:child", net.minecraft.world.item.ItemStack.EMPTY,
+            childPos, new BlockPos(1, 2, 3), "create:child", null,
             16.0F, 16.0F, 32, 0.0F, 0.0F, false, true);
 
         assertNotNull(TopologyEdges.indices(List.of(virtualChild)).get(childPos));
