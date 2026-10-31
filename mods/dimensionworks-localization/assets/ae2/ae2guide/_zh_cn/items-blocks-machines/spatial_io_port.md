@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 空间 IO 港港端
+  title: 空间输入输出端口
   icon: spatial_io_port
   position: 210
 categories:
@@ -10,15 +10,14 @@ item_ids:
 - ae2:spatial_io_port
 ---
 
-# 空间 IO 港港端
+# 空间输入输出端口
 
 <BlockImage id="spatial_io_port" p:powered="true" scale="8" />
 
-空间 IO 端口用于[空间 IO](../ae2-mechanics/spatial-io.md)保持[空间单元格](spatial_cells.md)
-控制空间 IO 运行中。
+空间输入输出端口是[空间存储系统](../ae2-mechanics/spatial-io.md)的一部分，用于安装[空间存储元件](spatial_cells.md)，并控制空间区域的存入和恢复。
 
-如果您想要自动化, 可以通过任何设备物流, 如 直升机 或 e2 客车 插入和提取该单元格。
+你可以使用漏斗、ME 输入总线等物流设备自动装入或取出空间存储元件，实现空间存储操作的自动化。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="spatial_io_port" />
