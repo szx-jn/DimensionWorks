@@ -58,14 +58,14 @@ README 中的原则需要转化成可执行的约束：
 
 ## 构建与验证
 
-- 每个自研 Mod 独立构建，在对应目录执行：`gradle build --no-daemon`。
-- 修改自研 Mod 的 Java、mixins、资源或构建脚本后，先构建通过再汇报结果。
-- 构建失败时给出真实错误输出，不要隐藏或改写为“应该没问题”。
-- 仅改文档、KubeJS 或 JSON 数据时，说明进行了哪些检查，例如 JSON 语法、命名空间、引用路径。
-- 未经实际运行验证的内容不要描述为已验证。
-- 打包整合包必须走 `python3 scripts/package_mrpack.py`；它会自动先跑 `scripts/pack_hook.py` 预检（Mod 清单、实例配置、JSON、KubeJS 语法、自增殖配方规则、任务图、仓库内 Mod 构建），预检失败则不产出 `.mrpack`。Node.js 是 KubeJS 语法与自增殖配方检查的必需依赖；缺失时预检失败。
-- 仓库级 `.codex/hooks.json` 会在 Codex 的 Bash 调用命中 `scripts/package_mrpack.py` 时自动运行 `.codex/hooks/pack_preflight.py`，先做静态预检；失败则阻断命令，成功只回传一行 `PACK-HOOK OK`。项目钩子首次使用或内容变更后必须由用户在 `/hooks` 中信任。
-- 汇报打包结果时只保留钩子的错误日志，或一行成功信息，不要贴构建与下载的冗余输出。
+- **本机禁止构建。** 不得在本地运行 Gradle 构建、`scripts/package_mrpack.py`、`scripts/package_server.py` 或其他会编译、打包自研 Mod/整合包的命令；不要通过 IDE、脚本、容器或其他工具绕过此规定。
+- 每次修改代码、配置、数据或构建脚本后，提交前必须在本地完成与改动范围匹配的静态检查，并确认全部通过。静态检查可包括 `git diff --check`、JSON/YAML 语法、脚本语法、命名空间与引用路径、依赖版本/清单一致性、静态分析器或格式检查；不得把构建或运行测试称为静态检查。记录实际执行的检查及结果，不得声称未执行的检查已通过。
+- 静态检查发现问题时，先修复并重新检查；未通过或未完成检查时不得提交或推送。
+- 提交并推送代码后，必须使用 GitHub Actions 的“整合包正式发布”工作流（`.github/workflows/release-pack.yml`）进行自动化构建、校验和发布。该工作流只支持 `workflow_dispatch`，推送本身不会启动正式发布；使用 GitHub CLI 手动触发时，按实际改动填写版本选项与发布说明输入栏。
+- 必须等待发布工作流结束并检查结果。失败时读取真实 Actions 日志、修复后重新执行静态检查、提交推送并重跑工作流；工作流未成功时不得报告构建或发布成功。
+- 发布工作流会运行 `scripts/package_mrpack.py`、`scripts/package_server.py` 和所需的仓库 Mod 构建；这些命令只允许在 GitHub Actions 环境中执行。不要在本地调用它们来代替 GitHub 构建。
+- 未经实际运行验证的内容不要描述为已验证。Actions 构建成功只证明自动化构建与工作流校验通过，不等于已在 Minecraft 游戏内验证。
+- 汇报打包结果时只保留工作流的错误日志，或一行成功信息，不要贴构建与下载的冗余输出；正式产物使用 GitHub Release 中的可点击链接。
 
 ## 产物纪律
 
@@ -97,7 +97,7 @@ README 中的原则需要转化成可执行的约束：
 - 提交信息使用带 scope 的 Conventional Commits，例如 `feat(rpm): ...`、`fix(transfer): ...`、`docs(rpm): ...`、`ci: ...`。
 - 文档使用中文，与现有 README 一致。
 - 改动行为时同步更新对应 `mods/<name>/README.md`，尤其是暴露给 KubeJS 或命令行的接口。
-- 每次构建完成后，在回复里给出产物链接：本地产物（自研 Mod 的 `gradle build` jar、`dist/*.mrpack`）用绝对路径的 Markdown 文件链接，远程产物用可点击 URL。
+- 每次 GitHub Actions 构建发布完成后，在回复中给出 GitHub Release 的可点击产物链接；本机不生成构建产物。
 
 ## 边界
 
