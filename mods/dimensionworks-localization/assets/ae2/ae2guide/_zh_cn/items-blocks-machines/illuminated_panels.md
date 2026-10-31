@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 化学聚二氟酯
+  title: 照明面板
   icon: semi_dark_monitor
   position: 010
 categories:
@@ -12,18 +12,18 @@ item_ids:
 - ae2:dark_monitor
 ---
 
-# 化学聚二氟酯
+# 照明面板
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../assets/assemblies/illuminated_panels.snbt" />
   <IsometricCamera yaw="-75" pitch="30" />
 </GameScene>
 
-电镀电池板是一种装饰性光源,也用于生产[终端](terminals.md).
+照明面板既可以用作装饰光源，也是制作部分[终端](terminals.md)的材料。
 
-他们是[电缆子部件](../ae2-mechanics/cable-subparts.md).
+它们属于可以安装在线缆上的[附属部件](../ae2-mechanics/cable-subparts.md)。
 
-## 食食权
+## 合成配方
 
 <Row>
   <RecipeFor id="monitor" />
