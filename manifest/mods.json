@@ -495,7 +495,7 @@
       "name": "DimensionWorks 简体中文汉化",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-localization",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "required": true,
       "environment": "client",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-localization"
