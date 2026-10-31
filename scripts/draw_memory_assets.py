@@ -33,7 +33,7 @@ TYPES={
  "high_storage":((113,54,201),(177,105,249)), "final":((226,162,40),(255,222,100))}
 
 def drive(level):
-    c=Canvas(); a=DDR_ACCENTS[level-1]
+    c=Canvas(color=(*NAVY,255)); a=DDR_ACCENTS[level-1]
     # AE2-like metal chassis with ten narrow cell windows; the BE renderer
     # overlays the type-colored light only when a card is installed.
     c.rect(2,0,13,0,NAVY); c.rect(1,1,14,1,EDGE); c.rect(0,2,15,13,EDGE)
@@ -174,7 +174,7 @@ def main():
             elif face=="top": c.rect(2,2,13,13,(107,120,141)); c.rect(5,6,10,9,NAVY); c.rect(7,7,8,8,DDR_ACCENTS[d-1])
             else: c.rect(2,2,13,13,(48,62,81)); c.rect(3,3,12,12,(58,72,91))
             c.save(block/f"memory_drive_ddr{d}_{face}.png")
-        model={"parent":"minecraft:block/block","textures":{"particle":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_side","front":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_front","side":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_side","top":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_top","bottom":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_bottom"},"elements":[{"from":[1,0,1],"to":[15,16,15],"faces":{"north":{"texture":"#front"},"south":{"texture":"#side"},"east":{"texture":"#side"},"west":{"texture":"#side"},"up":{"texture":"#top"},"down":{"texture":"#bottom"}}}]}
+        model={"parent":"minecraft:block/block","textures":{"particle":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_side","front":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_front","side":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_side","top":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_top","bottom":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}_bottom"},"elements":[{"from":[0,0,0],"to":[16,16,16],"faces":{"north":{"texture":"#front"},"south":{"texture":"#side"},"east":{"texture":"#side"},"west":{"texture":"#side"},"up":{"texture":"#top"},"down":{"texture":"#bottom"}}}]}
         (models/"block"/f"memory_drive_ddr{d}.json").write_text(json.dumps(model,indent=2)+"\n")
         (models/"item"/f"memory_drive_ddr{d}.json").write_text(json.dumps({"parent":f"dimensionworks_mek_stress:block/memory_drive_ddr{d}"},indent=2)+"\n")
         for kind, x in card_x.items():

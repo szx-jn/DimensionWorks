@@ -1,5 +1,6 @@
 """Visual asset regressions. Run with the Pillow asset-generator environment."""
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -10,6 +11,23 @@ ASSETS = ROOT / 'mods/dimensionworks-mek-stress/src/main/resources/assets/dimens
 
 
 class MemoryAssetsTest(unittest.TestCase):
+    def test_drive_models_cover_full_cube_with_opaque_face_textures(self):
+        for level in range(1, 6):
+            model_path = ASSETS.parent / f'models/block/memory_drive_ddr{level}.json'
+            model = json.loads(model_path.read_text())
+            self.assertEqual(1, len(model['elements']))
+            element = model['elements'][0]
+            self.assertEqual([0, 0, 0], element['from'])
+            self.assertEqual([16, 16, 16], element['to'])
+            self.assertEqual({'north', 'south', 'east', 'west', 'up', 'down'}, set(element['faces']))
+            for face in element['faces'].values():
+                texture = model['textures'][face['texture'].removeprefix('#')]
+                namespace, relative = texture.split(':')
+                self.assertEqual('dimensionworks_mek_stress', namespace)
+                with self.subTest(level=level, texture=relative), Image.open(ASSETS / f'{relative}.png') as image:
+                    self.assertEqual((16, 16), image.size)
+                    self.assertEqual((255, 255), image.convert('RGBA').getchannel('A').getextrema())
+
     def test_card_padding_is_transparent_for_all_thirty_variants(self):
         cards = list((ASSETS / 'item').glob('memory_card_ddr[1-5]_*.png'))
         self.assertEqual(30, len(cards))

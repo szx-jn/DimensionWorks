@@ -32,7 +32,8 @@ public final class MemoryDriveLedRenderer implements BlockEntityRenderer<MemoryD
             float y0 = (12.4f - row * 2.0f) / 16.0f;
             float x1 = x0 + 1.7f / 16.0f;
             float y1 = y0 + 1.0f / 16.0f;
-            float z = 0.058f;
+            // The full-cube north face is at z=0; keep LEDs just outside it.
+            float z = -0.004f;
             float r = ((color >> 16) & 0xFF) / 255.0f;
             float g = ((color >> 8) & 0xFF) / 255.0f;
             float b = (color & 0xFF) / 255.0f;

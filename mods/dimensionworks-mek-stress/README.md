@@ -66,6 +66,7 @@ ME 应力不再是可积累的能源库存。内存卡和驱动器均不提供�
 - Jade 显示网格即时分配；每台齿轮箱也显示原始输入、全网占额/有效上限及总输出 RPM/上限。
 - /dw memory 查询附近已加载驱动器的实时分配，不加载新区块。
 - IMemoryGridService.snapshot 返回 capacitySu（原始输入）、effectiveCapacitySu（扣除后）、allocatedSu（占额）、availableSu（剩余）、demandRpm 与 bandwidthRpm；旧 insertSu/extractSu/reportGearboxExport 接口已移除。
+- DDR1–DDR5 驱动器使用完整 16×16×16 方块模型，所有机箱表面贴图均完全不透明，正面状态灯位于机箱外侧，避免边缘缺口与透视地下。Python 生成脚本同步保留这些约束；不增加实体、区块加载或服务端每 tick 开销。
 - 内存卡保留 64×64 透明纹理。原稿位于 scripts/assets/memory_cards_reference.png；使用 scripts/requirements-memory-assets.txt 环境运行 scripts/draw_memory_assets.py 可重建。
 
 ## MEK 机械动力
