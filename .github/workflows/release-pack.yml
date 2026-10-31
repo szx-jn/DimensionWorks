@@ -40,18 +40,18 @@ on:
       - 'scripts/package_server.py'
       - 'scripts/pack_hook.py'
       - 'scripts/pack_manifest.py'
+      - '.github/workflows/release-pack.yml'
 
 permissions:
   contents: write
-
-concurrency:
-  group: dimensionworks-release-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   release:
     name: 打包客户端与服务端
     if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[release]')
+    concurrency:
+      group: dimensionworks-release-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
