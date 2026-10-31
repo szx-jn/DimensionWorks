@@ -99,6 +99,6 @@
   "op.brandonscore.op_stored": "已储存 OP",
   "op.brandonscore.op_transfer": "OP 传输",
   "op.brandonscore.operational_potential": "运作能量",
-  "struct_build.brandonscore.found_invalid": "构建错误：在 %s 处发现无效方块“%s”。",
+  "struct_build.brandonscore.found_invalid": "构建错误：在 %2$s 处发现无效方块“%1$s”。",
   "struct_build.brandonscore.missing_required": "构建错误：无法完成结构！缺少必需方块“%s”。"
 }
