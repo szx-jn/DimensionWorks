@@ -1,14 +1,14 @@
 {
-  "carryon.category.settings": "设置环境设置",
+  "carryon.category.settings": "通用设置",
   "carryon.category.blacklist": "黑名单",
-  "carryon.category.modeloverrides": "模型重叠(高级)",
-  "carryon.category.custompickupconditions": "自定义取款条件( 高级)",
+  "carryon.category.modeloverrides": "模型覆盖（高级）",
+  "carryon.category.custompickupconditions": "自定义搬运条件（高级）",
   "carryon.category.whitelist": "白名单",
-  "carryon.general.modeloverrides.modeloverrides": "模式覆盖",
-  "carryon.general.blacklist.forbiddenentities": "玩家无法接收的实体",
-  "carryon.general.blacklist.forbiddentiles": "玩家无法接取的 方块T",
-  "carryon.category.custompickupconditions.custompickupconditionsblocks": "自定义 方块 取款条件",
-  "carryon.category.custompickupconditions.custompickupconditionsentities": "自定义实体拾取条件",
-  "key.carry.desc": "承运",
-  "key.carry.category": "继续"
+  "carryon.general.modeloverrides.modeloverrides": "模型覆盖",
+  "carryon.general.blacklist.forbiddenentities": "禁止玩家搬运的实体",
+  "carryon.general.blacklist.forbiddentiles": "禁止玩家搬运的方块实体",
+  "carryon.category.custompickupconditions.custompickupconditionsblocks": "自定义方块搬运条件",
+  "carryon.category.custompickupconditions.custompickupconditionsentities": "自定义实体搬运条件",
+  "key.carry.desc": "搬运",
+  "key.carry.category": "搬运"
 }
