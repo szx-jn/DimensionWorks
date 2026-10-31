@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 物质球球
+  title: 物质球
   icon: matter_ball
   position: 010
 categories:
@@ -10,10 +10,10 @@ item_ids:
 - ae2:matter_ball
 ---
 
-# 弹珠弹球
+# 物质球
 
 <ItemImage id="matter_ball" scale="4" />
 
-一个通用物质球,作为弹药可用于<ItemLink id="matter_cannon" />或用于生产[彩弹弹](paintballs.md).
+物质球可作为<ItemLink id="matter_cannon" />的弹药，也能用于制作[彩色弹丸](paintballs.md)。
 
-以 256 个物品或桶装<ItemLink id="condenser" />在物质球模式中。
+将<ItemLink id="condenser" />设置为物质球模式，投入足够的物品，就可以把物质压缩成物质球。
