@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: MEIO 港港端
+  title: ME 输入输出端口
   icon: io_port
   position: 210
 categories:
@@ -10,29 +10,27 @@ item_ids:
 - ae2:io_port
 ---
 
-# MEI/O 港港
+# ME 输入输出端口
 
 <BlockImage id="io_port" p:powered="true" scale="8" />
 
-IO 端口允许您快速填充或空[存储单元格](../items-blocks-machines/storage_cells.md)至或
-[网络存储](../ae2-mechanics/import-export-storage.md).
+ME 输入输出端口可以快速把物品从[存储元件](../items-blocks-machines/storage_cells.md)转移到[ME 网络存储](../ae2-mechanics/import-export-storage.md)，或反过来将网络中的物品装入元件。
 
-轮轮用<ItemLink id="certus_quartz_wrench" />.
+使用<ItemLink id="certus_quartz_wrench" />可以调整设备朝向。
 
 ## 设置
 
-*   IO 当单元格是空的、满的或完成工作时,可以设置端口将单元格移动到输出槽。
-*   如果 a<ItemLink id="redstone_card" />中插入,将针对各种重复条件选择选项
-*   在中央的中央 GUI 中,有一个箭头用于设定将物品从单元格转到[网络存储](../ae2-mechanics/import-export-storage.md),
-    或从存储到单元格。
+* 可以设定元件在**已清空、已装满或处理完毕**时，自动移到输出槽。
+* 安装<ItemLink id="redstone_card" />后，还可以按不同红石信号条件控制运行。
+* 界面中央的箭头用于切换传输方向：从存储元件转入网络，或从网络写入存储元件。
 
 ## 升级
 
-IO 端口支持以下[升级](upgrade_cards.md):
+输入输出端口支持以下[升级卡](upgrade_cards.md)：
 
-*   <ItemLink id="speed_card" />增加每次操作移动的物品数量
-*   <ItemLink id="redstone_card" />添加红岩控制,允许在高信号、低信号或每脉冲一次时使用
+* <ItemLink id="speed_card" />：提高每次操作搬运的物品数量。
+* <ItemLink id="redstone_card" />：根据有无红石信号，或每次红石脉冲，控制传输行为。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="io_port" />
