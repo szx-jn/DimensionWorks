@@ -44,6 +44,21 @@ class KineticNetworkOptimizerIntegrationContractTest {
     }
 
     @Test
+    void silentlyLoadedMembersScheduleOneNetworkSyncEvenForUnchangedTotals() throws IOException {
+        String mixin = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/KineticNetworkMixin.java"));
+        String optimizer = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
+
+        assertTrue(mixin.contains("KineticNetworkOptimizer.onMemberLoadedSilently("));
+        assertTrue(mixin.contains("@Redirect("));
+        assertTrue(mixin.contains("KineticNetworkOptimizer.syncDuringNetworkRefresh(network)"));
+        assertTrue(mixin.contains("KineticNetworkOptimizer.finishLoadedNetworkRefresh("));
+        assertTrue(optimizer.contains("member.networkDirty = true"));
+        assertTrue(optimizer.contains("if (alreadySynced != null && !alreadySynced)"));
+    }
+
+    @Test
     void createUpdateMethodsKeepTheirNormalBodiesOutsideTheBatch() throws IOException {
         String mixin = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/KineticNetworkMixin.java"));

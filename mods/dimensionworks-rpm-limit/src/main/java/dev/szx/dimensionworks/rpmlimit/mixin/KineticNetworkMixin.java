@@ -9,6 +9,7 @@ import dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -109,6 +110,20 @@ public abstract class KineticNetworkMixin {
         }
     }
 
+    @Redirect(
+        method = "updateNetwork",
+        at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/kinetics/KineticNetwork;sync()V"),
+        remap = false
+    )
+    private void dimensionworks$trackLoadRefreshSync(KineticNetwork network) {
+        KineticNetworkOptimizer.syncDuringNetworkRefresh(network);
+    }
+
+    @Inject(method = "updateNetwork", at = @At("TAIL"), remap = false)
+    private void dimensionworks$finishLoadRefresh(CallbackInfo ci) {
+        KineticNetworkOptimizer.finishLoadedNetworkRefresh((KineticNetwork) (Object) this);
+    }
+
     @Inject(method = "add", at = @At("RETURN"), remap = false)
     private void dimensionworks$invalidateAfterAdd(KineticBlockEntity be, CallbackInfo ci) {
         KineticNetworkOptimizer.onTopologyChanged((KineticNetwork) (Object) this);
@@ -117,7 +132,7 @@ public abstract class KineticNetworkMixin {
     @Inject(method = "addSilently", at = @At("RETURN"), remap = false)
     private void dimensionworks$invalidateAfterSilentAdd(KineticBlockEntity be, float lastCapacity,
                                                          float lastStress, CallbackInfo ci) {
-        KineticNetworkOptimizer.onTopologyChanged((KineticNetwork) (Object) this);
+        KineticNetworkOptimizer.onMemberLoadedSilently((KineticNetwork) (Object) this, be);
     }
 
     @Inject(method = "remove", at = @At("RETURN"), remap = false)

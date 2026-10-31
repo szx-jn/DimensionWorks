@@ -23,6 +23,12 @@ public final class KineticNetworkOptimizer {
 
     private static final Map<KineticNetwork, NetworkCache> CACHES =
         Collections.synchronizedMap(new WeakHashMap<>());
+    /**
+     * Networks rebuilt from chunk NBT need one member sync even when their aggregate totals did
+     * not change. The value records whether Create already synchronized during that refresh.
+     */
+    private static final Map<KineticNetwork, Boolean> PENDING_LOAD_REFRESHES =
+        Collections.synchronizedMap(new WeakHashMap<>());
 
     private static final ThreadLocal<Batch> BATCH =
         ThreadLocal.withInitial(Batch::new);
@@ -300,6 +306,38 @@ public final class KineticNetworkOptimizer {
     /** Call after a network's membership or unloaded-member accounting changes. */
     public static void onTopologyChanged(KineticNetwork network) {
         invalidate(network);
+    }
+
+    /**
+     * Create restores chunk members with {@code addSilently}, which deliberately avoids syncing
+     * them. Mark the network dirty so one loaded member drives a full refresh on its next tick.
+     */
+    public static void onMemberLoadedSilently(KineticNetwork network, KineticBlockEntity member) {
+        if (network == null || member == null) {
+            return;
+        }
+        invalidate(network);
+        PENDING_LOAD_REFRESHES.put(network, false);
+        member.networkDirty = true;
+    }
+
+    /** Called by the mixin around the sync already present in Create's updateNetwork method. */
+    public static void syncDuringNetworkRefresh(KineticNetwork network) {
+        if (PENDING_LOAD_REFRESHES.containsKey(network)) {
+            PENDING_LOAD_REFRESHES.put(network, true);
+        }
+        network.sync();
+    }
+
+    /**
+     * Finish a load-triggered refresh. Create only syncs when aggregate totals change, so force one
+     * sync when its normal updateNetwork path found equal totals and skipped its usual sync.
+     */
+    public static void finishLoadedNetworkRefresh(KineticNetwork network) {
+        Boolean alreadySynced = PENDING_LOAD_REFRESHES.remove(network);
+        if (alreadySynced != null && !alreadySynced) {
+            network.sync();
+        }
     }
 
     /**
