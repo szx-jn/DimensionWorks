@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 赛特斯石英尘土
+  title: 赛特斯石英粉
   icon: certus_quartz_dust
   position: 010
 categories:
@@ -10,13 +10,12 @@ item_ids:
 - ae2:certus_quartz_dust
 ---
 
-# 赛特斯石英尘土
+# 赛特斯石英粉
 
 <ItemImage id="certus_quartz_dust" scale="4" />
 
-A<ItemLink id="certus_quartz_crystal" />被一个<ItemLink id="inscriber" />用于生产
-数个 AE2 材料和部件。
+赛特斯石英粉可由<ItemLink id="certus_quartz_crystal" />加工获得，也是制作多种 AE2 材料和部件的基础原料。部分配方需要使用<ItemLink id="inscriber" />。
 
-## 用途
+## 合成与用途
 
 <RecipeFor id="certus_quartz_dust" />
