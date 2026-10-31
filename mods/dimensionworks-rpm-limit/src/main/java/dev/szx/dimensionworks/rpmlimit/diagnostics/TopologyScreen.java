@@ -27,10 +27,12 @@ public final class TopologyScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof TopologyScreen screen && screen.snapshot.origin().equals(snapshot.origin())) {
             boolean changedPage = screen.snapshot.page() != snapshot.page();
+            BlockPos selectedPos = screen.selected >= 0 ? screen.snapshot.nodes().get(screen.selected).pos() : null;
             screen.snapshot = snapshot;
             screen.selected = -1;
             screen.layout();
-            if (changedPage) { screen.panX = 0; screen.panY = 0; }
+            if (changedPage) screen.centerOnEntry();
+            else if (selectedPos != null) screen.selected = screen.indexOf(selectedPos);
         } else mc.setScreen(new TopologyScreen(snapshot));
     }
     @Override protected void init() {
@@ -38,9 +40,23 @@ public final class TopologyScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("上一页"), b -> refresh(snapshot.page() - 1)).bounds(10, 10, 54, 20).build());
         addRenderableWidget(Button.builder(Component.literal("下一页"), b -> refresh(snapshot.page() + 1)).bounds(68, 10, 54, 20).build());
         addRenderableWidget(Button.builder(Component.literal("刷新"), b -> refresh(snapshot.page())).bounds(126, 10, 46, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("居中"), b -> { panX = 0; panY = 0; zoom = 1; }).bounds(176, 10, 46, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("居中"), b -> { zoom = 1; centerOnEntry(); }).bounds(176, 10, 46, 20).build());
         layout();
+        centerOnEntry();
     }
+    private int indexOf(BlockPos pos) {
+        for (int i = 0; i < snapshot.nodes().size(); i++) if (snapshot.nodes().get(i).pos().equals(pos)) return i;
+        return -1;
+    }
+    private void centerOnEntry() {
+        if (snapshot.nodes().isEmpty()) { selected = -1; panX = 0; panY = 0; return; }
+        selected = indexOf(snapshot.focus());
+        if (selected < 0) selected = 0;
+        double[] point = positions.get(selected);
+        panX = (5 + graphRight) / 2.0 - point[0] * zoom;
+        panY = (38 + height - 24) / 2.0 - 40 - (point[1] - 40) * zoom;
+    }
+    private int nodeHalfSize() { return Math.max(3, (int) Math.ceil(11 * zoom)); }
     private void refresh(int page) {
         int last = Math.max(0, (snapshot.total() - 1) / NetworkSnapshot.PAGE_SIZE);
         TopologyNetwork.request(snapshot.origin(), Math.max(0, Math.min(last, page)));
@@ -87,9 +103,18 @@ public final class TopologyScreen extends Screen {
             NetworkSnapshot.Node n = snapshot.nodes().get(i);
             double[] p = positions.get(i); int x = sx(p[0]), y = sy(p[1]);
             int color = n.overloaded() ? 0xffe15b64 : n.capacity() > 0 ? 0xff62d39b : n.virtual() ? 0xffb998f0 : 0xff77bce8;
-            if (selected == i) g.fill(x - 7, y - 7, x + 8, y + 8, 0xffffffff);
-            g.fill(x - 5, y - 5, x + 6, y + 6, color);
-            g.drawString(font, "#" + (snapshot.page() * NetworkSnapshot.PAGE_SIZE + i) + " " + number(n.actualRpm()), x + 9, y - 4, color, false);
+            int half = nodeHalfSize();
+            if (selected == i) g.fill(x - half - 2, y - half - 2, x + half + 3, y + half + 3, 0xffffffff);
+            g.fill(x - half, y - half, x + half + 1, y + half + 1, color);
+            if (!n.icon().isEmpty()) {
+                // Inventory rendering preserves each mod's model and resource-pack appearance.
+                g.pose().pushPose();
+                g.pose().translate(x - 8 * zoom, y - 8 * zoom, 0);
+                g.pose().scale((float) zoom, (float) zoom, 1);
+                g.renderItem(n.icon(), 0, 0);
+                g.pose().popPose();
+            }
+            g.drawString(font, "#" + (snapshot.page() * NetworkSnapshot.PAGE_SIZE + i) + " " + number(n.actualRpm()), x + half + 4, y - 4, color, false);
         }
         g.disableScissor();
         g.enableScissor(graphRight + 4, 38, width, height - 24);
@@ -118,7 +143,7 @@ public final class TopologyScreen extends Screen {
         if (super.mouseClicked(x, y, button)) return true;
         if (button != 0 || x >= graphRight || y < 38 || y >= height - 24) return false;
         selected = -1;
-        for (var entry : positions.entrySet()) if (Math.abs(x - sx(entry.getValue()[0])) <= 9 && Math.abs(y - sy(entry.getValue()[1])) <= 9) {
+        for (var entry : positions.entrySet()) if (Math.abs(x - sx(entry.getValue()[0])) <= nodeHalfSize() + 2 && Math.abs(y - sy(entry.getValue()[1])) <= nodeHalfSize() + 2) {
             selected = entry.getKey(); break;
         }
         return true;

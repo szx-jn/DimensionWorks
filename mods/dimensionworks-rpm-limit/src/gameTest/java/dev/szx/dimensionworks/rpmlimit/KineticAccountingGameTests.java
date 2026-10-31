@@ -128,8 +128,46 @@ public final class KineticAccountingGameTests {
         helper.assertTrue(restored.calculateCapacity() == 0, "Legacy phantom capacity was imported");
         helper.succeed();
     }
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void topologyFocusAndIconsSurvivePaginationAndPacket(GameTestHelper helper) {
+        block(helper, "creative_motor", new BlockPos(2, 1, 2));
+        helper.runAfterDelay(20, () -> {
+            KineticBlockEntity motor = (KineticBlockEntity) helper.getBlockEntity(new BlockPos(2, 1, 2));
+            KineticNetwork network = motor.getOrCreateNetwork();
+            BlockPos clickedMachine = motor.getBlockPos().offset(1000, 0, 0);
+            java.util.List<RuntimeMember> virtuals = new java.util.ArrayList<>();
+            for (int i = 0; i < 256; i++) {
+                RuntimeMember member = new RuntimeMember(motor, motor.getBlockPos().offset(i + 1, 0, 0));
+                virtuals.add(member);
+                network.members.put(member, 0f);
+            }
+            RuntimeMember clicked = new RuntimeMember(motor, clickedMachine);
+            virtuals.add(clicked);
+            network.members.put(clicked, 0f);
+            try {
+                var snapshot = dev.szx.dimensionworks.rpmlimit.diagnostics.NetworkSnapshot.capture(motor, -1, clickedMachine);
+                helper.assertTrue(snapshot.page() == 1, "Opening did not choose the page containing the clicked node");
+                helper.assertTrue(snapshot.focus().equals(clickedMachine), "Virtual machine focus was replaced by its input shaft");
+                net.minecraft.network.FriendlyByteBuf buffer = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+                try {
+                    snapshot.encode(buffer);
+                    var decoded = dev.szx.dimensionworks.rpmlimit.diagnostics.NetworkSnapshot.decode(buffer);
+                    helper.assertTrue(decoded.origin().equals(clickedMachine) && decoded.focus().equals(clickedMachine),
+                        "Entry/focus coordinates changed during packet serialization");
+                    var node = decoded.nodes().stream().filter(n -> n.pos().equals(clickedMachine)).findFirst().orElseThrow();
+                    helper.assertTrue(node.icon().is(motor.getBlockState().getBlock().asItem()), "Node lost its inventory item icon");
+                    helper.assertTrue(node.icon().getCount() == 1 && !node.icon().hasTag(), "Icon must not carry machine inventory NBT");
+                } finally { buffer.release(); }
+            } finally {
+                for (RuntimeMember member : virtuals) network.members.remove(member);
+                KineticNetworkOptimizer.invalidate(network);
+            }
+            helper.succeed();
+        });
+    }
     private static final class RuntimeMember extends KineticBlockEntity implements IRuntimeKineticMember {
-        RuntimeMember(KineticBlockEntity real) { super(real.getType(), real.getBlockPos(), real.getBlockState()); }
+        RuntimeMember(KineticBlockEntity real) { this(real, real.getBlockPos()); }
+        RuntimeMember(KineticBlockEntity real, BlockPos pos) { super(real.getType(), pos, real.getBlockState()); }
         @Override public float getTheoreticalSpeed() { return 64; }
     }
 }

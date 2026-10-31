@@ -26,7 +26,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class TopologyNetwork {
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(DimensionWorksRpmLimit.MOD_ID, "topology"), () -> "1", "1"::equals, "1"::equals);
+        new ResourceLocation(DimensionWorksRpmLimit.MOD_ID, "topology"), () -> "2", "2"::equals, "2"::equals);
     private static final TagKey<Item> WRENCHES = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/wrenches"));
     private static final Map<ServerPlayer, Long> LAST_REQUEST = Collections.synchronizedMap(new WeakHashMap<>());
     private static final java.util.List<Adapter> ADAPTERS = new java.util.ArrayList<>();
@@ -62,8 +62,8 @@ public final class TopologyNetwork {
         // Cancel on both logical sides, including creative mode, before block damage starts.
         event.setCanceled(true);
         if (event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START) return;
-        if (event.getLevel().isClientSide) request(event.getPos(), 0);
-        else if (event.getEntity() instanceof ServerPlayer player) send(player, event.getPos(), 0);
+        if (event.getLevel().isClientSide) request(event.getPos(), -1);
+        else if (event.getEntity() instanceof ServerPlayer player) send(player, event.getPos(), -1);
     }
 
     private static void send(ServerPlayer player, BlockPos pos, int page) {
@@ -80,10 +80,8 @@ public final class TopologyNetwork {
             player.displayClientMessage(net.minecraft.network.chat.Component.literal("该机械当前没有接入应力网络"), true);
             return;
         }
-        NetworkSnapshot data = NetworkSnapshot.capture(kinetic, page);
-        // Keep the actual clicked target for reach validation on later page/refresh requests.
-        data = new NetworkSnapshot(pos, data.id(), data.time(), data.page(), data.total(), data.unloadedMembers(), data.rpmLimit(),
-            data.capacity(), data.stress(), data.unloadedCapacity(), data.unloadedStress(), data.loadedCapacity(), data.loadedStress(), data.nodes());
+        // The entry remains the reach-check anchor; focus may be its virtual member or input shaft.
+        NetworkSnapshot data = NetworkSnapshot.capture(kinetic, page, pos);
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), data);
     }
     public static void request(BlockPos pos, int page) { CHANNEL.sendToServer(new Request(pos, page)); }
