@@ -10,13 +10,12 @@ item_ids:
 - ae2:charged_certus_quartz_crystal
 ---
 
-# 代 费赛特斯石英水晶
+# 充能赛特斯石英水晶
 
 <ItemImage id="charged_certus_quartz_crystal" scale="4" />
 
-A<ItemLink id="certus_quartz_crystal" />已经通过<ItemLink id="charger" />用于生产
-<ItemLink id="fluix_crystal" />和[赛特斯石英母岩](../items-blocks-machines/budding_certus.md).
+将<ItemLink id="certus_quartz_crystal" />放入<ItemLink id="charger" />充能，就能得到充能赛特斯石英水晶。它可用于制作<ItemLink id="fluix_crystal" />以及培育[赛特斯石英母岩](../items-blocks-machines/budding_certus.md)。
 
-## 用途
+## 合成与用途
 
 <RecipeFor id="charged_certus_quartz_crystal" />
