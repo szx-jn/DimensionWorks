@@ -15,15 +15,12 @@ item_ids:
   <ImportStructure src="../structure/cable_tag_storage_bus.snbt"></ImportStructure>
 </GameScene>
 
-ME 标签存储总线是一种<ItemLink id="ae2:storage_bus" />，可以按物品或流体标签过滤，并支持一些基本的逻辑运算符。
+ME 标签存储总线在<ItemLink id="ae2:storage_bus" />基础上增加了**按物品或流体标签筛选**的能力，还支持简单的逻辑组合。
 
-以下是一些示例：
+例如，只允许原材料：
 
-- 只接受原矿
+`forge:raw_materials/*`
 
-forge:raw_materials/*
+同时允许所有金属锭和宝石：
 
-- 接受所有锭和宝石
-
-forge:ingots/* | forge:gems/*
-
+`forge:ingots/* | forge:gems/*`
