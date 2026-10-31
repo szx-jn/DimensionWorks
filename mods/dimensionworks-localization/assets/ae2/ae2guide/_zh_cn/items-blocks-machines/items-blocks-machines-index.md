@@ -1,14 +1,14 @@
 ---
 navigation:
-  title: 物项、块和机器
+  title: 物品、方块与机器
   position: 50
 ---
 
-# 物项、块和机器
+# 物品、方块与机器
 
-用于连接其它页面的版本中的东西列表, 并描述其功能。
+本章节按用途分类介绍 AE2 中的各类材料、方块、设备和工具。
 
-## 杂项. 原料和块
+## 材料与杂项方块
 
 <CategoryIndex category="misc ingredients blocks" />
 
@@ -20,7 +20,7 @@ navigation:
 
 <CategoryIndex category="devices" />
 
-## 机器机机
+## 机器
 
 <CategoryIndex category="machines" />
 
