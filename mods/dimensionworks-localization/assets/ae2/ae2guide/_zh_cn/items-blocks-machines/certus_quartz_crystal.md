@@ -14,11 +14,11 @@ item_ids:
 
 <ItemImage id="certus_quartz_crystal" scale="4" />
 
-*"赛特斯石英水晶具有将大量能量吸收到晶体矩阵中的独特特性。”*
+*“赛特斯石英水晶具有将大量能量储存在晶体结构中的独特性质。”*
 
-一种主要原料之一 AE2 区块,[设备](../ae2-mechanics/devices.md)和物品,通过种植[赛特斯石英母岩](../ae2-mechanics/certus-growth.md).
+赛特斯石英水晶是 AE2 方块、[设备](../ae2-mechanics/devices.md)和工具的重要原料，可以通过培育[赛特斯石英母岩](../ae2-mechanics/certus-growth.md)来持续获得。
 
-## 一些替代食谱
+## 其他获取方式
 
 <Recipe id="misc/deconstruction_certus_quartz_block" />
 
