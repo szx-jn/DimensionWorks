@@ -1565,6 +1565,18 @@
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-item-pickup-guard"
+    },
+    {
+      "id": "industrial_platform",
+      "name": "Industrial Platform",
+      "source": "curseforge",
+      "project_slug": "industrial-platform",
+      "file_id": 8979564,
+      "file_name": "Industrial Platform-1.20.1-2.0.1.jar",
+      "version": "1.20.1-2.0.1",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/industrial-platform"
     }
   ]
 }
