@@ -5,6 +5,11 @@ const DW_DE_KEEP = [
   'draconium_dust',
   'draconium_ingot',
   'awakened_draconium_ingot',
+  'awakened_draconium_block',
+  'awakened_draconium_nugget',
+  'large_chaos_frag',
+  'medium_chaos_frag',
+  'small_chaos_frag',
   'reactor_core',
   'reactor_stabilizer',
   'reactor_injector'
@@ -33,6 +38,38 @@ ServerEvents.recipes(event => {
     .id('dimensionworks:reactor/nether_draconium_ore_smelting')
   event.smelting('draconicevolution:draconium_ingot', 'draconicevolution:end_draconium_ore')
     .id('dimensionworks:reactor/end_draconium_ore_smelting')
+
+  // Fuel can be inserted/withdrawn in block, ingot and nugget units.
+  event.shaped('draconicevolution:awakened_draconium_block', [
+    'AAA', 'AAA', 'AAA'
+  ], { A: 'draconicevolution:awakened_draconium_ingot' })
+    .id('dimensionworks:reactor/awakened_draconium_block')
+  event.shapeless('9x draconicevolution:awakened_draconium_ingot',
+    ['draconicevolution:awakened_draconium_block'])
+    .id('dimensionworks:reactor/awakened_draconium_block_unpack')
+  event.shapeless('9x draconicevolution:awakened_draconium_nugget',
+    ['draconicevolution:awakened_draconium_ingot'])
+    .id('dimensionworks:reactor/awakened_draconium_nugget_unpack')
+  event.shaped('draconicevolution:awakened_draconium_ingot', [
+    'AAA', 'AAA', 'AAA'
+  ], { A: 'draconicevolution:awakened_draconium_nugget' })
+    .id('dimensionworks:reactor/awakened_draconium_nugget_pack')
+
+  // Spent fuel is returned by the reactor as large/medium/small chaos fragments.
+  event.shapeless('9x draconicevolution:medium_chaos_frag',
+    ['draconicevolution:large_chaos_frag'])
+    .id('dimensionworks:reactor/large_chaos_fragment_unpack')
+  event.shapeless('9x draconicevolution:small_chaos_frag',
+    ['draconicevolution:medium_chaos_frag'])
+    .id('dimensionworks:reactor/medium_chaos_fragment_unpack')
+  event.shaped('draconicevolution:large_chaos_frag', [
+    'AAA', 'AAA', 'AAA'
+  ], { A: 'draconicevolution:medium_chaos_frag' })
+    .id('dimensionworks:reactor/large_chaos_fragment_pack')
+  event.shaped('draconicevolution:medium_chaos_frag', [
+    'AAA', 'AAA', 'AAA'
+  ], { A: 'draconicevolution:small_chaos_frag' })
+    .id('dimensionworks:reactor/medium_chaos_fragment_pack')
 
   // Avoid the FE-powered fusion crafting chain entirely.
   event.shaped('draconicevolution:awakened_draconium_ingot', [
