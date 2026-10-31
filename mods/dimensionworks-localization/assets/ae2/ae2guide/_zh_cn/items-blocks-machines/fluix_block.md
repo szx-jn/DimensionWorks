@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 福鲁伊克斯块块
+  title: 福鲁伊克斯块
   icon: fluix_block
   position: 010
 categories:
@@ -10,12 +10,12 @@ item_ids:
 - ae2:fluix_block
 ---
 
-# 福鲁伊克斯块块
+# 福鲁伊克斯块
 
 <BlockImage id="fluix_block" scale="8" />
 
-存储区块<ItemLink id="fluix_crystal" />。它也用于几台机器的配方。
+由<ItemLink id="fluix_crystal" />合成的储存方块，也可作为部分 AE2 机器和装置的合成材料。
 
-## 用途
+## 合成与用途
 
 <RecipeFor id="fluix_block" />
