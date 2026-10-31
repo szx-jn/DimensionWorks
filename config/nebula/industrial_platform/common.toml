@@ -1,0 +1,19 @@
+# DimensionWorks platform policy. Changes require a client/server restart.
+[general]
+	# Stone-tagged blocks and stone are the only allowed construction materials.
+	platform_material = ["#forge:stone"]
+	# Keep boundary preview and platform cycle controls on the wrench.
+	adjuster = ["#forge:tools/wrench"]
+	# Default vertical fill around the platform.
+	default_top_filling_distance = 5
+	default_bottom_filling_distance = 5
+
+[platform]
+	# Lock the platform builder footprint to 3x3 chunks.
+	min_platform_chunks = 3
+	max_platform_chunks = 3
+
+[cost]
+	light_platform_cost = 1
+	heavy_platform_cost = 1
+	filling_layer_cost = 0
