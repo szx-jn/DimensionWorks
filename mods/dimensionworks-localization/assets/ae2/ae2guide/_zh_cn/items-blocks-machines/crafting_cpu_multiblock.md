@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 手工合成 CPU 多个区块(存储、协同处理、监测、单元)
+  title: 自动合成 CPU 多方块结构
   icon: 1k_crafting_storage
   position: 210
 categories:
@@ -17,7 +17,7 @@ item_ids:
 - ae2:crafting_unit
 ---
 
-# 术术 CPU
+# 自动合成 CPU
 
 <GameScene zoom="4" background="transparent">
   <ImportStructure src="../assets/assemblies/crafting_cpus.snbt" />
@@ -26,94 +26,75 @@ item_ids:
 
 <Row>
   <BlockImage id="1k_crafting_storage" scale="4" />
-
   <BlockImage id="crafting_accelerator" scale="4" />
-
   <BlockImage id="crafting_monitor" scale="4" />
-
   <BlockImage id="crafting_unit" scale="4" />
 </Row>
 
-手合成的 CPU 管理手写要求/工作,它们存储中间原料,同时用多步制来合成工作。
-这些工作正在进行中,影响到大工作的规模和完成的速度。[自动自制](../ae2-mechanics/autocrafting.md)
-以获取更多细节。
+合成 CPU 负责分配和执行[自动合成](../ae2-mechanics/autocrafting.md)任务，并暂存生产过程中需要的材料和中间产物。CPU 的容量与协处理器数量会影响可处理的任务规模和材料投送速度。
 
-每个合成 CPU 处理 1 个请求或工作, 所以如果您想要同时请求计算处理器和 256 块平滑石, 您需要 2。CPU 多个区块。
+每个合成 CPU **同一时间只能处理一项合成请求**。如果想同时合成计算处理器和大量石头，通常至少需要两套独立 CPU。
 
-他们可以处理球员的要求,自动化(导出总车和接口)或者两者兼而有之
+合成任务既可以由玩家在终端中发起，也可以由安装了<ItemLink id="crafting_card" />的<ItemLink id="export_bus" />等设备自动发起。
 
-右键单击一键可生成一个手动状态界面, 以便您检查手写工作的进展。CPU 正在处理中。
+右键合成 CPU 可以打开任务状态界面，查看正在执行的任务及其进度。
 
 ## 设置
 
-*   CPU 可以设定可以接受来自球员的要求, 仅仅是自动化(类似<ItemLink id="export_bus" />以
-    <ItemLink id="crafting_card" />)或者两者兼而有之
+可以决定 CPU 只接受玩家手动请求、只接受自动化请求，或者两种请求都接受。
 
-## 建筑
+## 多方块结构
 
-手合成式 CPU 是多块块,必须是坚实的长方形棱柱,没有缝隙。它们由若干组成部分组成。
+合成 CPU 必须组成**没有空隙的完整长方体**。最小结构只需要一个合成存储组件；更大的 CPU 可以加入合成单元、协处理器和显示器。
 
-每个 CPU 必须至少包含 1 合成存储块块(和最低限度的可行和最低 CPU 事实上,只有一公里合成存储).
-
-# 手工合成股
+## 合成单元
 
 <BlockImage id="crafting_unit" scale="4" />
 
-(任择)手合成单位只需填充一个 CPU 使它成为坚固的矩形棱柱 如果你没有足够的
-它们也是其他组成部分的基本原料。
+合成单元为可选组件，主要用来补齐多方块结构的空位，也可以用于合成其他 CPU 部件。
 
 <RecipeFor id="crafting_unit" />
 
-# 合成存储
+## 合成存储
 
 <Row>
   <BlockImage id="1k_crafting_storage" scale="4" />
-
   <BlockImage id="4k_crafting_storage" scale="4" />
-
   <BlockImage id="16k_crafting_storage" scale="4" />
-
   <BlockImage id="64k_crafting_storage" scale="4" />
-
   <BlockImage id="256k_crafting_storage" scale="4" />
 </Row>
 
-(所需)所有标准细胞大小都有手工存储库(1k, 4k, 16k, 64k, 256k)它们存储原料和
-合成品中含有的中间原料,因此需要较大的或更多的存储库,以达到以下条件:CPU 处理手合成工作
-含有更多原料。
+**每个 CPU 至少需要一个合成存储组件。**
+
+合成存储有 1K、4K、16K、64K 和 256K 五种容量。它们用于缓存合成任务所需的材料和中间产物。任务越复杂、需要暂存的资源越多，通常越需要较大的合成存储空间。
 
 <Column>
   <Row>
     <RecipeFor id="1k_crafting_storage" />
-
     <RecipeFor id="4k_crafting_storage" />
-
     <RecipeFor id="16k_crafting_storage" />
   </Row>
-
   <Row>
     <RecipeFor id="64k_crafting_storage" />
-
     <RecipeFor id="256k_crafting_storage" />
   </Row>
 </Column>
 
-# 联合处理股
+## 合成协处理器
 
 <BlockImage id="crafting_accelerator" scale="4" />
 
-(任择)手合成共同处理器使系统从<ItemLink id="pattern_provider" />更经常
-这使得它们能够跟上机器的快速进程。样板供应器周围环绕着
-<ItemLink id="molecular_assembler" />能够比单个装配器能更快地推动原料,从而
-在周围组装工之间分配原料批次。
+协处理器是可选组件，能够提高合成 CPU 同时向多个<ItemLink id="pattern_provider" />分发原料的能力。
+
+如果一个样板供应器周围连接了多个<ItemLink id="molecular_assembler" />，增加协处理器通常可以更好地利用并行生产能力。
 
 <RecipeFor id="crafting_accelerator" />
 
-# 手工合成监测器
+## 合成监视器
 
 <BlockImage id="crafting_monitor" scale="4" />
 
-(任择)设计显示器显示工作 CPU 正在处理中。
-屏幕的颜色可以使用<ItemLink id="color_applicator" />.
+合成监视器也是可选组件，用来直接显示 CPU 当前处理的任务。可以使用<ItemLink id="color_applicator" />调整显示颜色。
 
 <RecipeFor id="crafting_monitor" />
