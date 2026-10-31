@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 浓缩器
+  title: 物质浓缩器
   icon: condenser
   position: 310
 categories:
@@ -14,22 +14,16 @@ item_ids:
 
 <BlockImage id="condenser" scale="8" />
 
-物质浓缩器可以用作垃圾桶或创建<ItemLink id="matter_ball" />和
-[奇数](singularities.md)。它可以使用任何物品或液体等。存储元件可以存储。
+物质浓缩器既可以当作垃圾处理器，也能把多余的物品或流体转化为<ItemLink id="matter_ball" />和[奇点](singularities.md)。它能够处理 ME 存储系统支持的大多数资源类型。
 
-## 设置/环境设置
+## 运行模式
 
-*   在垃圾桶模式中, 物质冷却器将所有进入它的东西全部清除掉
-*   在物质球模式中,冷凝器合成<ItemLink id="matter_ball" />你所施于其中的,
-    此模式要求您在冷凝器的顶槽中放置存储组件。物质球需要 256 个物件或桶
-    每一个,所以 a<ItemLink id="cell_component_1k" />(提供 8192 比特的容量)足够了
-*   在物质独一模式下,冷凝器合成[奇数](singularities.md)你所施于其中的,
-    此模式要求您在冷凝器的顶槽中放置存储组件。特性需要 256,000 个物件或桶
-    每一个,所以 a<ItemLink id="cell_component_64k" />(524 288 比特的容量)足够了
+* **垃圾处理模式：**销毁所有输入的物品和流体，不产生输出。
+* **物质球模式：**使用放入上方槽位的存储组件，将输入资源压缩为<ItemLink id="matter_ball" />。每个物质球需要 256 单位物品或流体；安装<ItemLink id="cell_component_1k" />通常就足够。
+* **奇点模式：**将大量输入资源压缩为[奇点](singularities.md)。每个奇点需要约 256,000 单位资源，通常需要<ItemLink id="cell_component_64k" />等更大容量的存储组件。
 
-请注意,在生产某些资源的后两种模式中,物质浓缩器*能够*后向后退, 将
-如果能源和输出项缓冲部分全部填充,则不接受任何进一步的输入。
+在后两种模式中，如果内部物质存储空间或输出缓冲已满，浓缩器会暂停接收新的物品。设计自动化产线时要考虑这一点。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="condenser" />
