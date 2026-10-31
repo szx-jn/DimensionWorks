@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: ME 延长样板供应器
+    title: ME 扩展样板供应器
     icon: expatternprovider:ex_pattern_provider
 categories:
 - extended devices
@@ -10,7 +10,7 @@ item_ids:
 - expatternprovider:ex_pattern_provider_part
 ---
 
-# ME 延长样板供应器
+# ME 扩展样板供应器
 
 <Row gap="20">
 <BlockImage id="expatternprovider:ex_pattern_provider" scale="8"></BlockImage>
@@ -20,9 +20,8 @@ item_ids:
 </GameScene>
 </Row>
 
-ME 延长样板供应器是 a<ItemLink id="ae2:pattern_provider" />具有较大 
-典型库存。
+ME 扩展样板供应器是<ItemLink id="ae2:pattern_provider" />的升级版，具有更多样板槽位，适合集中管理大量加工配方。
 
-*当您可以将所有图案放入一个街区时, 需要子网的人。*
+*一个方块就能容纳更多样板，也许你不再需要为容量不足而搭建那么多子网。*
 
-![EPPGui](../pic/epp_gui.png)
+![扩展样板供应器界面](../pic/epp_gui.png)
