@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 导体操纵器
+  title: 熵变操纵器
   icon: entropy_manipulator
   position: 410
 categories:
@@ -10,17 +10,16 @@ item_ids:
 - ae2:entropy_manipulator
 ---
 
-# 宇宙操纵器
+# 熵变操纵器
 
 <ItemImage id="entropy_manipulator" scale="4" />
 
-Entropy 操纵器允许您通过右键和右转键分别点击来取暖和冷却。它不能做什么,
-就像蒸发或冷冻水, 凝固熔岩到粘糊糊的,熔炼木炭,和熔化 腐烂的岩石在世界上。
+熵变操纵器能够对世界中的方块进行**加热或冷却**。普通右键与潜行右键分别执行不同操作。
 
-如果它不能对一个街区做具体的事情,它就会起到火石和钢铁的作用。
+例如，它可以蒸发或冻结水、改变熔岩状态、将木头烧成木炭，或熔化部分方块。若目标方块不支持这些特殊操作，熵变操纵器通常会像打火石一样点火。
 
-其能量可以充充电<ItemLink id="charger" />.
+使用<ItemLink id="charger" />可以为它补充能量。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="entropy_manipulator" />
