@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 彩弹
+  title: 彩弹与发光彩弹
   icon: green_lumen_paint_ball
   position: 410
 categories:
@@ -55,12 +55,11 @@ item_ids:
   <ItemImage id="red_paint_ball" scale="4" />
 </Row>
 
-彩弹用于<ItemLink id="color_applicator" />来绘制彩色区块,例如[电缆](cables.md),
-羊毛、梯可开塔、玻璃和混凝土。<ItemLink id="matter_cannon" />拍摄一些油漆。
+彩弹可以作为<ItemLink id="color_applicator" />的颜料，为[ME 线缆](cables.md)、羊毛、玻璃和混凝土等方块染色。它们也能用作<ItemLink id="matter_cannon" />的弹药。
 
-## 食食权
+## 合成配方
 
-染料周围 8 个物球
+将染料与 8 个物质球组合，制作对应颜色的彩弹。
 
 <Column>
   <Row>
@@ -82,7 +81,7 @@ item_ids:
   <br />
 </Column>
 
-# 卢门彩彩弹
+# 发光彩弹
 
 <Row gap="-8">
   <ItemImage id="white_lumen_paint_ball" scale="4" />
@@ -96,12 +95,11 @@ item_ids:
   <ItemImage id="red_lumen_paint_ball" scale="4" />
 </Row>
 
-它们与普通的彩弹弹完全一样, 但是弹珠弹出时发出光亮<ItemLink id="matter_cannon" />.
-可能像发射弹一样有用
+发光彩弹与普通彩弹用途相同，但使用<ItemLink id="matter_cannon" />发射后会产生发光效果，可以用于照明或标记地点。
 
-## 食食权
+## 合成配方
 
-八个彩弹 围绕一个发光石灰尘
+将 8 个彩弹与荧石粉组合，可以制作对应颜色的发光彩弹。
 
 <Column>
   <Row>
