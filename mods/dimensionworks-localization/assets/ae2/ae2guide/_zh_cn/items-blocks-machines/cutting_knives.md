@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 切刀刀
+  title: 石英切割刀
   icon: certus_quartz_cutting_knife
   position: 410
 categories:
@@ -11,7 +11,7 @@ item_ids:
 - ae2:nether_quartz_cutting_knife
 ---
 
-# 夸石工具
+# 石英切割刀
 
 <Row>
   <ItemImage id="certus_quartz_cutting_knife" scale="4" />
@@ -19,12 +19,11 @@ item_ids:
   <ItemImage id="nether_quartz_cutting_knife" scale="4" />
 </Row>
 
-剪刀是用来做<ItemLink id="name_press" />和<ItemLink id="cable_anchor" />.
+石英切割刀可用于制作<ItemLink id="name_press" />和<ItemLink id="cable_anchor" />。
 
-要绘制名称按键, 右键单击切刀刀, 然后插入金属的一小块, 那么您就必须输入您的名字
-想要在板块上写字,然后简单地抽取完成的板子。
+要制作命名压印模板，先右键使用切割刀，在界面中放入金属锭，再输入想刻在模板上的名称。完成后取出压印模板即可。
 
-## 食食权
+## 合成配方
 
 <Row>
   <RecipeFor id="certus_quartz_cutting_knife" />
