@@ -25,7 +25,7 @@ public abstract class RotationPropagatorMixin {
     @Inject(method = "getConveyedSpeed", at = @At("RETURN"), cancellable = true, remap = false)
     private static void dimensionworks$capConveyedSpeed(KineticBlockEntity from, KineticBlockEntity to,
                                                         CallbackInfoReturnable<Float> cir) {
-        cir.setReturnValue(RpmLimitManager.clamp(to, cir.getReturnValueF()));
+        cir.setReturnValue(RpmLimitManager.clampIndividual(to, cir.getReturnValueF()));
     }
 
     @Inject(method = "isLargeCogToSpeedController", at = @At("HEAD"), cancellable = true, remap = false)

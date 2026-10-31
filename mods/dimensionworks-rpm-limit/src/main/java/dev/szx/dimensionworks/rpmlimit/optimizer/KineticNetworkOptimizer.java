@@ -114,6 +114,7 @@ public final class KineticNetworkOptimizer {
      * Returns true only when a valid cached total was incrementally updated.
      */
     public static boolean updateStressContribution(KineticNetwork network, KineticBlockEntity member) {
+        KineticPersistence.invalidate(network);
         NetworkCache cache = existingCache(network);
         if (cache == null || !cache.stressValid
             || !cache.stressContributions.containsKey(member)) {
@@ -155,6 +156,7 @@ public final class KineticNetworkOptimizer {
      * Returns true only when a valid cached total was incrementally updated.
      */
     public static boolean updateCapacityContribution(KineticNetwork network, KineticBlockEntity source) {
+        KineticPersistence.invalidate(network);
         NetworkCache cache = existingCache(network);
         if (cache == null || !cache.capacityValid
             || !cache.capacityContributions.containsKey(source)) {
@@ -306,6 +308,14 @@ public final class KineticNetworkOptimizer {
     /** Call after a network's membership or unloaded-member accounting changes. */
     public static void onTopologyChanged(KineticNetwork network) {
         invalidate(network);
+        for (KineticBlockEntity candidate : network.members.keySet()) {
+            if (candidate.getLevel() != null && !candidate.getLevel().isClientSide && !candidate.isRemoved()
+                && candidate.getLevel().hasChunkAt(candidate.getBlockPos())
+                && candidate.getLevel().getBlockEntity(candidate.getBlockPos()) == candidate) {
+                candidate.networkDirty = true;
+                break;
+            }
+        }
     }
 
     /**
@@ -348,6 +358,9 @@ public final class KineticNetworkOptimizer {
         if (network == null) {
             return;
         }
+        KineticPersistence.invalidate(network);
+        NetworkRpmLimit.invalidate(network);
+        PENDING_LOAD_REFRESHES.put(network, false);
         NetworkCache cache = cacheFor(network);
         cache.stressValid = false;
         cache.capacityValid = false;
@@ -399,9 +412,8 @@ public final class KineticNetworkOptimizer {
     public static void abortBatch() {
         Batch batch = BATCH.get();
         if (batch.depth > 0) {
-            batch.depth = 0;
-            batch.dirtyNetworks.clear();
-            BATCH.remove();
+            batch.depth = 1;
+            endBatch();
         }
     }
 

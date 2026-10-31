@@ -127,6 +127,13 @@ public final class DimensionWorksMekStress {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             MemoryGridService.register();
+            dev.szx.dimensionworks.rpmlimit.diagnostics.TopologyNetwork.registerAdapter(
+                tile -> tile instanceof mekanism.common.tile.base.TileEntityMekanism,
+                tile -> {
+                    var route = dev.szx.dimensionworks.mekstress.memory.MachinePowerManager.powerRoute(
+                        (mekanism.common.tile.base.TileEntityMekanism) tile);
+                    return route == null ? null : route.source();
+                });
         });
     }
 

@@ -7,6 +7,7 @@ import dev.szx.dimensionworks.mekstress.reactor.ReactorPowerBridge;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = KineticBlockEntity.class, remap = false)
 public abstract class ReactorShaftMixin {
     @Unique private boolean dimensionworks$reactorOutput;
+    @Shadow protected float lastCapacityProvided;
 
     @Inject(method = "getGeneratedSpeed", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$reactorRpm(CallbackInfoReturnable<Float> cir) {
@@ -33,7 +35,8 @@ public abstract class ReactorShaftMixin {
         KineticBlockEntity shaft = (KineticBlockEntity) (Object) this;
         ReactorPowerBridge.Output output = ReactorPowerBridge.outputFor(shaft);
         if (output != null) {
-            cir.setReturnValue(output.stressPerRpm());
+            lastCapacityProvided = output.stressPerRpm();
+            cir.setReturnValue(lastCapacityProvided);
         }
     }
 
@@ -71,6 +74,7 @@ public abstract class ReactorShaftMixin {
         }
 
         float capacity = output.stressPerRpm();
+        lastCapacityProvided = capacity;
         Float previous = network.sources.put(shaft, capacity);
         if (previous == null) {
             KineticNetworkOptimizer.invalidate(network);

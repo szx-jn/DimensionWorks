@@ -129,10 +129,11 @@ public abstract class KineticNetworkMixin {
         KineticNetworkOptimizer.onTopologyChanged((KineticNetwork) (Object) this);
     }
 
-    @Inject(method = "addSilently", at = @At("RETURN"), remap = false)
+    @Inject(method = "addSilently", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$invalidateAfterSilentAdd(KineticBlockEntity be, float lastCapacity,
                                                          float lastStress, CallbackInfo ci) {
-        KineticNetworkOptimizer.onMemberLoadedSilently((KineticNetwork) (Object) this, be);
+        dev.szx.dimensionworks.rpmlimit.optimizer.KineticPersistence.restore((KineticNetwork) (Object) this, be);
+        ci.cancel();
     }
 
     @Inject(method = "remove", at = @At("RETURN"), remap = false)

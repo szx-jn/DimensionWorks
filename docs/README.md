@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/kinetic-network-diagnostics.md`](design/kinetic-network-diagnostics.md)：应力网络恢复账目、最低 RPM 上限与扳手拓扑 GUI
+
 - [`design/me-live-stress-network.md`](design/me-live-stress-network.md)：ME 实时应力额度、RPM 总量过载与两条供能路线造价
 
 - [`design/advanced-speed-controller.md`](design/advanced-speed-controller.md)：高级转速控制器配方、数字面板与进度边界

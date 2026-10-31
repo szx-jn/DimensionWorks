@@ -127,7 +127,12 @@ public final class RpmLimitManager {
             return 0;
         if (k instanceof IPreclampedKineticSpeed)
             return requested;
-        return RpmLimitMath.cap(requested, limitFor(k));
+        return RpmLimitMath.cap(requested, dev.szx.dimensionworks.rpmlimit.optimizer.NetworkRpmLimit.limit(k));
+    }
+
+    public static float clampIndividual(KineticBlockEntity k, float requested) {
+        if (k instanceof IPreclampedKineticSpeed) return Float.isFinite(requested) ? requested : 0;
+        return RpmLimitMath.cap(requested, individualLimit(k));
     }
 
     /** Ratio from an unscaled network speed to the player-limited effective speed. */
@@ -152,7 +157,7 @@ public final class RpmLimitManager {
             UUID direct = directOwner(cur);
             if (direct != null)
                 return direct;
-            if (!cur.hasSource() || cur.getLevel() == null)
+            if (!cur.hasSource() || cur.getLevel() == null || !cur.getLevel().hasChunkAt(cur.source))
                 break;
             BlockEntity blockEntity = cur.getLevel().getBlockEntity(cur.source);
             cur = blockEntity instanceof KineticBlockEntity source ? source : null;
@@ -232,6 +237,11 @@ public final class RpmLimitManager {
 
 
 
+    public static int individualLimit(KineticBlockEntity k) {
+        if (k instanceof dev.szx.dimensionworks.rpmlimit.api.IRuntimeKineticMember) return RpmLimitConfig.MAX_RPM.get();
+        return limitFor(k);
+    }
+
     private static int limitFor(KineticBlockEntity k) {
         UUID owner = owner(k);
         if (k.getLevel() != null && !k.getLevel().isClientSide && owner != null) {
@@ -248,7 +258,7 @@ public final class RpmLimitManager {
             int inherited = storedMachineLimit(current);
             if (inherited > 0)
                 return inherited;
-            if (!current.hasSource() || current.getLevel() == null)
+            if (!current.hasSource() || current.getLevel() == null || !current.getLevel().hasChunkAt(current.source))
                 break;
             BlockEntity blockEntity = current.getLevel().getBlockEntity(current.source);
             current = blockEntity instanceof KineticBlockEntity source ? source : null;

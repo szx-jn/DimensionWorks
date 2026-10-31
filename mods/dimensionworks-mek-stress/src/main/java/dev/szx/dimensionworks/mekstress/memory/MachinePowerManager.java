@@ -148,7 +148,7 @@ public final class MachinePowerManager {
         boolean assign = route != null && PowerRouteSafety.shouldAssignStress(
             true, route.running(), route.rpm(), routeStillPresent(route));
         if (assign) {
-            MachineKineticRegistry.sync(tile, route.network(), memberRpm(route));
+            MachineKineticRegistry.sync(tile, route.network(), memberRpm(route), route.source().getBlockPos());
         } else {
             MachineKineticRegistry.detach(tile);
         }

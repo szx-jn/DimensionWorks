@@ -94,3 +94,9 @@ AE 服务只跟踪驱动器和齿轮箱参与节点，每次实时读取只检�
 在本目录执行 gradle build --no-daemon。组合构建会生成 RPM Limit 的 devJar 用于官方映射开发环境，生产服使用其常规 reobf JAR，禁止把 -dev.jar 放入实例。
 
 独立运行 gradle runGameTestServer --no-daemon -x downloadAssets 验证真实 AE 节点、齿轮箱分配、应力与 RPM 全网过载、卡插拔、零供给和恢复。测试源和世界不进入发布 JAR。
+
+## 0.3.16：虚拟负载恢复与拓扑诊断
+
+依赖 RPM Limit 0.4.14 或更新版本。虚拟机器和反应堆输入成员统一标记为运行时成员，不进入 Create 物理成员的持久化总账；重启重新接入时避免重复计费。反应堆输出轴同时维护 `lastCapacityProvided`，恢复时不再漏记已提供容量。反应堆输入负载按接入网络最低 RPM 上限核算。
+
+蹲下持扳手左键已接入动力的 Mekanism 机器，可打开对应应力网络拓扑；虚拟机器节点保存其实际接入端坐标，显示到来源方块的连接。`MachineKineticRegistry.sync` 新增带 `BlockPos attachment` 的重载，原三参数调用保持兼容。

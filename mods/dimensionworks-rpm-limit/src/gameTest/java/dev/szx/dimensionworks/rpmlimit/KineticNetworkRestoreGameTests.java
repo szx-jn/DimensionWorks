@@ -48,7 +48,7 @@ public final class KineticNetworkRestoreGameTests {
                 helper.assertTrue(member.isOverStressed(), "Fixture failed to set stale overload state");
             }
 
-            network.addSilently(motor, 0, 0);
+            dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.onMemberLoadedSilently(network, motor);
             helper.assertTrue(motor.networkDirty, "Loaded member was not scheduled for a network refresh");
 
             // The restored totals match Create's current totals, so its normal updateNetwork path
@@ -62,6 +62,7 @@ public final class KineticNetworkRestoreGameTests {
             for (KineticBlockEntity member : network.members.keySet()) {
                 network.members.put(member, 100_000_000f);
             }
+            dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.invalidate(network);
             float overloadedStress = network.calculateStress();
             helper.assertTrue(overloadedStress > network.calculateCapacity(),
                 "Fixture must be able to exceed its real network capacity");
@@ -73,7 +74,7 @@ public final class KineticNetworkRestoreGameTests {
                     network.getSize());
             }
 
-            network.addSilently(motor, 0, 0);
+            dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.onMemberLoadedSilently(network, motor);
             network.updateNetwork();
             for (KineticBlockEntity member : network.members.keySet()) {
                 helper.assertTrue(member.isOverStressed(),

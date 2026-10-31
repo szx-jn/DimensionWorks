@@ -5,6 +5,9 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import dev.szx.dimensionworks.rpmlimit.OverspeedBonus;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
+import dev.szx.dimensionworks.rpmlimit.optimizer.KineticPersistence;
+import com.simibubi.create.content.kinetics.KineticNetwork;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -46,7 +49,12 @@ public abstract class KineticBlockEntityMixin {
     @ModifyVariable(method = "setSpeed", at = @At("HEAD"), argsOnly = true, remap = false)
     private float dimensionworks$capNetworkSpeed(float requested) {
         KineticBlockEntity self = (KineticBlockEntity) (Object) this;
-        return RpmLimitManager.clamp(self, requested);
+        return RpmLimitManager.clampIndividual(self, requested);
+    }
+
+    @Redirect(method = "initialize", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/kinetics/KineticNetwork;initFromTE(FFI)V"), remap = false)
+    private void dimensionworks$restoreAccounting(KineticNetwork network, float capacity, float stress, int count) {
+        KineticPersistence.initialize((KineticBlockEntity) (Object) this, network);
     }
 
     @Inject(method = "initialize", at = @At("TAIL"), remap = false)
@@ -57,11 +65,31 @@ public abstract class KineticBlockEntityMixin {
     @Inject(method = "write", at = @At("TAIL"), remap = false)
     private void dimensionworks$writeLimitData(CompoundTag compound, boolean clientPacket, CallbackInfo ci) {
         RpmLimitManager.writeSyncData((KineticBlockEntity) (Object) this, compound);
+        compound.putInt("DWNetworkRpmLimit", ((KineticBlockEntity) (Object) this).getPersistentData().getInt("DWNetworkRpmLimit"));
+        KineticPersistence.write((KineticBlockEntity) (Object) this, compound, clientPacket);
     }
 
     @Inject(method = "read", at = @At("TAIL"), remap = false)
     private void dimensionworks$readLimitData(CompoundTag compound, boolean clientPacket, CallbackInfo ci) {
         RpmLimitManager.readSyncData((KineticBlockEntity) (Object) this, compound);
+        ((KineticBlockEntity) (Object) this).getPersistentData().putInt("DWNetworkRpmLimit", compound.getInt("DWNetworkRpmLimit"));
+        KineticPersistence.read((KineticBlockEntity) (Object) this, compound, clientPacket);
+    }
+
+    @Inject(method = "updateFromNetwork", at = @At("RETURN"), remap = false)
+    private void dimensionworks$syncNetworkLimit(float capacity, float stress, int count, CallbackInfo ci) {
+        KineticBlockEntity self = (KineticBlockEntity) (Object) this;
+        if (self.getLevel() == null || self.getLevel().isClientSide) return;
+        int limit = dev.szx.dimensionworks.rpmlimit.optimizer.NetworkRpmLimit.limit(self);
+        int previous = self.getPersistentData().getInt("DWNetworkRpmLimit");
+        if (previous != limit) {
+            float oldSpeed = overStressed ? 0 : dev.szx.dimensionworks.rpmlimit.RpmLimitMath.cap(
+                self.getTheoreticalSpeed(), previous > 0 ? previous : RpmLimitManager.individualLimit(self));
+            self.getPersistentData().putInt("DWNetworkRpmLimit", limit);
+            if (oldSpeed != self.getSpeed()) self.onSpeedChanged(oldSpeed);
+            self.setChanged();
+            self.sendData();
+        }
     }
 
     /**

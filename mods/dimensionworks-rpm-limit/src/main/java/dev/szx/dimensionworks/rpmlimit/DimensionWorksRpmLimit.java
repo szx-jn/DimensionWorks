@@ -21,6 +21,8 @@ public final class DimensionWorksRpmLimit {
         dev.szx.dimensionworks.rpmlimit.controller.AdvancedController.register(FMLJavaModLoadingContext.get().getModEventBus());
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, RpmLimitConfig.SPEC);
         MinecraftForge.EVENT_BUS.register(RpmForgeEvents.class);
+        dev.szx.dimensionworks.rpmlimit.diagnostics.TopologyNetwork.register();
+        MinecraftForge.EVENT_BUS.register(dev.szx.dimensionworks.rpmlimit.diagnostics.TopologyNetwork.class);
         MinecraftForge.EVENT_BUS.register(GearHeartForgeEvents.class);
         MinecraftForge.EVENT_BUS.register(GearHeartCommands.class);
 

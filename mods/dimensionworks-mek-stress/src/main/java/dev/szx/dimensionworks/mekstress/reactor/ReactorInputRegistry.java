@@ -22,7 +22,7 @@ final class ReactorInputRegistry {
 
     static void sync(TileReactorCore core, TileReactorInjector injector,
                      KineticBlockEntity shaft, KineticNetwork network) {
-        float rpm = Math.abs(shaft.getTheoreticalSpeed());
+        float rpm = Math.abs(dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp(shaft, shaft.getTheoreticalSpeed()));
         synchronized (MEMBERS) {
             ReactorInputMember member = MEMBERS.get(core);
             if (member != null && (!member.dimensionworks$isValid()
@@ -47,6 +47,7 @@ final class ReactorInputRegistry {
             }
 
             member.setSpeed(rpm);
+            member.source = shaft.getBlockPos().immutable();
             member.bind(network);
             if (topologyChanged) {
                 network.members.put(member, ReactorPowerBridge.INPUT_STRESS_PER_RPM);

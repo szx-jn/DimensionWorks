@@ -50,7 +50,7 @@ class KineticNetworkOptimizerIntegrationContractTest {
         String optimizer = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
 
-        assertTrue(mixin.contains("KineticNetworkOptimizer.onMemberLoadedSilently("));
+        assertTrue(mixin.contains("KineticPersistence.restore("));
         assertTrue(mixin.contains("@Redirect("));
         assertTrue(mixin.contains("KineticNetworkOptimizer.syncDuringNetworkRefresh(network)"));
         assertTrue(mixin.contains("KineticNetworkOptimizer.finishLoadedNetworkRefresh("));

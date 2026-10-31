@@ -8,6 +8,7 @@
     "KineticBlockEntityMixin",
     "GeneratingKineticBlockEntityMixin",
     "KineticNetworkMixin",
+    "KineticNetworkAccessor",
     "ChunkMapAccessor",
     "ValueSettingsPacketMixin",
     "AirCurrentMixin",

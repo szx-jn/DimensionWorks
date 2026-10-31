@@ -106,3 +106,8 @@ jobs:
       - name: 构建并测试模组
         working-directory: mods/${{ matrix.module }}
         run: gradle build --no-daemon
+
+      - name: 动力网络保存恢复回归
+        if: matrix.module == 'dimensionworks-rpm-limit'
+        working-directory: mods/dimensionworks-rpm-limit
+        run: gradle runGameTestServer --no-daemon

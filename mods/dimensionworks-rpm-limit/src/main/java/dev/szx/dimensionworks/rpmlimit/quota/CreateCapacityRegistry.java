@@ -20,11 +20,16 @@ public final class CreateCapacityRegistry {
     private static final Map<KineticNetwork, Map<UUID, Double>> SAMPLES =
         Collections.synchronizedMap(new WeakHashMap<>());
 
+    private static final java.util.Set<KineticNetwork> PENDING =
+        java.util.Collections.newSetFromMap(new WeakHashMap<>());
+
     private CreateCapacityRegistry() {
     }
 
     public static float limitNaturalCapacity(KineticNetwork network, float naturalCapacity) {
-        if (network == null || !Float.isFinite(naturalCapacity) || naturalCapacity <= 0.0F) {
+        if (network == null || !Float.isFinite(naturalCapacity)) return naturalCapacity;
+        if (naturalCapacity <= 0.0F) {
+            registerOwners(network, Map.of());
             return naturalCapacity;
         }
 
@@ -89,15 +94,32 @@ public final class CreateCapacityRegistry {
     }
 
     private static void registerOwners(KineticNetwork network, Map<UUID, Double> contributions) {
-        if (network == null || contributions == null || contributions.isEmpty()) {
-            return;
+        if (network == null || contributions == null) return;
+        Map<UUID, Double> next = Map.copyOf(contributions);
+        Map<UUID, Double> previous = next.isEmpty() ? SAMPLES.remove(network) : SAMPLES.put(network, next);
+        if (java.util.Objects.equals(previous, next) || previous == null && next.isEmpty()) return;
+        synchronized (SAMPLES) {
+            PENDING.addAll(SAMPLES.keySet());
+            PENDING.remove(network); // This caller is already calculating its current allocation.
         }
-        SAMPLES.put(network, Map.copyOf(contributions));
     }
 
     public static void clearRemoved() {
         synchronized (SAMPLES) {
-            SAMPLES.keySet().removeIf(network -> !shouldRetainNetwork(isActive(network)));
+            boolean changed = SAMPLES.keySet().removeIf(network -> !shouldRetainNetwork(isActive(network)));
+            if (changed) PENDING.addAll(SAMPLES.keySet());
+        }
+        java.util.List<KineticNetwork> pending = new java.util.ArrayList<>(PENDING);
+        PENDING.clear();
+        for (KineticNetwork network : pending) {
+            if (isActive(network)) {
+                try { network.updateCapacity(); }
+                catch (RuntimeException exception) {
+                    PENDING.add(network);
+                    dev.szx.dimensionworks.rpmlimit.DimensionWorksRpmLimit.LOGGER.warn(
+                        "Failed to refresh a shared Create capacity allocation; retrying next tick.", exception);
+                }
+            }
         }
     }
 
