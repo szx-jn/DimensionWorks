@@ -21,46 +21,34 @@ item_ids:
 </GameScene>
 </Row>
 
-样板供应器是[自动自制](../ae2-mechanics/autocrafting.md)系统与世界互动。它们将元素推入
-其[模式](patterns.md)相邻的库存,物品可以插入其中,以便插入网络。
-将机器的输出再回到附近时, 通道就可以被保存样板供应器(经常推动原料的)
-而不是使用<ItemLink id="import_bus" />将机器的输出拉入网络。
+样板供应器是[自动合成](../ae2-mechanics/autocrafting.md)系统向世界输出原料、接收成品的主要设备。它会根据安装的[样板](patterns.md)将一整批原料送入相邻的机器或容器。加工完成后，可以让机器将产物直接送回样板供应器，也可以使用<ItemLink id="import_bus" />将产物送回 ME 网络。
 
-值得注意的是,由于它们直接将原料从[合成存储](crafting_cpu_multiblock.md#crafting-storage)a 中合成 CPU,他们
-从未将原料包含在他们的库存中, 所以您无法从中解开。您必须让样板供应器推
-对另一个清单的(像桶一样)然后从那管。
+样板供应器的原料来自合成 CPU 的[合成存储](crafting_cpu_multiblock.md#crafting-storage)，**它自身并不是普通存储箱**。需要先让它把材料送入相邻容器，再由其他设备分配。
 
-另外,样板供应器必须同时推所有原料, 不能推半个孔。这很有用
-剥削。
+供应器会尽量将完整批次的原料一次性送出，不会主动发送半份配方。结合[子网络](../ae2-mechanics/subnetworks.md)和未配置缓存的接口，可以直接向子网的[存储系统](../ae2-mechanics/import-export-storage.md)投料，避免在接口中途缓存不完整的配方。
 
-样板供应器与[子网](../ae2-mechanics/subnetworks.md):如果接口未修改(请求空档中无)
-提供商将完全跳过接口 直接按到子网[存储](../ae2-mechanics/import-export-storage.md),
-跳过接口,不填入配方批次,更重要的是,在机器有空间之前,不要插入下一批。
-这在屏蔽模式下正确工作, 提供商将监测机器中的空位的原料, 而不要监视接口中的空缺。
-
-例如,这种设置将把要熔化的燃料和燃料直接推入炉内的相应槽。
-您可以使用此模式向机器或多机器的多个侧面提供模式。
+例如，下面的布局可以将燃料和待熔炼物分别送入熔炉对应的输入位置：
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../assets/assemblies/furnace_automation.snbt" />
 
 <BoxAnnotation color="#dddddd" min="1 0 0" max="2 1 1">
-        (1)样板供应器:通过使用赛特斯石英扳手,用相关的处理模式
+        （1）样板供应器：使用赛特斯石英扳手设置输出方向，并安装对应处理样板
 
-        ![铁铁模式](../assets/diagrams/furnace_pattern_small.png)
+        ![熔炼样板](../assets/diagrams/furnace_pattern_small.png)
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 1 0" max="2 1.3 1">
-        (2)接口: 在其默认配置中。
+        （2）接口：保持默认设置，作为子网连接。
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 1 0" max="1.3 2 1">
-        (3)存储总线#1:过滤到煤炭。
+        （3）存储总线 1：只接收煤炭。
         <ItemImage id="minecraft:coal" scale="2" />
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="0 2 0" max="1 2.3 1">
-        (4)存储总线#2:用反转卡将煤列入黑名单。
+        （4）存储总线 2：安装反转卡并排除煤炭。
         <Row><ItemImage id="minecraft:coal" scale="2" /><ItemImage id="inverter_card" scale="2" /></Row>
   </BoxAnnotation>
 
@@ -71,116 +59,86 @@ item_ids:
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-这是向多台机器提供的一般说明。
+下面的示例展示了如何把同一批材料分配给多台机器：
 
 <GameScene zoom="6" background="transparent">
 <ImportStructure src="../assets/assemblies/provider_interface_storage.snbt" />
 
 <BoxAnnotation color="#dddddd" min="2.7 0 1" max="3 1 2">
-        界面(必须是平平的,而不是满满的)
+        扁平接口（不能使用完整方块接口）
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 0 0" max="1.3 1 4">
-        存储库
+        外部容器
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="0 0 0" max="1 1 4">
-        您想要提供模式提供的位置
+        样板供应器的目标机器或输入位置
   </BoxAnnotation>
 
 <IsometricCamera yaw="185" pitch="30" />
 </GameScene>
 
-支持模式相同的多种模式样板供应器,并平行运作。
+多个供应器可以安装相同的样板并行工作。普通方块形态的供应器还会尝试向相邻的各个有效面输出原料，以同时利用多台加工设备。
 
-样板供应器将试图将分批的物品围在他们所有的脸部,从而同时使用所有附属机器。
+## 三种形态
 
-## 变式
+样板供应器分为普通、定向和[扁平线缆附属部件](../ae2-mechanics/cable-subparts.md)三种形态：
 
-提供商有三种不同的变式:正常、方向和固定/固定。[下分部分](../ae2-mechanics/cable-subparts.md)这影响到它们所推动的具体方面。
-元素,接收物品,并提供网络连接。
+* **普通形态**：可以向多个方向输出材料，也能从不同方向接收产物，并在各个可连接面传递网络。
+* **定向形态**：使用<ItemLink id="certus_quartz_wrench" />设置指定输出面。它不会通过该输出面传递网络连接，适合用来分隔[子网](../ae2-mechanics/subnetworks.md)。
+* **扁平形态**：安装在[线缆附属部件](../ae2-mechanics/cable-subparts.md)的位置，节省空间，具有定向输出的特性。
 
-*   正常样板供应器将原料推向各方,接受各方的投入,并像大多数样板供应器一样 AE2 机器,动作
-    就像一条线 提供网络连接到所有侧面
+普通与扁平形态可以通过合成栏相互转换。
 
-*   使用<ItemLink id="certus_quartz_wrench" />正常时样板供应器更改
-    方向。它们只将原料推向选定侧面, 接收来自各方的投入, 尤其是不提供网络
-    选择的侧面的连接。这样他们就可以按到 AE2 如果您想要创建子网络, 则不连接网络的机器。
+## 设置与优先级
 
-*   平板型式样板供应器是[电缆子部件](../ae2-mechanics/cable-subparts.md),因此可以在同一条电缆上安装多个,允许设置压缩装置。
-    它们在方向上与选定方相似样板供应器提供模式,接受投入,以及**否**
-    提供他们脸上的网络连接。
+* **阻塞模式**：目标机器中还有未处理的原料时，不再投放下一批。
+* **锁定合成**：通过红石状态或等待产物返回的条件锁定供应器，避免工序混乱。
+* **可见性**：选择是否在<ItemLink id="pattern_access_terminal" />中显示该供应器。
+* **优先级**：多张[样板](patterns.md)可以生成相同物品时，会优先使用较高优先级的供应器；如果该配方原料不足，系统可以考虑其他配方。
 
-样板供应器可以在正常和平坦的编织网格中互换。
+## 常见误解：样板供应器不是物品管道
 
-## 设置
+部分玩家会把样板供应器连接到一段普通[线缆](cables.md)，再在远端安装<ItemLink id="export_bus" />，希望输出总线自动把样板原料送进机器。
 
-样板供应器有多种模式:
-
-*   **阻塞模式**：如果机器中已有原料，样板供应器将停止推送新原料
-    当机器中的原料被处理完后才会继续。
-*   **锁定合成**可在各种红石条件下或直到产生结果时将样板供应器锁定在
-    插入该特定的样板供应器.
-*   样板供应器可以显示或隐藏于<ItemLink id="pattern_access_terminal" />.
-
-## 优先
-
-可以通过单击扳手在 GUI. 在几个案件中[模式](patterns.md)
-对于同一物品,优先程度较高的样板供应器模式将相对于优先度较低的样板供应器的模式使用,
-除非网络没有更高优先级模式的原料。
-
-## 常见误解
-
-出于某种原因 人们一直这么做 我不明白为什么 但我希望这能帮上忙(也许
-人误认为<ItemLink id="export_bus" />只有这样,才能让事情脱离网络,不知道
-样板供应器也出口物品)
-
-这将不做您想要它做的事情。如前文所提及[电缆](cables.md),电缆不是物品管道,没有内部管道
-样板供应器不会投入这些清单。
+**这种结构不会按预期工作。** 普通 ME 线缆只负责连接网络，不是运输物品的管道。样板供应器需要直接对着可接受材料的机器或容器输出。
 
 <GameScene zoom="8" background="transparent">
   <ImportStructure src="../assets/assemblies/provider_misconception_1.snbt" />
 
   <BoxAnnotation color="#dddddd" min="1 0 3" max="2 1 4">
-        不是爆爆火
+        错误连接：无法执行这批自动合成
   </BoxAnnotation>
 
   <IsometricCamera yaw="95" pitch="5" />
 </GameScene>
 
-因为样板供应器没有东西可以推动,所以它会的
-无法运作。它在这里所做的就是像电缆一样,连接着<ItemLink id="export_bus" />会 议 日 和 排
-网络。
-
-提供商也不会不知怎么告诉<ItemLink id="export_bus" />要导出什么,输出总线将只出口
-你放进过滤器里的东西
-
-我们基本上所做的是:
+在错误布线中，样板供应器的输出面没有相邻容器，因此无法把原料推出。它仅通过线缆与输出总线连接，不会自动改变输出总线的过滤设置。
 
 <GameScene zoom="8" background="transparent">
   <ImportStructure src="../assets/assemblies/provider_misconception_2.snbt" />
 
   <BoxAnnotation color="#dddddd" min="1 0 3" max="2 1 4">
-        不是爆爆火
+        错误连接：无法执行这批自动合成
   </BoxAnnotation>
 
   <IsometricCamera yaw="95" pitch="5" />
 </GameScene>
 
-可能你真正想要做的就是这里样板供应器其模式的内容可以导出到
-相邻的机器:
+正确做法是将样板供应器的输出面对准实际处理原料的机器或中间容器，例如：
 
 <GameScene zoom="8" background="transparent">
   <ImportStructure src="../assets/assemblies/provider_misconception_3.snbt" />
 
   <BoxAnnotation color="#dddddd" min="1 0 3" max="2 1 4">
-        不是爆爆火
+        错误连接：无法执行这批自动合成
   </BoxAnnotation>
 
   <IsometricCamera yaw="95" pitch="5" />
 </GameScene>
 
-## 食食权
+## 合成配方
 
 <RecipeFor id="pattern_provider" />
 
