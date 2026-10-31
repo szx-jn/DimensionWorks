@@ -219,12 +219,11 @@ public final class GearHeartEffects {
             ? RpmLimitConfig.GEAR_HEART_ROTATION_REPAIRED_RPM.get()
             : RpmLimitConfig.GEAR_HEART_ROTATION_CURSED_RPM.get();
 
-        // External limits are restrictive caps (min(base limit, external limit)). A repaired
-        // Gear Heart therefore cannot raise the default 32 RPM limit merely by setting a 512 RPM
-        // external cap. Promote the persisted player limit once, on repair/login, so the repaired
-        // state survives logout and already-existing worlds are migrated without per-tick writes.
-        if (rotationRepaired && RpmLimitApi.getLimit(player) < rpm) {
-            RpmLimitApi.setLimit(player, rpm);
+        // Promote the persisted default once when the rotation curse is repaired. An explicit
+        // /dw rpm (or API setLimit) value has higher priority and must survive login unchanged.
+        if (rotationRepaired && !RpmLimitManager.hasCommandOverride(player)
+            && RpmLimitApi.getLimit(player) < rpm) {
+            RpmLimitManager.setGearHeartDefaultLimit(player, rpm);
         }
         RpmLimitApi.setExternalLimit(player, RPM_SOURCE, rpm);
     }

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,12 +23,15 @@ public final class RpmLimitManager {
     private static final String OWNER_KEY = "dimensionworks_owner";
     private static final String MACHINE_LIMIT_KEY = "dimensionworks_machine_rpm_limit";
     private static final String INIT_KEY = "dimensionworks_rpm_initialized";
+    private static final String COMMAND_OVERRIDE_KEY = "dimensionworks_rpm_command_override";
+    private static final String GEAR_HEART_RPM_SOURCE = "gear_heart:rpm";
 
     private static final String SYNC_OWNER_KEY = "DimensionWorksOwner";
     private static final String SYNC_MACHINE_LIMIT_KEY = "DimensionWorksMachineRpmLimit";
 
     private static final Map<UUID, Integer> CACHE = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, Integer>> EXTERNAL_LIMITS = new ConcurrentHashMap<>();
+    private static final Set<UUID> COMMAND_OVERRIDES = ConcurrentHashMap.newKeySet();
     private static long last = Long.MIN_VALUE;
 
     public static void init(Player p) {
@@ -37,6 +41,10 @@ public final class RpmLimitManager {
             d.putBoolean(INIT_KEY, true);
         }
         CACHE.put(p.getUUID(), sanitize(d.getInt(PLAYER_KEY)));
+        if (d.getBoolean(COMMAND_OVERRIDE_KEY))
+            COMMAND_OVERRIDES.add(p.getUUID());
+        else
+            COMMAND_OVERRIDES.remove(p.getUUID());
     }
 
     public static int get(UUID id) {
@@ -49,15 +57,39 @@ public final class RpmLimitManager {
 
     public static int getEffectiveLimit(UUID id) {
         int effective = get(id);
-        for (int external : externalLimits(id).values())
-            effective = Math.min(effective, sanitize(external));
+        boolean commandOverride = hasCommandOverride(id);
+        for (Map.Entry<String, Integer> limit : externalLimits(id).entrySet()) {
+            if (commandOverride && GEAR_HEART_RPM_SOURCE.equals(limit.getKey()))
+                continue;
+            effective = Math.min(effective, sanitize(limit.getValue()));
+        }
         return effective;
     }
 
     public static void setLimit(ServerPlayer p, int rpm) {
+        setStoredLimit(p, rpm, true);
+    }
+
+    static void setGearHeartDefaultLimit(ServerPlayer p, int rpm) {
+        setStoredLimit(p, rpm, false);
+    }
+
+    static boolean hasCommandOverride(ServerPlayer player) {
+        return hasCommandOverride(player.getUUID());
+    }
+
+    private static boolean hasCommandOverride(UUID id) {
+        return COMMAND_OVERRIDES.contains(id);
+    }
+
+    private static void setStoredLimit(ServerPlayer p, int rpm, boolean commandOverride) {
         int v = sanitize(rpm);
         p.getPersistentData().putInt(PLAYER_KEY, v);
         p.getPersistentData().putBoolean(INIT_KEY, true);
+        if (commandOverride)
+            p.getPersistentData().putBoolean(COMMAND_OVERRIDE_KEY, true);
+        if (commandOverride)
+            COMMAND_OVERRIDES.add(p.getUUID());
         CACHE.put(p.getUUID(), v);
         applyLimitToOwned(p, getEffectiveLimit(p.getUUID()));
     }

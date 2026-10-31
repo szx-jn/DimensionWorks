@@ -6,7 +6,7 @@
   "gui.dimensionworks_rpm_limit.save_on_close": "回车 / Esc 关闭并应用 · 负数反转",
   "gui.dimensionworks_rpm_limit.invalid": "输入无效，关闭时保留原设置",
   "gui.dimensionworks_rpm_limit.effective_limit": "所有者实际生效上限：%s RPM",
-  "gui.dimensionworks_rpm_limit.external_limit": "齿轮之心等额外上限仍会限制实际输出",
+  "gui.dimensionworks_rpm_limit.external_limit": "其他外部上限仍会收紧输出",
   "commands.dimensionworks_rpm_limit.limit": "已设置 %s 的基础转速上限为 %s RPM；实际生效上限：%s RPM。",
-  "commands.dimensionworks_rpm_limit.external_limit": " 齿轮之心等外部限制仍然生效。"
+  "commands.dimensionworks_rpm_limit.external_limit": " 其他外部上限仍会继续生效。"
 }
