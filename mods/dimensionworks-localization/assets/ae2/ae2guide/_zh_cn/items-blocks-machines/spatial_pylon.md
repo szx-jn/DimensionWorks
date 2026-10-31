@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 空间金象
+  title: 空间塔
   icon: spatial_pylon
   position: 210
 categories:
@@ -10,17 +10,16 @@ item_ids:
 - ae2:spatial_pylon
 ---
 
-# 空间金象
+# 空间塔
 
 <BlockImage id="spatial_pylon" p:powered_on="true" scale="8" />
 
-使用空间金象的[空间 IO](../ae2-mechanics/spatial-io.md)以生成空间字段和定义音量
-将受到影响。
+空间塔用于构建[空间存储系统](../ae2-mechanics/spatial-io.md)的空间边界，决定可以被保存或恢复的区域大小。
 
-每一连续的赛塔线使用 1[频道](../ae2-mechanics/channels.md)
+每条连续的空间塔结构占用一个[频道](../ae2-mechanics/channels.md)。
 
-赛昂线必须至少有 2 个街区长才能运行。
+一条空间塔结构至少需要由两个方块组成才能正常工作。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="spatial_pylon" />
