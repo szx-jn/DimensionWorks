@@ -12,22 +12,19 @@ item_ids:
 - ae2:creative_energy_cell
 ---
 
-# 能源电池
+# 能源元件
 
 <Row gap="20">
   <BlockImage id="energy_cell" scale="8" p:fullness="4" />
-
   <BlockImage id="dense_energy_cell" scale="8" p:fullness="4" />
-
   <BlockImage id="creative_energy_cell" scale="8" />
 </Row>
 
-能量电池能给网络带来更多[能源](../ae2-mechanics/energy.md)存储一定数量的能源缓冲剂有助于平滑
-当大量物品被插入或抽取,以及大量能源贮存时,能源抽出
-允许网络运行, 而能源没有产生(晚上和太阳能电池板一样)或操作巨大的瞬时
-电能抽取[空间存储](../ae2-mechanics/spatial-io.md).
+能源元件可增加 ME 网络的[能源](../ae2-mechanics/energy.md)缓冲容量，防止短时间内大量存取物品时出现断电，也能在电源暂时中断时维持网络运行。
 
-## 填充栏
+足够的储能还可以承担[空间存储](../ae2-mechanics/spatial-io.md)等操作产生的瞬时大额能耗。
+
+## 储能指示灯
 
 <Row>
 <BlockImage id="energy_cell" scale="4" p:fullness="0" />
@@ -37,26 +34,23 @@ item_ids:
 <BlockImage id="energy_cell" scale="4" p:fullness="4" />
 </Row>
 
-细胞侧边的栅栏与它能耐的能量相符。
+能源元件侧面的指示灯会根据储能比例变化：
 
-*   0 低于 25%时收费
-*   1 收取 25%至 50%
-*   2 收费在 50%至 75%之间
-*   3 年,75%至 99%收费
-*   4 高于 99%的收费
+* **0 格：**低于 25%。
+* **1 格：**25%～50%。
+* **2 格：**50%～75%。
+* **3 格：**75%～99%。
+* **4 格：**高于 99%。
 
-## 单元格类型
+## 元件类型
 
-*   <ItemLink id="energy_cell" />可以存储 200 公里的可控电源,而且对于处理电流的多数使用案例来说,只要一个就足够了。
-    * 容易地正常使用网络。
-*   <ItemLink id="dense_energy_cell" />可存储 1.6M 电源, 用于您想要用存储的电量运行网络时, 或者
-    处理大型瞬时能量抽取[空间存储](../ae2-mechanics/spatial-io.md)设置。
-*   <ItemLink id="creative_energy_cell" />是一个用于测试的创意物品,提供 UNLIMITED POWAHH HH 或其它东西。
+* <ItemLink id="energy_cell" />：容量约 **200 kAE**，适合小型网络和瞬时能耗缓冲。
+* <ItemLink id="dense_energy_cell" />：容量约 **1.6 MAE**，适合大型网络、断电缓冲和[空间存储](../ae2-mechanics/spatial-io.md)等高能耗操作。
+* <ItemLink id="creative_energy_cell" />：创造模式专用，可以提供无限 AE 能量，用于测试。
 
-## 食食权
+## 合成配方
 
 <Row>
   <RecipeFor id="energy_cell" />
-
   <RecipeFor id="dense_energy_cell" />
 </Row>
