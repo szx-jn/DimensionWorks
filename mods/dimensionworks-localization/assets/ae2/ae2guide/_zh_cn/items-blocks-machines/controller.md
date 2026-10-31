@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 主计长
+  title: ME 控制器
   icon: controller
   position: 110
 categories:
@@ -10,44 +10,42 @@ item_ids:
 - ae2:controller
 ---
 
-# 主计长
+# ME 控制器
 
 <BlockImage id="controller" p:state="online" scale="8" />
 
-控制器是[ME 网络网网](../ae2-mechanics/me-network-connections.md).
-没有它,一个网络是“ad-hoc”,最多只能使用 8 个频道[设备](../ae2-mechanics/devices.md)总计。
+ME 控制器是大型[ME 网络](../ae2-mechanics/me-network-connections.md)的核心组件。
 
-无法在其中设置两个控制器[ME 网络网网](../ae2-mechanics/me-network-connections.md).
+没有控制器时，网络处于**临时网络（Ad-hoc）**模式，最多只能供 **8 个需要频道的[设备](../ae2-mechanics/devices.md)** 工作。
 
-控制器提供 32[声道](../ae2-mechanics/channels.md)脸部。
+同一个 ME 网络不能存在两个彼此独立的控制器结构。
 
-控制器需要每个控制区块 6 个 AE/t 的
-函数。每个控制器块块可以存储 8000 AE,因此更大的网络可能需要额外的
-能源存储。[能源](../ae2-mechanics/energy.md)详细信息。
+每个控制器方块的每一侧最多可提供 **32 个[频道](../ae2-mechanics/channels.md)**。
 
-多块控制器可以相当自由的形式建立。
+控制器工作时每格通常消耗 6 AE/t，每个控制器方块能够储存 8000 AE。因此，大型网络还需要配置充足的[能源](../ae2-mechanics/energy.md)供应和缓冲。
+
+多个控制器方块可以组合成多方块结构，不必拘泥于单个方块。
 
 <GameScene zoom="2" background="transparent">
   <ImportStructure src="../assets/assemblies/controllers.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-然而,必须遵循几项规则:
+## 多方块结构规则
 
-1.  A 上的所有控制器区块[ME 网络网网](../ae2-mechanics/me-network-connections.md)必须连接; 否则, 区块会变成红色。
-2.  控制器的大小必须在 7x7 x7 内; 否则它会变成红色。
-3.  控制器最多可有两个相邻区块,最多为 1 轴;如果一个区段违反这一规则,则会禁用并变红。
+1. 同一[ME 网络](../ae2-mechanics/me-network-connections.md)中的控制器方块必须连接在同一个结构中；否则会显示红色错误状态。
+2. 整个控制器结构必须在 **7×7×7** 的尺寸范围内。
+3. 控制器结构不能出现过宽的连续实体截面：每条轴线上允许的相邻控制器组合受结构规则限制，违规时结构会变红并停止工作。
 
 <GameScene zoom="2" background="transparent">
   <ImportStructure src="../assets/assemblies/controller_rules.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-只要所有规则都得到遵守和授权,控制器就应当发光和发亮
-循环颜色。
+符合规则并通电后，控制器会亮起，并显示循环变化的颜色。
 
-您可以右键单击控制器以获得相同的 GUI 作为 a 的<ItemLink id="network_tool" />
+右键点击控制器可以打开网络诊断界面，其功能与<ItemLink id="network_tool" />提供的诊断信息类似。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="controller" />
