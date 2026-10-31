@@ -14,15 +14,15 @@ item_ids:
 
 <ItemImage id="fluix_crystal" scale="4" />
 
-*"福鲁伊克斯水晶具有吸收和转换能源从一种形式转变为另一种形式的独特能力,并且是
-能源技术”*
+*“福鲁伊克斯水晶能够吸收和转化不同形式的能量，是 AE2 技术的重要基础材料。”*
 
-一种主要原料之一 AE2 区块,[设备](../ae2-mechanics/devices.md)和物品 扔掉石英 红石 以及
-<ItemLink id="charged_certus_quartz_crystal" />在水中。
+福鲁伊克斯水晶是制作 AE2 方块、[设备](../ae2-mechanics/devices.md)和物品的主要原料之一。
 
-可能是[自动](../example-setups/throw-in-water-automation.md)使用 a<ItemLink id="formation_plane" />和<ItemLink id="annihilation_plane" />.
+将下界石英、红石粉和<ItemLink id="charged_certus_quartz_crystal" />一起投入水中，即可获得福鲁伊克斯水晶。
 
-## 食食权
+可以使用<ItemLink id="formation_plane" />和<ItemLink id="annihilation_plane" />[自动完成这一过程](../example-setups/throw-in-water-automation.md)。
+
+## 合成与用途
 
 <Row>
   <Recipe id="transform/fluix_crystals" />
