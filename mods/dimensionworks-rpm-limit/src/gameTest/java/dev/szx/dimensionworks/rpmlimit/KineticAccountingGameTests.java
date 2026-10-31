@@ -100,6 +100,52 @@ public final class KineticAccountingGameTests {
             helper.succeed();
         });
     }
+
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void rpmLimitCacheInvalidatesAfterPruneAndSourceSetChanges(GameTestHelper helper) {
+        block(helper, "creative_motor", new BlockPos(2, 1, 2));
+        block(helper, "shaft", new BlockPos(5, 1, 2));
+        helper.runAfterDelay(20, () -> {
+            KineticBlockEntity motor = (KineticBlockEntity) helper.getBlockEntity(new BlockPos(2, 1, 2));
+            KineticBlockEntity shaft = (KineticBlockEntity) helper.getBlockEntity(new BlockPos(5, 1, 2));
+            highLimit(motor);
+            motor.setSpeed(1024);
+            shaft.getPersistentData().putUUID("dimensionworks_owner", new java.util.UUID(102, shaft.getBlockPos().asLong()));
+            shaft.getPersistentData().putInt("dimensionworks_machine_rpm_limit", 64);
+            shaft.setNetwork(motor.network);
+
+            KineticNetwork network = motor.getOrCreateNetwork();
+            KineticNetworkOptimizer.onTopologyChanged(network);
+            network.calculateCapacity();
+            helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 64,
+                "Fixture must cache the lowest participant RPM limit");
+
+            // A stale member can be pruned during calculateStress without passing through Create's
+            // normal remove lifecycle. Exercise the cache invalidation hook used by that path.
+            shaft.getPersistentData().putInt("dimensionworks_machine_rpm_limit", 10240);
+            KineticNetworkOptimizer.onMemberPruned(network, shaft);
+            helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 1024,
+                "Pruning a stale member must discard its cached lower network limit");
+
+            // Capacity accounting detects source-map changes and must invalidate the same
+            // network-level RPM cache even when no member-removal lifecycle hook ran.
+            shaft.getPersistentData().putInt("dimensionworks_machine_rpm_limit", 64);
+            KineticNetworkOptimizer.onTopologyChanged(network);
+            network.calculateCapacity();
+            helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 64,
+                "Fixture must recache the lower RPM limit before changing sources");
+            shaft.getPersistentData().putInt("dimensionworks_machine_rpm_limit", 10240);
+            Float sourceCapacity = network.sources.remove(motor);
+            helper.assertTrue(sourceCapacity != null, "Fixture motor must be registered as a network source");
+            KineticNetworkOptimizer.finishCapacityRebuild(network, 0);
+            helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 1024,
+                "Changing the source set must invalidate its cached network RPM limit");
+            network.sources.put(motor, sourceCapacity);
+            KineticNetworkOptimizer.invalidate(network);
+            helper.succeed();
+        });
+    }
+
     @GameTest(template = "empty", timeoutTicks = 100)
     public static void stoppedSourceStillDeductsItsSavedCapacity(GameTestHelper helper) {
         KineticBlockEntity shaft = block(helper, "shaft", new BlockPos(2, 1, 2));
