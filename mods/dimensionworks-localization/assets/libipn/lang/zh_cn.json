@@ -1,9 +1,9 @@
 {
-  "libipn.common.gui.config.colorpicker.alpha": "阿尔法",
-  "libipn.common.gui.config.colorpicker.red": "红红",
+  "libipn.common.gui.config.colorpicker.alpha": "透明度",
+  "libipn.common.gui.config.colorpicker.red": "红色",
   "libipn.common.gui.config.colorpicker.green": "绿色",
-  "libipn.common.gui.config.colorpicker.blue": "蓝蓝色",
+  "libipn.common.gui.config.colorpicker.blue": "蓝色",
   "libipn.common.gui.config.color_picker_dialog": "选择颜色",
   "libipn.common.gui.config.settings_screen.search-box": "搜索",
-  "libipn.common.gui.config.description.settings_screen.search-box": "只显示匹配框中搜索条目的选项。"
+  "libipn.common.gui.config.description.settings_screen.search-box": "仅显示与搜索框内容匹配的设置项。"
 }
