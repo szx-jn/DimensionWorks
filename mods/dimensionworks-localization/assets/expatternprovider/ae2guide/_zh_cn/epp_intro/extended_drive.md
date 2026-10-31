@@ -15,4 +15,4 @@ item_ids:
 <BlockImage id="expatternprovider:ex_drive" scale="8"></BlockImage>
 </Row>
 
-ME 扩展驱动器是一个<ItemLink id="ae2:drive" />拥有较大的细胞存储库,可以存放 20 个存储室。
+ME 扩展驱动器是<ItemLink id="ae2:drive" />的加强版本，拥有更多存储元件槽位，**最多可容纳 20 张存储元件**。
