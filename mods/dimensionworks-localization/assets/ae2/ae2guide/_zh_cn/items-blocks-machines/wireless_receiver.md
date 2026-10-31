@@ -14,8 +14,8 @@ item_ids:
 
 <ItemImage id="wireless_receiver" scale="4" />
 
-A<ItemLink id="fluix_pearl" />在反射盘中,一个短程无线组件 ME 技术。
+无线接收器由<ItemLink id="fluix_pearl" />等材料制作，是 AE2 无线通信技术的基础部件。
 
-## 用途
+## 合成与用途
 
 <RecipeFor id="wireless_receiver" />
