@@ -37,7 +37,7 @@ navigation:
     </BoxAnnotation>
 
     <BoxAnnotation color="#dddddd" min="10.9 0 0.9" max="13.1 2 7.1" thickness="0.05">
-        各种存储方法,包括驱动器或存储总车,8 人组通知所有。
+        存储区可使用驱动器和存储总线组合；普通线缆分支应按每组不超过 8 个频道规划。
     </BoxAnnotation>
 
   <IsometricCamera yaw="315" pitch="30" />
