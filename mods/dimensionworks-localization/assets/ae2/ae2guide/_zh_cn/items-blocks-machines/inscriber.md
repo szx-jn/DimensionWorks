@@ -14,70 +14,56 @@ item_ids:
 
 <BlockImage id="inscriber" scale="8" />
 
-压印器用于安装电路和[处理器](processors.md)使用[压印模板](presses.md),并粉碎各种物品。
-它可以接受其中之一 AE2 电源(英英阿英)或合成/Forge 能源(E/FE)。它可以被置于一边,以便插入来自不同侧面的物品
-将它们插入到其清单中不同的空格中。<ItemLink id="certus_quartz_wrench" />.
-还可以将手合成成果推向邻近的库存清单。
+压印器用于制作[处理器](processors.md)、使用[压印模板](presses.md)加工电路，以及粉碎部分材料。
 
-输入缓冲的大小可以调整。例如,如果您想要从一个清单中输入大量压印器,
-您需要一个小缓冲器,以使材料在压印器之间更优化地分布(代替第一个
-压印器填充最多 64 个,其余为空).
+压印器的不同侧面对应不同输入槽位，可以通过<ItemLink id="certus_quartz_wrench" />调整朝向，方便与漏斗、ME 总线和其他物流设备搭配。
 
-4 电路压印模板用于编织[处理器](processors.md)
+设备能够使用 AE 能量，也能根据整合包当前的能源改造接受相应的供能方式。不要直接套用原版 FE 与 AE 的换算值。
+
+压印器可以调整输入缓冲区的最大堆叠数。并行放置多台压印器时，较小的缓冲区能让材料分配更加均衡，而不是让第一台机器先堆满原料。
+
+制作处理器通常需要以下四种压印模板：
 
 <Row>
   <ItemImage id="silicon_press" scale="4" />
-
   <ItemImage id="logic_processor_press" scale="4" />
-
   <ItemImage id="calculation_processor_press" scale="4" />
-
   <ItemImage id="engineering_processor_press" scale="4" />
 </Row>
 
-名称按键可以用来命名类似弧形块的区块,但可用于在<ItemLink id="pattern_access_terminal" />.
+此外还可以使用<ItemImage id="name_press" scale="4" />给部分物品或方块添加名称；自定义名称也有助于在<ItemLink id="pattern_access_terminal" />中区分自动合成样板。
 
-<ItemImage id="name_press" scale="4" />
+## 配置模式
 
-## 设置
+* **按面分配槽位**：不同方向对应指定的材料槽和成品槽，便于自动化。
+* **自由输入模式**：输入物品可以由内部过滤规则分配到合适的槽位，但顶部和底部通常不能作为输出。
+* **自动输出**：加工完成后，可将产物推入相邻容器。
+* **缓冲区大小**：手动使用时可以适当调大；多台机器并行时建议调小。
 
-* 压印器可设置为侧面(解释如下:)或允许从任何一侧输入任何空格, 由内部过滤器决定
-    哪里去。在非偏向模式下, 无法从上位和下位提取物品。
-* 压印器可设定将物品推入相邻的库存清单。
-* 输入缓冲的大小可以调整,大选项是独立压印器手动喂养
-小选项使大型平行设置更加可行。
+## 界面与输入输出方向
 
-## GUI 和忧愁,
+下图展示按面分配槽位时，各个方向的功能：
 
-在侧边模式中时,压印器过滤器,什么是插入或提取的侧边。
+![压印器界面](../assets/diagrams/inscriber_gui.png) ![压印器各侧面](../assets/diagrams/inscriber_sides.png)
 
-![压印器 GUI](../assets/diagrams/inscriber_gui.png)![压印器侧面](../assets/diagrams/inscriber_sides.png)
+* **A：顶部输入**。可以向顶部材料槽输入，也可以从该槽取出。
+* **B：中部输入**。从左、右、前、后等侧面输入中间材料；不能直接从该槽自动取出。
+* **C：底部输入**。可以向底部材料槽输入，也可以从该槽取出。
+* **D：成品输出**。从侧面抽取完成的产物；不能向成品槽输入材料。
 
-A.**顶输入**可以通过压印器(既可以推到此位置,也可以从这个位置拉动物品)
+## 简易自动化
 
-B.**中心输入**插入,以通过左、右、前和后侧压印器(只能将物品推到此位置, 而不是从)
-
-C.**下输入**通过下侧访问压印器(既可以推到此位置,也可以从这个位置拉动物品)
-
-D.**产出 输出产出**从左、右、前和后侧拉出压印器(只能从此时档中拖动物品, 而不是推到)
-
-## 简单自动化
-
-举例来说,侧面和可旋转性 意味着你可以半自动登记员喜欢这样:
+利用侧面分配和可旋转的特点，可以用漏斗建立简单的半自动生产线：
 
 <GameScene zoom="4" background="transparent">
   <ImportStructure src="../assets/assemblies/inscriber_hopper_automation.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-或直接进出压印器以非倾斜的状态的时候。
+## 升级卡
 
-## 升级
+压印器支持[升级卡](upgrade_cards.md)，例如<ItemLink id="speed_card" />，用于提高加工速度。
 
-压印器支持以下支持[升级](upgrade_cards.md):
-
-*   <ItemLink id="speed_card" />
-
-## 用途
+## 合成配方
 
 <RecipeFor id="inscriber" />
