@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 量子桥
+  title: 量子网络桥
   icon: quantum_ring
   position: 110
 categories:
@@ -13,11 +13,11 @@ item_ids:
 
 # 量子网络桥
 
-![组成量子网络桥](../assets/diagrams/quantum_bridge_demonstration.png)
+![量子网络桥的构造](../assets/diagrams/quantum_bridge_demonstration.png)
 
-量子网络桥梁[网络网](../ae2-mechanics/me-network-connections.md)距离甚远,甚至各维之间
-总共可携带 32 个频道(不论电缆如何与每张脸相连接),基本上
-像无线[密集电缆](cables.md#dense-cable).
+量子网络桥可以把相隔很远的[ME 网络](../ae2-mechanics/me-network-connections.md)连接起来，甚至支持**跨维度连接**。
+
+量子桥最多可以传输 **32 个频道**，相当于一条无线的[致密线缆](cables.md#dense-cable)。
 
 <GameScene zoom="4" background="transparent">
   <ImportStructure src="../assets/assemblies/quantum_bridge_internal_structure_1.snbt" />
@@ -28,38 +28,33 @@ item_ids:
   <ImportStructure src="../assets/assemblies/quantum_bridge_internal_structure_2.snbt" />
 
   <BoxAnnotation color="#33dd33" min="1 1 1" max="6 2 3">
-        两个端端之间的一条想象中的电缆
+        两座量子桥之间的虚拟连接线
   </BoxAnnotation>
 
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-值得注意的是,**两侧必须填满**a 包括 a<ItemLink id="spatial_anchor" />或必须使用其他块加载器
-如果两边相距甚远,
+**注意：两端都必须保持区块加载。** 如果相距较远，可以在两侧使用<ItemLink id="spatial_anchor" />或其他区块加载方式，否则连接可能中断。
 
 # 量子环
 
 <BlockImage id="quantum_ring" scale="8" />
 
-其中八个街区环绕<ItemLink id="quantum_link" />将创建
-量子网络桥只有 4 个<ItemLink id="quantum_ring" />相邻
-排<ItemLink id="quantum_link" />将接受网络连接,
-4 个角落区块无法连接到电缆。
+用 8 个<ItemLink id="quantum_ring" />围绕一个<ItemLink id="quantum_link" />即可组成量子网络桥。
 
-## 用途
+只有正上、正下、左、右的四个<ItemLink id="quantum_ring" />能连接 ME 线缆；四个角落无法直接连接线缆。
+
+## 合成配方
 
 <RecipeFor id="quantum_ring" />
 
-# 量子链接厅
+# 量子连接仓
 
 <BlockImage id="quantum_link" scale="8" />
 
-环绕着<ItemLink id="quantum_ring" />
-将创建量子网络桥。此块块与任何电缆和登记册没有连接。
-作为网络的一部分 与全桥搭建。
+<ItemLink id="quantum_ring" />围绕量子连接仓组成完整结构后，量子连接仓才会成为 ME 网络的一部分。它本身不能直接连接线缆。
 
-这个区块的库存清单只能持有一个<ItemLink id="quantum_entangled_singularity" />并且为
-自动可达。
+连接仓只能安装一个<ItemLink id="quantum_entangled_singularity" />，但支持通过自动化物流输入和输出。
 
 ## 用途
 
