@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 查看单元格视图
+  title: 视图元件
   icon: view_cell
   position: 410
 categories:
@@ -10,19 +10,17 @@ item_ids:
 - ae2:view_cell
 ---
 
-# 查看单元格视图
+# 视图元件
 
 <ItemImage id="view_cell" scale="2" />
 
-查看单元格用于过滤[终端](terminals.md)你将它们分割成一个<ItemLink id="cell_workbench" />.
+视图元件用于筛选[终端](terminals.md)中显示的物品。先通过<ItemLink id="cell_workbench" />配置允许显示的物品，再将视图元件放入终端。
 
-例如, 表示您想要一个终端只显示一些石块建筑材料。将视图单元格分隔为那些
-将材料放置在终端中,只显示那些物品。
+例如，如果你只想在建筑材料终端中看到石头和木板，就可以把这两种材料添加到视图元件。这样终端只会显示符合条件的物品。
 
-查看单元格是添加的,如果您为橡木木板和可腐岩的查看细胞设置一个视图单元格,则将两者都放入将显示
-木板和可塑石
+安装多张视图元件时，允许显示的物品会取并集。例如，一张允许橡木木板，另一张允许圆石，那么终端会同时显示两者。
 
-## 用途
+## 合成配方
 
 <Recipe id="network/cells/view_cell_storage" />
 
