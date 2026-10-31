@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 被充任工作人员
+  title: 充能法杖
   icon: charged_staff
   position: 410
 categories:
@@ -10,15 +10,14 @@ item_ids:
 - ae2:charged_staff
 ---
 
-# 被充任工作人员
+# 充能法杖
 
 <ItemImage id="charged_staff" scale="4" />
 
-充电工作人员是用<ItemLink id="charged_certus_quartz_crystal" />尾端。它使用 300 个 AE, 造成 6 个损坏
-每一次攻击。
+充能法杖使用<ItemLink id="charged_certus_quartz_crystal" />制作。每次攻击消耗 300 AE，造成 6 点伤害。
 
-其能量可以充充电<ItemLink id="charger" />.
+能量耗尽后，可以使用<ItemLink id="charger" />为它重新充能。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="charged_staff" />
