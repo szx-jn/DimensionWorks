@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 夸石玻璃
+  title: 石英玻璃
   icon: quartz_glass
   position: 010
 categories:
@@ -11,16 +11,15 @@ item_ids:
 - ae2:quartz_vibrant_glass
 ---
 
-# 夸石玻璃
+# 石英玻璃
 
 <BlockImage id="quartz_glass" scale="8" />
 
-最清晰的玻璃<ItemLink id="certus_quartz_dust" />.
-用来做很多 AE2 机器和物品。
+石英玻璃是一种以<ItemLink id="certus_quartz_dust" />制作的透明方块，也是多种 AE2 机器与物品的重要合成材料。
 
-有一种变异的,充满活力的石英玻璃 发出光芒
+它还有一种会发光的变种：充能石英玻璃。
 
-## 食食权
+## 合成配方
 
 <RecipeFor id="quartz_glass" />
 
