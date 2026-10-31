@@ -44,6 +44,10 @@ public final class ReactorPowerBridge {
         if (kinetic == null || !isShaft(kinetic)) {
             return null;
         }
+        float speed = kinetic.getTheoreticalSpeed();
+        if (speed != 0.0F && speed != OUTPUT_RPM) {
+            return null;
+        }
         Level level = kinetic.getLevel();
         BlockPos shaftPos = kinetic.getBlockPos();
         if (level == null || !level.hasChunkAt(shaftPos)) {
@@ -63,7 +67,7 @@ public final class ReactorPowerBridge {
             if (kinetic.getBlockState().getValue(ShaftBlock.AXIS) != towardsStabilizer.getAxis()) {
                 continue;
             }
-            TileReactorCore core = stabilizer.tryGetCore();
+            TileReactorCore core = boundCore(stabilizer);
             if (core == null || !core.structureValid.get()
                 || core.reactorState.get() != ReactorState.RUNNING) {
                 continue;
@@ -89,6 +93,47 @@ public final class ReactorPowerBridge {
         return ShaftBlock.isShaft(kinetic.getBlockState());
     }
 
+    // Resolve only loaded positions: a Create shaft must never load the core's chunk.
+    @Nullable
+    private static TileReactorCore boundCore(TileReactorStabilizer stabilizer) {
+        Level level = stabilizer.getLevel();
+        if (level == null || !stabilizer.isBound.get()) {
+            return null;
+        }
+        Direction towardCore = stabilizer.facing.get();
+        for (int distance = 4; distance < TileReactorCore.COMPONENT_MAX_DISTANCE; distance++) {
+            BlockPos pos = stabilizer.getBlockPos().relative(towardCore, distance);
+            if (!level.hasChunkAt(pos)) {
+                continue;
+            }
+            BlockEntity neighbor = level.getBlockEntity(pos);
+            if (!(neighbor instanceof TileReactorCore core)) {
+                continue;
+            }
+            Direction side = towardCore.getOpposite();
+            BlockPos linked = core.getBlockPos()
+                .subtract(core.componentPositions[side.get3DDataValue()].get().getPos());
+            return linked.equals(stabilizer.getBlockPos()) ? core : null;
+        }
+        return null;
+    }
+
+    @Nullable
+    private static TileReactorComponent boundComponent(TileReactorCore core, Direction side) {
+        Level level = core.getLevel();
+        if (level == null) {
+            return null;
+        }
+        BlockPos pos = core.getBlockPos()
+            .subtract(core.componentPositions[side.get3DDataValue()].get().getPos());
+        if (pos.equals(core.getBlockPos()) || !level.hasChunkAt(pos)) {
+            return null;
+        }
+        BlockEntity entity = level.getBlockEntity(pos);
+        return entity instanceof TileReactorComponent component && component.isBound.get()
+            && component.facing.get() == side.getOpposite() ? component : null;
+    }
+
     private static List<KineticBlockEntity> outputShafts(TileReactorCore core) {
         List<KineticBlockEntity> result = new ArrayList<>(4);
         Level level = core.getLevel();
@@ -96,7 +141,7 @@ public final class ReactorPowerBridge {
             return result;
         }
         for (Direction direction : Direction.values()) {
-            TileReactorComponent component = core.getComponent(direction);
+            TileReactorComponent component = boundComponent(core, direction);
             if (!(component instanceof TileReactorStabilizer stabilizer)) {
                 continue;
             }
@@ -106,7 +151,8 @@ public final class ReactorPowerBridge {
             }
             BlockEntity neighbor = level.getBlockEntity(shaftPos);
             if (neighbor instanceof KineticBlockEntity shaft && isShaft(shaft)
-                && shaft.getBlockState().getValue(ShaftBlock.AXIS) == stabilizer.facing.get().getAxis()) {
+                && shaft.getBlockState().getValue(ShaftBlock.AXIS) == stabilizer.facing.get().getAxis()
+                && (shaft.getTheoreticalSpeed() == 0.0F || shaft.getTheoreticalSpeed() == OUTPUT_RPM)) {
                 result.add(shaft);
             }
         }
@@ -180,7 +226,7 @@ public final class ReactorPowerBridge {
             return null;
         }
         for (Direction direction : Direction.values()) {
-            TileReactorComponent component = core.getComponent(direction);
+            TileReactorComponent component = boundComponent(core, direction);
             if (!(component instanceof TileReactorInjector injector)) {
                 continue;
             }
