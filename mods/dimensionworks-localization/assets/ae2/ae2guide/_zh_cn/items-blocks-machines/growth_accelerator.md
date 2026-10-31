@@ -14,24 +14,24 @@ item_ids:
 
 <BlockImage id="growth_accelerator" p:powered="true" scale="8"/>
 
-晶体催生器大规模加速[增长的可](../ae2-mechanics/certus-growth.md)赛特斯或在萌芽区附近被放置时,或取火。
+将晶体催生器放在赛特斯石英母岩或石英芽附近，可以显著提高[赛特斯石英晶体的生长速度](../ae2-mechanics/certus-growth.md)。
 
-奇怪的是,它能*也*加速各种植物的生长。
+它还能够加快部分其他植物的生长。
 
 <GameScene zoom="6" interactive={true}>
   <ImportStructure src="../assets/assemblies/growth_accelerator.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-手动给它动力,放<ItemLink id="crank" />在顶部或底部单击右键。
+前期没有稳定的供电系统时，可以将<ItemLink id="crank" />安装在催生器顶部或底部，再通过右键手动转动。
 
-它只连接到粉红色的端端的电缆福鲁伊克斯牙齿是。
+催生器的线缆接口位于带有福鲁伊克斯纹理的端面，只有这些面可以连接能源和网络。
 
 <GameScene zoom="6" background="transparent">
 <ImportStructure src="../assets/assemblies/accelerator_connections.snbt" />
 <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-## 用途
+## 合成配方
 
 <RecipeFor id="growth_accelerator" />
