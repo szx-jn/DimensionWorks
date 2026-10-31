@@ -1,12 +1,12 @@
 {
-  "gui.ae2wtlib.magnetcard.desc.me_no_magnet": "磁网关闭, 提取到 ME",
-  "gui.ae2wtlib.wireless_terminal_settings_title": "无线终端 设置",
-  "gui.ae2wtlib.magnet_settings_title": "磁磁设置",
-  "gui.ae2wtlib.pick_block.text": "启用 选取方块",
-  "gui.ae2wtlib.craft_if_missing.text": "手合成(如果失踪)",
-  "gui.ae2wtlib.restock.text": "存储",
-  "gui.ae2wtlib.magnet.text": "磁石",
-  "gui.ae2wtlib.pickup_to_me.text": "提取到 ME 系统",
-  "key.ae2.ae2wtlib_stow": "将一组粘在ME系统中",
+  "gui.ae2wtlib.magnetcard.desc.me_no_magnet": "关闭物品吸附，将拾取物直接存入 ME 网络",
+  "gui.ae2wtlib.wireless_terminal_settings_title": "无线终端设置",
+  "gui.ae2wtlib.magnet_settings_title": "磁力吸附设置",
+  "gui.ae2wtlib.pick_block.text": "启用选取方块",
+  "gui.ae2wtlib.craft_if_missing.text": "物品不足时自动合成",
+  "gui.ae2wtlib.restock.text": "自动补货",
+  "gui.ae2wtlib.magnet.text": "磁力吸附",
+  "gui.ae2wtlib.pickup_to_me.text": "直接存入 ME 网络",
+  "key.ae2.ae2wtlib_stow": "将物品堆叠存入 ME 网络",
   "chat.ae2wtlib.NetworkNotPowered": "网络未供电"
 }
