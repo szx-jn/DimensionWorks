@@ -4,7 +4,7 @@
 
 ## 覆盖范围
 
-- 52 个命名空间的 2,333 个缺失 `zh_cn` 语言键。
+- 按当前安装模组版本补齐全部缺失的 `zh_cn` 语言键；以构建预检统计为准。
 - AE2 GuideME 手册 119 页。
 - ExtendedAE GuideME 手册 32 页。
 - 车万女仆 Patchouli 手册 55 页。
@@ -35,7 +35,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 gradle build --no-daemon
 ```
 
-产物为 `build/libs/dimensionworks_localization-0.1.0.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
+当前产物为 `build/libs/dimensionworks_localization-0.1.2.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
 
 ## 校验
 
@@ -47,7 +47,7 @@ python3 scripts/check_localization.py
 
 校验器扫描 DimensionWorks 本地实例的全部第三方 Jar，合并第三方原始 `zh_cn` 与本 Mod 覆盖，并检查：
 
-- 52 个命名空间的语言键和 206 个手册页面是否完整覆盖。
+- 当前锁定模组的全部缺失语言键和 206 个手册页面是否完整覆盖。
 - 是否出现无源键、重复 JSON 键、占位符变化。
 - 是否缺页或覆盖了第三方后来已经补齐的条目。
 - 是否存在没有对应英文页面或已被第三方补齐的手册覆盖。
@@ -61,3 +61,7 @@ python3 scripts/check_localization.py
 ## FTB Chunks 2001.3.8
 
 补齐该版本新增的队伍属性默认值中文键，避免发布预检遗漏语言键。此修订对应汉化 Mod 版本 0.1.1。
+
+## 龙之进化及 ECO AE 前置（0.1.2）
+
+新增 Brandon's Core、Draconic Evolution、CodeChicken Lib、LDLib 的 263 个中文语言键；只覆盖第三方原本缺少翻译的文本，保留格式占位符。
