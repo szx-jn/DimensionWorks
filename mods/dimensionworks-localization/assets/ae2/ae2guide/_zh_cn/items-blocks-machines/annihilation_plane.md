@@ -16,43 +16,38 @@ item_ids:
 <ImportStructure src="../assets/blocks/annihilation_plane.snbt" />
 </GameScene>
 
-破坏面板中断区块和取取物品。<ItemLink id="import_bus" />推东西
-与[网络存储](../ae2-mechanics/import-export-storage.md)。要取取物品,它们必须和
-飞机的表面,它不 在一个区域取出。
+破坏面板能够破坏正前方的方块，并拾取与面板表面接触的掉落物，再将它们存入[ME 网络存储](../ae2-mechanics/import-export-storage.md)。你可以把它理解成同时具备挖掘和<ItemLink id="import_bus" />收集能力的设备。
 
-粉碎的飞机可以被任何 砍轴魔法所迷惑, 所以,是的,你可以把 疯狂的财富水平 在少数和
-[自动解动矿石处理](../example-setups/ore-fortuner.md)如果你的软件包允许的话精准采集做什么 做什么
-效率会降低突破一个街区的能源成本 破碎后就有机会不使用任何能源
+破坏面板只能操作与自身直接接触的方块或物品，不会自动扫描大范围区域。
 
-他们是[电缆子部件](../ae2-mechanics/cable-subparts.md).
+它可以接受部分工具附魔，例如时运、精准采集和效率。合理利用这些附魔，可以制作[自动矿物采集装置](../example-setups/ore-fortuner.md)。
 
-**E. 记得在您的索赔中**
+破坏面板属于[线缆附属部件](../ae2-mechanics/cable-subparts.md)。
 
-## 过滤
+**注意：**部分领地保护或区块认领规则可能会阻止破坏面板挖掘方块。
 
-破坏面板只有在能够存储产生的滴滴/项时,才会打破块块或取取物品。
-在其网络中。这意味着过滤一个,*您必须限制其网络上存储的内容*,最有可能
-以一个[子网络](../ae2-mechanics/subnetworks.md). A<ItemLink id="storage_bus" />或[单元格](../items-blocks-machines/storage_cells.md)
-可以是[元件工作台](cell_workbench.md)实现这一点。
+## 如何过滤目标
+
+破坏面板只有在网络能够接收相应掉落物时，才会尝试破坏目标。因此，要限制它能破坏什么，需要限制其所连接网络能够存储的物品种类。
+
+最简单的方式是建立独立[子网络](../ae2-mechanics/subnetworks.md)，通过<ItemLink id="storage_bus" />或在[元件工作台](cell_workbench.md)设置过筛选规则的[存储元件](../items-blocks-machines/storage_cells.md)，只允许接收所需材料。
 
 <GameScene zoom="6" interactive={true}>
   <ImportStructure src="../assets/assemblies/annihilation_filtering.snbt" />
 
   <DiamondAnnotation pos="1 0.5 0.5" color="#00ff00">
-        过滤到任何您想要打破的东西的滴子。
+    只允许目标方块的掉落物进入网络
   </DiamondAnnotation>
 
   <DiamondAnnotation pos=".5 0.5 2.5" color="#00ff00">
-        切换到任何你想要破碎的东西的滴水
+    通过存储规则限制面板会采集的物品
   </DiamondAnnotation>
 
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-它再次过滤*依物品滴滴*例如,如果您想要过滤<ItemLink id="minecraft:amethyst_cluster" />,
-需要一架飞机施魔法精准采集,否则之前的每个成长阶段 都不会有任何下降 所以飞机会打破它们
-网络总能存储"什么都没有"
+**过滤依据是最终掉落物，而不是方块的注册名。** 例如，想限制<ItemLink id="minecraft:amethyst_cluster" />的采集，必须考虑成熟度与精准采集附魔对掉落物的影响。没有掉落物的未成熟晶芽，可能不会按预期被阻止破坏。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="annihilation_plane" />
