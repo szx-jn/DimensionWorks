@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 天空石石罐
+  title: 天空石储罐
   icon: sky_stone_tank
   position: 310
 categories:
@@ -10,12 +10,12 @@ item_ids:
 - ae2:sky_stone_tank
 ---
 
-# 天空石罐
+# 天空石储罐
 
 <BlockImage id="sky_stone_tank" scale="8" />
 
-储有 16 桶液体的液态罐体 捡起来时不保留里面的东西,没什么可说的
+天空石储罐最多容纳 **16 桶流体**。注意：直接破坏并拾取储罐时，储存在其中的流体不会保留，请提前取出。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="sky_stone_tank" />
