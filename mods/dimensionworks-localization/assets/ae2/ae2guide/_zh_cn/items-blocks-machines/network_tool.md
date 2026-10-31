@@ -14,31 +14,26 @@ item_ids:
 
 <ItemImage id="network_tool" scale="4" />
 
-网络工具已修改[扳手](wrench.md)显示网络诊断信息并可以存储[升级卡卡](upgrade_cards.md).
-它保留扳手的能力 迅速拆解东西,拉[子子 part](../ae2-mechanics/cable-subparts.md)
-从有线上取出,不能旋动。
+网络工具是[石英扳手](wrench.md)的进阶版本，除了拆卸 AE2 组件，还可以查看网络诊断信息、携带[升级卡](upgrade_cards.md)。
 
-它有 9 个空位可以存储[升级卡卡](upgrade_cards.md),并且它们将在任何 AE2 如果工具
-在你的库存清单中
+它保留了扳手拆除方块与[线缆附属部件](../ae2-mechanics/cable-subparts.md)的功能，但不能用来旋转设备。
 
-右单击网络的任何部分将显示一个诊断信息窗口,类似于右键单击<ItemLink id="controller" />.
-此窗口显示
+网络工具拥有 **9 个升级卡槽位**。只要工具位于背包中，就可以随时取用其中保存的升级卡。
 
-*   网络上使用的频道数量
-*   A 切换全球环境以 AE 或 E/ 显示能量 FE
-*   数额[能源](../ae2-mechanics/energy.md)存储在网络中的网络,以及网络的最大能量能力
-*   网络输入和使用能源的能量量
-*   全部列表[设备](../ae2-mechanics/devices.md)和网络上的组件
+右键点击 ME 网络中的设备，可以打开诊断界面，类似于右键点击<ItemLink id="controller" />，其中包括：
 
-此窗口还有助于了解两个不同的电缆或装置在与
-[子网络](../ae2-mechanics/subnetworks.md).
+* 网络已使用的频道数量。
+* AE 和 FE 等能源显示单位的切换选项（具体取决于整合包配置）。
+* 网络当前的[能源](../ae2-mechanics/energy.md)存量和最大容量。
+* 网络的能源输入和消耗情况。
+* 网络中的全部[设备](../ae2-mechanics/devices.md)及组件。
 
-## 隐藏远藏缓冲
+如果两段线缆没有合并成一个网络，这个界面也有助于区分它们是否属于不同[子网络](../ae2-mechanics/subnetworks.md)。
 
-<a href="facades.md">法卡德</a>将隐藏,同时将网络工具放在双手中。
+## 临时隐藏伪装板
 
-你可以与隐蔽的外表后面的街区互动,而不必先清除外观。
+手持网络工具时，<a href="facades.md">伪装板</a>会临时隐藏，方便你直接操作后方的设备，无需先拆掉装饰外壳。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="network_tool" />
