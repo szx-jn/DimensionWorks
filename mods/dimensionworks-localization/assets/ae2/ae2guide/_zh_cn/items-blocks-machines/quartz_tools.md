@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 夸石工具
+  title: 石英工具
   icon: certus_quartz_pickaxe
   position: 410
 categories:
@@ -19,7 +19,7 @@ item_ids:
 - ae2:nether_quartz_sword
 ---
 
-# 夸石工具
+# 石英工具
 
 <Row>
   <ItemImage id="certus_quartz_axe" scale="4" />
@@ -45,10 +45,10 @@ item_ids:
   <ItemImage id="nether_quartz_sword" scale="4" />
 </Row>
 
-夸尔兹工具在功能上与铁工具相同,其破坏力、耐久性、采矿速度等相同。
-里面有硝基的石英,[赛特斯石英](fluix_crystal.md)变式。
+石英工具的耐久度、挖掘速度和攻击性能与原版铁制工具相近。
+它们有**下界石英**和**赛特斯石英**两种材质。更高级的工具可参见[福鲁伊克斯工具](fluix_tools.md)。
 
-## 食食权
+## 合成配方
 
 <Column>
   <Row>
