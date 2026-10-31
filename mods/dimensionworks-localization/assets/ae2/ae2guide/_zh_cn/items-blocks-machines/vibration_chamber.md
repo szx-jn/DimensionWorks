@@ -10,39 +10,35 @@ item_ids:
 - ae2:vibration_chamber
 ---
 
-# 振动会议厅
+# 振动室
 
 <BlockImage id="vibration_chamber" p:active="true" scale="8" />
 
-原用主要提供方法[能源](../ae2-mechanics/energy.md)到您的网络为
-<ItemLink id="energy_acceptor" />,振动室可直接产生小到中位的 AE。
+振动室可以在不使用<ItemLink id="energy_acceptor" />的情况下，直接为 ME 网络生产少量[AE 能量](../ae2-mechanics/energy.md)。
 
-默认(无 无[升级](upgrade_cards.md)和默认配置)40 个 AE/t
+在原版默认设置下，没有升级卡的振动室约产生 **40 AE/t**。但维度工坊对 AE2 供能规则进行了改造，实际可用性与产出应以整合包内的配置和配方为准。
 
-当网络[能源](../ae2-mechanics/energy.md)振动室的油门都满满了 准备保存
-燃料,但不能完全关闭。
+当网络已有充足能源时，振动室会降低燃料消耗，但通常不会完全停止。
 
 ## 设置
 
-*   振动室提供进入全球环境以查看可感应源或可控源的能量的机会。FE.
+可以在界面中查看能源状态，也可以按配置切换能源显示单位。
 
 ## 升级
 
-振动室支撑以下[升级](upgrade_cards.md):
+振动室支持以下[升级卡](upgrade_cards.md)：
 
-*   <ItemLink id="energy_card" />最高为+150%或基本效率的 250%,使会议厅的效率增加 50%。
-*   <ItemLink id="speed_card" />将室内燃烧率增加 50%+50%,最高为+150%,或基本功率输出量的 250%。
+* <ItemLink id="energy_card" />：提高燃料使用效率，每张卡通常增加 50%，最高可达到基础效率的 250%。
+* <ItemLink id="speed_card" />：提高燃料消耗速度和发电功率，每张卡通常增加 50%，最高可达到基础输出的 250%。
 
 ## 配置
 
-振动室的属性可以以共写方式编辑。json 可放在您.minecraft 的配置文件夹中的 Ae2 文件夹中。\
-目录。
+振动室的详细参数可以在 AE2 配置文件中调整，包括：
 
-*   基底能源燃料公司设置了震动室的基数,未升级的效率。
-*   分钟能源 PerGameTick 设定尽可能最低的能源生成(即使网络,舱内也总是会慢慢使用一些燃料
-    不需要能源).
-*   HEPerGameTick 设置未升级的最大输出(和速度)振动室。
+* 基础燃料效率：决定无升级时能从燃料获得多少 AE 能量。
+* 每刻最低输出：即使网络暂时不缺电，也可能继续缓慢消耗燃料。
+* 每刻最高输出：限制无升级时的最大功率。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="vibration_chamber" />
