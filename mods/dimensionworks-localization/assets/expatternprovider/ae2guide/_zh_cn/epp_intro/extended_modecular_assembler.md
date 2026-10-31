@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: 延长分子装配室
+    title: 扩展分子装配室
     icon: expatternprovider:ex_molecular_assembler
 categories:
 - extended devices
@@ -9,16 +9,14 @@ item_ids:
 - expatternprovider:ex_molecular_assembler
 ---
 
-# 延长分子装配室
+# 扩展分子装配室
 
 <Row gap="20">
 <BlockImage id="expatternprovider:ex_molecular_assembler" scale="8"></BlockImage>
 </Row>
 
-延长分子装配室高级<ItemLink id="ae2:molecular_assembler" />.
+扩展分子装配室是<ItemLink id="ae2:molecular_assembler" />的升级版本，能同时执行 **8 项合成任务**，合成速度也可达到普通版本的 **2 倍**。
 
-它可以同时经营 8 个手艺工作(当然你需要<ItemLink id="ae2:crafting_accelerator" />在您 ME 开始时的网络)
-2x 比正常速度快。
+想要让 ME 网络并发处理多个任务，需要配置足够的<ItemLink id="ae2:crafting_accelerator" />等自动合成资源。
 
-然而,它只支持从<ItemLink id="ae2:pattern_provider" />所以你不能直接把一个图案放进去
-
+注意：它仅接收来自<ItemLink id="ae2:pattern_provider" />的配方与材料，不能直接在装配室中安装样板。
