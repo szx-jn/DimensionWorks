@@ -27,21 +27,20 @@ item_ids:
   <ItemImage id="engineering_processor" scale="4" />
 </Row>
 
-处理器是主要原料之一 AE2[设备](../ae2-mechanics/devices.md)和机器,它们也是你最早的
-有三种处理器,用黄金制成,<ItemLink id="certus_quartz_crystal" />,
-钻石和钻石分别使用[压印模板](presses.md)中<ItemLink id="inscriber" />,在多步
-进程(通常通过一系列登记人和过滤管道实现).
+处理器是 AE2 [设备](../ae2-mechanics/devices.md)和机器的重要材料。主要有三种：使用金锭的**逻辑处理器**、使用<ItemLink id="certus_quartz_crystal" />的**计算处理器**，以及使用钻石的**工程处理器**。
+
+制作处理器需要相应的[压印模板](presses.md)和<ItemLink id="inscriber" />。整个过程包括多个加工步骤，建议尽早建立自动化生产线。
 
 ## 生产步骤
 
 <Column gap="5">
-  1.  收集/合成所需原料:硅、红石、金、<ItemLink id="certus_quartz_crystal" />钻石
+  1. 准备硅、红石、金锭、<ItemLink id="certus_quartz_crystal" />和钻石等原料。
 
   <RecipeFor id="silicon" />
 
   <br />
 
-  2.  按要求的印刷电路部件
+  2. 使用压印模板制作印制硅和三种印制电路。
 
   <Row>
     <RecipeFor id="printed_silicon" />
@@ -57,7 +56,7 @@ item_ids:
 
   <br />
 
-  3.  最后文件最后大会
+  3. 将印制部件与红石等原料再次压印，得到最终处理器。
 
   <Row>
     <RecipeFor id="logic_processor" />
