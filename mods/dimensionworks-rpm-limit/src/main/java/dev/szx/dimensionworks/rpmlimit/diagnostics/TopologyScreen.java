@@ -76,7 +76,7 @@ public final class TopologyScreen extends Screen {
             }
             int row = rows.getOrDefault(depth, 0);
             rows.put(depth, row + 1);
-            positions.put(i, new double[]{35 + depth * 105, 65 + row * 45});
+            positions.put(i, new double[]{35 + depth * 145, 65 + row * 45});
         }
     }
     private int sx(double x) { return (int) (x * zoom + panX); }
@@ -114,7 +114,7 @@ public final class TopologyScreen extends Screen {
                 g.renderItem(n.icon(), 0, 0);
                 g.pose().popPose();
             }
-            g.drawString(font, "#" + (snapshot.page() * NetworkSnapshot.PAGE_SIZE + i) + " " + number(n.actualRpm()), x + half + 4, y - 4, color, false);
+            g.drawString(font, "#" + (snapshot.page() * NetworkSnapshot.PAGE_SIZE + i) + " 实际 " + number(n.actualRpm()), x + half + 4, y - 4, color, false);
         }
         g.disableScissor();
         g.enableScissor(graphRight + 4, 38, width, height - 24);
@@ -130,7 +130,7 @@ public final class TopologyScreen extends Screen {
         if (selected >= 0 && selected < snapshot.nodes().size()) {
             NetworkSnapshot.Node n = snapshot.nodes().get(selected); y += 8;
             String[] detail = {Component.translatable(n.name()).getString(), "位置 " + pos(n.pos()), "上游 " + pos(n.parent()),
-                "理论 RPM " + number(n.rpm()), "实际 RPM " + number(n.actualRpm()), "个人上限 " + n.limit(),
+                "理论 RPM " + number(n.rpm()), "实际 RPM " + number(n.actualRpm()), "个人/继承上限 " + n.limit(),
                 "负载 " + number(n.stress()) + " SU", "自然容量 " + number(n.capacity()) + " SU",
                 n.overloaded() ? "状态：过载" : "状态：未过载", n.virtual() ? "虚拟/非当前世界实体" : "世界动力方块"};
             for (String line : detail) { g.drawString(font, font.plainSubstrByWidth(line, 202), x, y, 0xfff1d49b, false); y += 12; }

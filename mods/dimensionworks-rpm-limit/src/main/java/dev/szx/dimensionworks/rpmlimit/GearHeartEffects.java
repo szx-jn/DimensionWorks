@@ -54,6 +54,7 @@ public final class GearHeartEffects {
 
         ItemStack heart = maybeHeart.get();
         applyBaseBonuses(player);
+        ensureRepairedRotationLimit(player, heart);
         if (GearHeartState.isFullyReleased(heart) || !GearHeartState.isCursed(heart)) {
             clearCurses(player);
             updateQuotaMask(player.getUUID(), null);
@@ -217,6 +218,14 @@ public final class GearHeartEffects {
             return Optional.of(stack);
         }
         return Optional.empty();
+    }
+
+    private static void ensureRepairedRotationLimit(ServerPlayer player, ItemStack heart) {
+        boolean repaired = GearHeartState.isBlessed(heart) && !GearHeartState.isLegacyCursed(heart) || GearHeartState.isRepairApplied(
+            GearHeartState.getRepairedMask(heart), GearHeartState.ROTATION_SPEED);
+        int rpm = RpmLimitConfig.GEAR_HEART_ROTATION_REPAIRED_RPM.get();
+        if (repaired && !RpmLimitManager.hasCommandOverride(player) && RpmLimitApi.getLimit(player) < rpm)
+            RpmLimitManager.setGearHeartDefaultLimit(player, rpm);
     }
 
     private static void syncQuotaState(ServerPlayer player, ItemStack heart) {

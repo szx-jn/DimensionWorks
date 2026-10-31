@@ -65,7 +65,7 @@ public abstract class KineticBlockEntityMixin {
     @Inject(method = "write", at = @At("TAIL"), remap = false)
     private void dimensionworks$writeLimitData(CompoundTag compound, boolean clientPacket, CallbackInfo ci) {
         RpmLimitManager.writeSyncData((KineticBlockEntity) (Object) this, compound);
-        compound.putInt("DWNetworkRpmLimit", ((KineticBlockEntity) (Object) this).getPersistentData().getInt("DWNetworkRpmLimit"));
+        compound.putInt("DWNetworkRpmLimit", dev.szx.dimensionworks.rpmlimit.optimizer.NetworkRpmLimit.limit((KineticBlockEntity) (Object) this));
         KineticPersistence.write((KineticBlockEntity) (Object) this, compound, clientPacket);
     }
 

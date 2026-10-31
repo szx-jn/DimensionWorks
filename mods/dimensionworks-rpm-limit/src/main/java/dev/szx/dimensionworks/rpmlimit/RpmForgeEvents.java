@@ -24,6 +24,26 @@ public final class RpmForgeEvents {
     private static final int REQUIRED_CREATE_ROTATION_CAP = 10240;
 
     @SubscribeEvent
+    public static void starting(net.minecraftforge.event.server.ServerAboutToStartEvent event) {
+        RpmLimitManager.beginServer(event.getServer());
+    }
+    @SubscribeEvent
+    public static void stopped(net.minecraftforge.event.server.ServerStoppedEvent event) { RpmLimitManager.endServer(); }
+    @SubscribeEvent
+    public static void clonePlayer(PlayerEvent.Clone event) {
+        RpmPlayerState.copy(event.getOriginal().getPersistentData(), event.getEntity().getPersistentData());
+        RpmLimitManager.init(event.getEntity());
+    }
+    @SubscribeEvent
+    public static void respawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            RpmLimitManager.init(player);
+            GearHeartEffects.tickPlayer(player);
+            RpmLimitManager.applyLimitToOwned(player, RpmLimitManager.getEffectiveLimit(player.getUUID()));
+        }
+    }
+
+    @SubscribeEvent
     public static void login(PlayerEvent.PlayerLoggedInEvent e) {
         RpmLimitManager.init(e.getEntity());
         if (e.getEntity() instanceof ServerPlayer player)
@@ -32,8 +52,10 @@ public final class RpmForgeEvents {
 
     @SubscribeEvent
     public static void logout(PlayerEvent.PlayerLoggedOutEvent e) {
-        if (e.getEntity() instanceof ServerPlayer player)
+        if (e.getEntity() instanceof ServerPlayer player) {
+            RpmLimitManager.rememberLogout(player);
             GearHeartEffects.clearPlayer(player);
+        }
     }
 
     public static void config(ModConfigEvent event) {

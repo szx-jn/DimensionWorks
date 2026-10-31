@@ -26,7 +26,8 @@ class RpmLimitManagerContractTest {
 
         assertTrue(mixin.contains("@ModifyVariable(method = \"setSpeed\""));
         assertTrue(manager.contains("float cappedSpeed = RpmLimitMath.cap(currentSpeed, value)"));
-        assertTrue(manager.contains("player == null ? storedMachineLimit(k) : getEffectiveLimit(direct)"));
+        assertTrue(manager.contains("loadOfflineProfile(direct, server)"));
+        assertTrue(manager.contains("CACHE.containsKey(direct) ? getEffectiveLimit(direct) : storedMachineLimit(k)"));
 
         String outputGate = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/quota/FinalProductionGate.java"));

@@ -61,6 +61,8 @@ public final class ControllerPropagationGameTests {
         helper.setBlock(cogPos, createBlock("large_cogwheel").setValue(CogWheelBlock.AXIS, Direction.Axis.X));
         SpeedControllerBlockEntity controller = (SpeedControllerBlockEntity) helper.getBlockEntity(controllerPos);
         KineticBlockEntity cog = (KineticBlockEntity) helper.getBlockEntity(cogPos);
+        controller.getPersistentData().putUUID("dimensionworks_owner", new java.util.UUID(103, controller.getBlockPos().asLong()));
+        cog.getPersistentData().putUUID("dimensionworks_owner", new java.util.UUID(103, cog.getBlockPos().asLong()));
         controller.getPersistentData().putInt("dimensionworks_machine_rpm_limit", limit);
         cog.getPersistentData().putInt("dimensionworks_machine_rpm_limit", limit);
         controller.targetSpeed.setValue(target);
@@ -68,6 +70,7 @@ public final class ControllerPropagationGameTests {
         Direction facing = motorOnCog ? Direction.EAST : Direction.NORTH;
         helper.setBlock(motorPos, createBlock("creative_motor").setValue(CreativeMotorBlock.FACING, facing));
         CreativeMotorBlockEntity motor = (CreativeMotorBlockEntity) helper.getBlockEntity(motorPos);
+        motor.getPersistentData().putUUID("dimensionworks_owner", new java.util.UUID(103, motor.getBlockPos().asLong()));
         motor.getPersistentData().putInt("dimensionworks_machine_rpm_limit", limit);
         helper.runAfterDelay(20, () -> {
             KineticBlockEntity output = motorOnCog ? controller : cog;

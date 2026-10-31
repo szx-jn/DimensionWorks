@@ -5,6 +5,8 @@ import dev.szx.dimensionworks.rpmlimit.mixin.ChunkMapAccessor;
 import dev.szx.dimensionworks.rpmlimit.api.IPreclampedKineticSpeed;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
@@ -32,12 +34,48 @@ public final class RpmLimitManager {
     private static final Map<UUID, Integer> CACHE = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, Integer>> EXTERNAL_LIMITS = new ConcurrentHashMap<>();
     private static final Set<UUID> COMMAND_OVERRIDES = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Integer> OFFLINE_EFFECTIVE = new ConcurrentHashMap<>();
+    private static final Set<UUID> CHECKED_PROFILES = ConcurrentHashMap.newKeySet();
+    private static MinecraftServer activeServer;
     private static long last = Long.MIN_VALUE;
+
+    public static void beginServer(MinecraftServer server) {
+        CACHE.clear(); EXTERNAL_LIMITS.clear(); COMMAND_OVERRIDES.clear();
+        OFFLINE_EFFECTIVE.clear(); CHECKED_PROFILES.clear(); last = Long.MIN_VALUE;
+        activeServer = server;
+    }
+    public static void endServer() { beginServer(null); }
+
+    private static void loadOfflineProfile(UUID owner, MinecraftServer server) {
+        if (server == null || CACHE.containsKey(owner) || !CHECKED_PROFILES.add(owner)) return;
+        java.io.File file = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(owner + ".dat").toFile();
+        if (!file.isFile()) return;
+        try {
+            CompoundTag nbt = NbtIo.readCompressed(file);
+            RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(nbt);
+            CACHE.put(owner, profile.base());
+            OFFLINE_EFFECTIVE.put(owner, profile.effective());
+            if (profile.commandOverride()) COMMAND_OVERRIDES.add(owner);
+        } catch (java.io.IOException | RuntimeException exception) {
+            DimensionWorksRpmLimit.LOGGER.warn("Could not load an offline RPM profile; retaining machine fallback limits.", exception);
+        }
+    }
+    public static void rememberLogout(ServerPlayer player) {
+        RpmPlayerState.persist(player.getPersistentData());
+        OFFLINE_EFFECTIVE.put(player.getUUID(), getEffectiveLimit(player.getUUID()));
+    }
 
     public static void init(Player p) {
         CompoundTag d = p.getPersistentData();
-        if (!d.getBoolean(INIT_KEY)) {
-            d.putInt(PLAYER_KEY, RpmLimitConfig.DEFAULT_RPM.get());
+        if (p instanceof ServerPlayer serverPlayer) loadOfflineProfile(p.getUUID(), serverPlayer.getServer());
+        Integer recovered = CACHE.get(p.getUUID());
+        boolean recoveredOverride = COMMAND_OVERRIDES.contains(p.getUUID());
+        OFFLINE_EFFECTIVE.remove(p.getUUID());
+        CHECKED_PROFILES.add(p.getUUID());
+        RpmPlayerState.restore(d);
+        if (!d.getBoolean(INIT_KEY) || !d.contains(PLAYER_KEY, net.minecraft.nbt.Tag.TAG_ANY_NUMERIC)) {
+            if (!d.contains(PLAYER_KEY, net.minecraft.nbt.Tag.TAG_ANY_NUMERIC)) d.putInt(PLAYER_KEY, recovered == null ? RpmLimitConfig.DEFAULT_RPM.get() : recovered);
+            if (recoveredOverride) d.putBoolean(COMMAND_OVERRIDE_KEY, true);
             d.putBoolean(INIT_KEY, true);
         }
         CACHE.put(p.getUUID(), sanitize(d.getInt(PLAYER_KEY)));
@@ -45,9 +83,11 @@ public final class RpmLimitManager {
             COMMAND_OVERRIDES.add(p.getUUID());
         else
             COMMAND_OVERRIDES.remove(p.getUUID());
+        RpmPlayerState.persist(d);
     }
 
     public static int get(UUID id) {
+        loadOfflineProfile(id, activeServer);
         return CACHE.getOrDefault(id, RpmLimitConfig.DEFAULT_RPM.get());
     }
 
@@ -56,7 +96,8 @@ public final class RpmLimitManager {
     }
 
     public static int getEffectiveLimit(UUID id) {
-        int effective = get(id);
+        int base = get(id);
+        int effective = Math.min(base, OFFLINE_EFFECTIVE.getOrDefault(id, base));
         boolean commandOverride = hasCommandOverride(id);
         for (Map.Entry<String, Integer> limit : externalLimits(id).entrySet()) {
             if (commandOverride && GEAR_HEART_RPM_SOURCE.equals(limit.getKey()))
@@ -88,6 +129,8 @@ public final class RpmLimitManager {
         p.getPersistentData().putBoolean(INIT_KEY, true);
         if (commandOverride)
             p.getPersistentData().putBoolean(COMMAND_OVERRIDE_KEY, true);
+        OFFLINE_EFFECTIVE.remove(p.getUUID());
+        RpmPlayerState.persist(p.getPersistentData());
         if (commandOverride)
             COMMAND_OVERRIDES.add(p.getUUID());
         CACHE.put(p.getUUID(), v);
@@ -109,12 +152,13 @@ public final class RpmLimitManager {
 
     public static void refresh(Iterable<ServerPlayer> ps, long tick) {
         int i = Math.max(1, RpmLimitConfig.CACHE_INTERVAL_TICKS.get());
-        if (tick - last < i)
+        if (last != Long.MIN_VALUE && tick >= last && tick - last < i)
             return;
         last = tick;
         for (ServerPlayer p : ps) {
             int v = sanitize(p.getPersistentData().getInt(PLAYER_KEY));
             p.getPersistentData().putInt(PLAYER_KEY, v);
+            RpmPlayerState.persist(p.getPersistentData());
             Integer previous = CACHE.put(p.getUUID(), v);
             if (previous == null || previous != v)
                 applyLimitToOwned(p, getEffectiveLimit(p.getUUID()));
@@ -132,7 +176,9 @@ public final class RpmLimitManager {
 
     public static float clampIndividual(KineticBlockEntity k, float requested) {
         if (k instanceof IPreclampedKineticSpeed) return Float.isFinite(requested) ? requested : 0;
-        return RpmLimitMath.cap(requested, individualLimit(k));
+        // Unowned relay/belt segments inherit the network at the work boundary. Their raw
+        // propagation speed must not be irreversibly capped to a synthetic default owner.
+        return RpmLimitMath.cap(requested, directOwner(k) == null ? RpmLimitConfig.MAX_RPM.get() : individualLimit(k));
     }
 
     /** Ratio from an unscaled network speed to the player-limited effective speed. */
@@ -165,14 +211,14 @@ public final class RpmLimitManager {
         return null;
     }
 
-    private static UUID directOwner(KineticBlockEntity k) {
+    public static UUID directOwner(KineticBlockEntity k) {
         CompoundTag data = k.getPersistentData();
         return data.hasUUID(OWNER_KEY) ? data.getUUID(OWNER_KEY) : null;
     }
 
     public static void setOwner(KineticBlockEntity k, UUID u) {
         k.getPersistentData().putUUID(OWNER_KEY, u);
-        setMachineLimit(k, get(u));
+        setMachineLimit(k, getEffectiveLimit(u));
         k.setChanged();
         k.sendData();
     }
@@ -182,10 +228,13 @@ public final class RpmLimitManager {
             return;
         MinecraftServer server = k.getLevel().getServer();
         UUID direct = directOwner(k);
-        if (server == null || direct == null)
+        if (server == null) return;
+        if (direct == null) {
+            if (k.hasNetwork()) k.updateSpeed = true;
             return;
-        ServerPlayer player = server.getPlayerList().getPlayer(direct);
-        int limit = player == null ? storedMachineLimit(k) : getEffectiveLimit(direct);
+        }
+        loadOfflineProfile(direct, server);
+        int limit = CACHE.containsKey(direct) ? getEffectiveLimit(direct) : storedMachineLimit(k);
         if (limit <= 0)
             return;
 
@@ -239,11 +288,17 @@ public final class RpmLimitManager {
 
     public static int individualLimit(KineticBlockEntity k) {
         if (k instanceof dev.szx.dimensionworks.rpmlimit.api.IRuntimeKineticMember) return RpmLimitConfig.MAX_RPM.get();
+        if (directOwner(k) == null && k.getLevel() != null && k.hasNetwork())
+            return dev.szx.dimensionworks.rpmlimit.optimizer.NetworkRpmLimit.limit(k);
         return limitFor(k);
     }
 
+    public static int fallbackIndividualLimit(KineticBlockEntity k) { return limitFor(k); }
+
     private static int limitFor(KineticBlockEntity k) {
         UUID owner = owner(k);
+        if (owner != null && k.getLevel() != null && !k.getLevel().isClientSide)
+            loadOfflineProfile(owner, k.getLevel().getServer());
         if (k.getLevel() != null && !k.getLevel().isClientSide && owner != null) {
             if (CACHE.containsKey(owner))
                 return getEffectiveLimit(owner);
@@ -285,11 +340,17 @@ public final class RpmLimitManager {
         int value = sanitize(limit);
         CompoundTag data = k.getPersistentData();
         boolean changed = data.getInt(MACHINE_LIMIT_KEY) != value;
+        int previousLimit = data.getInt(MACHINE_LIMIT_KEY);
         if (changed) {
             data.putInt(MACHINE_LIMIT_KEY, value);
             k.setChanged();
             // Cached stress/capacity depend on the effective RPM limit, not only Create's raw speed.
             KineticNetworkOptimizer.invalidateAndRefreshFor(k);
+            if (value > previousLimit) {
+                k.updateSpeed = true;
+                if (k instanceof com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity generator)
+                    generator.reActivateSource = true;
+            }
         }
 
         float currentSpeed = k.getTheoreticalSpeed();
@@ -307,7 +368,7 @@ public final class RpmLimitManager {
         UUID direct = directOwner(k);
         if (direct != null)
             compound.putUUID(SYNC_OWNER_KEY, direct);
-        int machineLimit = storedMachineLimit(k);
+        int machineLimit = individualLimit(k);
         if (machineLimit > 0)
             compound.putInt(SYNC_MACHINE_LIMIT_KEY, machineLimit);
     }
