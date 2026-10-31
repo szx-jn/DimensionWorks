@@ -16,48 +16,43 @@ item_ids:
   <ImportStructure src="../assets/blocks/formation_plane.snbt" />
 </GameScene>
 
-成型面板设置空格和滴放物品。它的工作方式类似于只插入的<ItemLink id="storage_bus" />,
-当东西被“存储”时放置/ 投放[设备](../ae2-mechanics/devices.md)插入[网络存储](../ae2-mechanics/import-export-storage.md),
-类似<ItemLink id="import_bus" />和<ItemLink id="interface" />.
+成型面板能够把物品从 ME 网络中**放置到世界中或作为掉落物抛出**。它类似一个只允许输入的<ItemLink id="storage_bus" />：当其他[设备](../ae2-mechanics/devices.md)尝试将物品存入[网络存储](../ae2-mechanics/import-export-storage.md)时，成型面板会把物品放到自己前方。
+
+例如，<ItemLink id="import_bus" />或<ItemLink id="interface" />向网络输送材料时，若成型面板被设置为高优先级存储目标，这些材料就可以被它直接放置或丢弃。
 
 <GameScene zoom="6" interactive={true}>
   <ImportStructure src="../assets/assemblies/formation_plane_demonstration.snbt" />
   <IsometricCamera yaw="255" pitch="30" />
 </GameScene>
 
-这个[设备](../ae2-mechanics/devices.md)使用存储总客车在诸如[管道子网](../example-setups/pipe-subnet.md),
-如果您想要丢弃物品/位置块而不是运输物品, 还可以在这些设置中替换存储总线。
+成型面板常用于[管道子网](../example-setups/pipe-subnet.md)等小型独立网络：你可以用它代替部分存储总线，让物品直接落到地面或自动放置方块。
 
-他们是[电缆子部件](../ae2-mechanics/cable-subparts.md).
+成型面板属于[线缆附属部件](../ae2-mechanics/cable-subparts.md)。
 
-**E. 记得在您的索赔中**
+**注意：**服务器的领地保护规则可能会阻止成型面板放置方块。
 
 ## 过滤
 
-默认情况下, 平面将放置/ 放下任何东西。插入到过滤器槽中的物品将作为空白列表, 只有
-允许放置这些具体物品。
+默认情况下，面板可以放置任何受支持的材料。把物品拖入过滤槽后，它就只会接受符合条件的物品。
 
-物品和液体可以拖进从 JEI 即使你没有那东西
+你也可以从 JEI 拖入筛选用物品。如果要筛选流体本身，可以手持装有该流体的桶或容器右键过滤槽。
 
-用液体容器右键单击(象桶或液罐一样)将液体设置为过滤器,而不是桶或罐体物品。
+## 优先级
 
-## 优先
+在界面中点击扳手调整优先级。网络向存储设备分配物品时，优先使用优先级更高的目标。
 
-可以通过单击扳手在 GUI.
-输入网络的物品将从最优先存储开始。
+## 工作模式
 
-## 设置
+面板可以配置为**放置方块**，也可以配置为**直接投出掉落物**。
 
-*   平面可以设置为在世界上放置块块或投放物品
+## 升级卡
 
-## 升级
+支持以下[升级卡](upgrade_cards.md)：
 
-成型面板支持以下支持[升级](upgrade_cards.md):
+* <ItemLink id="capacity_card" />：增加过滤槽。
+* <ItemLink id="fuzzy_card" />：按需忽略部分耐久或 NBT 差异。
+* <ItemLink id="inverter_card" />：把白名单切换为黑名单。
 
-*   <ItemLink id="capacity_card" />增加过滤空格的数量
-*   <ItemLink id="fuzzy_card" />让平面通过损坏等级和/或忽略物品过滤 NBT
-*   <ItemLink id="inverter_card" />将过滤器从白色列表切换为黑名单
-
-## 用途
+## 合成配方
 
 <RecipeFor id="formation_plane" />
