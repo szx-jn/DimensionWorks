@@ -21,7 +21,7 @@ navigation:
 <BoxAnnotation color="#dddddd" min="1 0 0" max="2 1 1">
         （1）样板供应器：使用赛特斯石英扳手调整朝向，安装烧炼用处理样板。
 
-        ![铁铁模式](../assets/diagrams/furnace_pattern_small.png)
+        ![熔炉处理样板](../assets/diagrams/furnace_pattern_small.png)
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 1 0" max="2 1.3 1">
