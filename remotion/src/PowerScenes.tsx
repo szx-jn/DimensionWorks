@@ -78,7 +78,7 @@ export const NetworkPower: React.FC = () => {
         <Label x={915} y={867} size={21}>DDR{tier} 内存驱动器 · 转速额度</Label>
         <Label x={575} y={782} size={19}>DDR1 → DDR2 → DDR3 → DDR4 → DDR5</Label>
         <Label x={575} y={819} size={17}>逐代展示，仅一台接入示意网络</Label>
-        <Label x={575} y={852} size={18} color={palette.paper}>同一 ME 网络最多接入 2 台内存驱动器</Label>
+        <Label x={575} y={894} size={18} color={palette.paper}>同一 ME 网络最多接入 2 台内存驱动器</Label>
       </g>
       <g opacity={ramp(t, 10.5, 11)}>
         <circle cx="1195" cy="758" r="6" fill={palette.teal}/>
