@@ -28,13 +28,13 @@ item_ids:
   <ItemImage id="fluix_sword" scale="4" />
 </Row>
 
-[福鲁伊克斯](fluix_crystal.md)工具与铁工具类似,耐久度为 3x,攻击破坏和采矿速度略高。
+[福鲁伊克斯](fluix_crystal.md)工具的基础性能优于铁制工具，耐久度约为铁制工具的 **3 倍**，攻击伤害和挖掘速度也略有提高。
 
-全部福鲁伊克斯工具似乎至少拥有幸运/搜刮 1,在进入迷人的桌前有用。
+这些工具还自带相当于至少一级幸运或抢夺的效果，因此在获得高等级附魔前就很实用。
 
-你需要做一个<ItemLink id="fluix_upgrade_smithing_template" />
+制作时需要使用<ItemLink id="fluix_upgrade_smithing_template" />。
 
-## 食食权
+## 合成配方
 
 <Column>
   <Row>
