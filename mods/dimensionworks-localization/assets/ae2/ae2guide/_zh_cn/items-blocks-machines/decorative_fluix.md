@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 装饰福鲁伊克斯
+  title: 福鲁伊克斯装饰方块
   icon: fluix_stairs
   position: 010
 categories:
@@ -12,16 +12,16 @@ item_ids:
 - ae2:fluix_slab
 ---
 
-# 装饰福鲁伊克斯
+# 福鲁伊克斯装饰方块
 
 <GameScene zoom="4" background="transparent">
 <ImportStructure src="../assets/assemblies/decorative_fluix.snbt" />
 <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-<ItemLink id="fluix_block" />能够被设计成一些装饰性构件。
+<ItemLink id="fluix_block" />可以加工成楼梯、墙和台阶等装饰方块，方便为 ME 机房增添统一的外观。
 
-## 食食权
+## 合成配方
 
 <Row>
   <RecipeFor id="fluix_stairs" />
