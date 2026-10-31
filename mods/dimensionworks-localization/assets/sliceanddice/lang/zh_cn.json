@@ -1,8 +1,8 @@
 {
-  "sliceanddice.ponder.sprinkler/intro.header": "上方的星盘",
-  "sliceanddice.ponder.sprinkler/intro.text_1": "将喷洒器放置在管道下",
-  "sliceanddice.ponder.sprinkler/uses.header": "喷洒种类",
-  "sliceanddice.ponder.sprinkler/uses.text_1": "不同的流体对实体的影响也不同",
-  "sliceanddice.recipe.assembly.slicer": "剪切与剪剪刀",
-  "sliceanddice.recipe.slicer": "剪切器"
+  "sliceanddice.ponder.sprinkler/intro.header": "喷洒器",
+  "sliceanddice.ponder.sprinkler/intro.text_1": "将喷洒器安装在流体管道下方。",
+  "sliceanddice.ponder.sprinkler/uses.header": "喷洒效果",
+  "sliceanddice.ponder.sprinkler/uses.text_1": "不同流体会对实体产生不同效果。",
+  "sliceanddice.recipe.assembly.slicer": "切片加工",
+  "sliceanddice.recipe.slicer": "切片机"
 }
