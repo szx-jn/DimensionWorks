@@ -17,7 +17,12 @@
     "mek.JadeUniversalEnergyProviderMixin",
     "mek.MachineEnergyContainerAccessor",
     "mek.TileEntityMekanismInvoker",
-    "mek.TileEntityMekanismMixin"
+    "mek.TileEntityMekanismMixin",
+    "create.ReactorShaftMixin",
+    "draconic.ReactorCoreMixin",
+    "draconic.ReactorStabilizerMixin",
+    "draconic.ReactorInjectorEnergyMixin",
+    "draconic.ReactorStabilizerEnergyMixin"
   ],
   "client": [
     "mek.JadeUniversalEnergyProviderClientMixin"
