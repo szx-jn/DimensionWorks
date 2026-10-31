@@ -191,7 +191,7 @@ public final class ReactorPowerBridge {
             BlockEntity neighbor = level.getBlockEntity(shaftPos);
             if (!(neighbor instanceof KineticBlockEntity shaft) || !isShaft(shaft)
                 || shaft.getBlockState().getValue(ShaftBlock.AXIS) != injector.facing.get().getAxis()
-                || shaft.getTheoreticalSpeed() == 0.0F || shaft.isOverStressed()) {
+                || shaft.getTheoreticalSpeed() == 0.0F) {
                 continue;
             }
             KineticNetwork network = shaft.getOrCreateNetwork();
