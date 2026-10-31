@@ -1,30 +1,53 @@
-# DimensionWorks opening cinematic
+# 维度工序 · 90 秒开场
 
-A 90-second, 1920x1080, 30 fps Remotion opening. Run all commands from this directory.
+Remotion 合成 `DimensionWorksIntro` 固定为 **1920×1080、30 fps、2700 帧（90 秒）**。
+主题是「异变留在了世界的运作之中」，整体保持宁静、陌生与好奇，不为玩家规定使命或唯一工业路线。
 
-## Timeline
+## 时间轴
 
-- 00:00-00:15: dimensional anomaly disturbs the sky and land.
-- 00:15-00:30: living red heart transforms into the repository normal Gear Heart texture.
-- 00:30-00:40: a gear falls from the sky and knocks the player unconscious.
-- 00:40-00:58: 30,000 years pass; nature reclaims the world without industrial ruins.
-- 00:58-01:15: the player wakes, sees the damaged heart locked in the accessory slot, and discovers its remaining base bonuses.
-- 01:15-01:30: DimensionWorks title.
+| 时间 | 内容 |
+| --- | --- |
+| 00:00–00:10 | 普通天地作为参照，随后发生当年的天空异象 |
+| 00:10–00:21 | 鲜活心脏逐渐改写为正常齿轮之心，不解释起因 |
+| 00:21–00:27 | 齿轮坠落，玩家失去意识 |
+| 00:27–00:39 | 昼夜与草木表现三万年流逝，不新增遗迹或工厂 |
+| 00:39–00:48 | 苏醒，发现破损且无法取下的齿轮之心 |
+| 00:48–01:01 | 独立插画：机械动力驱动原本使用 FE 的加工设备；应用机动经 ME 网络分配动力 |
+| 01:01–01:19 | 多种金属熔化；同温同种金属的空气接触对照；结晶后仍流动、后续反应停滞；最后两秒提示特殊加工分离的可能 |
+| 01:19–01:24 | 晶体细响接回心脏与自然场景，保留因果疑问 |
+| 01:24–01:30 | 正式片名「维度工序 · DimensionWorks」与最后一次心跳 |
 
-## Run
+## 叙事与实现边界
 
-Install Node.js 20+, Python 3.10+, then run:
+- 自然景象是普通方块化风景，未设定新地形、工业遗迹、野外工厂或其他建造者。动力和金属段采用抽离背景的独立机制插画，不代表出生地已有设备。
+- 动力段依据当前 Mekanism 机械供能与修改后的应用机动：展示输入、传递、分配和输出，不宣称所有设备均可任意双向转换 SU/FE。ME 网络不凭空发电，也不把应力表现为可无限积累的库存。
+- 当前脚本注册 21 种熔融材料；画面选取铜、铁、金作为代表，不逐项罗列。
+- **空气异常物质、熔融结晶、空气隔绝与特殊加工分离是目标版本的机制预告，本视频没有实现这些游戏机制。** 不代表当前已可玩或已完成游戏内验证。
+- 结晶金属保持液态、热光与流动纹理；晶体随流体移动，不表现成冷却凝固、永久报废或管道必然堵塞。同温同种金属保持一致的流动速度，暴露样本逐渐出现晶体，隔绝样本保持原状。
+- 容器剖面和气流是关系示意，不规定游戏里的密封判定、容器方块或施工方式。结晶处理仅给出局部分离示意，不指定方块、名称、配方或普通过滤方法。
+- 心脏与结晶只用声音呼应，不确认共同成因或共同修复手段。不展示七碎片顺序、配方与工业额度清单；饰品面板也是电影化重建，并非游戏录屏。
 
-    python -m pip install -r requirements.txt
-    npm install
-    npm run studio
+## 本地预览与静态检查
 
-Render with: npm run render. Output: out/dimensionworks-intro.mp4.
+需要 Node.js 20+、Python 3.10+，已有素材可直接启动 Studio：
 
-## Source assets and mechanics
+```sh
+npm install
+npx remotion studio src/index.ts --no-open
+npx tsc --noEmit
+git diff --check
+```
 
-The normal and damaged 32x32 PNGs are copied from the existing KubeJS textures. The Python asset script preserves the normal texture exact alpha silhouette while replacing all RGB values and internal industrial details with a red organic palette. The final transformed frame uses the original normal texture; the awakening scene uses the existing damaged texture.
+打开 Studio 输出地址下的 `/DimensionWorksIntro`。九个片段有中文时间轴名称，可以直接定位查看。
+所有运动、字幕渐变和场景转场由帧驱动；中文字体优先使用 macOS 的 PingFang SC，回退 Microsoft YaHei 与系统无衬线字体。
 
-The accessory panel is a cinematic reconstruction, not a live Minecraft capture. The displayed base bonuses match the implementation: interaction reach +2, Haste II, and Luck I. Industrial RPM limits and the seven industrial bottlenecks are intentionally not mislabeled as potion effects.
+`npm run studio` 会先运行素材生成，再打开 Studio。心脏素材生成需要 `python3 -m pip install -r requirements.txt`；音景脚本仅使用 Python 标准库。
 
-Key motion is frame-driven with useCurrentFrame, interpolate, and restrained spring transitions. CSS is used for static layout, not CSS animations.
+本次制作只使用 Studio 预览与静态检查，不编译或打包整合包，不导出 MP4。保留的 `npm run render` 是以后明确要求导出时使用的入口，本次不执行。
+
+## 原创素材与声音
+
+- 正常、破损的 32×32 心脏贴图复制自仓库 KubeJS 资源。`scripts/generate_assets.py` 保留正常心脏的透明轮廓，生成红色变形前素材；不引入第三方图片。
+- 方块化风景、机械部件、网络和金属反应均为代码绘制的原创插画，未复制第三方模组模型或贴图。
+- `scripts/generate_soundscape.py` 以固定随机种子生成 `public/audio/intro-soundscape.wav`，为 90 秒、22,050 Hz、PCM16 单声道原创合成音景。包括风、水声质感、鸟鸣、双拍心跳、轻微机械声、加热噪声与晶体共振，无配音和外部录音。
+- 声音脚本只生成视频音频素材，不调用任何 Mod 或整合包构建。可独立运行 `python3 scripts/generate_soundscape.py` 重建；音频作为源素材随项目保留，避免首次预览缺失音轨。

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "assets": "python scripts/generate_assets.py",
+    "assets": "python3 scripts/generate_assets.py && python3 scripts/generate_soundscape.py",
     "studio": "npm run assets && remotion studio src/index.ts",
     "render": "npm run assets && remotion render src/index.ts DimensionWorksIntro out/dimensionworks-intro.mp4"
   },
