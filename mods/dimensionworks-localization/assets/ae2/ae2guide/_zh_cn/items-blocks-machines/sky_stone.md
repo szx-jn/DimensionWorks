@@ -15,12 +15,11 @@ item_ids:
 
 <BlockImage id="sky_stone_block" scale="8" />
 
-材料[陨石](../ae2-mechanics/meteorites.md)由制成,用于配方。<ItemLink id="sky_stone_tank" />,<ItemLink id="not_so_mysterious_cube" />,
-<ItemLink id="cell_component_256k" />最重要的是,<ItemLink id="controller" />.
+天空石主要出现在[陨石](../ae2-mechanics/meteorites.md)中，也是制作许多 AE2 设备的基础材料，包括<ItemLink id="sky_stone_tank" />、<ItemLink id="not_so_mysterious_cube" />、<ItemLink id="cell_component_256k" />，以及重要的<ItemLink id="controller" />。
 
-## 食食权
+## 合成与用途
 
-a/ 位置破坏面板面对着顶层的天轮 以获得天石灰尘
+你还可以让破坏面板朝向世界建筑高度上限，在那里收集天空石粉。
 
 <RecipeFor id="sky_stone_block" />
 
