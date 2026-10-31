@@ -63,8 +63,7 @@ public final class TopologyScreen extends Screen {
     }
     private void layout() {
         positions.clear();
-        Map<BlockPos, Integer> indices = new HashMap<>();
-        for (int i = 0; i < snapshot.nodes().size(); i++) if (!snapshot.nodes().get(i).virtual()) indices.put(snapshot.nodes().get(i).pos(), i);
+        Map<BlockPos, Integer> indices = TopologyEdges.indices(snapshot.nodes());
         Map<Integer, Integer> rows = new HashMap<>();
         for (int i = 0; i < snapshot.nodes().size(); i++) {
             int depth = 0;
@@ -87,8 +86,7 @@ public final class TopologyScreen extends Screen {
         renderBackground(g);
         g.fill(5, 38, graphRight, height - 24, 0xee17242c);
         g.enableScissor(5, 38, graphRight, height - 24);
-        Map<BlockPos, Integer> indices = new HashMap<>();
-        for (int i = 0; i < snapshot.nodes().size(); i++) if (!snapshot.nodes().get(i).virtual()) indices.put(snapshot.nodes().get(i).pos(), i);
+        Map<BlockPos, Integer> indices = TopologyEdges.indices(snapshot.nodes());
         for (int i = 0; i < snapshot.nodes().size(); i++) {
             Integer parent = indices.get(snapshot.nodes().get(i).parent());
             if (parent == null) continue;
@@ -119,13 +117,16 @@ public final class TopologyScreen extends Screen {
         g.disableScissor();
         g.enableScissor(graphRight + 4, 38, width, height - 24);
         int x = graphRight + 8, y = 42 - detailsScroll;
+        TopologyEdges.Summary edges = TopologyEdges.summarize(snapshot.nodes());
         String[] summary = {"网络 " + snapshot.id(), "采样 tick " + snapshot.time(),
             "页 " + (snapshot.page() + 1) + "/" + Math.max(1, (snapshot.total() + 255) / 256) + " · 节点 " + snapshot.total(),
             "网络上限 " + snapshot.rpmLimit() + " RPM",
             "总负载 " + number(snapshot.stress()) + " SU", "有效容量 " + number(snapshot.capacity()) + " SU",
             "成员负载 " + number(snapshot.loadedStress()), "来源自然容量 " + number(snapshot.loadedCapacity()),
             "未加载负载 " + number(snapshot.unloadedStress()), "未加载容量 " + number(snapshot.unloadedCapacity()),
-            "未加载成员 " + snapshot.unloadedMembers()};
+            "未加载成员 " + snapshot.unloadedMembers(),
+            "source 边 " + edges.sourceEdges() + " · 本页可解析 " + edges.resolvableEdges(),
+            "跨页/缺失上游 " + edges.unresolvedParents()};
         for (String line : summary) { g.drawString(font, line, x, y, 0xffd8e6ed, false); y += 12; }
         if (selected >= 0 && selected < snapshot.nodes().size()) {
             NetworkSnapshot.Node n = snapshot.nodes().get(selected); y += 8;

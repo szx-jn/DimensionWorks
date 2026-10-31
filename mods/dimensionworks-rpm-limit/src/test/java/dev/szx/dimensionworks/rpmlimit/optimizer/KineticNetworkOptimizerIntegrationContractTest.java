@@ -59,6 +59,20 @@ class KineticNetworkOptimizerIntegrationContractTest {
     }
 
     @Test
+    void staleMembersFailTheNetworkLimitCacheWhenStressPruningRemovesThem() throws IOException {
+        String mixin = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/KineticNetworkMixin.java"));
+        String virtualMixin = Files.readString(Path.of(
+            "../dimensionworks-mek-stress/src/main/java/dev/szx/dimensionworks/mekstress/mixin/create/KineticNetworkMixin.java"));
+        String optimizer = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
+
+        assertTrue(virtualMixin.contains("KineticNetworkOptimizer.onMemberPruned("));
+        assertTrue(mixin.contains("finishCapacityRebuild(self, naturalCapacity)"));
+        assertTrue(optimizer.contains("if (sourceSetChanged) NetworkRpmLimit.invalidate(network)"));
+    }
+
+    @Test
     void createUpdateMethodsKeepTheirNormalBodiesOutsideTheBatch() throws IOException {
         String mixin = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/KineticNetworkMixin.java"));

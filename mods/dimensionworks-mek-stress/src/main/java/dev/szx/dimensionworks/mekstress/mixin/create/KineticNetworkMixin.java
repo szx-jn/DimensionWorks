@@ -37,11 +37,13 @@ public abstract class KineticNetworkMixin {
             if (member instanceof IVirtualKineticMember virtualMember) {
                 if (!virtualMember.dimensionworks$isValid()) {
                     iterator.remove();
+                    KineticNetworkOptimizer.onMemberPruned(network, member);
                     continue;
                 }
             } else if (member.getLevel() == null
                 || member.getLevel().getBlockEntity(member.getBlockPos()) != member) {
                 iterator.remove();
+                KineticNetworkOptimizer.onMemberPruned(network, member);
                 continue;
             }
 

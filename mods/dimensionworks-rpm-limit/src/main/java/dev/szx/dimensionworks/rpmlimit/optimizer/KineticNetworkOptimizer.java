@@ -82,6 +82,7 @@ public final class KineticNetworkOptimizer {
      */
     public static void finishCapacityRebuild(KineticNetwork network, float totalCapacity) {
         NetworkCache cache = cacheFor(network);
+        boolean sourceSetChanged = !cache.capacityContributions.keySet().equals(network.sources.keySet());
         cache.capacityValid = false;
         cache.capacityContributions.clear();
 
@@ -107,6 +108,7 @@ public final class KineticNetworkOptimizer {
         cache.capacityTotal = totalCapacity;
         cache.capacityValid = true;
         cache.capacityDeltaUpdates = 0;
+        if (sourceSetChanged) NetworkRpmLimit.invalidate(network);
     }
 
     /**
@@ -316,6 +318,11 @@ public final class KineticNetworkOptimizer {
                 break;
             }
         }
+    }
+
+    /** Invalidates cached limits after a recalculation prunes a stale member from Create's map. */
+    public static void onMemberPruned(KineticNetwork network, KineticBlockEntity member) {
+        if (network != null && member != null) invalidate(network);
     }
 
     /**

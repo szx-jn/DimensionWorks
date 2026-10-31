@@ -37,6 +37,16 @@ class KineticNetworkMixinContractTest {
         assertFalse(blockEntity.contains("dimensionworks$overspeedStress"));
     }
 
+    @Test
+    void sourcePruningCannotLeaveAStaleNetworkLimitCache() throws IOException {
+        String source = Files.readString(Path.of(SOURCE_PATH));
+        String optimizer = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
+
+        assertTrue(source.contains("finishCapacityRebuild(self, naturalCapacity)"));
+        assertTrue(optimizer.contains("if (sourceSetChanged) NetworkRpmLimit.invalidate(network)"));
+    }
+
     private static int occurrences(String source, String needle) {
         int count = 0;
         int offset = 0;
