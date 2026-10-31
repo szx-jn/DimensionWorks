@@ -85,12 +85,15 @@ public abstract class ReactorShaftMixin {
 
     @Unique
     private void dimensionworks$detachReactorSource(KineticBlockEntity shaft) {
-        if (!dimensionworks$reactorOutput) {
+        KineticNetwork network = shaft.hasNetwork() ? shaft.getOrCreateNetwork() : null;
+        // A chunk reload can reconstruct Create's sources map before this Mixin
+        // has seen its first active tick. A regular shaft has no native source.
+        if (!dimensionworks$reactorOutput
+            && (network == null || !network.sources.containsKey(shaft))) {
             return;
         }
         dimensionworks$reactorOutput = false;
 
-        KineticNetwork network = shaft.hasNetwork() ? shaft.getOrCreateNetwork() : null;
         if (network != null) {
             network.sources.remove(shaft);
             KineticNetworkOptimizer.invalidate(network);
