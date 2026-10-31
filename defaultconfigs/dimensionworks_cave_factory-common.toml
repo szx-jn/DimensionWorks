@@ -21,3 +21,7 @@
 	#Reserved modules receive no behavior from this value until their milestone is enabled.
 	#Range: 10 ~ 25
 	numericModulePercent = 25
+
+[dimension_access]
+	#Prevent players from traveling to the Aether or Dimensions of Alex's Caves.
+	blockAetherAndAlexCaves = true

@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import dev.szx.dimensionworks.cavefactory.logic.ModuleHost;
@@ -19,9 +20,20 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public final class CFForgeEvents {
+    private static final java.util.Set<ResourceLocation> BLOCKED_DIMENSIONS = java.util.Set.of(
+        new ResourceLocation("aether", "the_aether"),
+        new ResourceLocation("alex_caves_dimensions", "abyssal_chasm"),
+        new ResourceLocation("alex_caves_dimensions", "candy_cavity"),
+        new ResourceLocation("alex_caves_dimensions", "forlorn_hollows"),
+        new ResourceLocation("alex_caves_dimensions", "magnetic_caves"),
+        new ResourceLocation("alex_caves_dimensions", "primordial_caves"),
+        new ResourceLocation("alex_caves_dimensions", "toxic_caves")
+    );
+
     private CFForgeEvents() {}
 
     public static void register() {
@@ -52,6 +64,19 @@ public final class CFForgeEvents {
                 createHost.claimOwner(player);
             }
         });
+    }
+
+    @SubscribeEvent
+    public static void blockRestrictedDimensionTravel(EntityTravelToDimensionEvent event) {
+        if (!CaveFactoryConfig.blockAetherAndAlexCaves()
+            || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer)
+            || !BLOCKED_DIMENSIONS.contains(event.getDimension().location())) {
+            return;
+        }
+        event.setCanceled(true);
+        event.getEntity().displayClientMessage(
+            Component.literal("该维度暂未开放。"), true
+        );
     }
 
     @SubscribeEvent

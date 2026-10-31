@@ -12,6 +12,7 @@ public final class CaveFactoryConfig {
     public static final ForgeConfigSpec.IntValue KINETIC_SATURATION_RPM;
     public static final ForgeConfigSpec.DoubleValue STRESS_IMPACT;
     public static final ForgeConfigSpec.IntValue NUMERIC_MODULE_PERCENT;
+    public static final ForgeConfigSpec.BooleanValue BLOCK_AETHER_AND_ALEX_CAVES;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -41,6 +42,11 @@ public final class CaveFactoryConfig {
             )
             .defineInRange("numericModulePercent", 25, 10, 25);
         builder.pop();
+        builder.push("dimension_access");
+        BLOCK_AETHER_AND_ALEX_CAVES = builder
+            .comment("Prevent players from traveling to the Aether or Dimensions of Alex's Caves.")
+            .define("blockAetherAndAlexCaves", true);
+        builder.pop();
         SPEC = builder.build();
     }
 
@@ -57,6 +63,14 @@ public final class CaveFactoryConfig {
             return NUMERIC_MODULE_PERCENT.get();
         } catch (IllegalStateException | NullPointerException ignored) {
             return 25;
+        }
+    }
+
+    public static boolean blockAetherAndAlexCaves() {
+        try {
+            return BLOCK_AETHER_AND_ALEX_CAVES.get();
+        } catch (IllegalStateException | NullPointerException ignored) {
+            return true;
         }
     }
 

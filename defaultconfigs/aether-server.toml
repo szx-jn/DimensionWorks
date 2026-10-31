@@ -1,0 +1,3 @@
+[Modpack]
+	#Disables Aether Portal creation.
+	disable_aether_portal = true

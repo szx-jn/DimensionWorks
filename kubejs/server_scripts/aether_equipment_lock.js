@@ -135,6 +135,10 @@ ServerEvents.recipes(event => {
     event.remove({ output: id })
     event.remove({ id: `${id}_repairing` })
   })
+  // The Aether is intentionally inaccessible in this pack. The portal frame
+  // has no normal recipe in the bundled Aether version, but keep it covered
+  // in case another data pack adds one.
+  event.remove({ output: 'aether:aether_portal_frame' })
 })
 
 ItemEvents.canPickUp(event => {
