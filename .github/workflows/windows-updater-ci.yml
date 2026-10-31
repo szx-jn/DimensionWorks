@@ -5,11 +5,9 @@ on:
     branches: [main]
     paths:
       - 'update-Windows/**'
-      - '.github/workflows/windows-updater-ci.yml'
   pull_request:
     paths:
       - 'update-Windows/**'
-      - '.github/workflows/windows-updater-ci.yml'
   workflow_dispatch:
 
 concurrency:
