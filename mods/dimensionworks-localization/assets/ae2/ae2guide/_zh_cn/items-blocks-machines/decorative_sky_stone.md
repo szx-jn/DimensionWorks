@@ -34,9 +34,9 @@ item_ids:
   <BlockImage id="smooth_sky_stone_chest" scale="4" />
 </Row>
 
-<ItemLink id="sky_stone_block" />能够将块状构件制成和石刻成一些装饰性构块
+<ItemLink id="sky_stone_block" />可以加工成不同样式的砖块、台阶、楼梯、围墙和箱子，适合搭建天空石风格的建筑。
 
-## 食食权
+## 合成配方
 
 <Column gap="5">
   <Row>
