@@ -17,46 +17,42 @@ item_ids:
 <ItemImage id="expatternprovider:wireless_tool" scale="6"></ItemImage>
 </Row>
 
-ME 无线连接器可以连接两个网络,例如<ItemLink id="ae2:quantum_link" />但距离有限,不能 
-交叉维度。ME 无线连接器只支持一对一连接, 您需要使用<ItemLink id="expatternprovider:wireless_hub" />
-如果您想要很多到很多连接。
+ME 无线连接器可以在一定距离内无线连接两处 ME 网络，其用途类似<ItemLink id="ae2:quantum_link" />，但**不能跨维度连接**。
 
-## 链接无线连接器
+普通无线连接器只支持一对一配对。如需同时连接多个设备，可使用<ItemLink id="expatternprovider:wireless_hub" />。
 
-单击要连接到 ME 无线设置工具包, 然后你可以把它们连接在一起。
+## 配对无线连接器
 
-溜溜 + 单击以清除 ME 无线设置工具包的当前设置。
+手持无线设置工具，依次右键点击需要配对的两个连接器，即可建立连接。
 
-ME 无线连接器将在成功建立链接时改变其纹理。
+潜行并右键使用设置工具，可以清除工具中保存的配对信息。
 
-断开 ME 无线连接器
+连接成功后，连接器的外观会发生变化。
+
+未连接状态：
 
 <GameScene zoom="5" background="transparent">
   <ImportStructure src="../structure/wireless_connector_off.snbt"></ImportStructure>
 </GameScene>
 
-链接 ME 无线连接器
+已连接状态：
 
 <GameScene zoom="5" background="transparent">
   <ImportStructure src="../structure/wireless_connector_on.snbt"></ImportStructure>
 </GameScene>
 
-## 颜色
+## 颜色匹配
 
-无线连接器的颜色可以像电缆一样,只能用同样的颜色连接电缆/连接机。
+无线连接器可以像 ME 线缆一样染色，只有颜色匹配的组件才能相互连接。
 
-你需要一个<ItemLink id="ae2:color_applicator" />以颜色显示连接符。
-
-这样你就可以设置这样的无线连接器:
+使用<ItemLink id="ae2:color_applicator" />调整颜色，就能区分多条无线网络。
 
 <GameScene zoom="3" background="transparent" interactive={true}>
   <ImportStructure src="../structure/wireless_connector_setup.snbt"></ImportStructure>
 </GameScene>
 
-## 电力使用
+## 能源消耗
 
-ME 无线连接器离线越远,能源成本越高。它的成本-距离曲线不是线性曲线,所以电能 
-如果相距太远,成本会非常高。
+无线连接的距离越远，耗能越高，而且**耗能增长并非线性**。两端距离过远时，能源成本可能急剧上升。
 
-您可以使用<ItemLink id="ae2:energy_card" />为了节省电力,每张卡片都能降低 10%的能源成本。
-
+可以安装<ItemLink id="ae2:energy_card" />降低耗能，每张能源卡减少约 10% 的能量开销。
