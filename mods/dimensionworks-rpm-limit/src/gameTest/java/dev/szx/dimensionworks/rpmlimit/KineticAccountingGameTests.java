@@ -89,6 +89,9 @@ public final class KineticAccountingGameTests {
             KineticNetwork network = motor.getOrCreateNetwork();
             KineticNetworkOptimizer.onTopologyChanged(network);
             helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 64, "Lowest member was ignored");
+            shaft.setRemoved();
+            helper.assertTrue(network.members.containsKey(shaft), "Fixture must retain the removed member before map cleanup");
+            helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 1024, "Unloaded member retained a stale limit");
             shaft.setNetwork(null);
             helper.assertTrue(Math.abs(RpmLimitManager.clamp(motor, 1024)) == 1024, "Removed member left a stale network limit");
             helper.succeed();

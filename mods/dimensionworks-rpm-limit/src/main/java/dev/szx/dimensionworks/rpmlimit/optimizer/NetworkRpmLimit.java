@@ -25,7 +25,9 @@ public final class NetworkRpmLimit {
             int minimum = RpmLimitConfig.MAX_RPM.get();
             for (KineticBlockEntity participant : network.members.keySet()) {
                 // Runtime adapters inherit the network's limit; their synthetic BE has no owner.
-                if (!(participant instanceof IRuntimeKineticMember))
+                if (!(participant instanceof IRuntimeKineticMember) && participant.getLevel() != null
+                    && !participant.isRemoved() && participant.getLevel().hasChunkAt(participant.getBlockPos())
+                    && participant.getLevel().getBlockEntity(participant.getBlockPos()) == participant)
                     minimum = Math.min(minimum, RpmLimitManager.individualLimit(participant));
             }
             cached = minimum;
