@@ -1,20 +1,17 @@
 ---
 navigation:
   parent: ae2-mechanics/ae2-mechanics-index.md
-  title: 声道
+  title: 频道
   icon: controller
 ---
 
-# 声道
+# 频道
 
-应用能源 2's[ME 网络](me-network-connections.md)需要
-支持的通道[设备](../ae2-mechanics/devices.md)使用网络存储或其他网络
-。想想您所有设备都用 USB 电缆等频道。一个计算机只有这么多的 US B 端口, 只能支持
-大部分机器、全路障装置和标准电缆只能通过
-最多 8 个频道。你可以把全屏装置和标准电缆当作 8 条“通道电线”的捆包。然而,[密集电缆](../items-blocks-machines/cables.md#dense-cable)能够支持
-至 32 频道。唯一能够传输 32 的其他装置是<ItemLink id="me_p2p_tunnel" />
-和[量子网络桥](../items-blocks-machines/quantum_bridge.md)。每次一个装置使用一个频道, 想象一下从
-这显然意味着"电线" 无法在线下更远的地方使用
+AE2 的[ME 网络](me-network-connections.md)需要用**频道**连接多数[设备](../ae2-mechanics/devices.md)。你可以把频道理解成一台电脑上的 USB 接口：即使设备通电了，没有空闲接口也无法连接工作。
+
+普通线缆和多数完整方块设备最多可传递 **8 个频道**；[致密线缆](../items-blocks-machines/cables.md#dense-cable)最多可传递 **32 个频道**。<ItemLink id="me_p2p_tunnel" />和[量子网络桥](../items-blocks-machines/quantum_bridge.md)也能传输更高数量的频道。
+
+每台需要频道的设备通常占用一个频道。当线路上的频道都被占满时，后续设备即使已经接线，也可能无法正常工作。
 
 <GameScene zoom="7" interactive={true}>
   <ImportStructure src="../assets/assemblies/channel_demonstration_1.snbt" />
@@ -49,7 +46,7 @@ navigation:
   <LineAnnotation color="#33ff33" from="1.5 .1 .3" to="1.5 .4 .3" alwaysOnTop={true}/>
 
   <LineAnnotation color="#ff3333" from="3.5 .5 .5" to="5.5 .5 .5" alwaysOnTop={true}>
-  电缆里的所有 8 个频道都被使用过 所以车道上没有  
+  这段线缆的 8 个频道已经全部占用，后续设备无法获取频道  
   </LineAnnotation>
 
   <LineAnnotation color="#993333" from="1 .5 .5" to="1.25 .5 .5" alwaysOnTop={true}/>
@@ -59,32 +56,25 @@ navigation:
   <LineAnnotation color="#993333" from="3 .5 .5" to="3.25 .5 .5" alwaysOnTop={true}/>
 
   <DiamondAnnotation pos="3.6 0.5 0.5" color="#ff0000">
-        电缆里的所有 8 个频道都被使用过 所以车道上没有
+        这段线缆的 8 个频道已经全部占用，后续设备无法获取频道
     </DiamondAnnotation>
 
   <IsometricCamera yaw="15" pitch="30" />
 </GameScene>
 
-一种容易了解如何使用和通过网络途径的渠道的方法是使用[智能电缆](../items-blocks-machines/cables.md)中显示频道的路径和使用。
+使用[智能线缆](../items-blocks-machines/cables.md)能直接查看每段线路的频道使用量，是排查频道不足最方便的工具。
 
-通道每反向的节点, 将消耗 1⁄128 ae/t 的 1 y 128 ae / t, 这意味着
-添加 a<ItemLink id="controller" />a a
-网络 8 设备, 超过 96 节点, 您的电源使用实际上可能
-因为它改变了分配渠道的方式,从而降低了电力消耗。
+每段网络连接都会消耗少量 AE 能量。在设备和线路数量非常多时，加入<ItemLink id="controller" />并优化频道分配，有时反而能降低整个网络的能耗。
 
-值得注意的是,**更衣人没有做 与 CE CECOLOR**,所有电缆颜色都使电缆无法连接。
+注意：**线缆的颜色不会改变频道数量**。颜色的作用是控制哪些线缆可以互相连接。
 
-## 频道运行
+## 频道路径选择
 
-使用<ItemLink id="controller" />,
-它们首先走最短的路线,通过邻近的机器到最近的[普通有线](../items-blocks-machines/cables.md)
-(玻璃、蒙面玻璃或智能玻璃)。然后他们走最短的路线穿过普通电缆,到最近的[密集电缆](../items-blocks-machines/cables.md)
-(密度或密度智能)。然后他们走最短的路径 通过密密电缆到<ItemLink id="controller" />.
-如果最短的路径已经达到极限,有些[设备](devices.md)可能得不到所需的渠道,使用
-彩色电缆,有线锚和隧道 对你有利 以确保你的频道走你想要的道路
+对于有<ItemLink id="controller" />的网络，频道通常优先沿最短路径传递：先经过相邻设备与[普通线缆](../items-blocks-machines/cables.md)，再进入[致密线缆](../items-blocks-machines/cables.md)，最终连接控制器。
 
-例如,在这种情况下,有些驱动器得不到频道,因为尽管电缆容量足够,但
-频道尝试走最短的路, 超载一些电缆, 而留下其他空的。
+如果最短路径已经被占满，部分[设备](devices.md)可能拿不到频道，即使网络其他线路还有空余也是如此。可以通过不同颜色的线缆、线缆锚和 P2P 隧道明确分流。
+
+下面的示例中，部分 ME 驱动器没有频道，并不是总容量不够，而是频道集中通过一条较短的线路，导致局部拥堵。
 
 <GameScene zoom="4" interactive={true}>
   <ImportStructure src="../assets/assemblies/channel_path_length_issue.snbt" />
@@ -111,8 +101,7 @@ navigation:
 
 </GameScene>
 
-可以通过更仔细地限制路径通道可以采取的途径来解决这个问题。网络应该像树一样。(或类似树状).
-应尽量减少循环和模棱两可的通道。
+解决办法是主动约束频道路径，避免让多条分支在同一个位置争抢带宽。通常建议采用接近**树状结构**的布线方式，减少回路和模糊的连接路径。
 
 <GameScene zoom="4" interactive={true}>
   <ImportStructure src="../assets/assemblies/channel_path_length_issue_fix.snbt" />
@@ -128,44 +117,27 @@ navigation:
 
 </GameScene>
 
-## 特设网络网
+## 无控制器网络（临时网络）
 
-没有网络的网络<ItemLink id="controller" />
-被视为 Ad-Hoc, 可用设备支持多达 8 个频道。
-一旦超过 8 个装置 网络频道使用装置将关闭
-您可以删除设备,也可以添加<ItemLink id="controller" />.
+没有<ItemLink id="controller" />的 ME 网络称为无控制器网络，默认最多只能让 **8 台需要频道的设备**工作。超过限制后，多余设备将无法分配频道。你可以删除部分设备，或者加入<ItemLink id="controller" />扩展容量。
 
-与控制网络不同[智能电缆](../items-blocks-machines/cables.md)在特设网络上显示数字的
-而不是通过该具体电缆流通的频道数量。
+在无控制器网络中，[智能线缆](../items-blocks-machines/cables.md)显示的是网络整体使用的频道数量，不一定是该段线路上实际流经的频道数。它与有控制器网络的最短路径分配方式不同。
 
-在使用特设网络时,每个装置将
-使用 1 个频道网络宽广,这与<ItemLink id="controller" />基于
-最短路线。
+## 网络布线示例
 
-## 设计的设计
+建议从控制器引出致密线缆作为主干，再分出普通线缆，每条普通分支连接不超过 8 台[设备](../ae2-mechanics/devices.md)。
 
-如前文所述[频道路由](channels.md#channel-routing),它最好用树状结构来设计你的网络, 用密电缆从控制器中分流,固定电缆。
-密密的、密布的,[设备](../ae2-mechanics/devices.md)常规电缆上 8 或 8 小组。
+下面是一个不合理的布局示例。普通线缆上的频道被沿途设备逐渐占用：
 
-以下是一个不采取行动的例子:
+1. 频道从致密主干进入普通线缆时，上限已经降为 8。
+2. 驱动器占用 1 个，剩余 7 个。
+3. 两台终端各占 1 个，剩余 5 个。
+4. 接口占用 1 个，剩余 4 个。
+5. 样板供应器占用 1 个，剩余 3 个。
+6. 输入总线占用 1 个，剩余 2 个。
+7. 末端多台分子装配室只能分享最后的频道，部分设备无法工作。
 
-沿着通道的路径,
-
-1. 我们被困在 8 个频道 因为驱动器就像正常的电缆
-然而,既然我们在这里没有使用智能电缆 我们看不到有多少频道在使用。
-2. 驱动器要有一个频道
-还剩 7 个频道
-3. 两个频道到终点站
-还有 5 个频道
-4. 继续右侧, 接口取另一个频道。
-剩下 4 个频道。
-5. 1 个频道到样板供应器.
-还有 3 个频道
-6. 继续右转,1 个频道到输入总线.
-只剩两个频道了
-7. 样板供应器喂养组装配者晶簇只得到两个渠道,因此其中两个样板供应器得不到渠道。
-
-最终错误在于堵塞频道, 而不是想如何分配频道。
+问题不在于“网络里没有频道”，而是**局部线路承载量不够**。
 
 <GameScene zoom="4" interactive={true}>
   <ImportStructure src="../assets/assemblies/bad_network_structure.snbt" />
@@ -175,7 +147,7 @@ navigation:
 </LineAnnotation>
 
 <LineAnnotation color="#33ff33" from="6 .5 1.5" to="5.5 .5 1.5" alwaysOnTop={true} thickness="0.2">
-  8 个渠道
+  8 个频道
 </LineAnnotation>
 
 <LineAnnotation color="#33ff33" from="5.5 .5 1.5" to="5.5 1.5 1.5" alwaysOnTop={true} thickness="0.1">
@@ -247,17 +219,17 @@ navigation:
 
 ---
 
-以下是一个良好结构的例子:
+下面是更合理的树形网络布局：
 
 <GameScene zoom="2.5" interactive={true}>
   <ImportStructure src="../assets/assemblies/treelike_network_structure.snbt" />
 
     <BoxAnnotation color="#dddddd" min="6.9 0 4.9" max="9.1 4 7.1" thickness="0.05">
-        注意模式样板供应器分为 8 类,8 组。
+        样板供应器按频道限制分成多组，每组不超过 8 台设备。
     </BoxAnnotation>
 
     <BoxAnnotation color="#dddddd" min="5 4 4" max="8 5 5" thickness="0.05">
-        两条正常的电缆 连接了所有频道 意味着你需要一个密闭的电报
+        普通线缆无法承载全部频道，应改用致密线缆作为主干。
     </BoxAnnotation>
 
     <BoxAnnotation color="#dddddd" min="5 0 13" max="8 1 14" thickness="0.05">
@@ -270,21 +242,16 @@ navigation:
 
 ## 频道模式
 
-AE2 10.0.0 用于 Minecraft 1.18 提出新的备选方案,以改变 AE2 频道在你的世界里的行为。
-常规部分有一个新的配置选项(`channels`)控制此选项和新游戏
-操作器命令,操作员可以从游戏中更改模式和配置。命令是`/ae2 channelmode <mode>`
-修改和修改`/ae2 channelmode`以显示当前模式。当模式在游戏中被更改时,所有现有网格都将
-重新启动并立即使用新模式。
+AE2 从 Minecraft 1.18 对应版本开始，提供可配置的频道模式。服务器管理员可以通过配置项 `channels`，或者使用 `/ae2 channelmode <mode>` 修改频道模式。单独执行 `/ae2 channelmode` 可以查看当前模式。修改后，现有 ME 网络会重新计算频道。
 
-这恢复并改进了现有备选方案,Minecraft 1.12 和提出更好的备选办法
-球员们只是想要 更低调的游戏 但是不想让机械师完全消失
+不同模式适合不同规模的整合包，下面列出可用配置：
 
-下表列出了配置文件和命令中可用的模式。
+| 模式 | 说明 |
+| :--- | :--- |
+| `default` | 默认限制：普通线缆 8 频道、致密线缆 32 频道，无控制器网络最多 8 频道。 |
+| `x2` | 频道容量翻倍：普通线缆 16、致密线缆 64、无控制器网络 16。 |
+| `x3` | 频道容量变为三倍：普通线缆 24、致密线缆 96、无控制器网络 24。 |
+| `x4` | 频道容量变为四倍：普通线缆 32、致密线缆 128、无控制器网络 32。 |
+| `infinite` | 取消频道数量限制，智能线缆仅显示有无频道通过。 |
 
-| 设置布设    | 说明                                                                                                                                                                                                                               |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `default`  | 整个网站所描述的有线和特设网络频道能力的标准模式                                                                                                                           |
-| `x2`       | 所有频道能力翻一番(16 条正常电缆,64 条密集电缆 特别热电网支持 16 个频道)                                                                                                                           |
-| `x3`       | 所有频道能力增加两倍(正常有线 24 条,密集有电缆 92 条 临时网支持 24 个频道)                                                                                                                           |
-| `x4`       | 所有频道能力翻四番(正常电缆 32 条,密集电缆 128 条 临时网络支持 32 个频道)                                                                                                                       |
-| `infinite` | 取消所有频道限制。主计长仍然减少电网的电力消耗*明显*。智能电缆只会切换完全关闭的(没有传送频道)完全开着(1 个或 1 个以上通道). |
+实际使用哪一种模式，取决于整合包当前的服务端配置；不能仅凭此页推断维度工坊已启用无限频道。
