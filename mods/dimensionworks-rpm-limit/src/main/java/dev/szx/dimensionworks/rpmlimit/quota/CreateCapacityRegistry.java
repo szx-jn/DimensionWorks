@@ -104,6 +104,10 @@ public final class CreateCapacityRegistry {
         }
     }
 
+    public static void requestReallocation() {
+        synchronized (SAMPLES) { PENDING.addAll(SAMPLES.keySet()); }
+    }
+
     public static void clearRemoved() {
         synchronized (SAMPLES) {
             boolean changed = SAMPLES.keySet().removeIf(network -> !shouldRetainNetwork(isActive(network)));

@@ -22,7 +22,7 @@ class MachinePowerRouteContractTest {
         assertTrue(source.contains("if (network == null)"));
         assertTrue(source.contains("new DirectSource(kinetic, network,"));
         assertTrue(source.contains("PowerRouteSafety.shouldAssignStress("));
-        assertTrue(source.contains("MachineKineticRegistry.sync(tile, route.network(), memberRpm(route));"));
+        assertTrue(source.contains("MachineKineticRegistry.sync(tile, route.network(), memberRpm(route), route.source().getBlockPos());"));
         assertTrue(source.contains("MachineKineticRegistry.detach(tile);"));
         assertFalse(source.contains("findExportGearbox"));
     }

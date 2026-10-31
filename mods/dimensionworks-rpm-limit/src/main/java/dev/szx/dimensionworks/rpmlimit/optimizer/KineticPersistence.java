@@ -11,8 +11,8 @@ import net.minecraft.nbt.CompoundTag;
 /** Versioned physical-member accounting, independent of runtime quotas and virtual consumers. */
 public final class KineticPersistence {
     private static final String KEY = "DWKineticAccounting";
-    private static final Map<KineticBlockEntity, Saved> SAVED = new WeakHashMap<>();
-    private static final Map<KineticNetwork, Totals> SNAPSHOTS = new WeakHashMap<>();
+    private static final Map<KineticBlockEntity, Saved> SAVED = java.util.Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<KineticNetwork, Totals> SNAPSHOTS = java.util.Collections.synchronizedMap(new WeakHashMap<>());
     private record Saved(float capacity, float stress, int count, float ownCapacity, float ownStress) {}
     private record Totals(long tick, float capacity, float stress, int count) {}
     private KineticPersistence() {}

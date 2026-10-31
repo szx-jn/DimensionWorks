@@ -48,7 +48,7 @@ public final class GearHeartEffects {
         Optional<ItemStack> maybeHeart = equippedHeart(player);
         if (maybeHeart.isEmpty()) {
             clearAll(player);
-            ACTIVE_QUOTA_MASKS.remove(player.getUUID());
+            updateQuotaMask(player.getUUID(), null);
             return;
         }
 
@@ -56,18 +56,24 @@ public final class GearHeartEffects {
         applyBaseBonuses(player);
         if (GearHeartState.isFullyReleased(heart) || !GearHeartState.isCursed(heart)) {
             clearCurses(player);
-            ACTIVE_QUOTA_MASKS.remove(player.getUUID());
+            updateQuotaMask(player.getUUID(), null);
             return;
         }
 
-        ACTIVE_QUOTA_MASKS.put(player.getUUID(), GearHeartState.getRepairedMask(heart));
+        updateQuotaMask(player.getUUID(), GearHeartState.getRepairedMask(heart));
         syncQuotaState(player, heart);
+    }
+
+    private static void updateQuotaMask(UUID owner, Integer mask) {
+        Integer previous = mask == null ? ACTIVE_QUOTA_MASKS.remove(owner) : ACTIVE_QUOTA_MASKS.put(owner, mask);
+        if (!java.util.Objects.equals(previous, mask))
+            dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.requestReallocation();
     }
 
     public static void clearPlayer(ServerPlayer player) {
         clearAll(player);
         TOKEN_BUCKET.clearOwner(player.getUUID());
-        ACTIVE_QUOTA_MASKS.remove(player.getUUID());
+        updateQuotaMask(player.getUUID(), null);
     }
 
     public static boolean tryQuota(UUID owner, GearHeartQuotaType type,

@@ -94,6 +94,36 @@ public final class KineticAccountingGameTests {
             helper.succeed();
         });
     }
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void stoppedSourceStillDeductsItsSavedCapacity(GameTestHelper helper) {
+        KineticBlockEntity shaft = block(helper, "shaft", new BlockPos(2, 1, 2));
+        CompoundTag accounting = new CompoundTag();
+        accounting.putInt("Version", 1); accounting.putFloat("Capacity", 65536);
+        accounting.putFloat("OwnCapacity", 65536); accounting.putInt("Members", 1);
+        CompoundTag saved = new CompoundTag(); saved.put("DWKineticAccounting", accounting);
+        KineticPersistence.read(shaft, saved, false);
+        KineticNetwork restored = new KineticNetwork();
+        KineticPersistence.initialize(shaft, restored);
+        restored.addSilently(shaft, 0, 0);
+        helper.assertTrue(restored.calculateCapacity() == 0, "Stopped source retained its old capacity");
+        helper.assertTrue(restored.getSize() == 1, "Stopped source was not restored exactly once");
+        helper.succeed();
+    }
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void legacyPhantomTotalsAreNotImported(GameTestHelper helper) {
+        KineticBlockEntity shaft = block(helper, "shaft", new BlockPos(2, 1, 2));
+        CompoundTag legacy = new CompoundTag();
+        CompoundTag networkTag = new CompoundTag();
+        networkTag.putFloat("Stress", 999999); networkTag.putFloat("Capacity", 999999);
+        legacy.put("Network", networkTag);
+        KineticPersistence.read(shaft, legacy, false);
+        KineticNetwork restored = new KineticNetwork();
+        KineticPersistence.initialize(shaft, restored);
+        restored.addSilently(shaft, 0, 0);
+        helper.assertTrue(restored.calculateStress() == 0, "Legacy phantom stress was imported");
+        helper.assertTrue(restored.calculateCapacity() == 0, "Legacy phantom capacity was imported");
+        helper.succeed();
+    }
     private static final class RuntimeMember extends KineticBlockEntity implements IRuntimeKineticMember {
         RuntimeMember(KineticBlockEntity real) { super(real.getType(), real.getBlockPos(), real.getBlockState()); }
         @Override public float getTheoreticalSpeed() { return 64; }
