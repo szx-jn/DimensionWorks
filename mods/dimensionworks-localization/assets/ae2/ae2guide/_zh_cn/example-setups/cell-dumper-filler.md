@@ -46,7 +46,7 @@ navigation:
 ## 清空存储元件
 
 1. <ItemLink id="io_port" />把插入的[存储元件](../items-blocks-machines/storage_cells.md)中的资源转移到子网的[网络存储](../ae2-mechanics/import-export-storage.md)。
-2. 子网唯一的存储设备是<ItemLink id="storage_bus" />，所以物品和流体都会进入它指向的外部容器。
+2. 子网唯一的存储入口是<ItemLink id="storage_bus" />，所以物品和流体都会进入它指向的外部容器。
 3. <ItemLink id="energy_cell" />提供足够的[能源](../ae2-mechanics/energy.md)缓冲，避免一次性转移大量资源时供电不足。
 
 ## 填充存储元件
