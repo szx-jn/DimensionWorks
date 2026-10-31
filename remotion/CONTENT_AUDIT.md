@@ -47,7 +47,7 @@
 
 ## 本轮时间与视觉约束
 
-0–10 天地异变；10–21 心脏改写；21–27 史蒂夫遭遇齿轮；27–34 三万年（7 秒）；34–48 苏醒与实际效果（14 秒）；48–61 动力与应用机动；61–79 熔融反应；79–84 回到世界；84–90 片名。总长 2700 帧。
+0–6 天地异变；6–13 心脏改写；13–17 史蒂夫遭遇齿轮；17–24 三万年（7 秒）；24–33 苏醒与实际效果；33–39 马达与九类工厂；39–55 完整 ME 网络与支路；55–70 DDR 驱动器和 30 张卡；70–85 熔融反应；85–87 回到世界；87–90 片名。总长仍为 2700 帧。
 
 史蒂夫采用原创方块人物插画，使用棕发、像素面部、青色上衣、蓝裤与鞋区分四肢；没有复制第三方皮肤或模型。自然场景不增加工业设施；机制插画抽离背景；心脏与结晶只用声音呼应，不确认共同成因。
 
@@ -107,7 +107,7 @@
 | `dimensionworks_ftbchunks_no_forceload` · DimensionWorks FTB Chunks Force-load Disable | 0.1.2 | in-repo | 双端 |
 | `dimensionworks_localization` · DimensionWorks 简体中文汉化 | 0.1.3 | in-repo | 客户端 |
 | `dimensionworks_maid_ae_crank` · DimensionWorks Maid AE2 Crank | 0.1.0 | in-repo | 双端 |
-| `dimensionworks_mek_stress` · DimensionWorks ME Mechanical Power | 0.3.13 | in-repo | 双端 |
+| `dimensionworks_mek_stress` · DimensionWorks ME Mechanical Power | 0.3.15 | in-repo | 双端 |
 | `dimensionworks_rpm_limit` · DimensionWorks RPM Limit | 0.4.13 | in-repo | 双端 |
 | `dimensionworks_transfer` · DimensionWorks Transfer | 0.2.0 | in-repo | 双端 |
 | `dimensionworks_version_gate` · DimensionWorks Version Gate | 0.1.0 | in-repo | 双端 |
@@ -199,3 +199,10 @@
 | `xaeroworldmap` · Xaero's World Map | forge-1.20.1-1.40.16 | modrinth | 双端 |
 | `dimensionworks_item_pickup_guard` · DimensionWorks Item Pickup Guard | 0.1.0 | in-repo | 双端 |
 | `industrial_platform` · Industrial Platform | 1.20.1-2.0.1 | curseforge | 双端 |
+
+
+## 后续批注落实
+
+AE 供能支路只展示动能接收器和谐振仓，不引入外部 FE 供能或创造能源元件。创造马达仍按用户要求作为机械演示源。主链以玻璃线缆连接输入齿轮箱、ME 控制器和输出齿轮箱，输出轴驱动压力机；DDR 支路注明最多两台有效驱动器。卡片介绍使用六类共 30 张仓库原创贴图，并把全网最高应力扣除同步为 99%。金属对照的热源每侧三个正常燃烧室，不使用超级加热蓝火。
+
+工厂类型核对了当前 Mekanism 10.4.16.80 的 `FactoryType` 枚举及中文语言键，九种工艺名称为熔炼、富集、粉碎、压缩、融合、提纯、压射、灌注、锯木。AE2 15.4.10 的本地源码与语言键用于核对谐振仓供能，不把未采用的外部 FE 接收器列为本片供能路径。

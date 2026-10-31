@@ -1,15 +1,17 @@
 import React from "react";
 import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {Caption, Gear, Landscape, palette, ramp, Scene} from "./Cinema";
-import {MoltenChemistry, PowerConnections} from "./Mechanisms";
+import {MoltenChemistry} from "./Mechanisms";
+import {DirectPower, NetworkPower} from "./PowerScenes";
+import {MemoryOverview} from "./MemoryOverview";
 import {Steve} from "./Steve";
 
 const Heart: React.FC<{damaged?: boolean; size?: number; opacity?: number; scale?: number}> = ({damaged = true, size = 210, opacity = 1, scale = 1}) => <Img src={staticFile(damaged ? "gear_heart_damaged.png" : "gear_heart_normal.png")} style={{width: size, height: size, objectFit: "contain", imageRendering: "pixelated", opacity, scale: String(scale), filter: "drop-shadow(0 0 26px #cf786344)"}}/>;
 
 const Anomaly: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const disruption = ramp(t, 2, 6);
-  return <Scene duration={10} label="那一天" background="#567b7c">
+  const disruption = ramp(t, 1, 4);
+  return <Scene duration={6} label="那一天" background="#567b7c">
     <Landscape time={t} night={disruption * .6}/>
     <AbsoluteFill style={{background: "radial-gradient(ellipse at 50% 28%, #d1888577, transparent 60%)", opacity: disruption}}/>
     <svg width="1920" height="1080" viewBox="0 0 1920 1080" style={{position: "absolute", inset: 0}}>
@@ -19,15 +21,15 @@ const Anomaly: React.FC = () => {
         <ellipse cx="958" cy="270" rx={180 + disruption * 100} ry="118" fill="none" stroke="#bcb3b7" strokeWidth="1" opacity=".5"/>
       </g>
     </svg>
-    <Caption start={2.2} end={9.5}>那一天，天地发生了异变。</Caption>
+    <Caption start={1.2} end={5.6}>那一天，天地发生了异变。</Caption>
   </Scene>;
 };
 
 const HeartChange: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const conversion = ramp(t, 2.8, 8.6);
+  const conversion = ramp(t, 1.8, 5.7);
   const beat = 1 + Math.sin(t * Math.PI * 2) * .035 * (1 - conversion);
-  return <Scene duration={11} label="目光之外" background="radial-gradient(ellipse at 50% 44%,#45343b,#151f26 65%)">
+  return <Scene duration={7} label="目光之外" background="radial-gradient(ellipse at 50% 44%,#45343b,#151f26 65%)">
     <div style={{position: "absolute", left: 960, top: 490, translate: "-50% -50%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle,#cc68522b,transparent 65%)"}}/>
     <div style={{position: "absolute", left: 960, top: 490, translate: "-50% -50%", scale: String(beat)}}>
       <Img src={staticFile("heart_red.png")} style={{position: "absolute", width: 290, height: 290, imageRendering: "pixelated", opacity: 1 - conversion}}/>
@@ -39,22 +41,22 @@ const HeartChange: React.FC = () => {
         return <path key={i} d={`M${960 + Math.cos(a) * 215} ${490 + Math.sin(a) * 215} l${Math.cos(a) * 18} ${Math.sin(a) * 18}`} stroke="#be9e86" opacity={conversion * .65} strokeWidth="2"/>;
       })}
     </svg>
-    <Caption start={.7} end={10.4}>有些变化，发生在目光之外。</Caption>
+    <Caption start={.5} end={6.6}>有些变化，发生在目光之外。</Caption>
   </Scene>;
 };
 
 const FallingGear: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const fall = ramp(t, 1, 3.6);
-  const impact = ramp(t, 3.6, 3.68) * (1 - ramp(t, 3.68, 3.95));
-  return <Scene duration={6} label="一瞬之间">
+  const fall = ramp(t, .5, 2.5);
+  const impact = ramp(t, 2.5, 2.58) * (1 - ramp(t, 2.58, 2.85));
+  return <Scene duration={4} label="一瞬之间">
     <Landscape time={t} night={.5}/>
     <svg width="1920" height="1080" viewBox="0 0 1920 1080" style={{position: "absolute", inset: 0}}>
-      <g opacity={1 - ramp(t, 3.85, 4.55)}><Steve x={960} y={480} time={t} tilt={ramp(t, 3.65, 4.4) * 72}/></g>
+      <g opacity={1 - ramp(t, 2.75, 3.4)}><Steve x={960} y={480} time={t} tilt={ramp(t, 2.55, 3.3) * 72}/></g>
       <Gear x={960} y={-160 + fall * 525} radius={100} angle={fall * 260}/>
     </svg>
     <AbsoluteFill style={{background: "#fff1d8", opacity: impact * .65}}/>
-    <AbsoluteFill style={{background: "#090f13", opacity: ramp(t, 3.95, 4.8)}}/>
+    <AbsoluteFill style={{background: "#090f13", opacity: ramp(t, 2.85, 3.5)}}/>
   </Scene>;
 };
 
@@ -71,9 +73,9 @@ const TimePassing: React.FC = () => {
 
 const Awakening: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const panel = ramp(t, 2, 3);
-  const effects = ramp(t, 5, 6);
-  return <Scene duration={14} label="苏醒">
+  const panel = ramp(t, .8, 1.5);
+  const effects = ramp(t, 2.3, 3.3);
+  return <Scene duration={9} label="苏醒">
     <Landscape time={t * .2}/>
     <AbsoluteFill style={{background: "#102126", opacity: panel * .6}}/>
     <div style={{position: "absolute", left: 960 - effects * 350, top: 460, translate: "-50% -50%", width: 660 - effects * 100, height: 380, opacity: panel, border: "1px solid #b4b7a461", background: "linear-gradient(135deg,#1c3037ee,#13242bf5)", padding: "46px 50px", display: "flex", alignItems: "center", gap: 35, boxShadow: "0 30px 100px #09141877"}}>
@@ -87,21 +89,21 @@ const Awakening: React.FC = () => {
         {name: "急迫 II", detail: "挖掘速度提升", symbol: "⛏", color: "#dac77a"},
         {name: "虚弱 I", detail: "近战攻击伤害降低", symbol: "↓", color: "#d79f96"},
         {name: "夜视 I", detail: "在黑暗中看清世界", symbol: "☾", color: "#a4b9db"},
-      ].map((effect, i) => <div key={effect.name} style={{display: "flex", gap: 22, alignItems: "center", padding: "15px 20px", marginBottom: 12, background: "#152a31ed", border: `1px solid ${effect.color}55`, opacity: ramp(t, 5.5 + i * .55, 6.1 + i * .55), translate: `${(1 - ramp(t, 5.5 + i * .55, 6.1 + i * .55)) * 24}px 0`}}>
+      ].map((effect, i) => <div key={effect.name} style={{display: "flex", gap: 22, alignItems: "center", padding: "15px 20px", marginBottom: 12, background: "#152a31ed", border: `1px solid ${effect.color}55`, opacity: ramp(t, 2.7 + i * .32, 3.1 + i * .32), translate: `${(1 - ramp(t, 2.7 + i * .32, 3.1 + i * .32)) * 24}px 0`}}>
         <div style={{width: 52, textAlign: "center", fontSize: 38, color: effect.color}}>{effect.symbol}</div>
         <div><div style={{fontSize: 27, color: effect.color}}>{effect.name}</div><div style={{fontSize: 19, marginTop: 6, color: palette.muted}}>{effect.detail}</div></div>
       </div>)}
     </div>
     <AbsoluteFill style={{background: "#080f12", opacity: (1 - ramp(t, 0, 1.3)) * .95}}/>
-    <Caption start={2} end={5}>眼前的世界，似乎仍然熟悉。</Caption>
-    <Caption start={8.3} end={13.6}>残存的力量，与它留下的代价，一同苏醒。</Caption>
+    <Caption start={1.2} end={3.2}>眼前的世界，似乎仍然熟悉。</Caption>
+    <Caption start={4.6} end={8.6}>残存的力量，与它留下的代价，一同苏醒。</Caption>
   </Scene>;
 };
 
 const ReturnToWorld: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const reveal = ramp(t, .8, 3.5);
-  return <Scene duration={5} label="" background="#1b3438">
+  const reveal = ramp(t, .2, 1.4);
+  return <Scene duration={2} label="" background="#1b3438">
     <Landscape time={t * .3}/>
     <AbsoluteFill style={{background: "#102026", opacity: .75 * (1 - reveal)}}/>
     <div style={{position: "absolute", left: 960, top: 520 + reveal * 200, translate: "-50% -50%", opacity: 1 - reveal, scale: String(1 + Math.sin(t * Math.PI * 2) * .018)}}><Heart size={220}/></div>
@@ -111,8 +113,8 @@ const ReturnToWorld: React.FC = () => {
 
 const EndTitle: React.FC = () => {
   const t = useCurrentFrame() / useVideoConfig().fps;
-  const enter = ramp(t, .3, 1.6);
-  return <Scene duration={6} label="">
+  const enter = ramp(t, .15, .8);
+  return <Scene duration={3} label="">
     <div style={{position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", opacity: enter, translate: `0 ${(1 - enter) * 14}px`}}>
       <Heart size={145}/>
       <div style={{fontSize: 84, letterSpacing: 21, marginTop: 40, fontWeight: 600}}>维度工序</div>
@@ -128,14 +130,16 @@ export const Intro: React.FC = () => {
   const {fps} = useVideoConfig();
   return <AbsoluteFill style={{background: "#090f13"}}>
     <Soundscape/>
-    <Sequence name="天地异变" from={0} durationInFrames={10 * fps} premountFor={fps}><Anomaly/></Sequence>
-    <Sequence name="心脏改写" from={10 * fps} durationInFrames={11 * fps} premountFor={fps}><HeartChange/></Sequence>
-    <Sequence name="齿轮坠落" from={21 * fps} durationInFrames={6 * fps} premountFor={fps}><FallingGear/></Sequence>
-    <Sequence name="三万年" from={27 * fps} durationInFrames={7 * fps} premountFor={fps}><TimePassing/></Sequence>
-    <Sequence name="苏醒与饰品效果" from={34 * fps} durationInFrames={14 * fps} premountFor={fps}><Awakening/></Sequence>
-    <Sequence name="动力与应用机动" from={48 * fps} durationInFrames={13 * fps} premountFor={fps}><PowerConnections/></Sequence>
-    <Sequence name="熔融金属与空气" from={61 * fps} durationInFrames={18 * fps} premountFor={fps}><MoltenChemistry/></Sequence>
-    <Sequence name="回到世界" from={79 * fps} durationInFrames={5 * fps} premountFor={fps}><ReturnToWorld/></Sequence>
-    <Sequence name="维度工序" from={84 * fps} durationInFrames={6 * fps} premountFor={fps}><EndTitle/></Sequence>
+    <Sequence name="天地异变" from={0} durationInFrames={6 * fps} premountFor={fps}><Anomaly/></Sequence>
+    <Sequence name="心脏改写" from={6 * fps} durationInFrames={7 * fps} premountFor={fps}><HeartChange/></Sequence>
+    <Sequence name="齿轮坠落" from={13 * fps} durationInFrames={4 * fps} premountFor={fps}><FallingGear/></Sequence>
+    <Sequence name="三万年" from={17 * fps} durationInFrames={7 * fps} premountFor={fps}><TimePassing/></Sequence>
+    <Sequence name="苏醒与饰品效果" from={24 * fps} durationInFrames={9 * fps} premountFor={fps}><Awakening/></Sequence>
+    <Sequence name="创造马达与机械供能" from={33 * fps} durationInFrames={6 * fps} premountFor={fps}><DirectPower/></Sequence>
+    <Sequence name="应用机动三条支路" from={39 * fps} durationInFrames={16 * fps} premountFor={fps}><NetworkPower/></Sequence>
+    <Sequence name="DDR驱动器与30张内存卡" from={55 * fps} durationInFrames={15 * fps} premountFor={fps}><MemoryOverview/></Sequence>
+    <Sequence name="熔融金属与空气" from={70 * fps} durationInFrames={15 * fps} premountFor={fps}><MoltenChemistry/></Sequence>
+    <Sequence name="回到世界" from={85 * fps} durationInFrames={2 * fps} premountFor={fps}><ReturnToWorld/></Sequence>
+    <Sequence name="维度工序" from={87 * fps} durationInFrames={3 * fps} premountFor={fps}><EndTitle/></Sequence>
   </AbsoluteFill>;
 };

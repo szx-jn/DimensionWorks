@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.mekstress;
 
 import dev.szx.dimensionworks.mekstress.core.MachineTier;
+import dev.szx.dimensionworks.mekstress.core.InputStressMath;
 import dev.szx.dimensionworks.mekstress.core.MemoryCardType;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import java.util.EnumMap;
@@ -42,8 +43,9 @@ public final class MekStressConfig {
             MACHINE_RPM.put(tier, builder.defineInRange(tier.name().toLowerCase() + "Rpm", tier.targetRpm(), 1, 65536));
         builder.pop();
         builder.push("tuning");
-        MAXIMUM_INPUT_LOSS_BP = builder.comment("Maximum network input stress loss, in basis points (1500 = 15%).")
-            .defineInRange("maximumInputLossBasisPoints", 1500, 0, 10000);
+        MAXIMUM_INPUT_LOSS_BP = builder.comment("Maximum network input stress loss, in basis points (9900 = 99%). Hard ceiling: 99%.")
+            .defineInRange("maximumInputLossBasisPoints", InputStressMath.MAXIMUM_INPUT_LOSS_BASIS_POINTS,
+                0, InputStressMath.MAXIMUM_INPUT_LOSS_BASIS_POINTS);
         DIRECT_MAX_RPM = builder.defineInRange("directMaxRpm", 10240, 1, 10240);
         builder.pop();
         SPEC = builder.build();
@@ -55,6 +57,8 @@ public final class MekStressConfig {
     public static int speedExponent(MemoryCardType type) { return SPEED.get(type).get(); }
     public static int machineRpm(MachineTier tier) { return MACHINE_RPM.get(tier).get(); }
     public static double defectiveChance() { return DEFECTIVE_CHANCE.get(); }
-    public static int maximumInputLossBasisPoints() { return MAXIMUM_INPUT_LOSS_BP.get(); }
+    public static int maximumInputLossBasisPoints() {
+        return InputStressMath.cappedReductionBasisPoints(MAXIMUM_INPUT_LOSS_BP.get());
+    }
     public static int directMaxRpm() { return DIRECT_MAX_RPM.get(); }
 }

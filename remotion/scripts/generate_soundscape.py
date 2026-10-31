@@ -41,36 +41,36 @@ def generate():
         t = n / RATE
         noise = rng.uniform(-1, 1)
         wind = wind * 0.985 + noise * 0.015
-        nature = (envelope(t, 0, 10) + envelope(t, 27, 48)
-                  + envelope(t, 79, 90))
+        nature = (envelope(t, 0, 6) + envelope(t, 17, 33)
+                  + envelope(t, 85, 90))
         value = wind * 0.35 * nature
         # Soft stream and sparse birds, confined to ordinary nature scenes.
         value += noise * 0.012 * nature * (0.7 + 0.3 * sin(t * 1.7))
         bird_phase = t % 6.1
         if bird_phase < 0.23:
             value += sin(2 * pi * (1700 * bird_phase + 1200 * bird_phase**2)) * sin(pi * bird_phase / 0.23)**2 * 0.025 * nature
-        value += heartbeat(t, 10, 21, 0.19)
-        value += heartbeat(t, 35, 48, 0.12)
-        value += heartbeat(t, 79, 83, 0.12)
-        value += heartbeat(t, 87, 88, 0.17)
+        value += heartbeat(t, 6, 13, 0.19)
+        value += heartbeat(t, 25, 33, 0.12)
+        value += heartbeat(t, 85, 87, 0.12)
+        value += heartbeat(t, 88, 89, 0.17)
         # Dimensional disturbance, falling gear and a single restrained impact.
-        value += sin(2 * pi * 43 * t) * envelope(t, 2, 10, 2) * 0.025
-        fall = t - 22
-        if 0 <= fall < 2.6:
-            value += noise * (fall / 2.6)**2 * 0.055
-        impact = t - 24.6
+        value += sin(2 * pi * 43 * t) * envelope(t, 1, 6, 1) * 0.025
+        fall = t - 13.5
+        if 0 <= fall < 2:
+            value += noise * (fall / 2)**2 * 0.055
+        impact = t - 15.5
         if 0 <= impact < 1:
             value += (sin(2 * pi * 72 * impact) * 0.26 + noise * 0.12) * exp(-impact * 10)
         # Powered machine hum: one connected system, not a soundtrack beat.
-        machinery = envelope(t, 48, 61, 0.8)
+        machinery = envelope(t, 33, 55, 0.8)
         value += (sin(2 * pi * 88 * t) + 0.3 * sin(2 * pi * 176 * t)) * 0.024 * machinery
-        tick = (t - 48) % 0.36
+        tick = (t - 33) % 0.36
         if tick < 0.025:
             value += noise * exp(-tick * 150) * 0.035 * machinery
-        heat = envelope(t, 61, 79, 0.7)
+        heat = envelope(t, 70, 85, 0.7)
         value += noise * 0.025 * heat
         # Crystal resonance shares a timbre with the return to the heart, not a stated cause.
-        for hit in (66.2, 67.8, 69.4, 71.5, 73.8, 76.1, 77.7, 79.1):
+        for hit in (74.2, 75.8, 77.4, 79.5, 81.8, 83.1, 84.2, 85.1):
             p = t - hit
             if 0 <= p < 0.65:
                 value += (sin(2 * pi * 1560 * p) + 0.4 * sin(2 * pi * 2340 * p)) * exp(-p * 9) * 0.035

@@ -34,6 +34,6 @@ eliteRpm = 4096
 ultimateRpm = 8192
 
 [tuning]
-# Input loss is bounded at 15%; raw network capacity always equals live gearbox input.
-maximumInputLossBasisPoints = 1500
+# Input loss is bounded at 99%; raw network capacity always equals live gearbox input.
+maximumInputLossBasisPoints = 9900
 directMaxRpm = 10240

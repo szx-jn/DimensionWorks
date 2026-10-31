@@ -39,7 +39,11 @@ class LiveStressBudgetTest {
         assertEquals(2000, budget.snapshot(1000).rawSu());
         assertEquals(1800, budget.snapshot(1000).effectiveSu());
         assertFalse(budget.snapshot(1000).overloaded());
-        assertEquals(0, budget.snapshot(10000).effectiveSu());
+        assertEquals(20, budget.snapshot(10000).effectiveSu());
+        budget.output("load", 20);
+        assertFalse(budget.snapshot(9900).overloaded());
+        budget.output("load", 21);
+        assertTrue(budget.snapshot(9900).overloaded());
         budget.clear();
         budget.input("a", Long.MAX_VALUE); budget.input("b", 1);
         assertEquals(Long.MAX_VALUE, budget.snapshot(0).rawSu());
