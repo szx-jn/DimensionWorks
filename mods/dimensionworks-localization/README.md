@@ -25,7 +25,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 
 翻译必须保留源英文中的 `%s`、`%1$s`、`%%`、颜色代码、换行、Markdown 链接、`ItemLink` 标签和格式标记。需要调整参数顺序时使用显式位置参数。
 
-当前 `0.1.0` 的 GuideME 译文由机器翻译和术语后处理生成，已通过结构与覆盖校验，但仍需要后续逐页人工审校。覆盖完整不代表所有措辞均已定稿。
+初版 GuideME 译文曾采用机器翻译及术语后处理。`0.1.3` 针对原有全部语言 JSON、GuideME 页面及 Patchouli 资源进行集中审校：纠正误译、重复词、中文语序、技术术语及指南操作步骤。保留原有资源结构与页面链接；未发现问题或已有可靠简体中文的内容不作无意义改写。构建预检负责检验语言键与资源完整性，游戏内表现仍应以实际客户端为准。
 
 ## 构建
 
@@ -35,7 +35,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 gradle build --no-daemon
 ```
 
-当前产物为 `build/libs/dimensionworks_localization-0.1.2.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
+当前产物为 `build/libs/dimensionworks_localization-0.1.3.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
 
 ## 校验
 
@@ -65,3 +65,10 @@ python3 scripts/check_localization.py
 ## 龙之进化及 ECO AE 前置（0.1.2）
 
 新增 Brandon's Core、Draconic Evolution、CodeChicken Lib、LDLib 的 263 个中文语言键；只覆盖第三方原本缺少翻译的文本，保留格式占位符。
+
+## 全量汉化质量审校（0.1.3）
+
+- 涵盖原有 58 个语言 JSON 命名空间及全部翻译键；逐类审查并修正明显机翻和错误表达。
+- 审校 AE2 GuideME 119 页、Extended AE GuideME 32 页，共 151 页；核心机制、自动合成、存储、线缆、终端、子网络与生产线示例均进行重点重译。
+- 检查车万女仆 Patchouli 的 55 个 JSON：它们沿用原有语言键引用，不把资源键误改为界面文字。
+- 在静态核对中检查全部 GuideME 页面间 Markdown 链接路径与 JSON 解析；完整语言键、参数格式及来源 Jar 覆盖仍由 `scripts/check_localization.py` 在打包预检中验证。
