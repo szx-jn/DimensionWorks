@@ -1,7 +1,7 @@
 {
   "ae2.emi_integration.category_charger": "充电器",
   "ae2.emi_integration.category_condenser": "浓缩器",
-  "ae2.emi_integration.category_entropy_manipulator": "熵变机械臂",
+  "ae2.emi_integration.category_entropy_manipulator": "熵变操纵器",
   "ae2.emi_integration.category_inscriber": "压印器",
   "block.ae2.crystal_resonance_generator": "晶共振生成器",
   "chat.ae2.TestWorldNotInSuperflat": "只能在超平坦世界中创建测试世界！",
