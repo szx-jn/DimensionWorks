@@ -19,8 +19,8 @@ item_ids:
 </GameScene>
 </Row>
 
-ME 扩展接口是 A<ItemLink id="ae2:interface" />具有较大的配置库存。
+ME 扩展接口是<ItemLink id="ae2:interface" />的加强版本，提供更多配置槽位，适合为复杂自动化设备准备多种物品。
 
-*我需要这个吗?*
+*需要为同一台设备管理更多不同种类的材料？它就能派上用场。*
 
-![EIGui 环境](../pic/ei_gui.png)
+![扩展接口界面](../pic/ei_gui.png)
