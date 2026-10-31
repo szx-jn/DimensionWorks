@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: MECaner 罐
+    title: ME 罐装机
     icon: expatternprovider:caner
 categories:
 - extended devices
@@ -9,50 +9,48 @@ item_ids:
 - expatternprovider:caner
 ---
 
-# MECaner 罐
+# ME 罐装机
 
 <BlockImage id="expatternprovider:caner" scale="8"></BlockImage>
 
-ME 罐头是一台机器 它能“扫描”东西 包括液体 Mekanism 天然气,Botaniamana 甚至能源!
+ME 罐装机可以在不同容器之间**灌装或抽取资源**。除流体以外，安装对应附属模组后，还能处理 Mekanism 化学品、Botania 魔力以及能量等资源。
 
-第一个空位是填充什么,第二个空档是填写什么。
+第一个槽位用于放置待处理的容器，第二个槽位用于提供灌装材料。机器需要能源才能工作，每次操作消耗 **80 AE**。
 
-它需要能源才能运行,每个运行费用为 80 个 AE。
+![罐装机界面](../pic/caner_gui.png)
 
-![GUI](../pic/caner_gui.png)
+默认只支持流体。若要处理其他资源，需要安装对应的扩展支持。
 
-它只默认地填充液体, 您需要安装相应的配方, 才能填满其它东西。
+### 相关附属模组
 
-### 支持附加词 :
-- 应用流量
-- 应用中养量体
-- 应用植物添加剂
+* Applied Flux
+* Applied Mekanistics
+* Applied Botanics
 
-## 与 MECaner 罐
+## 自动化罐装
 
-只有上方和下方才能接受能量并连接到网络。
+只有顶部和底部能连接到 ME 网络并接收能源。
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../structure/caner_example.snbt"></ImportStructure>
 </GameScene>
 
-简单设置 ME 坎纳 MECaner 接受从<ItemLink id="ae2:pattern_provider" />.
+可以使用<ItemLink id="ae2:pattern_provider" />将材料和容器送入罐装机，建立自动化灌装产线。
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../structure/caner_auto.snbt"></ImportStructure>
 </GameScene>
 
-模式只必须包含要填充的材料和要装满的容器。以下是一些例子:
+处理样板只需要包含待灌装的资源和目标容器。例如：
 
-装满水桶:
+将水装入水桶：
 
-![P1](../pic/fill_water.png)
+![灌装水桶样板](../pic/fill_water.png)
 
-增强权能能源板(安装了应用车辆):
+给能量容器充能（需要 Applied Flux）：
 
-![P1](../pic/fill_energy.png)
+![充能样板](../pic/fill_energy.png)
 
+## 反向操作
 
-## 取消扫描
-
-MECaner 也可以用空模式从容器中排出垃圾。您需要以模式转换输入和输出。
+罐装机还可以把容器中的资源抽出。此时需要在处理样板中交换输入与输出的配置。
