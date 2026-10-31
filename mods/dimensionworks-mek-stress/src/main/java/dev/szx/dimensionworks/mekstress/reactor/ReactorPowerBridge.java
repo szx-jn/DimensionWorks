@@ -240,20 +240,19 @@ public final class ReactorPowerBridge {
             if (network == null) {
                 continue;
             }
-            // A reactor may never recharge its own injector from its output,
-            // even if several of its stabilizers join one Create network.
-            boolean feedback = false;
-            boolean externalSource = false;
+            // Source and consumer may share a network: the virtual member pays
+            // the full SU cost, so this is the intentional reactor self-sustain
+            // loop, not free energy. WARMING_UP still requires an external source
+            // because the reactor cannot generate until activated.
+            boolean hasGenerator = false;
             for (KineticBlockEntity source : network.sources.keySet()) {
-                if (isOutputOf(source, core)) {
-                    feedback = true;
+                if (source.getGeneratedSpeed() != 0
+                    && source.calculateAddedStressCapacity() > 0.0F) {
+                    hasGenerator = true;
                     break;
                 }
-                if (source.getGeneratedSpeed() != 0 && source.calculateAddedStressCapacity() > 0) {
-                    externalSource = true;
-                }
             }
-            if (!feedback && externalSource) {
+            if (hasGenerator) {
                 return new Input(injector, shaft, network);
             }
         }
