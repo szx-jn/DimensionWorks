@@ -1,37 +1,35 @@
 ---
 navigation:
   parent: example-setups/example-setups-index.md
-  title: 充电自动
+  title: 充电器自动化
   icon: charger
 ---
 
-# 充电自动
+# 充电器自动化
 
-请注意,由于此用途 a<ItemLink id="pattern_provider" />,它意指融入[自动自制](../ae2-mechanics/autocrafting.md)
-设置。如果仅想要自动化 a<ItemLink id="charger" />独立,用子和箱子之类的东西
+这个示例会用到<ItemLink id="pattern_provider" />，因此适合已经拥有[自动合成系统](../ae2-mechanics/autocrafting.md)的玩家。如果只想独立使用<ItemLink id="charger" />，漏斗和箱子就能满足简单的自动化需求。
 
-自动调<ItemLink id="charger" />很简单。A<ItemLink id="pattern_provider" />将原料推入充电器,然后[管道子网](pipe-subnet.md)
-或其它项管道将结果推回样板供应器。
+基本思路是：让<ItemLink id="pattern_provider" />向充电器发送未充能材料，再由[管道子网](pipe-subnet.md)把成品送回样板供应器。
 
 <GameScene zoom="6" interactive={true}>
   <ImportStructure src="../assets/assemblies/charger_automation.snbt" />
 
 <BoxAnnotation color="#dddddd" min="1 0 0" max="2 1 1">
-        (1)样板供应器:在其默认配置中,使用相关处理模式。同时为充电器提供电源。
+        （1）样板供应器：安装充电用处理样板，保持默认设置，同时为充电器提供网络连接与能源。
 
         ![充电模式](../assets/diagrams/charger_pattern_small.png)
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="0 1 0" max="1 1.3 1">
-        (2)输入总线:在其默认配置中。
+        （2）输入总线：使用默认设置，负责抽取充电成品。
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 1 0" max="2 1.3 1">
-        (3)存储总线:在其默认配置中。
+        （3）存储总线：使用默认设置，将成品送回样板供应器。
   </BoxAnnotation>
 
 <DiamondAnnotation pos="4 0.5 0.5" color="#00ff00">
-        转到主网络
+        连接主网络
     </DiamondAnnotation>
 
   <IsometricCamera yaw="195" pitch="30" />
@@ -39,18 +37,17 @@ navigation:
 
 ## 配置
 
-* <ItemLink id="pattern_provider" />(1)处于默认配置中,且相关<ItemLink id="processing_pattern" />.
-  它还规定:<ItemLink id="charger" />与[能源](../ae2-mechanics/energy.md)因为它的行为就像[电缆](../items-blocks-machines/cables.md).
-  
-    ![充电模式](../assets/diagrams/charger_pattern.png)
+* <ItemLink id="pattern_provider" />（1）：安装对应的<ItemLink id="processing_pattern" />，保持默认配置。它通过[ME 线缆](../items-blocks-machines/cables.md)为充电器提供[能源](../ae2-mechanics/energy.md)。
 
-* <ItemLink id="import_bus" />(2)默认配置。
-* <ItemLink id="storage_bus" />(3)默认配置。
+  ![充电处理样板](../assets/diagrams/charger_pattern.png)
 
-## 如何运作
+* <ItemLink id="import_bus" />（2）：使用默认设置。
+* <ItemLink id="storage_bus" />（3）：使用默认设置。
 
-1. <ItemLink id="pattern_provider" />将元素推进<ItemLink id="charger" />.
-2. 充电者负责充电器
-3. <ItemLink id="import_bus" />绿色亚网上的绿色子网将充电器的结果拉出来 并试图存储在
-   [网络存储](../ae2-mechanics/import-export-storage.md).
-4. 绿色子网上唯一的存储库是<ItemLink id="storage_bus" />中存储所产生的物项,样板供应器返回主网络
+## 工作流程
+
+1. <ItemLink id="pattern_provider" />把未充能的材料送入<ItemLink id="charger" />。
+2. 充电器消耗能源，将材料加工为充能物品。
+3. 绿色子网中的<ItemLink id="import_bus" />把成品取出，并尝试存入子网的[网络存储](../ae2-mechanics/import-export-storage.md)。
+4. 子网上的<ItemLink id="storage_bus" />连接到主网络的样板供应器，因此成品会返回主网络，完成这次加工任务。
+
