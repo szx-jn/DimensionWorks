@@ -94,94 +94,74 @@ item_ids:
 - ae2:fluix_smart_dense_cable
 ---
 
-# 电缆
+# ME 线缆
 
 <GameScene zoom="3" background="transparent">
   <ImportStructure src="../assets/assemblies/cables.snbt" />
   <IsometricCamera yaw="180" pitch="30" />
 </GameScene>
 
-期间 ME 由相邻的 ME- 有能力的机器,电缆是
-延伸 ME 在更大的区域上建立网络。
+ME 网络中，相邻设备可以直接连接。需要跨越较远距离时，则可以使用线缆将设备组成同一个网络。
 
-可以使用不同颜色的电缆,以确保相邻电缆不相互连接,
-允许[频道](../ae2-mechanics/channels.md)以便更高效地分配。它们也会影响连接它们的终端的颜色,
-所以你不必把所有终端都紫色福鲁伊克斯电缆连接到其他颜色
+不同颜色的线缆可以用来隔离连接，方便管理[频道](../ae2-mechanics/channels.md)。线缆还会影响终端显示的颜色，因此可以用不同颜色区分网络区域。
 
-值得注意的是,**更衣人没有做 与 CE CECOLOR**
+**注意：线缆染色不会增加频道容量。**
 
-## 重要注释
+## 初学者建议
 
-**如果您是新来 AE2 并且不熟悉频道, 使用智能电缆 和密集智能电报,只要你可以。
-它将显示如何通过网络 引导频道, 使其行为更容易理解。**
+刚接触 AE2 时，建议优先使用智能线缆与致密智能线缆。它们可以直接显示频道使用情况，方便查找设备没有频道、布线拥堵等问题。
 
-## 另一注注
+## 线缆不是物品管道
 
-**这些不是物品或液体或能量,等等。**他们没有内部库存,型号样板供应器和机器不“推”
-他们只连连着连结,AE2[设备](../ae2-mechanics/devices.md)一起进入网络。
+**普通 ME 线缆不存储也不主动运输物品、流体或外部能源。** 它们负责把 AE2 [设备](../ae2-mechanics/devices.md)连接成网络；实际的物品输入输出，需要使用相应总线或接口来完成。
 
-## 玻璃电缆
+## 玻璃线缆
 
 <GameScene zoom="6" background="transparent">
 <ImportStructure src="../assets/assemblies/fluix_glass_cable.snbt" />
 <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-<ItemLink id="fluix_glass_cable" />是最简单的电缆 合成,传输电源
-至 8 岁[频道](../ae2-mechanics/channels.md)。它以 17 个不同颜色出现,默认
-正在福鲁伊克斯,并且可以使用 16 种染料中的任何一种染色来染上任何颜色。
+<ItemLink id="fluix_glass_cable" />是最基本的 ME 线缆，能够传递 AE 能量和最多 **8 个[频道](../ae2-mechanics/channels.md)**。
 
-搭乘彩色电缆,围绕任何类型的染染色物,有 8 条同型电缆
-类型(电缆颜色的颜色并不重要, 但必须是相同的类型,
-玻璃、智能等)。您也可以用任何与任何伪造相容的油漆来油漆电缆。
-世界的刷子。
+玻璃线缆有未染色的福鲁伊克斯版本，以及 16 种染色版本。通常可以用同类线缆和染料合成其他颜色，也可以使用支持的染色工具直接上色；将染色线缆与水桶合成可以去掉颜色。
 
-你可以用一个水桶来合成任何彩色电缆来去除染料。
-
-你可以用羊毛覆盖电缆 来创造<ItemLink id="fluix_covered_cable" />和手合成<ItemLink id="fluix_smart_cable" />来更好地了解到底发生了什么
-贵国的[频道](../ae2-mechanics/channels.md).
+用羊毛覆盖玻璃线缆，可以制作<ItemLink id="fluix_covered_cable" />；制作<ItemLink id="fluix_smart_cable" />后，还能直观查看频道使用情况。
 
 <RecipeFor id="fluix_glass_cable" />
-
 <RecipeFor id="blue_glass_cable" />
 
-## 覆盖电缆
+## 包层线缆
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../assets/assemblies/fluix_covered_cable.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-覆盖的有线电视变异品种<ItemLink id="fluix_glass_cable" />然而,它可以用于对应方
-作为一种替代的审美选择,如果您喜欢覆盖外观的话。
+包层线缆与<ItemLink id="fluix_glass_cable" />功能基本相同，但外观更加完整，适合建筑装饰。它同样支持染色。
 
-颜色可以与<ItemLink id="fluix_glass_cable" />. 四个<ItemLink id="fluix_covered_cable" />能够与
-红石和发光石<ItemLink id="fluix_covered_dense_cable" />.
+将四段<ItemLink id="fluix_covered_cable" />与红石、荧石等材料组合，可以制作<ItemLink id="fluix_covered_dense_cable" />。
 
 <Recipe id="network/cables/covered_fluix" />
-
 <RecipeFor id="blue_covered_cable" />
 
-## 高密度电缆
+## 致密线缆
 
 <GameScene zoom="6" background="transparent">
   <ImportStructure src="../assets/assemblies/fluix_covered_dense_cable.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-高电能电缆,可携带 32 个频道,不同于标准电缆(只能运载 8 个),
-但它不支持总线 所以首先必须从密度降低到
-小型电缆(诸如<ItemLink id="fluix_glass_cable" />或<ItemLink id="fluix_smart_cable" />)在使用总线或
-面板。
+致密线缆最多能承载 **32 个频道**，比普通线缆的 8 个频道更适合作为主干。
 
-频道将走最短的路径
-密闭电缆,然后是最短的路径 通过密密稠电缆到控制器。
+但致密线缆的表面不能像普通线缆一样安装所有总线和面板。要连接这些设备，应先通过<ItemLink id="fluix_glass_cable" />或<ItemLink id="fluix_smart_cable" />分出普通线缆支路。
+
+频道会根据连接路径进行分配，具体规则可参见[频道系统](../ae2-mechanics/channels.md)。
 
 <Recipe id="network/cables/dense_covered_fluix" />
-
 <RecipeFor id="blue_covered_dense_cable" />
 
-## 智能有线
+## 智能线缆
 
 <Row>
 <GameScene zoom="6" background="transparent">
@@ -194,21 +174,14 @@ item_ids:
 </GameScene>
 </Row>
 
-与《公约》<ItemLink id="fluix_covered_cable" />表面上,他们
-提供诊断功能,通过直观地显示电缆上频道的使用,
-频道显示为亮色线 沿着黑条线运行
-电线能让你们了解 你的频道是如何被使用的
-您的网络。对于普通智能电缆,前四个频道显示为与
-接下来的四条线显示为白色线。对于密密智能电缆来说,每条带代表 4 个频道。
+智能线缆在普通包层线缆的基础上增加了频道显示条，可以直观查看频道使用量。
 
-网络上<ItemLink id="controller" />,电缆上的线条显示了频道的路径。
+普通智能线缆最多承载 8 个频道；致密智能线缆最多承载 32 个频道，每条亮色纹路代表一定数量的频道。
 
-相反,特设网络上的智能电缆将显示整个网络使用的频道数量,而不是通过该具体电缆流经的频道的数量。
+在连接<ItemLink id="controller" />的网络中，智能线缆显示的是经过该线路的频道。无控制器网络的显示方式有所不同，通常表示整个网络已经使用的频道数量。
 
-这些颜色也可以以与<ItemLink id="fluix_glass_cable" />.
+它们也可以像<ItemLink id="fluix_glass_cable" />一样进行染色。
 
 <Recipe id="network/cables/smart_fluix" />
-
 <Recipe id="network/cables/dense_smart_fluix" />
-
 <RecipeFor id="blue_smart_cable" />
