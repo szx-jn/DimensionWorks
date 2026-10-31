@@ -1,15 +1,15 @@
 {
-  "block.megacells.mega_emc_interface": "MEGA 转换 接口",
-  "item.megacells.cable_mega_emc_interface": "MEGA 转换 接口",
-  "item.megacells.mega_source_cell_housing": "MEGA 来源元件住房",
-  "item.megacells.portable_source_cell_16m": "16M 便携式源元件",
-  "item.megacells.portable_source_cell_1m": "1M 便携式源元件",
-  "item.megacells.portable_source_cell_256m": "256M 便携式源元件",
-  "item.megacells.portable_source_cell_4m": "4M 便携式源元件",
-  "item.megacells.portable_source_cell_64m": "64M 便携式源元件",
-  "item.megacells.source_storage_cell_16m": "16M MEGA 源 存储元件",
-  "item.megacells.source_storage_cell_1m": "1M MEGA 源 存储元件",
-  "item.megacells.source_storage_cell_256m": "256M MEGA 源 存储元件",
-  "item.megacells.source_storage_cell_4m": "4M MEGA 源 存储元件",
-  "item.megacells.source_storage_cell_64m": "64M MEGA 源 存储元件"
+  "block.megacells.mega_emc_interface": "MEGA 转换接口",
+  "item.megacells.cable_mega_emc_interface": "MEGA 转换接口",
+  "item.megacells.mega_source_cell_housing": "MEGA 源存储元件外壳",
+  "item.megacells.portable_source_cell_16m": "16M 便携式源存储元件",
+  "item.megacells.portable_source_cell_1m": "1M 便携式源存储元件",
+  "item.megacells.portable_source_cell_256m": "256M 便携式源存储元件",
+  "item.megacells.portable_source_cell_4m": "4M 便携式源存储元件",
+  "item.megacells.portable_source_cell_64m": "64M 便携式源存储元件",
+  "item.megacells.source_storage_cell_16m": "16M MEGA 源存储元件",
+  "item.megacells.source_storage_cell_1m": "1M MEGA 源存储元件",
+  "item.megacells.source_storage_cell_256m": "256M MEGA 源存储元件",
+  "item.megacells.source_storage_cell_4m": "4M MEGA 源存储元件",
+  "item.megacells.source_storage_cell_64m": "64M MEGA 源存储元件"
 }
