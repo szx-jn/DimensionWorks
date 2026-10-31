@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: ME 延长合成终端
+    title: ME 扩展合成终端
     icon: expatternprovider:ex_crafting_terminal
 categories:
 - extended devices
@@ -9,9 +9,9 @@ item_ids:
 - expatternprovider:ex_crafting_terminal
 ---
 
-# ME 延长合成终端
+# ME 扩展合成终端
 
-ME 延长合成终端添加石板、史密斯表和安道<ItemLink id="ae2:crafting_terminal" />.
+ME 扩展合成终端在<ItemLink id="ae2:crafting_terminal" />的基础上增加了切石机、锻造台和铁砧等功能，无需切换到其他工作台。
 
 <Row gap="20">
 <GameScene zoom="6" background="transparent">
@@ -20,14 +20,14 @@ ME 延长合成终端添加石板、史密斯表和安道<ItemLink id="ae2:craft
 </GameScene>
 </Row>
 
-## 额外配方
+## 额外加工功能
 
-您可以使用扩展合成终端作为石器、史密斯表和安维尔, 使用制表按钮更改模式。
+点击界面上的切换按钮，即可在普通合成、切石、锻造和铁砧模式之间切换。
 
-保存在 ME 当您没有足够的级别时, 网络。
+铁砧操作消耗的经验等级也可以由 ME 网络相关设备提供支持，具体取决于当前网络的配置。
 
-![M1](../pic/ex_stonecutter.png)
+![切石模式](../pic/ex_stonecutter.png)
 
-![M2](../pic/ex_smith.png)
+![锻造模式](../pic/ex_smith.png)
 
-![M3](../pic/ex_anvil.png)
+![铁砧模式](../pic/ex_anvil.png)
