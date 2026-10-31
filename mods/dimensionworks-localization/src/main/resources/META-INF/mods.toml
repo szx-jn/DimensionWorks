@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="dimensionworks_localization"
-version="0.1.0"
+version="0.1.2"
 displayName="DimensionWorks 简体中文汉化"
 authors="szx-jn"
 description='''DimensionWorks 客户端简体中文覆盖，只补充第三方 Mod 缺失的语言键与指南页面。'''
