@@ -1,7 +1,7 @@
 ---
 navigation:
     parent: epp_intro/epp_intro-index.md
-    title: ME 延长样板管理终端
+    title: ME 扩展样板管理终端
     icon: expatternprovider:ex_pattern_access_part
 categories:
 - extended devices
@@ -10,9 +10,9 @@ item_ids:
 - expatternprovider:wireless_ex_pat
 ---
 
-# ME 延长样板管理终端
+# ME 扩展样板管理终端
 
-ME 延长样板管理终端与<ItemLink id="ae2:pattern_access_terminal" />.
+ME 扩展样板管理终端升级了<ItemLink id="ae2:pattern_access_terminal" />，让大量样板的检索和维护更方便。
 
 <Row gap="20">
 <GameScene zoom="6" background="transparent">
@@ -22,23 +22,20 @@ ME 延长样板管理终端与<ItemLink id="ae2:pattern_access_terminal" />.
 <ItemImage id="expatternprovider:wireless_ex_pat" scale="4"></ItemImage>
 </Row>
 
-## 更好的模式搜索
+## 根据材料搜索样板
 
-您可以通过输入/输出原料名称搜索模式。
+不仅可以按样板名称搜索，还可以输入配方的**输入材料或输出产物**名称，快速找到对应的样板。
 
-![EPE1 环境经济 1](../pic/epa_gui1.png)
+![样板搜索界面](../pic/epa_gui1.png)
 
-## 突出显示
+## 高亮匹配的样板
 
-有时仍然很难找到想要的图案,因为图式总是作为一个组显示。现在扩展
-样板管理终端能够突出匹配模式 GUI.
+当多个样板按组显示时，很难直接辨认目标。扩展样板管理终端可以在界面中高亮符合搜索条件的样板。
 
-![EEPA2 环境经济 2](../pic/epa_gui2.png)
+![样板高亮效果](../pic/epa_gui2.png)
 
-## 样板供应器时地世界要闻
+## 定位世界中的样板供应器
 
-找出哪个才是最讨厌样板供应器执行大型手合成任务时被卡住。样板管理终端
-重点可以突出样板供应器在世界,所以你可以很容易地找到它。
+大型 ME 网络的自动合成任务卡住时，往往很难知道问题出在哪台样板供应器。扩展样板管理终端可以高亮其在世界中的位置，帮助你快速排查。
 
-![EEPA3 环境经济 3](../pic/epa_gui3.png)
-
+![定位样板供应器](../pic/epa_gui3.png)
