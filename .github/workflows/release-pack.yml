@@ -28,27 +28,12 @@ on:
         description: "其他变更；每行一条，如 docs: 更新使用说明"
         required: false
         type: string
-  push:
-    branches:
-      - main
-    paths:
-      - 'update-Windows/**'
-      - 'mods/dimensionworks-*/**'
-      - 'manifest/mods.json'
-      - 'kubejs/**'
-      - 'scripts/package_mrpack.py'
-      - 'scripts/package_server.py'
-      - 'scripts/pack_hook.py'
-      - 'scripts/pack_manifest.py'
-      - '.github/workflows/release-pack.yml'
-
 permissions:
   contents: write
 
 jobs:
   release:
     name: 打包客户端与服务端
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[release]')
     concurrency:
       group: dimensionworks-release-${{ github.ref }}
       cancel-in-progress: false

@@ -2,10 +2,23 @@ name: 代码与脚本检查
 
 on:
   pull_request:
+    paths:
+      - 'manifest/**'
+      - 'kubejs/**'
+      - 'scripts/**'
+      - '.github/workflows/validate-version-gate.yml'
   push:
     branches:
       - main
-      - feature/version-gate-and-safe-updater
+    paths:
+      - 'manifest/**'
+      - 'kubejs/**'
+      - 'scripts/**'
+      - '.github/workflows/validate-version-gate.yml'
+
+concurrency:
+  group: validate-config-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

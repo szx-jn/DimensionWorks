@@ -11,29 +11,81 @@ on:
       - 'mods/dimensionworks-*/**'
       - '.github/workflows/build-java-mods.yml'
 
+concurrency:
+  group: build-java-mods-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
+  changed-modules:
+    name: 查找变更模组
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.changed.outputs.matrix }}
+      has_modules: ${{ steps.changed.outputs.has_modules }}
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 计算变更模组
+        id: changed
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          base="$BEFORE_SHA"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base="$BASE_SHA"
+          fi
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            printf 'matrix={"module":[]}\n' >> "$GITHUB_OUTPUT"
+            printf 'has_modules=false\n' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          matrix="$(python3 - "$base" "$HEAD_SHA" <<'PY'
+          import json
+          import subprocess
+          import sys
+
+          changed = subprocess.check_output(
+              ["git", "diff", "--name-only", sys.argv[1], sys.argv[2]],
+              text=True,
+          ).splitlines()
+          modules = sorted({
+              parts[1]
+              for path in changed
+              if len(parts := path.split("/")) > 1
+              and parts[0] == "mods"
+              and parts[1].startswith("dimensionworks-")
+          })
+          print(json.dumps({"module": modules}, separators=(",", ":")))
+          PY
+          )"
+          printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
+          if [[ "$matrix" == '{"module":[]}' ]]; then
+            printf 'has_modules=false\n' >> "$GITHUB_OUTPUT"
+          else
+            printf 'has_modules=true\n' >> "$GITHUB_OUTPUT"
+          fi
+
   build:
     name: 构建 ${{ matrix.module }}
+    needs: changed-modules
+    if: needs.changed-modules.outputs.has_modules == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
-        module:
-          - dimensionworks-cave-factory
-          - dimensionworks-drop-lifetime
-          - dimensionworks-ftbchunks-no-forceload
-          - dimensionworks-item-pickup-guard
-          - dimensionworks-localization
-          - dimensionworks-maid-ae-crank
-          - dimensionworks-mek-stress
-          - dimensionworks-rpm-limit
-          - dimensionworks-transfer
-          - dimensionworks-version-gate
-          - dimensionworks-wrench-compat
+        module: ${{ fromJson(needs.changed-modules.outputs.matrix).module }}
     steps:
       - name: 检出仓库代码
         uses: actions/checkout@v4
@@ -54,11 +106,3 @@ jobs:
       - name: 构建并测试模组
         working-directory: mods/${{ matrix.module }}
         run: gradle build --no-daemon
-
-      - name: 上传构建产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.module }}-jar
-          path: mods/${{ matrix.module }}/build/libs/*.jar
-          if-no-files-found: error
-          retention-days: 14

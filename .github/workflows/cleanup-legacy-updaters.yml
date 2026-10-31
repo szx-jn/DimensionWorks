@@ -1,11 +1,6 @@
 name: 清理旧版更新器发行资产
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/cleanup-legacy-updaters.yml'
   workflow_dispatch:
 
 permissions:
