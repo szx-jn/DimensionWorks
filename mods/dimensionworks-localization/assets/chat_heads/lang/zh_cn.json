@@ -1,5 +1,5 @@
 {
-  "text.autoconfig.chat_heads.option.threeDeeNess": "3D 度",
-  "text.autoconfig.chat_heads.option.threeDeeNess.@Tooltip": "调换帽子层稍大一点, 使聊天头部看起来不那么平滑。 这可能会引起一些问题 。 加入一个世界来查看预览 !",
+  "text.autoconfig.chat_heads.option.threeDeeNess": "立体效果",
+  "text.autoconfig.chat_heads.option.threeDeeNess.@Tooltip": "让头像的帽子层稍微突出，增加立体感，但可能造成显示问题。进入世界后可查看效果。",
   "text.autoconfig.chat_heads.option.drawShadow": "显示阴影"
 }
