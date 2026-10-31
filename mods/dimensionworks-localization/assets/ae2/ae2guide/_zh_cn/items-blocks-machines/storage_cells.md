@@ -54,12 +54,11 @@ item_ids:
   </Row>
 </Column>
 
-存储槽是存储在 Applied Energistics。他们进入<ItemLink id="drive" />
-或<ItemLink id="chest" />.
+存储元件是 AE2 的主要存储设备。把元件插入<ItemLink id="drive" />或<ItemLink id="chest" />，就可以通过 ME 网络保存和取出物品、流体。
 
-见见[字节和类型](../ae2-mechanics/bytes-and-types.md)说明其能力的字节和类型。
+存储容量受到**字节容量**和**物品类型数量**的共同限制。具体规则可参见[字节与物品类型](../ae2-mechanics/bytes-and-types.md)。
 
-如果单元格空,可按左转右键单击,用手边的单元格来移动存储组件,则可以从房屋中移除存储部件。
+空白存储元件可以通过手持、潜行并右键拆开，将存储组件从外壳中取出。
 
 ## 不同物品类型数量下的容量
 
