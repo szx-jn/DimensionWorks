@@ -1,17 +1,19 @@
 ---
 navigation:
-    title: 扩展 AE 导言
+    title: 扩展 AE 入门
     position: 60
 ---
 
-# 扩展你的 AE 设置!
+# 扩展 AE 入门
 
-扩展的 AE 为现代 AE 带来了大约 1.7.10/1.12.2 的 AEC 特性。
+扩展 AE（Extended AE）为现代 AE2 增加了许多实用设备和功能，其中部分设计继承了旧版本 AE2 附属模组的思路。
 
-[扩展 AE GitHub](https://github.com/GlodBlock/ExtendedAE) 
+项目源码：[Extended AE GitHub](https://github.com/GlodBlock/ExtendedAE)
 
 ## 扩展设备
+
 <CategoryIndex category="extended devices"></CategoryIndex>
 
-## 扩展项
+## 扩展物品
+
 <CategoryIndex category="extended items"></CategoryIndex>
