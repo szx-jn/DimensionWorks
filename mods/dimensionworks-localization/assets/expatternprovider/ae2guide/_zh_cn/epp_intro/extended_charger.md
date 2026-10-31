@@ -15,6 +15,4 @@ item_ids:
 <BlockImage id="expatternprovider:ex_charger" scale="8"></BlockImage>
 </Row>
 
-扩展充电器是高级<ItemLink id="ae2:charger" />.
-
-它可以同时收取 4 个物品的费用。
+扩展充电器是<ItemLink id="ae2:charger" />的升级版本，**最多可以同时为 4 个物品充能**，适合需要大量充能材料的自动化生产线。
