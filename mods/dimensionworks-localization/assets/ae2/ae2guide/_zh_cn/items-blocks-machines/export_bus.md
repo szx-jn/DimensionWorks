@@ -10,51 +10,44 @@ item_ids:
 - ae2:export_bus
 ---
 
-# 输出总线
+# ME 输出总线
 
 <GameScene zoom="8" background="transparent">
 <ImportStructure src="../assets/blocks/export_bus.snbt" />
 </GameScene>
 
-输出总线拉拉物品和液体(或别的,或给加文,)调自[网络存储](../ae2-mechanics/import-export-storage.md)
-把他们推入它感动的目录
+输出总线从[ME 网络存储](../ae2-mechanics/import-export-storage.md)提取物品、流体或其他受支持的资源，并将它们送入相邻的外部容器。
 
-为了减少时差,如果输出总线最近没有导出什么, 它进入了一种
-"睡眠模式" 缓慢运行, 醒来并加速到全速(每秒 4 次行动)当它成功地出口了东西
+长时间没有成功输出资源时，总线会自动降低检查频率；一旦可以重新输出，就会恢复正常运行速度。
 
-他们是[电缆子部件](../ae2-mechanics/cable-subparts.md).
+输出总线属于[线缆附属部件](../ae2-mechanics/cable-subparts.md)。
 
-## 过滤
+## 过滤规则
 
-默认情况下,总线不会导出任何文件。插入到其过滤槽的物品将起到“白列表”的作用,
-允许出口这些特定物品。
+默认情况下，输出总线**不会主动输出任何物品**。你需要在过滤槽指定需要输出的物品或流体。
 
-物品和液体可以拖进从 JEI 即使你没有那东西
+可以直接从 JEI 中拖入物品设置过滤条件。要过滤流体本身，可以手持装有目标流体的容器右键过滤槽。
 
-用液体容器右键单击(象桶或液罐一样)将液体设置为过滤器,而不是桶或罐体物品。
+## 升级卡
 
-## 升级
+输出总线支持以下[升级卡](upgrade_cards.md)：
 
-输入总线支持以下支持[升级](upgrade_cards.md):
+* <ItemLink id="capacity_card" />：增加过滤槽数量，并允许设置输出顺序。
+* <ItemLink id="speed_card" />：增加每次操作搬运的数量。
+* <ItemLink id="fuzzy_card" />：允许忽略部分耐久或 NBT 差异。
+* <ItemLink id="crafting_card" />：网络内缺少指定物品时，可以向[自动合成系统](../ae2-mechanics/autocrafting.md)发起请求。
+* <ItemLink id="redstone_card" />：增加红石控制方式，例如有信号时运行或响应脉冲。
 
-*   <ItemLink id="capacity_card" />增加过滤槽的数量, 并设定要导出过滤器的顺序。
-*   <ItemLink id="speed_card" />增加每次操作移动的物品数量
-*   <ItemLink id="fuzzy_card" />使总线通过损坏等级和/或忽略物品过滤 NBT
-*   <ItemLink id="crafting_card" />让公交车向您发送伪造请求[自动自制](../ae2-mechanics/autocrafting.md)
-    系统以获取它想要的物品。可以设置在可能情况下将物品从存储中拉出, 或者总是提出请求
-    用于设计新物品。
-*   <ItemLink id="redstone_card" />添加红岩控制,允许在高信号、低信号或每脉冲一次时使用
+## 传输速度
 
-## 速度
+| 加速卡数量 | 每次操作搬运的物品数 |
+| :--- | ---: |
+| 0 | 1 |
+| 1 | 8 |
+| 2 | 32 |
+| 3 | 64 |
+| 4 | 96 |
 
-| 加速卡卡 | 每个操作都移动的物品 |
-|:-------------------|:--------------------------|
-| 0                  | 1                         |
-| 1                  | 8                         |
-| 2                  | 32                        |
-| 3                  | 64                        |
-| 4                  | 96                        |
+## 合成配方
 
-## 用途
-
-<RecipeFor id="import_bus" />
+<RecipeFor id="export_bus" />
