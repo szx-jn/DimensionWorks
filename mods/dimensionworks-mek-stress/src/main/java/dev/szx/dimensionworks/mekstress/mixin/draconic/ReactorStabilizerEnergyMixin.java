@@ -18,6 +18,18 @@ public abstract class ReactorStabilizerEnergyMixin {
         cir.setReturnValue(0);
     }
 
+    // External storage reporting is also zero. The core's real operating
+    // saturation remains internal and is never exposed as FE/OP.
+    @Inject(method = "getMaxOPStored", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$hideOpCapacity(CallbackInfoReturnable<Long> cir) {
+        cir.setReturnValue(0L);
+    }
+
+    @Inject(method = "getMaxEnergyStored", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$hideFeCapacity(CallbackInfoReturnable<Integer> cir) {
+        cir.setReturnValue(0);
+    }
+
     @Inject(method = "canExtract", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$rejectCapability(CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(false);
