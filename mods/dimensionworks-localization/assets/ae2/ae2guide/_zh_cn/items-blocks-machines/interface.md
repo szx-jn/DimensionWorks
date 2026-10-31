@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 界面
+  title: ME 接口
   icon: interface
   position: 210
 categories:
@@ -11,7 +11,7 @@ item_ids:
 - ae2:cable_interface
 ---
 
-# 界面
+# ME 接口
 
 <Row gap="20">
 <BlockImage id="interface" scale="8" />
@@ -20,128 +20,110 @@ item_ids:
 </GameScene>
 </Row>
 
-接口的功能就像一个小胸部和液体罐, 填满了自己和空空到[网络存储](../ae2-mechanics/import-export-storage.md)
-取决于您设置它以保存其空位的存储量。它试图在一局棋中完成, 以便它能填满
-或从每个色调的最多 9 堆中空出,如果有快件管道,则快速导入或导出。
+ME 接口相当于一个能够自动补充和回收物品的箱子与流体储罐。它会根据设定的目标库存，从[网络存储](../ae2-mechanics/import-export-storage.md)中提取资源，或者把多余资源送回网络。
 
-另一个有用的特征是,虽然大多数液体罐只能存储一种液体,但接口可以存储多达 9 种液体和物品。
-它们基本上只是胸箱/多流水罐体,具有一些额外的功能, 你可以通过保持
-他们与任何网络都断绝了联系
-因此,它们在某些特殊情况下是有用的, 在那些情况下,你想存储 少量的一帮不同的东西。
+它最多可以缓存 9 种不同的物品或流体，还能在一次操作中处理多个槽位。即使不接入网络，接口本身也可以作为一个容量有限的多资源容器使用。
 
-## 一个接口如何在内部工作
+## 接口的工作原理
 
-如前所述,接口基本上是胸部/坦克,带有某些超级哑人。<ItemLink id="import_bus" />和
-<ItemLink id="export_bus" />连着一束<ItemLink id="level_emitter" />.
+可以把接口理解为同时具有<ItemLink id="import_bus" />、<ItemLink id="export_bus" />和多个<ItemLink id="level_emitter" />的组合。内部按目标库存自动输入、输出和调整物品数量。
 
 <GameScene zoom="3" interactive={true}>
   <ImportStructure src="../assets/assemblies/interface_internals.snbt" />
 
   <BoxAnnotation color="#dddddd" min="1.3 0.3 1.3" max="9.7 1 1.7">
-        一组级别排放器来控制要求的库存量
+        一组标准发信器，负责判断各槽位的目标库存数量
         <GameScene zoom="4" background="transparent">
         <ImportStructure src="../assets/blocks/level_emitter.snbt" />
         </GameScene>
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="1.3 4 1.3" max="9.7 4.7 1.7">
-        一组级别排放器来控制要求的库存量
+        一组标准发信器，负责判断各槽位的目标库存数量
         <GameScene zoom="4" background="transparent">
         <ImportStructure src="../assets/blocks/level_emitter.snbt" />
         </GameScene>
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="1.3 1.3 1.3" max="9.7 2 1.7">
-        一堆超级哑巴进口大客车 每只可以传输一堆垃圾
+        输入总线负责将多余的物品送回 ME 网络
         <GameScene zoom="4" background="transparent">
         <ImportStructure src="../assets/blocks/import_bus.snbt" />
         </GameScene>
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="1.3 3 1.3" max="9.7 3.7 1.7">
-        一群超级哑巴出口的总线 每只可以传输一堆垃圾
+        输出总线负责从 ME 网络补充物品
         <GameScene zoom="4" background="transparent">
         <ImportStructure src="../assets/blocks/export_bus.snbt" />
         </GameScene>
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="1 2 1" max="10 3 2">
-        9 个单独的内部空档
+        9 个独立的内部缓存槽
   </BoxAnnotation>
 
   <IsometricCamera yaw="195" pitch="15" />
 </GameScene>
 
-## 特别互动
+## 特殊交互
 
-接口还具有一些与其它 AE2[设备](../ae2-mechanics/devices.md):
+ME 接口与其他[设备](../ae2-mechanics/devices.md)还有一些特殊的配合方式。
 
-A<ItemLink id="storage_bus" />在一个未配置的界面上显示[网络存储](../ae2-mechanics/import-export-storage.md)
-联系的网络的联网到存储总线网络,好像接口的网络 是一个大箱子存储总线被放在上面。
-设置要存储在接口过滤槽中的物品将禁用此功能。
+当接口没有设置目标库存时，将<ItemLink id="storage_bus" />连接到它，可以让存储总线所在的网络访问接口所连接的[网络存储](../ae2-mechanics/import-export-storage.md)，就像把另一套网络当作一个大型仓库。为接口配置目标库存后，这种特殊行为会停止。
 
 <GameScene zoom="6" interactive={true}>
   <ImportStructure src="../assets/assemblies/interface_storage.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-样板供应器与[子网](../ae2-mechanics/subnetworks.md):如果接口未配置
-提供商将完全跳过接口 直接按到子网[存储](../ae2-mechanics/import-export-storage.md),
-跳过接口,不填满配方批量, 更重要的是,在存储空间之前不要插入下一批。
+样板供应器可以通过没有设置目标库存的接口，把整批加工材料直接送入[子网络](../ae2-mechanics/subnetworks.md)的[存储系统](../ae2-mechanics/import-export-storage.md)。这时材料会绕过接口本身的缓冲区，避免因缓存空间不足而只传输部分材料。
 
 <GameScene zoom="6" background="transparent">
 <ImportStructure src="../assets/assemblies/provider_interface_storage.snbt" />
 
 <BoxAnnotation color="#dddddd" min="2.7 0 1" max="3 1 2">
-        界面(必须是平平的,而不是满满的)
+        扁平接口（不能使用完整方块形态）
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="1 0 0" max="1.3 1 4">
-        存储库
+        外部存储容器
   </BoxAnnotation>
 
 <BoxAnnotation color="#dddddd" min="0 0 0" max="1 1 4">
-        您想要提供模式提供的位置(多台机器, 或 1 台计算机的多面)
+        样板供应器的输出目标（可以连接多台机器，或机器的多个输入面）
   </BoxAnnotation>
 
 <IsometricCamera yaw="185" pitch="30" />
 </GameScene>
 
-## 变式
+## 两种安装形式
 
-接口以两种不同的变式出现:正常和平方/[下分部分](../ae2-mechanics/cable-subparts.md).这影响到哪些方面可以查阅其清单
-和它们提供网络连接。
+ME 接口有完整方块和[扁平附属部件](../ae2-mechanics/cable-subparts.md)两种形式：
 
-*   正常界面让事物能够从所有方面 和像多数人一样 推进、拉出并进入它们的库存 AE2 机器,动作
-    就像一条线 提供网络连接到所有侧面
+* **完整方块接口**：各面可以输入和输出物品，并像其他完整的 AE2 设备一样，在多个方向提供网络连接。
+* **扁平接口**：安装在线缆表面，节省空间。它从指定面交换资源，但不会通过这个面把外部设备连接到网络。
 
-*   平坦接口为[电缆子部件](../ae2-mechanics/cable-subparts.md),因此可以在同一条电缆上安装多个,允许设置压缩装置。
-    它们允许事物从表面上推动、拉动和进入其库存,但表面却不提供网络连接。
+两种形态可以通过合成栏互相转换。
 
-接口可以在正常和平坦的交接网格中互换。
+## 库存设置
 
-## 设置
+界面上方的配置槽用于设定每种物品或流体应保留的数量。将物品放入配置槽或从 JEI 拖入图标后，可以点击扳手设置目标数量。
 
-界面的上方空档确定界面设置在内部存储的设置位置。当某东西被放置在
-或被拖去的,JEIREI,一个扳手似乎让你设定数量。
+如果想配置流体本身，可以手持装有该流体的桶或储罐右键配置槽，而不是把容器物品当作目标。
 
-用液体容器右键单击(象桶或液罐一样)将液体设置为过滤器,而不是桶或罐体物品。
+## 升级卡
 
-## 升级
+ME 接口支持以下[升级卡](upgrade_cards.md)：
 
-接口支持以下内容[升级](upgrade_cards.md):
+* <ItemLink id="fuzzy_card" />：允许按需忽略部分耐久或 NBT 差异。
+* <ItemLink id="crafting_card" />：库存不足时，可以向[自动合成系统](../ae2-mechanics/autocrafting.md)发出合成请求，补充目标物品。
 
-*   <ItemLink id="fuzzy_card" />使总线通过损坏等级和/或忽略物品过滤 NBT
-*   <ItemLink id="crafting_card" />让接口将拼写请求发送到您[自动自制](../ae2-mechanics/autocrafting.md)
-    系统,以获取它想要的物品。它会尽可能在提出要求之前将物品从存储中拉出
-    用于设计新物品。
+## 优先级
 
-## 优先
+可以通过界面右上角的扳手调整接口优先级。优先级较高的接口通常会更早获得所需材料。
 
-可以通过单击扳手在 GUI。具有更高优先级的接口将获得其物品
-在优先程度较低的人之前,
-
-## 食食权
+## 合成配方
 
 <Recipe id="network/blocks/interfaces_interface" />
 
