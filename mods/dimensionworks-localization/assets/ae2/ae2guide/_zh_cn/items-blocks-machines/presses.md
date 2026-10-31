@@ -16,7 +16,7 @@ item_ids:
 
 # 压印模板
 
-5 种不同,五种不同的压印模板中使用的<ItemLink id="inscriber" />.
+AE2 共有五种压印模板，用于<ItemLink id="inscriber" />加工材料和处理器。
 
 <Row>
   <ItemImage id="silicon_press" scale="4" />
@@ -32,9 +32,9 @@ item_ids:
 
 ## 处理器压印模板
 
-硅、逻辑、计算和工程压印模板用于生产[处理器](processors.md).
-这 4 压印模板以打破 a 的方式获取<ItemLink id="mysterious_cube" />a 中[陨石](../ae2-mechanics/meteorites.md).
-也可以在<ItemLink id="inscriber" />.
+硅、逻辑、计算和工程压印模板用于制作[处理器](processors.md)。
+
+这四种模板可以通过挖掘[陨石](../ae2-mechanics/meteorites.md)中心的<ItemLink id="mysterious_cube" />获得，也可以通过<ItemLink id="inscriber" />的相关配方制作。
 
 <Column>
   <Row>
@@ -50,11 +50,10 @@ item_ids:
   </Row>
 </Column>
 
-## 名称新闻
+## 命名压印模板
 
-NamePrP 可用于压印器来命名物品,类似一个弧弧。
+命名压印模板可以在压印器中为物品刻上自定义名称，作用类似铁砧的重命名功能。
 
-鼠标右单击<ItemLink id="certus_quartz_cutting_knife" />或<ItemLink id="nether_quartz_cutting_knife" />
-键,然后输入您的名称
-想要在板块上写入文字, 然后简单地提取完成的板盘。您可以在时间上一次使用一到两个盘子压印器,
-如果您使用两个牌照, 它将会使用这两个名字、顶层位、然后底层槽的组合来打印名称。
+手持<ItemLink id="certus_quartz_cutting_knife" />或<ItemLink id="nether_quartz_cutting_knife" />右键打开界面，放入金属锭并输入名称，即可制作对应的命名压印模板。
+
+压印器可以同时使用一张或两张命名模板。如果使用两张，最终名称会依次组合顶部和底部模板上的文字。
