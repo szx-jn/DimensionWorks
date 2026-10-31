@@ -17,40 +17,33 @@ item_ids:
 - ae2:quartz_cluster
 ---
 
-# 赛特斯石英母岩夸尔
+# 赛特斯石英母岩
 
-(另见[赛特斯增长 增长率](../ae2-mechanics/certus-growth.md))
+详情也可阅读[赛特斯石英生长机制](../ae2-mechanics/certus-growth.md)。
 
 <GameScene zoom="4" background="transparent">
   <ImportStructure src="../assets/assemblies/budding_blocks.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-赛特斯石英芽由赛特斯石英母岩,类似于 氨基金属。在[陨石](../ae2-mechanics/meteorites.md).
-共有 4 个等级赛特斯石英母岩:无法的、放荡的,寒冷的和被损坏的。它们很容易识别出来
-和像 HWYLA 的模版,Jade、" 一个实验 " 等(或 f3 屏幕)
+赛特斯石英芽会在母岩表面生长，方式类似原版紫水晶母岩。母岩通常可以在[陨石](../ae2-mechanics/meteorites.md)中找到。
 
-有缺陷, 芯片,和损坏赛特斯石英母岩每当一个萌芽生长在另一个阶段, 萌起的街区有一个机会
-降解成一层,最终变成一层平原<ItemLink id="quartz_block" />.
+赛特斯石英母岩分为四个等级：**无瑕、有瑕、开裂、损坏**。使用 Jade 等信息提示模组或 F3 调试界面，可以查看具体方块类型。
 
-法无法赛特斯石英母岩不会因为生长的芽芽而退化 也不会成为无限的来源
+有瑕、开裂和损坏的母岩每当石英芽进入下一生长阶段时，都有概率降低一个品质等级，最终变为普通<ItemLink id="quartz_block" />。
 
-如果用普通的皮克斯折断赛特斯石英母岩如果被砍断的话,将降低 1 级
-被施魔法精准采集除非他们是无瑕的,否则他们不会堕落。**这意味着无瑕无缺赛特斯石英母岩无法不能
-被捡起来,用拾起轴移动**相反,[空间存储](../ae2-mechanics/spatial-io.md)可用于
-剪切和擦拭无瑕的 萌芽区周围。
+**无瑕母岩不会因为石英芽生长而退化**，因此是最理想的持续晶体来源。
 
-## 食食权
+普通挖掘母岩会降低品质；使用精准采集时，除无瑕母岩以外的其他等级可以保持原样。**即使使用精准采集，无瑕母岩也无法原样取得。**若需要移动无瑕母岩，可以研究[空间存储](../ae2-mechanics/spatial-io.md)。
 
-易碎、碎裂和损坏赛特斯石英母岩可以通过扔掉前一层的萌芽块来合成(或 a/<ItemLink id="quartz_block" />)
-水中含有一种或多种<ItemLink id="charged_certus_quartz_crystal" />.
+## 修复母岩
 
-法无法赛特斯石英母岩无法构思,只存在于世界上。
+把较低品质的母岩或普通<ItemLink id="quartz_block" />与一个或多个<ItemLink id="charged_certus_quartz_crystal" />一起投入水中，可以把它们提升为相应品质的母岩。
+
+无瑕母岩无法通过这种方式合成，只能在世界中寻找。
 
 <Row>
   <RecipeFor id="damaged_budding_quartz" />
-
   <RecipeFor id="chipped_budding_quartz" />
-
   <RecipeFor id="flawed_budding_quartz" />
 </Row>
