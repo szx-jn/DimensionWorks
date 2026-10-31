@@ -1,7 +1,7 @@
 ---
 navigation:
   parent: items-blocks-machines/items-blocks-machines-index.md
-  title: 级别发射
+  title: ME 标准发信器
   icon: level_emitter
   position: 220
 categories:
@@ -11,62 +11,44 @@ item_ids:
 - ae2:energy_level_emitter
 ---
 
-# 级别 Einspir 状态
+# ME 标准发信器
 
 <GameScene zoom="8" background="transparent">
   <ImportStructure src="../assets/blocks/level_emitter.snbt" />
 </GameScene>
 
-级 Einirit 发送一个红石信号, 视某物项的数量而定
-[网络存储](../ae2-mechanics/import-export-storage.md).
+标准发信器根据[ME 网络存储](../ae2-mechanics/import-export-storage.md)中某种物品或流体的数量输出红石信号。另有一种**能源标准发信器**，可以监测网络的[能源](../ae2-mechanics/energy.md)水平。
 
-还有一个版本,根据[能源](../ae2-mechanics/energy.md)存储的
-在你的网络。
+可以从 JEI 拖入目标物品设置检测对象。若需要检测某种流体，可以手持装有该流体的容器右键设置槽。
 
-物品和液体可以拖进槽中,从 JEI 即使你没有那东西
+标准发信器属于[线缆附属部件](../ae2-mechanics/cable-subparts.md)。与多数其他[设备](../ae2-mechanics/devices.md)不同，**标准发信器不占用[频道](../ae2-mechanics/channels.md)**。
 
-用液体容器右键单击(象桶或液罐一样)将液体设置为过滤器,而不是桶或罐体物品。
+## 基本设置
 
-他们是[电缆子部件](../ae2-mechanics/cable-subparts.md).
-
-与其他不同[设备](../ae2-mechanics/devices.md)、级别排放源*不 不*需要 a[频道](../ae2-mechanics/channels.md).
-
-## 设置
-
-*   关卡 Enister 可以设置为“ 大于/ 等于” 模式或“ 小于”
-*   当 a<ItemLink id="crafting_card" />插入时,它可以设置为“在物品正在编织时微红石”或
-    "半红石到船体"
+* **大于或等于**：库存达到设定数量后输出红石信号。
+* **小于**：库存低于设定数量时输出红石信号。
+* 安装<ItemLink id="crafting_card" />后，可切换为自动合成相关的控制模式。
 
 ## 升级
 
-级别排放源支持以下[升级](upgrade_cards.md):
+标准发信器支持以下[升级卡](upgrade_cards.md)：
 
-*   <ItemLink id="fuzzy_card" />使发射者通过损坏级别和/或忽略物品过滤 NBT
-*   <ItemLink id="crafting_card" />启用绘图功能
+* <ItemLink id="fuzzy_card" />：比较物品时可选择忽略部分耐久或 NBT 差异。
+* <ItemLink id="crafting_card" />：启用自动合成控制功能。
 
-## 手合成功能
+## 自动合成控制
 
-如果 a<ItemLink id="crafting_card" />插入时,排放程序将被切换为绘图模式。
+安装<ItemLink id="crafting_card" />后，可以选择两种常见用途：
 
-这样可以有两个选项 :
+**合成期间输出信号：**当[自动合成系统](../ae2-mechanics/autocrafting.md)正在制作指定物品时输出红石信号。这适合仅在生产任务运行时启用的机器或产线。
 
-第一个选项,“当物品在编织时,微红岩” 使发射者发出红石信号,而你的[自动自制](../ae2-mechanics/autocrafting.md)
-正在通过<ItemLink id="pattern_provider" />。这对仅打开特定的
-在实际使用时安装了电源饥饿自动化装置。
+**通过红石信号请求合成：**将红石状态作为某种物品的生产请求。它特别适合刷石机、农场等无需从 ME 网络主动投入原料的生产线。
 
-第二种选择,“微红石来合成物品”,对于诸如无限农场等特定用途案例极为有用。
-自动设置, 只能产生输出, 而不能产生古兰酸输出。
-此设置创建虚拟[样式](patterns.md)用于[自动自制](../ae2-mechanics/autocrafting.md)用于任何物品
-位于排放者过滤槽中。
-(对于正确功能,同一物品的实际模式**不应存在**在您<ItemLink id="pattern_provider" />)
+此时系统会生成一个虚拟的[样板](patterns.md)来代表这种生产方式，因此不应再为同一种物品同时放置会发生冲突的实际样板。可以将其理解为：发信器被触发后，外部生产线开始工作，直到所需产物重新进入网络。
 
-这个"模式"没有定义,甚至没有关心原料。
-上面写着"如果你从这层排放物中 释放出红石 ME 系统将在
-通常用于激活和拆除不需要投入原料的无限农场,
-或激活一个处理循环食谱的系统(标准自动隐藏无法理解)例如,“1 个可碎石 = 2 块可裂石”
-如果你有一台机器 复制了可塑石
+<ItemLink id="pattern_provider" />可以配合其他处理样板完成更复杂的任务。
 
-## 用途
+## 合成配方
 
 <RecipeFor id="level_emitter" />
 
