@@ -19,6 +19,14 @@ jobs:
       - name: 检出仓库代码
         uses: actions/checkout@v4
 
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装图像测试依赖
+        run: python3 -m pip install -r scripts/requirements-memory-assets.txt
+
       - name: 检查 JSON、KubeJS 与 Python
         run: |
           set -euo pipefail
