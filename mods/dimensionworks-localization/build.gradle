@@ -4,7 +4,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.1.1'
+version = '0.1.2'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_localization'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
