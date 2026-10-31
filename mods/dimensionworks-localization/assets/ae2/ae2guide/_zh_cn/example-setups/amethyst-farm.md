@@ -1,53 +1,48 @@
 ---
 navigation:
   parent: example-setups/example-setups-index.md
-  title: 阿米思斯特农场
+  title: 自动紫水晶农场
   icon: minecraft:amethyst_shard
 ---
 
-# 种植阿米塞斯特
+# 自动紫水晶农场
 
-期间的<ItemLink id="growth_accelerator" />用于防腐蚀的常规过滤方法[赛特斯芽芽](../items-blocks-machines/budding_certus.md)
-与 a 具有<ItemLink id="annihilation_plane" />与不成熟的不一样,不以复合的芽为试验对象。赛特斯下落的芽芽
-<ItemLink id="certus_quartz_dust" />,非自然的 复合蕾丝芽 落空无踪,所以破坏面板总是会打碎他们
-因为网络总能存储"什么都没有"
+[晶体催生器](../items-blocks-machines/growth_accelerator.md)既可以加速赛特斯石英生长，也可以用于紫水晶农场。
 
-绕着这个方向是迷惑破坏面板与精准采集。然后非自然的复合芽芽*do do 做*放下东西
-(物理芽块不同阶段),从而可以被过滤。
+不过，普通紫水晶芽在被破坏时不会掉落物品。若直接使用<ItemLink id="annihilation_plane" />，便无法通过掉落物筛选成熟晶簇。解决方法是先给第一个破坏面板附魔**精准采集**，让不同生长阶段的紫水晶芽变成可以筛选的方块物品。
 
-<ItemLink id="minecraft:amethyst_cluster" />然后必须由 a 重新放置<ItemLink id="formation_plane" />,然后成为
-被一个<ItemLink id="annihilation_plane" />无无精准采集,以获得<ItemLink id="minecraft:amethyst_shard" />.
+第一个破坏面板将成熟的<ItemLink id="minecraft:amethyst_cluster" />采集下来，<ItemLink id="formation_plane" />再把成熟晶簇放到第二个破坏面板前。第二个面板不带精准采集，使用时运将晶簇转化为<ItemLink id="minecraft:amethyst_shard" />。
 
-请注意,由于该组具有方向性,因此必须有一个与成型面板.
+注意：紫水晶簇的朝向会影响能否正确放置，成型面板应面向合适的方向。
 
 <GameScene zoom="6" interactive={true}>
   <ImportStructure src="../assets/assemblies/amethyst_farm.snbt" />
 
   <BoxAnnotation color="#dddddd" min="2.7 1 1" max="3 2 2">
-        (1)破坏面板#1:没有 GUI 要配置,但被施魔法精准采集.
+        (1)破坏面板 1：必须附魔精准采集，用于收获完整的成熟紫水晶簇。
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="2 1 1" max="2.3 2 2">
-        (2)成型面板: 过滤到 Amethyst 群集。
+        (2)成型面板：只允许放置成熟紫水晶簇。
         <ItemImage id="minecraft:amethyst_cluster" scale="2" />
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="1.3 0.7 1" max="2 1 2">
-        (3)破坏面板#2:否 GUI 来配置,但可以用财富来施魔法。
+        (3)破坏面板 2：可以附魔时运，用于将晶簇加工为紫水晶碎片。
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="1 0 1" max="1.3 1 2">
-        (4)存储总线#1: 过滤到 Amenthyst Shard。
+        (4)存储总线 1：只允许紫水晶碎片。
         <ItemImage id="minecraft:amethyst_shard" scale="2" />
   </BoxAnnotation>
 
   <BoxAnnotation color="#dddddd" min="0 0 .7" max="1 1 1">
-        (5)存储总线# 2 : 过滤到 Amenthyst Shard。优先级设置高于您主存储处。
+        (5)存储总线 2：只允许紫水晶碎片，优先级高于主网络存储。
         <ItemImage id="minecraft:amethyst_shard" scale="2" />
   </BoxAnnotation>
 
 <DiamondAnnotation pos="0 0.5 0.5" color="#00ff00">
-        转到主网络
+        连接主网络
     </DiamondAnnotation>
 
   <IsometricCamera yaw="195" pitch="30" />
@@ -55,22 +50,17 @@ navigation:
 
 ## 配置
 
-* 第一个<ItemLink id="annihilation_plane" />(1)没有无 GUI 并且无法配置, 但必须被施魔法精准采集.
-* <ItemLink id="formation_plane" />(2)过滤到<ItemLink id="minecraft:amethyst_cluster" />.
-* 第二次<ItemLink id="annihilation_plane" />(3)没有无 GUI 无法配置,但可以被魔法 与财富。
-* 第一个<ItemLink id="storage_bus" />(4)过滤到<ItemLink id="minecraft:amethyst_shard" />.
-* 第二次<ItemLink id="storage_bus" />(5)过滤到<ItemLink id="minecraft:amethyst_shard" />,并且拥有
-  [优先](../ae2-mechanics/import-export-storage.md#storage-priority)设置高于主存储处。
+* 第一个<ItemLink id="annihilation_plane" />（1）：必须附魔精准采集。
+* <ItemLink id="formation_plane" />（2）：筛选<ItemLink id="minecraft:amethyst_cluster" />。
+* 第二个<ItemLink id="annihilation_plane" />（3）：可以附魔时运，不要附魔精准采集。
+* 第一个<ItemLink id="storage_bus" />（4）：筛选<ItemLink id="minecraft:amethyst_shard" />。
+* 第二个<ItemLink id="storage_bus" />（5）：同样筛选<ItemLink id="minecraft:amethyst_shard" />，并将[优先级](../ae2-mechanics/import-export-storage.md#storage-priority)设为高于主网络。
 
-## 如何运作
+## 工作流程
 
-1. 第一个<ItemLink id="annihilation_plane" />试图打破前面的,但只能打破<ItemLink id="minecraft:amethyst_cluster" />
-    因为子网上唯一的存储器是<ItemLink id="formation_plane" />,过滤到 ameethethyst 集。这只因为
-飞机被施魔法精准采集否则它就能打破非成熟的芽 因为它们没有掉下来
-2. <ItemLink id="formation_plane" />将晶簇置于反对区块上。
-3. 第二次<ItemLink id="annihilation_plane" />制成<ItemLink id="minecraft:amethyst_shard" />.
-4. 第一个<ItemLink id="storage_bus" />将碎片存储在桶内。
-第二件事破坏面板遇到的应该是成熟的集群。
-5. 第二次<ItemLink id="storage_bus" />主网络允许主网络进入桶内所有含铁晶碎片。
-高[优先](../ae2-mechanics/import-export-storage.md#storage-priority)以便(真主使众人)享受至善的,
-放在桶里,而不是在主仓库里
+1. 第一个破坏面板采集成熟紫水晶簇。因为面板附有精准采集，晶芽和晶簇都会作为物品掉落，子网就可以依靠筛选规则只接受成熟晶簇。
+2. 成型面板重新放置成熟晶簇，确保放置方向正确。
+3. 第二个破坏面板破坏晶簇，得到紫水晶碎片；附魔时运可提高产量。
+4. 第一个存储总线将碎片放入缓冲容器。
+5. 第二个存储总线让主网络访问这些碎片。高优先级保证它们优先进入缓冲容器，而不是散落在其他存储设备中。
+
