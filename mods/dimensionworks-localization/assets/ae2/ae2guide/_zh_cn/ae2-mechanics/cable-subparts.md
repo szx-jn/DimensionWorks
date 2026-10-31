@@ -1,17 +1,17 @@
 ---
 navigation:
   parent: ae2-mechanics/ae2-mechanics-index.md
-  title: 电缆子分区
+  title: 线缆上的附属部件
 icon: fluix_glass_cable
 ---
 
-# 电缆子分区
+# 线缆上的附属部件
 
 <GameScene zoom="4" background="transparent">
   <ImportStructure src="../assets/assemblies/subparts_demonstration.snbt" />
   <IsometricCamera yaw="195" pitch="30" />
 </GameScene>
 
-内 AE2, 确定[设备](devices.md)和组件可以放置在同一块块的电缆上。这对安装紧凑装置有用。
-以<ItemLink id="certus_quartz_wrench" />或<ItemLink id="network_tool" />可以打破单
-下分部分(或电缆)在那个街区里,没有打破一切
+AE2 允许将某些[设备](devices.md)和部件安装在同一个方块空间的线缆上，方便搭建紧凑的网络。
+
+手持<ItemLink id="certus_quartz_wrench" />或<ItemLink id="network_tool" />，可以只拆除某个附属部件，而不破坏同一位置的其他部件。
