@@ -474,6 +474,17 @@
       "url": "https://modrinth.com/mod/create-gears-and-tavern"
     },
     {
+      "id": "creeper_firework",
+      "name": "Creeper Firework",
+      "source": "modrinth",
+      "project_id": "owUiXPam",
+      "version": "2.1.0.b",
+      "version_id": "9yfw6mXP",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/creeper-firework"
+    },
+    {
       "id": "creativecore",
       "name": "CreativeCore",
       "source": "modrinth",
