@@ -21,6 +21,10 @@
 `server_scripts/aether_equipment_lock.js` 禁用天境装备的制作、修复和正常获取流程，保留流程功能物。
 配套的 `defaultconfigs/aether-client.toml` 与 `defaultconfigs/aether-common.toml` 隐藏天境饰品按钮，并启用 Curios 标准菜单。
 
+## 车万女仆妖精生成
+
+`server_scripts/touhou_little_maid_fairy_natural_spawn.js` 阻止车万女仆的女仆妖精（`touhou_little_maid:fairy`）自然生成，保留其他生成方式。
+
 ## 齿轮之心
 
 `startup_scripts/gear_heart.js` 注册两个最高稀有度的齿轮之心和七个独立贴图的修复碎片；`server_scripts/gear_heart_recipes.js` 提供七个固定 ID 配方。
