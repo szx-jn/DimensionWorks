@@ -42,16 +42,6 @@ const BASIC_MINERAL_LINES = [
     "mekanismCarrierCount": 3
   },
   {
-    "item": "minecraft:coal",
-    "path": "coal",
-    "compactingInputs": [
-      "2x minecraft:charcoal",
-      "minecraft:gravel"
-    ],
-    "mekanismCarrier": "minecraft:charcoal",
-    "mekanismCarrierCount": 2
-  },
-  {
     "item": "minecraft:lapis_lazuli",
     "path": "lapis",
     "compactingInputs": [

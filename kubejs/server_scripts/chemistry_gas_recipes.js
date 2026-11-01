@@ -4,28 +4,23 @@
 
 ServerEvents.recipes(event => {
   // Create 工作盆通过内部标记物品输出 Mekanism 气体；标记会被 Java 集成转换为气体缓冲。
-  // 露天时每秒随机损失 100–200 mB，封闭时不损失，液体规则不变。
+  // 无盖或开盖时每 20 游戏刻固定流失 200 mB 气体；柴油动力工作盆盖关闭时不流失，液体规则不变。
+  // Create 的 heated 也匹配超级加热；标记限制确保普通加热的一氧化碳路线不会抢占二氧化碳路线。
   event.recipes.create.mixing(
-    Item.of('dimensionworks_mek_stress:gas_output', { Gas: 'dimensionworks:carbon_dioxide', Amount: 1000 }),
-    ['minecraft:coal']
-  ).heated().id('dimensionworks:chemistry/create/carbon_dioxide_from_coal')
+    Item.of('dimensionworks_mek_stress:gas_output', {
+      Gas: 'dimensionworks:carbon_monoxide', Amount: 125, ExcludeSuperheated: true
+    }),
+    ['minecraft:charcoal']
+  ).heated().id('dimensionworks:chemistry/create/carbon_monoxide_from_charcoal')
+
+  event.recipes.create.mixing(
+    Item.of('dimensionworks_mek_stress:gas_output', { Gas: 'dimensionworks:carbon_dioxide', Amount: 250 }),
+    ['minecraft:charcoal']
+  ).superheated().id('dimensionworks:chemistry/create/carbon_dioxide_from_charcoal')
 
   const item = id => ({ ingredient: { item: id } })
   const gas = (id, amount) => ({ gas: id, amount: amount })
   const fluid = (id, amount) => ({ fluid: id, amount: amount })
-
-  // 碳及其氧化物：化学氧化室处理含碳原料。
-  event.custom({
-    type: 'mekanism:oxidizing',
-    input: item('minecraft:coal'),
-    output: gas('dimensionworks:carbon_dioxide', 1000)
-  }).id('dimensionworks:chemistry/carbon_dioxide_from_coal')
-
-  event.custom({
-    type: 'mekanism:oxidizing',
-    input: item('minecraft:charcoal'),
-    output: gas('dimensionworks:carbon_monoxide', 500)
-  }).id('dimensionworks:chemistry/carbon_monoxide_from_charcoal')
 
   // 氮气：以火药等含氮原料作为分离工艺的游戏化入口。
   event.custom({

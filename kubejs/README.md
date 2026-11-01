@@ -68,11 +68,13 @@ Create 的 Mixer、Press、Crushing Wheels、Saw、Deployer、Spout、Fan 等加
 
 server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create 固体压制与 Mekanism 合成路线。压制线要求对应目标的有限样本作为输入。
 
+煤炭自增殖配方已移除，仅规划木炭化学合成来源；现已实现木炭制气，后续制煤工序待定。
+
 ## 余烬面粉与红石
 
 `server_scripts/cinder_flour_recipes.js` 将 Create 原版下界岩粉碎配方改为固定产出 1 个余烬面粉，另有 2 个各以 85% 概率、2 个各以 89% 概率额外产出（逐个物品独立判定）；4 个余烬面粉可在工作盆压制成下界岩。余烬面粉经注液器注入 250 mB Create: Diesel Generators 原油，可制成 1 个红石粉。旧的红石矿物自增殖线已移除。
 
-完整目标清单、配方成本和游戏内验收步骤见 ../docs/design/basic-mineral-production-lines.md。
+完整矿物形态清单、路线分类和验收步骤见 `../docs/design/basic-mineral-production-lines.md`。
 
 ## 烈焰蛋糕红石成本
 
@@ -100,9 +102,9 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 ## Create 工作盆 Mekanism 气体输出
 
 - 工作盆内置 10,000 mB 单气体缓冲，可由 Mekanism 气体管道抽取。
-- Create 配方可将内部物品 `dimensionworks_mek_stress:gas_output` 作为唯一产物，并在物品 NBT 指定 `Gas`（气体注册 ID）和 `Amount`（mB 数量）；标记会转为真正的 Mekanism 气体，不会作为物品掉落。
-- `server_scripts/chemistry_gas_recipes.js` 提供煤经烈焰人燃烧室加热生成 1,000 mB 二氧化碳的示例。
-- 工作盆上方可见天空时，每 20 游戏刻随机损失 100–200 mB；封闭工作盆不损失。该规则只作用于工作盆产出的气体，不影响液体，也不允许管道向工作盆灌入气体。
+- Create 配方可将内部物品 `dimensionworks_mek_stress:gas_output` 作为唯一产物，并在物品 NBT 指定 `Gas`（气体注册 ID）和 `Amount`（mB 数量）；标记会转为真正的 Mekanism 气体，不会作为物品掉落。可选 NBT `ExcludeSuperheated: true` 会在超级加热时拒绝配方，包括匹配模拟阶段，以支持普通加热与超级加热使用同一原料产出不同气体。
+- `server_scripts/chemistry_gas_recipes.js` 提供木炭熔炼配方：工作盆普通加热每消耗 1 个木炭产出 125 mB 一氧化碳，超级加热每消耗 1 个木炭产出 250 mB 二氧化碳，由 Mekanism 气体管道抽取。木炭化学氧化室产一氧化碳入口已移除。煤炭增殖及煤炭制二氧化碳入口已移除；后续制煤工序待定。
+- 工作盆无盖或开盖时，每 20 游戏刻固定流失 200 mB，余量不足 200 mB 时清空。只有盆正上方关闭的柴油动力工作盆盖（`createdieselgenerators:basin_lid`）能阻止流失；屋顶、普通方块和搅拌器不视作密封盖。所有进入盆内气体缓冲的 Mekanism 气体均遵循此规则，与气体种类无关。该规则不影响液体，也不允许管道向工作盆灌入气体。
 
 其他气体配方可复用同一输出物品，将 `Gas` 改为对应注册 ID、`Amount` 改为 mB 数量。工作盆缓冲同一时间只存一种气体；切换气体前先用 Mekanism 管道抽空。
 

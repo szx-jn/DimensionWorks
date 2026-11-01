@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.mekstress.mixin.create;
 
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
+import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.integration.BasinGasHandler;
 import java.util.List;
@@ -50,6 +51,15 @@ public abstract class BasinGasIntegrationMixin {
         ItemStack marker = outputItems.get(0);
         CompoundTag tag = marker.getTag();
         if (tag == null || !tag.contains("Gas", Tag.TAG_STRING) || !tag.contains("Amount", Tag.TAG_ANY_NUMERIC)) {
+            cir.setReturnValue(false);
+            return;
+        }
+
+        // Heated Create recipes also match a seething burner. Reject during
+        // output simulation as well, so the alternate recipe can be selected
+        // without consuming ingredients or producing the wrong gas.
+        if (tag.getBoolean("ExcludeSuperheated")
+            && ((BasinBlockEntity) (Object) this).getHeatLevel() == HeatLevel.SEETHING) {
             cir.setReturnValue(false);
             return;
         }

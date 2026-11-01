@@ -7,11 +7,18 @@ import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.util.LazyOptional;
 
 public final class BasinGasHandler implements IGasHandler {
     private static final long CAPACITY = 10_000L;
+    private static final long LEAK_AMOUNT = 200L;
+    private static final ResourceLocation BASIN_LID =
+        new ResourceLocation("createdieselgenerators", "basin_lid");
     private static final String NBT_KEY = "DimensionWorksBasinGas";
 
     private final BasinBlockEntity owner;
@@ -47,15 +54,13 @@ public final class BasinGasHandler implements IGasHandler {
 
         gas = new GasStack(producedGas, gas.getAmount() + amount);
         owner.setChanged();
-        leakIfDue();
         owner.notifyUpdate();
         return true;
     }
 
     public void leakIfDue() {
         Level level = owner.getLevel();
-        if (level == null || level.isClientSide || gas.isEmpty()
-            || !level.canSeeSky(owner.getBlockPos().above())) {
+        if (level == null || level.isClientSide) {
             return;
         }
 
@@ -65,11 +70,23 @@ public final class BasinGasHandler implements IGasHandler {
         }
         lastLeakTick = now;
 
-        long loss = 100L + level.getRandom().nextInt(101);
-        long remaining = Math.max(0L, gas.getAmount() - loss);
+        // Advance the timer even when empty or sealed. Production must not
+        // trigger extra leak events, and reopening must not accumulate losses.
+        if (gas.isEmpty() || hasClosedLid(level)) {
+            return;
+        }
+
+        long remaining = Math.max(0L, gas.getAmount() - LEAK_AMOUNT);
         gas = remaining == 0 ? GasStack.EMPTY : new GasStack(gas, remaining);
         owner.setChanged();
         owner.notifyUpdate();
+    }
+
+    private boolean hasClosedLid(Level level) {
+        BlockState cover = level.getBlockState(owner.getBlockPos().above());
+        return BASIN_LID.equals(BuiltInRegistries.BLOCK.getKey(cover.getBlock()))
+            && cover.hasProperty(BlockStateProperties.OPEN)
+            && !cover.getValue(BlockStateProperties.OPEN);
     }
 
     public void readFromNbt(CompoundTag tag) {
