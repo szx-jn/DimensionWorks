@@ -80,6 +80,16 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 完整矿物形态清单、路线分类和验收步骤见 `../docs/design/basic-mineral-production-lines.md`。
 
+## 稳定硫供应
+
+`server_scripts/sulfur_processing.js` 新增普通加热工作盆搅拌：4 个余烬面粉 → 1 个 `kubejs:crude_sulfur`（粗硫）；Create 磨石将 1 个粗硫固定磨成 1 个 `mekanism:dust_sulfur`。粗硫由 `startup_scripts/mineral_processing_items.js` 注册，复用原版粗金纹理；更新后需要完整重启以加载新物品。
+
+下界岩粉碎与压块回流沿用原配方。优先回流母料后，每加工一个下界岩期望剩余 0.48 个余烬面粉，即长期平均约 8.33 次粉碎净产一份硫；概率波动需要库存缓冲。余烬面粉同时供红石与硫使用。
+
+移除 Mekanism `reaction/coal_gasification/` 下的 `coals`、`dusts_coals`、`blocks_coals` 三条原生煤炭/木炭制硫配方，保留火药制硫及其他硫化学。`forge:dusts/sulfur` 合并 Mekanism 与 Alex’s Caves 硫粉，硫化氢和铀精矿配方改用该标签；旧洞穴配方的硫粉输出和任务物品保持兼容。
+
+工艺设定、产能与验证边界见 [稳定硫供应设计](../docs/design/sulfur-production.md)。
+
 ## 烈焰蛋糕红石成本
 
 `server_scripts/blaze_cake_redstone_cost.js` 统一替换所有产出 `create:blaze_cake_base` 的配方，要求鸡蛋、糖、灰烬粉（Create Cinder Flour）和 1 份红石粉经机械压制合成底料。原版将底料注入 250 mB 熔岩制成烈焰蛋糕的配方保留不变；这样附属模组若提供其他底料配方，也不会绕过红石成本。

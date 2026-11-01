@@ -146,7 +146,7 @@ ServerEvents.recipes(event => {
   ]), 'toxic/radrock_recovery')
   supportRecipe(create.mixing('2x create:crushed_raw_uranium', [
     'alexscaves:acidic_radrock',
-    'alexscaves:sulfur_dust'
+    '#forge:dusts/sulfur'
   ]), 'toxic/uranium_concentrate')
 
   selfRecipe(create.mixing('2x alexscaves:sulfur_dust', [

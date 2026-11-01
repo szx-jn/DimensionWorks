@@ -68,5 +68,7 @@
   "fluid.dimensionworks.molten_poseidite": "Molten Poseidite",
   "fluid.dimensionworks.molten_shulkerate": "Molten Shulkerate",
   "fluid.dimensionworks.molten_sculkium": "Molten Sculkium",
-  "fluid.dimensionworks.molten_eternium": "Molten Eternium"
+  "fluid.dimensionworks.molten_eternium": "Molten Eternium",
+  "item.kubejs.crude_sulfur": "Crude Sulfur",
+  "item.kubejs.crude_sulfur.tooltip": "Thermally separated from sulfur-bearing volcanic material. Mill into sulfur dust."
 }

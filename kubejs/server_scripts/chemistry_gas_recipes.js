@@ -62,7 +62,7 @@ ServerEvents.recipes(event => {
   // 硫化氢：硫粉、氢气和水在加压反应室中处理。
   event.custom({
     type: 'mekanism:reaction',
-    itemInput: item('mekanism:dust_sulfur'),
+    itemInput: { ingredient: { tag: 'forge:dusts/sulfur' } },
     fluidInput: fluid('minecraft:water', 1000),
     gasInput: gas('mekanism:hydrogen', 1000),
     energyRequired: 10000,

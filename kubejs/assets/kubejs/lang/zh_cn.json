@@ -70,5 +70,7 @@
   "fluid.dimensionworks.molten_poseidite": "熔融海神石",
   "fluid.dimensionworks.molten_shulkerate": "熔融潜影合金",
   "fluid.dimensionworks.molten_sculkium": "熔融幽匿金属",
-  "fluid.dimensionworks.molten_eternium": "熔融永恒金属"
+  "fluid.dimensionworks.molten_eternium": "熔融永恒金属",
+  "item.kubejs.crude_sulfur": "粗硫",
+  "item.kubejs.crude_sulfur.tooltip": "含硫火山物料热分离产物，可在磨石中制成硫粉。"
 }
