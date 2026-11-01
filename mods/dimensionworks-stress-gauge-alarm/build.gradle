@@ -1,0 +1,48 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+    id 'eclipse'
+    id 'idea'
+}
+
+version = '0.1.0'
+group = 'dev.szx.dimensionworks'
+base.archivesName = 'dimensionworks_stress_gauge_alarm'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            mods { dimensionworks_stress_gauge_alarm { source sourceSets.main } }
+        }
+        client {}
+        server {}
+    }
+}
+
+repositories {
+    maven { name = 'Create'; url = 'https://maven.createmod.net' }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
+    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
+    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
+    implementation fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, 'dimensionworks_stress_gauge_alarm.refmap.json'
+    config 'dimensionworks_stress_gauge_alarm.mixins.json'
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+jar {
+    manifest.attributes(['MixinConfigs': 'dimensionworks_stress_gauge_alarm.mixins.json'])
+    finalizedBy 'reobfJar'
+}

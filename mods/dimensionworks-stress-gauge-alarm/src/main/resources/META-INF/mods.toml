@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="dimensionworks_stress_gauge_alarm"
+version="0.1.0"
+displayName="DimensionWorks Stress Gauge Alarm"
+authors="szx-jn"
+description='''Emits a redstone signal from Create stress gauges while their kinetic network is overstressed.'''
+[[dependencies.dimensionworks_stress_gauge_alarm]]
+modId="forge"
+mandatory=true
+versionRange="[47.0,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.dimensionworks_stress_gauge_alarm]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.dimensionworks_stress_gauge_alarm]]
+modId="create"
+mandatory=true
+versionRange="[6.0.8,6.0.9)"
+ordering="AFTER"
+side="BOTH"

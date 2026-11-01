@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/stress-gauge-redstone-alert.md`](design/stress-gauge-redstone-alert.md)：Create 应力表过载红石告警行为与实现边界
+
 - [`design/kinetic-network-diagnostics.md`](design/kinetic-network-diagnostics.md)：应力网络恢复账目、最低 RPM 上限与扳手拓扑 GUI
 
 - [`design/me-live-stress-network.md`](design/me-live-stress-network.md)：ME 实时应力额度、RPM 总量过载与两条供能路线造价
