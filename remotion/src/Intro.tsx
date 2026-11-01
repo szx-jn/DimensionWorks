@@ -1,6 +1,5 @@
 import React from "react";
 import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
-import voiceoverPlan from "../voiceover.json";
 import {Caption, Gear, Landscape, palette, ramp, Scene} from "./Cinema";
 import {MoltenChemistry} from "./Mechanisms";
 import {DirectPower, NetworkPower} from "./PowerScenes";
