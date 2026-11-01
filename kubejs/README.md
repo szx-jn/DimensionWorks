@@ -23,7 +23,7 @@
 
 ## 车万女仆妖精生成
 
-`server_scripts/touhou_little_maid_fairy_natural_spawn.js` 阻止车万女仆的女仆妖精（`touhou_little_maid:fairy`）通过生成检查与实体加入世界两层事件禁止生成，包括自然生成、刷怪蛋、刷怪笼、命令和模组直接添加；存档中的妖精重新加载时也会被拦截。已加载的妖精不会因脚本热重载立即消失，需重新加载所在区块或重启服务端。此规则不扫描每 tick 的实体列表。
+`server_scripts/touhou_little_maid_fairy_natural_spawn.js` 通过生成检查与实体加入世界两层事件，禁止车万女仆的女仆妖精（`touhou_little_maid:fairy`）生成，包括自然生成、刷怪蛋、刷怪笼、命令和模组直接添加；存档中的妖精重新加载时也会被拦截。已加载的妖精不会因脚本热重载立即消失，需重新加载所在区块或重启服务端。此规则不扫描每 tick 的实体列表。
 
 ## 齿轮之心
 
@@ -109,3 +109,9 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 燃料定义使用 Create: Liquid Fuel 2.2.0 的 `fluid`、`burnTime`、`superHeat` 和 `amountConsumedPerTick` 字段。当前平衡值分别为柴油 32、生物柴油 24、汽油 24、乙醇 16，均每 tick 消耗 1 mB；这些是整合包自定义燃烧参数，不是柴油动力引擎 SU 参数的直接换算。
 
 原油与植物油未加入：当前柴油动力版本没有为它们注册对应的发动机 FuelType，避免将原料油误作可直接驱动发动机的成品燃料。这些数据只影响 Create 烈焰人燃烧室，不会改变柴油动力引擎自身的燃料倍率或燃烧器规则。
+
+## 配方加载兼容
+
+`startup_scripts/mekanism_schema_compat.js` 对当前 KubeJS Mekanism 插件无法正确解析的 rotary、washing、reaction、separating、evaporating 类型使用原始 JSON schema，保留 Mekanism 自身对配方的解析和校验。其余正常工作的类型（包括 crushing、combining）保留插件的类型化接口；上述五种类型的新配方使用 `event.custom`。
+
+部分上游集成配方缺少依赖条件：ComputerCraft 网络监视器、暮色森林酒类配方、已不存在的驴肉配方及未注册的熔岩渔网配方在对应依赖或物品不存在时跳过加载，保留原材料与产出定义。AE2 128³ 空间存储元件配方删除未使用的图案键，修复配方被拒绝加载的问题。

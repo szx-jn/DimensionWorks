@@ -1,0 +1,161 @@
+{
+  "type": "kaleidoscope_cookery:pot",
+  "carrier": {
+    "item": "minecraft:bowl"
+  },
+  "ingredients": [
+    {
+      "item": "kaleidoscope_nether:gilded_fragment"
+    },
+    {
+      "item": "kaleidoscope_nether:gilded_fragment"
+    },
+    {
+      "tag": "forge:hot_spices"
+    },
+    {
+      "tag": "forge:hot_spices"
+    },
+    [
+      {
+        "tag": "forge:raw_pork"
+      },
+      {
+        "tag": "forge:raw_beef"
+      },
+      {
+        "tag": "forge:raw_mutton"
+      },
+      {
+        "tag": "forge:raw_chicken"
+      },
+      {
+        "item": "minecraft:rabbit"
+      },
+      {
+        "item": "kaleidoscope_nether:raw_strider_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_donkey_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_cut_small_meats"
+      }
+    ],
+    [
+      {
+        "tag": "forge:raw_pork"
+      },
+      {
+        "tag": "forge:raw_beef"
+      },
+      {
+        "tag": "forge:raw_mutton"
+      },
+      {
+        "tag": "forge:raw_chicken"
+      },
+      {
+        "item": "minecraft:rabbit"
+      },
+      {
+        "item": "kaleidoscope_nether:raw_strider_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_donkey_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_cut_small_meats"
+      }
+    ],
+    [
+      {
+        "tag": "forge:raw_pork"
+      },
+      {
+        "tag": "forge:raw_beef"
+      },
+      {
+        "tag": "forge:raw_mutton"
+      },
+      {
+        "tag": "forge:raw_chicken"
+      },
+      {
+        "item": "minecraft:rabbit"
+      },
+      {
+        "item": "kaleidoscope_nether:raw_strider_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_donkey_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_cut_small_meats"
+      }
+    ],
+    [
+      {
+        "tag": "forge:raw_pork"
+      },
+      {
+        "tag": "forge:raw_beef"
+      },
+      {
+        "tag": "forge:raw_mutton"
+      },
+      {
+        "tag": "forge:raw_chicken"
+      },
+      {
+        "item": "minecraft:rabbit"
+      },
+      {
+        "item": "kaleidoscope_nether:raw_strider_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_donkey_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_cut_small_meats"
+      }
+    ],
+    [
+      {
+        "tag": "forge:raw_pork"
+      },
+      {
+        "tag": "forge:raw_beef"
+      },
+      {
+        "tag": "forge:raw_mutton"
+      },
+      {
+        "tag": "forge:raw_chicken"
+      },
+      {
+        "item": "minecraft:rabbit"
+      },
+      {
+        "item": "kaleidoscope_nether:raw_strider_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_donkey_meat"
+      },
+      {
+        "item": "kaleidoscope_cookery:raw_cut_small_meats"
+      }
+    ]
+  ],
+  "result": {
+    "item": "kaleidoscope_nether:gilded_barbaric_roast"
+  },
+  "stir_fry_count": 6,
+  "time": 650,
+  "conditions": [
+    {
+      "type": "forge:item_exists",
+      "item": "kaleidoscope_cookery:raw_donkey_meat"
+    }
+  ]
+}

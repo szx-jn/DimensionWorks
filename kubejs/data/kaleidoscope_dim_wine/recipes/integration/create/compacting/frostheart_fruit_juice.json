@@ -1,0 +1,51 @@
+{
+  "forge:conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "twilightforest"
+    }
+  ],
+  "type": "create:compacting",
+  "ingredients": [
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    }
+  ],
+  "results": [
+    {
+      "fluid": "kaleidoscope_dim_wine:frostheart_fruit_juice",
+      "amount": 1000
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "twilightforest"
+    }
+  ]
+}
