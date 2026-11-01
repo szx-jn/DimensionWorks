@@ -1300,6 +1300,17 @@
       "url": "https://modrinth.com/mod/modern-ui"
     },
     {
+      "id": "moonlight",
+      "name": "Moonlight Lib",
+      "source": "modrinth",
+      "project_id": "twkfQtEc",
+      "version": "1.20-2.16.38B-forge",
+      "version_id": "ibsm7pYC",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/moonlight"
+    },
+    {
       "id": "mousetweaks",
       "name": "Mouse Tweaks",
       "source": "modrinth",
@@ -1477,6 +1488,17 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/sophisticated-core"
+    },
+    {
+      "id": "supplementaries",
+      "name": "Supplementaries",
+      "source": "modrinth",
+      "project_id": "fFEIiSDQ",
+      "version": "1.20-3.1.44-forge",
+      "version_id": "foXRPXFH",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/supplementaries"
     },
     {
       "id": "titanium",
