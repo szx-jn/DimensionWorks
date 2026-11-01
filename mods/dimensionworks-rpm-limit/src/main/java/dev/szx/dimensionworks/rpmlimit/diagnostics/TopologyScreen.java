@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
@@ -18,6 +19,9 @@ public final class TopologyScreen extends Screen {
     private int selected = -1;
     private int graphRight;
     private int detailsScroll;
+    private Button dismantleButton;
+    private Button teleportButton;
+    private Button highlightButton;
 
     private TopologyScreen(NetworkSnapshot snapshot) {
         super(Component.literal("应力网络拓扑 · 服务端快照"));
@@ -33,6 +37,7 @@ public final class TopologyScreen extends Screen {
             screen.layout();
             if (changedPage) screen.centerOnEntry();
             else if (selectedPos != null) screen.selected = screen.indexOf(selectedPos);
+            screen.updateActionButtons();
         } else mc.setScreen(new TopologyScreen(snapshot));
     }
     @Override protected void init() {
@@ -41,8 +46,16 @@ public final class TopologyScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("下一页"), b -> refresh(snapshot.page() + 1)).bounds(68, 10, 54, 20).build());
         addRenderableWidget(Button.builder(Component.literal("刷新"), b -> refresh(snapshot.page())).bounds(126, 10, 46, 20).build());
         addRenderableWidget(Button.builder(Component.literal("居中"), b -> { zoom = 1; centerOnEntry(); }).bounds(176, 10, 46, 20).build());
+        int actionX = width - 222, actionY = height - 25;
+        dismantleButton = addRenderableWidget(Button.builder(Component.literal("拆除"), b -> confirmDismantle())
+            .bounds(actionX, actionY, 70, 20).build());
+        teleportButton = addRenderableWidget(Button.builder(Component.literal("传送到此处"), b -> teleportToSelection())
+            .bounds(actionX + 74, actionY, 70, 20).build());
+        highlightButton = addRenderableWidget(Button.builder(Component.literal("高亮显示"), b -> toggleHighlight())
+            .bounds(actionX + 148, actionY, 70, 20).build());
         layout();
         centerOnEntry();
+        updateActionButtons();
     }
     private int indexOf(BlockPos pos) {
         for (int i = 0; i < snapshot.nodes().size(); i++) if (snapshot.nodes().get(i).pos().equals(pos)) return i;
@@ -60,6 +73,40 @@ public final class TopologyScreen extends Screen {
     private void refresh(int page) {
         int last = Math.max(0, (snapshot.total() - 1) / NetworkSnapshot.PAGE_SIZE);
         TopologyNetwork.request(snapshot.origin(), Math.max(0, Math.min(last, page)));
+    }
+    private NetworkSnapshot.Node selectedNode() {
+        return selected >= 0 && selected < snapshot.nodes().size() ? snapshot.nodes().get(selected) : null;
+    }
+    private void updateActionButtons() {
+        if (dismantleButton == null) return;
+        boolean hasSelection = selectedNode() != null;
+        dismantleButton.visible = teleportButton.visible = highlightButton.visible = hasSelection;
+        NetworkSnapshot.Node node = selectedNode();
+        if (node != null) {
+            dismantleButton.active = !node.virtual();
+            highlightButton.setMessage(Component.literal(TopologyWorldHighlight.isHighlighted(node.pos()) ? "取消高亮" : "高亮显示"));
+        }
+    }
+    private void confirmDismantle() {
+        NetworkSnapshot.Node node = selectedNode();
+        if (node == null) return;
+        Minecraft mc = Minecraft.getInstance();
+        mc.setScreen(new ConfirmScreen(confirmed -> {
+            if (confirmed) TopologyNetwork.dismantle(snapshot.origin(), node.pos(), snapshot.id());
+            mc.setScreen(confirmed ? null : this);
+        }, Component.literal("确认拆除机械？"), Component.translatable(node.name())));
+    }
+    private void teleportToSelection() {
+        NetworkSnapshot.Node node = selectedNode();
+        if (node == null) return;
+        TopologyNetwork.teleport(snapshot.origin(), node.pos(), snapshot.id());
+        Minecraft.getInstance().setScreen(null);
+    }
+    private void toggleHighlight() {
+        NetworkSnapshot.Node node = selectedNode();
+        if (node == null) return;
+        TopologyWorldHighlight.toggle(node.pos());
+        Minecraft.getInstance().setScreen(null);
     }
     private void layout() {
         positions.clear();
@@ -92,10 +139,10 @@ public final class TopologyScreen extends Screen {
             if (parent == null) continue;
             double[] a = positions.get(parent), b = positions.get(i);
             int x1 = sx(a[0]), y1 = sy(a[1]), x2 = sx(b[0]), y2 = sy(b[1]);
-            // Orthogonal lines show direction from parent to child without custom render state.
+            // The parent is the source, so the arrow on the connecting line points toward this child.
             g.fill(Math.min(x1, x2), y1, Math.max(x1, x2) + 1, y1 + 1, 0xff718999);
             g.fill(x2, Math.min(y1, y2), x2 + 1, Math.max(y1, y2) + 1, 0xff718999);
-            g.drawString(font, "v", x2 - 2, y2 - 15, 0xffa7c8d8, false);
+            drawRightArrow(g, (x1 + x2) / 2, y1, 0xffb7d9e8);
         }
         for (int i = 0; i < snapshot.nodes().size(); i++) {
             NetworkSnapshot.Node n = snapshot.nodes().get(i);
@@ -147,7 +194,15 @@ public final class TopologyScreen extends Screen {
         for (var entry : positions.entrySet()) if (Math.abs(x - sx(entry.getValue()[0])) <= nodeHalfSize() + 2 && Math.abs(y - sy(entry.getValue()[1])) <= nodeHalfSize() + 2) {
             selected = entry.getKey(); break;
         }
+        updateActionButtons();
         return true;
+    }
+    private static void drawRightArrow(GuiGraphics g, int x, int y, int color) {
+        g.fill(x - 2, y - 3, x - 1, y - 2, color);
+        g.fill(x - 1, y - 2, x, y - 1, color);
+        g.fill(x, y - 1, x + 2, y + 1, color);
+        g.fill(x - 1, y + 1, x, y + 2, color);
+        g.fill(x - 2, y + 2, x - 1, y + 3, color);
     }
     @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
         if (button == 0 && x < graphRight && y > 38) { panX += dx; panY += dy; return true; }
