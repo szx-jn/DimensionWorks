@@ -14,6 +14,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ public final class CFItems {
     public static RegistryObject<BlockItem> FACTORY_CASING;
     public static RegistryObject<BlockItem> FACTORY_PORT;
     public static RegistryObject<BlockItem> FLUID_STABILIZER;
+    public static final Map<String, RegistryObject<BlockItem>> CRYSTALLIZED_MOLTEN_METALS =
+        new LinkedHashMap<>();
     public static RegistryObject<FluidAmpouleItem> FLUID_AMPOULE;
     public static RegistryObject<CreativeModeTab> CREATIVE_TAB;
 
@@ -45,6 +48,13 @@ public final class CFItems {
         FACTORY_CASING = registerBlockItem("factory_casing", CFBlocks.FACTORY_CASING);
         FACTORY_PORT = registerBlockItem("factory_port", CFBlocks.FACTORY_PORT);
         FLUID_STABILIZER = registerBlockItem("fluid_stabilizer", CFBlocks.FLUID_STABILIZER);
+        CFBlocks.CRYSTALLIZED_MOLTEN_METALS.forEach((fluidId, block) -> {
+            String metalId = fluidId.substring("molten_".length());
+            CRYSTALLIZED_MOLTEN_METALS.put(
+                fluidId,
+                registerBlockItem("crystallized_molten_" + metalId, block)
+            );
+        });
 
         for (MachineType machine : MachineType.values()) {
             CONTROLLER_ITEMS.put(

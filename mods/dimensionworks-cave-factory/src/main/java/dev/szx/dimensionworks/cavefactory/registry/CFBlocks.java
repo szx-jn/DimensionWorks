@@ -7,10 +7,13 @@ import dev.szx.dimensionworks.cavefactory.block.FactoryPortBlock;
 import dev.szx.dimensionworks.cavefactory.block.FluidStabilizerBlock;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class CFBlocks {
@@ -21,6 +24,12 @@ public final class CFBlocks {
     public static RegistryObject<FactoryCasingBlock> FACTORY_CASING;
     public static RegistryObject<FactoryPortBlock> FACTORY_PORT;
     public static RegistryObject<FluidStabilizerBlock> FLUID_STABILIZER;
+    public static final Map<String, RegistryObject<Block>> CRYSTALLIZED_MOLTEN_METALS = new LinkedHashMap<>();
+    private static final List<String> MOLTEN_METAL_IDS = List.of(
+        "iron", "copper", "gold", "netherite", "zinc", "brass", "tin", "lead", "osmium",
+        "uranium", "bronze", "steel", "refined_obsidian", "refined_glowstone", "scarlet_neodymium",
+        "azure_neodymium", "totemic_gold", "poseidite", "shulkerate", "sculkium", "eternium"
+    );
 
     private CFBlocks() {}
 
@@ -50,6 +59,17 @@ public final class CFBlocks {
                 .strength(5.0F, 10.0F)
                 .requiresCorrectToolForDrops())
         );
+
+        for (String metalId : MOLTEN_METAL_IDS) {
+            CRYSTALLIZED_MOLTEN_METALS.put(
+                "molten_" + metalId,
+                DimensionWorksCaveFactory.CFRegistry.BLOCKS.register(
+                    "crystallized_molten_" + metalId,
+                    () -> new Block(BlockBehaviour.Properties.copy(Blocks.AMETHYST_BLOCK)
+                        .strength(1.5F, 3.0F))
+                )
+            );
+        }
 
         for (MachineType machine : MachineType.values()) {
             CONTROLLERS.put(
