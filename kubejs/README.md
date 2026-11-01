@@ -23,7 +23,7 @@
 
 ## 车万女仆妖精生成
 
-`server_scripts/touhou_little_maid_fairy_natural_spawn.js` 阻止车万女仆的女仆妖精（`touhou_little_maid:fairy`）自然生成，保留其他生成方式。
+`server_scripts/touhou_little_maid_fairy_natural_spawn.js` 阻止车万女仆的女仆妖精（`touhou_little_maid:fairy`）通过生成检查与实体加入世界两层事件禁止生成，包括自然生成、刷怪蛋、刷怪笼、命令和模组直接添加；存档中的妖精重新加载时也会被拦截。已加载的妖精不会因脚本热重载立即消失，需重新加载所在区块或重启服务端。此规则不扫描每 tick 的实体列表。
 
 ## 齿轮之心
 
