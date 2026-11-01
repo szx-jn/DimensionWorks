@@ -1032,6 +1032,8 @@ const (
 
 const downloadAttemptTimeout = 6 * time.Hour
 
+var errSingleConnection = errors.New("使用单连接下载")
+
 func downloadOnce(source, destination string) error {
 	return downloadOnceLimited(source, destination, maxDownloadBytes)
 }
@@ -1049,7 +1051,11 @@ func downloadOnceLimited(source, destination string, maxBytes int64) error {
 	if rangeErr == nil {
 		return nil
 	}
-	fmt.Printf("[下载] 分段下载失败，保留已校验缓存并使用独立连接重试：%s\n", safeErrorForLog(rangeErr))
+	if errors.Is(rangeErr, errSingleConnection) {
+		fmt.Printf("[下载] %s\n", safeErrorForLog(rangeErr))
+	} else {
+		fmt.Printf("[下载] 分段下载失败，保留已校验缓存并使用独立连接重试：%s\n", safeErrorForLog(rangeErr))
+	}
 
 	progressReset(destination)
 	sequentialCtx, cancelSequential := context.WithTimeout(context.Background(), downloadAttemptTimeout)
@@ -1301,7 +1307,8 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	probeBody, bodyErr := io.ReadAll(io.LimitReader(activityReader{reader: resp.Body, touch: touchProbe}, 2))
 	resp.Body.Close()
 	if bodyErr != nil { return fmt.Errorf("读取 Range 探测响应失败：%w", bodyErr) }
-	if resp.StatusCode != http.StatusPartialContent { return fmt.Errorf("服务器不支持 HTTP Range（状态码 %d）", resp.StatusCode) }
+	if resp.StatusCode == http.StatusOK { return fmt.Errorf("%w：服务器未启用 HTTP Range", errSingleConnection) }
+	if resp.StatusCode != http.StatusPartialContent { return fmt.Errorf("Range 探测失败（HTTP %d）", resp.StatusCode) }
 	matches := regexp.MustCompile("^bytes 0-0/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
 	if len(matches) != 2 || len(probeBody) != 1 || (resp.ContentLength >= 0 && resp.ContentLength != 1) {
 		return errors.New("服务器返回无效的 Range 探测响应")
@@ -1316,7 +1323,7 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	// or yield different mirror origins/validators for each concurrent request.
 	segmentSource := resp.Request.URL.String()
 	progressSetTotal(destination, total)
-	if total < parallelDownloadThreshold { return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total)) }
+	if total < parallelDownloadThreshold { return fmt.Errorf("%w：文件仅 %s，小于分段阈值 %s", errSingleConnection, humanSize(total), humanSize(parallelDownloadThreshold)) }
 
 	segmentBudget := int64(parallelDownloadWorkers)
 	if configured := parallelDownloadLimit.Load(); configured > 0 && configured < segmentBudget {
