@@ -38,6 +38,7 @@ public final class CFForgeEvents {
 
     public static void register() {
         MinecraftForge.EVENT_BUS.register(CFForgeEvents.class);
+        MinecraftForge.EVENT_BUS.register(MoltenCrystallizationEvents.class);
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
