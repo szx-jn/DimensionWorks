@@ -15,7 +15,12 @@ ServerEvents.recipes(event => {
 
   event.recipes.create.compacting(
     'minecraft:netherrack',
-    ['4x create:cinder_flour']
+    [
+      'create:cinder_flour',
+      'create:cinder_flour',
+      'create:cinder_flour',
+      'create:cinder_flour'
+    ]
   ).id('dimensionworks:cinder_flour/netherrack_compacting')
 
   event.recipes.create.filling(

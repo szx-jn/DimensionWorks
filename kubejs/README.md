@@ -86,6 +86,8 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 下界岩粉碎与压块回流沿用原配方。优先回流母料后，每加工一个下界岩期望剩余 0.48 个余烬面粉，即长期平均约 8.33 次粉碎净产一份硫；概率波动需要库存缓冲。余烬面粉同时供红石与硫使用。
 
+下界岩压块回流的四份面粉已展开为四个独立输入条目，修正旧 `4x` 写法导致实际扣料不足的风险。
+
 移除 Mekanism `reaction/coal_gasification/` 下的 `coals`、`dusts_coals`、`blocks_coals` 三条原生煤炭/木炭制硫配方，保留火药制硫及其他硫化学。`forge:dusts/sulfur` 合并 Mekanism 与 Alex’s Caves 硫粉，硫化氢和铀精矿配方改用该标签；旧洞穴配方的硫粉输出和任务物品保持兼容。
 
 工艺设定、产能与验证边界见 [稳定硫供应设计](../docs/design/sulfur-production.md)。
