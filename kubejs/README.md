@@ -70,7 +70,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 ## 余烬面粉与红石
 
-`server_scripts/cinder_flour_recipes.js` 将 Create 原版下界岩粉碎配方改为固定产出 1 个余烬面粉，另有 85% 和 80% 概率各额外产出 2 个；4 个余烬面粉可在工作盆压制成下界岩。余烬面粉经注液器注入 250 mB Create: Diesel Generators 原油，可制成 1 个红石粉。旧的红石矿物自增殖线已移除。
+`server_scripts/cinder_flour_recipes.js` 将 Create 原版下界岩粉碎配方改为固定产出 1 个余烬面粉，另有 2 个各以 85% 概率、2 个各以 89% 概率额外产出（逐个物品独立判定）；4 个余烬面粉可在工作盆压制成下界岩。余烬面粉经注液器注入 250 mB Create: Diesel Generators 原油，可制成 1 个红石粉。旧的红石矿物自增殖线已移除。
 
 完整目标清单、配方成本和游戏内验收步骤见 ../docs/design/basic-mineral-production-lines.md。
 
@@ -115,3 +115,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 `startup_scripts/mekanism_schema_compat.js` 对当前 KubeJS Mekanism 插件无法正确解析的 rotary、washing、reaction、separating、evaporating 类型使用原始 JSON schema，保留 Mekanism 自身对配方的解析和校验。其余正常工作的类型（包括 crushing、combining）保留插件的类型化接口；上述五种类型的新配方使用 `event.custom`。
 
 部分上游集成配方缺少依赖条件：ComputerCraft 网络监视器、暮色森林酒类配方、已不存在的驴肉配方及未注册的熔岩渔网配方在对应依赖或物品不存在时跳过加载，保留原材料与产出定义。AE2 128³ 空间存储元件配方删除未使用的图案键，修复配方被拒绝加载的问题。
+
+## 下界岩自增期望
+
+`server_scripts/cinder_flour_recipes.js` 的每个下界岩产出 1 个保底余烬面粉、2 个各有 85% 概率的面粉和 2 个各有 89% 概率的面粉，期望共 4.48 个。4 个面粉压回 1 个下界岩后，期望净余 0.48 个面粉，等价于净增 0.12 个下界岩（12%）。概率按每个物品独立计算；循环需保留库存缓冲，不能保证每轮都盈利。

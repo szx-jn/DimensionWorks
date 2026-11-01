@@ -1,6 +1,6 @@
 // Redstone and Netherrack now share a Cinder Flour production chain.
 ServerEvents.recipes(event => {
-  // Replace Create's native Netherrack crushing recipe with the DimensionWorks yield.
+  // Expected flour: 1 + 2*0.85 + 2*0.89 = 4.48; 4 flour returns the seed (12% net).
   event.remove({ id: 'create:crushing/netherrack' })
   global.DimensionWorksGrinding.register(event, {
     id: 'dimensionworks:cinder_flour/netherrack_crushing',
@@ -9,7 +9,7 @@ ServerEvents.recipes(event => {
     outputs: [
       { item: 'create:cinder_flour', count: 1 },
       { item: 'create:cinder_flour', count: 2, chance: 0.85 },
-      { item: 'create:cinder_flour', count: 2, chance: 0.80 }
+      { item: 'create:cinder_flour', count: 2, chance: 0.89 }
     ]
   })
 

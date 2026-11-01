@@ -113,6 +113,10 @@ ServerEvents.tick(event => {
       for (var rid of ['mekanism:rotary/hydrofluoric_acid', 'mekanism:processing/copper/slurry/clean', 'mekanism:reaction/wood_gasification/logs', 'mekanism:separator/water', 'mekanism:evaporating/brine', 'dimensionworks:chemistry/carbon_dioxide_from_coal']) {
         check('preserved recipe ' + rid, server.recipeManager.byKey(new $ProbeRL(rid)).isPresent())
       }
+      var netherrackRecipe = server.recipeManager.byKey(new $ProbeRL('dimensionworks:cinder_flour/netherrack_crushing')).get()
+      var flourExpectation = 0
+      netherrackRecipe.getRollableResults().forEach(output => { flourExpectation += output.getStack().count * output.getChance() })
+      check('netherrack net expectation is 12 percent', Math.abs(flourExpectation / 4 - 1.12) < 0.000001)
       check('AE2 128 spatial cell recipe loaded', server.recipeManager.byKey(new $ProbeRL('ae2:network/cells/spatial_storage_cell_128_cubed')).isPresent())
     } catch (error) {
       failures++
