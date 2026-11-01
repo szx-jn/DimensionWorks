@@ -52,17 +52,6 @@ const BASIC_MINERAL_LINES = [
     "mekanismCarrierCount": 2
   },
   {
-    "item": "minecraft:redstone",
-    "path": "redstone",
-    "compactingInputs": [
-      "minecraft:clay_ball",
-      "minecraft:iron_nugget",
-      "minecraft:flint"
-    ],
-    "mekanismCarrier": "minecraft:glowstone_dust",
-    "mekanismCarrierCount": 2
-  },
-  {
     "item": "minecraft:lapis_lazuli",
     "path": "lapis",
     "compactingInputs": [

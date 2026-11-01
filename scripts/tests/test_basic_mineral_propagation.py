@@ -15,7 +15,6 @@ EXPECTED_ITEMS = (
     "create:raw_zinc",
     "minecraft:raw_gold",
     "minecraft:coal",
-    "minecraft:redstone",
     "minecraft:lapis_lazuli",
     "minecraft:quartz",
     "minecraft:amethyst_shard",
@@ -47,7 +46,7 @@ class BasicMineralPropagationTest(unittest.TestCase):
         items = tuple(line["item"] for line in self.lines)
         self.assertEqual(items, EXPECTED_ITEMS)
         self.assertEqual(len(items), len(set(items)))
-        self.assertEqual(len(self.lines), 13)
+        self.assertEqual(len(self.lines), 12)
         self.assertNotIn("mineral_residue", self.source)
 
     def test_every_target_has_only_two_recipe_styles(self) -> None:

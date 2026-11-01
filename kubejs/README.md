@@ -62,7 +62,11 @@ Create 的 Mixer、Press、Crushing Wheels、Saw、Deployer、Spout、Fan 等加
 
 ## 基础矿物与常规金属三路线
 
-server_scripts/basic_mineral_propagation.js 为 16 种目标资源配置三条不同路线：Create 固体压制、Mekanism 高端合成、Create 加热残渣回收。压制线产出通用矿物残渣；每条路线均要求对应目标的有限样本作为输入，回收线还要消耗残渣、辅料、流体与热量。
+server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create 固体压制与 Mekanism 合成路线。压制线要求对应目标的有限样本作为输入。
+
+## 余烬面粉与红石
+
+`server_scripts/cinder_flour_recipes.js` 将 Create 原版下界岩粉碎配方改为固定产出 1 个余烬面粉，另有 85% 和 80% 概率各额外产出 2 个；4 个余烬面粉可在工作盆压制成下界岩。余烬面粉经注液器注入 250 mB Create: Diesel Generators 原油，可制成 1 个红石粉。旧的红石矿物自增殖线已移除。
 
 完整目标清单、配方成本和游戏内验收步骤见 ../docs/design/basic-mineral-production-lines.md。
 
