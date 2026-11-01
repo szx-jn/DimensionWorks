@@ -22,7 +22,7 @@
   "tooltip.kubejs.gear_heart.base": "饰品效果",
   "tooltip.kubejs.gear_heart.reach": "交互距离 +2",
   "tooltip.kubejs.gear_heart.haste": "急迫 II",
-  "tooltip.kubejs.gear_heart.weakness": "虚弱 I",
+  "tooltip.kubejs.gear_heart.damage_penalty": "造成伤害降低 10%",
   "tooltip.kubejs.gear_heart.night_vision": "夜视 I",
   "tooltip.kubejs.gear_heart.blessed_header": "全链释限",
   "tooltip.kubejs.gear_heart.blessed": "齿轮之心不再附加工业额度，Create、Mekanism、AE2 原有限制继续生效。",

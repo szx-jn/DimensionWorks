@@ -33,7 +33,7 @@ public final class GearHeartEffects {
     private static final String RPM_SOURCE = "gear_heart:rpm";
     private static final String BONUS_STATE_KEY = "dimensionworks_gear_heart_bonuses";
     private static final String BONUS_VERSION_KEY = "dimensionworks_gear_heart_bonus_version";
-    private static final int BONUS_VERSION = 2;
+    private static final int BONUS_VERSION = 3;
     private static final FixedIntervalTokenBucket TOKEN_BUCKET = new FixedIntervalTokenBucket();
     private static final Map<UUID, Integer> ACTIVE_QUOTA_MASKS = new ConcurrentHashMap<>();
 
@@ -220,6 +220,10 @@ public final class GearHeartEffects {
         return Optional.empty();
     }
 
+    public static boolean hasEquippedHeart(ServerPlayer player) {
+        return equippedHeart(player).isPresent();
+    }
+
     private static void ensureRepairedRotationLimit(ServerPlayer player, ItemStack heart) {
         boolean repaired = GearHeartState.isBlessed(heart) && !GearHeartState.isLegacyCursed(heart) || GearHeartState.isRepairApplied(
             GearHeartState.getRepairedMask(heart), GearHeartState.ROTATION_SPEED);
@@ -260,6 +264,7 @@ public final class GearHeartEffects {
         if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)
             && player.getPersistentData().getInt(BONUS_VERSION_KEY) < BONUS_VERSION) {
             removeHeartEffect(player, MobEffects.LUCK, 0);
+            removeHeartEffect(player, MobEffects.WEAKNESS, 0);
         }
         player.getPersistentData().putBoolean(BONUS_STATE_KEY, true);
         player.getPersistentData().putInt(BONUS_VERSION_KEY, BONUS_VERSION);
@@ -269,12 +274,6 @@ public final class GearHeartEffects {
         if (!hasInfiniteEffect(player, MobEffects.DIG_SPEED, 1)) {
             player.addEffect(new MobEffectInstance(
                 MobEffects.DIG_SPEED, MobEffectInstance.INFINITE_DURATION, 1,
-                false, false, true
-            ));
-        }
-        if (!hasInfiniteEffect(player, MobEffects.WEAKNESS, 0)) {
-            player.addEffect(new MobEffectInstance(
-                MobEffects.WEAKNESS, MobEffectInstance.INFINITE_DURATION, 0,
                 false, false, true
             ));
         }

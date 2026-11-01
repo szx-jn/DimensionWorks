@@ -12,6 +12,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -98,7 +99,7 @@ public final class GearHeartForgeEvents {
             .withStyle(ChatFormatting.GREEN));
         event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.haste")
             .withStyle(ChatFormatting.GREEN));
-        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.weakness")
+        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.damage_penalty")
             .withStyle(ChatFormatting.RED));
         event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.night_vision")
             .withStyle(ChatFormatting.GREEN));
@@ -171,6 +172,14 @@ public final class GearHeartForgeEvents {
     public static void preventUnequip(CurioUnequipEvent event) {
         if (GearHeartState.isGearHeart(event.getStack())) {
             event.setResult(Event.Result.DENY);
+        }
+    }
+
+    @SubscribeEvent
+    public static void reduceOutgoingDamage(LivingHurtEvent event) {
+        if (event.getSource().getEntity() instanceof ServerPlayer attacker
+            && GearHeartEffects.hasEquippedHeart(attacker)) {
+            event.setAmount(event.getAmount() * 0.9F);
         }
     }
 

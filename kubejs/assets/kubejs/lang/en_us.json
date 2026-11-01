@@ -22,7 +22,7 @@
   "tooltip.kubejs.gear_heart.base": "Trinket effects",
   "tooltip.kubejs.gear_heart.reach": "Interaction range +2",
   "tooltip.kubejs.gear_heart.haste": "Haste II",
-  "tooltip.kubejs.gear_heart.weakness": "Weakness I",
+  "tooltip.kubejs.gear_heart.damage_penalty": "Deals 10% less damage",
   "tooltip.kubejs.gear_heart.night_vision": "Night Vision I",
   "tooltip.kubejs.gear_heart.blessed_header": "Full Release",
   "tooltip.kubejs.gear_heart.blessed": "The Gear Heart adds no industrial quotas; native Create, Mekanism, and AE2 limits still apply.",
