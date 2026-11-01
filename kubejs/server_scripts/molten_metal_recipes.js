@@ -1,9 +1,9 @@
 // DimensionWorks：金属锭高温熔融配方。
 // Create 6.0.8 + KubeJS Create。
 // Create 原生只区分 HEATED / SUPERHEATED 两档热需求；这里按材料熔点分档。
-// 每个锭熔成 90 mB，沿用常见的 9 锭 = 810 mB 方块换算比例。
+// 统一采用 1 个锭 = 1,000 mB（1 B），与熔融流体桶的容量一致。
 
-const DW_MOLTEN_INGOT_AMOUNT = 90
+const DW_MOLTEN_INGOT_AMOUNT = 1000
 
 const DW_MOLTEN_INGOT_RECIPES = [
   // 普通加热：低熔点金属与常规铜合金
