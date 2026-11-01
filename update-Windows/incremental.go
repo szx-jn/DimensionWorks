@@ -291,7 +291,7 @@ func stageIncrementalPackages(root, work, stageRoot string, packages []Increment
 			_ = archive.Close()
 			return fmt.Errorf("增量包 %s 展开前磁盘空间不足：%w", pkg.Release, spaceErr)
 		}
-		if err := stageArchiveEntries(archive, present, stageRoot); err != nil {
+		if err := extractArchiveEntries(archive, present, stageRoot, false); err != nil {
 			_ = archive.Close()
 			return fmt.Errorf("暂存增量包 %s 失败：%w", pkg.Release, err)
 		}

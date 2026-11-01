@@ -217,6 +217,7 @@ func TestSequentialDownloadResumesFromSavedRange(t *testing.T) {
 func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
 	data := bytes.Repeat([]byte("dimensionworks"), int((parallelDownloadThreshold+4096)/14+1))
 	var failed atomic.Bool
+	failed.Store(true)
 	var segmentRequests atomic.Int64
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("ETag", "\"range-v1\"")
@@ -229,7 +230,7 @@ func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
 			return
 		}
 		segmentRequests.Add(1)
-		if failed.CompareAndSwap(false, true) {
+		if failed.Load() && strings.HasPrefix(rangeValue, "bytes=0-") {
 			time.Sleep(100 * time.Millisecond)
 			w.WriteHeader(http.StatusBadGateway)
 			return
@@ -252,16 +253,17 @@ func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
 	defer func(){ downloadCacheRoot = oldCache }()
 	destination := filepath.Join(t.TempDir(), "package.zip")
 	if err := downloadRanged(context.Background(), server.URL, destination, int64(len(data))); err == nil {
-		t.Fatal("first ranged attempt should fail once")
+		t.Fatal("first ranged attempt should exhaust retries")
 	}
 	cached, err := filepath.Glob(filepath.Join(cache, "*.part"))
 	if err != nil { t.Fatal(err) }
 	if len(cached) == 0 { t.Fatal("completed segments were not persisted") }
 	before := segmentRequests.Load()
+	failed.Store(false)
 	if err := downloadRanged(context.Background(), server.URL, destination, int64(len(data))); err != nil {
 		t.Fatalf("second ranged attempt should resume: %v", err)
 	}
-	if segmentRequests.Load()-before >= int64(parallelDownloadWorkers) {
+	if segmentRequests.Load()-before != 1 {
 		t.Fatal("resume redownloaded every segment instead of reusing completed ones")
 	}
 	got, err := os.ReadFile(destination)

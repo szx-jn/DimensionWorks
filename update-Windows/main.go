@@ -1049,7 +1049,7 @@ func downloadOnceLimited(source, destination string, maxBytes int64) error {
 	if rangeErr == nil {
 		return nil
 	}
-	fmt.Printf("[下载] 分段下载失败，清理分段并使用独立连接重试：%v\n", rangeErr)
+	fmt.Printf("[下载] 分段下载失败，保留已校验缓存并使用独立连接重试：%s\n", safeErrorForLog(rangeErr))
 
 	progressReset(destination)
 	sequentialCtx, cancelSequential := context.WithTimeout(context.Background(), downloadAttemptTimeout)
@@ -1294,6 +1294,7 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Range", "bytes=0-0")
 	resp, err := newHTTPClient(0, 20*time.Second).Do(req)
 	if err != nil { return err }
@@ -1310,8 +1311,10 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	}
 	total, err := strconv.ParseInt(matches[1], 10, 64)
 	if err != nil || total <= 0 || total > maxBytes { return errors.New("服务器返回无效或超限的 Content-Range") }
-	validator := resp.Header.Get("ETag")
-	if validator == "" { validator = resp.Header.Get("Last-Modified") }
+	validator := rangeValidator(resp.Header)
+	// Reuse the probed endpoint: release redirects can be expensive, rate-limited,
+	// or yield different mirror origins/validators for each concurrent request.
+	segmentSource := resp.Request.URL.String()
 	progressSetTotal(destination, total)
 	if total < parallelDownloadThreshold { return fmt.Errorf("文件仅 %s，使用单连接下载", humanSize(total)) }
 
@@ -1378,7 +1381,7 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 				} else if !os.IsNotExist(cacheErr) {
 					select { case errs <- cacheErr: default: }; cancelRange(); return
 				}
-				if err := downloadRangeSegment(rangeCtx, source, partPaths[index], destination, begin, end, total, validator); err != nil {
+				if err := downloadRangeSegmentWithRetry(rangeCtx, segmentSource, partPaths[index], destination, begin, end, total, validator); err != nil {
 					select { case errs <- fmt.Errorf("分段 %d：%w", index+1, err): default: }
 					cancelRange(); return
 				}
@@ -1435,12 +1438,40 @@ func writeSmallFileAtomic(path string, data []byte, mode os.FileMode) error {
 	return replaceExistingFile(tempPath, path)
 }
 
+// RFC 9110 forbids weak entity tags in If-Range. Prefer a strong ETag,
+// otherwise use Last-Modified; final file digests remain mandatory.
+func rangeValidator(header http.Header) string {
+	etag := strings.TrimSpace(header.Get("ETag"))
+	if strings.HasPrefix(etag, "\"") && strings.HasSuffix(etag, "\"") {
+		return etag
+	}
+	return header.Get("Last-Modified")
+}
+
+func downloadRangeSegmentWithRetry(ctx context.Context, source, destination, progressKey string, begin, end, total int64, validator string) error {
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			timer := time.NewTimer(time.Duration(attempt) * time.Second)
+			select {
+			case <-ctx.Done(): timer.Stop(); return ctx.Err()
+			case <-timer.C:
+			}
+		}
+		lastErr = downloadRangeSegment(ctx, source, destination, progressKey, begin, end, total, validator)
+		if lastErr == nil { return nil }
+		if ctx.Err() != nil { return ctx.Err() }
+	}
+	return lastErr
+}
+
 func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64, validator string) error {
 	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(end-begin+1))
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
 	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
 	if validator != "" { req.Header.Set("If-Range", validator) }
 	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
@@ -1472,6 +1503,10 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	file, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil { return err }
 	progressWriter := &downloadProgress{writer: file, key: progressKey}
+	succeeded := false
+	defer func() {
+		if !succeeded { downloadProgressUI.rewind(progressKey, progressWriter.written) }
+	}()
 	n, copyErr := io.Copy(progressWriter, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, expected+1))
 	syncErr := file.Sync()
 	closeErr := file.Close()
@@ -1482,6 +1517,7 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	digest, err := hashFile(destination, "sha256")
 	if err != nil { _ = os.Remove(destination); return err }
 	if err := writeSmallFileAtomic(destination+".sha256", []byte(digest), 0600); err != nil { _ = os.Remove(destination); return err }
+	succeeded = true
 	return nil
 }
 
@@ -1548,6 +1584,15 @@ func (p *progressTracker) add(key string, count int64) {
 		p.renderLocked(false)
 	}
 	p.mu.Unlock()
+}
+
+func (p *progressTracker) rewind(key string, count int64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if file := p.files[key]; file != nil && count > 0 {
+		file.written -= count
+		if file.written < 0 { file.written = 0 }
+	}
 }
 
 func (p *progressTracker) finish(key string, success bool) {
@@ -1921,6 +1966,12 @@ func embeddedManifest(archive *Archive, kind string) (*Manifest, error) {
 }
 
 func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) error {
+	return extractArchiveEntries(archive, entries, stageRoot, true)
+}
+
+// Incremental overlays must finish before their bytes can match the target digest.
+// Callers disabling verification must verify every final staged entry before apply.
+func extractArchiveEntries(archive *Archive, entries []Entry, stageRoot string, verify bool) error {
 	if archive == nil {
 		return errors.New("没有可用的更新归档")
 	}
@@ -1971,8 +2022,10 @@ func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) er
 		if readerErr != nil {
 			return readerErr
 		}
-		if err := verifyDigest(stage, entry.Algorithm, entry.Value); err != nil {
-			return fmt.Errorf("归档文件摘要不匹配 %s：%w", entry.Path, err)
+		if verify {
+			if err := verifyDigest(stage, entry.Algorithm, entry.Value); err != nil {
+				return fmt.Errorf("归档文件摘要不匹配 %s：%w", entry.Path, err)
+			}
 		}
 	}
 	return nil
