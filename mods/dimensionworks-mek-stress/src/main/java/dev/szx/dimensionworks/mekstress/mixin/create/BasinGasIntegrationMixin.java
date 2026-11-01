@@ -19,6 +19,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -26,6 +27,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BasinBlockEntity.class, remap = false)
 public abstract class BasinGasIntegrationMixin {
+    @Invoker(value = "getHeatLevel", remap = false)
+    public abstract HeatLevel dimensionworks$getHeatLevel();
+
     @Unique
     private BasinGasHandler dimensionworks$gasHandler =
         new BasinGasHandler((BasinBlockEntity) (Object) this);
@@ -59,7 +63,7 @@ public abstract class BasinGasIntegrationMixin {
         // output simulation as well, so the alternate recipe can be selected
         // without consuming ingredients or producing the wrong gas.
         if (tag.getBoolean("ExcludeSuperheated")
-            && ((BasinBlockEntity) (Object) this).getHeatLevel() == HeatLevel.SEETHING) {
+            && dimensionworks$getHeatLevel() == HeatLevel.SEETHING) {
             cir.setReturnValue(false);
             return;
         }
