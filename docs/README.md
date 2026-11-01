@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/copper-recipe-inventory.md`](design/copper-recipe-inventory.md)：基于 0.2.63 发布包数据和当前脚本的铜、黄铜、青铜配方静态清单，附完整 CSV、条件配方及世界交互说明。
+
 - [`design/stress-gauge-redstone-alert.md`](design/stress-gauge-redstone-alert.md)：Create 应力表过载红石告警行为与实现边界
 
 - [`design/kinetic-network-diagnostics.md`](design/kinetic-network-diagnostics.md)：应力网络恢复账目、最低 RPM 上限与扳手拓扑 GUI

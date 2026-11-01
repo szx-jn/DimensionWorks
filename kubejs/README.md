@@ -66,7 +66,11 @@ Create 的 Mixer、Press、Crushing Wheels、Saw、Deployer、Spout、Fan 等加
 
 ## 基础矿物与常规金属三路线
 
+本包将原版粗铜（`minecraft:raw_copper`）显示为“氧化铜”，粗铜块显示为“氧化铜块”；英文分别为 Copper Oxide 和 Block of Copper Oxide。语言覆盖位于 `assets/minecraft/lang/`，仅调整显示名称，物品 ID、纹理、标签、默认熔炉和高炉烧制均保留。不新增其他现实铜化合物。铜、黄铜、青铜及相关加工/用途配方盘点见 [铜配方清单](../docs/design/copper-recipe-inventory.md)。
+
 server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create 固体压制与 Mekanism 合成路线。压制线要求对应目标的有限样本作为输入。
+
+铜改用 `server_scripts/copper_processing.js`：氧化铜 + 250 mB 一氧化碳在普通加热工作盆中搅拌得到 1 铜锭 + 250 mB 二氧化碳；铜锭经 Create 粉碎轮产出 1 个保底铜粉、2 个各 80% 概率铜粉、1 个 60% 概率铜粉（期望 3.2 个）；4 铜粉 + 1 圆石加热搅拌得到 2 辉绿岩；每个辉绿岩经 Mekanism 提纯室耗氧得到 2 氧化铜。旧的铜双路线增殖和原生铜碎块提纯配方移除。默认烧制、高炉烧制及其他未指定铜加工保留。
 
 煤炭自增殖配方已移除，仅规划木炭化学合成来源；现已实现木炭制气，后续制煤工序待定。
 
@@ -99,14 +103,14 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 - 获取方式为整合包生产线的简化模型，并非每条配方都逐原子复刻实验室制备；继续扩充时应优先保持化学反应方向、元素守恒和工业流程合理性。
 
 
-## Create 工作盆 Mekanism 气体输出
+## Create 工作盆 Mekanism 气体输入与输出
 
-- 工作盆内置 10,000 mB 单气体缓冲，可由 Mekanism 气体管道抽取。
-- Create 配方可将内部物品 `dimensionworks_mek_stress:gas_output` 作为唯一产物，并在物品 NBT 指定 `Gas`（气体注册 ID）和 `Amount`（mB 数量）；标记会转为真正的 Mekanism 气体，不会作为物品掉落。可选 NBT `ExcludeSuperheated: true` 会在超级加热时拒绝配方，包括匹配模拟阶段，以支持普通加热与超级加热使用同一原料产出不同气体。
+- 工作盆拥有独立的进气、出气缓冲，各 10,000 mB、每个缓冲只存一种气体。管道灌入进气缓冲、抽取出气缓冲；制气盆的 CO 需要通过管道送入反应盆。
+- Create 配方以内部物品 `dimensionworks_mek_stress:gas_output` 的 NBT `Gas`（注册 ID）和 `Amount`（mB）指定气体产出，可与普通物品同时产出，标记不会掉落。可选的 `InputGas` 与 `InputAmount` 指定进气消耗；气体不足、气体类型不匹配或产物无空间时不能加工。可选 `ExcludeSuperheated: true` 限制配方不能在超级加热时执行，匹配与实际执行都检查。
 - `server_scripts/chemistry_gas_recipes.js` 提供木炭熔炼配方：工作盆普通加热每消耗 1 个木炭产出 125 mB 一氧化碳，超级加热每消耗 1 个木炭产出 250 mB 二氧化碳，由 Mekanism 气体管道抽取。木炭化学氧化室产一氧化碳入口已移除。煤炭增殖及煤炭制二氧化碳入口已移除；后续制煤工序待定。
-- 工作盆无盖或开盖时，每 20 游戏刻固定流失 200 mB，余量不足 200 mB 时清空。只有盆正上方关闭的柴油动力工作盆盖（`createdieselgenerators:basin_lid`）能阻止流失；屋顶、普通方块和搅拌器不视作密封盖。所有进入盆内气体缓冲的 Mekanism 气体均遵循此规则，与气体种类无关。该规则不影响液体，也不允许管道向工作盆灌入气体。
+- 工作盆无盖或开盖时，每 20 游戏刻合计流失 200 mB，按进气、出气缓冲存量比例分摊；总量不足时清空。只有盆正上方关闭的柴油动力工作盆盖（`createdieselgenerators:basin_lid`）能阻止流失；屋顶、普通方块和搅拌器不视作密封盖。所有盆内 Mekanism 气体均遵循此规则，与气体种类无关，液体不受影响。
 
-其他气体配方可复用同一输出物品，将 `Gas` 改为对应注册 ID、`Amount` 改为 mB 数量。工作盆缓冲同一时间只存一种气体；切换气体前先用 Mekanism 管道抽空。
+其他气体配方可复用同一输出标记，并按需设置进气要求；进气缓冲只通过配方消耗，出气缓冲可由管道抽空。切换产出气体前需抽空出气缓冲。
 
 ## Create 烈焰人燃烧室柴油动力燃料
 

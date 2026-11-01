@@ -11,7 +11,6 @@ LANG = ROOT / "kubejs/assets/kubejs/lang/zh_cn.json"
 
 EXPECTED_ITEMS = (
     "minecraft:raw_iron",
-    "minecraft:raw_copper",
     "create:raw_zinc",
     "minecraft:raw_gold",
     "minecraft:lapis_lazuli",
@@ -45,7 +44,7 @@ class BasicMineralPropagationTest(unittest.TestCase):
         items = tuple(line["item"] for line in self.lines)
         self.assertEqual(items, EXPECTED_ITEMS)
         self.assertEqual(len(items), len(set(items)))
-        self.assertEqual(len(self.lines), 11)
+        self.assertEqual(len(self.lines), 10)
         self.assertNotIn("mineral_residue", self.source)
 
     def test_every_target_has_only_two_recipe_styles(self) -> None:

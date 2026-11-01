@@ -12,16 +12,6 @@ const BASIC_MINERAL_LINES = [
     "mekanismCarrierCount": 1
   },
   {
-    "item": "minecraft:raw_copper",
-    "path": "copper",
-    "compactingInputs": [
-      "2x minecraft:gravel",
-      "minecraft:calcite"
-    ],
-    "mekanismCarrier": "minecraft:flint",
-    "mekanismCarrierCount": 2
-  },
-  {
     "item": "create:raw_zinc",
     "path": "zinc",
     "compactingInputs": [

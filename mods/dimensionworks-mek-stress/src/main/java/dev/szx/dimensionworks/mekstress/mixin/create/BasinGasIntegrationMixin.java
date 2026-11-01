@@ -7,7 +7,6 @@ import dev.szx.dimensionworks.mekstress.integration.BasinGasHandler;
 import java.util.List;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.GasStack;
 import mekanism.common.capabilities.Capabilities;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +29,10 @@ public abstract class BasinGasIntegrationMixin {
     @Invoker(value = "getHeatLevel", remap = false)
     public abstract HeatLevel dimensionworks$getHeatLevel();
 
+    @Invoker(value = "acceptOutputs", remap = false)
+    public abstract boolean dimensionworks$acceptRegularOutputs(
+        List<ItemStack> items, List<FluidStack> fluids, boolean simulate);
+
     @Unique
     private BasinGasHandler dimensionworks$gasHandler =
         new BasinGasHandler((BasinBlockEntity) (Object) this);
@@ -47,12 +50,14 @@ public abstract class BasinGasIntegrationMixin {
             return;
         }
 
-        if (outputItems.size() != 1 || !outputFluids.isEmpty()) {
+        List<ItemStack> markers = outputItems.stream()
+            .filter(stack -> stack.is(DimensionWorksMekStress.GAS_OUTPUT_ITEM.get())).toList();
+        if (markers.size() != 1) {
             cir.setReturnValue(false);
             return;
         }
 
-        ItemStack marker = outputItems.get(0);
+        ItemStack marker = markers.get(0);
         CompoundTag tag = marker.getTag();
         if (tag == null || !tag.contains("Gas", Tag.TAG_STRING) || !tag.contains("Amount", Tag.TAG_ANY_NUMERIC)) {
             cir.setReturnValue(false);
@@ -70,13 +75,49 @@ public abstract class BasinGasIntegrationMixin {
 
         ResourceLocation gasId = ResourceLocation.tryParse(tag.getString("Gas"));
         Gas gas = gasId == null ? null : MekanismAPI.gasRegistry().getValue(gasId);
-        long amount = tag.getLong("Amount") * marker.getCount();
+        long amount = dimensionworks$scaledAmount(tag, "Amount", marker.getCount());
         if (gas == null || gas.isEmptyType() || amount <= 0) {
             cir.setReturnValue(false);
             return;
         }
 
-        cir.setReturnValue(dimensionworks$gasHandler.acceptProducedGas(gas, amount, simulate));
+        Gas inputGas = null;
+        long inputAmount = 0L;
+        if (tag.contains("InputGas") || tag.contains("InputAmount")) {
+            ResourceLocation inputId = ResourceLocation.tryParse(tag.getString("InputGas"));
+            inputGas = inputId == null ? null : MekanismAPI.gasRegistry().getValue(inputId);
+            inputAmount = dimensionworks$scaledAmount(tag, "InputAmount", marker.getCount());
+            if (inputGas == null || inputGas.isEmptyType() || inputAmount <= 0) {
+                cir.setReturnValue(false);
+                return;
+            }
+        }
+
+        // Validate gas before invoking Create's normal output handling. The
+        // recursive call has no marker, so it takes the original item/fluid path.
+        // Matching only simulates; execution commits once, on the server thread.
+        if (!dimensionworks$gasHandler.processRecipeGas(inputGas, inputAmount, gas, amount, true)) {
+            cir.setReturnValue(false);
+            return;
+        }
+        List<ItemStack> regularItems = outputItems.stream()
+            .filter(stack -> !stack.is(DimensionWorksMekStress.GAS_OUTPUT_ITEM.get())).toList();
+        if (!dimensionworks$acceptRegularOutputs(regularItems, outputFluids, simulate)) {
+            cir.setReturnValue(false);
+            return;
+        }
+        cir.setReturnValue(
+            dimensionworks$gasHandler.processRecipeGas(inputGas, inputAmount, gas, amount, simulate));
+    }
+
+    @Unique
+    private static long dimensionworks$scaledAmount(CompoundTag tag, String key, int count) {
+        if (!tag.contains(key, Tag.TAG_ANY_NUMERIC) || tag.getLong(key) <= 0 || count <= 0) return -1L;
+        try {
+            return Math.multiplyExact(tag.getLong(key), (long) count);
+        } catch (ArithmeticException overflow) {
+            return -1L;
+        }
     }
 
     @Inject(method = "tick", at = @At("TAIL"), remap = false)
