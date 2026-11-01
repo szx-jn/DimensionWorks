@@ -84,6 +84,10 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 `server_scripts/molten_metal_recipes.js` 将对应锭熔成 1,000 mB（1 B）流体，并定义黄铜、青铜熔融混合配方。21 种熔融流体的冷却配方位于 `data/create_dragons_plus/recipes/freezing/`：使用 Create: Connected 冷冻触媒和 Create: Dragons Plus 鼓风冷冻类型处理 1,000 mB 熔融流体桶，输出空桶与 1 个对应锭，保持 1 个锭与 1 B 流体一一对应。
 
+## Create 染色触媒兼容
+
+`data/create_dragons_plus/tags/blocks/fan_processing_catalysts/coloring/` 为 Create: Connected 的 16 色染色触媒补充 Create: Dragons Plus 所需的方块标签。Create: Connected 1.2.3 只为 Garnished 生成了染色触媒兼容标签，漏掉 Dragons Plus 使用的标签；补齐后，鼓风机可通过对应触媒执行批量染色。标签采用可扩展合并，不替换其他数据包内容。
+
 ## 高中化学核心气体
 
 - `startup_scripts/chemistry_gases.js` 注册 Mekanism 原版未提供的核心化学品气体，使用独立的 `dimensionworks:` 命名空间，避免覆盖 Mekanism 原版气体。
