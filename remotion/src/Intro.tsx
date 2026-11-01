@@ -1,5 +1,6 @@
 import React from "react";
 import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
+import voiceoverPlan from "../voiceover.json";
 import {Caption, Gear, Landscape, palette, ramp, Scene} from "./Cinema";
 import {MoltenChemistry} from "./Mechanisms";
 import {DirectPower, NetworkPower} from "./PowerScenes";
@@ -124,12 +125,27 @@ const EndTitle: React.FC = () => {
   </Scene>;
 };
 
-const Soundscape: React.FC = () => <Audio src={staticFile("audio/intro-soundscape.wav")} volume={.8}/>;
+const Soundscape: React.FC = () => <Audio src={staticFile("audio/intro-soundscape.wav")} volume={.24}/>;
+
+const Voiceover: React.FC = () => {
+  const {fps} = useVideoConfig();
+  return <>
+    {voiceoverPlan.segments.map((segment, index) => <Sequence
+      key={segment.start}
+      name={`旁白 ${index + 1}`}
+      from={Math.round(segment.start * fps)}
+      durationInFrames={Math.round((segment.end - segment.start) * fps)}
+    >
+      <Audio src={staticFile(`audio/voiceover/voiceover-${String(index + 1).padStart(2, "0")}.wav`)} volume={.95}/>
+    </Sequence>)}
+  </>;
+};
 
 export const Intro: React.FC = () => {
   const {fps} = useVideoConfig();
   return <AbsoluteFill style={{background: "#090f13"}}>
     <Soundscape/>
+    <Voiceover/>
     <Sequence name="天地异变" from={0} durationInFrames={6 * fps} premountFor={fps}><Anomaly/></Sequence>
     <Sequence name="心脏改写" from={6 * fps} durationInFrames={7 * fps} premountFor={fps}><HeartChange/></Sequence>
     <Sequence name="齿轮坠落" from={13 * fps} durationInFrames={4 * fps} premountFor={fps}><FallingGear/></Sequence>
