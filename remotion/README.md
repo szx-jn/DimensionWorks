@@ -53,7 +53,7 @@ git diff --check
 - 方块化风景、机械部件、网络和金属反应均为代码绘制的原创插画，未复制第三方模组模型或贴图。
 - `scripts/generate_soundscape.py` 以固定随机种子生成 `public/audio/intro-soundscape.wav`，为 90 秒、22,050 Hz、PCM16 单声道原创合成音景。包括风、水声质感、鸟鸣、双拍心跳、轻微机械声、加热噪声与晶体共振，无配音和外部录音。
 - 声音脚本只生成视频音频素材，不调用任何 Mod 或整合包构建。可独立运行 `python3 scripts/generate_soundscape.py` 重建；音频作为源素材随项目保留，避免首次预览缺失音轨。
-- `voiceover.json` 保存按镜头分段的中文旁白与时间窗；`scripts/generate_voiceover.py` 使用小米 MiMo Token Plan 的 `mimo-v2.5-tts`、预置中文音色“茉莉”合成 WAV。声音参考“曼波”轻快俏皮、略带唱念感的表达，但保持本片的安静叙事，不克隆具体角色。通过 `MIMO_API_KEY` 环境变量传入密钥；可选用 `MIMO_BASE_URL` 覆盖 Token Plan 地址。运行 `npm run voiceover` 后，旁白保存在 `public/audio/voiceover/`，项目不保存密钥。
+- `voiceover.json` 保存与各镜头现有字幕一致的旁白句子和字幕时间窗；`scripts/generate_voiceover.py` 使用小米 MiMo Token Plan 的 `mimo-v2.5-tts`、预置中文音色“茉莉”合成分镜音频，并按时间窗组装为 90 秒单轨 WAV。各段统一采用平稳、自然的叙述口吻，保留轻快明亮感但不过度表演，不克隆具体角色。通过 `MIMO_API_KEY` 环境变量传入密钥；可选用 `MIMO_BASE_URL` 覆盖 Token Plan 地址。运行 `npm run voiceover` 后，旁白保存在 `public/audio/voiceover/`，项目不保存密钥。
 - 旁白按时间窗放入现有 90 秒时间轴，背景音景降至较轻音量以留出人声空间。生成脚本会检查每段音频是否超出对应镜头时长，并写出实际时长清单。
 
 ## 内容核对依据

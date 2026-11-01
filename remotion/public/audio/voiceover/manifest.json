@@ -3,74 +3,60 @@
   "voice": "茉莉",
   "segments": [
     {
-      "start": 0.7,
-      "end": 6,
+      "start": 1.2,
+      "end": 5.6,
       "text": "那一天，天地发生了异变。",
       "file": "voiceover-01.wav",
       "duration": 3.2
     },
     {
-      "start": 6.4,
-      "end": 13,
-      "text": "目光之外，心脏化作齿轮之心。",
+      "start": 6.5,
+      "end": 12.6,
+      "text": "有些变化，发生在目光之外。",
       "file": "voiceover-02.wav",
-      "duration": 4.16
-    },
-    {
-      "start": 13.3,
-      "end": 17,
-      "text": "齿轮坠落，万物沉睡。",
-      "file": "voiceover-03.wav",
       "duration": 3.68
     },
     {
-      "start": 17.6,
-      "end": 24,
-      "text": "草木掩去痕迹，三万年过去。",
-      "file": "voiceover-04.wav",
-      "duration": 4.0
+      "start": 17.9,
+      "end": 23.6,
+      "text": "三万年过去。草木已看不出那一天的痕迹。",
+      "file": "voiceover-03.wav",
+      "duration": 4.48
     },
     {
-      "start": 24.8,
+      "start": 24.35,
       "end": 33,
-      "text": "醒来，力量与代价并存。",
-      "file": "voiceover-05.wav",
-      "duration": 3.52
-    },
-    {
-      "start": 33.6,
-      "end": 39,
-      "text": "动力沿传动杆，驱动生产。",
-      "file": "voiceover-06.wav",
-      "duration": 2.72
-    },
-    {
-      "start": 39.8,
-      "end": 55,
-      "text": "机械动力接入应用机动网络，经控制分配，驱动加工；储存与计算，也加入生产。",
-      "file": "voiceover-07.wav",
-      "duration": 8.32
-    },
-    {
-      "start": 55.7,
-      "end": 70,
-      "text": "五代驱动器，基础转速各异。三十张内存卡，在存储、速度与损耗间取舍。",
-      "file": "voiceover-08.wav",
+      "text": "眼前的世界，似乎仍然熟悉。残存的力量，与它留下的代价，一同苏醒。",
+      "file": "voiceover-04.wav",
       "duration": 8.0
     },
     {
-      "start": 70.7,
-      "end": 85,
-      "text": "熔融的金属与空气相遇，细微变化随之发生。接触，或隔绝；保留，或分离。",
-      "file": "voiceover-09.wav",
-      "duration": 8.64
+      "start": 33,
+      "end": 38.8,
+      "text": "转动沿传动杆传开，各类工厂开始运作。",
+      "file": "voiceover-05.wav",
+      "duration": 4.32
     },
     {
-      "start": 85.2,
-      "end": 90,
-      "text": "维度工序。",
-      "file": "voiceover-10.wav",
-      "duration": 1.44
+      "start": 39,
+      "end": 54.7,
+      "text": "应力进入齿轮箱，沿 ME 玻璃线缆接入网络。网络自身，也需要 AE 能量。接入驱动器，另一端的齿轮箱便能带动压力机。",
+      "file": "voiceover-06.wav",
+      "duration": 11.36
+    },
+    {
+      "start": 55,
+      "end": 69.7,
+      "text": "驱动器拓展转速额度，内存卡决定如何分配这份余地。更多转速，也意味着新的取舍。",
+      "file": "voiceover-07.wav",
+      "duration": 8.48
+    },
+    {
+      "start": 70,
+      "end": 82.9,
+      "text": "金属依旧会在高温中熔化。可如今，空气中多了某些东西。它们留下的结晶，连炉火也难以抹去。",
+      "file": "voiceover-08.wav",
+      "duration": 10.56
     }
   ]
 }

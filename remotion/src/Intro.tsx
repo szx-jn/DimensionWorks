@@ -96,7 +96,7 @@ const Awakening: React.FC = () => {
       </div>)}
     </div>
     <AbsoluteFill style={{background: "#080f12", opacity: (1 - ramp(t, 0, 1.3)) * .95}}/>
-    <Caption start={1.2} end={3.2}>眼前的世界，似乎仍然熟悉。</Caption>
+    <Caption start={.35} end={4.5}>眼前的世界，似乎仍然熟悉。</Caption>
     <Caption start={4.6} end={8.6}>残存的力量，与它留下的代价，一同苏醒。</Caption>
   </Scene>;
 };
@@ -128,17 +128,7 @@ const EndTitle: React.FC = () => {
 const Soundscape: React.FC = () => <Audio src={staticFile("audio/intro-soundscape.wav")} volume={.24}/>;
 
 const Voiceover: React.FC = () => {
-  const {fps} = useVideoConfig();
-  return <>
-    {voiceoverPlan.segments.map((segment, index) => <Sequence
-      key={segment.start}
-      name={`旁白 ${index + 1}`}
-      from={Math.round(segment.start * fps)}
-      durationInFrames={Math.round((segment.end - segment.start) * fps)}
-    >
-      <Audio src={staticFile(`audio/voiceover/voiceover-${String(index + 1).padStart(2, "0")}.wav`)} volume={.95}/>
-    </Sequence>)}
-  </>;
+  return <Audio src={staticFile("audio/voiceover/voiceover-track.wav")} volume={.95}/>;
 };
 
 export const Intro: React.FC = () => {
