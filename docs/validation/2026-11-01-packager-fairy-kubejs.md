@@ -8,6 +8,7 @@
 - Create Mobile Packages fork 测试提交：`09c2b9b`。
 - GitHub Actions 测试构建：`41282304043`，构建成功。
 - 测试 Jar SHA-256：`23b7fdd1f5f7c693b85dfe7d613c9f5c8c310bcbabffdfe39e23e25aa86106c0`。
+- 正式 Release Jar 与测试 Jar 的全部文件内容一致，仅 MANIFEST 的构建时间戳不同。
 - 对照测试 `.10` 复现原地拆包、掉落搬运后拆包返还空箱的问题；普通 Mekanism 纸箱返还正常。
 
 ## 修复后结果
