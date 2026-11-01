@@ -2252,6 +2252,20 @@ func bootstrapState(root, kind string) (*Manifest, error) {
 		rootFiles = []string{"modrinth.index.json", "options.txt", "log4j2.xml", "rhino.local.properties", "CustomSkinLoader/CustomSkinLoader.json", "minemenu/menu.json"}
 	}
 	state := &Manifest{Kind: kind, Version: "0.0.0", Release: "v0.0.0", Base: "none"}
+	// VERSION locates the incremental baseline only. File hashes are still
+	// scanned below, and the caller keeps legacy deletion protection enabled.
+	versionData, versionErr := readRegularFile(filepath.Join(root, "VERSION"), 64)
+	if versionErr != nil && !os.IsNotExist(versionErr) {
+		return nil, fmt.Errorf("读取实例 VERSION 失败：%w", versionErr)
+	}
+	version := strings.TrimSpace(string(versionData))
+	if versionRE.MatchString(version) {
+		state.Version = version
+		state.Release = "v" + version
+		fmt.Printf("[状态] 首次初始化，从 VERSION 识别当前版本 %s；正在扫描实际文件\n", version)
+	} else {
+		fmt.Println("[状态] 未找到有效 VERSION，不遍历历史增量链，使用完整包更新")
+	}
 	seen := map[string]bool{}
 	addFile := func(rel string) error {
 		if reservedRelative(rel) || preservePath(root, kind, rel) || strings.EqualFold(rel, "VERSION") {

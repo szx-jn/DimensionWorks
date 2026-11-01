@@ -127,12 +127,25 @@ func releaseManifestForTag(kind, tag, work string) (*Manifest, error) {
 }
 
 func incrementalReleaseChain(kind, currentRelease string, target *Manifest, targetInfo *ReleaseInfo, work string) ([]releaseStep, error) {
+	return incrementalReleaseChainWithLoaders(kind, currentRelease, target, targetInfo, work, releaseManifestForTag, releaseInfoForTag)
+}
+
+func incrementalReleaseChainWithLoaders(kind, currentRelease string, target *Manifest, targetInfo *ReleaseInfo, work string,
+	loadManifest func(string, string, string) (*Manifest, error), loadInfo func(string) (*ReleaseInfo, error)) ([]releaseStep, error) {
 	if !validReleaseTag(currentRelease) {
 		return nil, errors.New("当前实例没有可信发行标签，无法计算增量链")
 	}
 	if target == nil || !validReleaseTag(target.Release) {
 		return nil, errors.New("目标清单没有有效发行标签")
 	}
+	if currentRelease == "v0.0.0" {
+		return nil, errors.New("当前版本未知，不遍历历史增量链")
+	}
+	currentVersion := strings.TrimPrefix(currentRelease, "v")
+	if comparison, err := compareVersions(currentVersion, target.Version); err != nil || comparison >= 0 {
+		return nil, errors.New("同版本修复或降级使用完整包，不遍历历史增量链")
+	}
+	fmt.Printf("[计划] 仅检查已安装版本 %s 到目标 %s 之间的增量链\n", currentRelease, target.Release)
 
 	reverse := []releaseStep{{manifest: target, info: targetInfo}}
 	seen := map[string]struct{}{target.Release: {}}
@@ -150,16 +163,23 @@ func incrementalReleaseChain(kind, currentRelease string, target *Manifest, targ
 		if _, exists := seen[cursor.Base]; exists {
 			return nil, fmt.Errorf("增量链出现循环发行标签：%s", cursor.Base)
 		}
+		baseVersion := strings.TrimPrefix(cursor.Base, "v")
+		if comparison, err := compareVersions(baseVersion, currentVersion); err != nil || comparison < 0 {
+			return nil, fmt.Errorf("增量链已越过当前版本 %s，在 %s 找不到对应基线", currentRelease, cursor.Release)
+		}
+		if comparison, err := compareVersions(baseVersion, cursor.Version); err != nil || comparison >= 0 {
+			return nil, fmt.Errorf("增量链版本顺序无效：%s -> %s", cursor.Base, cursor.Release)
+		}
 		seen[cursor.Base] = struct{}{}
 
-		previous, err := releaseManifestForTag(kind, cursor.Base, work)
+		previous, err := loadManifest(kind, cursor.Base, work)
 		if err != nil {
 			return nil, err
 		}
 		if comparison, compareErr := compareVersions(previous.Version, cursor.Version); compareErr != nil || comparison >= 0 {
 			return nil, fmt.Errorf("增量链版本顺序无效：%s -> %s", previous.Version, cursor.Version)
 		}
-		info, _ := releaseInfoForTag(previous.Release)
+		info, _ := loadInfo(previous.Release)
 		reverse = append(reverse, releaseStep{manifest: previous, info: info})
 		cursor = previous
 	}
