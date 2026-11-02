@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/quark-integration.md`](design/quark-integration.md)：Quark 铁丝网、默认建筑与机制、世界生成关闭及背包整理去重。
+
 - [`design/sulfur-production.md`](design/sulfur-production.md)：余烬面粉热分离制硫、原生煤炭制硫替换与硫粉兼容
 
 - [`design/copper-recipe-inventory.md`](design/copper-recipe-inventory.md)：基于 0.2.63 发布包数据和当前脚本的铜、黄铜、青铜配方静态清单，附完整 CSV、条件配方及世界交互说明。

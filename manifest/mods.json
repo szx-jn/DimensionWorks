@@ -1400,6 +1400,17 @@
       "url": "https://modrinth.com/mod/prism-lib"
     },
     {
+      "id": "quark",
+      "name": "Quark",
+      "source": "modrinth",
+      "project_id": "qnQsVE2z",
+      "version": "1.20.1-4.0-462",
+      "version_id": "DijQLauD",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/quark"
+    },
+    {
       "id": "rhino",
       "name": "Rhino",
       "source": "modrinth",
@@ -1620,6 +1631,17 @@
       "required": true,
       "environment": "both",
       "url": "https://www.curseforge.com/minecraft/mc-mods/industrial-platform"
+    },
+    {
+      "id": "zeta",
+      "name": "Zeta",
+      "source": "modrinth",
+      "project_id": "MVARlG2f",
+      "version": "1.20.1-1.0-31",
+      "version_id": "mSER3jBI",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/zeta"
     }
   ]
 }

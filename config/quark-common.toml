@@ -1,0 +1,18 @@
+# DimensionWorks：保留 Quark 的默认建筑方块与机制，关闭世界生成相关内容。
+# 未列出的模块和参数沿用 Quark 4.0-462 自身默认值。
+
+[categories]
+    building = true
+    world = false
+    mobs = false
+
+[general]
+    "Terrablender Add Region" = false
+    "Terrablender Modify Vanilla Anyway" = false
+
+[building]
+    "Grate" = true
+
+[management]
+    # 已有 Inventory Profiles Next 负责背包整理，避免出现两套整理按钮与快捷键。
+    "Inventory Sorting" = false
