@@ -145,3 +145,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 ## 森罗物语配方接口
 
 清单加入 KubeJS Kaleidoscope 1.1.0，提供上游森罗配方联动接口；本次保留附属原生配方，未新增自定义配方脚本。附属清单、依赖与兼容性边界见 [食物附属扩展](../docs/design/food-addon-expansion.md)。
+
+## AE2 能源接入
+
+`startup_scripts/ae2_energy_acceptor.js` 从 AE2 创造栏移除能源接收器与能源接收线缆；`server_scripts/ae2_energy_acceptor.js` 删除其合成配方，并将使用能源接收器作为材料的配方改为应用机动的 `kinetic_energy_acceptor`。`client_scripts/ae2_energy_acceptor.js` 同步隐藏 JEI 条目。ME 网络保留应用机动应力接收器作为能源输入端。
