@@ -114,7 +114,9 @@ def _read_lang_files(
             continue
         namespace, language = match.groups()
         try:
-            values, _ = _load_json_object(archive.read(name).decode("utf-8"))
+            # Some upstream language files include a UTF-8 BOM; JSON permits us to
+            # ignore it when reading text without changing the packaged source jar.
+            values, _ = _load_json_object(archive.read(name).decode("utf-8-sig"))
         except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
             errors.append(f"{archive.filename}:{name}: {error}")
             continue
@@ -260,7 +262,7 @@ def build_report(instance_dir: Path, override_root: Path) -> LocalizationReport:
         english = source_en.get(namespace, {})
         existing = source_zh.get(namespace, {})
         override = overrides.get(namespace, {})
-        if namespace in optional_namespaces and not english and not existing:
+        if namespace in optional_namespaces:
             continue
         for key in sorted(set(override) - set(english)):
             report.unknown_override_keys.append((namespace, key))
