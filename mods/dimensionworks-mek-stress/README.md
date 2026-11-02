@@ -2,6 +2,10 @@
 
 Minecraft 1.20.1 / Forge / Java 17。通过自研 Mixin 接入 Create、AE2、Applied Create 与 Mekanism，不修改第三方模组源码。
 
+## 0.3.19：修复发电机启动注入
+
+Mekanism 10.4.16.80 的 `CableUtils.emit` 接受 `Set<Direction>`，禁止 FE 输出的 Redirect 按该签名匹配，避免误写为 `EnumSet` 导致发电机类加载失败。保留严格注入检查；发电机仍通过相邻转轴输出应力，不向电缆发送 FE。修复不增加区块加载、实体或扫描任务。
+
 ## 工作盆气体反应与混合产出
 
 工作盆具有两个各 10,000 mB 的气体缓冲：槽 0 保留为出气（可抽取，不接受管道灌入），槽 1 为进气（可灌入，只由配方消耗）。旧存档的 `DimensionWorksBasinGas` 仍保存出气；新增进气保存在 `DimensionWorksBasinInputGas`，不会将旧产气误作为原料消耗。每个缓冲只能存一种气体。

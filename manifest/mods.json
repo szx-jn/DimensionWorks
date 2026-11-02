@@ -582,7 +582,7 @@
       "name": "DimensionWorks ME Mechanical Power",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-mek-stress",
-      "version": "0.3.18",
+      "version": "0.3.19",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
@@ -981,8 +981,8 @@
       "name": "Kaleidoscope Compat",
       "source": "modrinth",
       "project_id": "Xm1eP54z",
-      "version": "2.6.5-forge+mc1.20.1-Patch",
-      "version_id": "F0Fnk6VA",
+      "version": "2.6.5-forge+mc1.20.1-Patch.2",
+      "version_id": "HvOVFiEQ",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/kaleidoscope-compat"
