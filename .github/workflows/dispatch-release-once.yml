@@ -1,0 +1,25 @@
+name: 一次性触发整合包正式发布
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/dispatch-release-once.yml
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 触发正式发布
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run release-pack.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f 'release_fixes=fix(mods): 修复万花筒中华美食与万花筒机械的版本冲突及启动崩溃'
