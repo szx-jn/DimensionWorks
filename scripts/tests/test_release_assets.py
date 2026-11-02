@@ -27,6 +27,10 @@ class ReleaseWorkflowTest(unittest.TestCase):
             "update-dimensionworks-server-linux-amd64",
             "update-dimensionworks-client-macos-arm64",
             "update-dimensionworks-server-macos-arm64",
+            "aria2c-windows-amd64.exe",
+            "aria2c-linux-amd64",
+            "aria2c-macos-arm64",
+            "aria2-third-party-source.tar.gz",
             "SHA256SUMS",
             "git push origin",
         )

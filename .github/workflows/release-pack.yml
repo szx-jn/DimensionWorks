@@ -250,6 +250,35 @@ jobs:
           darwin arm64
           TARGETS
 
+      - name: 获取 aria2 sidecar 与 GPL 源码包
+        shell: bash
+        run: |
+          set -euo pipefail
+          motrix_commit=7012040fec926e16fe8f6c403cf038527f5c18b9
+          aria2_source=https://github.com/aria2/aria2/releases/download/release-1.36.0/aria2-1.36.0.tar.xz
+          mkdir -p dist/aria2-source
+          curl -fL --retry 3 "$aria2_source" -o dist/aria2-source/aria2-1.36.0.tar.xz
+          echo "58d1e7608c12404f0229a3d9a4953d0d00c18040504498b483305bcb3de907a5  dist/aria2-source/aria2-1.36.0.tar.xz" | sha256sum -c -
+          curl -fL --retry 3 https://codeload.github.com/agalwood/aria2/tar.gz/905073c6990ee9621a27cf8341ca54de7816bdc5 -o dist/aria2-source/agalwood-aria2-source.tar.gz
+          echo "a26bbde0b40f8941e0799365eb56194ff086abd73cbcbca0c7a05863cfe1a467  dist/aria2-source/agalwood-aria2-source.tar.gz" | sha256sum -c -
+          curl -fL --retry 3 "https://codeload.github.com/agalwood/Motrix/tar.gz/${motrix_commit}" -o dist/aria2-source/motrix-source.tar.gz
+          echo "d15ae99dcca0bbe6c17970e21a49414debbb0a10d6980b101de0cb5d4b23d04e  dist/aria2-source/motrix-source.tar.gz" | sha256sum -c -
+          curl -fL --retry 3 https://codeload.github.com/motrixapp/Aria2-Pro-Core/tar.gz/4074895d73324485e3d489bfdb749e9ac7bfadff -o dist/aria2-source/aria2-pro-core-build-source.tar.gz
+          echo "ac494b4a6360d3bb6b21605c4f0c6902ba34b6af6c2d986afb1b2fa8d16ed43d  dist/aria2-source/aria2-pro-core-build-source.tar.gz" | sha256sum -c -
+          cp update-Windows/third_party/aria2/COPYING dist/aria2-source/COPYING-ARIA2
+          cp update-Windows/third_party/aria2/LICENSE-MOTRIX dist/aria2-source/LICENSE-MOTRIX
+          cp update-Windows/third_party/aria2/NOTICE.md dist/aria2-source/NOTICE.md
+          (cd dist && tar -czf aria2-third-party-source.tar.gz aria2-source)
+          rm -rf dist/aria2-source
+          curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/win32/x64/engine/aria2c.exe" -o dist/aria2c-windows-amd64.exe
+          echo "098a065ab71f639bf7048e790c870756fd6e83de9cc678915bbd07077d473fa2  dist/aria2c-windows-amd64.exe" | sha256sum -c -
+          curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/linux/x64/engine/aria2c" -o dist/aria2c-linux-amd64
+          echo "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc  dist/aria2c-linux-amd64" | sha256sum -c -
+          chmod 0755 dist/aria2c-linux-amd64
+          curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/darwin/arm64/engine/aria2c" -o dist/aria2c-macos-arm64
+          echo "1527c4d071c16c1266880e93750e385cdd4e9d2a950d7f56cb5a21125e3bd311  dist/aria2c-macos-arm64" | sha256sum -c -
+          chmod 0755 dist/aria2c-macos-arm64
+
 
       - name: 检查发布文件
         env:
@@ -275,6 +304,13 @@ jobs:
               file "$binary" | grep -q "$expected" || { echo "Wrong binary format: $binary" >&2; exit 1; }
             done
           done
+          for engine in aria2c-windows-amd64.exe aria2c-linux-amd64 aria2c-macos-arm64 aria2-third-party-source.tar.gz; do
+            [[ -s "dist/$engine" ]] || { echo "Missing aria2 runtime/source asset: $engine" >&2; exit 1; }
+          done
+          file dist/aria2c-windows-amd64.exe | grep -q 'PE32+ executable'
+          file dist/aria2c-linux-amd64 | grep -q 'ELF 64-bit'
+          file dist/aria2c-macos-arm64 | grep -q 'Mach-O 64-bit'
+          tar -tzf dist/aria2-third-party-source.tar.gz >/dev/null
           if [[ "$(wc -c < "dist/DimensionWorks-${PACK_VERSION}-delta.zip")" -gt 22 ]]; then
             unzip -t "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
           fi
@@ -314,6 +350,10 @@ jobs:
               update-dimensionworks-server-linux-amd64 \
               update-dimensionworks-client-macos-arm64 \
               update-dimensionworks-server-macos-arm64 \
+              aria2c-windows-amd64.exe \
+              aria2c-linux-amd64 \
+              aria2c-macos-arm64 \
+              aria2-third-party-source.tar.gz \
               > SHA256SUMS
           )
 
@@ -356,7 +396,7 @@ jobs:
           if entries:
               print("\n".join(entries))
           else:
-              print("更新器：修复分段下载超时后单连接回退复用过期上下文的问题；分段失败时立即取消其余请求；修复分段下载进度未计入总进度的问题；保留系统代理设置并延长大文件下载时限。")
+            print("更新器：集成 aria2 多线程下载引擎（GPL-2.0 sidecar），随发行版提供对应许可证与源码；保留 Go 下载器作为引擎不可用时的回退。")
           PY
           )"
           assets=(
@@ -372,6 +412,10 @@ jobs:
             "dist/update-dimensionworks-server-linux-amd64"
             "dist/update-dimensionworks-client-macos-arm64"
             "dist/update-dimensionworks-server-macos-arm64"
+            "dist/aria2c-windows-amd64.exe"
+            "dist/aria2c-linux-amd64"
+            "dist/aria2c-macos-arm64"
+            "dist/aria2-third-party-source.tar.gz"
             dist/SHA256SUMS
           )
           if gh release view "$TAG" >/dev/null 2>&1; then

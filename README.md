@@ -8,7 +8,7 @@
 
 ## 下载
 
-请前往 **[GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases/latest)** 获取最新版本。正式发布包含客户端整合包、服务端整合包、增量更新文件、更新清单、Windows/Linux/macOS Go 更新器及 SHA-256 校验文件。
+请前往 **[GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases/latest)** 获取最新版本。正式发布包含客户端整合包、服务端整合包、增量更新文件、更新清单、跨平台更新器与 aria2 下载引擎，以及第三方许可证、源码包和 SHA-256 校验文件。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -20,7 +20,11 @@
 | `update-dimensionworks-server-windows-amd64.exe` | Windows 服务端更新器 |
 | `update-dimensionworks-{client,server}-linux-amd64` | Linux x86-64 更新器 |
 | `update-dimensionworks-{client,server}-macos-arm64` | macOS Apple 芯片更新器 |
+| `aria2c-windows-amd64.exe`、`aria2c-linux-amd64`、`aria2c-macos-arm64` | 更新器的并发下载引擎；需与对应更新器放在同一目录 |
+| `aria2-third-party-source.tar.gz` | aria2 第三方源码、构建来源与许可证材料 |
 | `SHA256SUMS` | 发布文件 SHA-256 校验值 |
+
+运行更新器时请同时下载对应系统的 `aria2c` 文件，并与更新器放在同一目录。aria2 以独立 GPL sidecar 进程运行；该文件缺失或校验失败时，更新器会回退到内置 Go 下载器。第三方版权与源码信息见更新器目录的 `third_party/aria2/NOTICE.md` 及每次 Release 附带的源码包。
 
 增量包用于版本更新，不是完整整合包；首次安装请下载对应的完整客户端或服务端包。具体文件以每个 Release 实际提供的资产为准。
 
@@ -57,7 +61,7 @@
 
 ## 当前开发状态
 
-项目已建立可重复的客户端与服务端打包发布流程。发布工作流会生成完整包、增量包、更新清单、校验文件，以及 Windows amd64、Linux amd64/arm64、macOS amd64/arm64 的 Go 更新器，并在发布前验证二进制格式、归档结构及清单一致性。
+项目已建立可重复的客户端与服务端打包发布流程。发布工作流会生成完整包、增量包、更新清单、校验文件，以及 Windows amd64、Linux amd64、macOS arm64 的 Go 更新器和 aria2 sidecar，并在发布前验证二进制格式、归档结构及清单一致性。aria2 的 GPL 许可证和源码包会随 Release 一并提供。
 
 **当前仍处于持续开发阶段。** Mod 组合、配方、科技进度、维度规划和配置可能随版本变化；版本号代表发布版本，不意味着所有设计目标均已完成。
 
