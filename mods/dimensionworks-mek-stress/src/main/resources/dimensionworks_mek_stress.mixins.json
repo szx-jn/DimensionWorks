@@ -18,6 +18,8 @@
     "mek.MachineEnergyContainerAccessor",
     "mek.TileEntityMekanismInvoker",
     "mek.TileEntityMekanismMixin",
+    "mekgenerators.GeneratorNoFeExportMixin",
+    "create.MekanismGeneratorShaftMixin",
     "create.ReactorShaftMixin",
     "draconic.ReactorCoreMixin",
     "draconic.ReactorStabilizerMixin",

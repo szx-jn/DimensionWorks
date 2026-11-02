@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/food-addon-expansion.md`](design/food-addon-expansion.md)：20 项森罗/农夫附属、兼容版本选择、必需库与 Curios 3/1 默认容量。
+
 - [`design/quark-integration.md`](design/quark-integration.md)：Quark 铁丝网、默认建筑与机制、世界生成关闭及背包整理去重。
 
 - [`design/sulfur-production.md`](design/sulfur-production.md)：余烬面粉热分离制硫、原生煤炭制硫替换与硫粉兼容

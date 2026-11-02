@@ -141,3 +141,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 ## 下界岩自增期望
 
 `server_scripts/cinder_flour_recipes.js` 的每个下界岩产出 1 个保底余烬面粉、2 个各有 85% 概率的面粉和 2 个各有 89% 概率的面粉，期望共 4.48 个。4 个面粉压回 1 个下界岩后，期望净余 0.48 个面粉，等价于净增 0.12 个下界岩（12%）。概率按每个物品独立计算；循环需保留库存缓冲，不能保证每轮都盈利。
+
+## 森罗物语配方接口
+
+清单加入 KubeJS Kaleidoscope 1.1.0，提供上游森罗配方联动接口；本次保留附属原生配方，未新增自定义配方脚本。附属清单、依赖与兼容性边界见 [食物附属扩展](../docs/design/food-addon-expansion.md)。

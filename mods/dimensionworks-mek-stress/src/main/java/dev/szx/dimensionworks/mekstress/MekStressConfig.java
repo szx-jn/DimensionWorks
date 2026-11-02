@@ -17,6 +17,7 @@ public final class MekStressConfig {
     public static final ForgeConfigSpec.DoubleValue DEFECTIVE_CHANCE;
     public static final ForgeConfigSpec.IntValue MAXIMUM_INPUT_LOSS_BP;
     public static final ForgeConfigSpec.IntValue DIRECT_MAX_RPM;
+    public static final ForgeConfigSpec.IntValue GENERATOR_RPM;
 
     static {
         var builder = new ForgeConfigSpec.Builder();
@@ -47,6 +48,7 @@ public final class MekStressConfig {
             .defineInRange("maximumInputLossBasisPoints", InputStressMath.MAXIMUM_INPUT_LOSS_BASIS_POINTS,
                 0, InputStressMath.MAXIMUM_INPUT_LOSS_BASIS_POINTS);
         DIRECT_MAX_RPM = builder.defineInRange("directMaxRpm", 10240, 1, 10240);
+        GENERATOR_RPM = builder.defineInRange("mekanismGeneratorRpm", 32, 1, 10240);
         builder.pop();
         SPEC = builder.build();
     }
@@ -61,4 +63,5 @@ public final class MekStressConfig {
         return InputStressMath.cappedReductionBasisPoints(MAXIMUM_INPUT_LOSS_BP.get());
     }
     public static int directMaxRpm() { return DIRECT_MAX_RPM.get(); }
+    public static int generatorRpm() { return GENERATOR_RPM.get(); }
 }

@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.3.17'
+version = '0.3.18'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -52,6 +52,7 @@ dependencies {
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
     implementation fg.deobf('mekanism:Mekanism:1.20.1-10.4.16.80')
+    implementation fg.deobf('maven.modrinth:OFVYKsAk:Th4Czz4N')
     implementation fg.deobf('appeng:appliedenergistics2-forge:15.4.10')
     implementation fg.deobf('maven.modrinth:applied-create:1.1.5')
     implementation fg.deobf('maven.modrinth:kotlin-for-forge:4.12.0')

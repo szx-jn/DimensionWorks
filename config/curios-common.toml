@@ -1,5 +1,25 @@
-#List of slots to create or modify.
-#See documentation for syntax: https://docs.illusivesoulworks.com/curios/configuration#slot-configuration
-#
-slots = []
-
+# DimensionWorks：当前整合包的普通 Curios 槽位各 3 格；齿轮之心专属槽位仅 1 格。
+# 使用 SET 覆盖基础数量，不叠加数量；不修改各槽的图标、校验器或装备规则。
+# 固定槽位类型来自现有模组的数据定义和 IMC 注册；新增槽位类型时需同步维护。
+slots = [
+    "id=aether_accessory;size=3;operation=SET",
+    "id=aether_cape;size=3;operation=SET",
+    "id=aether_gloves;size=3;operation=SET",
+    "id=aether_pendant;size=3;operation=SET",
+    "id=aether_ring;size=3;operation=SET",
+    "id=aether_shield;size=3;operation=SET",
+    "id=back;size=3;operation=SET",
+    "id=belt;size=3;operation=SET",
+    "id=body;size=3;operation=SET",
+    "id=bracelet;size=3;operation=SET",
+    "id=charm;size=3;operation=SET",
+    "id=curio;size=3;operation=SET",
+    "id=feet;size=3;operation=SET",
+    "id=gear_heart;size=1;operation=SET",
+    "id=hands;size=3;operation=SET",
+    "id=head;size=3;operation=SET",
+    "id=necklace;size=3;operation=SET",
+    "id=ring;size=3;operation=SET",
+    "id=scroll;size=3;operation=SET",
+    "id=spellbook;size=3;operation=SET",
+]
