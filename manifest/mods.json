@@ -990,13 +990,14 @@
     {
       "id": "kaleidoscope_contraption",
       "name": "Kaleidoscope Contraption",
-      "source": "modrinth",
-      "project_id": "JCCAvv9N",
-      "version": "1.0.3",
-      "version_id": "SaePvs9e",
+      "source": "curseforge",
+      "project_slug": "kaleidoscope-contraption",
+      "file_id": 9046774,
+      "file_name": "kaleidoscope_contraption-1.0.4-HOTFIX.jar",
+      "version": "1.0.4-HOTFIX",
       "required": true,
       "environment": "both",
-      "url": "https://modrinth.com/mod/kaleidoscope-contraption"
+      "url": "https://www.curseforge.com/minecraft/mc-mods/kaleidoscope-contraption"
     },
     {
       "id": "kaleidoscope_cookery",
