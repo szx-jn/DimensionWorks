@@ -1,14 +1,15 @@
 # aria2 sidecar notices
 
-The Linux amd64 release embeds the pinned `aria2c` executable as data and
-extracts it into a private directory before launching it as a separate process.
-Windows/macOS releases use the separately distributed executable. No aria2 code
-is linked into the Go updater.
+All six release updaters (Windows amd64, Linux amd64 and macOS arm64,
+client and server) embed their pinned `aria2c` executable as data and extract it
+into a private directory before launching it as a separate process. No aria2
+code is linked into the Go updater. The release does not distribute loose engine
+executables; license texts and corresponding source remain in the source bundle.
 
 - **aria2**, version 1.36.0, Copyright (C) 2006-2019 Tatsuhiro Tsujikawa and
   contributors. License: GNU General Public License, version 2. See
   [`COPYING`](COPYING).
-- The Windows amd64, Linux amd64, and macOS arm64 sidecar binaries are taken
+- The Windows amd64, Linux amd64, and macOS arm64 embedded binaries are taken
   from Motrix commit `7012040fec926e16fe8f6c403cf038527f5c18b9` under its
   `extra/<platform>/<arch>/engine/` directories. Motrix is Copyright
   Dr_rOot and licensed under MIT; its notice is preserved in

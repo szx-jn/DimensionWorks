@@ -13,7 +13,7 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(updater): Linux 更新器内置 aria2 引擎"
+        description: "新增功能；每行一条，如 feat(updater): 六个跨平台更新器全部内置 aria2 引擎"
         required: false
         type: string
       release_fixes:
@@ -238,16 +238,7 @@ jobs:
           cp update-Windows/third_party/aria2/NOTICE.md dist/aria2-source/NOTICE.md
           (cd dist && tar -czf aria2-third-party-source.tar.gz aria2-source)
           rm -rf dist/aria2-source
-          curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/win32/x64/engine/aria2c.exe" -o dist/aria2c-windows-amd64.exe
-          echo "098a065ab71f639bf7048e790c870756fd6e83de9cc678915bbd07077d473fa2  dist/aria2c-windows-amd64.exe" | sha256sum -c -
-          curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/linux/x64/engine/aria2c" -o dist/aria2c-linux-amd64
-          echo "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc  dist/aria2c-linux-amd64" | sha256sum -c -
-          chmod 0755 dist/aria2c-linux-amd64
-          curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/darwin/arm64/engine/aria2c" -o dist/aria2c-macos-arm64
-          echo "1527c4d071c16c1266880e93750e385cdd4e9d2a950d7f56cb5a21125e3bd311  dist/aria2c-macos-arm64" | sha256sum -c -
-          chmod 0755 dist/aria2c-macos-arm64
-          mkdir -p update-Windows/aria2-runtime
-          cp dist/aria2c-linux-amd64 update-Windows/aria2-runtime/aria2c-linux-amd64
+          python3 scripts/prepare_aria2.py
 
       - name: 测试 Linux 内置 aria2 实际下载
         working-directory: update-Windows
@@ -266,12 +257,10 @@ jobs:
               darwin) platform="macos"; extension="" ;;
               *) echo "Unsupported target: $goos" >&2; exit 1 ;;
             esac
-            bundle_args=()
-            if [[ "$goos" == linux ]]; then bundle_args=(-tags bundled_aria2); fi
             for kind in client server; do
               output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
               echo "Building ${output}"
-              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build "${bundle_args[@]}" \
+              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -tags bundled_aria2 \
                 -trimpath \
                 -ldflags="-s -w -X main.defaultKind=${kind}" \
                 -o "$output" .
@@ -303,6 +292,11 @@ jobs:
           [[ "$client_version" == "$PACK_VERSION" ]] || { echo "Client VERSION mismatch: $client_version != $PACK_VERSION" >&2; exit 1; }
           [[ "$server_version" == "$PACK_VERSION" ]] || { echo "Server VERSION mismatch: $server_version != $PACK_VERSION" >&2; exit 1; }
           echo "Client and server VERSION verified: $PACK_VERSION"
+          [[ "$(find dist -maxdepth 1 -type f -name 'update-dimensionworks-*' | wc -l)" -eq 6 ]] || { echo "Expected exactly six updater binaries" >&2; exit 1; }
+          if compgen -G 'dist/aria2c-*' >/dev/null; then
+            echo "Loose aria2 engines must not be published" >&2
+            exit 1
+          fi
           for target in windows-amd64.exe linux-amd64 macos-arm64; do
             case "$target" in
               windows-amd64.exe) expected='PE32+ executable' ;;
@@ -315,12 +309,12 @@ jobs:
               file "$binary" | grep -q "$expected" || { echo "Wrong binary format: $binary" >&2; exit 1; }
             done
           done
-          for engine in aria2c-windows-amd64.exe aria2c-linux-amd64 aria2c-macos-arm64 aria2-third-party-source.tar.gz; do
+          for engine in aria2-third-party-source.tar.gz; do
             [[ -s "dist/$engine" ]] || { echo "Missing aria2 runtime/source asset: $engine" >&2; exit 1; }
           done
-          file dist/aria2c-windows-amd64.exe | grep -q 'PE32+ executable'
-          file dist/aria2c-linux-amd64 | grep -q 'ELF 64-bit'
-          file dist/aria2c-macos-arm64 | grep -q 'Mach-O 64-bit'
+          file update-Windows/aria2-runtime/aria2c-windows-amd64.exe | grep -q 'PE32+ executable'
+          file update-Windows/aria2-runtime/aria2c-linux-amd64 | grep -q 'ELF 64-bit'
+          file update-Windows/aria2-runtime/aria2c-macos-arm64 | grep -q 'Mach-O 64-bit'
           tar -tzf dist/aria2-third-party-source.tar.gz >/dev/null
           if [[ "$(wc -c < "dist/DimensionWorks-${PACK_VERSION}-delta.zip")" -gt 22 ]]; then
             unzip -t "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
@@ -361,9 +355,6 @@ jobs:
               update-dimensionworks-server-linux-amd64 \
               update-dimensionworks-client-macos-arm64 \
               update-dimensionworks-server-macos-arm64 \
-              aria2c-windows-amd64.exe \
-              aria2c-linux-amd64 \
-              aria2c-macos-arm64 \
               aria2-third-party-source.tar.gz \
               > SHA256SUMS
           )
@@ -407,7 +398,7 @@ jobs:
           if entries:
               print("\n".join(entries))
           else:
-            print("更新器：Linux amd64 单文件内置 aria2 引擎，Windows/macOS 使用独立 sidecar；同版提供 GPL 许可证与源码，保留 Go 下载器回退。")
+            print("更新器：Windows/Linux/macOS 六个更新器全部单文件内置 aria2 引擎；同版提供 GPL 许可证与源码，保留 Go 下载器回退。")
           PY
           )"
           assets=(
@@ -423,9 +414,6 @@ jobs:
             "dist/update-dimensionworks-server-linux-amd64"
             "dist/update-dimensionworks-client-macos-arm64"
             "dist/update-dimensionworks-server-macos-arm64"
-            "dist/aria2c-windows-amd64.exe"
-            "dist/aria2c-linux-amd64"
-            "dist/aria2c-macos-arm64"
             "dist/aria2-third-party-source.tar.gz"
             dist/SHA256SUMS
           )

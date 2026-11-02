@@ -889,7 +889,7 @@ func printUsage(kind string) {
 	fmt.Println("  updater --help                     显示帮助")
 	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
 	if len(bundledAria2) > 0 {
-		fmt.Println("此 Linux 更新器已内置 aria2c，无需另外下载引擎。")
+		fmt.Println("此更新器已内置 aria2c，无需另外下载引擎。")
 		fmt.Println("aria2 1.36.0 © Tatsuhiro Tsujikawa and contributors，GPL-2.0-or-later。")
 		fmt.Println("许可证与对应源码：同版 GitHub Release 的 aria2-third-party-source.tar.gz。")
 	}

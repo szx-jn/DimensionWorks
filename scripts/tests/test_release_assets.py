@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +38,16 @@ class ReleaseWorkflowTest(unittest.TestCase):
         for fragment in required:
             with self.subTest(fragment=fragment):
                 self.assertIn(fragment, text)
+
+    def test_release_has_exactly_six_bundled_updaters_and_no_loose_engines(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        assets = text.split("assets=(", 1)[1].split(")", 1)[0]
+        updaters = re.findall(r'"dist/(update-dimensionworks-[^"\n]+)"', assets)
+        self.assertEqual(len(updaters), 6)
+        self.assertEqual(len(set(updaters)), 6)
+        self.assertNotIn('"dist/aria2c-', assets)
+        self.assertIn("go build -tags bundled_aria2", text)
+        self.assertIn("python3 scripts/prepare_aria2.py", text)
 
     def test_workflow_does_not_watch_removed_shell_updater_directory(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")

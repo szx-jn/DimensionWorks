@@ -32,14 +32,8 @@ jobs:
           go-version: stable
           cache-dependency-path: update-Windows/go.mod
 
-      - name: 准备 Linux 单文件内置引擎
-        working-directory: update-Windows
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p aria2-runtime
-          curl -fL --retry 3 https://raw.githubusercontent.com/agalwood/Motrix/7012040fec926e16fe8f6c403cf038527f5c18b9/extra/linux/x64/engine/aria2c -o aria2-runtime/aria2c-linux-amd64
-          echo "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc  aria2-runtime/aria2c-linux-amd64" | sha256sum -c -
+      - name: 准备三平台内置引擎
+        run: python3 scripts/prepare_aria2.py
 
       - name: 运行更新器测试
         working-directory: update-Windows
@@ -66,16 +60,11 @@ jobs:
               darwin) platform=macos; extension=; expected='Mach-O 64-bit' ;;
               *) exit 1 ;;
             esac
-            bundle_args=()
-            if [[ "$goos" == linux ]]; then bundle_args=(-tags bundled_aria2); fi
             for kind in client server; do
               output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
-              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build "${bundle_args[@]}" \
+              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -tags bundled_aria2 \
                 -trimpath -ldflags="-s -w -X main.defaultKind=${kind}" -o "$output" .
               file "$output" | grep -q "$expected"
-              if [[ "$goos" == windows ]]; then
-                cp "$output" "../dist/update-dimensionworks-${kind}.exe"
-              fi
             done
           done <<'TARGETS'
           windows amd64
@@ -108,9 +97,12 @@ jobs:
           go-version: stable
           cache-dependency-path: update-Windows/go.mod
 
+      - name: 准备 Windows 内置引擎
+        run: python scripts/prepare_aria2.py --platform windows-amd64
+
       - name: 在 Windows 上运行测试
         working-directory: update-Windows
-        run: go test -v ./...
+        run: go test -tags bundled_aria2 -v ./...
 
       - name: 构建并冒烟测试 Windows 程序
         working-directory: update-Windows
@@ -119,8 +111,8 @@ jobs:
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force ../dist | Out-Null
           foreach ($kind in @("client", "server")) {
-            $exe = "../dist/update-dimensionworks-$kind.exe"
-            go build -trimpath -ldflags="-s -w -X main.defaultKind=$kind" -o $exe .
+            $exe = "../dist/update-dimensionworks-$kind-windows-amd64.exe"
+            go build -tags bundled_aria2 -trimpath -ldflags="-s -w -X main.defaultKind=$kind" -o $exe .
             if ($LASTEXITCODE -ne 0) { throw "构建 $kind 更新器失败" }
             & $exe --help
             if ($LASTEXITCODE -ne 0) { throw "$kind 更新器冒烟测试失败" }
@@ -140,9 +132,12 @@ jobs:
           go-version: stable
           cache-dependency-path: update-Windows/go.mod
 
+      - name: 准备 macOS 内置引擎
+        run: python3 scripts/prepare_aria2.py --platform macos-arm64
+
       - name: 在 macOS 上运行测试
         working-directory: update-Windows
-        run: go test -v ./...
+        run: go test -tags bundled_aria2 -v ./...
 
       - name: 构建并冒烟测试 macOS 程序
         working-directory: update-Windows
@@ -152,7 +147,7 @@ jobs:
           mkdir -p ../dist
           for kind in client server; do
             binary="../dist/update-dimensionworks-$kind-macos-$(go env GOARCH)"
-            CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.defaultKind=$kind" -o "$binary" .
+            CGO_ENABLED=0 go build -tags bundled_aria2 -trimpath -ldflags="-s -w -X main.defaultKind=$kind" -o "$binary" .
             test -x "$binary"
             "$binary" --help
           done

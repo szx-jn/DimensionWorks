@@ -5,21 +5,32 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync/atomic"
 	"testing"
 	"time"
 )
 
 func TestBundledAria2DownloadsWithoutSidecar(t *testing.T) {
+	if !hasAria2BuildForRuntime() {
+		t.Skip("no bundled engine for this architecture")
+	}
 	root := filepath.Join(t.TempDir(), "server with spaces")
 	if err := os.Mkdir(root, 0700); err != nil {
 		t.Fatal(err)
 	}
-	engine, cleanup, err := unpackAria2(root, "aria2c-linux-amd64", "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc", bundledAria2)
+	name := "aria2c"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	digest := sha256.Sum256(bundledAria2)
+	engine, cleanup, err := unpackAria2(root, name, hex.EncodeToString(digest[:]), bundledAria2)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,6 @@
 # Go 跨平台更新器
 
-本目录包含 DimensionWorks 客户端与服务端的统一 Go 更新器。目录名沿用历史命名；同一份源码可构建为 Windows、Linux 与 macOS 原生程序。正式发布的 Linux amd64 更新器是内置 aria2c 的单文件程序；Windows/macOS 优先调用同目录的 aria2 sidecar。引擎不可用时回退到 Go 标准库下载器；玩家不需要额外安装 aria2、curl、wget、Python 或 Java。
+本目录包含 DimensionWorks 客户端与服务端的统一 Go 更新器。目录名沿用历史命名；同一份源码可构建为 Windows、Linux 与 macOS 原生程序。正式发布的 Windows amd64、Linux amd64、macOS arm64 客户端与服务端共六个更新器，全部为内置 aria2c 的单文件程序。引擎不可用时回退到 Go 标准库下载器；玩家不需要额外安装 aria2、curl、wget、Python 或 Java。
 
 ## 本地测试
 
@@ -16,9 +16,8 @@ go test -race -tags bundled_aria2 ./...
 在本目录执行，示例以 Linux/macOS shell 为例：
 
 ~~~sh
-mkdir -p ../dist aria2-runtime
-curl -fL https://raw.githubusercontent.com/agalwood/Motrix/7012040fec926e16fe8f6c403cf038527f5c18b9/extra/linux/x64/engine/aria2c -o aria2-runtime/aria2c-linux-amd64
-echo "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc  aria2-runtime/aria2c-linux-amd64" | sha256sum -c -
+mkdir -p ../dist
+python3 ../scripts/prepare_aria2.py
 for target in "windows amd64" "linux amd64" "darwin arm64"; do
   read -r goos goarch <<EOF
 $target
@@ -28,10 +27,8 @@ EOF
     linux) platform=linux; extension= ;;
     darwin) platform=macos; extension= ;;
   esac
-  bundle_args=()
-  if [[ "$goos" == linux ]]; then bundle_args=(-tags bundled_aria2); fi
   for kind in client server; do
-    GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build "${bundle_args[@]}" \
+    GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -tags bundled_aria2 \
       -trimpath -ldflags="-s -w -X main.defaultKind=$kind" \
       -o "../dist/update-dimensionworks-$kind-$platform-$goarch$extension" .
   done
@@ -46,7 +43,7 @@ done
 - Linux amd64：update-dimensionworks-{client,server}-linux-amd64
 - macOS Apple Silicon（arm64）：update-dimensionworks-{client,server}-macos-arm64
 
-Linux amd64 只需下载一个 `update-dimensionworks-{client,server}-linux-amd64` 文件放到实例根目录，无需再下载或摆放 `aria2c`。运行时自动校验并释放内置引擎到更新器所在文件系统上的进程私有目录，授予 0700 权限，正常退出时清理。这样不依赖系统临时目录的执行权限。旧的外置 aria2c 可留存，内置版本优先。Windows/macOS 仍将更新器和同平台 aria2c 放到同一目录。
+每个平台只需下载对应的一个更新器放到实例根目录，无需再下载或摆放 `aria2c`。正式发行只提供上述六个更新器，不再提供额外引擎文件或重复命名的更新器。运行时自动校验并释放内置引擎到更新器所在文件系统上的进程私有目录，授予 0700 权限，正常退出时清理。这样不依赖系统临时目录的执行权限。旧的外置 aria2c 可留存，内置版本优先。Windows/macOS 同样内置各自平台引擎，不需要额外组件。
 
 Linux 示例：
 
