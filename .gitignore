@@ -45,3 +45,6 @@ out/
 .hmcl/
 .env
 *.local
+
+# Verified binaries staged only for single-file updater builds
+update-Windows/aria2-runtime/

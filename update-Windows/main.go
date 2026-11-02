@@ -40,8 +40,10 @@ var consoleInputMu sync.Mutex
 var activeDownloadSkips = make(map[uint64]func())
 var nextDownloadSkipID atomic.Uint64
 var awaitingConsolePrompt bool
+var consoleReadErr error
 var aria2PathOnce sync.Once
 var aria2PathCache string
+var aria2RuntimeCleanup func()
 var progressMu sync.Mutex
 var downloadProgressUI = newProgressTracker()
 var downloadCacheRoot string
@@ -131,6 +133,7 @@ func startConsoleInput() {
 func handleDownloadInput(line string, readErr error) {
 	consoleInputMu.Lock()
 	defer consoleInputMu.Unlock()
+	if readErr != nil { consoleReadErr = readErr }
 	var latest uint64
 	for id := range activeDownloadSkips {
 		if id > latest { latest = id }
@@ -148,6 +151,11 @@ func handleDownloadInput(line string, readErr error) {
 
 func readConsoleLine() (string, error) {
 	consoleInputMu.Lock()
+	if consoleReadErr != nil && len(consolePromptLines) == 0 {
+		err := consoleReadErr
+		consoleInputMu.Unlock()
+		return "", err
+	}
 	awaitingConsolePrompt = true
 	consoleInputMu.Unlock()
 	startConsoleInput()
@@ -171,6 +179,7 @@ func main() {
 		}
 	}
 	err := run(kind, os.Args[1:])
+	if aria2RuntimeCleanup != nil { aria2RuntimeCleanup() }
 	if err == nil {
 		fmt.Println()
 		fmt.Println("操作完成。按回车键关闭窗口。")
@@ -297,7 +306,13 @@ func acquireUpdateLock(lockPath string, input *bufio.Reader, output io.Writer) (
 	if statErr != nil { return nil, fmt.Errorf("读取现有更新锁失败：%w", statErr) }
 	fmt.Fprintln(output, "检测到更新锁 .dimensionworks-update/lock。")
 	fmt.Fprint(output, "上一个更新进程是否仍在运行？只有确认它已经退出时才输入 Y（清理残留锁并继续更新）；输入 N 取消更新：")
-	answer, readErr := input.ReadString('\n')
+	var answer string
+	var readErr error
+	if input == nil {
+		answer, readErr = readConsoleLine()
+	} else {
+		answer, readErr = input.ReadString('\n')
+	}
 	if readErr != nil && len(answer) == 0 { return nil, fmt.Errorf("无法读取更新锁确认：%w", readErr) }
 	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
 		return nil, errors.New("用户选择不清理更新锁，已拒绝更新")
@@ -385,7 +400,7 @@ func run(kind string, args []string) error {
 		return errors.New("下载缓存目录不安全")
 	}
 	lockPath := filepath.Join(updateRoot, "lock")
-	releaseLock, err := acquireUpdateLock(lockPath, consoleReader, os.Stdout)
+	releaseLock, err := acquireUpdateLock(lockPath, nil, os.Stdout)
 	if err != nil {
 		return err
 	}
@@ -873,6 +888,11 @@ func printUsage(kind string) {
 	fmt.Println("  updater --allow-downgrade          允许安装低于当前版本的发行版")
 	fmt.Println("  updater --help                     显示帮助")
 	fmt.Println("请先退出 Minecraft、启动器或服务端。更新器会保留存档和运行数据。")
+	if len(bundledAria2) > 0 {
+		fmt.Println("此 Linux 更新器已内置 aria2c，无需另外下载引擎。")
+		fmt.Println("aria2 1.36.0 © Tatsuhiro Tsujikawa and contributors，GPL-2.0-or-later。")
+		fmt.Println("许可证与对应源码：同版 GitHub Release 的 aria2-third-party-source.tar.gz。")
+	}
 }
 
 func compareVersions(left, right string) (int, error) {
@@ -1196,6 +1216,14 @@ func findAria2ExecutablePath() string {
 	default:
 		return ""
 	}
+	if len(bundledAria2) > 0 {
+		candidate, cleanup, err := unpackAria2(dir, name, expectedDigest, bundledAria2)
+		if err == nil {
+			aria2RuntimeCleanup = cleanup
+			return candidate
+		}
+		fmt.Printf("[下载] 内置 aria2 引擎准备失败：%s\n", safeErrorForLog(err))
+	}
 	candidate := filepath.Join(dir, name)
 	info, statErr := os.Lstat(candidate)
 	if statErr != nil || info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
@@ -1214,10 +1242,7 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 	ctx, cancel := context.WithCancel(parent)
 	defer cancel()
 	defer os.Remove(destination + ".aria2")
-	size, resolvedSource, err := aria2RemoteInfo(ctx, source)
-	if err != nil { return fmt.Errorf("aria2 下载预检失败：%w", err) }
-	if size > maxBytes { return fmt.Errorf("远程文件超过大小限制：%s", humanSize(size)) }
-	if size > 0 { progressSetTotal(destination, size) }
+
 	rpcPort, err := reserveAria2RPCPort()
 	if err != nil { return fmt.Errorf("为 aria2 进度接口分配本地端口失败：%w", err) }
 	rpcSecret, err := randomAria2RPCSecret()
@@ -1246,7 +1271,7 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 		"--summary-interval=0",
 		"--dir=" + filepath.Dir(destination),
 		"--out=" + filepath.Base(destination),
-		resolvedSource,
+		source,
 	}
 	command := exec.CommandContext(ctx, enginePath, args...)
 	var output limitedOutput
@@ -1270,6 +1295,8 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 
 	monitorDone := make(chan struct{})
 	var tooLarge atomic.Bool
+	var completed atomic.Bool
+	var engineFailure atomic.Value
 	go func() {
 		defer close(monitorDone)
 		ticker := time.NewTicker(250 * time.Millisecond)
@@ -1286,7 +1313,7 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 					completed, completedErr := strconv.ParseInt(item.CompletedLength, 10, 64)
 					total, totalErr := strconv.ParseInt(item.TotalLength, 10, 64)
 					if completedErr != nil || totalErr != nil || completed < 0 || total < 0 { continue }
-					if total > maxBytes {
+					if total > maxBytes || completed > maxBytes {
 					tooLarge.Store(true)
 					cancel()
 					return
@@ -1298,6 +1325,22 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 					} else if completed < reported {
 						progressRewind(destination, reported-completed)
 						reported = completed
+					}
+				}
+				// RPC mode keeps aria2 alive after its final download. Observe
+				// the terminal result instead of waiting forever for process exit.
+				var stopped []aria2DownloadResult
+				if err := callAria2RPC(ctx, rpcClient, rpcURL, rpcSecret, "aria2.tellStopped",
+					[]any{0, 1, []string{"status", "errorCode", "errorMessage"}}, &stopped); err == nil && len(stopped) > 0 {
+					if stopped[0].Status == "complete" {
+						completed.Store(true)
+						cancel()
+						return
+					}
+					if stopped[0].Status == "error" || stopped[0].Status == "removed" {
+						engineFailure.Store(fmt.Sprintf("code=%s: %s", stopped[0].ErrorCode, stopped[0].ErrorMessage))
+						cancel()
+						return
 					}
 				}
 			}
@@ -1312,9 +1355,11 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 		_ = os.Remove(destination)
 		return fmt.Errorf("下载超过大小限制：%s", humanSize(maxBytes))
 	}
-	if waitErr != nil {
+	if parent.Err() != nil { return parent.Err() }
+	if waitErr != nil && !completed.Load() {
 		_ = os.Remove(destination)
 		message := strings.TrimSpace(output.String())
+		if failure := engineFailure.Load(); failure != nil { message += " " + failure.(string) }
 		if len(message) > 2048 { message = message[len(message)-2048:] }
 		if message != "" { return fmt.Errorf("aria2 下载失败：%s：%w", message, waitErr) }
 		return fmt.Errorf("aria2 下载失败：%w", waitErr)
@@ -1353,30 +1398,15 @@ func (w *limitedOutput) String() string {
 	return string(w.data)
 }
 
-func aria2RemoteInfo(parent context.Context, source string) (int64, string, error) {
-	ctx, cancel := context.WithTimeout(parent, 5*time.Second)
-	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, source, nil)
-	if err != nil { return 0, "", err }
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
-	resp, err := newHTTPClient(0, 5*time.Second).Do(req)
-	if err != nil { return 0, "", err }
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return 0, "", fmt.Errorf("HEAD 请求未成功（HTTP %d）", resp.StatusCode)
-	}
-	resolvedSource := resp.Request.URL.String()
-	initialURL, initialErr := url.Parse(source)
-	finalURL, finalErr := url.Parse(resolvedSource)
-	if initialErr != nil || finalErr != nil || initialURL.Scheme == "https" && finalURL.Scheme != "https" {
-		return 0, "", errHTTPSDowngrade
-	}
-	return resp.ContentLength, resolvedSource, nil
-}
-
 type aria2Status struct {
 	TotalLength     string `json:"totalLength"`
 	CompletedLength string `json:"completedLength"`
+}
+
+type aria2DownloadResult struct {
+    Status string `json:"status"`
+    ErrorCode string `json:"errorCode"`
+    ErrorMessage string `json:"errorMessage"`
 }
 
 type aria2RPCResponse struct {

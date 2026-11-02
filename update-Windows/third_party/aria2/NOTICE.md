@@ -1,7 +1,9 @@
 # aria2 sidecar notices
 
-The updater can launch the separately distributed `aria2c` executable. It is
-not linked into the Go updater.
+The Linux amd64 release embeds the pinned `aria2c` executable as data and
+extracts it into a private directory before launching it as a separate process.
+Windows/macOS releases use the separately distributed executable. No aria2 code
+is linked into the Go updater.
 
 - **aria2**, version 1.36.0, Copyright (C) 2006-2019 Tatsuhiro Tsujikawa and
   contributors. License: GNU General Public License, version 2. See

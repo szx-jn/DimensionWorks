@@ -13,11 +13,11 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(webpanel): 新增设置页面"
+        description: "新增功能；每行一条，如 feat(updater): Linux 更新器内置 aria2 引擎"
         required: false
         type: string
       release_fixes:
-        description: "问题修复；每行一条，如 fix(daemon): 修复启动异常"
+        description: "问题修复；每行一条，如 fix(updater): 修复下载预检超时与引擎退出异常"
         required: false
         type: string
       release_performance:
@@ -218,38 +218,6 @@ jobs:
         working-directory: update-Windows
         run: go test -v ./...
 
-      - name: 构建 Windows、Linux、macOS Go 更新器
-        working-directory: update-Windows
-        shell: bash
-        run: |
-          set -euo pipefail
-          while read -r goos goarch; do
-            case "$goos" in
-              windows) platform="windows"; extension=".exe" ;;
-              linux) platform="linux"; extension="" ;;
-              darwin) platform="macos"; extension="" ;;
-              *) echo "Unsupported target: $goos" >&2; exit 1 ;;
-            esac
-            for kind in client server; do
-              output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
-              echo "Building ${output}"
-              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
-                -trimpath \
-                -ldflags="-s -w -X main.defaultKind=${kind}" \
-                -o "$output" .
-              test -s "$output"
-              case "$goos" in
-                windows) file "$output" | grep -q 'PE32+ executable' ;;
-                linux) file "$output" | grep -q 'ELF 64-bit' ;;
-                darwin) file "$output" | grep -q 'Mach-O 64-bit' ;;
-              esac
-            done
-          done <<'TARGETS'
-          windows amd64
-          linux amd64
-          darwin arm64
-          TARGETS
-
       - name: 获取 aria2 sidecar 与 GPL 源码包
         shell: bash
         run: |
@@ -278,7 +246,50 @@ jobs:
           curl -fL --retry 3 "https://raw.githubusercontent.com/agalwood/Motrix/${motrix_commit}/extra/darwin/arm64/engine/aria2c" -o dist/aria2c-macos-arm64
           echo "1527c4d071c16c1266880e93750e385cdd4e9d2a950d7f56cb5a21125e3bd311  dist/aria2c-macos-arm64" | sha256sum -c -
           chmod 0755 dist/aria2c-macos-arm64
+          mkdir -p update-Windows/aria2-runtime
+          cp dist/aria2c-linux-amd64 update-Windows/aria2-runtime/aria2c-linux-amd64
 
+      - name: 测试 Linux 内置 aria2 实际下载
+        working-directory: update-Windows
+        run: go test -tags bundled_aria2 -run 'TestBundledAria2|TestUnpackAria2' -v ./...
+
+
+      - name: 构建 Windows、Linux、macOS Go 更新器
+        working-directory: update-Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r goos goarch; do
+            case "$goos" in
+              windows) platform="windows"; extension=".exe" ;;
+              linux) platform="linux"; extension="" ;;
+              darwin) platform="macos"; extension="" ;;
+              *) echo "Unsupported target: $goos" >&2; exit 1 ;;
+            esac
+            bundle_args=()
+            if [[ "$goos" == linux ]]; then bundle_args=(-tags bundled_aria2); fi
+            for kind in client server; do
+              output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
+              echo "Building ${output}"
+              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build "${bundle_args[@]}" \
+                -trimpath \
+                -ldflags="-s -w -X main.defaultKind=${kind}" \
+                -o "$output" .
+              test -s "$output"
+              case "$goos" in
+                windows) file "$output" | grep -q 'PE32+ executable' ;;
+                linux) file "$output" | grep -q 'ELF 64-bit' ;;
+                darwin) file "$output" | grep -q 'Mach-O 64-bit' ;;
+              esac
+            done
+          done <<'TARGETS'
+          windows amd64
+          linux amd64
+          darwin arm64
+          TARGETS
+
+      - name: 验证 Linux 单文件更新事务
+        run: python3 scripts/integration/updater_linux_e2e.py dist/update-dimensionworks-server-linux-amd64
 
       - name: 检查发布文件
         env:
@@ -396,7 +407,7 @@ jobs:
           if entries:
               print("\n".join(entries))
           else:
-            print("更新器：集成 aria2 多线程下载引擎（GPL-2.0 sidecar），随发行版提供对应许可证与源码；保留 Go 下载器作为引擎不可用时的回退。")
+            print("更新器：Linux amd64 单文件内置 aria2 引擎，Windows/macOS 使用独立 sidecar；同版提供 GPL 许可证与源码，保留 Go 下载器回退。")
           PY
           )"
           assets=(

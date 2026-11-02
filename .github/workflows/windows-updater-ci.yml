@@ -32,17 +32,26 @@ jobs:
           go-version: stable
           cache-dependency-path: update-Windows/go.mod
 
+      - name: 准备 Linux 单文件内置引擎
+        working-directory: update-Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p aria2-runtime
+          curl -fL --retry 3 https://raw.githubusercontent.com/agalwood/Motrix/7012040fec926e16fe8f6c403cf038527f5c18b9/extra/linux/x64/engine/aria2c -o aria2-runtime/aria2c-linux-amd64
+          echo "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc  aria2-runtime/aria2c-linux-amd64" | sha256sum -c -
+
       - name: 运行更新器测试
         working-directory: update-Windows
-        run: go test -v ./...
+        run: go test -tags bundled_aria2 -v ./...
 
       - name: 检查 Go 静态问题
         working-directory: update-Windows
-        run: go vet ./...
+        run: go vet -tags bundled_aria2 ./...
 
       - name: 运行并发竞态测试
         working-directory: update-Windows
-        run: go test -race ./...
+        run: go test -tags bundled_aria2 -race ./...
 
       - name: 交叉编译 Windows、Linux、macOS 更新器
         working-directory: update-Windows
@@ -57,9 +66,11 @@ jobs:
               darwin) platform=macos; extension=; expected='Mach-O 64-bit' ;;
               *) exit 1 ;;
             esac
+            bundle_args=()
+            if [[ "$goos" == linux ]]; then bundle_args=(-tags bundled_aria2); fi
             for kind in client server; do
               output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
-              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
+              GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build "${bundle_args[@]}" \
                 -trimpath -ldflags="-s -w -X main.defaultKind=${kind}" -o "$output" .
               file "$output" | grep -q "$expected"
               if [[ "$goos" == windows ]]; then
@@ -71,6 +82,9 @@ jobs:
           linux amd64
           darwin arm64
           TARGETS
+
+      - name: 验证 Linux 单文件更新事务
+        run: python3 scripts/integration/updater_linux_e2e.py dist/update-dimensionworks-server-linux-amd64
 
       - name: 上传跨平台更新器
         uses: actions/upload-artifact@v4
