@@ -1,0 +1,37 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+clientSideOnly=true
+
+[[mods]]
+modId="dimensionworks_jei_ticks"
+version="0.1.0"
+displayName="DimensionWorks JEI & Jade Details"
+authors="szx-jn"
+displayTest="IGNORE_ALL_VERSION"
+description='''在 JEI 加工箭头内显示游戏刻数，并在背包提示和 Jade 中显示机械动力及附属、龙之进化的燃料消耗。'''
+
+[[dependencies.dimensionworks_jei_ticks]]
+modId="forge"
+mandatory=true
+versionRange="[47.0,)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.dimensionworks_jei_ticks]]
+modId="jade"
+mandatory=false
+versionRange="[11.13.2,12)"
+ordering="AFTER"
+side="CLIENT"
+[[dependencies.dimensionworks_jei_ticks]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.dimensionworks_jei_ticks]]
+modId="jei"
+mandatory=true
+versionRange="[15.20.0.130,15.21)"
+ordering="AFTER"
+side="CLIENT"

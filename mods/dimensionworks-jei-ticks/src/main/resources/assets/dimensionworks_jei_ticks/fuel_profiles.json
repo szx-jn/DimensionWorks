@@ -1,0 +1,44 @@
+{
+  "create:blaze_burner": [
+    {
+      "kind": "fluid",
+      "fuel": "minecraft:lava",
+      "amount": 1,
+      "unit": "mB",
+      "ticks": 1,
+      "condition": "本包默认：补热时每 tick 扣除；热量缓存接近 10000t 时暂停补充"
+    },
+    {
+      "kind": "fluid",
+      "fuel": "createdieselgenerators:diesel",
+      "amount": 1,
+      "unit": "mB",
+      "ticks": 1,
+      "condition": "本包默认：补热时每 tick 扣除；每批补充 32t 热量，热量缓存满时暂停"
+    },
+    {
+      "kind": "fluid",
+      "fuel": "createdieselgenerators:biodiesel",
+      "amount": 1,
+      "unit": "mB",
+      "ticks": 1,
+      "condition": "本包默认：补热时每 tick 扣除；每批补充 24t 热量，热量缓存满时暂停"
+    },
+    {
+      "kind": "fluid",
+      "fuel": "createdieselgenerators:gasoline",
+      "amount": 1,
+      "unit": "mB",
+      "ticks": 1,
+      "condition": "本包默认：补热时每 tick 扣除；每批补充 24t 热量并超级加热，热量缓存满时暂停"
+    },
+    {
+      "kind": "fluid",
+      "fuel": "createdieselgenerators:ethanol",
+      "amount": 1,
+      "unit": "mB",
+      "ticks": 1,
+      "condition": "本包默认：补热时每 tick 扣除；每批补充 16t 热量，热量缓存满时暂停"
+    }
+  ]
+}

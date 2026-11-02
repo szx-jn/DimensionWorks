@@ -30,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_localization  # noqa: E402  (sibling localization coverage check)
+import check_jei_details  # noqa: E402  (client tooltip metadata and fuel data)
 import pack_manifest  # noqa: E402  (sibling update manifest helpers)
 import pack_version  # noqa: E402  (sibling release version rules)
 
@@ -96,6 +97,11 @@ def check_manifest() -> CheckResult:
             elif isinstance(value, str) and "pending" in value.lower():
                 problems.append(f"{mod.get('id')}: {field_name}={value} is not a fixed version")
     return CheckResult("manifest", not problems, f"{len(manifest.get('mods', []))} mods", problems)
+
+
+def check_jei_tooltips() -> CheckResult:
+    problems = check_jei_details.check()
+    return CheckResult("jei-jade-details", not problems, "client metadata and fuel profiles", problems)
 
 
 def check_localization_overlay(instance_dir: Path) -> CheckResult:
@@ -468,6 +474,7 @@ def run_all(
     started = time.monotonic()
     checks = [
         check_manifest,
+        check_jei_tooltips,
         check_update_assets,
         check_shaderpack_manifest,
         lambda: check_pack_version(

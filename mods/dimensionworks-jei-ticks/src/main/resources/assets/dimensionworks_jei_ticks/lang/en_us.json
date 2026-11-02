@@ -1,0 +1,7 @@
+{
+  "tooltip.dimensionworks_jei_ticks.fuel_title": "Base fuel consumption",
+  "tooltip.dimensionworks_jei_ticks.fuel_rate": "%2$s %3$s every %1$st",
+  "tooltip.dimensionworks_jei_ticks.fuel_page": "Fuel page %s/%s · Shift + scroll",
+  "tooltip.dimensionworks_jei_ticks.fuel_inventory": "%s fuels; full list in inventory tooltip",
+  "config.jade.plugin_dimensionworks_jei_ticks.fuel_consumption": "Base fuel consumption"
+}

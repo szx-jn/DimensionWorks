@@ -1,0 +1,7 @@
+{
+  "tooltip.dimensionworks_jei_ticks.fuel_title": "燃料基础消耗",
+  "tooltip.dimensionworks_jei_ticks.fuel_rate": "每 %st 消耗 %s %s",
+  "tooltip.dimensionworks_jei_ticks.fuel_page": "燃料 %s/%s 页 · Shift + 滚轮翻页",
+  "tooltip.dimensionworks_jei_ticks.fuel_inventory": "共 %s 种燃料，完整列表见背包提示",
+  "config.jade.plugin_dimensionworks_jei_ticks.fuel_consumption": "燃料基础消耗"
+}

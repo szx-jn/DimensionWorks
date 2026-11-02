@@ -1,0 +1,44 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+}
+
+version = '0.1.0'
+group = 'dev.szx.dimensionworks'
+base.archivesName = 'dimensionworks_jei_ticks'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+}
+
+repositories {
+    maven { url = 'https://maven.blamejared.com' }
+    maven { url = 'https://api.modrinth.com/maven' }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.23'
+    implementation fg.deobf('mezz.jei:jei-1.20.1-forge:15.20.0.130')
+    compileOnly fg.deobf('maven.modrinth:jade:LecuGude')
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+mixin {
+    add sourceSets.main, 'dimensionworks_jei_ticks.refmap.json'
+    config 'dimensionworks_jei_ticks.mixins.json'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+tasks.named('test') { useJUnitPlatform() }
+
+jar {
+    manifest.attributes(['MixinConfigs': 'dimensionworks_jei_ticks.mixins.json'])
+    finalizedBy 'reobfJar'
+}

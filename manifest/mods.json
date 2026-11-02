@@ -548,6 +548,16 @@
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-ftbchunks-no-forceload"
     },
     {
+      "id": "dimensionworks_jei_ticks",
+      "name": "DimensionWorks JEI & Jade Details",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-jei-ticks",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "client",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-jei-ticks"
+    },
+    {
       "id": "dimensionworks_localization",
       "name": "DimensionWorks 简体中文汉化",
       "source": "in-repo",
