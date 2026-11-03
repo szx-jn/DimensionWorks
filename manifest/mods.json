@@ -552,7 +552,7 @@
       "name": "DimensionWorks JEI & Jade Details",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-jei-ticks",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "required": true,
       "environment": "client",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-jei-ticks"

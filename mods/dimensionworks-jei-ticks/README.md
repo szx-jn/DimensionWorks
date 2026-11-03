@@ -14,6 +14,12 @@
 
 JEI 是必需的客户端依赖；Jade 为可选集成，编译版本固定为清单中的 11.13.2。Create、Mekanism 和农夫乐事不新增为运行依赖。作为整合包客户端条目分发，服务端不安装此模组。仅靠 KubeJS 的配方事件无法统一改动这些第三方箭头的绘制，因此采用独立兼容模组和客户端 Mixin。
 
+## 0.1.1：Mekanism 启动兼容修复
+
+修复客户端初始化时 `MekanismProgressMixin` 的 `@Shadow getRelativeX` 无法解析而崩溃的问题。按清单固定的 Mekanism 10.4.16.80 类层次继承 `GuiTexturedElement`，正常调用其纹理访问器及 `GuiElement` 的相对坐标访问器，移除三个继承方法的 Shadow 声明。Mekanism 仅作为固定版本编译依赖，不加入发布 JAR，也不增加必需运行依赖。
+
+箭头仍使用相对坐标，保留原有 JEI 刻数显示与非 JEI 界面行为；不增加区块加载、实体或服务端 tick 开销。发布后仍需实际启动客户端并打开 Mekanism JEI 配方页验收。
+
 ## 燃料消耗提示
 
 **燃料提示仅针对 Create、声明依赖 Create 的附属，以及龙之进化。** 这项范围约束不限制上面的 JEI 配方时间覆盖。不会给原版、Mekanism、天境等设备添加燃料提示；这些模组的物品仍可以作为 Create 设备接受的燃料出现在列表中。

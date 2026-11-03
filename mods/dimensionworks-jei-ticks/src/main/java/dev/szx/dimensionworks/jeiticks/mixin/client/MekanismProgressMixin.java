@@ -3,21 +3,24 @@ package dev.szx.dimensionworks.jeiticks.mixin.client;
 import dev.szx.dimensionworks.jeiticks.client.TickArrowRenderer;
 import dev.szx.dimensionworks.jeiticks.client.TickArrowRenderer.Direction;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
+import mekanism.client.gui.IGuiWrapper;
+import mekanism.client.gui.element.GuiTexturedElement;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Pseudo
 @Mixin(targets = "mekanism.client.gui.element.progress.GuiProgress", remap = false)
-public abstract class MekanismProgressMixin {
-    @Shadow public abstract int getRelativeX();
-    @Shadow public abstract int getRelativeY();
-    @Shadow protected abstract ResourceLocation getResource();
+public abstract class MekanismProgressMixin extends GuiTexturedElement {
+    // These accessors belong to GuiElement/GuiTexturedElement, not GuiProgress.
+    // Inherit them normally: Mixin cannot resolve inherited methods as @Shadow here.
+    protected MekanismProgressMixin(ResourceLocation resource, IGuiWrapper gui,
+                                    int x, int y, int width, int height) {
+        super(resource, gui, x, y, width, height);
+    }
 
     @Inject(method = "drawBackground", at = @At("HEAD"), cancellable = true)
     private void dimensionworks$arrow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks,
@@ -30,9 +33,8 @@ public abstract class MekanismProgressMixin {
             case "down.png" -> Direction.DOWN;
             default -> null; // Flames, upgrade indicators and bidirectional flows are not timed arrows.
         };
-        AbstractWidget widget = (AbstractWidget) (Object) this;
         if (direction != null && TickArrowRenderer.draw(graphics, getRelativeX(), getRelativeY(),
-                widget.getWidth(), widget.getHeight(), direction)) {
+                getWidth(), getHeight(), direction)) {
             ci.cancel();
         }
     }
