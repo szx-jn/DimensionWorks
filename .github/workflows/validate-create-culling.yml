@@ -1,0 +1,65 @@
+name: Create 遮挡独立客户端验证
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['validate/create-culling-*']
+  pull_request:
+    paths:
+      - 'mods/dimensionworks-create-culling/**'
+      - '.github/workflows/validate-create-culling.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  client:
+    name: 独立客户端 (${{ matrix.backend }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [instancing, off]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+      - name: 准备独立图形环境
+        run: sudo apt-get update -qq && sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libopenal1
+      - name: 构建并执行几何回归
+        working-directory: mods/dimensionworks-create-culling
+        run: gradle build compileProbeJava --no-daemon
+      - name: 启动真实 Forge 客户端并验证遮挡与恢复
+        working-directory: mods/dimensionworks-create-culling
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 'true'
+          ALSOFT_DRIVERS: 'null'
+        run: |
+          set -euo pipefail
+          mkdir -p run-probe/config
+          printf 'backend = "flywheel:${{ matrix.backend }}"\n' > run-probe/config/flywheel-client.toml
+          printf 'onboardAccessibility:false\nrenderDistance:5\nsimulationDistance:5\nmaxFps:60\n' > run-probe/options.txt
+          timeout 900 xvfb-run -a -s '-screen 0 1280x720x24' gradle runClient -PprobeBackend=${{ matrix.backend }} --no-daemon > run-probe/client-console.log 2>&1
+          test -f run-probe/probe-result.txt
+          cat run-probe/probe-result.txt
+          ! grep -q '^FAIL' run-probe/probe-result.txt
+          grep -q '^PASS COMPLETE' run-probe/probe-result.txt
+      - name: 保存独立验证证据
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: create-culling-${{ matrix.backend }}
+          path: |
+            mods/dimensionworks-create-culling/run-probe/probe-result.txt
+            mods/dimensionworks-create-culling/run-probe/probe-stage-*.png
+            mods/dimensionworks-create-culling/run-probe/client-console.log
+            mods/dimensionworks-create-culling/run-probe/logs/
+            mods/dimensionworks-create-culling/run-probe/crash-reports/
+            mods/dimensionworks-create-culling/build/reports/tests/
+            mods/dimensionworks-create-culling/build/libs/*.jar

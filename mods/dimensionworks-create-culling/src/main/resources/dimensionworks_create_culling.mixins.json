@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.szx.dimensionworks.createculling.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "dimensionworks_create_culling.refmap.json",
+  "client": ["BlockEntityRenderDispatcherMixin", "VisualAccess", "VisualStorageMixin"],
+  "injectors": {"defaultRequire": 1}
+}
