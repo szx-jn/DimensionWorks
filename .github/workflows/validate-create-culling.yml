@@ -55,7 +55,7 @@ jobs:
         run: |
           mkdir -p probe-libs
           curl -fL --retry 3 https://mediafilez.forgecdn.net/files/6994/299/mekalus-mc1.20.1-1.8.0.1.jar -o probe-libs/mekalus-1.8.0.1.jar
-      - name: 配置整合包默认光影
+      - name: 配置默认光影并开启方块实体阴影测试
         if: matrix.shaders == 'true'
         working-directory: mods/dimensionworks-create-culling
         run: |
@@ -64,6 +64,9 @@ jobs:
           curl -fL --retry 3 https://cdn.modrinth.com/data/R6NEzAwj/versions/B1kyfoUZ/ComplementaryUnbound_r5.9.3.zip -o run-probe/shaderpacks/ComplementaryUnbound_r5.9.3.zip
           echo '2ee08300e1d6f039e63eae8484dddf57b3aaaf67  run-probe/shaderpacks/ComplementaryUnbound_r5.9.3.zip' | sha1sum -c -
           cp ../../config/oculus.properties run-probe/config/oculus.properties
+          # Complementary disables block-entity shadows by default. Enable them in
+          # the isolated probe so bypassing the shadow pass is actually exercised.
+          printf 'ENTITY_SHADOW=2\n' > run-probe/shaderpacks/ComplementaryUnbound_r5.9.3.zip.txt
       - name: 构建并执行几何回归
         working-directory: mods/dimensionworks-create-culling
         run: gradle build compileProbeJava -PprobeCompat=${{ matrix.compat }} --no-daemon
