@@ -25,14 +25,19 @@ EXPECTED = {
 }
 
 
-def stage(repo: Path, group: str, artifact: str, version: str, payload: bytes, classifier: str = "") -> None:
+def stage(repo: Path, group: str, artifact: str, version: str, payload: bytes, classifier: str = "",
+          dependencies: dict[tuple[str, str], str] | None = None) -> None:
     directory = repo / group.replace(".", "/") / artifact / version
     directory.mkdir(parents=True, exist_ok=True)
     stem = f"{artifact}-{version}"
     name = stem + (f"-{classifier}" if classifier else "") + ".jar"
     (directory / name).write_bytes(payload)
+    dependency_xml = "".join(
+        f'<dependency><groupId>{g}</groupId><artifactId>{a}</artifactId><version>{v}</version>'
+        '<scope>compile</scope></dependency>' for (g,a),v in (dependencies or {}).items())
     pom = (f'<project><modelVersion>4.0.0</modelVersion><groupId>{group}</groupId>'
-           f'<artifactId>{artifact}</artifactId><version>{version}</version></project>\n')
+           f'<artifactId>{artifact}</artifactId><version>{version}</version>'
+           f'<dependencies>{dependency_xml}</dependencies></project>\n')
     (directory / f"{stem}.pom").write_text(pom, encoding="utf-8")
     for file in [directory / name, directory / f"{stem}.pom"]:
         data = file.read_bytes()
@@ -79,7 +84,7 @@ def main() -> None:
             for info in archive.infolist():
                 if not info.filename.startswith("META-INF/jarjar/"):
                     slim.writestr(info, archive.read(info))
-        stage(repo, "com.simibubi.create", "create-1.20.1", "6.0.8-291", output.getvalue(), "slim")
+        stage(repo, "com.simibubi.create", "create-1.20.1", "6.0.8-291", output.getvalue(), "slim", EXPECTED)
     # Register before project repositories; restrict raw pinned versions to this
     # repository so Gradle does not retry the expired upstream certificate.
     init = Path(os.environ.get("GRADLE_USER_HOME", str(Path.home() / ".gradle"))) / "init.d"
