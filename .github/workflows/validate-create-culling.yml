@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   client:
-    name: 独立客户端 (${{ matrix.backend }}, compat=${{ matrix.compat }})
+    name: 独立客户端 (${{ matrix.backend }}, compat=${{ matrix.compat }}, shaders=${{ matrix.shaders }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -28,10 +28,16 @@ jobs:
         include:
           - backend: instancing
             compat: 'false'
+            shaders: 'false'
           - backend: 'off'
             compat: 'false'
+            shaders: 'false'
           - backend: instancing
             compat: 'true'
+            shaders: 'false'
+          - backend: 'off'
+            compat: 'true'
+            shaders: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -49,6 +55,18 @@ jobs:
         run: |
           mkdir -p probe-libs
           curl -fL --retry 3 https://mediafilez.forgecdn.net/files/6994/299/mekalus-mc1.20.1-1.8.0.1.jar -o probe-libs/mekalus-1.8.0.1.jar
+      - name: 配置默认光影并开启方块实体阴影测试
+        if: matrix.shaders == 'true'
+        working-directory: mods/dimensionworks-create-culling
+        run: |
+          set -euo pipefail
+          mkdir -p run-probe/config run-probe/shaderpacks
+          curl -fL --retry 3 https://cdn.modrinth.com/data/R6NEzAwj/versions/B1kyfoUZ/ComplementaryUnbound_r5.9.3.zip -o run-probe/shaderpacks/ComplementaryUnbound_r5.9.3.zip
+          echo '2ee08300e1d6f039e63eae8484dddf57b3aaaf67  run-probe/shaderpacks/ComplementaryUnbound_r5.9.3.zip' | sha1sum -c -
+          cp ../../config/oculus.properties run-probe/config/oculus.properties
+          # Complementary disables block-entity shadows by default. Enable them in
+          # the isolated probe so bypassing the shadow pass is actually exercised.
+          printf 'ENTITY_SHADOW=2\n' > run-probe/shaderpacks/ComplementaryUnbound_r5.9.3.zip.txt
       - name: 构建并执行几何回归
         working-directory: mods/dimensionworks-create-culling
         run: gradle build compileProbeJava -PprobeCompat=${{ matrix.compat }} --no-daemon
@@ -62,7 +80,7 @@ jobs:
           mkdir -p run-probe/config
           printf 'backend = "flywheel:${{ matrix.backend }}"\n' > run-probe/config/flywheel-client.toml
           printf 'onboardAccessibility:false\nrenderDistance:5\nsimulationDistance:5\nmaxFps:60\n' > run-probe/options.txt
-          timeout 900 xvfb-run -a -s '-screen 0 1280x720x24' gradle runClient -PprobeBackend=${{ matrix.backend }} -PprobeCompat=${{ matrix.compat }} --no-daemon > run-probe/client-console.log 2>&1 || { tail -100 run-probe/client-console.log; exit 1; }
+          timeout 900 xvfb-run -a -s '-screen 0 1280x720x24' gradle runClient -PprobeBackend=${{ matrix.backend }} -PprobeCompat=${{ matrix.compat }} -PprobeShaders=${{ matrix.shaders }} --no-daemon > run-probe/client-console.log 2>&1 || { tail -100 run-probe/client-console.log; exit 1; }
           test -f run-probe/probe-result.txt
           cat run-probe/probe-result.txt
           ! grep -q '^FAIL' run-probe/probe-result.txt
@@ -71,7 +89,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: create-culling-${{ matrix.backend }}-${{ matrix.compat }}
+          name: create-culling-${{ matrix.backend }}-${{ matrix.compat }}-${{ matrix.shaders }}
           path: |
             mods/dimensionworks-create-culling/run-probe/probe-result.txt
             mods/dimensionworks-create-culling/run-probe/probe-stage-*.png

@@ -95,8 +95,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
-          cache-dependency-path: mods/${{ matrix.module }}/**/*.gradle*
 
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v4

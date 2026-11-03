@@ -117,6 +117,9 @@ public final class ClientRenderProbe {
             String backend = Backend.REGISTRY.getIdOrThrow(BackendManager.currentBackend()).toString();
             String requested = System.getProperty("dimensionworks.culling.backend");
             check("actual backend " + requested, backend.equals("flywheel:" + requested));
+            boolean shaders = Boolean.getBoolean("dimensionworks.culling.shaders");
+            check("actual shader pack state", dev.engine_room.flywheel.lib.util.ShadersModHelper.isShaderPackInUse() == shaders);
+            if (shaders) check("actual shadow pass preserved", ClientOcclusion.shadowPassBypasses > 0);
             var frame = stage == 1 ? new ClientOcclusion.Frame(mc.level, mc.gameRenderer.getMainCamera().getPosition()) : ClientOcclusion.frame();
             check("world and camera ready", frame != null && Math.abs(mc.player.getZ()-(stage==4?-18:22)) < 1);
             for (int i=0;i<TARGETS.length;i++) {

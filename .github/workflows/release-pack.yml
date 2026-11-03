@@ -55,7 +55,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v4

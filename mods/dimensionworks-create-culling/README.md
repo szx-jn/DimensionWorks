@@ -12,12 +12,12 @@
 
 每条渲染路径每帧最多读取 8192 个遮挡方块、检查 4096 个目标，帧内共享查询缓存，单截面最多 256 个方块、每个轴最多 24 个截面；超预算保留渲染。没有跨帧遮挡缓存，不增加服务器开销、实体、网络包或强制加载。收益依场景而定，不承诺固定 FPS 提升；无法证明完整遮挡时保留绘制。
 
-启用 Oculus/Iris 光影包时暂停剔除，保留阴影；无法读取光影状态时同样保留。Ponder 等虚拟世界不参与。可使用 JVM 参数 `-Ddimensionworks.culling.disabled=true` 关闭优化，便于对比和排障。
+使用 Flywheel 的光影兼容 API 区分通道：玩家视角正常剔除，阴影通道保留所有原有绘制。光影启用时 Create/Flywheel 默认退回普通渲染，仍可优化主视角；若第三方后端在光影下强制实例化，实例路径保留绘制以保护共享实例的阴影。Ponder 等虚拟世界不参与。可使用 JVM 参数 `-Ddimensionworks.culling.disabled=true` 关闭优化，便于对比和排障。
 
 ## 独立验证
 
-`.github/workflows/validate-create-culling.yml` 在隔离 Xvfb/Mesa 图形客户端中分别运行 Flywheel `instancing` 与 `off`，另测整合包固定的 Embeddium 0.3.31 / Mekalus 1.8.0.1 组合，使用新建独立世界与仅测试时加载的 `src/probe`。探针检查机壳轴、完整包裹轴、水车和齿轮箱的遮挡，裸露轴、玻璃后的水车和部分遮挡大水车的保留，关闭优化后的恢复、重新启用及渲染器重建、拆墙后的恢复、移动相机到墙后以及更换水车材质后的实例重建。Flywheel 检查真实实例句柄可见性；普通路径检查实际调度器跳过计数。断言失败或未输出完成标记时工作流失败，截图、日志与报告保存为 Actions artifacts。
+`.github/workflows/validate-create-culling.yml` 在隔离 Xvfb/Mesa 图形客户端中分别运行 Flywheel `instancing` 与 `off`，另测整合包固定的 Embeddium 0.3.31 / Mekalus 1.8.0.1 组合以及默认启用的 Complementary Unbound r5.9.3，使用新建独立世界与仅测试时加载的 `src/probe`。探针检查机壳轴、完整包裹轴、水车和齿轮箱的遮挡，裸露轴、玻璃后的水车和部分遮挡大水车的保留，关闭优化后的恢复、重新启用及渲染器重建、拆墙后的恢复、移动相机到墙后以及更换水车材质后的实例重建。Flywheel 检查真实实例句柄可见性；普通路径检查实际调度器跳过计数。断言失败或未输出完成标记时工作流失败，截图、日志与报告保存为 Actions artifacts。
 
 JUnit 几何回归包含六向墙、中心开孔、大水车边缘、反向遮挡、负坐标、无效边界和独立线段/AABB 相交算法的随机对照。构建与运行只在 GitHub Actions 执行；Actions 构建成功本身不算客户端验证通过。测试源码不随正式 jar 分发。
 
-独立测试记录见 [2026-11-03 验证报告](../../docs/validation/2026-11-03-create-culling.md)。正式发布工作流重跑三组客户端测试，通过后才打包，单独发布 `dimensionworks_create_culling-0.1.0.jar` 并纳入 SHA256SUMS。
+独立测试记录见 [2026-11-03 验证报告](../../docs/validation/2026-11-03-create-culling.md)。正式发布工作流重跑四组客户端测试，通过后才打包，单独发布 `dimensionworks_create_culling-0.1.0.jar` 并纳入 SHA256SUMS。
