@@ -528,6 +528,16 @@
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-cave-factory"
     },
     {
+      "id": "dimensionworks_create_culling",
+      "name": "DimensionWorks Create Culling",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-create-culling",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "client",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-create-culling"
+    },
+    {
       "id": "dimensionworks_drop_lifetime",
       "name": "DimensionWorks Drop Lifetime",
       "source": "in-repo",

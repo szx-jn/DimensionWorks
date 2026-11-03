@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="dimensionworks_create_culling"
+version="0.1.0"
+displayName="DimensionWorks Create Culling"
+authors="szx-jn"
+displayTest="IGNORE_ALL_VERSION"
+description='''Conservative client-side occlusion culling for Create kinetic renderers and Flywheel instances.'''
+[[dependencies.dimensionworks_create_culling]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.dimensionworks_create_culling]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.dimensionworks_create_culling]]
+modId="create"
+mandatory=true
+versionRange="[6.0.8,6.0.9)"
+ordering="AFTER"
+side="CLIENT"
+[[dependencies.dimensionworks_create_culling]]
+modId="flywheel"
+mandatory=true
+versionRange="[1.0.5,1.0.6)"
+ordering="AFTER"
+side="CLIENT"
