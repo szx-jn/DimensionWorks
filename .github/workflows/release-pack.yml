@@ -56,6 +56,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: 同步 Java 与系统证书
+        run: bash scripts/prepare_java_trust.sh
+
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
