@@ -55,6 +55,7 @@ minecraft.runs {
     client {
         workingDirectory project.file('run-probe')
         property 'dimensionworks.culling.probe', 'true'
+        property 'dimensionworks.culling.shaders', providers.gradleProperty('probeShaders').getOrElse('false')
         property 'dimensionworks.culling.backend', providers.gradleProperty('probeBackend').getOrElse('instancing')
         mods {
             dimensionworks_create_culling { sources = [sourceSets.main, sourceSets.probe] }

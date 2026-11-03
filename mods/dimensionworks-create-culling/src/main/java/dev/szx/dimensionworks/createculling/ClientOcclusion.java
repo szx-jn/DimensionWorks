@@ -1,9 +1,7 @@
 package dev.szx.dimensionworks.createculling;
 
-import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllBlockEntityTypes;
@@ -11,6 +9,7 @@ import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
+import dev.engine_room.flywheel.lib.util.ShadersModHelper;
 import dev.szx.dimensionworks.createculling.mixin.VisualAccess;
 import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -24,25 +23,29 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = DimensionWorksCreateCulling.MOD_ID, value = Dist.CLIENT)
 public final class ClientOcclusion {
-    private static final BooleanSupplier SHADERS = shaderGuard();
     private static Frame vanilla;
     private static boolean renderPass;
+    private static boolean vanillaPrepared;
     public static long skippedRenders;
+    public static long shadowPassBypasses;
     private ClientOcclusion() {}
 
     @SubscribeEvent
     public static void renderTick(TickEvent.RenderTickEvent event) {
         vanilla = null;
+        vanillaPrepared = false;
         renderPass = event.phase == TickEvent.Phase.START;
     }
 
     public static boolean skip(BlockEntity be) {
-        if (renderPass && vanilla == null) vanilla = frame();
+        if (!renderPass || !supported(be)) return false;
+        // Shadows use the light camera, so player-view occlusion must never suppress them.
+        if (ShadersModHelper.isRenderingShadowPass()) { shadowPassBypasses++; return false; }
+        if (!vanillaPrepared) { vanilla = frame(); vanillaPrepared = true; }
         boolean hidden = vanilla != null && vanilla.hidden(be);
         if (hidden) skippedRenders++;
         return hidden;
@@ -50,7 +53,7 @@ public final class ClientOcclusion {
 
     /** Runs after all visual updates and before Flywheel's engine upload, in the same plan. */
     public static void updateInstances(Storage<?> storage) {
-        Frame frame = frame();
+        Frame frame = ShadersModHelper.isShaderPackInUse() ? null : frame();
         for (Visual visual : storage.getAllVisuals()) {
             if (!(visual instanceof AbstractBlockEntityVisual<?>)) continue;
             BlockEntity be = ((VisualAccess) visual).dimensionworks$getBlockEntity();
@@ -64,7 +67,7 @@ public final class ClientOcclusion {
 
     public static Frame frame() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || Boolean.getBoolean("dimensionworks.culling.disabled") || SHADERS.getAsBoolean()) return null;
+        if (mc.level == null || Boolean.getBoolean("dimensionworks.culling.disabled") || ShadersModHelper.isRenderingShadowPass()) return null;
         return new Frame(mc.level, mc.gameRenderer.getMainCamera().getPosition());
     }
 
@@ -136,19 +139,4 @@ public final class ClientOcclusion {
         }
     }
 
-    private static BooleanSupplier shaderGuard() {
-        if (!ModList.get().isLoaded("oculus") && !ModList.get().isLoaded("iris")) return () -> false;
-        for (String name : new String[]{"net.irisshaders.iris.api.v0.IrisApi", "net.coderbot.iris.api.v0.IrisApi"}) {
-            try {
-                Class<?> api = Class.forName(name);
-                Object instance = api.getMethod("getInstance").invoke(null);
-                Method enabled = api.getMethod("isShaderPackInUse");
-                return () -> {
-                    try { return (boolean) enabled.invoke(instance); }
-                    catch (ReflectiveOperationException e) { return true; }
-                };
-            } catch (ReflectiveOperationException ignored) { }
-        }
-        return () -> true;
-    }
 }
