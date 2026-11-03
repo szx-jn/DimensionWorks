@@ -1,0 +1,10 @@
+{
+  "key.dimensionworks_spectator_toggle.toggle": "切换旁观模式",
+  "key.categories.dimensionworks_spectator_toggle": "DimensionWorks",
+  "message.dimensionworks_spectator_toggle.entered": "已进入旁观模式，再按一次 F4 返回。",
+  "message.dimensionworks_spectator_toggle.returned": "已返回进入旁观模式前的位置和游戏模式。",
+  "message.dimensionworks_spectator_toggle.already_spectator": "你已处于旁观模式，且没有可用的返回位置。",
+  "message.dimensionworks_spectator_toggle.enter_failed": "无法进入旁观模式。",
+  "message.dimensionworks_spectator_toggle.return_failed": "无法返回保存的位置。",
+  "message.dimensionworks_spectator_toggle.dimension_unavailable": "原维度当前不可用，返回位置已保留。"
+}

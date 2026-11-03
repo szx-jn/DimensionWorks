@@ -1,0 +1,21 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="dimensionworks_spectator_toggle"
+version="0.1.0"
+displayName="DimensionWorks Spectator Toggle"
+authors="szx-jn"
+description='''Press F4 to enter spectator mode and press it again to return to the saved position and game mode.'''
+[[dependencies.dimensionworks_spectator_toggle]]
+modId="forge"
+mandatory=true
+versionRange="[47.0,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.dimensionworks_spectator_toggle]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
