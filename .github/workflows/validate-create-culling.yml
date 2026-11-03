@@ -44,8 +44,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: 同步 Java 与系统证书
-        run: bash scripts/prepare_java_trust.sh
+      - name: 准备固定版本 Create 编译依赖
+        run: python3 scripts/prepare_create_build_repository.py
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.8'
