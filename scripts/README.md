@@ -150,3 +150,9 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 ## GitHub Actions 发行
 
 手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、六个原生 Go 更新器和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
+
+## CI 固定 Create 编译依赖
+
+`prepare_create_build_repository.py` 仅允许在 GitHub Actions 中执行。Create Maven 站点证书过期时，从清单固定的 Modrinth Create 6.0.8 原包读取编译依赖；校验固定 SHA-512 和内嵌库版本，将 Flywheel、Ponder、Registrate、MixinExtras 原始 jar 及去掉内嵌依赖的 Create 编译 jar 放入运行器临时 Maven 仓库，并以 Gradle init 脚本限定这些固定坐标的来源。
+
+该步骤不编译或修改第三方 Java 类，保留所需编译依赖，不改变整合包分发的 Create 原包，不关闭 HTTPS 验证。升级清单中的 Create 版本时必须同步审查此脚本的版本与哈希。普通模组构建、独立客户端验证、正式发布共同使用该准备步骤。

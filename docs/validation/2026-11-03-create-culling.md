@@ -38,3 +38,5 @@ Create 6.0.8 的旋转部件通过方块实体渲染器和 Flywheel 1.0.5 实例
 这是实际 Forge 图形客户端和集成服务器验证。未进行完整整合包长期生产线压测、硬件显卡 FPS 对比或玩家手工验收，不承诺固定帧率提升。移动结构、皮带、机械臂、活塞等动态伸出模型保持原行为。
 
 提交前静态检查：`git diff --check`、工作流 YAML 与嵌入 Bash 语法、清单和模组 JSON/TOML、版本一致性、Python 语法、`pack_hook.check_manifest()` 均通过。仓库 Python 测试 74 项全部通过；本机未编译或打包模组。发布说明生成逻辑以四类样例输入执行，确认每条更新独占一行。
+
+构建环境另确认 `maven.createmod.net` 的证书已过期（curl 和 Java 均拒绝）。CI 改用 `prepare_create_build_repository.py`：从清单固定的 Modrinth 原包校验 SHA-512、提取同版本依赖并准备临时编译仓库；第三方 Java 类字节和随包分发的 Create 原包不变，不关闭 TLS 验证。依赖方案的构建与客户端回归见 [41611119537](https://github.com/szx-jn/DimensionWorks/actions/runs/41611119537)，正式发布再次使用该方案构建。
