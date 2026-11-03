@@ -608,6 +608,16 @@
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-rpm-limit"
     },
     {
+      "id": "dimensionworks_spectator_toggle",
+      "name": "DimensionWorks Spectator Toggle",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-spectator-toggle",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-spectator-toggle"
+    },
+    {
       "id": "dimensionworks_transfer",
       "name": "DimensionWorks Transfer",
       "source": "in-repo",
