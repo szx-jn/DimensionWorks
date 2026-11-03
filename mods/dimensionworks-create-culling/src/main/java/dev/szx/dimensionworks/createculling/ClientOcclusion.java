@@ -31,16 +31,18 @@ import net.minecraftforge.fml.common.Mod;
 public final class ClientOcclusion {
     private static final BooleanSupplier SHADERS = shaderGuard();
     private static Frame vanilla;
+    private static boolean renderPass;
     public static long skippedRenders;
     private ClientOcclusion() {}
 
     @SubscribeEvent
     public static void renderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) vanilla = frame();
-        else vanilla = null;
+        vanilla = null;
+        renderPass = event.phase == TickEvent.Phase.START;
     }
 
     public static boolean skip(BlockEntity be) {
+        if (renderPass && vanilla == null) vanilla = frame();
         boolean hidden = vanilla != null && vanilla.hidden(be);
         if (hidden) skippedRenders++;
         return hidden;
@@ -96,7 +98,8 @@ public final class ClientOcclusion {
             AABB bounds = be.getRenderBoundingBox();
             // Large cogs protrude from the unit block even though the default BE box doesn't.
             if (AllBlocks.LARGE_COGWHEEL.has(be.getBlockState())
-                || be.getType() == AllBlockEntityTypes.ENCASED_LARGE_COGWHEEL.get()) bounds = bounds.inflate(0.5);
+                || be.getType() == AllBlockEntityTypes.ENCASED_LARGE_COGWHEEL.get()
+                || be.getType() == AllBlockEntityTypes.MECHANICAL_PUMP.get()) bounds = bounds.inflate(0.5);
             OcclusionProof.Box box = new OcclusionProof.Box(bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ);
             boolean hidden = false;
             if (!box.contains(camera.x, camera.y, camera.z)) {

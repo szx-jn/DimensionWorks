@@ -25,7 +25,10 @@ public final class OcclusionProof {
     public static boolean hidden(Box box, double x, double y, double z, Solid solid) {
         if (!box.usable() || !Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)
             || box.contains(x, y, z)) return false;
-        if (enclosed(box, solid)) return true;
+        boolean insideEnvelope = x >= Math.floor(box.minX) && x <= Math.ceil(box.maxX)
+            && y >= Math.floor(box.minY) && y <= Math.ceil(box.maxY)
+            && z >= Math.floor(box.minZ) && z <= Math.ceil(box.maxZ);
+        if (!insideEnvelope && enclosed(box, solid)) return true;
         double[] camera = {x, y, z};
         for (int axis = 0; axis < 3; axis++) {
             double eye = camera[axis];
