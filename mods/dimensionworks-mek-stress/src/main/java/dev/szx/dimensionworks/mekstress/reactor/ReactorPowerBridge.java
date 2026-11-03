@@ -25,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class ReactorPowerBridge {
     public static final float OUTPUT_RPM = ReactorPowerMath.OUTPUT_RPM;
-    public static final float INPUT_STRESS_PER_RPM = ReactorPowerMath.INPUT_STRESS_PER_RPM;
     private static final double SHIELD_TARGET = 0.95D;
 
     private ReactorPowerBridge() {
@@ -190,26 +189,39 @@ public final class ReactorPowerBridge {
             ReactorInputRegistry.detach(core);
             return;
         }
-        ReactorInputRegistry.sync(core, input.injector(), input.shaft(), input.network());
+        long availableFe = (long) Math.min(1_000_000_000D, Math.floor(ReactorInputRegistry.availableSu(core, input.network()) / 2.0D));
+        long requestedFe = state == ReactorState.WARMING_UP ? warmingInput(core) : shieldInput(core);
+        long suppliedFe = Math.min(availableFe, requestedFe);
+        ReactorInputRegistry.sync(core, input.injector(), input.shaft(), input.network(), suppliedFe);
         // The virtual input is powered only if the real Create network has enough
-        // stress capacity to carry the extra 256 SU/RPM consumer.
+        // stress capacity to carry this tick's real FE-equivalent input.
         if (input.shaft().isOverStressed() || input.shaft().getSpeed() == 0) {
             return;
         }
 
-        if (state == ReactorState.WARMING_UP) {
-            // The three original charge stages (field, saturation, heat) are retained.
-            // There is no real FE inventory; Mek-style virtual energy supplies them.
-            core.injectEnergy(1_000_000_000L);
-        } else if (core.maxShieldCharge.get() > 0) {
-            // Avoid exactly 100%: vanilla fieldInputRate divides by (1 - field%).
-            // The virtual input keeps the field charged, but loss of mechanical
-            // power leaves the original drain / failure behaviour untouched.
-            double minimum = core.maxShieldCharge.get() * SHIELD_TARGET;
-            if (core.shieldCharge.get() < minimum) {
-                core.shieldCharge.set(minimum);
-            }
-        }
+        if (suppliedFe > 0) core.injectEnergy(suppliedFe);
+    }
+
+    private static long shieldInput(TileReactorCore core) {
+        double max = core.maxShieldCharge.get();
+        double shield = core.shieldCharge.get();
+        if (!Double.isFinite(max) || max <= 0 || !Double.isFinite(shield)) return 0;
+        double deficit = Math.max(0, max * SHIELD_TARGET - shield);
+        double temperatureEfficiency = Math.max(0, 1 - Math.max(0, core.temperature.get() - 15_000) / 10_000);
+        double efficiency = Math.max(0, 1 - shield / max) * temperatureEfficiency;
+        if (!Double.isFinite(efficiency) || efficiency <= 0) return 0;
+        return (long) Math.min(1_000_000_000D, Math.ceil(deficit / efficiency));
+    }
+
+    private static long warmingInput(TileReactorCore core) {
+        if (!core.startupInitialized.get()) return 0;
+        double halfShield = core.maxShieldCharge.get() / 2;
+        if (core.shieldCharge.get() < halfShield)
+            return Math.max(0L, (long) Math.ceil(halfShield - core.shieldCharge.get()) + 1);
+        long saturationDeficit = core.maxSaturation.get() / 2 - core.saturation.get();
+        if (saturationDeficit > 0) return saturationDeficit;
+        double heat = Math.max(0, 2000 - core.temperature.get()) * (1000 + core.reactableFuel.get() * 10);
+        return Double.isFinite(heat) ? (long) Math.min(1_000_000_000D, Math.ceil(heat)) : 0;
     }
 
     private record Input(TileReactorInjector injector, KineticBlockEntity shaft, KineticNetwork network) {

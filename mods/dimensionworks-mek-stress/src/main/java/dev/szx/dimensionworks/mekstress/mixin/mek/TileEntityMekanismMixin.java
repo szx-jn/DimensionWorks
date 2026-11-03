@@ -5,6 +5,8 @@ import dev.szx.dimensionworks.mekstress.core.MachineWorkContext;
 import dev.szx.dimensionworks.mekstress.core.WorkScheduler;
 import dev.szx.dimensionworks.mekstress.memory.MachinePowerManager;
 import dev.szx.dimensionworks.mekstress.memory.StressRules;
+import dev.szx.dimensionworks.mekstress.integration.mekgenerators.GeneratorPowerBridge;
+import mekanism.generators.common.tile.TileEntityGenerator;
 import java.util.Map;
 import java.util.WeakHashMap;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -34,6 +36,10 @@ public abstract class TileEntityMekanismMixin {
     )
     private static void dimensionworks$scheduleAndWrapUpdate(TileEntityMekanism tile) {
         TileEntityMekanismInvoker invoker = (TileEntityMekanismInvoker) tile;
+        if (tile instanceof TileEntityGenerator generator) {
+            GeneratorPowerBridge.tick(generator, invoker::dimensionworks$onUpdateServer);
+            return;
+        }
         if (!StressRules.isEligible(tile)) {
             invoker.dimensionworks$onUpdateServer();
             return;
@@ -50,7 +56,8 @@ public abstract class TileEntityMekanismMixin {
         try (MachinePowerRouteScope.Scope ignored = MachinePowerRouteScope.push(tile, route)) {
             MachinePowerManager.updateDirectStress(tile, route);
 
-            double workRate = MachinePowerManager.workRate(tile, route);
+            double workRate = tile instanceof mekanism.common.tile.multiblock.TileEntitySPSPort
+                ? 1 : MachinePowerManager.workRate(tile, route);
             WorkScheduler.Advance advance = WorkScheduler.advance(
                 workRate, tick, dimensionworks$workAdvances.get(tile));
             dimensionworks$workAdvances.put(tile, advance);

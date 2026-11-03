@@ -13,6 +13,8 @@ public final class StressRules {
         "mekanism.common.tile.TileEntityEnergyCube",
         "mekanism.common.tile.TileEntityQuantumEntangloporter",
         "mekanism.common.tile.TileEntityCardboardBox",
+        "mekanism.common.tile.laser.TileEntityLaserAmplifier",
+        "mekanism.common.tile.laser.TileEntityLaserTractorBeam",
         "mekanism.common.tile.multiblock.TileEntityInductionCasing",
         "mekanism.common.tile.multiblock.TileEntityInductionCell",
         "mekanism.common.tile.multiblock.TileEntityInductionPort",
@@ -32,6 +34,7 @@ public final class StressRules {
     }
 
     public static boolean isEligibleClass(String className) {
+        if ("mekanism.common.tile.multiblock.TileEntitySPSPort".equals(className)) return true;
         if (className == null || EXCLUDED_CLASSES.contains(className)
             || className.startsWith("mekanismgenerators.")
             || className.startsWith("mekanism.common.tile.multiblock.")

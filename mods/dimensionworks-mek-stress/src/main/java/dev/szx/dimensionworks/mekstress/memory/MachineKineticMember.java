@@ -2,7 +2,7 @@ package dev.szx.dimensionworks.mekstress.memory;
 
 import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import dev.szx.dimensionworks.mekstress.core.MachinePowerMath;
+import dev.szx.dimensionworks.mekstress.integration.mek.MechanicalEnergy;
 import dev.szx.dimensionworks.rpmlimit.api.IPreclampedKineticSpeed;
 import java.lang.ref.WeakReference;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -53,7 +53,8 @@ public final class MachineKineticMember extends KineticBlockEntity
 
     @Override
     public float calculateStressApplied() {
-        return MachinePowerMath.stressPerRpm(1.0F);
+        TileEntityMekanism current = machine.get();
+        return current == null ? 0 : MechanicalEnergy.stressPerRpm(current);
     }
 
     @Override

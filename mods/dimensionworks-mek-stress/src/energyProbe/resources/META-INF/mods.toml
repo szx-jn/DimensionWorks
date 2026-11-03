@@ -1,0 +1,8 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="dimensionworks_energy_probe"
+version="1.0.0"
+displayName="DimensionWorks Isolated Energy Validation"
+description='''Opt-in isolated graphical client validation; never distribute in the pack.'''

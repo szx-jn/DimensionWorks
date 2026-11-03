@@ -3,8 +3,6 @@ package dev.szx.dimensionworks.mekstress.reactor;
 /** Pure reactor conversion rules; never treats SU as a stored FE balance. */
 public final class ReactorPowerMath {
     public static final float OUTPUT_RPM = 256.0F;
-    public static final float INPUT_STRESS_PER_RPM = 256.0F;
-    private static final double SU_PER_FE = 2.0D;
 
     private ReactorPowerMath() {
     }
@@ -14,8 +12,8 @@ public final class ReactorPowerMath {
         if (connectedPorts <= 0 || !Double.isFinite(generatedFePerTick) || generatedFePerTick <= 0) {
             return 0.0F;
         }
-        double perPort = generatedFePerTick * SU_PER_FE / (OUTPUT_RPM * connectedPorts);
-        return (float) Math.min(Float.MAX_VALUE / 1024.0D, perPort);
+        return dev.szx.dimensionworks.mekstress.core.EnergyPowerMath.coefficient(
+            dev.szx.dimensionworks.mekstress.core.EnergyPowerMath.su(generatedFePerTick), OUTPUT_RPM, connectedPorts);
     }
 
     /** Replace this tick's exported FE with a drain of the internal saturation. */

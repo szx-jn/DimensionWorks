@@ -11,7 +11,7 @@ import java.util.WeakHashMap;
 
 /**
  * Mirrors the Mekanism virtual-machine member, without fabricating FE.
- * Create charges 256 SU per RPM against the injector's actual input network.
+ * Create reserves two SU per supplied FE/t against the injector's actual network.
  */
 final class ReactorInputRegistry {
     private static final Map<TileReactorCore, ReactorInputMember> MEMBERS =
@@ -21,7 +21,7 @@ final class ReactorInputRegistry {
     }
 
     static void sync(TileReactorCore core, TileReactorInjector injector,
-                     KineticBlockEntity shaft, KineticNetwork network) {
+                     KineticBlockEntity shaft, KineticNetwork network, long fePerTick) {
         float rpm = Math.abs(dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp(shaft, shaft.getTheoreticalSpeed()));
         synchronized (MEMBERS) {
             ReactorInputMember member = MEMBERS.get(core);
@@ -38,6 +38,9 @@ final class ReactorInputRegistry {
             KineticNetwork previous = member.boundNetwork();
             boolean topologyChanged = previous != network || !network.members.containsKey(member);
             boolean speedChanged = Float.compare(member.getTheoreticalSpeed(), rpm) != 0;
+            float coefficient = dev.szx.dimensionworks.mekstress.core.EnergyPowerMath.demandCoefficient(fePerTick * 2.0D, rpm);
+            boolean loadChanged = Float.compare(member.calculateStressApplied(), coefficient) != 0;
+            member.setCoefficient(coefficient);
 
             if (previous != null && previous != network) {
                 member.unbind();
@@ -50,14 +53,23 @@ final class ReactorInputRegistry {
             member.source = shaft.getBlockPos().immutable();
             member.bind(network);
             if (topologyChanged) {
-                network.members.put(member, ReactorPowerBridge.INPUT_STRESS_PER_RPM);
+                network.members.put(member, coefficient);
                 KineticNetworkOptimizer.invalidate(network);
                 network.updateNetwork();
-            } else if (speedChanged) {
+            } else if (speedChanged || loadChanged) {
+                network.members.put(member, coefficient);
                 KineticNetworkOptimizer.updateStressContribution(network, member);
                 network.updateNetwork();
             }
         }
+    }
+
+    static double availableSu(TileReactorCore core, KineticNetwork network) {
+        ReactorInputMember member = MEMBERS.get(core);
+        double own = member != null && member.boundNetwork() == network && network.members.containsKey(member)
+            ? member.calculateStressApplied() * (double) Math.abs(member.getTheoreticalSpeed()) : 0;
+        double free = network.calculateCapacity() - (double) network.calculateStress() + own;
+        return Double.isFinite(free) && free > 0 ? Math.max(0, Math.nextDown((float) free)) : 0;
     }
 
     static void detach(TileReactorCore core) {

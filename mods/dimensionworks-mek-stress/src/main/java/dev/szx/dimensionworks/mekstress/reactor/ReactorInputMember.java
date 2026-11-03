@@ -12,7 +12,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /** One Mek-style virtual consumer; the injector itself is NOT a Create BlockEntity. */
-final class ReactorInputMember extends KineticBlockEntity implements IVirtualKineticMember {
+final class ReactorInputMember extends KineticBlockEntity implements IVirtualKineticMember,
+    dev.szx.dimensionworks.rpmlimit.api.IPreclampedKineticSpeed {
+    private float coefficient;
+
+    void setCoefficient(float value) { coefficient = value; }
     private final WeakReference<TileReactorInjector> injector;
     private final WeakReference<TileReactorCore> core;
     private final BlockPos position;
@@ -45,7 +49,7 @@ final class ReactorInputMember extends KineticBlockEntity implements IVirtualKin
 
     @Override
     public float calculateStressApplied() {
-        return ReactorPowerBridge.INPUT_STRESS_PER_RPM;
+        return coefficient;
     }
 
     @Override

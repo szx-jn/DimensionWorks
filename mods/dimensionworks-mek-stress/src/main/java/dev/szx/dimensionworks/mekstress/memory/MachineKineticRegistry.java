@@ -2,7 +2,6 @@ package dev.szx.dimensionworks.mekstress.memory;
 
 import com.simibubi.create.content.kinetics.KineticNetwork;
 import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
-import dev.szx.dimensionworks.mekstress.core.MachinePowerMath;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +41,9 @@ public final class MachineKineticRegistry {
             boolean wasAttached = network.members.containsKey(member);
             boolean topologyChanged = previous != network || !wasAttached;
             boolean speedChanged = Float.compare(previousRpm, rpm) != 0;
+            float coefficient = member.calculateStressApplied();
+            Float previousCoefficient = network.members.get(member);
+            boolean loadChanged = previousCoefficient == null || Float.compare(previousCoefficient, coefficient) != 0;
             member.setSpeed(rpm);
             member.source = attachment.immutable();
 
@@ -54,8 +56,9 @@ public final class MachineKineticRegistry {
             }
             if (topologyChanged) {
                 KineticNetworkOptimizer.invalidate(network);
-                network.members.put(member, MachinePowerMath.stressPerRpm(1.0F));
-            } else if (speedChanged) {
+                network.members.put(member, coefficient);
+            } else if (speedChanged || loadChanged) {
+                network.members.put(member, coefficient);
                 // Virtual members do not tick in the world, so their own KineticBlockEntity
                 // dirty flag cannot drive the refresh. Update the aggregate directly when cached.
                 KineticNetworkOptimizer.updateStressContribution(network, member);
@@ -65,10 +68,11 @@ public final class MachineKineticRegistry {
                 KineticNetworkOptimizer.invalidate(previous);
                 schedule(previous);
             }
-            if (topologyChanged || speedChanged) {
+            if (topologyChanged || speedChanged || loadChanged) {
                 if (topologyChanged)
                     KineticNetworkOptimizer.invalidate(network);
-                schedule(network);
+                // Pay before processing, including first connection and newly installed upgrades.
+                network.updateNetwork();
             }
         }
     }

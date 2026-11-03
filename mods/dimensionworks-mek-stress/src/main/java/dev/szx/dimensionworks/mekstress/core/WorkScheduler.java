@@ -34,25 +34,12 @@ public final class WorkScheduler {
         if (!Double.isFinite(rate) || rate <= 0.0D || tick < 0L) {
             return 0;
         }
-        if (rate < 1.0D) {
-            double next = rate * (double) (tick + 1L);
-            double current = rate * (double) tick;
-            return Math.max(0, ceilToInt(next) - ceilToInt(current));
-        }
+        // Floor both boundaries: partial mechanical work must be earned before a native tick.
+        // Ceil would grant a free first tick after every unload, reconnect, or rate change.
         long next = saturatedProduct(rate, tick + 1L);
         long current = saturatedProduct(rate, tick);
         long calls = next - current;
         return calls > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) Math.max(0L, calls);
-    }
-
-    private static int ceilToInt(double value) {
-        if (value >= Integer.MAX_VALUE) {
-            return Integer.MAX_VALUE;
-        }
-        if (value <= 0.0D) {
-            return 0;
-        }
-        return (int) Math.ceil(value);
     }
 
     private static long saturatedProduct(double rate, long tick) {

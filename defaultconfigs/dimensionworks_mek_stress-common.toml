@@ -37,3 +37,4 @@ ultimateRpm = 8192
 # Input loss is bounded at 99%; raw network capacity always equals live gearbox input.
 maximumInputLossBasisPoints = 9900
 directMaxRpm = 10240
+mekanismGeneratorRpm = 32

@@ -29,6 +29,9 @@ public class LiveStressGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 300)
     public static void liveAllocationAndImmediateOverload(GameTestHelper helper) {
+        // This isolated test intentionally exercises 128+129 RPM; unowned fixtures otherwise
+        // inherit the pack's 32 RPM starter limit and never reach the advertised boundary.
+        dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.DEFAULT_RPM.set(10240);
         BlockPos drivePos = new BlockPos(3, 2, 3);
         BlockPos inputPos = drivePos.west();
         BlockPos outputPos = drivePos.east();
@@ -131,6 +134,7 @@ public class LiveStressGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 200)
     public static void legacyStoredStressCannotPowerGrid(GameTestHelper helper) {
+        dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.DEFAULT_RPM.set(10240);
         BlockPos pos = new BlockPos(3, 2, 3);
         helper.setBlock(pos, block("dimensionworks_mek_stress:memory_drive_ddr1"));
         helper.setBlock(pos.south(), block("ae2:creative_energy_cell"));

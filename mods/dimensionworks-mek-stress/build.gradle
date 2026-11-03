@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.3.19'
+version = '0.3.20'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -99,11 +99,23 @@ jar {
 }
 
 sourceSets {
+    energyProbe {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
     gameTest {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
 }
+
+// Explicit opt-in production-client probe. Never included in the main or release jar.
+tasks.register('energyProbeJar', Jar) {
+    dependsOn tasks.named('energyProbeClasses')
+    archiveBaseName = 'dimensionworks_energy_probe'
+    from sourceSets.energyProbe.output
+}
+reobf { energyProbeJar {} }
 minecraft.runs {
     gameTestServer {
         workingDirectory project.file('run-gametest')

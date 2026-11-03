@@ -44,11 +44,9 @@ public final class MachinePowerManager {
     }
 
     public static long suPerTick(TileEntityMekanism tile) {
-        return suPerTick(powerRoute(tile));
-    }
-
-    public static long suPerTick(@Nullable DirectSource route) {
-        return MachinePowerMath.suForRpm(currentRpm(route));
+        DirectSource route = powerRoute(tile);
+        double su = route == null ? 0 : dev.szx.dimensionworks.mekstress.integration.mek.MechanicalEnergy.stressPerRpm(tile) * (double) route.networkRpm();
+        return su >= Long.MAX_VALUE ? Long.MAX_VALUE : (long) Math.ceil(su);
     }
 
     public static boolean hasMechanicalPower(TileEntityMekanism tile) {
@@ -68,7 +66,7 @@ public final class MachinePowerManager {
     }
 
     public static double workRate(TileEntityMekanism tile, @Nullable DirectSource route) {
-        int rpm = currentRpm(route);
+        float rpm = route == null || !route.running() ? 0 : route.rpm();
         int tierRpm = MekStressConfig.machineRpm(tier(tile));
         return hasMechanicalPower(route) ? MachinePowerMath.workRate(rpm, tierRpm) : 0.0D;
     }
@@ -78,7 +76,7 @@ public final class MachinePowerManager {
     }
 
     public static double productionMultiplier(TileEntityMekanism tile, @Nullable DirectSource route) {
-        int rpm = currentRpm(route);
+        float rpm = route == null || !route.running() ? 0 : route.rpm();
         int tierRpm = MekStressConfig.machineRpm(tier(tile));
         return hasMechanicalPower(route) ? MachinePowerMath.productionMultiplier(rpm, tierRpm) : 0.0D;
     }
@@ -88,7 +86,7 @@ public final class MachinePowerManager {
     }
 
     public static double throughputMultiplier(TileEntityMekanism tile, @Nullable DirectSource route) {
-        int rpm = currentRpm(route);
+        float rpm = route == null || !route.running() ? 0 : route.rpm();
         int tierRpm = MekStressConfig.machineRpm(tier(tile));
         return hasMechanicalPower(route) ? MachinePowerMath.throughputMultiplier(rpm, tierRpm) : 0.0D;
     }
@@ -148,6 +146,14 @@ public final class MachinePowerManager {
         boolean assign = route != null && PowerRouteSafety.shouldAssignStress(
             true, route.running(), route.rpm(), routeStillPresent(route));
         if (assign) {
+            for (var container : tile.getEnergyContainers(null)) {
+                if (container instanceof dev.szx.dimensionworks.mekstress.api.IMechanicalEnergyBudget budget) {
+                    budget.dimensionworks$prepareBudget(level.getGameTime(),
+                        dev.szx.dimensionworks.mekstress.integration.mek.MechanicalEnergy.rate(container, tile).doubleValue()
+                        * (tile instanceof mekanism.common.tile.multiblock.TileEntitySPSPort
+                            ? MachinePowerMath.throughputMultiplier(route.networkRpm(), StressRules.targetRpm(tile)) : 1));
+                }
+            }
             MachineKineticRegistry.sync(tile, route.network(), memberRpm(route), route.source().getBlockPos());
         } else {
             MachineKineticRegistry.detach(tile);

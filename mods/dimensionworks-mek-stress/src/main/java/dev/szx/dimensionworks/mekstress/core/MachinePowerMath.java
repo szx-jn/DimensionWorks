@@ -1,27 +1,10 @@
 package dev.szx.dimensionworks.mekstress.core;
 
-/** Fixed mechanical load charged by a running Mekanism machine or idle gearbox. */
+/** Mechanical throughput and native gearbox idle load. Energy conversion is in EnergyPowerMath. */
 public final class MachinePowerMath {
-    public static final long SU_PER_RPM = 256L;
     private static final long GEARBOX_SU_PER_RPM = 8L;
 
     private MachinePowerMath() {
-    }
-
-    public static long suForRpm(float rpm) {
-        float speed = Math.abs(rpm);
-        if (!Float.isFinite(rpm) || speed == 0.0F) {
-            return 0L;
-        }
-        double value = Math.ceil((double) speed * SU_PER_RPM);
-        return value >= Long.MAX_VALUE ? Long.MAX_VALUE : (long) value;
-    }
-
-    public static float stressPerRpm(float effectiveScale) {
-        if (!Float.isFinite(effectiveScale) || effectiveScale <= 0.0F) {
-            return 0.0F;
-        }
-        return SU_PER_RPM * Math.min(1.0F, effectiveScale);
     }
 
     /** Keeps the propagated speed a direct MEK route consumes before its own tier checks. */
@@ -43,7 +26,7 @@ public final class MachinePowerMath {
     }
 
     /** Work scales with supplied RPM and caps at full speed once the target is met. */
-    public static double workRate(int actualRpm, int targetRpm) {
+    public static double workRate(float actualRpm, int targetRpm) {
         if (actualRpm <= 0 || targetRpm <= 0) {
             return 0.0D;
         }
@@ -51,7 +34,7 @@ public final class MachinePowerMath {
     }
 
     /** Production output scales above the target RPM and never shrinks below it. */
-    public static double productionMultiplier(int actualRpm, int targetRpm) {
+    public static double productionMultiplier(float actualRpm, int targetRpm) {
         if (actualRpm <= 0 || targetRpm <= 0) {
             return 0.0D;
         }
@@ -59,14 +42,14 @@ public final class MachinePowerMath {
     }
 
     /** End-to-end throughput after combining tick frequency and per-operation output. */
-    public static double throughputMultiplier(int actualRpm, int targetRpm) {
+    public static double throughputMultiplier(float actualRpm, int targetRpm) {
         if (actualRpm <= 0 || targetRpm <= 0) {
             return 0.0D;
         }
         return (double) actualRpm / (double) targetRpm;
     }
 
-    /** Applies a production multiplier to each recipe result, rounding fractional item amounts up. */
+    /** Applies a production multiplier without creating unpaid fractional output. */
     public static long scaledOutput(long baseAmount, int operations, double multiplier) {
         if (baseAmount <= 0L || operations <= 0 || !Double.isFinite(multiplier) || multiplier <= 0.0D) {
             return 0L;
@@ -75,7 +58,7 @@ public final class MachinePowerMath {
         if (!Double.isFinite(scaled) || scaled <= 0.0D) {
             return 0L;
         }
-        return scaled >= (double) Long.MAX_VALUE ? Long.MAX_VALUE : (long) Math.ceil(scaled);
+        return scaled >= (double) Long.MAX_VALUE ? Long.MAX_VALUE : (long) Math.floor(scaled);
     }
 
     /** Finds the largest operation count whose scaled output still fits the available room. */

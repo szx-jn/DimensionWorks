@@ -4,6 +4,7 @@ import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
 import dev.szx.dimensionworks.mekstress.integration.mekgenerators.GeneratorPowerBridge;
+import dev.szx.dimensionworks.mekstress.reactor.ReactorPowerBridge;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,20 +15,33 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = KineticBlockEntity.class, remap = false)
-public abstract class MekanismGeneratorShaftMixin {
+public abstract class MekanismGeneratorShaftMixin implements dev.szx.dimensionworks.mekstress.api.IMechanicalSourceShaft {
     @Unique private boolean dimensionworks$mekGeneratorSource;
     @Shadow protected float lastCapacityProvided;
 
+    @Unique private static float dimensionworks$capacity(KineticBlockEntity shaft) {
+        if (!ShaftBlock.isShaft(shaft.getBlockState())) return 0;
+        var reactor = ReactorPowerBridge.outputFor(shaft);
+        return reactor == null ? GeneratorPowerBridge.stressPerRpm(shaft) : reactor.stressPerRpm();
+    }
+
+    @Unique private static float dimensionworks$rpm(KineticBlockEntity shaft) {
+        return ReactorPowerBridge.outputFor(shaft) == null
+            ? GeneratorPowerBridge.outputRpm() : ReactorPowerBridge.OUTPUT_RPM;
+    }
+
     @Inject(method = "getGeneratedSpeed", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$generatorSpeed(CallbackInfoReturnable<Float> cir) {
-        if (GeneratorPowerBridge.stressPerRpm((KineticBlockEntity) (Object) this) > 0)
-            cir.setReturnValue(GeneratorPowerBridge.outputRpm());
+        KineticBlockEntity shaft = (KineticBlockEntity) (Object) this;
+        if (ShaftBlock.isShaft(shaft.getBlockState()))
+            cir.setReturnValue(dimensionworks$capacity(shaft) > 0 ? dimensionworks$rpm(shaft) : 0);
     }
 
     @Inject(method = "calculateAddedStressCapacity", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$generatorCapacity(CallbackInfoReturnable<Float> cir) {
-        float capacity = GeneratorPowerBridge.stressPerRpm((KineticBlockEntity) (Object) this);
-        if (capacity > 0) {
+        KineticBlockEntity shaft = (KineticBlockEntity) (Object) this;
+        float capacity = dimensionworks$capacity(shaft);
+        if (ShaftBlock.isShaft(shaft.getBlockState())) {
             lastCapacityProvided = capacity;
             cir.setReturnValue(capacity);
         }
@@ -35,16 +49,21 @@ public abstract class MekanismGeneratorShaftMixin {
 
     @Inject(method = "tick", at = @At("TAIL"), remap = false)
     private void dimensionworks$syncGeneratorSource(CallbackInfo ci) {
+        dimensionworks$refreshMechanicalSource();
+    }
+
+    @Override public void dimensionworks$refreshMechanicalSource() {
         KineticBlockEntity shaft = (KineticBlockEntity) (Object) this;
         if (shaft.getLevel() == null || shaft.getLevel().isClientSide || !ShaftBlock.isShaft(shaft.getBlockState())) return;
-        float capacity = GeneratorPowerBridge.stressPerRpm(shaft);
-        if (capacity <= 0 || (shaft.getTheoreticalSpeed() != 0 && shaft.getTheoreticalSpeed() != GeneratorPowerBridge.outputRpm())) {
+        float capacity = dimensionworks$capacity(shaft);
+        float rpm = dimensionworks$rpm(shaft);
+        if (capacity <= 0 || (shaft.getTheoreticalSpeed() != 0 && shaft.getTheoreticalSpeed() != rpm)) {
             dimensionworks$detach(shaft);
             return;
         }
         if (shaft.getTheoreticalSpeed() == 0 && !shaft.hasSource()) {
             shaft.detachKinetics();
-            shaft.setSpeed(GeneratorPowerBridge.outputRpm());
+            shaft.setSpeed(rpm);
             shaft.setNetwork(shaft.getBlockPos().asLong());
             shaft.attachKinetics();
         }
@@ -66,6 +85,7 @@ public abstract class MekanismGeneratorShaftMixin {
         KineticNetwork network = shaft.hasNetwork() ? shaft.getOrCreateNetwork() : null;
         if (!dimensionworks$mekGeneratorSource && (network == null || !network.sources.containsKey(shaft))) return;
         dimensionworks$mekGeneratorSource = false;
+        lastCapacityProvided = 0;
         if (network != null) {
             network.sources.remove(shaft);
             KineticNetworkOptimizer.invalidate(network);
