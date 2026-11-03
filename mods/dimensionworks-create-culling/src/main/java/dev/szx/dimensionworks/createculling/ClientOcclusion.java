@@ -95,7 +95,10 @@ public final class ClientOcclusion {
             if (++candidates > 4096 || reads >= 8192) return false;
             double distance = camera.distanceToSqr(Vec3.atCenterOf(be.getBlockPos()));
             if (distance < 4 || distance > 256 * 256 || solid(BlockPos.containing(camera))) return false;
-            AABB bounds = be.getRenderBoundingBox();
+            boolean wheel = be.getType() == AllBlockEntityTypes.WATER_WHEEL.get()
+                || be.getType() == AllBlockEntityTypes.LARGE_WATER_WHEEL.get();
+            // Forge defaults to a collision box, which is not a rotating model bound.
+            AABB bounds = wheel ? be.getRenderBoundingBox() : new AABB(be.getBlockPos());
             // Rotating teeth and fan tips can protrude beyond the default unit BE box.
             if (AllBlocks.COGWHEEL.has(be.getBlockState()) || AllBlocks.LARGE_COGWHEEL.has(be.getBlockState())
                 || be.getType() == AllBlockEntityTypes.ENCASED_COGWHEEL.get()

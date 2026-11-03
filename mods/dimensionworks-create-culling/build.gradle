@@ -14,6 +14,8 @@ minecraft {
 repositories {
     maven { url = 'https://maven.createmod.net' }
     maven { url = 'https://maven.tterrag.com' }
+    maven { url = 'https://api.modrinth.com/maven' }
+    flatDir { dirs 'probe-libs' }
     mavenCentral()
 }
 dependencies {
@@ -26,6 +28,10 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+    if (providers.gradleProperty('probeCompat').getOrElse('false') == 'true') {
+        runtimeOnly fg.deobf('maven.modrinth:embeddium:UTbfe5d1')
+        runtimeOnly fg.deobf('local:mekalus:1.8.0.1')
+    }
 }
 mixin {
     add sourceSets.main, 'dimensionworks_create_culling.refmap.json'

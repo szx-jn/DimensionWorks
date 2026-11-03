@@ -118,12 +118,15 @@ public final class ClientRenderProbe {
             String requested = System.getProperty("dimensionworks.culling.backend");
             check("actual backend " + requested, backend.equals("flywheel:" + requested));
             var frame = stage == 1 ? new ClientOcclusion.Frame(mc.level, mc.gameRenderer.getMainCamera().getPosition()) : ClientOcclusion.frame();
-            check("world and camera ready", frame != null && Math.abs(mc.player.getZ()-22) < 1);
+            check("world and camera ready", frame != null && Math.abs(mc.player.getZ()-(stage==4?-18:22)) < 1);
             for (int i=0;i<TARGETS.length;i++) {
+                if (stage == 4 && i != 2) continue;
                 var be = mc.level.getBlockEntity(TARGETS[i]);
                 check("target loaded " + i, be != null);
                 boolean hidden = stage != 1 && stage != 3 && i < 5;
                 if (stage == 3) hidden = i == 1; // Only the sealed bare shaft remains enclosed.
+                if (stage == 4) hidden = false; // The wall is now behind the wheel relative to the camera.
+                if (stage == 5) hidden = i == 1 || i == 2;
                 if (stage != 1) {
                     boolean actual = frame.hidden(be);
                     if (actual != hidden) {
@@ -173,6 +176,21 @@ public final class ClientRenderProbe {
                         level.setBlockAndUpdate(new BlockPos(x,y,-2), Blocks.AIR.defaultBlockState());
                         level.setBlockAndUpdate(new BlockPos(x,y,-8), Blocks.AIR.defaultBlockState());
                     }
+                });
+            } else if (stage == 3) {
+                mc.getSingleplayerServer().execute(() -> {
+                    wall(-4,4,-2,false);
+                    var player = mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);
+                    player.connection.teleport(.5,100,-18,0,0);
+                });
+            } else if (stage == 4) {
+                mc.getSingleplayerServer().execute(() -> {
+                    var level = mc.getSingleplayerServer().overworld();
+                    var wheel = (com.simibubi.create.content.kinetics.waterwheel.WaterWheelBlockEntity) level.getBlockEntity(TARGETS[2]);
+                    wheel.material = Blocks.SPRUCE_PLANKS.defaultBlockState();
+                    wheel.sendData();
+                    var player = mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);
+                    player.connection.teleport(.5,100,22,180,0);
                 });
             } else {
                 checks.add("PASS COMPLETE backend=" + backend + " checks=" + checks.size());
