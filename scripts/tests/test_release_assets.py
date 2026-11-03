@@ -13,6 +13,10 @@ class ReleaseWorkflowTest(unittest.TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         required = (
             "pack_version.resolve_version",
+            "uses: ./.github/workflows/validate-create-culling.yml",
+            "needs: validate-create-culling",
+            "dist/dimensionworks_create_culling-0.1.0.jar",
+            "Test probe must not be included in the release mod",
             "inputs.release_version",
             "inputs.dimension_complete",
             "--dimension-complete",

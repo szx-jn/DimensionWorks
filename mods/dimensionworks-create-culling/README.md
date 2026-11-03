@@ -19,3 +19,5 @@
 `.github/workflows/validate-create-culling.yml` 在隔离 Xvfb/Mesa 图形客户端中分别运行 Flywheel `instancing` 与 `off`，另测整合包固定的 Embeddium 0.3.31 / Mekalus 1.8.0.1 组合，使用新建独立世界与仅测试时加载的 `src/probe`。探针检查机壳轴、完整包裹轴、水车和齿轮箱的遮挡，裸露轴、玻璃后的水车和部分遮挡大水车的保留，关闭优化后的恢复、重新启用及渲染器重建、拆墙后的恢复、移动相机到墙后以及更换水车材质后的实例重建。Flywheel 检查真实实例句柄可见性；普通路径检查实际调度器跳过计数。断言失败或未输出完成标记时工作流失败，截图、日志与报告保存为 Actions artifacts。
 
 JUnit 几何回归包含六向墙、中心开孔、大水车边缘、反向遮挡、负坐标、无效边界和独立线段/AABB 相交算法的随机对照。构建与运行只在 GitHub Actions 执行；Actions 构建成功本身不算客户端验证通过。测试源码不随正式 jar 分发。
+
+独立测试记录见 [2026-11-03 验证报告](../../docs/validation/2026-11-03-create-culling.md)。正式发布工作流重跑三组客户端测试，通过后才打包，单独发布 `dimensionworks_create_culling-0.1.0.jar` 并纳入 SHA256SUMS。

@@ -2,6 +2,7 @@ name: Create 遮挡独立客户端验证
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     branches: ['validate/create-culling-*']
   pull_request:

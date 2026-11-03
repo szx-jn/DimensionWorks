@@ -13,7 +13,7 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(updater): 六个跨平台更新器全部内置 aria2 引擎"
+        description: "新增功能；每行一条，如 feat(create): 新增独立客户端遮挡剔除模组"
         required: false
         type: string
       release_fixes:
@@ -21,7 +21,7 @@ on:
         required: false
         type: string
       release_performance:
-        description: "性能优化；每行一条，如 perf(webpanel): 优化加载速度"
+        description: "性能优化；每行一条，如 perf(create): 跳过完整遮挡的传动部件绘制"
         required: false
         type: string
       release_other:
@@ -32,8 +32,13 @@ permissions:
   contents: write
 
 jobs:
+  validate-create-culling:
+    name: 发布前独立客户端验证
+    uses: ./.github/workflows/validate-create-culling.yml
+
   release:
     name: 打包客户端与服务端
+    needs: validate-create-culling
     concurrency:
       group: dimensionworks-release-${{ github.ref }}
       cancel-in-progress: false
@@ -208,6 +213,18 @@ jobs:
               --empty
           fi
 
+      - name: 收集独立遮挡优化模组
+        run: |
+          set -euo pipefail
+          jar="mods/dimensionworks-create-culling/build/libs/dimensionworks_create_culling-0.1.0.jar"
+          test -s "$jar"
+          unzip -t "$jar" >/dev/null
+          if unzip -Z1 "$jar" | grep -q 'ClientRenderProbe'; then
+            echo "Test probe must not be included in the release mod" >&2
+            exit 1
+          fi
+          cp "$jar" dist/
+
       - name: 配置 Go 环境
         uses: actions/setup-go@v5
         with:
@@ -356,6 +373,7 @@ jobs:
               update-dimensionworks-client-macos-arm64 \
               update-dimensionworks-server-macos-arm64 \
               aria2-third-party-source.tar.gz \
+              dimensionworks_create_culling-0.1.0.jar \
               > SHA256SUMS
           )
 
@@ -415,6 +433,7 @@ jobs:
             "dist/update-dimensionworks-client-macos-arm64"
             "dist/update-dimensionworks-server-macos-arm64"
             "dist/aria2-third-party-source.tar.gz"
+            "dist/dimensionworks_create_culling-0.1.0.jar"
             dist/SHA256SUMS
           )
           if gh release view "$TAG" >/dev/null 2>&1; then

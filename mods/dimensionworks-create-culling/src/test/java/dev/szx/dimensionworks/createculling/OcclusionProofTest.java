@@ -56,6 +56,11 @@ class OcclusionProofTest {
         assertTrue(OcclusionProof.hidden(new OcclusionProof.Box(-20,-20,-20,-19,-19,-19),
             -19.5,-19.5,-10,(x,y,z) -> z==-15));
     }
+    @Test void cameraWithinEnclosureInteriorMustNotBeHiddenByOuterShell() {
+        var fractional = new OcclusionProof.Box(.25,.25,.25,1.5,1.5,1.5);
+        assertFalse(OcclusionProof.hidden(fractional,1.75,.75,.75,(x,y,z) ->
+            x == -1 || x == 2 || y == -1 || y == 2 || z == -1 || z == 2));
+    }
 
     @Test void randomizedProofsAgreeWithIndependentRayBoxOracle() {
         Random random = new Random(420231);
