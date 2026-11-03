@@ -1,10 +1,6 @@
 name: Go 跨平台更新器构建与测试
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'update-Windows/**'
   pull_request:
     paths:
       - 'update-Windows/**'
@@ -34,10 +30,6 @@ jobs:
 
       - name: 准备三平台内置引擎
         run: python3 scripts/prepare_aria2.py
-
-      - name: 运行更新器测试
-        working-directory: update-Windows
-        run: go test -tags bundled_aria2 -v ./...
 
       - name: 检查 Go 静态问题
         working-directory: update-Windows

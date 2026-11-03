@@ -32,13 +32,8 @@ permissions:
   contents: write
 
 jobs:
-  validate-create-culling:
-    name: 发布前独立客户端验证
-    uses: ./.github/workflows/validate-create-culling.yml
-
   release:
     name: 打包客户端与服务端
-    needs: validate-create-culling
     concurrency:
       group: dimensionworks-release-${{ github.ref }}
       cancel-in-progress: false

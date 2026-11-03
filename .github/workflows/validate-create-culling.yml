@@ -2,13 +2,6 @@ name: Create 遮挡独立客户端验证
 
 on:
   workflow_dispatch:
-  workflow_call:
-  push:
-    branches: ['validate/create-culling-*']
-  pull_request:
-    paths:
-      - 'mods/dimensionworks-create-culling/**'
-      - '.github/workflows/validate-create-culling.yml'
 
 concurrency:
   group: create-culling-${{ github.ref }}

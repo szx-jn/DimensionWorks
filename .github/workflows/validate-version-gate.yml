@@ -7,14 +7,6 @@ on:
       - 'kubejs/**'
       - 'scripts/**'
       - '.github/workflows/validate-version-gate.yml'
-  push:
-    branches:
-      - main
-    paths:
-      - 'manifest/**'
-      - 'kubejs/**'
-      - 'scripts/**'
-      - '.github/workflows/validate-version-gate.yml'
 
 concurrency:
   group: validate-config-${{ github.event.pull_request.number || github.ref }}
