@@ -9,6 +9,10 @@ on:
       - 'mods/dimensionworks-create-culling/**'
       - '.github/workflows/validate-create-culling.yml'
 
+concurrency:
+  group: create-culling-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

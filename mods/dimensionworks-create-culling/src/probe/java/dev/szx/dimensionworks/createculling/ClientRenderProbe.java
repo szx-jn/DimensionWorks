@@ -127,7 +127,9 @@ public final class ClientRenderProbe {
                 if (stage != 1) check("occlusion stage="+stage+" target="+i, frame.hidden(be) == hidden);
                 if (BackendManager.isBackendOn()) {
                     var manager = VisualizationManagerImpl.get(mc.level);
-                    var visual = manager.blockEntities().getStorage().visualAtPos(TARGETS[i].asLong());
+                    var storage = (dev.engine_room.flywheel.impl.visualization.storage.BlockEntityStorage)
+                        ((dev.engine_room.flywheel.impl.visualization.VisualManagerImpl<?, ?>) manager.blockEntities()).getStorage();
+                    var visual = storage.visualAtPos(TARGETS[i].asLong());
                     check("Flywheel visual exists " + i, visual != null);
                     int[] count = {0};
                     final boolean expectedVisible = !hidden;
@@ -144,7 +146,7 @@ public final class ClientRenderProbe {
                 check("vanilla dispatcher actually skipped hidden renders", ClientOcclusion.skippedRenders > 0);
             check("bounded block reads", frame.reads() <= 8192);
             try (var image = Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
-                image.writeToFile(Path.of("probe-stage-" + stage + ".png"));
+                image.writeToFile(Path.of("probe-stage-" + stage + ".png").toFile());
             }
             stageTicks = 0;
             if (stage == 0) {
