@@ -96,8 +96,10 @@ public final class ClientOcclusion {
             double distance = camera.distanceToSqr(Vec3.atCenterOf(be.getBlockPos()));
             if (distance < 4 || distance > 256 * 256 || solid(BlockPos.containing(camera))) return false;
             AABB bounds = be.getRenderBoundingBox();
-            // Large cogs protrude from the unit block even though the default BE box doesn't.
-            if (AllBlocks.LARGE_COGWHEEL.has(be.getBlockState())
+            // Rotating teeth and fan tips can protrude beyond the default unit BE box.
+            if (AllBlocks.COGWHEEL.has(be.getBlockState()) || AllBlocks.LARGE_COGWHEEL.has(be.getBlockState())
+                || be.getType() == AllBlockEntityTypes.ENCASED_COGWHEEL.get()
+                || be.getType() == AllBlockEntityTypes.ENCASED_FAN.get()
                 || be.getType() == AllBlockEntityTypes.ENCASED_LARGE_COGWHEEL.get()
                 || be.getType() == AllBlockEntityTypes.MECHANICAL_PUMP.get()) bounds = bounds.inflate(0.5);
             OcclusionProof.Box box = new OcclusionProof.Box(bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ);

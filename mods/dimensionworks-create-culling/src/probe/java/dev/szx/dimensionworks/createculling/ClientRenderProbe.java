@@ -124,7 +124,18 @@ public final class ClientRenderProbe {
                 check("target loaded " + i, be != null);
                 boolean hidden = stage != 1 && stage != 3 && i < 5;
                 if (stage == 3) hidden = i == 1; // Only the sealed bare shaft remains enclosed.
-                if (stage != 1) check("occlusion stage="+stage+" target="+i, frame.hidden(be) == hidden);
+                if (stage != 1) {
+                    boolean actual = frame.hidden(be);
+                    if (actual != hidden) {
+                        checks.add("DETAIL state="+be.getBlockState()+" bounds="+be.getRenderBoundingBox()+" camera="+mc.gameRenderer.getMainCamera().getPosition()+" reads="+frame.reads()+" supported="+ClientOcclusion.supported(be));
+                        for (var d : net.minecraft.core.Direction.values()) {
+                            var p = be.getBlockPos().relative(d);
+                            var state = mc.level.getBlockState(p);
+                            checks.add("DETAIL neighbor="+d+" state="+state+" solid="+state.isSolidRender(mc.level,p));
+                        }
+                    }
+                    check("occlusion stage="+stage+" target="+i, actual == hidden);
+                }
                 if (BackendManager.isBackendOn()) {
                     var manager = VisualizationManagerImpl.get(mc.level);
                     var storage = (dev.engine_room.flywheel.impl.visualization.storage.BlockEntityStorage)
