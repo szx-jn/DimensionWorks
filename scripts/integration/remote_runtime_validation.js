@@ -110,9 +110,10 @@ ServerEvents.tick(event => {
       unpack()
       check('packed chest restores contents', level.getBlockEntity(pos).getItem(0).count === 7)
       check('chest unpack drops no empty box', emptyBoxes() === 0)
-      for (var rid of ['mekanism:rotary/hydrofluoric_acid', 'mekanism:processing/copper/slurry/clean', 'mekanism:reaction/wood_gasification/logs', 'mekanism:separator/water', 'mekanism:evaporating/brine', 'dimensionworks:chemistry/carbon_dioxide_from_coal']) {
+      for (var rid of ['mekanism:rotary/hydrofluoric_acid', 'mekanism:processing/copper/slurry/clean', 'mekanism:reaction/wood_gasification/logs', 'mekanism:separator/water', 'mekanism:evaporating/brine', 'dimensionworks:chemistry/create/carbon_dioxide_from_charcoal', 'dimensionworks:chemistry/create/carbon_monoxide_from_charcoal']) {
         check('preserved recipe ' + rid, server.recipeManager.byKey(new $ProbeRL(rid)).isPresent())
       }
+      check('removed coal carbon dioxide recipe stays absent', !server.recipeManager.byKey(new $ProbeRL('dimensionworks:chemistry/carbon_dioxide_from_coal')).isPresent())
       var netherrackRecipe = server.recipeManager.byKey(new $ProbeRL('dimensionworks:cinder_flour/netherrack_crushing')).get()
       var flourExpectation = 0
       netherrackRecipe.getRollableResults().forEach(output => { flourExpectation += output.getStack().count * output.getChance() })
