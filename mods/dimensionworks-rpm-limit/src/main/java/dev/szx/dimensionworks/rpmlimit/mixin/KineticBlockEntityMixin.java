@@ -52,6 +52,16 @@ public abstract class KineticBlockEntityMixin {
         return RpmLimitManager.clampIndividual(self, requested);
     }
 
+    @Inject(method = "setNetwork", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$retainGeneratorMembership(Long requestedNetwork, CallbackInfo ci) {
+        KineticBlockEntity self = (KineticBlockEntity) (Object) this;
+        if (requestedNetwork == null && KineticNetworkOptimizer.preserveGeneratorMembership(self, null)) {
+            ci.cancel();
+        } else {
+            KineticNetworkOptimizer.prepareGeneratorRebind(self, requestedNetwork);
+        }
+    }
+
     @Redirect(method = "initialize", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/kinetics/KineticNetwork;initFromTE(FFI)V"), remap = false)
     private void dimensionworks$restoreAccounting(KineticNetwork network, float capacity, float stress, int count) {
         KineticPersistence.initialize((KineticBlockEntity) (Object) this, network);

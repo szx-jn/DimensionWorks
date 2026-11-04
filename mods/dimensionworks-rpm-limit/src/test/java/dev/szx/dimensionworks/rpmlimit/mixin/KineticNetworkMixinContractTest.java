@@ -28,6 +28,17 @@ class KineticNetworkMixinContractTest {
     }
 
     @Test
+    void calculateStressUsesAndRebuildsTheIncrementalContributionCache() throws IOException {
+        String source = Files.readString(Path.of(SOURCE_PATH));
+
+        assertTrue(source.contains("method = \"calculateStress\", at = @At(\"HEAD\"), cancellable = true"));
+        assertTrue(source.contains("KineticNetworkOptimizer.cachedStress(self)"));
+        assertTrue(source.contains("KineticNetworkOptimizer.beginStressRebuild(self)"));
+        assertTrue(source.contains("KineticNetworkOptimizer.recordStressContribution(network, member, contribution)"));
+        assertTrue(source.contains("KineticNetworkOptimizer.finishStressRebuild("));
+    }
+
+    @Test
     void overspeedStressIsAppliedAtTheActualStressBoundary() throws IOException {
         String network = Files.readString(Path.of(SOURCE_PATH));
         String blockEntity = Files.readString(Path.of(
@@ -46,6 +57,21 @@ class KineticNetworkMixinContractTest {
         assertTrue(source.contains("finishCapacityRebuild(self, naturalCapacity)"));
         assertTrue(optimizer.contains("if (sourceSetChanged) {"));
         assertTrue(optimizer.contains("NetworkRpmLimit.invalidate(network);"));
+    }
+
+    @Test
+    void stablePublicationChecksCachedOverloadStateBeforeScanningMembers() throws IOException {
+        String mixin = Files.readString(Path.of(SOURCE_PATH));
+        String optimizer = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
+
+        assertTrue(mixin.contains("@Inject(method = \"sync\", at = @At(\"TAIL\")"));
+        assertTrue(mixin.contains("KineticNetworkOptimizer.onNetworkSynced("));
+        int cachedCheck = optimizer.indexOf("if (cache != null && cache.publishedOverloadKnown)");
+        int fallbackScan = optimizer.indexOf("for (KineticBlockEntity member : network.members.keySet())", cachedCheck);
+        assertTrue(cachedCheck >= 0);
+        assertTrue(fallbackScan > cachedCheck);
+        assertTrue(optimizer.contains("cache.publishedOverloadKnown = false;"));
     }
 
     private static int occurrences(String source, String needle) {

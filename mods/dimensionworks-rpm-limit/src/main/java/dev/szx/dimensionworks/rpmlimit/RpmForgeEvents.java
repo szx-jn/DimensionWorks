@@ -28,7 +28,14 @@ public final class RpmForgeEvents {
         RpmLimitManager.beginServer(event.getServer());
     }
     @SubscribeEvent
-    public static void stopped(net.minecraftforge.event.server.ServerStoppedEvent event) { RpmLimitManager.endServer(); }
+    public static void stopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
+        KineticNetworkOptimizer.flushPendingPublications();
+    }
+
+    @SubscribeEvent
+    public static void stopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+        RpmLimitManager.endServer();
+    }
     @SubscribeEvent
     public static void clonePlayer(PlayerEvent.Clone event) {
         RpmPlayerState.copy(event.getOriginal().getPersistentData(), event.getEntity().getPersistentData());
@@ -123,6 +130,7 @@ public final class RpmForgeEvents {
         if (e.phase == TickEvent.Phase.END) {
             CreateCapacityRegistry.clearRemoved();
             KineticNetworkOptimizer.abortBatch();
+            KineticNetworkOptimizer.flushPendingPublications();
         }
     }
 

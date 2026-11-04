@@ -62,8 +62,17 @@ public class KineticLabGameTests {
    Fixture f=fixture(n,1,0); var net=f.network; var target=f.members.get(n-1);
    for(int rep=-1;rep<5;rep++) {
     sample("unchanged",n,1,100,rep,()->{ for(int i=0;i<100;i++) net.updateStressFor(target,net.members.get(target)); });
-    sample("sequential_changes",n,1,100,rep,()->{ for(int i=0;i<100;i++) net.updateStressFor(target,net.members.get(target)+1); });
+    sample("sequential_changes",n,1,100,rep,()->{
+     for(int i=0;i<100;i++) net.updateStressFor(target,net.members.get(target)+1);
+     KineticNetworkOptimizer.flushPendingPublications();
+    });
     sample("batched_changes",n,1,100,rep,()->{KineticNetworkOptimizer.beginBatch();try {for(int i=0;i<100;i++)net.updateStressFor(target,net.members.get(target)+1);}finally{KineticNetworkOptimizer.endBatch();}});
+    sample("cached_stress_reads",n,1,100,rep,()->{for(int i=0;i<100;i++)blackhole=net.calculateStress();});
+    h.assertTrue(LabMetrics.stress==0,"Cached stress reads must not visit members: "+LabMetrics.stress);
+    sample("batched_capacity_changes",n,1,100,rep,()->{KineticNetworkOptimizer.beginBatch();try {
+     var source=f.members.get(0);float base=net.sources.get(source);
+     for(int i=0;i<100;i++)net.updateCapacityFor(source,base+(i+1)*0.01f);
+    }finally{KineticNetworkOptimizer.endBatch();}});
     sample("invalidate_only",n,1,1000,rep,()->{for(int i=0;i<1000;i++)KineticNetworkOptimizer.invalidate(net);});
     net.updateNetwork();
     float exact=0;for(var be:net.members.keySet())exact+=net.getActualStressOf(be);
@@ -101,10 +110,23 @@ public class KineticLabGameTests {
    for(int rep=-1;rep<5;rep++){
     sample("physical_speed_change",n,1,1,rep,()->motor.generatedSpeed.setValue(motor.generatedSpeed.getValue()==16?32:16));
    }
+   float expectedSpeed=motor.getTheoreticalSpeed();
+   h.assertTrue(net.members.size()==n,"RPM retuning must preserve every member in the original network: expected="+n+" actual="+net.members.size()+" networkId="+net.id+" motorId="+motor.network);
+   for(var member:net.members.keySet()) {
+    h.assertTrue(member.hasNetwork()&&member.getOrCreateNetwork()==net,"Retuned member escaped its original network");
+    h.assertTrue(Math.abs(member.getTheoreticalSpeed()-expectedSpeed)<0.01f,"Retuned member retained stale speed");
+   }
+   float exactStress=0;for(var member:net.members.keySet())exactStress+=net.getActualStressOf(member);
+   h.assertTrue(Math.abs(exactStress-net.calculateStress())<0.1f,"Retuned stress total differs from exact member sum");
    dev.szx.dimensionworks.rpmlimit.lab.TickMetrics.n=n;
    dev.szx.dimensionworks.rpmlimit.lab.TickMetrics.remaining=100;
    h.runAfterDelay(110,()->{
     sample("physical_remove_source",n,1,1,0,()->level.setBlock(pos,Blocks.AIR.defaultBlockState(),3));
+    for(int i=1;i<n;i++) {
+     var detached=(KineticBlockEntity)level.getBlockEntity(h.absolutePos(new BlockPos(i,90,z)));
+     h.assertTrue(detached!=null&&!detached.hasNetwork()&&!detached.hasSource()&&detached.getTheoreticalSpeed()==0,
+      "Removing the only source must detach and stop every member");
+    }
     for(int i=1;i<n;i++)level.setBlock(h.absolutePos(new BlockPos(i,90,z)),Blocks.AIR.defaultBlockState(),18);
     physicalSuite(index+1);
    });

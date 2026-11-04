@@ -50,6 +50,33 @@ public abstract class KineticNetworkMixin {
         cir.setReturnValue(cir.getReturnValueF() * scale * multiplier);
     }
 
+    @Inject(method = "calculateStress", at = @At("HEAD"), cancellable = true, remap = false)
+    private void dimensionworks$useCachedStress(CallbackInfoReturnable<Float> cir) {
+        KineticNetwork self = (KineticNetwork) (Object) this;
+        Float cached = KineticNetworkOptimizer.cachedStress(self);
+        if (cached != null) {
+            cir.setReturnValue(cached);
+            return;
+        }
+        KineticNetworkOptimizer.beginStressRebuild(self);
+    }
+
+    @Redirect(
+        method = "calculateStress",
+        at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/kinetics/KineticNetwork;getActualStressOf(Lcom/simibubi/create/content/kinetics/base/KineticBlockEntity;)F"),
+        remap = false
+    )
+    private float dimensionworks$recordStressContribution(KineticNetwork network, KineticBlockEntity member) {
+        float contribution = network.getActualStressOf(member);
+        KineticNetworkOptimizer.recordStressContribution(network, member, contribution);
+        return contribution;
+    }
+
+    @Inject(method = "calculateStress", at = @At("RETURN"), remap = false)
+    private void dimensionworks$finishStressRebuild(CallbackInfoReturnable<Float> cir) {
+        KineticNetworkOptimizer.finishStressRebuild((KineticNetwork) (Object) this, cir.getReturnValueF());
+    }
+
     @Inject(method = "getActualCapacityOf", at = @At("RETURN"), cancellable = true, remap = false)
     private void dimensionworks$limitEffectiveCapacity(KineticBlockEntity be,
                                                        CallbackInfoReturnable<Float> cir) {
@@ -120,6 +147,29 @@ public abstract class KineticNetworkMixin {
         remap = false
     )
     private void dimensionworks$trackLoadRefreshSync(KineticNetwork network) {
+        KineticNetworkOptimizer.syncDuringNetworkRefresh(network);
+    }
+
+    @Inject(method = "sync", at = @At("TAIL"), remap = false)
+    private void dimensionworks$rememberPublishedOverload(CallbackInfo ci) {
+        KineticNetworkOptimizer.onNetworkSynced((KineticNetwork) (Object) this);
+    }
+
+    @Redirect(
+        method = "updateStress",
+        at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/kinetics/KineticNetwork;sync()V"),
+        remap = false
+    )
+    private void dimensionworks$deferStableStressPublication(KineticNetwork network) {
+        KineticNetworkOptimizer.syncDuringNetworkRefresh(network);
+    }
+
+    @Redirect(
+        method = "updateCapacity",
+        at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/kinetics/KineticNetwork;sync()V"),
+        remap = false
+    )
+    private void dimensionworks$deferStableCapacityPublication(KineticNetwork network) {
         KineticNetworkOptimizer.syncDuringNetworkRefresh(network);
     }
 

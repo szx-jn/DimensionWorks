@@ -19,6 +19,45 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 public final class KineticNetworkRestoreGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 100)
+    public static void overloadTransitionsPublishImmediatelyWhileStableChangesCanWait(GameTestHelper helper) {
+        BlockPos motorPos = new BlockPos(3, 1, 3);
+        BlockPos shaftPos = motorPos.east();
+        BlockState motorState = createBlock("creative_motor")
+            .setValue(CreativeMotorBlock.FACING, Direction.EAST);
+        BlockState shaftState = createBlock("shaft")
+            .setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
+        helper.setBlock(motorPos, motorState);
+        helper.setBlock(shaftPos, shaftState);
+
+        helper.runAfterDelay(20, () -> {
+            CreativeMotorBlockEntity motor = (CreativeMotorBlockEntity) helper.getBlockEntity(motorPos);
+            KineticBlockEntity shaft = (KineticBlockEntity) helper.getBlockEntity(shaftPos);
+            helper.assertTrue(motor != null && shaft != null, "Kinetic fixture did not initialize");
+            KineticNetwork network = motor.getOrCreateNetwork();
+            network.updateNetwork();
+            helper.assertFalse(shaft.isOverStressed(), "Fixture must start below its stress capacity");
+
+            float originalContribution = network.members.get(shaft);
+            network.updateStressFor(shaft, originalContribution + 1);
+            helper.assertFalse(shaft.isOverStressed(),
+                "A stable under-capacity contribution change must not flip overload state");
+
+            network.updateStressFor(shaft, 1_000_000);
+            for (KineticBlockEntity member : network.members.keySet()) {
+                helper.assertTrue(member.isOverStressed(),
+                    "Crossing the stress limit must stop every network member before returning");
+            }
+
+            network.updateStressFor(shaft, originalContribution);
+            for (KineticBlockEntity member : network.members.keySet()) {
+                helper.assertFalse(member.isOverStressed(),
+                    "Dropping below the stress limit must restart every member before returning");
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 100)
     public static void restoredMembersResyncWhenTotalsAreUnchanged(GameTestHelper helper) {
         BlockPos motorPos = new BlockPos(3, 1, 3);
         BlockPos shaftPos = motorPos.east();

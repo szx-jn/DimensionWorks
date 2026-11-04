@@ -8,8 +8,12 @@ import com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCo
 import com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorInjector;
 import com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorStabilizer;
 import com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCore.ReactorState;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -26,6 +30,9 @@ import org.jetbrains.annotations.Nullable;
 public final class ReactorPowerBridge {
     public static final float OUTPUT_RPM = ReactorPowerMath.OUTPUT_RPM;
     private static final double SHIELD_TARGET = 0.95D;
+    /** Successful bindings only; every lookup revalidates the live blocks and reactor state. */
+    private static final Map<KineticBlockEntity, OutputBinding> OUTPUT_BINDINGS =
+        Collections.synchronizedMap(new WeakHashMap<>());
 
     private ReactorPowerBridge() {
     }
@@ -34,6 +41,11 @@ public final class ReactorPowerBridge {
         public float stressPerRpm() {
             return ReactorPowerMath.stressPerRpm(generationPerTick, connectedPorts);
         }
+    }
+
+    private record OutputBinding(BlockPos shaftPos, Direction side,
+                                 WeakReference<TileReactorStabilizer> stabilizer, BlockPos stabilizerPos,
+                                 WeakReference<TileReactorCore> core, Direction coreSide) {
     }
 
     @Nullable
@@ -49,6 +61,18 @@ public final class ReactorPowerBridge {
         BlockPos shaftPos = kinetic.getBlockPos();
         if (level == null || !level.hasChunkAt(shaftPos)) {
             return null;
+        }
+        if (kinetic.isRemoved() || level.getBlockEntity(shaftPos) != kinetic) {
+            OUTPUT_BINDINGS.remove(kinetic);
+            return null;
+        }
+        OutputBinding cached = OUTPUT_BINDINGS.get(kinetic);
+        if (cached != null) {
+            Output output = resolveCachedOutput(kinetic, level, shaftPos, cached);
+            if (output != null) {
+                return output;
+            }
+            OUTPUT_BINDINGS.remove(kinetic);
         }
         // Only the four stabilizers can export energy; injectors are consumers.
         for (Direction towardsStabilizer : Direction.values()) {
@@ -69,16 +93,57 @@ public final class ReactorPowerBridge {
                 || core.reactorState.get() != ReactorState.RUNNING) {
                 continue;
             }
-            int ports = outputShafts(core).size();
-            if (ports > 0) {
-                double generated = core.generationRate.get();
-                if (!Double.isFinite(generated) || generated < 0.0D) {
-                    generated = 0.0D;
-                }
-                return new Output(core, ports, generated);
+            Direction coreSide = towardsStabilizer.getOpposite();
+            OutputBinding binding = new OutputBinding(shaftPos.immutable(), towardsStabilizer,
+                new WeakReference<>(stabilizer), stabilizer.getBlockPos().immutable(),
+                new WeakReference<>(core), coreSide);
+            Output output = createOutput(core);
+            if (output != null) {
+                OUTPUT_BINDINGS.put(kinetic, binding);
+                return output;
             }
         }
         return null;
+    }
+
+    @Nullable
+    private static Output resolveCachedOutput(KineticBlockEntity kinetic, Level level, BlockPos shaftPos,
+                                               OutputBinding binding) {
+        TileReactorStabilizer stabilizer = binding.stabilizer().get();
+        TileReactorCore core = binding.core().get();
+        if (stabilizer == null || core == null || !binding.shaftPos().equals(shaftPos)
+            || kinetic.getBlockState().getValue(ShaftBlock.AXIS) != binding.side().getAxis()) {
+            return null;
+        }
+        Level stabilizerLevel = stabilizer.getLevel();
+        if (stabilizerLevel != level || stabilizer.isRemoved()
+            || !level.hasChunkAt(binding.stabilizerPos())
+            || level.getBlockEntity(binding.stabilizerPos()) != stabilizer
+            || stabilizer.facing.get() != binding.side()
+            || !stabilizer.isBound.get()) {
+            return null;
+        }
+        BlockPos corePos = core.getBlockPos();
+        if (core.getLevel() != level || core.isRemoved() || !level.hasChunkAt(corePos)
+            || level.getBlockEntity(corePos) != core || !core.structureValid.get()
+            || core.reactorState.get() != ReactorState.RUNNING
+            || boundComponent(core, binding.coreSide()) != stabilizer) {
+            return null;
+        }
+        return createOutput(core);
+    }
+
+    @Nullable
+    private static Output createOutput(TileReactorCore core) {
+        int ports = outputShafts(core).size();
+        if (ports == 0) {
+            return null;
+        }
+        double generated = core.generationRate.get();
+        if (!Double.isFinite(generated) || generated < 0.0D) {
+            generated = 0.0D;
+        }
+        return new Output(core, ports, generated);
     }
 
     public static boolean isOutputOf(KineticBlockEntity kinetic, TileReactorCore expectedCore) {

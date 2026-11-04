@@ -85,9 +85,17 @@ public final class GeneratorPowerBridge {
             new Production(level.getGameTime(), EnergyPowerMath.su(fe), Set.copyOf(shafts)));
         Set<BlockPos> changed = new LinkedHashSet<>(shafts);
         if (previous != null) changed.addAll(previous.shafts());
-        for (BlockPos pos : changed) {
-            if (level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof dev.szx.dimensionworks.mekstress.api.IMechanicalSourceShaft shaft)
-                shaft.dimensionworks$refreshMechanicalSource();
+        // A multiblock output can feed several Create shafts on one kinetic network. Update each
+        // source contribution immediately, but publish the completed network totals only once.
+        dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.beginBatch();
+        try {
+            for (BlockPos pos : changed) {
+                if (level.hasChunkAt(pos)
+                    && level.getBlockEntity(pos) instanceof dev.szx.dimensionworks.mekstress.api.IMechanicalSourceShaft shaft)
+                    shaft.dimensionworks$refreshMechanicalSource();
+            }
+        } finally {
+            dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.endBatch();
         }
     }
 

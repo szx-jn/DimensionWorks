@@ -16,7 +16,8 @@ public abstract class GeneratingKineticBlockEntityMixin {
 
     @Inject(method = "updateGeneratedRotation", at = @At("HEAD"), remap = false)
     private void dimensionworks$beginKineticBatch(CallbackInfo ci) {
-        KineticNetworkOptimizer.beginBatch();
+        KineticNetworkOptimizer.beginGeneratorBatch(
+            (com.simibubi.create.content.kinetics.base.KineticBlockEntity) (Object) this);
     }
 
     @Inject(method = "updateGeneratedRotation", at = @At("RETURN"), remap = false)
