@@ -1,0 +1,93 @@
+{
+  "main_base_commit": "a458d9751c8cd22a30a1bbd7fa020820ecd7994c",
+  "merge_commit": "c001a7bd1724557b80f7e05c05a9639a4b8b8d1c",
+  "tested_source_commit": "48ec58536f4fd4d045e5580dbc19befde92cb113",
+  "tested_at_utc": "2026-11-04",
+  "toolchain": {
+    "java": "Temurin 17.0.21",
+    "gradle": "8.8"
+  },
+  "runtime": {
+    "minecraft": "1.20.1",
+    "forge": "47.4.16",
+    "create": "6.0.8-291 slim",
+    "rpm_limit": "0.4.17",
+    "mek_stress": "0.3.24",
+    "mekanism": "10.4.16.80",
+    "ae2": "15.4.10",
+    "applied_create": "1.1.5",
+    "draconic_evolution": "3.1.2.621",
+    "brandons_core": "3.2.1.302"
+  },
+  "create_artifacts": {
+    "create-1.20.1-6.0.8-291-slim.jar": "ba2af6811a8591ac73050b34d6d8e2d11598bab6e4ee90b3eb163f4351dca304"
+  },
+  "benchmark_environment": {
+    "cpu_quota": "200000 100000",
+    "memory_limit_bytes": 8589934592,
+    "independent_jvms": 2,
+    "fresh_world_per_run": true,
+    "runs": [
+      "run13",
+      "run14"
+    ],
+    "formal_samples_per_scenario_per_run": 5,
+    "warmup_samples_per_scenario_per_run": 1,
+    "timing": "Minecraft server thread CPU time and wall time; counters enabled only during samples",
+    "jfr_collected": false,
+    "ae2_channels": "infinite for isolated 128-port ME fixture",
+    "forge_gametest_runs": {
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "unit_tests": {
+    "dimensionworks-rpm-limit": {
+      "tests": 77,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dimensionworks-mek-stress": {
+      "tests": 95,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dimensionworks-stress-gauge-alarm": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "total": {
+      "tests": 174,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "forge_gametests": {
+    "dimensionworks-rpm-limit": {
+      "passed": 22,
+      "failed": 0
+    },
+    "dimensionworks-mek-stress": {
+      "passed": 4,
+      "failed": 0
+    },
+    "dimensionworks-stress-gauge-alarm": {
+      "passed": 1,
+      "failed": 0
+    },
+    "kinetic_performance_run13": {
+      "passed": 1,
+      "failed": 0
+    },
+    "kinetic_performance_run14": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "scope_note": "Isolated Forge tests, not the full modpack or a player factory save. Performance accounting fixtures use loaded block entities assembled into diagnostic networks; physical_speed_change and physical_remove_source use real connected shaft chains. Performance-only LabMetrics and game tests are installed in /workspace/stress-lab copies and are not included in product jars. Full Draconic Reactor structure GameTest, third-party member snapshot compatibility, long unload/restart cycles, and full-pack TPS were not measured."
+}

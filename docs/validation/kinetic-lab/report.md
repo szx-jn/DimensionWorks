@@ -6,7 +6,7 @@
 
 确认存在四条可重复的放大路径：变化次数×网络成员数的广播、容量纯读扫描全部来源、跨网络配额样本的平方级访问、ME 输出口纯读引发整个服务重算。真实长轴网络变速还有成员移除/接入与传播开销。稳定轴链没有每 tick 重复账目计算，不能把全部机器 tick 开销称为应力求和。
 
-实验运行真实 Forge 47.4.16、Create 6.0.8-291、RPM 0.4.17、Mek-Stress 0.3.20、Mekanism 10.4.16.80、AE2 15.4.10、Applied Create 1.1.5 及它们声明的依赖，使用官方映射。不是完整整合包，也没有玩家工厂存档；不能据此承诺完整整合包的 TPS 或全部附属兼容。
+实验运行真实 Forge 47.4.16、Create 6.0.8-291、RPM 0.4.17、Mek-Stress 0.3.24、Mekanism 10.4.16.80、AE2 15.4.10、Applied Create 1.1.5 及它们声明的依赖，使用官方映射。不是完整整合包，也没有玩家工厂存档；不能据此承诺完整整合包的 TPS 或全部附属兼容。
 
 Maven sources 的 KineticNetwork 和 RotationPropagator 与 tag mc1.20.1-6.0.8 完全一致。KineticBlockEntity 只有 convertToAngular 的等价角速度表达式及注释差异，应力同步方法一致。运行 slim jar SHA256 已记录。
 
@@ -41,7 +41,7 @@ Maven sources 的 KineticNetwork 和 RotationPropagator 与 tag mc1.20.1-6.0.8 �
 
 目前最直接的收益来源是减少重复广播和重复配额/ME遍历。批处理不能推迟新增负载扣账，不能允许本应过载的后续机器继续加工；过载翻转、真实变速和未知附属兼容路径必须保留即时屏障。真实传动变速仍需进一步定位成员迁移与失效，再决定传播改造。
 
-未覆盖完整第三方附属组合、真实加工阵列、反应堆完整结构负载、所有者共享额度的全部组合、长期重启/卸载循环和客户端图形。相关项目已经列入实施验收，不标记为测试通过。当前测试版已经落地缓存失效分离、配额总账、ME 同 tick 复用和应力表红石通知去重；批处理、动力源发现索引及 Create 拓扑传播改造仍待后续实现。
+未覆盖完整第三方附属组合、真实加工阵列、反应堆完整结构负载、所有者共享额度的全部组合、长期重启/卸载循环和客户端图形。相关项目已经列入实施验收，不标记为测试通过。当前测试版已落地缓存失效分离、配额总账、ME 同 tick 复用、应力表红石通知去重、受约束的成员快照合并、多轴发电容量批处理，以及 Draconic Reactor 成功绑定缓存。Create `RotationPropagator` 仍未替换；全局 owner→成员索引仍待生产采样评估。
 
 稳定窗口的“没有重建/广播”不等于没有任何 getActualStressOf 调用：异步安排的保存可通过 KineticPersistence.write 扫描物理贡献；变速刚结束时也可能有待处理刷新。应将窗口前段的收敛、保存调用与持续 network.calculateStress 重建分开看。测试回调内有大量刻意连续操作，日志中的 Can't keep up 不能直接视为正常工厂负载的测量。
 
@@ -76,7 +76,7 @@ Maven sources 的 KineticNetwork 和 RotationPropagator 与 tag mc1.20.1-6.0.8 �
 
 JFR 摘要见 jfr-summary.json；它覆盖整个启动及实验过程，不能将其中样本比例作为实际工厂热点占比。完整 JFR 保留在本地实验日志目录。
 
-## 优化测试版复测
+## 上一轮只读与配额优化版复测（历史数据）
 
 优化版数据见 [原始样本](optimized/samples.csv)、[服务器 tick 样本](optimized/ticks.csv)、[聚合结果](optimized/summary.json) 和 [环境/测试版本](optimized/environment.json)。两次独立 JVM、新世界，每个场景合并 10 个正式样本；Forge GameTest 各 1/1 通过。优化前后使用相同的 Forge/Create 版本、探针与夹具。性能夹具源码来自提交 `917f371`；同一优化补丁随后以 `d11cf8d` 重放到最新 `main`。最终测试源码提交 `2f66d8c` 包含该优化及应力表运行时 Mixin 修复；配额、优化器和 ME 快照热路径文件在测量树与最终测试树间完全相同。最终分支合入的 Mek 气体管道功能不参与隔离基准；其单元及 Forge GameTest 在最终树上另行通过。
 
@@ -94,4 +94,23 @@ JFR 摘要见 jfr-summary.json；它覆盖整个启动及实验过程，不能�
 
 配额读与 ME 纯读的重复扫描已消除；等值失效不再额外广播成员。稳定容量和纯读的 CPU 时间大幅下降。相反，真实轴链变速与分散应力变更基本未优化，样本也显示它们仍是后续重点。`me_reentrant_reads` 是 snapshot 正在执行时的重入入口计数，不代表完整 snapshot 次数；ME 扫描成本以 `me_participants` 参与节点访问数判断。基准不会证明拓扑传播或任意批处理安全，且不能外推完整整合包服务器 TPS。
 
-最终源码的单元测试为 166 项通过：RPM 75、Mek-stress 89、应力表 2。Forge GameTest 在最终源码上分别为 RPM 21/21、Mek-stress 4/4、应力表 1/1；应力表测试同时确认 Mixin 对实际 `BlockBehaviour.getSignal` 生效。
+## 最终实现双轮复测
+
+run13/run14 使用独立 JVM、全新世界和相同 Forge 47.4.16/Create 6.0.8-291 依赖；每个场景 5 次正式样本，合并 10 个样本。以服务端线程 CPU 计时和调用计数探针测量；本两轮没有采集 JFR。完整原始数据见 [samples.csv](optimized-final/samples.csv)、[ticks.csv](optimized-final/ticks.csv) 和 [summary.json](optimized-final/summary.json)，环境及验证结果见 [environment.json](optimized-final/environment.json)。两轮都通过了网络正确性断言和必需 GameTest。
+
+| 场景 | 输入 | 原基线 CPU ms | 上一优化版 CPU ms | 最终 CPU ms | 调用量变化 |
+| --- | --- | ---: | ---: | ---: | --- |
+| 顺序应力变化 | N=4096，U=100 | 249.157 | 264.138 | 3.035 | sync 100→1；成员更新 409600→4096；实际应力读取 409600→100；窗口内无整网重建 |
+| 物理轴链调速 | N=512 | 19.465 | 21.028 | 7.928 | sync=1；成员更新 1534→512 |
+| 物理轴链调速 | N=1024 | 60.193 | 未测 | 10.213 | sync=1；成员更新 3070→1024 |
+| 容量缓存纯读 | S=512，100 次 | 11.437 | 0.036 | 0.044 | source 读取 51200→0；成员更新 0 |
+| ME 输出转速纯读 | P=128 | 2.399 | 0.075 | 0.037 | 参与节点遍历 16512→0 |
+| ME snapshot 纯读 | 100 次 | 1.835 | 0.009 | 0.008 | 参与节点遍历 12900→0 |
+| 等值失效后刷新 | N=4096，10 次 | 41.849 | 16.229 | 17.524 | 保守整网重建 10 次；不会额外广播成员 |
+| 断开唯一动力源 | N=1024 | — | — | 24.948 | 两轮各一次，CPU 中位数；1024 个成员均清除网络与转速，拓扑拆分仍需访问整个组件 |
+
+应力与容量权威总值仍在每次变更中立即更新。只有全网过载标志不变时，成员快照才延至本 tick 末合并发布；过载与恢复仍在调用内同步并通过 GameTest 断言。独立动力源变速保留同 ID 网络的成员账目，Create 仍逐成员传播实际 RPM，因此此路径的理论成本仍为 O(N)。网络断源同样逐成员清理，不能宣称为 O(1)。
+
+最终源码测试结果：RPM Limit 单元测试 77/77、Forge GameTest 22/22；Mek-stress 单元测试 95/95、Forge GameTest 4/4；应力表单元测试 2/2、Forge GameTest 1/1。两轮性能 GameTest 各 1/1 通过，并验证 128/512/1024 个真实连接轴链的速度、成员关系、应力总和和断源停机。新增的阈值边界测试证明过载及恢复都会在当前更新调用返回前同步所有成员。
+
+这些结果来自隔离 Forge 实例，包含 Create、RPM Limit、Mek-stress、Mekanism、AE2、Applied Create 及依赖，不等于完整整合包或玩家工厂 TPS。第三方自定义 `updateFromNetwork` / 受保护快照读取、真实反应堆大结构、长期重启卸载循环仍需在完整包上验证。Draconic Reactor 的绑定缓存已做成功路径运行时代码校验，但没有真实完整结构 GameTest，不能把该附属路径视为性能验收完成。Create `RotationPropagator` 本次未替换；大网络必要的转速传播和真实拆网仍是线性工作。

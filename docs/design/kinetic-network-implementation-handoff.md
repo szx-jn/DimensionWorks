@@ -1,6 +1,6 @@
 # 给 6luna 的应力网络优化实施交接
 
-先读 [总体方案](kinetic-network-performance-plan.md) 和 [实测报告](../validation/kinetic-lab/report.md)。本文件定义实施任务、接口语义和交付条件。当前测试分支已实现并验证低风险的缓存失效、ME snapshot 去重、容量配额总账和红石输出优化；虚拟负载批量提交、动力源发现索引、拓扑算法改造仍未实现。
+先读 [总体方案](kinetic-network-performance-plan.md) 和 [实测报告](../validation/kinetic-lab/report.md)。本文件记录已经验证的改动和仍有边界的工作。应力/容量发布合并、特定独立动力源调速优化、ME 发电批处理和 Draconic Reactor 成功绑定缓存现已通过构建与 Forge GameTest；核心 Create 优化另有双轮性能复测。完整拓扑算法替换、全局动力源索引没有纳入本次实现。
 
 ## 1. 实施范围和优先级
 
@@ -11,11 +11,11 @@
 | 1 | 失效原因与加载同步标志拆分 | 已实现；常规失效不再触发恢复强制同步 | rpm-limit/optimizer/KineticNetworkOptimizer | 数值未变的普通失效也会强制广播 |
 | 2 | ME 服务读取去重、输入变更失效 | 已实现；同 tick 纯读复用，按动力网络订阅失效 | mek-stress/memory/MemoryGridService、mixin/create/KineticNetworkMixin | 读取路径存在计算及输出副作用 |
 | 3 | 容量所有者总账增量维护 | 已实现；按样本差值更新、容量读不遍历全局网络样本 | rpm-limit/quota/CreateCapacityRegistry | 已测出全局 G² 样本访问 |
-| 4 | 统一提交与受约束的批处理 | 未实现；仍保留即时 Create 更新契约 | 两个 Registry、GeneratorShaftMixin、Optimizer | 已测出 U×N 成员更新 |
+| 4 | 统一提交与受约束的批处理 | 已实现受约束发布：权威总值立即更新；稳定过载态的成员快照 tick 末合并；阈值状态已知时 O(1) 比较聚合过载态，拓扑/恢复后只做一次保守成员校验；过载翻转立即同步；显式事务在结束时同步 | rpm-limit/Optimizer、GeneratorPowerBridge、GeneratingKineticBlockEntityMixin | 100 次顺序变化的成员更新从 100N 压到 N，避免每次变更再扫描 N 个成员判断状态 |
 | 5 | 应力表输出变化检测 | 已实现；只在模拟红石档位变化时通知邻居 | stress-gauge-alarm/StressGaugeBlockEntityMixin | 避免红石反馈放大 |
-| 6 | 动力源发现与所有者索引 | 未实现 | GeneratorPowerBridge、ReactorPowerBridge、RpmLimitManager | 降低每轴重复探测与上限更新尖峰 |
-| 7 | 拓扑增量、RPM 频数、保存版本 | 未实现 | Optimizer、NetworkRpmLimit、KineticPersistence | 减少恢复和拓扑变化时全量重建 |
-| 8 | 传播算法与通知模型 | 未实现 | RotationPropagator 适配或正式 fork | 风险最高，最后处理 |
+| 6 | 动力源发现与所有者索引 | 部分优化：Draconic Reactor 成功绑定后弱缓存核心/稳定器，每次 O(1) 校验加载状态与绑定关系，发电率及输出轴数仍读取实时值；普通 Mek 发电机只查六邻位。owner→已加载动力成员索引仍暂缓；反应堆缓存尚无完整结构 GameTest，需生产采样继续核验 | GeneratorPowerBridge、ReactorPowerBridge、RpmLimitManager | 无成功缓存时首次绑定仍可能沿稳定器方向搜索；尚无真实大型反应堆基准 |
+| 7 | 拓扑增量、RPM 频数、保存版本 | 部分已有应力/容量/RPM 缓存；完整拓扑版本与持久化账本改造暂缓，当前基准未显示它是首要残余热点 | Optimizer、NetworkRpmLimit、KineticPersistence | 避免仅为设计完整性增加状态与存档风险 |
+| 8 | 传播算法与通知模型 | 部分优化：同 ID 独立动力源变速时保留成员账目；Create 仍逐成员传播新转速，未替换 DFS | Optimizer、GeneratingKineticBlockEntityMixin | 1024 轴调速约 10.2ms，成员更新 3070→1024 |
 
 ## 2. 权威状态与失效接口
 
@@ -39,11 +39,13 @@ WeakHashMap.clear 不会自动缩小底层表；反复 clear 的开销应结合 
 
 ## 3. 合并刷新时的同步边界
 
-实测已有 beginBatch/endBatch 可显著减少广播，但不能直接包围完整服务器 tick 后宣布完成。
+Create 的成员应力和容量总值在每次变化中立即更新。网络整体过载标志不变时，只将相同字段快照的成员写入合并到服务器 tick 尾；过载/恢复状态翻转则在当前调用立即同步。显式 beginBatch/endBatch 事务仍在边界同步，不能把整个服务器 tick 包成一个延迟事务。
+
+最近一次完整 `network.sync()` 后保存该网络已发布的过载状态。后续应力/容量变化直接用当前聚合值比较新旧状态，避免每次更新都遍历 `network.members` 查找过载标志不一致的成员。拓扑修改、恢复加载或发现成员数与贡献表不一致时清除此状态；首次判断退回成员扫描并重新建立基准，保留第三方结构变更的保守路径。
 
 每次变更先更新权威账本，并计算更新前后的过载状态。以下情况立即 flush：过载翻转、实际有效转速改变、成员迁移、加工前请求严格状态、未知兼容回调要求。纯数字变化且没有此类屏障时，允许 tick 末按网络身份去重发布。首次接入的虚拟负载必须先扣账再允许加工；同 tick 减容也必须先对后续机器生效。
 
-第一版保留原始 Create 成员回调契约。若调用方直接读取成员 stress/capacity/getSpeed，则在加工边界执行 ensureCurrent(network)；尚未审查的第三方保持即时发布。不能只保证全网总数正确，却让成员 overStressed 仍旧为 false。
+`overStressed` 与 `getSpeed()` 在阈值翻转时即时更新；非阈值数值变化时，成员保存的 stress/capacity 快照最多滞后一 tick。Create 公开网络总值仍可读取即时值。未知附属若直接读取受保护的成员快照字段，须在整合包兼容测试中检查；需要同调用内成员快照的扩展可在自己的边界调用 Create 的 `network.sync()`，不得让过载状态延迟。
 
 事务使用 try/finally，维护嵌套深度；flush 中产生新的变化放入下一轮待处理集合，按版本判断是否还有实际工作。循环不收敛时记录相关网络与变化来源并走保守同步，不能静默丢弃。服务器关闭清队列。批处理不得吞掉原始错误后继续把不完整账本标成有效。
 
@@ -69,7 +71,7 @@ WeakHashMap.clear 不会自动缩小底层表；反复 clear 的开销应结合 
 
 应力表记录上次实际输出强度；比较新旧强度后才通知邻居和比较器。首次加载、移除、方块替换和超载恢复必须有明确初值规则。保留其他模组对比较器输出的契约。
 
-建立已加载外部动力端口与轴的绑定索引；普通轴的负结果缓存由邻居/区块/结构事件失效。反应堆绑定核心、端口列表可缓存，generationRate 等动态出力必须按实时版本读。明确滞后一 tick 的容许范围，禁止保存或发现过程强制加载区块。
+普通 Mek 发电机目前只查询轴的六个相邻位置。Draconic Reactor 对成功绑定的输出轴弱缓存核心与稳定器，每次查询仍核对轴方向、区块已加载、方块实体身份、稳定器朝向/绑定状态、核心结构/运行状态和绑定组件；`generationRate` 与输出轴数实时读取，不使用负缓存，也不强制加载区块。完整反应堆结构的拆装、重载和性能尚无 Forge GameTest 覆盖。owner→已加载动力成员索引仍需生产采样证明收益后再做；登录、复活和额度变化时的全加载区块扫描不是每 tick 路径。
 
 RpmLimitManager.applyLimitToOwned 当前遍历所有维度加载区块的方块实体；维护 owner→已加载动力成员索引，按涉及网络分组更新。所有者离线缓存和 PlayerPersisted 迁移规则保持。无所有者中继继承网络限额，虚拟成员不引入默认 32 RPM 参与者。
 
