@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.stressgaugealarm.mixin;
 
 import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
+import dev.szx.dimensionworks.stressgaugealarm.redstone.StressGaugeSignal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,5 +1,6 @@
 package dev.szx.dimensionworks.stressgaugealarm.mixin;
 
+import dev.szx.dimensionworks.stressgaugealarm.redstone.StressGaugeSignal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
