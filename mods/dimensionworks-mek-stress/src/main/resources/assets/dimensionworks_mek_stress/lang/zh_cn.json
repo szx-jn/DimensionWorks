@@ -68,7 +68,7 @@
   "jade.dimensionworks_mek_stress.demand": "总输出：%s RPM，占额 %s SU",
   "jade.dimensionworks_mek_stress.machine_su": "机械应力负载：%s SU",
   "jade.dimensionworks_mek_stress.machine": "动力：%s %s @ %s RPM",
-  "jade.dimensionworks_mek_stress.production": "生产倍率：%sx",
+  "jade.dimensionworks_mek_stress.production": "理论生产倍率：%sx",
   "jade.dimensionworks_mek_stress.status.ok": "状态：正常",
   "jade.dimensionworks_mek_stress.status.no_drive": "状态：网络中无 ME Memory Drive",
   "jade.dimensionworks_mek_stress.status.too_many_drives": "状态：驱动器超过两台",

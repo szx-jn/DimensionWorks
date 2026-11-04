@@ -78,7 +78,7 @@ public final class MachinePowerManager {
     public static double productionMultiplier(TileEntityMekanism tile, @Nullable DirectSource route) {
         float rpm = route == null || !route.running() ? 0 : route.rpm();
         int tierRpm = MekStressConfig.machineRpm(tier(tile));
-        return hasMechanicalPower(route) ? MachinePowerMath.productionMultiplier(rpm, tierRpm) : 0.0D;
+        return hasMechanicalPower(route) ? MachinePowerMath.tierProductionMultiplier(rpm, tierRpm, MekStressConfig.machineMaxOutput(tier(tile))) : 0.0D;
     }
 
     public static double throughputMultiplier(TileEntityMekanism tile) {
@@ -88,7 +88,7 @@ public final class MachinePowerManager {
     public static double throughputMultiplier(TileEntityMekanism tile, @Nullable DirectSource route) {
         float rpm = route == null || !route.running() ? 0 : route.rpm();
         int tierRpm = MekStressConfig.machineRpm(tier(tile));
-        return hasMechanicalPower(route) ? MachinePowerMath.throughputMultiplier(rpm, tierRpm) : 0.0D;
+        return hasMechanicalPower(route) ? MachinePowerMath.tierThroughputMultiplier(rpm, tierRpm, MekStressConfig.machineMaxOutput(tier(tile))) : 0.0D;
     }
 
     public static boolean consumeForProcessing(TileEntityMekanism tile) {

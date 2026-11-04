@@ -14,6 +14,7 @@ public final class MekStressConfig {
     private static final EnumMap<MemoryTier, ForgeConfigSpec.LongValue> CARD_RPM = new EnumMap<>(MemoryTier.class);
     private static final EnumMap<MemoryCardType, ForgeConfigSpec.IntValue> SPEED = new EnumMap<>(MemoryCardType.class);
     private static final EnumMap<MachineTier, ForgeConfigSpec.IntValue> MACHINE_RPM = new EnumMap<>(MachineTier.class);
+    private static final EnumMap<MachineTier, ForgeConfigSpec.DoubleValue> MACHINE_MAX_OUTPUT = new EnumMap<>(MachineTier.class);
     public static final ForgeConfigSpec.DoubleValue DEFECTIVE_CHANCE;
     public static final ForgeConfigSpec.IntValue MAXIMUM_INPUT_LOSS_BP;
     public static final ForgeConfigSpec.IntValue DIRECT_MAX_RPM;
@@ -43,6 +44,11 @@ public final class MekStressConfig {
         for (MachineTier tier : MachineTier.values())
             MACHINE_RPM.put(tier, builder.defineInRange(tier.name().toLowerCase() + "Rpm", tier.targetRpm(), 1, 65536));
         builder.pop();
+        builder.push("mekanism_machine_max_output");
+        for (MachineTier tier : MachineTier.values())
+            MACHINE_MAX_OUTPUT.put(tier, builder.comment("Maximum per-operation output multiplier at 10240 RPM.")
+                .defineInRange(tier.name().toLowerCase() + "Multiplier", 1.25D + tier.mekanismOrdinal() * 0.25D, 1D, 2D));
+        builder.pop();
         builder.push("tuning");
         MAXIMUM_INPUT_LOSS_BP = builder.comment("Maximum network input stress loss, in basis points (9900 = 99%). Hard ceiling: 99%.")
             .defineInRange("maximumInputLossBasisPoints", InputStressMath.MAXIMUM_INPUT_LOSS_BASIS_POINTS,
@@ -58,6 +64,7 @@ public final class MekStressConfig {
     public static long cardBandwidthRpm(MemoryTier tier) { return CARD_RPM.get(tier).get(); }
     public static int speedExponent(MemoryCardType type) { return SPEED.get(type).get(); }
     public static int machineRpm(MachineTier tier) { return MACHINE_RPM.get(tier).get(); }
+    public static double machineMaxOutput(MachineTier tier) { return MACHINE_MAX_OUTPUT.get(tier).get(); }
     public static double defectiveChance() { return DEFECTIVE_CHANCE.get(); }
     public static int maximumInputLossBasisPoints() {
         return InputStressMath.cappedReductionBasisPoints(MAXIMUM_INPUT_LOSS_BP.get());

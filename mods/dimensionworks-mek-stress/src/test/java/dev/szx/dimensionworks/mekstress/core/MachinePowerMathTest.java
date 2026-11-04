@@ -57,4 +57,18 @@ class MachinePowerMathTest {
         assertEquals(0.0F, MachinePowerMath.directRpm(Float.NaN, 10_240), 1.0E-6F);
         assertEquals(0.0F, MachinePowerMath.directRpm(4_096.0F, 0), 1.0E-6F);
     }
+    @org.junit.jupiter.api.Test
+    void tieredOverdriveHasDistinctCapsAndRespectsTarget() {
+        int[] targets = {1024, 2048, 4096, 8192};
+        double[] caps = {1.25, 1.5, 1.75, 2.0};
+        for (int i = 0; i < targets.length; i++) {
+            assertEquals(1.0, MachinePowerMath.tierProductionMultiplier(targets[i], targets[i], caps[i]), 1e-9);
+            assertEquals(caps[i], MachinePowerMath.tierThroughputMultiplier(10240, targets[i], caps[i]), 1e-9);
+            assertEquals(caps[i], MachinePowerMath.tierProductionMultiplier(20000, targets[i], caps[i]), 1e-9);
+            assertEquals(0.5, MachinePowerMath.tierThroughputMultiplier(targets[i] / 2f, targets[i], caps[i]), 1e-9);
+        }
+        assertEquals(1.0, MachinePowerMath.tierProductionMultiplier(10240, 10240, 2), 1e-9);
+        assertEquals(0.0, MachinePowerMath.tierThroughputMultiplier(0, 1024, 1.25), 1e-9);
+    }
+
 }

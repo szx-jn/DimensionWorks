@@ -68,7 +68,7 @@
   "jade.dimensionworks_mek_stress.demand": "Total outputs: %s RPM, reserved %s SU",
   "jade.dimensionworks_mek_stress.machine_su": "Mechanical stress load: %s SU",
   "jade.dimensionworks_mek_stress.machine": "Power: %s %s @ %s RPM",
-  "jade.dimensionworks_mek_stress.production": "Production: %sx",
+  "jade.dimensionworks_mek_stress.production": "Theoretical production: %sx",
   "jade.dimensionworks_mek_stress.status.ok": "Status: OK",
   "jade.dimensionworks_mek_stress.status.no_drive": "Status: no ME Memory Drive",
   "jade.dimensionworks_mek_stress.status.too_many_drives": "Status: more than two Drives",
