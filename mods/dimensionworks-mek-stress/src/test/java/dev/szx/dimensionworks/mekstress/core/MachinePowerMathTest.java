@@ -71,4 +71,19 @@ class MachinePowerMathTest {
         assertEquals(0.0, MachinePowerMath.tierThroughputMultiplier(0, 1024, 1.25), 1e-9);
     }
 
+    @Test
+    void defaultFactoryUpgradesImproveThroughputAtEveryPoweredSpeed() {
+        int[] parallel = {3, 5, 7, 9};
+        for (int rpm = 1; rpm <= 10240; rpm++) {
+            double previous = 0;
+            for (MachineTier tier : MachineTier.values()) {
+                int index = tier.mekanismOrdinal();
+                double rate = MachinePowerMath.tierThroughputMultiplier(rpm, tier.targetRpm(), 1.25 + index * .25);
+                double output = parallel[index] * rate;
+                org.junit.jupiter.api.Assertions.assertTrue(output > previous, "RPM=" + rpm + ", tier=" + tier);
+                previous = output;
+            }
+        }
+    }
+
 }
