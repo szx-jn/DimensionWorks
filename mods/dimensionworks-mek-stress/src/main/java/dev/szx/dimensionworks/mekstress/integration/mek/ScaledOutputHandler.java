@@ -140,8 +140,7 @@ public final class ScaledOutputHandler<T> implements IOutputHandler<T> {
             }
         }
         for (AccumulatedItem accumulated : secondaryOutputs) {
-            long scaled = MachineWorkContext.scaleOutput(accumulated.count, 1);
-            MachineOutputDelivery.insertItemAmount(secondarySlot, accumulated.stack, scaled);
+            MachineOutputDelivery.insertItemScaled(secondarySlot, accumulated.stack, accumulated.count, 1);
         }
     }
 

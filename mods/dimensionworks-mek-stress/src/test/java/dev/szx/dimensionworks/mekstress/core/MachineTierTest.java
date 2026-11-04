@@ -10,7 +10,7 @@ class MachineTierTest {
     void followsTheMekanismQualityTable() {
         assertEquals(1_024, MachineTier.BASIC.targetRpm());
         assertEquals(1_024L, MachineTier.BASIC.bandwidthRpm());
-        assertEquals(8_192, MachineTier.ULTIMATE.targetRpm());
+        assertEquals(1_024, MachineTier.ULTIMATE.targetRpm());
         assertEquals(8_192L, MachineTier.ULTIMATE.bandwidthRpm());
     }
 }

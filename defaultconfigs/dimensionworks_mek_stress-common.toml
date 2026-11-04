@@ -29,9 +29,9 @@ speedExponent = 2
 
 [mekanism_machine_rpm]
 basicRpm = 1024
-advancedRpm = 2048
-eliteRpm = 4096
-ultimateRpm = 8192
+advancedRpm = 1024
+eliteRpm = 1024
+ultimateRpm = 1024
 
 [mekanism_machine_max_output]
 basicMultiplier = 1.25

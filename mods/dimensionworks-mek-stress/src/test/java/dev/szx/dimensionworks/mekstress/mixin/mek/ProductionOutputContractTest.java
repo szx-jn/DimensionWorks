@@ -26,7 +26,7 @@ class ProductionOutputContractTest {
         assertTrue(source.contains("wrapElectrolysisOutputHandler"));
         assertTrue(scaledHandler.contains("handleChanceOutput"));
         assertTrue(scaledHandler.contains("output.getMaxSecondaryOutput()"));
-        assertTrue(scaledHandler.contains("MachineWorkContext.scaleOutput(accumulated.count, 1)"));
+        assertTrue(scaledHandler.contains("MachineOutputDelivery.insertItemScaled(secondarySlot"));
         assertTrue(delivery.contains("remaining -= inserted"));
     }
 

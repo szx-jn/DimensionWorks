@@ -25,13 +25,22 @@ public final class MachineOutputDelivery {
         if (!MachineWorkContext.scaling() || operations <= 0 || toOutput.isEmpty()) {
             return;
         }
-        long count = MachineWorkContext.scaleOutput(toOutput.getCount(), operations);
-        insertItemAmount(slot, toOutput, count);
+        insertItemScaled(slot, toOutput, toOutput.getCount(), operations);
     }
 
-    public static void insertItemAmount(IInventorySlot slot, ItemStack toOutput, long count) {
+    public static void insertItemScaled(IInventorySlot slot, ItemStack output, long base, int operations) {
+        if (output.isEmpty() || base <= 0 || operations <= 0) return;
+        long count = ItemOutputCredit.preview(slot, output, base, operations);
+        if (count > Integer.MAX_VALUE || !slot.insertItem(output.copyWithCount((int) count),
+            Action.SIMULATE, AutomationType.INTERNAL).isEmpty()) return;
+        if (insertItemAmount(slot, output, count)) {
+            ItemOutputCredit.commit(slot, output, base, operations);
+        }
+    }
+
+    public static boolean insertItemAmount(IInventorySlot slot, ItemStack toOutput, long count) {
         if (count <= 0L || toOutput.isEmpty()) {
-            return;
+            return false;
         }
         int batchSize = Math.max(1, toOutput.getMaxStackSize());
         long remaining = count;
@@ -41,10 +50,11 @@ public final class MachineOutputDelivery {
                 Action.EXECUTE, AutomationType.INTERNAL);
             long inserted = batchCount - (long) remainder.getCount();
             if (inserted <= 0L) {
-                return;
+                return remaining < count;
             }
             remaining -= inserted;
         }
+        return true;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -77,9 +87,9 @@ public final class MachineOutputDelivery {
         ItemStack maxOutput = toOutput.copyWithCount(toOutput.getMaxStackSize());
         ItemStack remainder = slot.insertItem(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
         long availableRoom = maxOutput.getCount() - remainder.getCount();
-        int operations = MachineWorkContext.maxOutputOperations(toOutput.getCount(), availableRoom);
+        int operations = ItemOutputCredit.maxOperations(slot, toOutput, availableRoom);
         if (operations > 0 && !allowFinalProduction(
-            toOutput, scaledAmount(toOutput.getCount(), operations))) {
+            toOutput, ItemOutputCredit.preview(slot, toOutput, toOutput.getCount(), operations))) {
             operations = 0;
         }
         tracker.updateOperations(operations);

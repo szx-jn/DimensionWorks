@@ -5,6 +5,7 @@ import dev.szx.dimensionworks.rpmlimit.quota.GearHeartOwnerResolver;
 import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
 import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
 import dev.szx.dimensionworks.mekstress.integration.mek.MachineOutputDelivery;
+import dev.szx.dimensionworks.mekstress.integration.mek.ItemOutputCredit;
 import dev.szx.dimensionworks.mekstress.integration.mek.ScaledOutputHandler;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
@@ -43,7 +44,7 @@ public abstract class OutputHelperMixin {
         UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
         long tick = context == null ? 0L : context.tick();
         long gateAmount = MachineWorkContext.scaling()
-            ? MachineWorkContext.scaleOutput(toOutput.getCount(), operations)
+            ? ItemOutputCredit.preview(slot, toOutput, toOutput.getCount(), operations)
             : (long) toOutput.getCount() * operations;
         if (!hasItemSpace(slot, toOutput, gateAmount)
             || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
@@ -53,12 +54,7 @@ public abstract class OutputHelperMixin {
         if (!MachineWorkContext.scaling()) {
             return;
         }
-        long count = MachineWorkContext.scaleOutput(toOutput.getCount(), operations);
-        if (count <= 0L) {
-            ci.cancel();
-            return;
-        }
-        dimensionworks$insertItems(slot, toOutput, count);
+        MachineOutputDelivery.insertItemScaled(slot, toOutput, toOutput.getCount(), operations);
         ci.cancel();
     }
 
@@ -147,7 +143,7 @@ public abstract class OutputHelperMixin {
         ItemStack maxOutput = toOutput.copyWithCount(toOutput.getMaxStackSize());
         ItemStack remainder = slot.insertItem(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
         long availableRoom = maxOutput.getCount() - remainder.getCount();
-        int operations = MachineWorkContext.maxOutputOperations(toOutput.getCount(), availableRoom);
+        int operations = ItemOutputCredit.maxOperations(slot, toOutput, availableRoom);
         tracker.updateOperations(operations);
         if (operations == 0) {
             if (availableRoom == 0L && slot.getLimit(slot.getStack()) - slot.getCount() > 0) {
@@ -257,24 +253,6 @@ public abstract class OutputHelperMixin {
         FluidStack request = new FluidStack(toOutput, (int) amount);
         FluidStack remainder = tank.insert(request, Action.SIMULATE, AutomationType.INTERNAL);
         return remainder.isEmpty();
-    }
-
-    private static void dimensionworks$insertItems(IInventorySlot slot, ItemStack toOutput, long count) {
-        if (count <= 0L) {
-            return;
-        }
-        int batchSize = Math.max(1, toOutput.getMaxStackSize());
-        long remaining = count;
-        while (remaining > 0L) {
-            int batchCount = (int) Math.min((long) batchSize, remaining);
-            ItemStack remainder = slot.insertItem(toOutput.copyWithCount(batchCount),
-                Action.EXECUTE, AutomationType.INTERNAL);
-            long inserted = batchCount - (long) remainder.getCount();
-            if (inserted <= 0L) {
-                return;
-            }
-            remaining -= inserted;
-        }
     }
 
     @Inject(
