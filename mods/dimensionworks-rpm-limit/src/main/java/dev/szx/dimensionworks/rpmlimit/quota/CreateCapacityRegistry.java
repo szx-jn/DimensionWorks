@@ -20,8 +20,15 @@ public final class CreateCapacityRegistry {
     private static final Map<KineticNetwork, Map<UUID, Double>> SAMPLES =
         Collections.synchronizedMap(new WeakHashMap<>());
 
+    /** Aggregates the cached per-network samples. Rebuilding this by walking SAMPLES on every
+     * capacity read makes G networks cost G squared map visits. */
+    private static final Map<UUID, Double> RAW_TOTALS = new HashMap<>();
+    private static final Map<KineticNetwork, Float> NATURAL_CAPACITIES =
+        Collections.synchronizedMap(new WeakHashMap<>());
+
     private static final java.util.Set<KineticNetwork> PENDING =
         java.util.Collections.newSetFromMap(new WeakHashMap<>());
+    private static boolean pendingAll;
 
     private CreateCapacityRegistry() {
     }
@@ -37,8 +44,14 @@ public final class CreateCapacityRegistry {
             return naturalCapacity;
         }
 
-        Map<UUID, Double> contributions = ownerCapacities(network, naturalCapacity);
-        registerOwners(network, contributions);
+        Map<UUID, Double> contributions = SAMPLES.get(network);
+        Float sampledNaturalCapacity = NATURAL_CAPACITIES.get(network);
+        if (contributions == null || sampledNaturalCapacity == null
+            || Float.compare(sampledNaturalCapacity, naturalCapacity) != 0) {
+            registerOwners(network, ownerCapacities(network, naturalCapacity));
+            NATURAL_CAPACITIES.put(network, naturalCapacity);
+            contributions = SAMPLES.get(network);
+        }
 
         Map<UUID, Double> raw = rawCapacities();
         double limit = RpmLimitConfig.GEAR_HEART_CREATE_CAPACITY_CURSED_SU.get();
@@ -96,22 +109,69 @@ public final class CreateCapacityRegistry {
     private static void registerOwners(KineticNetwork network, Map<UUID, Double> contributions) {
         if (network == null || contributions == null) return;
         Map<UUID, Double> next = Map.copyOf(contributions);
-        Map<UUID, Double> previous = next.isEmpty() ? SAMPLES.remove(network) : SAMPLES.put(network, next);
+        Map<UUID, Double> previous = SAMPLES.get(network);
+        if (previous != null) {
+            previous.forEach((owner, value) -> addToRaw(owner, -value));
+        }
+        if (next.isEmpty()) {
+            SAMPLES.remove(network);
+            NATURAL_CAPACITIES.remove(network);
+        } else {
+            SAMPLES.put(network, next);
+            next.forEach(CreateCapacityRegistry::addToRaw);
+        }
         if (java.util.Objects.equals(previous, next) || previous == null && next.isEmpty()) return;
         synchronized (SAMPLES) {
-            PENDING.addAll(SAMPLES.keySet());
+            pendingAll = true;
             PENDING.remove(network); // This caller is already calculating its current allocation.
         }
     }
 
+    /** Drop a network's cached owner sample after a source, topology, or RPM contribution changes. */
+    public static void invalidate(KineticNetwork network) {
+        if (network == null) return;
+        Map<UUID, Double> previous = SAMPLES.remove(network);
+        NATURAL_CAPACITIES.remove(network);
+        if (previous == null) return;
+        previous.forEach((owner, value) -> addToRaw(owner, -value));
+        pendingAll = true;
+    }
+
+    private static void addToRaw(UUID owner, double delta) {
+        double next = RAW_TOTALS.getOrDefault(owner, 0.0D) + delta;
+        if (!Double.isFinite(next) || next <= 0.0D) RAW_TOTALS.remove(owner);
+        else RAW_TOTALS.put(owner, next);
+    }
+
     public static void requestReallocation() {
-        synchronized (SAMPLES) { PENDING.addAll(SAMPLES.keySet()); }
+        pendingAll = true;
     }
 
     public static void clearRemoved() {
         synchronized (SAMPLES) {
-            boolean changed = SAMPLES.keySet().removeIf(network -> !shouldRetainNetwork(isActive(network)));
-            if (changed) PENDING.addAll(SAMPLES.keySet());
+            var iterator = SAMPLES.entrySet().iterator();
+            Map<UUID, Double> rebuiltTotals = new HashMap<>();
+            while (iterator.hasNext()) {
+                Map.Entry<KineticNetwork, Map<UUID, Double>> entry = iterator.next();
+                if (shouldRetainNetwork(isActive(entry.getKey()))) {
+                    entry.getValue().forEach((owner, value) ->
+                        rebuiltTotals.merge(owner, value, CreateCapacityRegistry::saturatedAdd));
+                    continue;
+                }
+                NATURAL_CAPACITIES.remove(entry.getKey());
+                iterator.remove();
+            }
+            // WeakHashMap may discard collected networks before this loop can see their values.
+            // Rebuild during the existing once-per-server-tick cleanup so the owner totals do
+            // not retain those samples indefinitely. Per-capacity reads remain constant-time
+            // with respect to the number of other networks.
+            if (materiallyDifferent(RAW_TOTALS, rebuiltTotals)) pendingAll = true;
+            RAW_TOTALS.clear();
+            RAW_TOTALS.putAll(rebuiltTotals);
+            if (pendingAll) {
+                PENDING.addAll(SAMPLES.keySet());
+                pendingAll = false;
+            }
         }
         java.util.List<KineticNetwork> pending = new java.util.ArrayList<>(PENDING);
         PENDING.clear();
@@ -127,6 +187,24 @@ public final class CreateCapacityRegistry {
         }
     }
 
+    static boolean materiallyDifferent(Map<UUID, Double> before, Map<UUID, Double> after) {
+        for (Map.Entry<UUID, Double> entry : before.entrySet()) {
+            if (different(entry.getValue(), after.getOrDefault(entry.getKey(), 0.0D))) return true;
+        }
+        for (Map.Entry<UUID, Double> entry : after.entrySet()) {
+            if (!before.containsKey(entry.getKey())
+                && different(0.0D, entry.getValue())) return true;
+        }
+        return false;
+    }
+
+    private static boolean different(double before, double after) {
+        if (!Double.isFinite(before) || !Double.isFinite(after)) return before != after;
+        double scale = Math.max(Math.abs(before), Math.abs(after));
+        double tolerance = Math.max(Math.ulp(scale) * 8.0D, scale * 1.0e-12D);
+        return Math.abs(before - after) > tolerance;
+    }
+
     static boolean shouldRetainNetwork(boolean active) {
         return active;
     }
@@ -136,14 +214,8 @@ public final class CreateCapacityRegistry {
             return 0.0D;
         }
 
-        double total = 0.0D;
-        for (Map.Entry<UUID, Double> entry : capacities.entrySet()) {
-            Double value = entry.getValue();
-            if (bucketOwner.equals(entry.getKey()) && value != null
-                && Double.isFinite(value) && value > 0.0D) {
-                total += value;
-            }
-        }
+        Double sample = capacities.get(bucketOwner);
+        double total = sample != null && Double.isFinite(sample) && sample > 0.0D ? sample : 0.0D;
         if (!Double.isFinite(total) || total <= 0.0D) {
             return 0.0D;
         }
@@ -152,14 +224,8 @@ public final class CreateCapacityRegistry {
 
     private static float scaledCurrent(Map<UUID, Double> raw,
                                        UUID owner, float naturalCapacity, double bucketTarget) {
-        double rawTotal = 0.0D;
-        for (Map.Entry<UUID, Double> entry : raw.entrySet()) {
-            Double value = entry.getValue();
-            if (owner.equals(entry.getKey()) && value != null
-                && Double.isFinite(value) && value > 0.0D) {
-                rawTotal += value;
-            }
-        }
+        Double sample = raw.get(owner);
+        double rawTotal = sample != null && Double.isFinite(sample) && sample > 0.0D ? sample : 0.0D;
         if (rawTotal <= 0.0D || rawTotal > Double.MAX_VALUE) {
             return naturalCapacity;
         }
@@ -174,14 +240,9 @@ public final class CreateCapacityRegistry {
     }
 
     private static Map<UUID, Double> rawCapacities() {
-        Map<UUID, Double> result = new HashMap<>();
-        synchronized (SAMPLES) {
-            for (Map<UUID, Double> contributions : SAMPLES.values()) {
-                contributions.forEach((owner, capacity) ->
-                    result.merge(owner, capacity, CreateCapacityRegistry::saturatedAdd));
-            }
-        }
-        return result;
+        // All callers run on the server thread. The map is mutated only while applying one
+        // network's result, after its previous references have been read.
+        return RAW_TOTALS;
     }
 
     private static Map<UUID, Double> ownerCapacities(KineticNetwork network, float naturalCapacity) {

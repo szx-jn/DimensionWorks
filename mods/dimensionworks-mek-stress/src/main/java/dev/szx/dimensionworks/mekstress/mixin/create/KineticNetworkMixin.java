@@ -3,6 +3,7 @@ package dev.szx.dimensionworks.mekstress.mixin.create;
 import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.memory.IVirtualKineticMember;
+import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import java.util.Iterator;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = KineticNetwork.class, remap = false)
@@ -19,6 +21,22 @@ public abstract class KineticNetworkMixin {
 
     @Shadow
     private float unloadedStress;
+
+    @Inject(method = {"updateNetwork", "updateStress", "updateCapacity"}, at = @At("RETURN"), remap = false)
+    private void dimensionworks$invalidateMemoryAllocations(CallbackInfo ci) {
+        MemoryGridService.invalidateForKineticMutation((KineticNetwork) (Object) this);
+    }
+
+    @Inject(method = {"updateStressFor", "updateCapacityFor"}, at = @At("RETURN"), remap = false)
+    private void dimensionworks$invalidateMemoryInputs(KineticBlockEntity member, float contribution,
+                                                        CallbackInfo ci) {
+        MemoryGridService.invalidateForKineticMutation((KineticNetwork) (Object) this);
+    }
+
+    @Inject(method = {"add", "remove"}, at = @At("RETURN"), remap = false)
+    private void dimensionworks$invalidateMemoryTopology(KineticBlockEntity member, CallbackInfo ci) {
+        MemoryGridService.invalidateForKineticMember(member);
+    }
 
     @Inject(method = "calculateStress", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$calculateVirtualMachineStress(CallbackInfoReturnable<Float> cir) {

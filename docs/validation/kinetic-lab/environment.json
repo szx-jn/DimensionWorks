@@ -1,0 +1,23 @@
+{
+  "repository_commit": "a9b077c17a13cf826d67f3aa85f9a989e73d4355",
+  "java": "openjdk version \"17.0.21\" 2026-10-20\nOpenJDK Runtime Environment Temurin-17.0.21+9 (build 17.0.21+9)\nOpenJDK 64-Bit Server VM Temurin-17.0.21+9 (build 17.0.21+9, mixed mode, sharing)",
+  "cpu_quota": "200000 100000",
+  "memory_limit": "8589934592",
+  "tests": {
+    "dimensionworks-rpm-limit": {
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dimensionworks-mek-stress": {
+      "tests": 85,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "create_artifacts": {
+    "create-1.20.1-6.0.8-291-slim.jar": "ba2af6811a8591ac73050b34d6d8e2d11598bab6e4ee90b3eb163f4351dca304"
+  }
+}

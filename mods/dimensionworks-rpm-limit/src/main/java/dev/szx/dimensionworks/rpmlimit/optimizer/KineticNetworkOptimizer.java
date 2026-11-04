@@ -51,13 +51,15 @@ public final class KineticNetworkOptimizer {
         cache.stressValid = false;
         cache.stressContributions.clear();
         cache.stressDeltaUpdates = 0;
+        cache.stressRebuildFailed = false;
     }
 
     public static void recordStressContribution(KineticNetwork network,
                                                 KineticBlockEntity member,
                                                 float contribution) {
         if (!Float.isFinite(contribution)) {
-            invalidateStress(network);
+            NetworkCache cache = cacheFor(network);
+            cache.stressRebuildFailed = true;
             return;
         }
         NetworkCache cache = cacheFor(network);
@@ -66,7 +68,7 @@ public final class KineticNetworkOptimizer {
 
     public static void finishStressRebuild(KineticNetwork network, float totalStress) {
         NetworkCache cache = cacheFor(network);
-        if (!Float.isFinite(totalStress)) {
+        if (!Float.isFinite(totalStress) || cache.stressRebuildFailed) {
             cache.stressValid = false;
             cache.stressContributions.clear();
             return;
@@ -108,7 +110,10 @@ public final class KineticNetworkOptimizer {
         cache.capacityTotal = totalCapacity;
         cache.capacityValid = true;
         cache.capacityDeltaUpdates = 0;
-        if (sourceSetChanged) NetworkRpmLimit.invalidate(network);
+        if (sourceSetChanged) {
+            NetworkRpmLimit.invalidate(network);
+            dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.invalidate(network);
+        }
     }
 
     /**
@@ -159,6 +164,7 @@ public final class KineticNetworkOptimizer {
      */
     public static boolean updateCapacityContribution(KineticNetwork network, KineticBlockEntity source) {
         KineticPersistence.invalidate(network);
+        dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.invalidate(network);
         NetworkCache cache = existingCache(network);
         if (cache == null || !cache.capacityValid
             || !cache.capacityContributions.containsKey(source)) {
@@ -367,12 +373,13 @@ public final class KineticNetworkOptimizer {
         }
         KineticPersistence.invalidate(network);
         NetworkRpmLimit.invalidate(network);
-        PENDING_LOAD_REFRESHES.put(network, false);
         NetworkCache cache = cacheFor(network);
         cache.stressValid = false;
         cache.capacityValid = false;
-        cache.stressContributions.clear();
-        cache.capacityContributions.clear();
+        // Keep the old contribution tables until a rebuild replaces them. WeakHashMap.clear()
+        // walks its full bucket table, making repeated invalidations scale with the largest
+        // network ever cached. A valid flag is sufficient to reject the stale values.
+        dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.invalidate(network);
         if (isBatching()) {
             queueNetwork(network);
         }
@@ -431,13 +438,12 @@ public final class KineticNetworkOptimizer {
     private static void invalidateStress(KineticNetwork network) {
         NetworkCache cache = cacheFor(network);
         cache.stressValid = false;
-        cache.stressContributions.clear();
     }
 
     private static void invalidateCapacity(KineticNetwork network) {
         NetworkCache cache = cacheFor(network);
         cache.capacityValid = false;
-        cache.capacityContributions.clear();
+        dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.invalidate(network);
     }
 
     private static NetworkCache existingCache(KineticNetwork network) {
@@ -461,6 +467,7 @@ public final class KineticNetworkOptimizer {
         private float capacityTotal;
         private int stressDeltaUpdates;
         private int capacityDeltaUpdates;
+        private boolean stressRebuildFailed;
     }
 
     private static final class Batch {

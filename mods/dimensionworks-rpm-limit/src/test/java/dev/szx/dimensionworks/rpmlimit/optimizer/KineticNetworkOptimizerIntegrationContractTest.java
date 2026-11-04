@@ -69,7 +69,8 @@ class KineticNetworkOptimizerIntegrationContractTest {
 
         assertTrue(virtualMixin.contains("KineticNetworkOptimizer.onMemberPruned("));
         assertTrue(mixin.contains("finishCapacityRebuild(self, naturalCapacity)"));
-        assertTrue(optimizer.contains("if (sourceSetChanged) NetworkRpmLimit.invalidate(network)"));
+        assertTrue(optimizer.contains("if (sourceSetChanged) {"));
+        assertTrue(optimizer.contains("NetworkRpmLimit.invalidate(network);"));
     }
 
     @Test

@@ -217,10 +217,17 @@ public final class RpmLimitManager {
     }
 
     public static void setOwner(KineticBlockEntity k, UUID u) {
+        UUID previousOwner = directOwner(k);
         k.getPersistentData().putUUID(OWNER_KEY, u);
         setMachineLimit(k, getEffectiveLimit(u));
         k.setChanged();
         k.sendData();
+        if (!java.util.Objects.equals(previousOwner, u) && k.getLevel() != null
+            && !k.getLevel().isClientSide && k.hasNetwork()) {
+            var network = k.getOrCreateNetwork();
+            dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.invalidate(network);
+            network.updateCapacity();
+        }
     }
 
     public static void onMachineLoaded(KineticBlockEntity k) {

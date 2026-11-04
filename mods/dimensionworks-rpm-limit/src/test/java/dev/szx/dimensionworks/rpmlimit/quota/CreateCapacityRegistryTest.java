@@ -63,6 +63,16 @@ class CreateCapacityRegistryTest {
     }
 
     @Test
+    void aggregateReconciliationIgnoresOnlyFloatingPointNoise() {
+        assertFalse(CreateCapacityRegistry.materiallyDifferent(
+            Map.of(ownerA, 1000.0D), Map.of(ownerA, 1000.0D + 1.0e-10D)));
+        assertTrue(CreateCapacityRegistry.materiallyDifferent(
+            Map.of(ownerA, 1000.0D), Map.of(ownerA, 999.0D)));
+        assertTrue(CreateCapacityRegistry.materiallyDifferent(
+            Map.of(ownerA, 1000.0D), Map.of(ownerB, 1000.0D)));
+    }
+
+    @Test
     void mixedOwnerNetworksAggregateSourcesByOwner() throws Exception {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/quota/CreateCapacityRegistry.java"));

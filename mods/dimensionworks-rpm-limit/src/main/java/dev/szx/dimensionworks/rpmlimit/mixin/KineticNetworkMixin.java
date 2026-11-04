@@ -26,7 +26,11 @@ public abstract class KineticNetworkMixin {
         Float cached = KineticNetworkOptimizer.cachedCapacity(self);
         if (cached != null) {
             cir.setReturnValue(CreateCapacityRegistry.limitNaturalCapacity(self, cached));
+            return;
         }
+        // An uncached Create scan is the conservative boundary for source-map changes made
+        // directly by another mod. Its owner sample is rebuilt once from the completed result.
+        CreateCapacityRegistry.invalidate(self);
     }
 
     @Inject(method = "calculateCapacity", at = @At("RETURN"), cancellable = true, remap = false)

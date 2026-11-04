@@ -34,6 +34,8 @@ dependencies {
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
     implementation fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
 
 mixin {
@@ -42,6 +44,7 @@ mixin {
 }
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.named('test') { useJUnitPlatform() }
 jar {
     manifest.attributes(['MixinConfigs': 'dimensionworks_stress_gauge_alarm.mixins.json'])
     finalizedBy 'reobfJar'

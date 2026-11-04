@@ -4,6 +4,8 @@ import appeng.api.networking.GridServices;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import com.loliball.appliedcreate.energy.MEGearboxBlockEntity;
+import com.simibubi.create.content.kinetics.KineticNetwork;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.api.IMEGearboxExportState;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
@@ -14,29 +16,47 @@ import dev.szx.dimensionworks.mekstress.core.InputStressMath;
 import dev.szx.dimensionworks.mekstress.core.LiveStressBudget;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.lang.ref.WeakReference;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 /** Live allocations for one AE grid. No StressKey inventory and no SU/t debit. */
 public final class MemoryGridService implements IMemoryGridService {
+    private static final Map<KineticNetwork, Set<WeakReference<MemoryGridService>>> NETWORK_SERVICES =
+        new java.util.WeakHashMap<>();
     private final IGrid grid;
     private final Set<IGridNode> participants = new LinkedHashSet<>();
+    private final Set<KineticNetwork> kineticNetworks =
+        Collections.newSetFromMap(new IdentityHashMap<>());
+    private final WeakReference<MemoryGridService> serviceReference = new WeakReference<>(this);
     private boolean initialized;
     private boolean refreshing;
+    private final MemorySnapshotGate snapshotGate = new MemorySnapshotGate();
+    private long snapshotTick = Long.MIN_VALUE;
     private MemoryNetworkSnapshot lastSnapshot = MemoryNetworkSnapshot.empty(MemoryNetworkStatus.NO_DRIVE);
 
-    public MemoryGridService(IGrid grid) { this.grid = grid; }
+    public MemoryGridService(IGrid grid) {
+        this.grid = grid;
+    }
 
     public static void register() { GridServices.register(IMemoryGridService.class, MemoryGridService.class); }
 
-    @Override public void addNode(IGridNode node, CompoundTag savedData) { track(node); }
+    @Override public void addNode(IGridNode node, CompoundTag savedData) {
+        track(node);
+        snapshotGate.invalidate();
+    }
 
     @Override public void removeNode(IGridNode node) {
         participants.remove(node);
+        snapshotGate.invalidate();
         boolean previous = refreshing;
         refreshing = true;
         try {
@@ -47,8 +67,58 @@ public final class MemoryGridService implements IMemoryGridService {
         }
     }
 
-    @Override public void onServerStartTick() { snapshot(0); }
-    @Override public void onServerEndTick() { snapshot(0); }
+    @Override public void onServerStartTick() {
+        snapshotGate.invalidate();
+        snapshot(currentGameTick());
+    }
+
+    @Override public void onServerEndTick() { snapshot(currentGameTick()); }
+
+    /** Kinetic account changes can alter input stress without changing an AE node. */
+    public static void invalidateForKineticMutation(KineticNetwork network) {
+        if (network == null) return;
+        synchronized (NETWORK_SERVICES) {
+            Set<WeakReference<MemoryGridService>> services = NETWORK_SERVICES.get(network);
+            if (services == null) return;
+            services.removeIf(reference -> {
+                MemoryGridService service = reference.get();
+                if (service == null) return true;
+                service.snapshotGate.invalidate();
+                return false;
+            });
+            if (services.isEmpty()) NETWORK_SERVICES.remove(network);
+        }
+    }
+
+    /** Topology hooks cover a gearbox moving onto a network it was not subscribed to yet. */
+    public static void invalidateForKineticMember(KineticBlockEntity member) {
+        if (!(member instanceof MEGearboxBlockEntity gearbox)) return;
+        if (gearbox.getMainNode().getGrid() == null) return;
+        IMemoryGridService service = gearbox.getMainNode().getGrid().getService(IMemoryGridService.class);
+        if (service instanceof MemoryGridService memoryService) {
+            memoryService.snapshotGate.invalidate();
+        }
+    }
+
+    private void replaceKineticSubscriptions(Set<KineticNetwork> nextNetworks) {
+        synchronized (NETWORK_SERVICES) {
+            for (KineticNetwork previous : kineticNetworks) {
+                if (nextNetworks.contains(previous)) continue;
+                Set<WeakReference<MemoryGridService>> services = NETWORK_SERVICES.get(previous);
+                if (services != null) {
+                    services.remove(serviceReference);
+                    if (services.isEmpty()) NETWORK_SERVICES.remove(previous);
+                }
+            }
+            for (KineticNetwork next : nextNetworks) {
+                if (kineticNetworks.contains(next)) continue;
+                NETWORK_SERVICES.computeIfAbsent(next,
+                    ignored -> Collections.newSetFromMap(new IdentityHashMap<>())).add(serviceReference);
+            }
+            kineticNetworks.clear();
+            kineticNetworks.addAll(nextNetworks);
+        }
+    }
 
     private void track(IGridNode node) {
         if (node.getOwner() instanceof MEGearboxBlockEntity || node.getOwner() instanceof MemoryDriveBlockEntity)
@@ -57,7 +127,9 @@ public final class MemoryGridService implements IMemoryGridService {
 
     @Override public MemoryNetworkSnapshot snapshot(long gameTick) {
         if (refreshing) return lastSnapshot;
+        if (!snapshotGate.needsRefresh(gameTick)) return lastSnapshot;
         refreshing = true;
+        snapshotTick = gameTick;
         try {
             if (!initialized) {
                 for (IGridNode node : grid.getNodes()) track(node);
@@ -66,6 +138,7 @@ public final class MemoryGridService implements IMemoryGridService {
             var budget = new LiveStressBudget<GlobalPos>();
             List<MemoryDriveBlockEntity> drives = new ArrayList<>();
             List<Export> exports = new ArrayList<>();
+            Set<KineticNetwork> observedNetworks = Collections.newSetFromMap(new IdentityHashMap<>());
             long bandwidth = 0;
             long requestedRpm = 0;
             long reduction = 0;
@@ -78,6 +151,7 @@ public final class MemoryGridService implements IMemoryGridService {
                     reduction = add(reduction, drive.inputReductionBasisPoints());
                 } else if (owner instanceof MEGearboxBlockEntity gearbox) {
                     if (gearbox.getLevel() == null || gearbox.isRemoved()) continue;
+                    if (gearbox.hasNetwork()) observedNetworks.add(gearbox.getOrCreateNetwork());
                     GlobalPos key = GlobalPos.of(gearbox.getLevel().dimension(), gearbox.getBlockPos());
                     if (gearbox.getMode() == MEGearboxBlockEntity.Mode.EXPORT) {
                         int rpm = node.isActive() ? MachinePowerManager.effectiveGearboxRpm(gearbox) : 0;
@@ -103,7 +177,12 @@ public final class MemoryGridService implements IMemoryGridService {
                     running, output.rpm, output.reserved, status != MemoryNetworkStatus.OK);
             }
             for (MemoryDriveBlockEntity drive : drives) drive.applyNetworkSnapshot(lastSnapshot);
+            replaceKineticSubscriptions(observedNetworks);
+            snapshotGate.published(gameTick);
             return lastSnapshot;
+        } catch (RuntimeException exception) {
+            snapshotGate.invalidate();
+            throw exception;
         } finally { refreshing = false; }
     }
 
@@ -119,7 +198,20 @@ public final class MemoryGridService implements IMemoryGridService {
     }
 
     @Override public double finalQ(long gameTick) { return snapshot(gameTick).finalQ(); }
-    @Override public void invalidateSnapshot() { if (!refreshing) snapshot(0); }
+    @Override public void invalidateSnapshot() {
+        snapshotGate.invalidate();
+        if (!refreshing) snapshot(snapshotTick == Long.MIN_VALUE ? currentGameTick() : snapshotTick);
+    }
+
+    private long currentGameTick() {
+        for (IGridNode node : participants) {
+            Object owner = node.getOwner();
+            Level level = owner instanceof MemoryDriveBlockEntity drive ? drive.getLevel()
+                : owner instanceof MEGearboxBlockEntity gearbox ? gearbox.getLevel() : null;
+            if (level != null) return level.getGameTime();
+        }
+        return snapshotTick == Long.MIN_VALUE ? 0 : snapshotTick;
+    }
 
     private static long add(long a, long b) { return a > Long.MAX_VALUE - b ? Long.MAX_VALUE : a + b; }
     private record Export(MEGearboxBlockEntity gearbox, int rpm, long reserved) {}

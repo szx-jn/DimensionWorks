@@ -1,0 +1,31 @@
+{
+  "server_thread_samples": 2630,
+  "first_create_or_dimensionworks_frame": {
+    "dev.szx.dimensionworks.rpmlimit.RpmLimitManager.directOwner": 133,
+    "com.simibubi.create.content.kinetics.base.KineticBlockEntity.updateFromNetwork": 85,
+    "dev.szx.dimensionworks.mekstress.memory.MemoryGridService.snapshot": 16,
+    "dev.szx.dimensionworks.rpmlimit.optimizer.NetworkRpmLimit.limit": 15,
+    "com.simibubi.create.content.kinetics.TorquePropagator.getOrCreateNetworkFor": 6,
+    "dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp": 6,
+    "dev.szx.dimensionworks.mekstress.integration.mekgenerators.GeneratorPowerBridge.stressPerRpm": 5,
+    "com.simibubi.create.content.kinetics.base.KineticBlockEntity.handler$zcn000$dimensionworks$syncNetworkLimit": 5,
+    "dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.invalidate": 5,
+    "dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.ownerCapacities": 3,
+    "dev.szx.dimensionworks.mekstress.reactor.ReactorPowerBridge.outputFor": 3,
+    "com.simibubi.create.content.kinetics.KineticNetwork.getActualStressOf": 2,
+    "com.simibubi.create.foundation.blockEntity.SmartBlockEntity.forEachBehaviour": 2,
+    "com.simibubi.create.content.kinetics.base.KineticBlockEntity.onSpeedChanged": 2,
+    "dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.cacheFor": 1,
+    "dev.szx.dimensionworks.mekstress.KineticLabGameTests.sample": 1,
+    "com.simibubi.create.content.kinetics.KineticNetwork.sync": 1,
+    "com.simibubi.create.content.kinetics.KineticNetwork.handler$zzh000$dimensionworks$calculateVirtualMachineStress": 1,
+    "dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.recordStressContribution": 1,
+    "dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.beginStressRebuild": 1,
+    "com.simibubi.create.foundation.block.IBE.onRemove": 1,
+    "com.simibubi.create.content.kinetics.KineticNetwork.getActualCapacityOf": 1,
+    "dev.szx.dimensionworks.rpmlimit.quota.CreateCapacityRegistry.isActiveMember": 1,
+    "com.simibubi.create.content.kinetics.base.KineticBlockEntity.setNetwork": 1,
+    "dev.szx.dimensionworks.rpmlimit.RpmForgeEvents.serverTick": 1
+  },
+  "note": "Whole recording includes setup, chunk generation, artificial benchmarks and stable ticks; counts are not production CPU percentages."
+}

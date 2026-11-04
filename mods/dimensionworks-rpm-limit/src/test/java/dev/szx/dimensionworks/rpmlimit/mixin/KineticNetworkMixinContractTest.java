@@ -44,7 +44,8 @@ class KineticNetworkMixinContractTest {
             "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
 
         assertTrue(source.contains("finishCapacityRebuild(self, naturalCapacity)"));
-        assertTrue(optimizer.contains("if (sourceSetChanged) NetworkRpmLimit.invalidate(network)"));
+        assertTrue(optimizer.contains("if (sourceSetChanged) {"));
+        assertTrue(optimizer.contains("NetworkRpmLimit.invalidate(network);"));
     }
 
     private static int occurrences(String source, String needle) {

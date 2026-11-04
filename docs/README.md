@@ -35,3 +35,9 @@
 - [`superpowers/specs/2026-10-13-gear-heart-industrial-quotas-design.md`](superpowers/specs/2026-10-13-gear-heart-industrial-quotas-design.md)：齿轮之心七阶段工业瓶颈、修复祝福与跨模组额度边界
 
 专题规格位于 [`superpowers/specs/`](superpowers/specs/)，实施计划位于 [`superpowers/plans/`](superpowers/plans/)。
+
+## 应力网络性能分析
+
+- [总体性能方案](design/kinetic-network-performance-plan.md)
+- [给 6luna 的实施交接](design/kinetic-network-implementation-handoff.md)
+- [真实服务器基准与证据](validation/kinetic-lab/report.md)

@@ -139,7 +139,7 @@ Mekanism: Generators 发电机的原生能量输出面（包括太阳能底面�
 
 ## 性能与配置
 
-AE 服务只跟踪驱动器和齿轮箱参与节点，每次实时读取只检查这些已加载对象，复杂度 O(参与端口数)；不再反复扫描输出端全部下游机器。状态变化时才刷新 Create 来源及缓存，重入保护防止传播递归。新增内容不创建实体，不强加载区块，不逐 tick 写入应力库存。
+AE 服务只跟踪驱动器和齿轮箱参与节点，不再反复扫描输出端下游机器。一个服务器 tick 内的重复 snapshot 读取复用同一结果；服务在 tick 开始建立本 tick 快照，已知输入变更会使其失效，tick 结束只在失效时刷新。Create 网络回调只通知订阅该网络的 AE 服务；网络合并/拆分时齿轮箱成员钩子补登记对应服务，避免每次动力网络更新遍历所有 AE 网格。重入保护防止传播递归，输出状态仅在变化时写回 Create。新增内容不创建实体、不强加载区块，也不逐 tick 写入应力库存。
 
 配置在 config/ 与 defaultconfigs/ 的 dimensionworks_mek_stress-common.toml。更新已有实例时需要同步基础 RPM、卡 RPM 与 maximumInputLossBasisPoints；旧容量及 storageExponent、efficiencyExponent 配置已停用。客户端、服务端需要同时更新此版本的菜单协议。
 
