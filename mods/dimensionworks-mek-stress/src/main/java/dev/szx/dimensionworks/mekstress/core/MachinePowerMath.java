@@ -41,6 +41,19 @@ public final class MachinePowerMath {
         return Math.max(1.0D, (double) actualRpm / (double) targetRpm);
     }
 
+    /** Linear overdrive between the tier target and the global 10240 RPM design point. */
+    public static double tierProductionMultiplier(float rpm, int targetRpm, double maxMultiplier) {
+        if (!Float.isFinite(rpm) || rpm <= 0 || targetRpm <= 0 || !Double.isFinite(maxMultiplier)) return 0.0D;
+        double max = Math.max(1.0D, Math.min(2.0D, maxMultiplier));
+        if (targetRpm >= 10240 || rpm <= targetRpm) return 1.0D;
+        double progress = Math.min(1.0D, (rpm - targetRpm) / (10240.0D - targetRpm));
+        return 1.0D + (max - 1.0D) * progress;
+    }
+
+    public static double tierThroughputMultiplier(float rpm, int targetRpm, double maxMultiplier) {
+        return workRate(rpm, targetRpm) * tierProductionMultiplier(rpm, targetRpm, maxMultiplier);
+    }
+
     /** End-to-end throughput after combining tick frequency and per-operation output. */
     public static double throughputMultiplier(float actualRpm, int targetRpm) {
         if (actualRpm <= 0 || targetRpm <= 0) {

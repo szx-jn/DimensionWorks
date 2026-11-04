@@ -33,6 +33,12 @@ advancedRpm = 2048
 eliteRpm = 4096
 ultimateRpm = 8192
 
+[mekanism_machine_max_output]
+basicMultiplier = 1.25
+advancedMultiplier = 1.5
+eliteMultiplier = 1.75
+ultimateMultiplier = 2.0
+
 [tuning]
 # Input loss is bounded at 99%; raw network capacity always equals live gearbox input.
 maximumInputLossBasisPoints = 9900
