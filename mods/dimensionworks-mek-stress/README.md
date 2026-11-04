@@ -2,6 +2,10 @@
 
 Minecraft 1.20.1 / Forge / Java 17。通过自研 Mixin 接入 Create、AE2、Applied Create 与 Mekanism，不修改第三方模组源码。
 
+## 0.3.21：修复小数能耗误报
+
+机械供能的配方计算修正 Mekanism 对小数能量整除的低估：预算刚好足够时，安装升级后仍可正常加工；预算不足与动力过载仍会阻止加工。
+
 ## 0.3.20：统一 FE/t 与机械应力
 
 - 统一 `1 FE/t = 2 SU`。Mekanism 的 J 先经过当前 J/FE 配置换算；不再把最大传输上限当作实时发电量。

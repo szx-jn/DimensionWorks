@@ -21,6 +21,10 @@ public final class MachineWorkContext {
         return state != null && state.multiplier() > 1.0D;
     }
 
+    public static boolean active() {
+        return CURRENT.get() != null;
+    }
+
     public static long scaleOutput(long baseAmount, int operations) {
         State state = CURRENT.get();
         double multiplier = state == null ? 1.0D : state.multiplier();
