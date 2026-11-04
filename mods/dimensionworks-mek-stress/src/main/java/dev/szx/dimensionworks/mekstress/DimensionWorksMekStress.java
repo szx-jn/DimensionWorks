@@ -103,6 +103,7 @@ public final class DimensionWorksMekStress {
 
     public DimensionWorksMekStress() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        dev.szx.dimensionworks.mekstress.integration.gas.GasFluid.register(modBus);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);

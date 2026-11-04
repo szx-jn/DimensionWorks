@@ -94,5 +94,6 @@
   "goggles.dimensionworks_mek_stress.output": "ME stress output",
   "goggles.dimensionworks_mek_stress.coefficient": "Configured stress coefficient: %s SU/RPM",
   "goggles.dimensionworks_mek_stress.live_output": "Output: %s RPM, allocated %s SU",
-  "goggles.dimensionworks_mek_stress.stopped": "Network unavailable or overloaded; mechanical output stopped"
+  "goggles.dimensionworks_mek_stress.stopped": "Network unavailable or overloaded; mechanical output stopped",
+  "fluid_type.dimensionworks_mek_stress.transport_gas": "Transport Gas"
 }

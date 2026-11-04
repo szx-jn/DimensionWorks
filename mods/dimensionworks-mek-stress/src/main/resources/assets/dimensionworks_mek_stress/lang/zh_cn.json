@@ -94,5 +94,6 @@
   "goggles.dimensionworks_mek_stress.output": "ME 应力输出",
   "goggles.dimensionworks_mek_stress.coefficient": "设定应力系数：%s SU/RPM",
   "goggles.dimensionworks_mek_stress.live_output": "本端输出：%s RPM，占额 %s SU",
-  "goggles.dimensionworks_mek_stress.stopped": "网络不可用或过载，机械输出停止"
+  "goggles.dimensionworks_mek_stress.stopped": "网络不可用或过载，机械输出停止",
+  "fluid_type.dimensionworks_mek_stress.transport_gas": "管道气体"
 }
