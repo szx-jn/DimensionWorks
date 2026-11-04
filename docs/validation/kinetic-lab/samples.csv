@@ -1,4 +1,4 @@
-run,scenario,n,s,u,rep,wall_ns,cpu_ns,sync,member_updates,actual_stress,actual_capacity,stress_rebuilds,me_snapshots,me_participants,quota_samples,quota_sources
+run,scenario,n,s,u,rep,wall_ns,cpu_ns,sync,member_updates,actual_stress,actual_capacity,stress_rebuilds,me_reentrant_reads,me_participants,quota_samples,quota_sources
 mek-lab-run5,unchanged,128,1,100,-1,458868,485469,0,0,100,0,0,0,0,0,0
 mek-lab-run5,sequential_changes,128,1,100,-1,19297465,18883668,100,12800,100,0,0,0,0,0,0
 mek-lab-run5,batched_changes,128,1,100,-1,713204,731363,1,128,100,1,0,0,0,1,1

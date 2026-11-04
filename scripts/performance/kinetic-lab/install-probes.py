@@ -28,7 +28,7 @@ instrument_if_present(p,'Map.Entry<KineticNetwork, Map<UUID, Double>> entry = it
 instrument_if_present(p,'for (Map.Entry<UUID, Double> entry : contributions.entrySet()) {','quotaOwners')
 instrument(p,'for (KineticBlockEntity source : network.sources.keySet()) {','quotaSources')
 p=mek/'src/main/java/dev/szx/dimensionworks/mekstress/memory/MemoryGridService.java'
-instrument(p,'if (refreshing) return lastSnapshot;','snapshots')
+instrument(p,'if (refreshing) return lastSnapshot;','snapshotReentries')
 instrument(p,'for (IGridNode node : List.copyOf(participants)) {','participants')
 if (src/'KineticLabGameTests.java').exists():
  dst=mek/'src/gameTest/java/dev/szx/dimensionworks/mekstress/KineticLabGameTests.java'; shutil.copy2(src/'KineticLabGameTests.java',dst)

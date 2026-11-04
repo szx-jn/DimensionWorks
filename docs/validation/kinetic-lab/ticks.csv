@@ -1,4 +1,4 @@
-run,n,remaining,wall_ns,cpu_ns,sync,member_updates,actual_stress,actual_capacity,stress_rebuilds,me_snapshots,me_participants,quota_samples,quota_sources
+run,n,remaining,wall_ns,cpu_ns,sync,member_updates,actual_stress,actual_capacity,stress_rebuilds,me_reentrant_reads,me_participants,quota_samples,quota_sources
 mek-lab-run5,128,100,22231454,18558276,0,0,0,0,0,0,0,0,0
 mek-lab-run5,128,99,23187627,18895324,0,0,0,0,0,0,0,0,0
 mek-lab-run5,128,98,56522442,21329401,0,0,0,0,0,0,0,0,0

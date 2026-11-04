@@ -1,0 +1,77 @@
+{
+  "performance_source_commit": "917f371954b8afe40450fcd74abc1ac55ee9b6c5",
+  "final_source_and_test_commit": "2f66d8c61f6deb5afecdb2bce313163e2d0fb522",
+  "performance_base_commit": "a9b077c17a13cf826d67f3aa85f9a989e73d4355",
+  "final_test_base_commit": "f42ab14276b5a3484f9a430365f8dff5171d33dc",
+  "tested_at_utc": "2026-11-04",
+  "toolchain": {
+    "java": "Temurin 17.0.21",
+    "gradle": "8.8"
+  },
+  "runtime": {
+    "minecraft": "1.20.1",
+    "forge": "47.4.16",
+    "create": "6.0.8-291 slim",
+    "rpm_limit": "0.4.17",
+    "mek_stress": "0.3.20",
+    "mekanism": "10.4.16.80",
+    "ae2": "15.4.10",
+    "applied_create": "1.1.5"
+  },
+  "create_artifacts": {
+    "create-1.20.1-6.0.8-291-slim.jar": "ba2af6811a8591ac73050b34d6d8e2d11598bab6e4ee90b3eb163f4351dca304"
+  },
+  "benchmark_environment": {
+    "cpu_quota": "200000 100000",
+    "memory_limit_bytes": 8589934592,
+    "run_count": 2,
+    "fresh_world_per_run": true,
+    "formal_samples_per_scenario": 10,
+    "gametest_per_run": {
+      "passed": 1,
+      "failed": 0
+    },
+    "ae2_channels": "infinite for isolated 128-port fixture"
+  },
+  "final_head_unit_tests": {
+    "dimensionworks-rpm-limit": {
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dimensionworks-mek-stress": {
+      "tests": 89,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dimensionworks-stress-gauge-alarm": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "total": {
+      "tests": 166,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "final_head_gametests": {
+    "dimensionworks-rpm-limit": {
+      "passed": 21,
+      "failed": 0
+    },
+    "dimensionworks-mek-stress": {
+      "passed": 4,
+      "failed": 0
+    },
+    "dimensionworks-stress-gauge-alarm": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "benchmark_scope_note": "The two performance runs measured the optimization patch before replaying origin/main. The optimized kinetic source files are byte-identical in performance_source_commit and final_source_and_test_commit; final source was separately compiled and GameTested on the latest main base. This is an isolated Forge harness, not the complete modpack or player save."
+}

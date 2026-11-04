@@ -2,7 +2,7 @@
 import csv,json,statistics,sys
 from pathlib import Path
 out=Path(sys.argv[1]);out.mkdir(parents=True,exist_ok=True)
-cols='run scenario n s u rep wall_ns cpu_ns sync member_updates actual_stress actual_capacity stress_rebuilds me_snapshots me_participants quota_samples quota_owners quota_cleanup_samples quota_sources'.split()
+cols='run scenario n s u rep wall_ns cpu_ns sync member_updates actual_stress actual_capacity stress_rebuilds me_reentrant_reads me_participants quota_samples quota_owners quota_cleanup_samples quota_sources'.split()
 rows=[];ticks=[];status={}
 for arg in sys.argv[2:]:
  p=Path(arg);text=p.read_text(errors='replace'); status[p.stem]={'build_success': 'BUILD SUCCESSFUL' in text,'gametest_complete':'GAME TESTS COMPLETE' in text,'required_failure':'required tests failed' in text}

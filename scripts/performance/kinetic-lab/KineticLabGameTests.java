@@ -136,7 +136,7 @@ public class KineticLabGameTests {
  public static void benchmarks(GameTestHelper helper) {
   h=helper;
   dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.DEFAULT_RPM.set(10240);
-  System.out.println("KINETIC_LAB,scenario,n,s,u,rep,wall_ns,cpu_ns,sync,member_updates,actual_stress,actual_capacity,stress_rebuilds,me_snapshots,me_participants,quota_samples,quota_owners,quota_cleanup_samples,quota_sources");
+  System.out.println("KINETIC_LAB,scenario,n,s,u,rep,wall_ns,cpu_ns,sync,member_updates,actual_stress,actual_capacity,stress_rebuilds,me_reentrant_reads,me_participants,quota_samples,quota_owners,quota_cleanup_samples,quota_sources");
   h.runAfterDelay(20,()->{accountSuite();physicalSuite(0);});
  }
 }

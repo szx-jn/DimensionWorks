@@ -1,0 +1,1512 @@
+{
+  "runs": {
+    "mek-lab-optimized-run1": {
+      "build_success": true,
+      "gametest_complete": true,
+      "required_failure": false
+    },
+    "mek-lab-optimized-run2": {
+      "build_success": true,
+      "gametest_complete": true,
+      "required_failure": false
+    }
+  },
+  "summary": [
+    {
+      "scenario": "batched_changes",
+      "n": 128,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 383962,
+      "max_wall_ns": 834065,
+      "median_cpu_ns": 404319,
+      "max_cpu_ns": 868817,
+      "sync": [
+        1
+      ],
+      "member_updates": [
+        128
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "batched_changes",
+      "n": 1024,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 811662,
+      "max_wall_ns": 1345522,
+      "median_cpu_ns": 830055,
+      "max_cpu_ns": 1145409,
+      "sync": [
+        1
+      ],
+      "member_updates": [
+        1024
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "batched_changes",
+      "n": 4096,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 2893484,
+      "max_wall_ns": 3531921,
+      "median_cpu_ns": 2845310,
+      "max_cpu_ns": 3543258,
+      "sync": [
+        1
+      ],
+      "member_updates": [
+        4096
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "cached_capacity_reads",
+      "n": 128,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 222789,
+      "max_wall_ns": 353574,
+      "median_cpu_ns": 233100,
+      "max_cpu_ns": 284521,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        100
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "cached_capacity_reads",
+      "n": 128,
+      "s": 16,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 68792,
+      "max_wall_ns": 94260,
+      "median_cpu_ns": 68336,
+      "max_cpu_ns": 100369,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        100
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "cached_capacity_reads",
+      "n": 128,
+      "s": 128,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 28922,
+      "max_wall_ns": 101040,
+      "median_cpu_ns": 33705,
+      "max_cpu_ns": 60840,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        100
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "cached_capacity_reads",
+      "n": 512,
+      "s": 512,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 31166,
+      "max_wall_ns": 51787,
+      "median_cpu_ns": 35748,
+      "max_cpu_ns": 46510,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        100
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "equal_invalidate_refresh",
+      "n": 128,
+      "s": 1,
+      "u": 10,
+      "samples": 10,
+      "median_wall_ns": 1189729,
+      "max_wall_ns": 1330093,
+      "median_cpu_ns": 1176893,
+      "max_cpu_ns": 1255359,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        1280
+      ],
+      "actual_capacity": [
+        30
+      ],
+      "stress_rebuilds": [
+        10
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        10
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        10
+      ]
+    },
+    {
+      "scenario": "equal_invalidate_refresh",
+      "n": 1024,
+      "s": 1,
+      "u": 10,
+      "samples": 10,
+      "median_wall_ns": 4669856,
+      "max_wall_ns": 9357128,
+      "median_cpu_ns": 4533790,
+      "max_cpu_ns": 8116962,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        10240
+      ],
+      "actual_capacity": [
+        30
+      ],
+      "stress_rebuilds": [
+        10
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        10
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        10
+      ]
+    },
+    {
+      "scenario": "equal_invalidate_refresh",
+      "n": 4096,
+      "s": 1,
+      "u": 10,
+      "samples": 10,
+      "median_wall_ns": 16546139,
+      "max_wall_ns": 48227493,
+      "median_cpu_ns": 16228947,
+      "max_cpu_ns": 17068030,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        40960
+      ],
+      "actual_capacity": [
+        30
+      ],
+      "stress_rebuilds": [
+        10
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        10
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        10
+      ]
+    },
+    {
+      "scenario": "global_capacity_reads",
+      "n": 1,
+      "s": 1,
+      "u": 1,
+      "samples": 10,
+      "median_wall_ns": 961,
+      "max_wall_ns": 2043,
+      "median_cpu_ns": 4967,
+      "max_cpu_ns": 6490,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "global_capacity_reads",
+      "n": 16,
+      "s": 1,
+      "u": 16,
+      "samples": 10,
+      "median_wall_ns": 15888,
+      "max_wall_ns": 36214,
+      "median_cpu_ns": 20119,
+      "max_cpu_ns": 32288,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        16
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "global_capacity_reads",
+      "n": 64,
+      "s": 1,
+      "u": 64,
+      "samples": 10,
+      "median_wall_ns": 42667,
+      "max_wall_ns": 62462,
+      "median_cpu_ns": 46984,
+      "max_cpu_ns": 67650,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        64
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "invalidate_only",
+      "n": 128,
+      "s": 1,
+      "u": 1000,
+      "samples": 10,
+      "median_wall_ns": 136562,
+      "max_wall_ns": 189550,
+      "median_cpu_ns": 143512,
+      "max_cpu_ns": 199656,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "invalidate_only",
+      "n": 1024,
+      "s": 1,
+      "u": 1000,
+      "samples": 10,
+      "median_wall_ns": 119732,
+      "max_wall_ns": 265293,
+      "median_cpu_ns": 125781,
+      "max_cpu_ns": 305713,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "invalidate_only",
+      "n": 4096,
+      "s": 1,
+      "u": 1000,
+      "samples": 10,
+      "median_wall_ns": 70043,
+      "max_wall_ns": 89222,
+      "median_cpu_ns": 76017,
+      "max_cpu_ns": 95341,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "me_generated_speed_reads",
+      "n": 9,
+      "s": 0,
+      "u": 8,
+      "samples": 10,
+      "median_wall_ns": 8037,
+      "max_wall_ns": 67691,
+      "median_cpu_ns": 9764,
+      "max_cpu_ns": 32389,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        8
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "me_generated_speed_reads",
+      "n": 33,
+      "s": 0,
+      "u": 32,
+      "samples": 10,
+      "median_wall_ns": 19173,
+      "max_wall_ns": 35102,
+      "median_cpu_ns": 20865,
+      "max_cpu_ns": 38477,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        32
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "me_generated_speed_reads",
+      "n": 129,
+      "s": 0,
+      "u": 128,
+      "samples": 10,
+      "median_wall_ns": 73003,
+      "max_wall_ns": 16305986,
+      "median_cpu_ns": 75011,
+      "max_cpu_ns": 135391,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        128
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "me_snapshot_reads",
+      "n": 9,
+      "s": 0,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 7195,
+      "max_wall_ns": 8002,
+      "median_cpu_ns": 8843,
+      "max_cpu_ns": 10826,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        100
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "me_snapshot_reads",
+      "n": 33,
+      "s": 0,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 7661,
+      "max_wall_ns": 8653,
+      "median_cpu_ns": 9173,
+      "max_cpu_ns": 11336,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        100
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "me_snapshot_reads",
+      "n": 129,
+      "s": 0,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 7095,
+      "max_wall_ns": 8122,
+      "median_cpu_ns": 8572,
+      "max_cpu_ns": 9834,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        100
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "physical_remove_source",
+      "n": 128,
+      "s": 1,
+      "u": 1,
+      "samples": 2,
+      "median_wall_ns": 1660386,
+      "max_wall_ns": 1778423,
+      "median_cpu_ns": 1621702,
+      "max_cpu_ns": 1692096,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        128
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "physical_remove_source",
+      "n": 512,
+      "s": 1,
+      "u": 1,
+      "samples": 2,
+      "median_wall_ns": 8768771,
+      "max_wall_ns": 9529673,
+      "median_cpu_ns": 8578996,
+      "max_cpu_ns": 9543104,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        512
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "physical_remove_source",
+      "n": 1024,
+      "s": 1,
+      "u": 1,
+      "samples": 2,
+      "median_wall_ns": 43196476,
+      "max_wall_ns": 58642360,
+      "median_cpu_ns": 26877635,
+      "max_cpu_ns": 27525730,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        1024
+      ],
+      "actual_stress": [
+        0
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "physical_speed_change",
+      "n": 128,
+      "s": 1,
+      "u": 1,
+      "samples": 10,
+      "median_wall_ns": 4108081,
+      "max_wall_ns": 4515454,
+      "median_cpu_ns": 4038300,
+      "max_cpu_ns": 4402442,
+      "sync": [
+        1
+      ],
+      "member_updates": [
+        382
+      ],
+      "actual_stress": [
+        128
+      ],
+      "actual_capacity": [
+        3
+      ],
+      "stress_rebuilds": [
+        1
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        1
+      ]
+    },
+    {
+      "scenario": "physical_speed_change",
+      "n": 512,
+      "s": 1,
+      "u": 1,
+      "samples": 10,
+      "median_wall_ns": 22631139,
+      "max_wall_ns": 55014067,
+      "median_cpu_ns": 21028230,
+      "max_cpu_ns": 23075870,
+      "sync": [
+        1
+      ],
+      "member_updates": [
+        1534
+      ],
+      "actual_stress": [
+        512
+      ],
+      "actual_capacity": [
+        3
+      ],
+      "stress_rebuilds": [
+        1
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        1
+      ]
+    },
+    {
+      "scenario": "physical_speed_change",
+      "n": 1024,
+      "s": 1,
+      "u": 1,
+      "samples": 10,
+      "median_wall_ns": 59636763,
+      "max_wall_ns": 121688738,
+      "median_cpu_ns": 54832002,
+      "max_cpu_ns": 75665410,
+      "sync": [
+        1
+      ],
+      "member_updates": [
+        3070
+      ],
+      "actual_stress": [
+        1024
+      ],
+      "actual_capacity": [
+        3
+      ],
+      "stress_rebuilds": [
+        1
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        1
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        1
+      ]
+    },
+    {
+      "scenario": "sequential_changes",
+      "n": 128,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 18455802,
+      "max_wall_ns": 147652570,
+      "median_cpu_ns": 18188301,
+      "max_cpu_ns": 78795572,
+      "sync": [
+        100
+      ],
+      "member_updates": [
+        12800
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "sequential_changes",
+      "n": 1024,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 82838234,
+      "max_wall_ns": 277173036,
+      "median_cpu_ns": 66115722,
+      "max_cpu_ns": 88259759,
+      "sync": [
+        100
+      ],
+      "member_updates": [
+        102400
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "sequential_changes",
+      "n": 4096,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 304017037,
+      "max_wall_ns": 499860324,
+      "median_cpu_ns": 264137505,
+      "max_cpu_ns": 316926241,
+      "sync": [
+        100
+      ],
+      "member_updates": [
+        409600
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "unchanged",
+      "n": 128,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 88060,
+      "max_wall_ns": 227055,
+      "median_cpu_ns": 87620,
+      "max_cpu_ns": 237823,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "unchanged",
+      "n": 1024,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 56488,
+      "max_wall_ns": 96963,
+      "median_cpu_ns": 62963,
+      "max_cpu_ns": 109052,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    },
+    {
+      "scenario": "unchanged",
+      "n": 4096,
+      "s": 1,
+      "u": 100,
+      "samples": 10,
+      "median_wall_ns": 34892,
+      "max_wall_ns": 64535,
+      "median_cpu_ns": 39994,
+      "max_cpu_ns": 62182,
+      "sync": [
+        0
+      ],
+      "member_updates": [
+        0
+      ],
+      "actual_stress": [
+        100
+      ],
+      "actual_capacity": [
+        0
+      ],
+      "stress_rebuilds": [
+        0
+      ],
+      "me_reentrant_reads": [
+        0
+      ],
+      "me_participants": [
+        0
+      ],
+      "quota_samples": [
+        0
+      ],
+      "quota_owners": [
+        0
+      ],
+      "quota_cleanup_samples": [
+        0
+      ],
+      "quota_sources": [
+        0
+      ]
+    }
+  ]
+}

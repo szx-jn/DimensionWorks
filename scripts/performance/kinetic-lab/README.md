@@ -13,6 +13,6 @@
 5. 每轮使用新的 world，保留前轮结果；相同 world 的远处 ME 夹具不会被小型 GameTest 模板清除，会污染后轮稳定 tick 数据。每次启动独立 JVM。可加 `-Xmx3G -XX:ActiveProcessorCount=2` 和 JFR 的 profile 记录。
 6. 提取：`python scripts/performance/kinetic-lab/summarize.py docs/validation/kinetic-lab /workspace/stress-lab/logs/mek-lab-run4.log ...`。正式重复实验建议仅汇总全新世界的完整成功轮次。
 
-每场景有一轮预热（rep=-1）及五轮记录。计数器只在测量窗口启用，真实变速同步调用单独计数。quota_samples 表示容量查询为聚合所有者而访问的全局网络样本数；quota_owners 是当前网络被应用的所有者桶数；quota_cleanup_samples 是每秒级服务端清理期间访问的样本数；quota_sources 是重新采样实际 source 的次数。wall_ns 为当前操作墙钟时间，cpu_ns 为服务器线程 CPU 时间。physical 稳定 tick 包括整个测试服务器 tick，不是应力独占耗时。强制加载仅用于固定实验覆盖范围，生产优化不应照搬。
+每场景有一轮预热（rep=-1）及五轮记录。计数器只在测量窗口启用，真实变速同步调用单独计数。quota_samples 表示容量查询为聚合所有者而访问的全局网络样本数；quota_owners 是当前网络被应用的所有者桶数；quota_cleanup_samples 是每秒级服务端清理期间访问的样本数；quota_sources 是重新采样实际 source 的次数。me_reentrant_reads 只统计 snapshot 正在刷新时的重入入口，不等同于完整 snapshot 次数；me_participants 直接统计刷新期间遍历的参与节点数，是判断重复扫描的主要指标。wall_ns 为当前操作墙钟时间，cpu_ns 为服务器线程 CPU 时间。physical 稳定 tick 包括整个测试服务器 tick，不是应力独占耗时。强制加载仅用于固定实验覆盖范围，生产优化不应照搬。
 
 应力改变量夹具直接比较差量总账与逐成员精确重算。批处理 A/B 只演示减少通知的潜力，不证明对所有附属延迟同步安全。ME 测试使用空闲零应力输出，验证纯读取产生的扫描量；带载反馈环的正确性仍需实施时补测。
