@@ -67,7 +67,12 @@ class KineticNetworkMixinContractTest {
 
         assertTrue(mixin.contains("@Inject(method = \"sync\", at = @At(\"TAIL\")"));
         assertTrue(mixin.contains("KineticNetworkOptimizer.onNetworkSynced("));
-        int cachedCheck = optimizer.indexOf("if (cache != null && cache.publishedOverloadKnown)");
+        int syncObserver = optimizer.indexOf("public static void onNetworkSynced(KineticNetwork network)");
+        int followingMethod = optimizer.indexOf("private static Boolean calculatedOverloadState", syncObserver);
+        assertTrue(syncObserver >= 0);
+        assertTrue(followingMethod > syncObserver);
+        assertFalse(optimizer.substring(syncObserver, followingMethod).contains("network.calculate"));
+        int cachedCheck = optimizer.indexOf("if (cache.publishedOverloadKnown)");
         int fallbackScan = optimizer.indexOf("for (KineticBlockEntity member : network.members.keySet())", cachedCheck);
         assertTrue(cachedCheck >= 0);
         assertTrue(fallbackScan > cachedCheck);

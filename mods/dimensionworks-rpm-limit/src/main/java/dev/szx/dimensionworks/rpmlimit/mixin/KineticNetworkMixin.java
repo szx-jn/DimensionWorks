@@ -150,6 +150,11 @@ public abstract class KineticNetworkMixin {
         KineticNetworkOptimizer.syncDuringNetworkRefresh(network);
     }
 
+    @Inject(method = "sync", at = @At("HEAD"), remap = false)
+    private void dimensionworks$beginNetworkSync(CallbackInfo ci) {
+        KineticNetworkOptimizer.onNetworkSyncStarted((KineticNetwork) (Object) this);
+    }
+
     @Inject(method = "sync", at = @At("TAIL"), remap = false)
     private void dimensionworks$rememberPublishedOverload(CallbackInfo ci) {
         KineticNetworkOptimizer.onNetworkSynced((KineticNetwork) (Object) this);

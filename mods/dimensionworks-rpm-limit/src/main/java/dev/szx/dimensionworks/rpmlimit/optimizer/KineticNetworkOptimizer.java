@@ -39,6 +39,10 @@ public final class KineticNetworkOptimizer {
     private static final ThreadLocal<Set<KineticNetwork>> FORCE_PUBLICATION = ThreadLocal.withInitial(
         () -> Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
 
+    /** Aggregate overload states calculated by the calling update, consumed by sync's tail hook. */
+    private static final ThreadLocal<Map<KineticNetwork, Boolean>> EXPECTED_SYNC_STATES =
+        ThreadLocal.withInitial(java.util.IdentityHashMap::new);
+
     private static final ThreadLocal<Batch> BATCH =
         ThreadLocal.withInitial(Batch::new);
 
@@ -55,6 +59,7 @@ public final class KineticNetworkOptimizer {
         if (cache.stressContributions.size() != network.members.size()) {
             invalidateStress(network);
             cache.publishedOverloadKnown = false;
+            cache.calculatedOverloadKnown = false;
             return null;
         }
         return cache.stressTotal;
@@ -335,7 +340,9 @@ public final class KineticNetworkOptimizer {
 
     /** Call after a network's membership or unloaded-member accounting changes. */
     public static void onTopologyChanged(KineticNetwork network) {
-        cacheFor(network).publishedOverloadKnown = false;
+        NetworkCache cache = cacheFor(network);
+        cache.publishedOverloadKnown = false;
+        cache.calculatedOverloadKnown = false;
         if (isBatching() && BATCH.get().preservedTopologyNetworks.contains(network)) {
             Batch batch = BATCH.get();
             if (!batch.invalidatedTopologyNetworks.add(network)) {
@@ -365,7 +372,9 @@ public final class KineticNetworkOptimizer {
     /** Invalidates cached limits after a recalculation prunes a stale member from Create's map. */
     public static void onMemberPruned(KineticNetwork network, KineticBlockEntity member) {
         if (network != null && member != null) {
-            cacheFor(network).publishedOverloadKnown = false;
+            NetworkCache cache = cacheFor(network);
+            cache.publishedOverloadKnown = false;
+            cache.calculatedOverloadKnown = false;
             invalidate(network);
         }
     }
@@ -378,7 +387,9 @@ public final class KineticNetworkOptimizer {
         if (network == null || member == null) {
             return;
         }
-        cacheFor(network).publishedOverloadKnown = false;
+        NetworkCache cache = cacheFor(network);
+        cache.publishedOverloadKnown = false;
+        cache.calculatedOverloadKnown = false;
         invalidate(network);
         PENDING_LOAD_REFRESHES.put(network, false);
         member.networkDirty = true;
@@ -394,9 +405,11 @@ public final class KineticNetworkOptimizer {
             network.sync();
             return;
         }
-        if (FORCE_PUBLICATION.get().contains(network) || overloadStateNeedsRefresh(network)) {
+        boolean forced = FORCE_PUBLICATION.get().contains(network);
+        boolean overloadTransition = overloadStateNeedsRefresh(network);
+        if (forced || overloadTransition) {
             PENDING_PUBLICATIONS.remove(network);
-            network.sync();
+            syncWithExpectedState(network, calculatedOverloadState(network));
             return;
         }
         // KineticBlockEntity.updateFromNetwork only changes the costly running state when the
@@ -407,8 +420,10 @@ public final class KineticNetworkOptimizer {
 
     private static boolean overloadStateNeedsRefresh(KineticNetwork network) {
         boolean overloaded = StressImpact.isEnabled() && network.calculateStress() > network.calculateCapacity();
-        NetworkCache cache = existingCache(network);
-        if (cache != null && cache.publishedOverloadKnown) {
+        NetworkCache cache = cacheFor(network);
+        cache.calculatedOverloaded = overloaded;
+        cache.calculatedOverloadKnown = true;
+        if (cache.publishedOverloadKnown) {
             return cache.publishedOverloaded != overloaded;
         }
 
@@ -417,23 +432,64 @@ public final class KineticNetworkOptimizer {
                 return true;
             }
         }
-        if (cache != null) {
-            cache.publishedOverloaded = overloaded;
-            cache.publishedOverloadKnown = true;
-        }
+        cache.publishedOverloaded = overloaded;
+        cache.publishedOverloadKnown = true;
         return false;
     }
 
-    /** Record the aggregate state after Create publishes a full member snapshot. */
+    /** Invalidate the cached member snapshot while a full network sync is in progress. */
+    public static void onNetworkSyncStarted(KineticNetwork network) {
+        if (network != null) {
+            cacheFor(network).publishedOverloadKnown = false;
+        }
+    }
+
+    /** Restore the update path's aggregate decision without recalculating it after member sync. */
     public static void onNetworkSynced(KineticNetwork network) {
         if (network == null) {
             return;
         }
-        float stress = network.calculateStress();
-        float capacity = network.calculateCapacity();
+        Map<KineticNetwork, Boolean> expectedStates = EXPECTED_SYNC_STATES.get();
         NetworkCache cache = cacheFor(network);
-        cache.publishedOverloaded = StressImpact.isEnabled() && stress > capacity;
-        cache.publishedOverloadKnown = true;
+        if (expectedStates.containsKey(network)) {
+            cache.publishedOverloaded = expectedStates.remove(network);
+            cache.publishedOverloadKnown = true;
+        } else {
+            // An external caller synced without going through our aggregate update boundary.
+            // Force one conservative member check before trusting the published threshold again.
+            cache.publishedOverloadKnown = false;
+        }
+        if (expectedStates.isEmpty()) {
+            EXPECTED_SYNC_STATES.remove();
+        }
+    }
+
+    private static Boolean calculatedOverloadState(KineticNetwork network) {
+        NetworkCache cache = existingCache(network);
+        return cache != null && cache.calculatedOverloadKnown ? cache.calculatedOverloaded : null;
+    }
+
+    private static Boolean publishedOverloadState(KineticNetwork network) {
+        NetworkCache cache = existingCache(network);
+        return cache != null && cache.publishedOverloadKnown ? cache.publishedOverloaded : null;
+    }
+
+    private static void syncWithExpectedState(KineticNetwork network, Boolean expectedOverloaded) {
+        Map<KineticNetwork, Boolean> expectedStates = EXPECTED_SYNC_STATES.get();
+        cacheFor(network).publishedOverloadKnown = false;
+        if (expectedOverloaded == null) {
+            expectedStates.remove(network);
+        } else {
+            expectedStates.put(network, expectedOverloaded);
+        }
+        try {
+            network.sync();
+        } finally {
+            expectedStates.remove(network);
+            if (expectedStates.isEmpty()) {
+                EXPECTED_SYNC_STATES.remove();
+            }
+        }
     }
 
     /** Publish deferred, non-overload-changing snapshots once after the server tick's BE updates. */
@@ -445,7 +501,7 @@ public final class KineticNetworkOptimizer {
         }
         for (KineticNetwork network : pending) {
             if (network != null) {
-                network.sync();
+                syncWithExpectedState(network, publishedOverloadState(network));
             }
         }
     }
@@ -644,6 +700,8 @@ public final class KineticNetworkOptimizer {
         private boolean stressRebuildFailed;
         private boolean publishedOverloadKnown;
         private boolean publishedOverloaded;
+        private boolean calculatedOverloadKnown;
+        private boolean calculatedOverloaded;
     }
 
     private static final class Batch {
