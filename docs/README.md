@@ -24,6 +24,7 @@
 - [`design/advanced-speed-controller.md`](design/advanced-speed-controller.md)：高级转速控制器配方、数字面板与进度边界
 
 - [`gameplay/industrial-assessment.md`](gameplay/industrial-assessment.md)：以高中化学课程标准为参考的工业能力考核体系、任务设计规则与绕过审查
+- [`gameplay/parcel-dimension-dispatch.md`](gameplay/parcel-dimension-dispatch.md)：CMP 玩家打包、个人物流领地发运终端与暮色森林路线
 
 - [`dimensions.md`](dimensions.md)：六维洞穴的长期工业职责
 - [`resources.md`](resources.md)：洞穴资源与效果流体生态

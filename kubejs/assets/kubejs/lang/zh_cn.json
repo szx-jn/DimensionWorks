@@ -1,6 +1,6 @@
 {
   "item.kubejs.dimension_key": "维度钥匙",
-  "item.kubejs.dimension_key.tooltip": "消耗一次后永久解锁中转维度。",
+  "item.kubejs.dimension_key.tooltip": "右键进入物流维度，成功抵达后归还原主手物品。",
   "item.kubejs.gear_heart": "齿轮之心",
   "item.kubejs.gear_heart.tooltip": "一件因诅咒而破损的至高造物。悬停查看当前诅咒，按顺序使用修复碎片逐条破除。",
   "item.kubejs.gear_heart_enchanted": "全链齿轮之心",

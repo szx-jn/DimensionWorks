@@ -1,6 +1,6 @@
 {
   "item.kubejs.dimension_key": "Dimension Key",
-  "item.kubejs.dimension_key.tooltip": "Consume once to permanently unlock the transfer dimension.",
+  "item.kubejs.dimension_key.tooltip": "Right-click to enter the logistics dimension; your original main-hand item is returned on arrival.",
   "item.kubejs.gear_heart": "Gear Heart",
   "item.kubejs.gear_heart.tooltip": "A supreme creation damaged by industrial curses. Inspect the active bottlenecks and break them in order with repair fragments.",
   "item.kubejs.gear_heart_enchanted": "Unchained Gear Heart",

@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.transfer.territory;
 
 import dev.szx.dimensionworks.transfer.WDKeys;
+import dev.szx.dimensionworks.transfer.dispatch.DispatchController;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +34,7 @@ public final class TerritoryManager {
         }
 
         Territory territory = prepare(player, transfer);
+        DispatchController.ensure(transfer, territory);
         teleportInto(player, transfer, territory);
         return player.serverLevel() == transfer;
     }
@@ -44,6 +46,7 @@ public final class TerritoryManager {
         }
 
         Territory territory = prepare(player, level);
+        DispatchController.ensure(level, territory);
         teleportInto(player, level, territory);
     }
 
