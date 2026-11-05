@@ -433,12 +433,12 @@
       "name": "Create Mobile Packages — DimensionWorks",
       "source": "github-release",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "release": "1.20.1-0.6.1-dimensionworks.11",
-      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.11.jar",
-      "version": "0.6.1-dimensionworks.11",
+      "release": "1.20.1-0.6.1-dimensionworks.14",
+      "asset": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.14.jar",
+      "version": "0.6.1-dimensionworks.14",
       "required": true,
       "environment": "both",
-      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.11"
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/releases/tag/1.20.1-0.6.1-dimensionworks.14"
     },
     {
       "id": "create-ultimine",
@@ -622,7 +622,7 @@
       "name": "DimensionWorks Transfer",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-transfer",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-transfer"

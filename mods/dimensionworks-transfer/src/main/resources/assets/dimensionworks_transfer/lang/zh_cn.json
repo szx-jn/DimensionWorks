@@ -1,8 +1,22 @@
 {
   "key.categories.dimensionworks_transfer": "维度工序传送",
   "key.dimensionworks_transfer.toggle": "进入/返回中转维度",
+  "block.dimensionworks_transfer.dispatch_terminal": "维度发运终端",
+  "screen.dimensionworks_transfer.dispatch": "选择运输目的地",
   "message.dimensionworks_transfer.locked": "必须先消耗维度钥匙才能进入中转维度。",
   "message.dimensionworks_transfer.no_return": "没有可用的返回点。",
   "message.dimensionworks_transfer.dimension_missing": "返回点所在的维度未加载。",
-  "message.dimensionworks_transfer.returned": "已返回进入中转维度前的位置。"
+  "message.dimensionworks_transfer.returned": "已返回进入中转维度前的位置。",
+  "message.dimensionworks_transfer.terminal_hint": "变成包裹后钻入发运终端，选择目的地。",
+  "message.dimensionworks_transfer.destination_locked": "此目的地尚未解锁。",
+  "message.dimensionworks_transfer.destination_unavailable": "目的地暂不可用，请检查维度是否已加载。",
+  "message.dimensionworks_transfer.unpack_failed": "拆包失败，已将你送回中转领地。",
+  "message.dimensionworks_transfer.tutorial_title": "右键使用维度钥匙进入中转维度以解锁操作",
+  "dimensionworks_transfer.destination.overworld": "主世界",
+  "dimensionworks_transfer.destination.nether": "下界",
+  "dimensionworks_transfer.destination.end": "末地",
+  "dimensionworks_transfer.destination.twilight": "暮色森林",
+  "dimensionworks_transfer.destination.alexscaves": "Alex 洞穴",
+  "dimensionworks_transfer.destination.aether": "天境",
+  "message.dimensionworks_transfer.tutorial_action": "完成引导后操作将恢复"
 }

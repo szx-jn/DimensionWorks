@@ -1,0 +1,11 @@
+{
+  "lock_overlay":"dimensionworks_transfer:textures/gui/locked.png",
+  "destinations":[
+    {"route":"overworld","name":"dimensionworks_transfer.destination.overworld","image":"dimensionworks_transfer:textures/gui/destinations/overworld.png"},
+    {"route":"nether","name":"dimensionworks_transfer.destination.nether","image":"dimensionworks_transfer:textures/gui/destinations/nether.png"},
+    {"route":"end","name":"dimensionworks_transfer.destination.end","image":"dimensionworks_transfer:textures/gui/destinations/end.png"},
+    {"route":"twilight","name":"dimensionworks_transfer.destination.twilight","image":"dimensionworks_transfer:textures/gui/destinations/twilight.png"},
+    {"route":"alexscaves","name":"dimensionworks_transfer.destination.alexscaves","image":"dimensionworks_transfer:textures/gui/destinations/alexscaves.png","locked":true},
+    {"route":"aether","name":"dimensionworks_transfer.destination.aether","image":"dimensionworks_transfer:textures/gui/destinations/aether.png","locked":true}
+  ]
+}

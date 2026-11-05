@@ -41,6 +41,10 @@ public final class TransferController {
         return enterTransfer(player);
     }
 
+    public static boolean enterWithKey(ServerPlayer player) {
+        return enterTransfer(player);
+    }
+
     private static boolean enterTransfer(ServerPlayer player) {
         ReturnPoint point = new ReturnPoint(
                 player.level().dimension().location(),

@@ -53,6 +53,7 @@ public final class GearHeartEffects {
         }
 
         ItemStack heart = maybeHeart.get();
+        GearHeartMilestones.record(player.getPersistentData(), heart);
         applyBaseBonuses(player);
         ensureRepairedRotationLimit(player, heart);
         if (GearHeartState.isFullyReleased(heart) || !GearHeartState.isCursed(heart)) {
@@ -159,6 +160,7 @@ public final class GearHeartEffects {
                 result.slotContext().index(),
                 repaired
             );
+            GearHeartMilestones.record(player.getPersistentData(), repaired);
             return RepairResult.REPAIRED;
         }
         return RepairResult.NO_TARGET;

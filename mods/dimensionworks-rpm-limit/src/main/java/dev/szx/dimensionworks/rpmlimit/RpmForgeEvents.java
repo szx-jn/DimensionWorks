@@ -38,6 +38,7 @@ public final class RpmForgeEvents {
     }
     @SubscribeEvent
     public static void clonePlayer(PlayerEvent.Clone event) {
+        GearHeartMilestones.copy(event.getOriginal().getPersistentData(), event.getEntity().getPersistentData());
         RpmPlayerState.copy(event.getOriginal().getPersistentData(), event.getEntity().getPersistentData());
         RpmLimitManager.init(event.getEntity());
     }
