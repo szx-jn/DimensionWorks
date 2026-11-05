@@ -1917,6 +1917,17 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/mekanism-generators"
+    },
+    {
+      "id": "create_more_package_couriers",
+      "name": "Create More: Package Couriers",
+      "source": "modrinth",
+      "project_id": "GRqrodjM",
+      "version": "2.2.1",
+      "version_id": "YbhHI55E",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/create-more-package-couriers"
     }
   ]
 }
