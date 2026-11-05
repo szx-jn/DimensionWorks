@@ -139,7 +139,8 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
 
     @Override
     public float calculateStressApplied() {
-        return isPowerInput() ? stressPerRpm : 0.0F;
+        lastStressApplied = isPowerInput() ? stressPerRpm : 0.0F;
+        return lastStressApplied;
     }
 
     @Override
@@ -239,7 +240,7 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
         powerMode = mode;
         if (hasNetwork()) {
             var network = getOrCreateNetwork();
-            if (network != null) network.updateNetwork();
+            if (network != null) network.updateStressFor(this, calculateStressApplied());
         }
         if (mode != PowerMode.OUTPUT) applyPowerOutput(0, 0);
         setChanged();
@@ -289,7 +290,7 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
         stressPerRpm = clamped;
         // A lower output coefficient must never leave the previous source capacity live.
         if (isPowerOutput()) applyPowerOutput(0, 0);
-        if (hasNetwork()) getOrCreateNetwork().updateNetwork();
+        if (hasNetwork()) getOrCreateNetwork().updateStressFor(this, calculateStressApplied());
         setChanged();
         sendData();
     }

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -32,7 +31,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -170,7 +168,7 @@ public final class DimensionWorksMekStress {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MekStressConfig.SPEC);
 
         modBus.addListener(this::commonSetup);
-        modBus.addListener(this::buildCreativeTabs);
+        TransportNetwork.register();
         MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
         MinecraftForge.EVENT_BUS.addListener(MemoryCardCraftingHandler::onItemCrafted);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onMissingMappings);
@@ -199,18 +197,6 @@ public final class DimensionWorksMekStress {
                     return route == null ? null : route.source();
                 });
         });
-    }
-
-    private void buildCreativeTabs(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            DRIVE_BLOCKS.values().forEach(event::accept);
-            TRANSPORT_BLOCKS.values().forEach(event::accept);
-            event.accept(MATTER_BALL);
-            event.accept(ITEM_CAPACITY_UPGRADE);
-            event.accept(FLUID_CAPACITY_UPGRADE);
-            event.accept(MATTER_BALL_UNPACKER_ITEM);
-            allMemoryCards().forEach(event::accept);
-        }
     }
 
     private void registerCommands(RegisterCommandsEvent event) {

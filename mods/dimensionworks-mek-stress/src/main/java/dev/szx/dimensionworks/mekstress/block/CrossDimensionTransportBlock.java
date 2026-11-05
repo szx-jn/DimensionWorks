@@ -55,6 +55,7 @@ public final class CrossDimensionTransportBlock extends HorizontalAxisKineticBlo
         if (actualType != type.get()) return null;
         return (BlockEntityTicker<T>) (BlockEntityTicker<CrossDimensionTransportBlockEntity>)
             (world, pos, blockState, entity) -> {
+                entity.tick();
                 if (world instanceof ServerLevel server) entity.serverTick(server);
             };
     }

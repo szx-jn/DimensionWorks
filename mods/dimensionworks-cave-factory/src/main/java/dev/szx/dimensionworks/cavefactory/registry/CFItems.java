@@ -18,7 +18,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = DimensionWorksCaveFactory.MOD_ID,
+    bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.MOD)
 public final class CFItems {
+    @net.minecraftforge.eventbus.api.SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void keepDedicatedItemsInSharedTab(net.minecraftforge.event.BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey().location().equals(CREATIVE_TAB.getId())
+            || event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.SEARCH) return;
+        var iterator = event.getEntries().iterator();
+        while (iterator.hasNext()) {
+            var id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(iterator.next().getKey().getItem());
+            if (id != null && (id.getNamespace().startsWith("dimensionworks_") || id.getNamespace().equals("kubejs")))
+                iterator.remove();
+        }
+    }
+
     private static final Map<MachineType, RegistryObject<Item>> MATRICES = new EnumMap<>(MachineType.class);
     private static final Map<MachineType, RegistryObject<Item>> RESIDUES = new EnumMap<>(MachineType.class);
     private static final Map<MachineType, RegistryObject<BlockItem>> CONTROLLER_ITEMS =
@@ -92,9 +106,13 @@ public final class CFItems {
                 .title(Component.translatable("itemGroup.dimensionworks_cave_factory"))
                 .icon(() -> new ItemStack(CFBlocks.controller(MachineType.ABYSSAL).get()))
                 .displayItems((parameters, output) -> {
-                    for (RegistryObject<? extends Item> holder : CREATIVE_ORDER) {
-                        output.accept(holder.get());
-                    }
+                    // One shared tab for all pack-owned namespaces, including future additions.
+                    net.minecraftforge.registries.ForgeRegistries.ITEMS.getEntries().stream()
+                        .filter(entry -> entry.getKey().location().getNamespace().startsWith("dimensionworks_")
+                            || entry.getKey().location().getNamespace().equals("kubejs"))
+                        .filter(entry -> !entry.getKey().location().toString().equals("dimensionworks_mek_stress:gas_output"))
+                        .sorted(java.util.Comparator.comparing(entry -> entry.getKey().location().toString()))
+                        .forEach(entry -> output.accept(entry.getValue()));
                 })
                 .build()
         );

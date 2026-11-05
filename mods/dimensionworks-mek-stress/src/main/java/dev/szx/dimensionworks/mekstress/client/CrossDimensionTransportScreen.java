@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.Inventory;
 public final class CrossDimensionTransportScreen extends AbstractContainerScreen<CrossDimensionTransportMenu> {
     private EditBox channelInput;
     private Button applyChannel;
+    private EditBox coefficientInput;
+    private boolean coefficientInitialized;
 
     public CrossDimensionTransportScreen(CrossDimensionTransportMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -31,14 +33,21 @@ public final class CrossDimensionTransportScreen extends AbstractContainerScreen
             try { target = Integer.parseInt(channelInput.getValue()); }
             catch (NumberFormatException exception) { return; }
             if (target >= 1 && target <= 1024 && minecraft != null && minecraft.gameMode != null)
-                minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 1000 + target);
+                dev.szx.dimensionworks.mekstress.TransportNetwork.setChannel(menu.containerId, target);
         }).bounds(leftPos + 92, topPos + 39, 74, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.dimensionworks_mek_stress.transport.power_mode"), button -> send(0))
             .bounds(leftPos + 14, topPos + 73, 100, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.dimensionworks_mek_stress.transport.decrease"), button -> send(3))
-            .bounds(leftPos + 122, topPos + 73, 46, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.dimensionworks_mek_stress.transport.increase"), button -> send(4))
-            .bounds(leftPos + 174, topPos + 73, 46, 18).build());
+        coefficientInput = new EditBox(font, leftPos + 122, topPos + 73, 62, 18,
+            Component.translatable("gui.dimensionworks_mek_stress.transport.coefficient"));
+        coefficientInput.setMaxLength(10);
+        coefficientInput.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+            Component.translatable("gui.dimensionworks_mek_stress.transport.coefficient")));
+        coefficientInput.setFilter(value -> value.isEmpty() || value.matches("\\d{0,7}(\\.\\d{0,2})?"));
+        coefficientInput.setValue(Float.toString(menu.coefficient()));
+        coefficientInitialized = false;
+        addRenderableWidget(coefficientInput);
+        addRenderableWidget(Button.builder(Component.translatable("gui.dimensionworks_mek_stress.transport.apply"), button -> applyCoefficient())
+            .bounds(leftPos + 188, topPos + 73, 36, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.dimensionworks_mek_stress.transport.item_mode"), button -> send(1))
             .bounds(leftPos + 14, topPos + 98, 100, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.dimensionworks_mek_stress.transport.fluid_mode"), button -> send(2))
@@ -51,6 +60,36 @@ public final class CrossDimensionTransportScreen extends AbstractContainerScreen
                 applyChannel.active = parsed >= 1 && parsed <= 1024;
             } catch (NumberFormatException exception) { applyChannel.active = false; }
         });
+    }
+
+    private void applyCoefficient() {
+        try {
+            float value = Float.parseFloat(coefficientInput.getValue());
+            if (Float.isFinite(value) && value >= 0.01F && value <= 1_000_000.0F)
+                dev.szx.dimensionworks.mekstress.TransportNetwork.setCoefficient(menu.containerId, value);
+        } catch (NumberFormatException ignored) { }
+    }
+
+    @Override protected void containerTick() {
+        super.containerTick();
+        channelInput.tick();
+        coefficientInput.tick();
+        if (!coefficientInitialized && menu.tier() > 0 && !coefficientInput.isFocused()) {
+            coefficientInput.setValue(Float.toString(menu.coefficient()));
+            if (!channelInput.isFocused()) channelInput.setValue(Integer.toString(Math.max(1, menu.channel())));
+            coefficientInitialized = true;
+        }
+    }
+
+    @Override public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (coefficientInput.isFocused() && (key == 257 || key == 335)) {
+            applyCoefficient();
+            return true;
+        }
+        if ((coefficientInput.isFocused() || channelInput.isFocused()) && key != 256)
+            return coefficientInput.isFocused() ? coefficientInput.keyPressed(key, scanCode, modifiers)
+                : channelInput.keyPressed(key, scanCode, modifiers);
+        return super.keyPressed(key, scanCode, modifiers);
     }
 
     private void send(int id) {

@@ -34,9 +34,7 @@ public final class AdvancedController {
         ENTITIES.register(bus);
         MENUS.register(bus);
         ControllerNetwork.register();
-        bus.addListener((net.minecraftforge.event.BuildCreativeModeTabContentsEvent event) -> {
-            if (event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.FUNCTIONAL_BLOCKS) event.accept(ITEM.get());
-        });
+
     }
     private AdvancedController() {}
 }

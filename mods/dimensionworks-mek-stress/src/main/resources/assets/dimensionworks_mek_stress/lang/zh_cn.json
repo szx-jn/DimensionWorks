@@ -103,8 +103,6 @@
   "gui.dimensionworks_mek_stress.transport.channel": "频道编号",
   "gui.dimensionworks_mek_stress.transport.bind": "绑定频道",
   "gui.dimensionworks_mek_stress.transport.power_mode": "SU 模式",
-  "gui.dimensionworks_mek_stress.transport.decrease": "系数 −",
-  "gui.dimensionworks_mek_stress.transport.increase": "系数 +",
   "gui.dimensionworks_mek_stress.transport.item_mode": "物品模式",
   "gui.dimensionworks_mek_stress.transport.fluid_mode": "流体模式",
   "gui.dimensionworks_mek_stress.transport.priority": "输出优先级",
@@ -123,5 +121,8 @@
   "item.dimensionworks_mek_stress.item_capacity_upgrade": "物品容量卡",
   "item.dimensionworks_mek_stress.fluid_capacity_upgrade": "流体容量卡",
   "block.dimensionworks_mek_stress.matter_ball_unpacker": "物质球解包器",
-  "block.dimensionworks_mek_stress.matter_ball_unpacker.full": "解包器内仍有未输出的物品或流体，无法接收新的物质球"
+  "block.dimensionworks_mek_stress.matter_ball_unpacker.full": "解包器内仍有未输出的物品或流体，无法接收新的物质球",
+  "gui.dimensionworks_mek_stress.transport.coefficient": "应力倍率（SU/RPM）",
+  "gui.dimensionworks_mek_stress.transport.apply": "应用",
+  "config.jade.plugin_dimensionworks_mek_stress.gearbox_live_stress": "ME 齿轮箱实时应力"
 }

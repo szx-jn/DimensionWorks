@@ -38,6 +38,8 @@
 - 改设计思路、科技树、维度职责、资源生态、物流与性能策略 → 写进 `docs/`。
 - 新增 Mod 前的判断顺序：先确认现有 Mod 与 KubeJS 能否实现；确实需要才动 `manifest/mods.json`。
 
+- 所有维度工坊专属物品（`dimensionworks_*` 自研模组与 `kubejs` 命名空间）统一放入已有的 `dimensionworks_cave_factory:main`「维度工坊」创造模式页签；不得新建重复页签或放入原版、第三方模组页签。新增专属物品时必须核对该统一页签收录。
+
 ## 设计原则
 
 README 中的原则需要转化成可执行的约束：

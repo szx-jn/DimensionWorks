@@ -1,1 +1,1 @@
-{"variants":{"horizontal_axis=x":{"model":"dimensionworks_mek_stress:block/cross_dimension_transmitter_tier3"},"horizontal_axis=z":{"model":"dimensionworks_mek_stress:block/cross_dimension_transmitter_tier3","y":90}}}
+{"variants":{"axis=x":{"model":"dimensionworks_mek_stress:block/cross_dimension_transmitter_tier3"},"axis=z":{"model":"dimensionworks_mek_stress:block/cross_dimension_transmitter_tier3","y":90}}}

@@ -35,7 +35,7 @@ public final class CrossDimensionTransportMenu extends AbstractContainerMenu {
         this.endpoint = endpoint;
         this.player = inventory.player;
         this.position = endpoint == null ? BlockPos.ZERO : endpoint.getBlockPos().immutable();
-        int[] values = new int[12];
+        int[] values = new int[13];
         boolean clientSide = inventory.player.level().isClientSide;
         data = new ContainerData() {
             @Override public int get(int index) {
@@ -47,7 +47,8 @@ public final class CrossDimensionTransportMenu extends AbstractContainerMenu {
                     case 1 -> endpoint.itemMode();
                     case 2 -> endpoint.fluidMode();
                     case 3 -> endpoint.powerMode().ordinal();
-                    case 4 -> Math.round(endpoint.stressPerRpm() * 100.0F);
+                    case 4 -> Math.round(endpoint.stressPerRpm() * 100.0F) & 0xFFFF;
+                    case 12 -> Math.round(endpoint.stressPerRpm() * 100.0F) >>> 16;
                     case 5 -> endpoint.priority();
                     case 6 -> endpoint.tier();
                     case 7 -> Math.round(endpoint.getGeneratedSpeed());
@@ -68,7 +69,7 @@ public final class CrossDimensionTransportMenu extends AbstractContainerMenu {
     public int itemMode() { return data.get(1); }
     public int fluidMode() { return data.get(2); }
     public int powerMode() { return data.get(3); }
-    public float coefficient() { return data.get(4) / 100.0F; }
+    public float coefficient() { return ((data.get(4) & 0xFFFF) | ((data.get(12) & 0xFFFF) << 16)) / 100.0F; }
     public int priority() { return data.get(5); }
     public int tier() { return data.get(6); }
     public int outputRpm() { return data.get(7); }
@@ -80,23 +81,26 @@ public final class CrossDimensionTransportMenu extends AbstractContainerMenu {
     @Override public boolean clickMenuButton(Player player, int id) {
         if (player != this.player || !(player instanceof ServerPlayer serverPlayer) || endpoint == null
             || !stillValid(player) || !endpoint.mayManage(player.getUUID())) return false;
-        if (id >= 1001 && id <= 2024) {
-            int target = id - 1000;
-            boolean joined = endpoint.setChannel(serverPlayer, target);
-            if (!joined) serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                "无权加入此频道，或频道编号无效"), true);
-            return joined;
-        }
         switch (id) {
             case 0 -> endpoint.cyclePowerMode();
             case 1 -> endpoint.cycleItemMode();
             case 2 -> endpoint.cycleFluidMode();
-            case 3 -> endpoint.setStressPerRpm(endpoint.stressPerRpm() - (endpoint.stressPerRpm() < 10 ? 0.25F : 1.0F));
-            case 4 -> endpoint.setStressPerRpm(endpoint.stressPerRpm() + (endpoint.stressPerRpm() < 10 ? 0.25F : 1.0F));
             case 5 -> endpoint.cyclePriority();
             default -> { return false; }
         }
         return true;
+    }
+
+    public void setChannel(ServerPlayer sender, int target) {
+        if (sender != player || !stillValid(sender) || !endpoint.mayManage(sender.getUUID())) return;
+        if (!endpoint.setChannel(sender, target)) sender.displayClientMessage(
+            net.minecraft.network.chat.Component.literal("无权加入此频道，或频道编号无效"), true);
+    }
+
+    public void setCoefficient(ServerPlayer sender, float value) {
+        if (sender != player || !stillValid(sender) || !endpoint.mayManage(sender.getUUID())
+            || !Float.isFinite(value) || value < 0.01F || value > 1_000_000.0F) return;
+        endpoint.setStressPerRpm(Math.round(value * 100.0F) / 100.0F);
     }
 
     @Override public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }

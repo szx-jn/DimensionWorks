@@ -1,0 +1,29 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": false,
+  "pattern": [
+    "APA",
+    "CQC",
+    "ASA"
+  ],
+  "key": {
+    "A": {
+      "item": "mekanism:alloy_reinforced"
+    },
+    "P": {
+      "item": "create:precision_mechanism"
+    },
+    "C": {
+      "item": "mekanism:advanced_control_circuit"
+    },
+    "Q": {
+      "item": "mekanism:teleportation_core"
+    },
+    "S": {
+      "item": "create:brass_casing"
+    }
+  },
+  "result": {
+    "item": "dimensionworks_mek_stress:cross_dimension_transmitter_tier1"
+  }
+}

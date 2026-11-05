@@ -64,3 +64,7 @@ gradle build --no-daemon
 ```
 
 GameTest 源码已随工程编译，但本仓库的开发运行配置不携带 Alex's Caves 与洞穴维度运行依赖，因此当前不声称 GameTest、客户端或专用服已完成真实运行验证。
+
+## 0.1.2：共享维度工坊页签
+
+复用 `dimensionworks_cave_factory:main` 统一展示所有 `dimensionworks_*` 和 `kubejs` 专属物品，中文标题为「维度工坊」，从其他普通页签移除重复专属物品，搜索页签保持可检索。不依赖其他自研模组的 Java 类，按注册表收录新增物品。

@@ -66,7 +66,6 @@ for (let tier = 1; tier <= 5; tier++) {
 
 StartupEvents.modifyCreativeTab('appliedcreate:main', event => {
   dwRetiredStressStorageItems.forEach(id => event.remove(id))
-  dwMemoryItems.forEach(id => event.add(id))
 })
 
 StartupEvents.modifyCreativeTab('mekanism:mekanism', event => {

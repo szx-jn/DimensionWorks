@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.3.25'
+version = '0.3.26'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -127,4 +127,15 @@ minecraft.runs {
             }
         }
     }
+}
+
+// Optional local verification of the baked world models; excluded from production JARs.
+sourceSets {
+    clientCheck {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+minecraft.runs.client.mods.dimensionworks_mek_stress {
+    sources = [sourceSets.main, sourceSets.clientCheck]
 }
