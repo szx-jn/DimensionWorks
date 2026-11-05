@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/twilight-industrial-branch.md`](design/twilight-industrial-branch.md)：暮色森林物品调查、独立工业支线与第三修复碎片关联提案。
+
 - [`design/energy-mechanical-unification.md`](design/energy-mechanical-unification.md)：FE/t 与 SU 统一计量、跨模组供能范围与生命周期约束。
 - [`validation/2026-11-03-energy-unification.md`](validation/2026-11-03-energy-unification.md)：能源审查范围、独立客户端验证与存档恢复回归。
 
