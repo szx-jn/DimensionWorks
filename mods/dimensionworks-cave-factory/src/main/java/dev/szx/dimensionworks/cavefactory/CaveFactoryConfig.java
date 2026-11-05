@@ -13,6 +13,7 @@ public final class CaveFactoryConfig {
     public static final ForgeConfigSpec.DoubleValue STRESS_IMPACT;
     public static final ForgeConfigSpec.IntValue NUMERIC_MODULE_PERCENT;
     public static final ForgeConfigSpec.BooleanValue BLOCK_AETHER_AND_ALEX_CAVES;
+    public static final ForgeConfigSpec.BooleanValue BLOCK_TWILIGHT_FOREST;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -46,6 +47,9 @@ public final class CaveFactoryConfig {
         BLOCK_AETHER_AND_ALEX_CAVES = builder
             .comment("Prevent players from traveling to the Aether or Dimensions of Alex's Caves.")
             .define("blockAetherAndAlexCaves", true);
+        BLOCK_TWILIGHT_FOREST = builder
+            .comment("Prevent players from traveling to the Twilight Forest.")
+            .define("blockTwilightForest", true);
         builder.pop();
         SPEC = builder.build();
     }
@@ -69,6 +73,14 @@ public final class CaveFactoryConfig {
     public static boolean blockAetherAndAlexCaves() {
         try {
             return BLOCK_AETHER_AND_ALEX_CAVES.get();
+        } catch (IllegalStateException | NullPointerException ignored) {
+            return true;
+        }
+    }
+
+    public static boolean blockTwilightForest() {
+        try {
+            return BLOCK_TWILIGHT_FOREST.get();
         } catch (IllegalStateException | NullPointerException ignored) {
             return true;
         }

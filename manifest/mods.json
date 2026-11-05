@@ -592,7 +592,7 @@
       "name": "DimensionWorks ME Mechanical Power",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-mek-stress",
-      "version": "0.3.24",
+      "version": "0.3.25",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
@@ -1597,6 +1597,18 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/trueuuid"
+    },
+    {
+      "id": "twilightforest",
+      "name": "The Twilight Forest",
+      "source": "curseforge",
+      "project_slug": "the-twilight-forest",
+      "file_id": 5468648,
+      "file_name": "twilightforest-1.20.1-4.3.2508-universal.jar",
+      "version": "4.3.2508",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/the-twilight-forest"
     },
     {
       "id": "witherstormmod",

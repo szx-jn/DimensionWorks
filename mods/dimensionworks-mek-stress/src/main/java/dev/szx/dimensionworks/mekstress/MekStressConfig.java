@@ -19,6 +19,8 @@ public final class MekStressConfig {
     public static final ForgeConfigSpec.IntValue MAXIMUM_INPUT_LOSS_BP;
     public static final ForgeConfigSpec.IntValue DIRECT_MAX_RPM;
     public static final ForgeConfigSpec.IntValue GENERATOR_RPM;
+    public static final ForgeConfigSpec.IntValue MAX_TRANSPORT_ITEM_NBT_BYTES;
+    public static final ForgeConfigSpec.IntValue MAX_MATTER_BALL_NBT_BYTES;
 
     static {
         var builder = new ForgeConfigSpec.Builder();
@@ -55,6 +57,10 @@ public final class MekStressConfig {
                 0, InputStressMath.MAXIMUM_INPUT_LOSS_BASIS_POINTS);
         DIRECT_MAX_RPM = builder.defineInRange("directMaxRpm", 10240, 1, 10240);
         GENERATOR_RPM = builder.defineInRange("mekanismGeneratorRpm", 32, 1, 10240);
+        MAX_TRANSPORT_ITEM_NBT_BYTES = builder.comment("Maximum serialized NBT size of one item stored in a logistics channel.")
+            .defineInRange("maximumTransportItemNbtBytes", 8192, 256, 1_048_576);
+        MAX_MATTER_BALL_NBT_BYTES = builder.comment("Maximum serialized payload size inside one Matter Ball.")
+            .defineInRange("maximumMatterBallNbtBytes", 65536, 8192, 1_048_576);
         builder.pop();
         SPEC = builder.build();
     }
@@ -71,4 +77,6 @@ public final class MekStressConfig {
     }
     public static int directMaxRpm() { return DIRECT_MAX_RPM.get(); }
     public static int generatorRpm() { return GENERATOR_RPM.get(); }
+    public static int maximumTransportItemNbtBytes() { return MAX_TRANSPORT_ITEM_NBT_BYTES.get(); }
+    public static int maximumMatterBallNbtBytes() { return MAX_MATTER_BALL_NBT_BYTES.get(); }
 }

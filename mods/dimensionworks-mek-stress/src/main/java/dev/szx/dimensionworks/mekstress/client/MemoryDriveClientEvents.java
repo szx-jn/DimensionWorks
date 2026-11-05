@@ -17,6 +17,8 @@ public final class MemoryDriveClientEvents {
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> MenuScreens.register(
             DimensionWorksMekStress.MEMORY_DRIVE_MENU.get(), MemoryDriveScreen::new));
+        event.enqueueWork(() -> MenuScreens.register(
+            DimensionWorksMekStress.CROSS_DIMENSION_TRANSPORT_MENU.get(), CrossDimensionTransportScreen::new));
     }
 
     @SubscribeEvent

@@ -1,16 +1,23 @@
 package dev.szx.dimensionworks.mekstress;
 
 import dev.szx.dimensionworks.mekstress.block.MemoryDriveBlock;
+import dev.szx.dimensionworks.mekstress.block.CrossDimensionTransportBlock;
+import dev.szx.dimensionworks.mekstress.block.MatterBallUnpackerBlock;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
+import dev.szx.dimensionworks.mekstress.blockentity.CrossDimensionTransportBlockEntity;
+import dev.szx.dimensionworks.mekstress.blockentity.MatterBallUnpackerBlockEntity;
 import dev.szx.dimensionworks.mekstress.card.MemoryCardItem;
 import dev.szx.dimensionworks.mekstress.card.MemoryCardCraftingHandler;
 import dev.szx.dimensionworks.mekstress.command.MemoryCommand;
 import dev.szx.dimensionworks.mekstress.core.MemoryCardType;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import dev.szx.dimensionworks.mekstress.memory.MemoryDriveMenu;
+import dev.szx.dimensionworks.mekstress.memory.CrossDimensionTransportMenu;
 import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
 import dev.szx.dimensionworks.mekstress.memory.MemoryLegacyMigration;
 import dev.szx.dimensionworks.mekstress.memory.MachineKineticRegistry;
+import dev.szx.dimensionworks.mekstress.memory.CrossDimensionTransportManager;
+import dev.szx.dimensionworks.mekstress.memory.MatterBallMailbox;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +34,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -49,8 +58,19 @@ public final class DimensionWorksMekStress {
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
         DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MOD_ID);
+    public static final RegistryObject<BlockEntityType<CrossDimensionTransportBlockEntity>> CROSS_DIMENSION_TRANSPORT_BLOCK_ENTITY =
+        BLOCK_ENTITIES.register("cross_dimension_transmitter", DimensionWorksMekStress::createCrossDimensionTransportBlockEntity);
+    public static final RegistryObject<BlockEntityType<MatterBallUnpackerBlockEntity>> MATTER_BALL_UNPACKER_BLOCK_ENTITY =
+        BLOCK_ENTITIES.register("matter_ball_unpacker", DimensionWorksMekStress::createMatterBallUnpackerBlockEntity);
+    public static final RegistryObject<MatterBallUnpackerBlock> MATTER_BALL_UNPACKER = BLOCKS.register(
+        "matter_ball_unpacker", () -> new MatterBallUnpackerBlock(
+            BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).strength(3.5F, 6.0F).requiresCorrectToolForDrops(),
+            MATTER_BALL_UNPACKER_BLOCK_ENTITY));
+    private static final RegistryObject<Item> MATTER_BALL_UNPACKER_ITEM = ITEMS.register(
+        "matter_ball_unpacker", () -> new BlockItem(MATTER_BALL_UNPACKER.get(), new Item.Properties()));
 
     private static final Map<MemoryTier, RegistryObject<MemoryDriveBlock>> DRIVE_BLOCKS = new EnumMap<>(MemoryTier.class);
+    private static final Map<Integer, RegistryObject<CrossDimensionTransportBlock>> TRANSPORT_BLOCKS = new java.util.TreeMap<>();
     private static final Map<MemoryTier, Map<MemoryCardType, RegistryObject<MemoryCardItem>>> MEMORY_CARDS =
         new EnumMap<>(MemoryTier.class);
 
@@ -73,10 +93,29 @@ public final class DimensionWorksMekStress {
             }
             MEMORY_CARDS.put(tier, Map.copyOf(cards));
         }
+        for (int tier = 1; tier <= 3; tier++) {
+            int transportTier = tier;
+            String name = "cross_dimension_transmitter_tier" + tier;
+            RegistryObject<CrossDimensionTransportBlock> block = BLOCKS.register(name,
+                () -> new CrossDimensionTransportBlock(transportTier,
+                    BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).strength(4.5F, 8.0F).requiresCorrectToolForDrops(),
+                    CROSS_DIMENSION_TRANSPORT_BLOCK_ENTITY));
+            TRANSPORT_BLOCKS.put(tier, block);
+            ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+        }
     }
 
     public static final RegistryObject<Item> GAS_OUTPUT_ITEM = ITEMS.register(
         "gas_output", () -> new Item(new Item.Properties().stacksTo(1))
+    );
+    public static final RegistryObject<Item> MATTER_BALL = ITEMS.register(
+        "matter_ball", () -> new Item(new Item.Properties().stacksTo(1))
+    );
+    public static final RegistryObject<Item> ITEM_CAPACITY_UPGRADE = ITEMS.register(
+        "item_capacity_upgrade", () -> new Item(new Item.Properties())
+    );
+    public static final RegistryObject<Item> FLUID_CAPACITY_UPGRADE = ITEMS.register(
+        "fluid_capacity_upgrade", () -> new Item(new Item.Properties())
     );
 
     public static final RegistryObject<BlockEntityType<MemoryDriveBlockEntity>> MEMORY_DRIVE_BLOCK_ENTITY =
@@ -96,9 +135,29 @@ public final class DimensionWorksMekStress {
         return type;
     }
 
+    private static BlockEntityType<CrossDimensionTransportBlockEntity> createCrossDimensionTransportBlockEntity() {
+        Block[] blocks = TRANSPORT_BLOCKS.values().stream().map(RegistryObject::get).toArray(Block[]::new);
+        return BlockEntityType.Builder.of(
+            (pos, state) -> new CrossDimensionTransportBlockEntity(CROSS_DIMENSION_TRANSPORT_BLOCK_ENTITY.get(), pos, state),
+            blocks
+        ).build(null);
+    }
+
+    private static BlockEntityType<MatterBallUnpackerBlockEntity> createMatterBallUnpackerBlockEntity() {
+        return BlockEntityType.Builder.of(
+            (pos, state) -> new MatterBallUnpackerBlockEntity(MATTER_BALL_UNPACKER_BLOCK_ENTITY.get(), pos, state),
+            MATTER_BALL_UNPACKER.get()
+        ).build(null);
+    }
+
     public static final RegistryObject<MenuType<MemoryDriveMenu>> MEMORY_DRIVE_MENU = MENUS.register(
         "memory_drive",
         () -> IForgeMenuType.create(MemoryDriveMenu::new)
+    );
+
+    public static final RegistryObject<MenuType<CrossDimensionTransportMenu>> CROSS_DIMENSION_TRANSPORT_MENU = MENUS.register(
+        "cross_dimension_transmitter",
+        () -> IForgeMenuType.create(CrossDimensionTransportMenu::new)
     );
 
     public DimensionWorksMekStress() {
@@ -121,8 +180,12 @@ public final class DimensionWorksMekStress {
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onChunkLoad);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onEntityJoin);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onEntityLeave);
+        MinecraftForge.EVENT_BUS.addListener(MatterBallMailbox::onLogin);
+        MinecraftForge.EVENT_BUS.addListener(MatterBallMailbox::clearAtShutdown);
         MinecraftForge.EVENT_BUS.addListener(MachineKineticRegistry::onServerTick);
         MinecraftForge.EVENT_BUS.addListener(MachineKineticRegistry::onServerStopping);
+        MinecraftForge.EVENT_BUS.addListener(CrossDimensionTransportManager::onServerTick);
+        MinecraftForge.EVENT_BUS.addListener(CrossDimensionTransportManager::onServerStopping);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -141,6 +204,11 @@ public final class DimensionWorksMekStress {
     private void buildCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             DRIVE_BLOCKS.values().forEach(event::accept);
+            TRANSPORT_BLOCKS.values().forEach(event::accept);
+            event.accept(MATTER_BALL);
+            event.accept(ITEM_CAPACITY_UPGRADE);
+            event.accept(FLUID_CAPACITY_UPGRADE);
+            event.accept(MATTER_BALL_UNPACKER_ITEM);
             allMemoryCards().forEach(event::accept);
         }
     }

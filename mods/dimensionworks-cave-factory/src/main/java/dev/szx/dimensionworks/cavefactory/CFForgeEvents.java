@@ -33,6 +33,7 @@ public final class CFForgeEvents {
         new ResourceLocation("alex_caves_dimensions", "primordial_caves"),
         new ResourceLocation("alex_caves_dimensions", "toxic_caves")
     );
+    private static final ResourceLocation TWILIGHT_FOREST = new ResourceLocation("twilightforest", "twilight_forest");
 
     private CFForgeEvents() {}
 
@@ -69,9 +70,12 @@ public final class CFForgeEvents {
 
     @SubscribeEvent
     public static void blockRestrictedDimensionTravel(EntityTravelToDimensionEvent event) {
-        if (!CaveFactoryConfig.blockAetherAndAlexCaves()
-            || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
-            || !BLOCKED_DIMENSIONS.contains(event.getDimension().location())) {
+        if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
+            return;
+        }
+        ResourceLocation destination = event.getDimension().location();
+        if (!(CaveFactoryConfig.blockAetherAndAlexCaves() && BLOCKED_DIMENSIONS.contains(destination))
+            && !(CaveFactoryConfig.blockTwilightForest() && TWILIGHT_FOREST.equals(destination))) {
             return;
         }
         event.setCanceled(true);
