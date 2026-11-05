@@ -1,16 +1,16 @@
 # DimensionWorks Spectator Toggle
 
-Forge 1.20.1 mod that lets any player toggle spectator mode with **F4**.
+Forge 1.20.1 模组，允许玩家使用 **F4** 切换旁观模式。
 
-- First press saves the player's exact position, dimension, rotation, and current game mode, then enters spectator mode.
-- Second press returns to the saved point and restores the saved game mode.
-- The key is configurable under **Options → Controls → DimensionWorks**.
-- The server handles the mode change and return point, so the feature does not require OP permissions. Install the mod on both the client and server.
-- Return data is saved per player and copied when a death respawn recreates the player.
+- 第一次按键时保存玩家的位置、维度、朝向和游戏模式，然后进入旁观模式；再次按键返回保存的位置并恢复游戏模式。
+- 按键可以在 **选项 → 控制 → DimensionWorks** 中修改。
+- 切换和返回由服务端处理，无需 OP 权限；客户端和服务端都需要安装本模组。
+- 返回数据按玩家保存，死亡重生时会复制；同一次服务器运行期间重新登录也会保留。
+- 服务器重启后，未结束 F4 旁观的玩家下次登录时会在最后保存的位置恢复进入旁观前的游戏模式，旧返回点随即清除。旧版本留下的返回数据也会这样处理。
 
-If the original dimension is unavailable, the player stays in spectator mode and the saved return point is kept for a later attempt.
+同一次服务器运行期间，如果原维度不可用，玩家将保持旁观模式，返回点也会保留，以便稍后重试。
 
-## Build
+## 构建
 
 ```sh
 gradle build --no-daemon

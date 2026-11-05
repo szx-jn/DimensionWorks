@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_spectator_toggle"
-version="0.1.0"
+version="0.1.1"
 displayName="DimensionWorks Spectator Toggle"
 authors="szx-jn"
 description='''Press F4 to enter spectator mode and press it again to return to the saved position and game mode.'''

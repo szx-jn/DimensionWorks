@@ -1,6 +1,5 @@
 package dev.szx.dimensionworks.spectatortoggle.handler;
 
-import dev.szx.dimensionworks.spectatortoggle.DimensionWorksSpectatorToggle;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -11,9 +10,35 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 
+import java.util.UUID;
+
 /** Server-authoritative spectator toggle and per-player return point storage. */
 public final class SpectatorToggleController {
     private static final String RETURN_POINT_KEY = "dimensionworks_spectator_toggle";
+
+    private static UUID serverSession;
+
+    public static void startServerSession() {
+        serverSession = UUID.randomUUID();
+    }
+
+    public static void restoreAfterRestart(ServerPlayer player) {
+        CompoundTag data = player.getPersistentData();
+        if (!data.contains(RETURN_POINT_KEY)) {
+            return;
+        }
+
+        CompoundTag savedPoint = data.getCompound(RETURN_POINT_KEY);
+        if (serverSession != null && savedPoint.hasUUID("session")
+                && serverSession.equals(savedPoint.getUUID("session"))) {
+            return;
+        }
+
+        if (savedPoint.getBoolean("active")) {
+            player.setGameMode(previousGameMode(savedPoint));
+        }
+        data.remove(RETURN_POINT_KEY);
+    }
 
     private SpectatorToggleController() {
     }
@@ -36,6 +61,7 @@ public final class SpectatorToggleController {
 
         CompoundTag savedPoint = new CompoundTag();
         savedPoint.putBoolean("active", true);
+        savedPoint.putUUID("session", serverSession);
         savedPoint.putString("dimension", player.level().dimension().location().toString());
         savedPoint.putDouble("x", player.getX());
         savedPoint.putDouble("y", player.getY());
@@ -54,6 +80,11 @@ public final class SpectatorToggleController {
 
         player.displayClientMessage(
                 Component.translatable("message.dimensionworks_spectator_toggle.entered"), true);
+    }
+
+    private static GameType previousGameMode(CompoundTag savedPoint) {
+        GameType mode = GameType.byId(savedPoint.getInt("game_mode"));
+        return mode == GameType.SPECTATOR ? GameType.SURVIVAL : mode;
     }
 
     private static void returnToSavedPoint(
@@ -75,10 +106,7 @@ public final class SpectatorToggleController {
             return;
         }
 
-        GameType previousGameMode = GameType.byId(returnPoint.getInt("game_mode"));
-        if (previousGameMode == GameType.SPECTATOR) {
-            previousGameMode = GameType.SURVIVAL;
-        }
+        GameType previousGameMode = previousGameMode(returnPoint);
 
         player.teleportTo(
                 destination,

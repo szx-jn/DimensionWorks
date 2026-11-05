@@ -2,7 +2,9 @@ package dev.szx.dimensionworks.spectatortoggle.handler;
 
 import dev.szx.dimensionworks.spectatortoggle.DimensionWorksSpectatorToggle;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -12,6 +14,18 @@ public final class SpectatorToggleEvents {
     private static final String RETURN_POINT_KEY = "dimensionworks_spectator_toggle";
 
     private SpectatorToggleEvents() {
+    }
+
+    @SubscribeEvent
+    public static void onServerStarting(ServerStartingEvent event) {
+        SpectatorToggleController.startServerSession();
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            SpectatorToggleController.restoreAfterRestart(player);
+        }
     }
 
     @SubscribeEvent
