@@ -1,7 +1,8 @@
 package dev.szx.dimensionworks.mekstress.integration.mekgenerators;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
+import com.simibubi.create.content.kinetics.base.IRotate;
+import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.core.EnergyPowerMath;
 import java.util.LinkedHashSet;
@@ -107,21 +108,27 @@ public final class GeneratorPowerBridge {
             if (port instanceof TileEntityFusionReactorPort fusion && !fusion.getMultiblock().isPositionOutsideBounds(pos)) continue;
             if (!level.hasChunkAt(pos)) continue;
             if (level.getBlockEntity(pos) instanceof KineticBlockEntity shaft
-                && ShaftBlock.isShaft(shaft.getBlockState())
-                && shaft.getBlockState().getValue(ShaftBlock.AXIS) == direction.getAxis()
+                && connectsTowards(shaft, direction.getOpposite())
                 && (shaft.getTheoreticalSpeed() == 0 || shaft.getTheoreticalSpeed() == outputRpm())) {
                 shafts.add(pos.immutable());
             }
         }
     }
 
+    public static boolean connectsTowards(KineticBlockEntity kinetic, Direction face) {
+        Level level = kinetic.getLevel();
+        return level != null && !(kinetic instanceof GeneratingKineticBlockEntity)
+            && kinetic.getBlockState().getBlock() instanceof IRotate rotate
+            && rotate.hasShaftTowards(level, kinetic.getBlockPos(), kinetic.getBlockState(), face);
+    }
+
     public static float stressPerRpm(KineticBlockEntity shaft) {
         Level level = shaft.getLevel();
-        if (level == null || level.isClientSide || !ShaftBlock.isShaft(shaft.getBlockState())) return 0;
+        if (level == null || level.isClientSide) return 0;
         Set<Object> owners = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         double coefficient = 0;
         for (Direction side : Direction.values()) {
-            if (shaft.getBlockState().getValue(ShaftBlock.AXIS) != side.getAxis()) continue;
+            if (!connectsTowards(shaft, side)) continue;
             BlockPos pos = shaft.getBlockPos().relative(side);
             if (!level.hasChunkAt(pos)) continue;
             BlockEntity tile = level.getBlockEntity(pos);
