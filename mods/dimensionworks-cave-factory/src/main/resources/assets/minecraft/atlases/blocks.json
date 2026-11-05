@@ -1,0 +1,172 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_iron_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_iron_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_copper_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_copper_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_gold_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_gold_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_netherite_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_netherite_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_zinc_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_zinc_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_brass_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_brass_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_tin_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_tin_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_lead_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_lead_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_osmium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_osmium_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_uranium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_uranium_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_bronze_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_bronze_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_steel_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_steel_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_refined_obsidian_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_refined_obsidian_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_refined_glowstone_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_refined_glowstone_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_scarlet_neodymium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_scarlet_neodymium_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_azure_neodymium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_azure_neodymium_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_totemic_gold_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_totemic_gold_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_poseidite_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_poseidite_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_shulkerate_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_shulkerate_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_sculkium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_sculkium_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_eternium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "dimensionworks_cave_factory:block/crystallized_molten_eternium_flow"
+    }
+  ]
+}

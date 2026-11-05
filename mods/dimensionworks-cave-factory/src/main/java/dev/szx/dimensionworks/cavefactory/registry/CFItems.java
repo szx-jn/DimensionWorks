@@ -28,7 +28,7 @@ public final class CFItems {
         var iterator = event.getEntries().iterator();
         while (iterator.hasNext()) {
             var id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(iterator.next().getKey().getItem());
-            if (id != null && (id.getNamespace().startsWith("dimensionworks_") || id.getNamespace().equals("kubejs")))
+            if (id != null && (id.getNamespace().equals("dimensionworks") || id.getNamespace().startsWith("dimensionworks_") || id.getNamespace().equals("kubejs")))
                 iterator.remove();
         }
     }
@@ -44,8 +44,6 @@ public final class CFItems {
     public static RegistryObject<BlockItem> FACTORY_CASING;
     public static RegistryObject<BlockItem> FACTORY_PORT;
     public static RegistryObject<BlockItem> FLUID_STABILIZER;
-    public static final Map<String, RegistryObject<BlockItem>> CRYSTALLIZED_MOLTEN_METALS =
-        new LinkedHashMap<>();
     public static RegistryObject<FluidAmpouleItem> FLUID_AMPOULE;
     public static RegistryObject<CreativeModeTab> CREATIVE_TAB;
 
@@ -62,14 +60,6 @@ public final class CFItems {
         FACTORY_CASING = registerBlockItem("factory_casing", CFBlocks.FACTORY_CASING);
         FACTORY_PORT = registerBlockItem("factory_port", CFBlocks.FACTORY_PORT);
         FLUID_STABILIZER = registerBlockItem("fluid_stabilizer", CFBlocks.FLUID_STABILIZER);
-        CFBlocks.CRYSTALLIZED_MOLTEN_METALS.forEach((fluidId, block) -> {
-            String metalId = fluidId.substring("molten_".length());
-            CRYSTALLIZED_MOLTEN_METALS.put(
-                fluidId,
-                registerBlockItem("crystallized_molten_" + metalId, block)
-            );
-        });
-
         for (MachineType machine : MachineType.values()) {
             CONTROLLER_ITEMS.put(
                 machine,
@@ -108,7 +98,8 @@ public final class CFItems {
                 .displayItems((parameters, output) -> {
                     // One shared tab for all pack-owned namespaces, including future additions.
                     net.minecraftforge.registries.ForgeRegistries.ITEMS.getEntries().stream()
-                        .filter(entry -> entry.getKey().location().getNamespace().startsWith("dimensionworks_")
+                        .filter(entry -> entry.getKey().location().getNamespace().equals("dimensionworks")
+                            || entry.getKey().location().getNamespace().startsWith("dimensionworks_")
                             || entry.getKey().location().getNamespace().equals("kubejs"))
                         .filter(entry -> !entry.getKey().location().toString().equals("dimensionworks_mek_stress:gas_output"))
                         .sorted(java.util.Comparator.comparing(entry -> entry.getKey().location().toString()))

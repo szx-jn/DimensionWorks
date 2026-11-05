@@ -1,6 +1,5 @@
 package dev.szx.dimensionworks.cavefactory;
 
-import dev.szx.dimensionworks.cavefactory.registry.CFBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -16,12 +15,22 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.Map;
 
-/** Tracks molten-metal fluid placements and turns them into crystal after 30 exposed seconds. */
+/** Tracks molten-metal fluid placements and turns them into crystallized fluid after 30 exposed seconds. */
 public final class MoltenCrystallizationEvents {
     private static final long EXPOSURE_TICKS = 30L * 20L;
     private static final long CHECK_INTERVAL_TICKS = 20L;
 
     private MoltenCrystallizationEvents() {}
+
+    @SubscribeEvent
+    public static void migrateRetiredSolidItems(net.minecraftforge.registries.MissingMappingsEvent event) {
+        for (var mapping : event.getMappings(ForgeRegistries.Keys.ITEMS, DimensionWorksCaveFactory.MOD_ID)) {
+            if (!mapping.getKey().getPath().startsWith("crystallized_molten_")) continue;
+            var bucket = ForgeRegistries.ITEMS.getValue(new ResourceLocation(DimensionWorksCaveFactory.MOD_ID,
+                mapping.getKey().getPath() + "_bucket"));
+            if (bucket instanceof net.minecraft.world.item.BucketItem) mapping.remap(bucket);
+        }
+    }
 
     @SubscribeEvent
     public static void onFluidFlow(BlockEvent.FluidPlaceBlockEvent event) {
@@ -85,9 +94,14 @@ public final class MoltenCrystallizationEvents {
                 data.setDirty();
             } else if (now - startedAt >= EXPOSURE_TICKS) {
                 String fluidId = ForgeRegistries.BLOCKS.getKey(level.getBlockState(pos).getBlock()).getPath();
-                var crystal = CFBlocks.CRYSTALLIZED_MOLTEN_METALS.get(fluidId);
-                if (crystal != null) {
-                    level.setBlock(pos, crystal.get().defaultBlockState(), 3);
+                var crystal = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(
+                    DimensionWorksCaveFactory.MOD_ID, "crystallized_" + fluidId));
+                if (crystal instanceof net.minecraft.world.level.material.FlowingFluid flowing) {
+                    var original = level.getFluidState(pos);
+                    var result = original.isSource() ? flowing.getSource(false)
+                        : flowing.getFlowing(original.getAmount(), original.getValue(
+                            net.minecraft.world.level.material.FlowingFluid.FALLING));
+                    level.setBlock(pos, result.createLegacyBlock(), 3);
                 }
                 remove.add(packedPos);
             }

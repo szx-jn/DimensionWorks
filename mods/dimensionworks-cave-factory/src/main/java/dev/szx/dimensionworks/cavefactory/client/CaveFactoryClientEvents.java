@@ -23,7 +23,7 @@ import java.util.Map;
     value = Dist.CLIENT
 )
 public final class CaveFactoryClientEvents {
-    private static final Map<String, Integer> MOLTEN_COLORS = Map.ofEntries(
+    static final Map<String, Integer> MOLTEN_COLORS = Map.ofEntries(
         Map.entry("iron", 0xD77A42), Map.entry("copper", 0xE07845), Map.entry("gold", 0xFFD34D),
         Map.entry("netherite", 0x51454A), Map.entry("zinc", 0xB7C6C7), Map.entry("brass", 0xE5BE48),
         Map.entry("tin", 0xC7D8DE), Map.entry("lead", 0x777F91), Map.entry("osmium", 0xA6D9D1),
@@ -39,19 +39,6 @@ public final class CaveFactoryClientEvents {
 
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> CFBlocks.CRYSTALLIZED_MOLTEN_METALS.values().forEach(
-            block -> {
-                ItemBlockRenderTypes.setRenderLayer(block.get(), RenderType.translucent());
-                Minecraft.getInstance().getBlockColors().register((state, level, pos, tintIndex) -> {
-                    if (tintIndex != 0) {
-                        return -1;
-                    }
-                    ResourceLocation id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
-                    String metalId = id.getPath().substring("crystallized_molten_".length());
-                    return MOLTEN_COLORS.getOrDefault(metalId, 0xFFFFFF);
-                }, block.get());
-            }
-        ));
         event.enqueueWork(() -> MenuScreens.register(
             CFMenus.factoryMachine(),
             FactoryMachineScreen::new

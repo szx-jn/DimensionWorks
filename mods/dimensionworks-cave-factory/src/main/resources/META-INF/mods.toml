@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_cave_factory"
-version="0.1.2"
+version="0.1.3"
 displayName="DimensionWorks Cave Factory"
 authors="szx-jn"
 description='''Unified cave-dimension factories for DimensionWorks.'''

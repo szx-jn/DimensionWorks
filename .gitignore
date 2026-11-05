@@ -48,3 +48,6 @@ out/
 
 # Verified binaries staged only for single-file updater builds
 update-Windows/aria2-runtime/
+
+# Optional local fluid rendering verification
+run-crystal-check/

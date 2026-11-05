@@ -51,5 +51,12 @@ const DW_MOLTEN_METALS = [
 StartupEvents.registry('fluid', event => {
   DW_MOLTEN_METALS.forEach(([id, displayName, color]) => {
     new MoltenMetalFluidDefinition(id, displayName, color).register(event)
+    const metal = id.substring('dimensionworks:molten_'.length)
+    event.create(`dimensionworks_cave_factory:crystallized_molten_${metal}`)
+      .stillTexture(`dimensionworks_cave_factory:block/crystallized_molten_${metal}_still`)
+      .flowingTexture(`dimensionworks_cave_factory:block/crystallized_molten_${metal}_flow`)
+      .color(0xFFFFFF)
+      .bucketColor(color)
+      .displayName(`结晶${displayName}`)
   })
 })
