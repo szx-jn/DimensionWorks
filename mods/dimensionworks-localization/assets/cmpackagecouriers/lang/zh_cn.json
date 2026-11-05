@@ -1,0 +1,15 @@
+{
+  "cmpackagecouriers.keyinfo.open_portable_stock_ticker": "打开便携式仓库管理器",
+  "cmpackagecouriers.ponder.address_interactions.header": "附加地址交互",
+  "cmpackagecouriers.ponder.address_interactions.text_1": "发射飞机时，用“<>”括起的名称会覆盖飞机的目标地址",
+  "cmpackagecouriers.ponder.address_interactions.text_2": "→ <前哨> 农场",
+  "cmpackagecouriers.ponder.address_interactions.text_3": "正在前往“前哨”",
+  "cmpackagecouriers.ponder.address_interactions.text_4": "这能让复杂路线拥有更多灵活性",
+  "cmpackagecouriers.ponder.address_interactions.text_5": "餐桌布地址中的“<>”会由买家的姓名填入",
+  "cmpackagecouriers.ponder.address_interactions.text_6": "→ 已售出 <>",
+  "cmpackagecouriers.ponder.address_interactions.text_7": "→ 已售出 <李华_机械动力>",
+  "cmpackagecouriers.ponder.special_crafting_interactions.header": "特殊合成操作",
+  "cmpackagecouriers.ponder.special_crafting_interactions.text_1": "可以用动力锯切下飞机的机翼",
+  "cmpackagecouriers.ponder.special_crafting_interactions.text_2": "可以在机械手上安装剪刀，预先拆开飞机包裹",
+  "cmpackagecouriers.ponder.special_crafting_interactions.text_3": "预先拆开的包裹送达后会自动拆包"
+}
