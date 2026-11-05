@@ -78,7 +78,7 @@ public final class TerritoryManager {
     }
 
     private static void teleportInto(ServerPlayer player, ServerLevel level, Territory territory) {
-        player.teleportTo(level, territory.centerX(), Territory.FLOOR_Y + 1, territory.centerZ(),
+        player.teleportTo(level, territory.landingX(), Territory.FLOOR_Y + 1, territory.landingZ(),
                 player.getYRot(), player.getXRot());
         player.setDeltaMovement(Vec3.ZERO);
         player.fallDistance = 0.0F;

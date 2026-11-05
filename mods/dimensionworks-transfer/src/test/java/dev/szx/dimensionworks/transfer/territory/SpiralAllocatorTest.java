@@ -20,6 +20,18 @@ class SpiralAllocatorTest {
     }
 
     @Test
+    void landingIsOutsideTerminalForPositiveAndNegativePlots() {
+        for (int index = 0; index < CLAIMS; index++) {
+            int[] grid = SpiralAllocator.indexToGrid(index);
+            Territory plot = new Territory(index, grid[0], grid[1]);
+            // A standing player's half-width is 0.3 blocks; neither edge crosses the terminal.
+            assertTrue(plot.landingX() + 0.3D < plot.centerX());
+            assertEquals(plot.centerZ() + 0.5D, plot.landingZ());
+            assertTrue(plot.contains((int) Math.floor(plot.landingX()), (int) Math.floor(plot.landingZ())));
+        }
+    }
+
+    @Test
     void firstRingIsWalkedInOrder() {
         for (int i = 0; i < RING_ONE.length; i++) {
             assertGrid(i + 1, RING_ONE[i][0], RING_ONE[i][1]);

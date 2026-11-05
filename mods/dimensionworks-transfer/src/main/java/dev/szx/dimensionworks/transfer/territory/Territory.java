@@ -77,6 +77,15 @@ public record Territory(int spiralIndex, int gridX, int gridZ) {
         return minZ() + (TERRITORY_CHUNKS * 16) / 2.0D;
     }
 
+    /** Center of the block immediately west of the dispatch terminal. */
+    public double landingX() {
+        return centerX() - 0.5D;
+    }
+
+    public double landingZ() {
+        return centerZ() + 0.5D;
+    }
+
     /** Guard used by every write so nothing can ever be placed outside the plot. */
     public boolean contains(int x, int z) {
         return x >= minX() && x <= maxX() && z >= minZ() && z <= maxZ();

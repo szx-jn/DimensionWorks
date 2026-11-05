@@ -38,6 +38,9 @@ empty space between their edges. Claims are handed out along a square spiral cen
 
 A plot covers 48x48 blocks (3x3 chunks), from `minX`/`minZ` to `minX+47`/`minZ+47`.
 
+Players arrive in the block immediately west of the central dispatch terminal, so an unpacked
+player does not spawn inside its solid collision shape.
+
 - `y = -128`: bedrock
 - `y = -127 .. -64`: stone
 - `y > -64`: air, open for the owner to build in
