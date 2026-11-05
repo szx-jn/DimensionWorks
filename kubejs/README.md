@@ -21,6 +21,10 @@
 `server_scripts/aether_equipment_lock.js` 禁用天境装备的制作、修复和正常获取流程，保留流程功能物。
 配套的 `defaultconfigs/aether-client.toml` 与 `defaultconfigs/aether-common.toml` 隐藏天境饰品按钮，并启用 Curios 标准菜单。
 
+## 暮色森林拆解台
+
+`twilight_uncrafting_table.js` 移除拆解台配方，从暮色森林创造栏及 JEI 隐藏物品，清理玩家物品栏，并阻止放置和使用。已放置的拆解台在所在区块加载后移除；未加载的区块不会提前修改。箱子等容器内的存量不会主动扫描，进入玩家物品栏时才清理。启动脚本变更需要完整重启。
+
 ## 车万女仆妖精生成
 
 `server_scripts/touhou_little_maid_fairy_natural_spawn.js` 通过生成检查与实体加入世界两层事件，禁止车万女仆的女仆妖精（`touhou_little_maid:fairy`）生成，包括自然生成、刷怪蛋、刷怪笼、命令和模组直接添加；存档中的妖精重新加载时也会被拦截。已加载的妖精不会因脚本热重载立即消失，需重新加载所在区块或重启服务端。此规则不扫描每 tick 的实体列表。
