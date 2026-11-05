@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_drop_lifetime"
-version="0.1.1"
+version="0.1.2"
 displayName="DimensionWorks Drop Lifetime"
 authors="szx-jn"
 description='''Sets ground item lifetime according to the item's vanilla rarity.'''

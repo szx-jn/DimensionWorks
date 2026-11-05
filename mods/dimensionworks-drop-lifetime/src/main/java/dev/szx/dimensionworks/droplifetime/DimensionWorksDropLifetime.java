@@ -56,6 +56,8 @@ public final class DimensionWorksDropLifetime {
                 case UNCOMMON -> 50;
                 case RARE -> 75;
                 case EPIC -> MAX_LIFETIME_SECONDS;
+                // Forge permits other mods to add rarities at runtime.
+                default -> BASE_LIFETIME_SECONDS;
             };
             itemEntity.lifespan = lifetimeSeconds * TICKS_PER_SECOND;
         }
