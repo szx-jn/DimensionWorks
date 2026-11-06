@@ -1,15 +1,8 @@
 package dev.szx.dimensionworks.versiongate.client;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.BufferedInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.concurrent.CompletableFuture;
-import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -21,6 +14,7 @@ public final class VersionMismatchScreen extends Screen {
     private final String localVersion;
     private final String serverVersion;
     private String status = "";
+    private boolean launching;
 
     public VersionMismatchScreen(String localVersion, String serverVersion) {
         super(Component.literal("DimensionWorks 版本不匹配"));
@@ -40,6 +34,7 @@ public final class VersionMismatchScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("暂不更新"), button -> {
             Minecraft.getInstance().setScreen(new net.minecraft.client.gui.screens.TitleScreen());
         }).bounds(right, buttonY, buttonWidth, 20).build());
+        setButtonsActive(!launching);
     }
 
     @Override
@@ -62,124 +57,37 @@ public final class VersionMismatchScreen extends Screen {
     }
 
     private void launchUpdater() {
+        if (launching) return;
+        launching = true;
+        setButtonsActive(false);
         Path gameDir = FMLPaths.GAMEDIR.get().toAbsolutePath().normalize();
-        status = "正在准备更新器...";
+        Minecraft client = Minecraft.getInstance();
+        status = "正在查找本地更新器并启动终端...";
         CompletableFuture.runAsync(() -> {
             try {
-                Path updater = downloadUpdater(gameDir);
-                String tag = "v" + serverVersion;
-                ProcessBuilder process = new ProcessBuilder(updaterCommand(updater, tag));
-                if (!isWindows() && !updater.toFile().setExecutable(true)) {
-                    throw new IOException("无法设置更新器执行权限。");
-                }
-                process.directory(gameDir.toFile()).start();
-                Minecraft.getInstance().execute(() -> Minecraft.getInstance().stop());
-            } catch (IOException exception) {
-                Minecraft.getInstance().execute(() -> status = "启动更新失败：" + exception.getMessage());
+                LocalUpdaterLauncher.launch(gameDir, serverVersion, () -> client.execute(() -> {
+                    status = "更新终端已就绪，正在正常关闭游戏...";
+                    client.stop();
+                }));
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                client.execute(() -> launchFailed("更新器启动被中断。"));
+            } catch (IOException | RuntimeException exception) {
+                client.execute(() -> launchFailed(exception.getMessage()));
             }
         });
     }
 
-    private Path downloadUpdater(Path gameDir) throws IOException {
-        String filename = updaterFilename(System.getProperty("os.name"), System.getProperty("os.arch"));
-        String baseUrl = "https://github.com/szx-jn/DimensionWorks/releases/download/v"
-                + serverVersion + "/";
-        Path destination = gameDir.resolve(filename);
-        Path temporary = gameDir.resolve(filename + ".download");
-        Path checksums = gameDir.resolve("SHA256SUMS." + serverVersion + ".download");
-        try {
-            download(baseUrl + "SHA256SUMS", checksums);
-            download(baseUrl + filename, temporary);
-            String expected = expectedChecksum(Files.readString(checksums), filename);
-            String actual = sha256(temporary);
-            if (!expected.equalsIgnoreCase(actual)) {
-                throw new IOException("更新脚本 SHA-256 校验失败，已拒绝执行。");
-            }
-            try {
-                return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE);
-            } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
-                return Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } finally {
-            Files.deleteIfExists(temporary);
-            Files.deleteIfExists(checksums);
+    private void setButtonsActive(boolean active) {
+        for (var child : children()) {
+            if (child instanceof Button button) button.active = active;
         }
     }
 
-    static String updaterFilename(String osName, String architecture) throws IOException {
-        String os = osName.toLowerCase(java.util.Locale.ROOT);
-        String arch = architecture.toLowerCase(java.util.Locale.ROOT);
-        String platform;
-        String suffix = "";
-
-        if (os.contains("win")) {
-            if (!arch.equals("amd64") && !arch.equals("x86_64")) {
-                throw new IOException("当前 Windows 架构暂不支持自动更新：" + architecture);
-            }
-            platform = "windows-amd64";
-            suffix = ".exe";
-        } else if (os.contains("mac") || os.contains("darwin")) {
-            if (!arch.equals("arm64") && !arch.equals("aarch64")) {
-                throw new IOException("当前 macOS 架构暂不支持自动更新：" + architecture);
-            }
-            platform = "macos-arm64";
-        } else if (os.contains("linux")) {
-            if (!arch.equals("amd64") && !arch.equals("x86_64")) {
-                throw new IOException("当前 Linux 架构暂不支持自动更新：" + architecture);
-            }
-            platform = "linux-amd64";
-        } else {
-            throw new IOException("当前操作系统暂不支持自动更新：" + osName);
-        }
-
-        return "update-dimensionworks-client-" + platform + suffix;
-    }
-
-    static List<String> updaterCommand(Path updater, String tag) {
-        return List.of(updater.toString(), "--release", tag);
-    }
-
-    private static void download(String url, Path destination) throws IOException {
-        java.net.URLConnection connection = java.net.URI.create(url).toURL().openConnection();
-        connection.setConnectTimeout(10_000);
-        connection.setReadTimeout(20_000);
-        try (InputStream input = connection.getInputStream()) {
-            Files.copy(input, destination, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException exception) {
-            Files.deleteIfExists(destination);
-            throw exception;
-        }
-    }
-
-    private static String expectedChecksum(String checksums, String filename) throws IOException {
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
-                "(?m)^([0-9a-fA-F]{64})\\s+\\*?" + java.util.regex.Pattern.quote(filename) + "$");
-        java.util.regex.Matcher matcher = pattern.matcher(checksums);
-        if (!matcher.find()) {
-            throw new IOException("SHA256SUMS 中没有对应更新脚本的校验值。");
-        }
-        return matcher.group(1);
-    }
-
-    private static String sha256(Path file) throws IOException {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            try (InputStream input = new BufferedInputStream(Files.newInputStream(file))) {
-                byte[] buffer = new byte[8192];
-                int read;
-                while ((read = input.read(buffer)) != -1) {
-                    digest.update(buffer, 0, read);
-                }
-            }
-            return java.util.HexFormat.of().formatHex(digest.digest());
-        } catch (NoSuchAlgorithmException impossible) {
-            throw new IllegalStateException("SHA-256 is not available", impossible);
-        }
-    }
-
-    private boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("win");
+    private void launchFailed(String reason) {
+        launching = false;
+        setButtonsActive(true);
+        status = "启动更新失败：" + (reason == null ? "请检查本地更新器与终端。" : reason);
     }
 
     @Override
@@ -189,6 +97,6 @@ public final class VersionMismatchScreen extends Screen {
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().setScreen(new net.minecraft.client.gui.screens.TitleScreen());
+        if (!launching) Minecraft.getInstance().setScreen(new net.minecraft.client.gui.screens.TitleScreen());
     }
 }
