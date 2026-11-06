@@ -622,7 +622,7 @@
       "name": "DimensionWorks Transfer",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-transfer",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-transfer"

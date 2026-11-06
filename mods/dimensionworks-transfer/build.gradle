@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.3.2'
+version = '0.3.3'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_transfer'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -42,6 +42,12 @@ if (project.hasProperty('transferTestModsDir')) {
     dependencies {
         runtimeOnly fg.deobf('dw-test:twilightforest:1.20.1-4.3.2508-universal')
         runtimeOnly fg.deobf('dw-test:create_mobile_packages:1.20.1-0.6.1-dimensionworks.14')
+        runtimeOnly fg.deobf('dw-test:appliedenergistics2-forge:15.4.10')
+        runtimeOnly fg.deobf('dw-test:guideme:20.1.15')
+        runtimeOnly fg.deobf('dw-test:Mekanism:1.20.1-10.4.16.80')
+        runtimeOnly fg.deobf('dw-test:megacells-forge:2.4.6-1.20.1')
+        runtimeOnly fg.deobf('dw-test:Applied-Mekanistics:1.4.3')
+        runtimeOnly fg.deobf('dw-test:cloth-config:11.1.136-forge')
     }
 }
 

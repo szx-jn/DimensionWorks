@@ -20,6 +20,8 @@ public final class WDTransfer {
 
     public WDTransfer(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
+        modEventBus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
+            event.enqueueWork(dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy::initialize));
         TransferNetwork.register();
         DispatchBlocks.BLOCKS.register(modEventBus);
         ModChunkGenerators.CHUNK_GENERATORS.register(modEventBus);

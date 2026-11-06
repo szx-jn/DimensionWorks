@@ -6,6 +6,7 @@ import dev.szx.dimensionworks.transfer.WDTransfer;
 import dev.szx.dimensionworks.transfer.territory.Territory;
 import dev.szx.dimensionworks.transfer.territory.TerritoryBuilder;
 import dev.szx.dimensionworks.transfer.territory.TerritoryManager;
+import dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy;
 import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
 import dev.szx.dimensionworks.transfer.dispatch.DispatchController;
 import net.minecraft.commands.CommandSourceStack;
@@ -285,6 +286,17 @@ public final class TransferEvents {
             return;
         }
         if (!level.dimension().equals(WDKeys.TRANSFER_LEVEL)) {
+            return;
+        }
+        boolean forbidden = TransferBlockPolicy.forbidden(event.getPlacedBlock())
+            || TransferBlockPolicy.forbidden(level.getBlockState(event.getPos()));
+        if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
+            forbidden |= multi.getReplacedBlockSnapshots().stream()
+                .anyMatch(snapshot -> TransferBlockPolicy.forbidden(snapshot.getCurrentBlock()));
+        }
+        if (forbidden) {
+            event.setCanceled(true);
+            if (event.getEntity() instanceof ServerPlayer player) TransferBlockPolicy.notifyDenied(player);
             return;
         }
         if (!(event.getEntity() instanceof ServerPlayer player)) {
