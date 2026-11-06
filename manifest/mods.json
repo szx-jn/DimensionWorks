@@ -612,7 +612,7 @@
       "name": "DimensionWorks Spectator Toggle",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-spectator-toggle",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-spectator-toggle"

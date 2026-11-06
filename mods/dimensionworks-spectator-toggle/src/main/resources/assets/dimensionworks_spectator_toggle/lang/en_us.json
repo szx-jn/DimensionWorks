@@ -3,7 +3,7 @@
   "key.categories.dimensionworks_spectator_toggle": "DimensionWorks",
   "message.dimensionworks_spectator_toggle.entered": "Spectator mode enabled. Press F4 again to return.",
   "message.dimensionworks_spectator_toggle.returned": "Returned to your saved position and game mode.",
-  "message.dimensionworks_spectator_toggle.already_spectator": "You are already in spectator mode without a saved return point.",
+  "message.dimensionworks_spectator_toggle.recovered": "Spectator state cleared. Press F4 again to start from your current position.",
   "message.dimensionworks_spectator_toggle.enter_failed": "Could not enter spectator mode.",
   "message.dimensionworks_spectator_toggle.return_failed": "Could not return to your saved point.",
   "message.dimensionworks_spectator_toggle.dimension_unavailable": "Your saved dimension is unavailable. Your return point is being kept."

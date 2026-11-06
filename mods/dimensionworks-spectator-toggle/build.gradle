@@ -4,7 +4,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.1.0'
+version = '0.1.1'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_spectator_toggle'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -32,7 +32,11 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.23'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
+
+test { useJUnitPlatform() }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
