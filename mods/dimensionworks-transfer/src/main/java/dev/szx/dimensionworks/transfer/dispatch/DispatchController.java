@@ -19,21 +19,16 @@ import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
-import org.joml.Vector3f;
 
 /** Validates parcel dispatch requests and performs the selected dimension transfer. */
 public final class DispatchController {
@@ -185,7 +180,6 @@ public final class DispatchController {
         player.setDeltaMovement(Vec3.ZERO);
         player.fallDistance = 0;
         player.inventoryMenu.sendAllDataToRemote();
-        burst(player);
         return true;
     }
 
@@ -311,23 +305,4 @@ public final class DispatchController {
         }
     }
 
-    private static void burst(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
-        Vec3 center = player.position().add(0, player.getBbHeight() / 2, 0);
-        for (int i = 0; i < 100; i++) {
-            int rgb = java.awt.Color.HSBtoRGB(i / 100f, 0.9f, 1);
-            DustParticleOptions dust = new DustParticleOptions(
-                new Vector3f(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f),
-                1.2f);
-            double x = center.x + (level.random.nextDouble() - 0.5) * 3;
-            double y = center.y + (level.random.nextDouble() - 0.5) * 3;
-            double z = center.z + (level.random.nextDouble() - 0.5) * 3;
-            level.sendParticles(dust, x, y, z, 1, 0, 0, 0, 0);
-            if (i % 3 == 0) {
-                level.sendParticles(ParticleTypes.FIREWORK, x, y, z, 1, 0, 0, 0, 0);
-            }
-        }
-        level.playSound(null, player.blockPosition(), SoundEvents.FIREWORK_ROCKET_BLAST,
-            SoundSource.PLAYERS, 1, 1);
-    }
 }

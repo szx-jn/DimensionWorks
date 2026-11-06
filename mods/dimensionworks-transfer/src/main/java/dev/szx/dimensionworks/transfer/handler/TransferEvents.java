@@ -55,6 +55,7 @@ public final class TransferEvents {
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             DispatchController.forget(player);
+            UnpackFireworks.cancel(player.getUUID());
             FROG_RIDES.remove(player.getUUID());
             FROG_COOLDOWNS.remove(player.getUUID());
             dev.szx.dimensionworks.transfer.territory.PlotChunkLoading.deactivate(player.getUUID());
@@ -70,6 +71,7 @@ public final class TransferEvents {
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        UnpackFireworks.cancel(event.getEntity().getUUID());
         FROG_RIDES.remove(event.getEntity().getUUID());
         if (event.getEntity() instanceof ServerPlayer player && player.level().dimension().equals(WDKeys.TRANSFER_LEVEL))
             TerritoryManager.enter(player);
@@ -78,6 +80,7 @@ public final class TransferEvents {
     @SubscribeEvent
     public static void onStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
         TerritoryManager.clear();
+        UnpackFireworks.clear();
         FROG_RIDES.clear();
         FROG_COOLDOWNS.clear();
     }
@@ -88,6 +91,7 @@ public final class TransferEvents {
             return;
         }
         TerritoryBuilder.tick();
+        UnpackFireworks.tick(event.getServer());
     }
 
     private static final java.util.Map<java.util.UUID, FrogRide> FROG_RIDES = new java.util.HashMap<>();
