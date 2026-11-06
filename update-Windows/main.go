@@ -987,7 +987,11 @@ func newHTTPClient(timeout, responseHeaderTimeout time.Duration) *http.Client {
 func latestRelease() (ReleaseInfo, error) {
 	apiURL := "https://api.github.com/repos/" + repository + "/releases/latest"
 	client := newHTTPClient(30*time.Second, 10*time.Second)
-	return latestReleaseFrom(client, []string{apiURL, "https://gh-proxy.com/" + apiURL})
+	return latestReleaseFrom(client, releaseAPISources(apiURL))
+}
+
+func releaseAPISources(apiURL string) []string {
+	return []string{apiURL, "https://ghproxy.net/" + apiURL, "https://gh-proxy.com/" + apiURL}
 }
 
 func latestReleaseFrom(client *http.Client, sources []string) (ReleaseInfo, error) {

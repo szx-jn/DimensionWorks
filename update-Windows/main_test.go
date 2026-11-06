@@ -52,6 +52,24 @@ func TestLatestReleaseFallsBackWhenGitHubAPIUnavailable(t *testing.T) {
 	}
 }
 
+func TestReleaseAPISourcesIncludeMirrorFallbacks(t *testing.T) {
+	source := "https://api.github.com/repos/szx-jn/DimensionWorks/releases/latest"
+	want := []string{
+		source,
+		"https://ghproxy.net/" + source,
+		"https://gh-proxy.com/" + source,
+	}
+	got := releaseAPISources(source)
+	if len(got) != len(want) {
+		t.Fatalf("expected direct API URL and two mirror fallbacks, got %v", got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("candidate %d = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
 func TestAcquireUpdateLockSerializesConcurrentConfirmation(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "lock")
 	if err := os.WriteFile(path, []byte("old-lock"), 0600); err != nil { t.Fatal(err) }

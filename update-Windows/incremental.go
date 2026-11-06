@@ -96,7 +96,7 @@ func releaseInfoForTag(tag string) (*ReleaseInfo, error) {
 	}
 	apiURL := "https://api.github.com/repos/" + repository + "/releases/tags/" + url.PathEscape(tag)
 	client := newHTTPClient(20*time.Second, 8*time.Second)
-	info, err := latestReleaseFrom(client, []string{apiURL, "https://gh-proxy.com/" + apiURL})
+	info, err := latestReleaseFrom(client, releaseAPISources(apiURL))
 	if err != nil {
 		return nil, err
 	}
