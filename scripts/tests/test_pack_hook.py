@@ -1,6 +1,8 @@
 import json
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.pack_hook import check_update_assets, has_dependency_cycle, in_repo_mods
 
@@ -38,6 +40,31 @@ class UpdaterAssetContractTest(unittest.TestCase):
         self.assertTrue(check_update_assets().ok)
         self.assertFalse((ROOT / "release-updaters" / "update-dimensionworks-client.sh").exists())
         self.assertFalse((ROOT / "release-updaters" / "update-dimensionworks-server.sh").exists())
+
+    def test_missing_launcher_platform_is_reported(self) -> None:
+        import scripts.pack_hook as pack_hook
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            updater = root / "update-Windows"
+            updater.mkdir()
+            for name in ("go.mod", "main.go", "main_test.go", "console_windows.go", "console_other.go"):
+                (updater / name).touch()
+            workflow = root / ".github/workflows/release-pack.yml"
+            workflow.parent.mkdir(parents=True)
+            workflow.write_text((ROOT / ".github/workflows/release-pack.yml").read_text())
+            client = root / "mods/dimensionworks-version-gate/src/main/java/dev/szx/dimensionworks/versiongate/client"
+            client.mkdir(parents=True)
+            (client / "VersionMismatchScreen.java").write_text("LocalUpdaterLauncher.launch(gameDir);")
+            (client / "LocalUpdaterLauncher.java").write_text(
+                "update-dimensionworks-client-windows-amd64.exe\nupdate-dimensionworks-client-linux-amd64"
+            )
+            with patch.object(pack_hook, "ROOT", root):
+                result = check_update_assets()
+            self.assertFalse(result.ok)
+            self.assertEqual(result.log, [
+                "local updater launcher does not select updater asset: update-dimensionworks-client-macos-arm64"
+            ])
 
 
 class InRepoModResourceContractTest(unittest.TestCase):

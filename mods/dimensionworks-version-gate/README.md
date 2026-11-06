@@ -1,12 +1,19 @@
 # DimensionWorks Version Gate
 
-Forge 1.20.1 mod that compares the local pack's `VERSION` file with the server's during Forge login negotiation.
+Minecraft 1.20.1 Forge 自研模组，在 Forge 登录握手阶段比较客户端与服务端整合包的 `VERSION`。
 
-- If the client pack version is older, the login is disconnected before entering the world.
-- A Minecraft-style dirt-background screen shows both versions.
-- **立即更新** downloads the matching native Go client updater from the server's GitHub Release, verifies it against `SHA256SUMS`, runs it with the server's release tag, then exits Minecraft.
-- **暂不更新** returns to the title screen.
-- Supported automatic-update targets: Windows amd64, Linux amd64 and macOS arm64. Other OS/architecture combinations receive a clear unsupported-platform message.
-- The updater is downloaded into the game directory and does not need to be bundled in the Modrinth package.
+- 客户端版本过低时，在进入世界前断开登录，并显示当前版本和服务端版本。
+- 点击「立即更新」后，只查找游戏根目录中的本地客户端更新器，在独立终端中传入服务端目标 `--release vX.Y.Z`。本模组不下载或替换更新器。
+- Windows amd64 使用 PowerShell 新窗口，macOS arm64 使用 Terminal，Linux amd64 使用已安装的终端。其他系统或架构显示不支持提示。
+- 收到终端就绪标记后，正常关闭当前 Minecraft；交接程序等待该游戏 PID 退出后才运行更新器，最长等待 120 秒，不终止其他 Java 或启动器进程。
+- 更新器缺失、终端不可用或启动失败时，保留游戏界面并显示原因。点击「暂不更新」返回标题界面。
 
-Build with `gradle build --no-daemon`. The resulting jar is added to `manifest/mods.json` as an in-repository mod for both client and server packaging.
+客户端与服务端都需要安装本模组。更新器作为 GitHub Release 的独立资产分发，使用此入口前需要将对应平台的客户端更新器放入游戏根目录。交接文件使用 `.dimensionworks-update/handoff`，不增加游戏实体、区块加载或常驻服务端任务。
+
+## 本地验证
+
+使用 Java 17、Gradle 8.8 执行 `gradle build --no-daemon`。回归测试覆盖平台和架构选择、本地文件缺失、命令转义、指定 PID 等待，以及模拟终端就绪或失败时是否请求游戏退出；模拟测试不运行真实更新器，不代表三平台实际 Minecraft 客户端已验证。
+
+## 更新记录
+
+- `0.1.1`：版本过低时通过本地更新器与独立终端更新；收到终端就绪后正常退出游戏，替代自动下载更新器的旧入口。同步迁移测试接口与发布前资产检查。

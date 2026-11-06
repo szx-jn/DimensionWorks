@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_version_gate"
-version="0.1.0"
+version="0.1.1"
 displayName="DimensionWorks Version Gate"
 authors="szx-jn"
 description='''Checks the DimensionWorks pack version during the login handshake and offers an in-game update screen.'''

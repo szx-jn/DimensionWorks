@@ -162,9 +162,12 @@ def check_update_assets() -> CheckResult:
             if asset not in workflow_text:
                 problems.append(f"release workflow is missing updater asset: {asset}")
         gate_text = version_gate.read_text(encoding="utf-8")
-        for platform in ("windows-amd64", "linux-amd64", "macos-arm64"):
-            if platform not in gate_text:
-                problems.append(f"version gate does not select updater platform: {platform}")
+        if "LocalUpdaterLauncher.launch(" not in gate_text:
+            problems.append("version gate does not delegate to the local updater launcher")
+        launcher_text = (version_gate.parent / "LocalUpdaterLauncher.java").read_text(encoding="utf-8")
+        for asset in expected_assets:
+            if "-client-" in asset and asset not in launcher_text:
+                problems.append(f"local updater launcher does not select updater asset: {asset}")
     except OSError as error:
         problems.append(f"cannot validate updater release integration: {error}")
 
