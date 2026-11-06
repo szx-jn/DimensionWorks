@@ -90,4 +90,9 @@ public record Territory(int spiralIndex, int gridX, int gridZ) {
     public boolean contains(int x, int z) {
         return x >= minX() && x <= maxX() && z >= minZ() && z <= maxZ();
     }
+
+    public boolean containsChunk(int x, int z) {
+        return x >= chunkX() && x < chunkX() + TERRITORY_CHUNKS
+            && z >= chunkZ() && z < chunkZ() + TERRITORY_CHUNKS;
+    }
 }

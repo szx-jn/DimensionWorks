@@ -158,6 +158,9 @@ public final class DimensionWorksMekStress {
         () -> IForgeMenuType.create(CrossDimensionTransportMenu::new)
     );
 
+    public static final RegistryObject<MenuType<dev.szx.dimensionworks.mekstress.memory.CloudDiskMenu>> CLOUD_DISK_MENU = MENUS.register(
+        "cloud_disk", () -> IForgeMenuType.create(dev.szx.dimensionworks.mekstress.memory.CloudDiskMenu::new));
+
     public DimensionWorksMekStress() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         dev.szx.dimensionworks.mekstress.integration.gas.GasFluid.register(modBus);
@@ -179,7 +182,6 @@ public final class DimensionWorksMekStress {
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onEntityJoin);
         MinecraftForge.EVENT_BUS.addListener(MemoryLegacyMigration::onEntityLeave);
         MinecraftForge.EVENT_BUS.addListener(MatterBallMailbox::onLogin);
-        MinecraftForge.EVENT_BUS.addListener(MatterBallMailbox::clearAtShutdown);
         MinecraftForge.EVENT_BUS.addListener(MachineKineticRegistry::onServerTick);
         MinecraftForge.EVENT_BUS.addListener(MachineKineticRegistry::onServerStopping);
         MinecraftForge.EVENT_BUS.addListener(CrossDimensionTransportManager::onServerTick);

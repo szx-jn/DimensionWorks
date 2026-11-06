@@ -9,7 +9,7 @@
   "message.dimensionworks_transfer.returned": "Returned to the saved location.",
   "message.dimensionworks_transfer.terminal_hint": "Pack yourself and enter the dispatch terminal to choose a destination.",
   "message.dimensionworks_transfer.destination_locked": "This destination is still locked.",
-  "message.dimensionworks_transfer.destination_unavailable": "That destination is unavailable. Check that its dimension is loaded.",
+  "message.dimensionworks_transfer.destination_unavailable": "No safe landing was found, or the destination failed to load. Check the server log.",
   "message.dimensionworks_transfer.unpack_failed": "Could not unpack you, so you were returned to your transfer plot.",
   "message.dimensionworks_transfer.tutorial_title": "Use the Dimension Key to enter the transfer dimension and unlock controls",
   "dimensionworks_transfer.destination.overworld": "Overworld",
@@ -18,5 +18,6 @@
   "dimensionworks_transfer.destination.twilight": "Twilight Forest",
   "dimensionworks_transfer.destination.alexscaves": "Alex Caves",
   "dimensionworks_transfer.destination.aether": "The Aether",
-  "message.dimensionworks_transfer.tutorial_action": "Controls unlock when you arrive"
+  "message.dimensionworks_transfer.tutorial_action": "Controls unlock when you arrive",
+  "message.dimensionworks_transfer.no_safe_landing": "No safe landing in your plot: a safe floor and two clear vertical blocks are required."
 }

@@ -124,5 +124,13 @@
   "block.dimensionworks_mek_stress.matter_ball_unpacker.full": "解包器内仍有未输出的物品或流体，无法接收新的物质球",
   "gui.dimensionworks_mek_stress.transport.coefficient": "应力倍率（SU/RPM）",
   "gui.dimensionworks_mek_stress.transport.apply": "应用",
-  "config.jade.plugin_dimensionworks_mek_stress.gearbox_live_stress": "ME 齿轮箱实时应力"
+  "config.jade.plugin_dimensionworks_mek_stress.gearbox_live_stress": "ME 齿轮箱实时应力",
+  "key.dimensionworks_mek_stress.cloud_disk": "打开云盘",
+  "key.categories.dimensionworks_mek_stress": "维度工坊",
+  "gui.dimensionworks_mek_stress.cloud_title": "云盘",
+  "gui.dimensionworks_mek_stress.cloud_hint": "点击物品领取到背包",
+  "gui.dimensionworks_mek_stress.cloud_page": "第 %s / %s 页",
+  "gui.dimensionworks_mek_stress.cloud_contents": "包含 %s 种物品、%s 种流体",
+  "message.dimensionworks_mek_stress.cloud_inventory_full": "背包空间不足，未领取的物品仍保留在云盘。",
+  "message.dimensionworks_mek_stress.cloud_delivery": "你有一个频道完全损坏了......，这个频道的物品已经打包成物质球发到你的云盘了，可以点击f12打开云盘界面获取物质球"
 }

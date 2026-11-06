@@ -9,7 +9,7 @@
   "message.dimensionworks_transfer.returned": "已返回进入中转维度前的位置。",
   "message.dimensionworks_transfer.terminal_hint": "变成包裹后钻入发运终端，选择目的地。",
   "message.dimensionworks_transfer.destination_locked": "此目的地尚未解锁。",
-  "message.dimensionworks_transfer.destination_unavailable": "目的地暂不可用，请检查维度是否已加载。",
+  "message.dimensionworks_transfer.destination_unavailable": "找不到可用的安全落点或目的地生成失败，请检查服务端日志。",
   "message.dimensionworks_transfer.unpack_failed": "拆包失败，已将你送回中转领地。",
   "message.dimensionworks_transfer.tutorial_title": "右键使用维度钥匙进入中转维度以解锁操作",
   "dimensionworks_transfer.destination.overworld": "主世界",
@@ -18,5 +18,6 @@
   "dimensionworks_transfer.destination.twilight": "暮色森林",
   "dimensionworks_transfer.destination.alexscaves": "Alex 洞穴",
   "dimensionworks_transfer.destination.aether": "天境",
-  "message.dimensionworks_transfer.tutorial_action": "完成引导后操作将恢复"
+  "message.dimensionworks_transfer.tutorial_action": "完成引导后操作将恢复",
+  "message.dimensionworks_transfer.no_safe_landing": "领地内找不到安全落点：需要安全地面和连续两格空余空间。"
 }

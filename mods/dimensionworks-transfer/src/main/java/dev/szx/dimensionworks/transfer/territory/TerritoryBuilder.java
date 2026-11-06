@@ -48,8 +48,14 @@ public final class TerritoryBuilder {
 
     public static void tick() {
         int budget = BLOCKS_PER_TICK;
-        while (budget > 0 && !JOBS.isEmpty()) {
+        int remainingJobs = JOBS.size();
+        while (budget > 0 && !JOBS.isEmpty() && remainingJobs-- > 0) {
             Job job = JOBS.peek();
+            var player = job.level.getServer().getPlayerList().getPlayer(job.playerId);
+            if (player == null || player.serverLevel() != job.level) {
+                JOBS.addLast(JOBS.removeFirst());
+                continue;
+            }
             budget -= job.step(budget);
             if (job.isDone()) {
                 JOBS.poll();
@@ -57,6 +63,8 @@ public final class TerritoryBuilder {
             }
         }
     }
+
+    public static void clear() { JOBS.clear(); }
 
     /** Axis-aligned box of one block state, always inside the owning plot. */
     private record Box(int x0, int x1, int y0, int y1, int z0, int z1, BlockState state) {

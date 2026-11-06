@@ -9,7 +9,8 @@ import dev.szx.dimensionworks.transfer.returnpoint.ReturnPointSavedData;
 import dev.szx.dimensionworks.transfer.territory.Territory;
 import dev.szx.dimensionworks.transfer.territory.TerritoryManager;
 import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
-import java.lang.reflect.Constructor;
+import dev.szx.dimensionworks.transfer.territory.SafeLanding;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -160,10 +161,10 @@ public final class DispatchController {
                 case "overworld" -> toOverworld(player);
                 case "nether" -> toNether(player, source);
                 case "end" -> toEnd(player);
-                case "twilight" -> toTwilight(player);
+                case "twilight" -> toTwilight(player, source);
                 default -> false;
             };
-        } catch (ReflectiveOperationException | RuntimeException exception) {
+        } catch (ReflectiveOperationException | IOException | RuntimeException exception) {
             WDTransfer.LOGGER.error("Could not dispatch player to route {}", route, exception);
             arrived = false;
         }
@@ -179,7 +180,11 @@ public final class DispatchController {
                 Component.translatable("message.dimensionworks_transfer.unpack_failed"), false);
             return false;
         }
-
+        ReturnPointSavedData.get(player.server.overworld()).remove(player.getUUID());
+        player.setPortalCooldown();
+        player.setDeltaMovement(Vec3.ZERO);
+        player.fallDistance = 0;
+        player.inventoryMenu.sendAllDataToRemote();
         burst(player);
         return true;
     }
@@ -239,16 +244,12 @@ public final class DispatchController {
                 destination.getMinBuildHeight() + 8, destination.getMaxBuildHeight() - 8),
             (int) (originZ * scale));
 
-        var portal = destination.getPortalForcer().findPortalAround(
-            desired, true, destination.getWorldBorder());
-        if (portal.isEmpty()) {
-            portal = destination.getPortalForcer().createPortal(desired, Direction.Axis.X);
-        }
-        if (portal.isEmpty()) {
-            return false;
-        }
-
-        BlockPos safe = portal.get().minCorner;
+        // Nether roof/bedrock are excluded. No portal search or construction is involved.
+        var landing = SafeLanding.around(destination, desired, 24,
+            destination.getMinBuildHeight() + 1, Math.min(125, destination.getMaxBuildHeight() - 3), pos -> true);
+        if (landing.isEmpty()) return false;
+        BlockPos safe = landing.get();
+        player.setPortalCooldown();
         player.teleportTo(destination, safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5,
             player.getYRot(), 0);
         return player.serverLevel() == destination;
@@ -265,24 +266,48 @@ public final class DispatchController {
         return player.serverLevel() == destination;
     }
 
-    private static boolean toTwilight(ServerPlayer player) throws ReflectiveOperationException {
-        ResourceKey<Level> key = ResourceKey.create(
-            Registries.DIMENSION,
-            new ResourceLocation("twilightforest", "twilight_forest"));
-        ServerLevel destination = player.server.getLevel(key);
+    private static boolean toTwilight(ServerPlayer player, ReturnPoint source)
+            throws ReflectiveOperationException, IOException {
+        ServerLevel destination = TwilightDestination.getOrLoad(player.server);
         if (destination == null) {
             return false;
         }
 
-        Class<?> teleporterClass = Class.forName("twilightforest.world.TFTeleporter");
-        Constructor<?> constructor = teleporterClass.getConstructor(boolean.class);
-        ITeleporter teleporter = (ITeleporter) constructor.newInstance(false);
+        ServerLevel origin = source == null ? player.server.overworld() : player.server.getLevel(
+            ResourceKey.create(Registries.DIMENSION, source.dimension()));
+        double scale = origin == null ? 1 : net.minecraft.world.level.dimension.DimensionType.getTeleportationScale(
+            origin.dimensionType(), destination.dimensionType());
+        BlockPos desired = destination.getWorldBorder().clampToBounds(
+            (source == null ? 0 : source.x()) * scale, 64, (source == null ? 0 : source.z()) * scale);
+        destination.getChunk(desired);
+        desired = destination.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, desired);
+        // This stable TF method performs its progression/biome rerouting without makePortal().
+        var reroute = Class.forName("twilightforest.world.TFTeleporter").getDeclaredMethod(
+            "moveToSafeCoords", ServerLevel.class, net.minecraft.world.entity.Entity.class, BlockPos.class);
+        reroute.setAccessible(true);
+        var info = (net.minecraft.world.level.portal.PortalInfo) reroute.invoke(null, destination, player, desired);
+        var safeAround = Class.forName("twilightforest.world.TFTeleporter").getMethod(
+            "isSafeAround", Level.class, BlockPos.class, net.minecraft.world.entity.Entity.class, boolean.class);
+        boolean enforced = (boolean) Class.forName("twilightforest.util.LandmarkUtil")
+            .getMethod("isProgressionEnforced", Level.class).invoke(null, destination);
+        var landing = SafeLanding.around(destination, BlockPos.containing(info.pos), 24,
+            destination.getMinBuildHeight() + 1, destination.getMaxBuildHeight() - 3, pos -> {
+                try { return (boolean) safeAround.invoke(null, destination, pos, player, enforced); }
+                catch (ReflectiveOperationException e) { throw new IllegalStateException(e); }
+            });
+        if (landing.isEmpty()) return false;
         AUTHORIZED_TWILIGHT_TRAVEL.add(player.getUUID());
+        boolean previous = player.getPersistentData().getBoolean(TwilightDestination.AUTHORIZATION);
+        player.getPersistentData().putBoolean(TwilightDestination.AUTHORIZATION, true);
         try {
-            return player.changeDimension(destination, teleporter) != null
-                && player.serverLevel() == destination;
+            BlockPos safe = landing.get();
+            player.setPortalCooldown();
+            player.teleportTo(destination, safe.getX() + .5, safe.getY(), safe.getZ() + .5, player.getYRot(), 0);
+            return player.serverLevel() == destination;
         } finally {
             AUTHORIZED_TWILIGHT_TRAVEL.remove(player.getUUID());
+            if (previous) player.getPersistentData().putBoolean(TwilightDestination.AUTHORIZATION, true);
+            else player.getPersistentData().remove(TwilightDestination.AUTHORIZATION);
         }
     }
 

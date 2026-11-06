@@ -1,63 +1,41 @@
 # DimensionWorks Transfer
 
-Adds `dw:transfer`, a per-player isolated staging dimension for DimensionWorks.
+为维度工坊提供 `dw:transfer` 个人中转领地、维度钥匙引导和玩家包裹发运。
 
-## Behaviour
+## 进入与物品
 
-- **Dimension key access.** The configurable `P` key remains the return shortcut after the key tutorial. Completing Gear Heart stage 2 grants the key, stores the main-hand stack, and locks player controls until the key sends them into their transfer plot.
-- **Independent admin path.** The OP 2 `/dwtransfer` command and the player key use separate permission paths.
-- **Parcel dispatch.** Packed players enter a protected 1×1×1 terminal in their own plot to choose the overworld, nether, end or Twilight Forest. Alex's Caves and the Aether appear with a separate lock overlay and are rejected server-side.
-- **Create logistics.** The paired DimensionWorks CMP build lets packed players ride belts. A packed player near a Frogport targeting a running chain conveyor is drawn in and attached using Create's chain-riding synchronization.
-- **Progression tutorial.** Gear Heart stage 2 unlocks the temporary dimension key. Its original main-hand stack NBT and selected slot are restored after the first successful trip into the transfer plot.
-- **Void world.** The chunk generator emits nothing at all. All blocks come from plot setup.
-- **No sky.** A custom `DimensionSpecialEffects` suppresses sky, clouds, and weather rendering.
-- **Constant light.** `fixed_time` is pinned to noon and the lightmap is forced bright, so every
-  block reads as overworld daylight at all times.
-- **Permanent peace.** The biome declares no spawners, hostile entities are refused on join, and the
-  dimension type disables monster spawning. Other dimensions are unaffected.
-- **Dispatch terminal.** A protected 1×1 terminal is built at the plot centre. Packed players can enter it to open the destination screen; route imagery comes from a JSON catalog and locked destinations are overlaid with a separate image.
-- **One plot per player.** On first entry a player is assigned a 3x3 chunk plot, teleported to its
-  centre, and the plot is built around them.
-- **Confinement.** A barrier ring is placed on the plot's outer blocks and a per-tick clamp keeps
-  players inside it no matter how they try to leave.
+- 齿轮之心第二阶段完成后授予一次性维度钥匙。引导记录完整主手 NBT 与快捷栏槽位，冻结操作；主手右键成功进入领地后，在下一服务端 tick 恢复物品并完整同步背包。消费逻辑只操作使用开始时捕获的钥匙，不消费恢复后的物品。
+- 引导完成后，默认 `P` 在来源位置与个人中转领地之间切换；普通 P 传送不改变背包或主手。OP 2 `/dwtransfer` 使用独立管理权限路径。
+- 每次进入都在本人领地内搜索安全落点：脚部与头部连续两格无碰撞、无流体空间，脚下有完整支撑，脚下至头顶无危险方块。找不到时拒绝进入，不破坏建筑。
+- 危险落点标签为 `dimensionworks_transfer:unsafe_landing_blocks`，可由数据包追加第三方危险方块。
 
-## Plot layout
+## 领地与加载
 
-Plots live on a square grid with a stride of 14 chunks, so two neighbours always leave 11 chunks of
-empty space between their edges. Claims are handed out along a square spiral centred on grid
-`(0,0)`, which keeps every plot near the origin instead of producing a long single-file strip.
+每位玩家拥有 3×3 区块（48×48）的封闭领地，领地沿间距 14 区块的方格螺旋分配，两个相邻领地间留 11 个空区块。
 
-| Ring | Cells | Furthest plot origin |
-|------|-------|----------------------|
-| 0 | 1 | chunk (0, 0) |
-| 1 | 9 | chunk (14, 14) |
-| 2 | 25 | chunk (28, 28) |
-| 5 | 81 | chunk (70, 70) |
+- `y=-128` 为基岩，`-127..-64` 为石头；上方供玩家建造，边缘与世界顶层为屏障。
+- 首次进入同步铺设站立层，地下与边界每 tick 最多写入 4096 个方块；主人离开或下线暂停，回来继续，结束服务器清理任务状态。
+- 中转玩家不使用原版视距半径票据，只为本人九个区块添加临时运行票据，离开或下线移除。
+- 服务端在追踪、首次发送和更新广播入口检查玩家领地。客户端只接收本人九个区块，领地外及其他玩家领地均不发送。
+- 原版光照和区块状态升级仍需要周围空区块作为内部依赖；这些依赖不发送到客户端，不主动运行领地外机器。不能宣称服务端完全没有边缘依赖区块。
+- 没有常驻实体或保存到存档的强制加载设置，怪物不能加入中转维度。
 
-## Plot contents
+## 发运
 
-A plot covers 48x48 blocks (3x3 chunks), from `minX`/`minZ` to `minX+47`/`minZ+47`.
+中央 1×1×1 终端有完整六面材质。普通玩家被挡住，CMP 包裹可以进入；终端不判定为窒息方块。服务端检查本人领地、终端位置、距离、包裹状态和目的地权限。
 
-Players arrive in the block immediately west of the central dispatch terminal, so an unpacked
-player does not spawn inside its solid collision shape.
+| 目的地 | 行为 |
+| --- | --- |
+| 主世界 | 有效主世界出生点，否则世界出生点 |
+| 下界 | 按来源维度坐标比例搜索两格高的安全落点，不查找、不创建、不站入传送门，排除下界顶层 |
+| 末地 | 原版黑曜石平台 |
+| 暮色森林 | 按需加载暮色自身维度数据与生成器，调用 TF 的生物群系/进度落点检查，再搜索两格高空间；不生成传送门 |
+| Alex 洞穴、天境 | 保持锁定 |
 
-- `y = -128`: bedrock
-- `y = -127 .. -64`: stone
-- `y > -64`: air, open for the owner to build in
-- barrier ring on the four outer block columns, from `y = -128` to the build limit
-- barrier ceiling closing the whole top face at the build limit, so a plot is a sealed box
+暮色授权只存在于服务端发运调用期间，兼容洞穴工厂与转移模组两套入口限制，传统暮色门保持禁用。成功发运拆包、清除来源返回点并播放彩色粒子；失败保留包裹和来源返回点。
 
-Every `setBlock` call is guarded by `Territory#contains`, so generation can never spill outside the
-plot.
+## 本地验证
 
-## Commands
+使用 Java 17 与 Gradle 8.8：`gradle test build --no-daemon`。JUnit 覆盖负坐标九区块边界。可选 `gradle -PtransferTestModsDir=<整合包mods目录> runGameTestServer --no-daemon` 使用固定的暮色与 CMP 发行 JAR，检查两格空间、脚下/头顶危险方块、流体与传送门拒绝、终端窒息判定和暮色实例缺失时按需创建。测试使用独立 `run-gametest-recovery` 世界；编译、单测与 GameTest 不代替真实玩家的客户端交互验证。
 
-- `/dwtransfer` - OP 2 administrative entry. It bypasses the permanent unlock tag, sends you to `dw:transfer`, and claims a plot on first use.
-- `/dwtransfer` inside `dw:transfer` returns to the saved source location and clears the return point.
-- The default `P` key is the return shortcut. Players enter initially by right-clicking the granted KubeJS dimension key while it is in the main hand.
-
-## Build
-
-```sh
-gradle build --no-daemon
-```
+规格见 [中转维度安全与云盘回收](../../docs/design/transfer-safety-cloud-disk.md)。

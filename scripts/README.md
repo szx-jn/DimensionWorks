@@ -156,3 +156,5 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 `prepare_create_build_repository.py` 仅允许在 GitHub Actions 中执行。Create Maven 站点证书过期时，从清单固定的 Modrinth Create 6.0.8 原包读取编译依赖；校验固定 SHA-512 和内嵌库版本，将 Flywheel、Ponder、Registrate、MixinExtras 原始 jar 及去掉内嵌依赖的 Create 编译 jar 放入运行器临时 Maven 仓库，并以 Gradle init 脚本限定这些固定坐标的来源。
 
 该步骤不编译或修改第三方 Java 类，保留所需编译依赖，不改变整合包分发的 Create 原包，不关闭 HTTPS 验证。升级清单中的 Create 版本时必须同步审查此脚本的版本与哈希。普通模组构建、独立客户端验证、正式发布共同使用该准备步骤。
+
+`python3 scripts/draw_dispatch_terminal_assets.py` 生成中转发运终端的完整六面模型及不透明 16×16 PNG 材质，无第三方依赖。

@@ -124,5 +124,13 @@
   "block.dimensionworks_mek_stress.matter_ball_unpacker.full": "The unpacker still contains output; it cannot accept another Matter Ball",
   "gui.dimensionworks_mek_stress.transport.coefficient": "Stress coefficient (SU/RPM)",
   "gui.dimensionworks_mek_stress.transport.apply": "Apply",
-  "config.jade.plugin_dimensionworks_mek_stress.gearbox_live_stress": "ME Gearbox Live Stress"
+  "config.jade.plugin_dimensionworks_mek_stress.gearbox_live_stress": "ME Gearbox Live Stress",
+  "key.dimensionworks_mek_stress.cloud_disk": "Open Cloud Disk",
+  "key.categories.dimensionworks_mek_stress": "DimensionWorks",
+  "gui.dimensionworks_mek_stress.cloud_title": "Cloud Disk",
+  "gui.dimensionworks_mek_stress.cloud_hint": "Click an item to claim it",
+  "gui.dimensionworks_mek_stress.cloud_page": "Page %s / %s",
+  "gui.dimensionworks_mek_stress.cloud_contents": "Contains %s item types and %s fluid types",
+  "message.dimensionworks_mek_stress.cloud_inventory_full": "Your inventory is full. Unclaimed items remain in your cloud disk.",
+  "message.dimensionworks_mek_stress.cloud_delivery": "One of your channels has been completely destroyed...... Its items have been packed into Matter Balls and sent to your cloud disk. Press F12 to open it and claim them."
 }

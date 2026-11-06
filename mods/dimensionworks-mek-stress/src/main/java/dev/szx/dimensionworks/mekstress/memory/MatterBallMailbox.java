@@ -1,52 +1,32 @@
 package dev.szx.dimensionworks.mekstress.memory;
 
-import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
-/** Volatile in-memory delivery queue, matching the pack's short-lived cloud-disk recovery rule. */
+/** Online and offline deliveries always go to the owner's persistent cloud disk. */
 public final class MatterBallMailbox {
-    private static final Map<UUID, List<ItemStack>> PENDING = new HashMap<>();
     private MatterBallMailbox() {}
 
-    public static synchronized void deliver(MinecraftServer server, UUID owner, List<ItemStack> balls) {
+    public static void deliver(MinecraftServer server, UUID owner, List<ItemStack> balls) {
         if (balls.isEmpty()) return;
+        CloudDiskSavedData.get(server).deposit(owner, balls);
         ServerPlayer player = server.getPlayerList().getPlayer(owner);
-        if (player != null) {
-            List<ItemStack> remaining = new ArrayList<>();
-            for (ItemStack ball : balls) {
-                ItemStack remainder = ball.copy();
-                player.getInventory().add(remainder);
-                if (!remainder.isEmpty()) remaining.add(remainder);
-            }
-            if (!remaining.isEmpty()) PENDING.computeIfAbsent(owner, ignored -> new ArrayList<>()).addAll(remaining);
-        } else {
-            PENDING.computeIfAbsent(owner, ignored -> new ArrayList<>()).addAll(balls.stream().map(ItemStack::copy).toList());
-        }
+        if (player != null) notifyPending(player);
     }
 
-    public static synchronized void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        List<ItemStack> pending = PENDING.get(player.getUUID());
-        if (pending == null) return;
-        Iterator<ItemStack> iterator = pending.iterator();
-        while (iterator.hasNext()) {
-            ItemStack stack = iterator.next();
-            player.getInventory().add(stack);
-            if (stack.isEmpty()) iterator.remove();
-        }
-        if (pending.isEmpty()) PENDING.remove(player.getUUID());
+    public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) notifyPending(player);
     }
 
-    public static synchronized void clearAtShutdown(net.minecraftforge.event.server.ServerStoppingEvent event) {
-        PENDING.clear();
+    private static void notifyPending(ServerPlayer player) {
+        int notices = CloudDiskSavedData.get(player.server).consumeNotices(player.getUUID());
+        for (int i = 0; i < notices; i++) player.displayClientMessage(
+            Component.translatable("message.dimensionworks_mek_stress.cloud_delivery").withStyle(ChatFormatting.RED), false);
     }
 }

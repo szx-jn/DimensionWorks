@@ -42,6 +42,10 @@ public final class TransferEvents {
         }
         DispatchController.forceClose(player);
         FROG_RIDES.remove(player.getUUID());
+        player.inventoryMenu.sendAllDataToRemote();
+        if (!event.getTo().equals(WDKeys.TRANSFER_LEVEL)) {
+            dev.szx.dimensionworks.transfer.territory.PlotChunkLoading.deactivate(player.getUUID());
+        }
         if (!event.getTo().equals(WDKeys.TRANSFER_LEVEL)) return;
         TerritoryManager.enter(player);
     }
@@ -51,7 +55,26 @@ public final class TransferEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             DispatchController.forget(player);
             FROG_RIDES.remove(player.getUUID());
+            dev.szx.dimensionworks.transfer.territory.PlotChunkLoading.deactivate(player.getUUID());
         }
+    }
+
+    @SubscribeEvent
+    public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && player.level().dimension().equals(WDKeys.TRANSFER_LEVEL))
+            TerritoryManager.enter(player);
+    }
+
+    @SubscribeEvent
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && player.level().dimension().equals(WDKeys.TRANSFER_LEVEL))
+            TerritoryManager.enter(player);
+    }
+
+    @SubscribeEvent
+    public static void onStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
+        TerritoryManager.clear();
+        FROG_RIDES.clear();
     }
 
     @SubscribeEvent

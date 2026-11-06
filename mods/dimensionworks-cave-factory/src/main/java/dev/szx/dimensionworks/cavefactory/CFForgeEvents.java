@@ -74,6 +74,10 @@ public final class CFForgeEvents {
             return;
         }
         ResourceLocation destination = event.getDimension().location();
+        // A server-owned, call-scoped dispatch token admits the personal terminal route only.
+        if (TWILIGHT_FOREST.equals(destination)
+            && player.level().dimension().location().equals(new ResourceLocation("dw", "transfer"))
+            && player.getPersistentData().getBoolean("dw_dispatch_twilight_authorized")) return;
         if (!(CaveFactoryConfig.blockAetherAndAlexCaves() && BLOCKED_DIMENSIONS.contains(destination))
             && !(CaveFactoryConfig.blockTwilightForest() && TWILIGHT_FOREST.equals(destination))) {
             return;

@@ -91,7 +91,8 @@ public final class TutorialManager {
 
     /** Right-click use is the only operation allowed while locked. */
     public static boolean use(ServerPlayer player) {
-        if (!isKey(player.getMainHandItem())) {
+        ItemStack usedKey = player.getMainHandItem();
+        if (!isKey(usedKey)) {
             return false;
         }
 
@@ -99,7 +100,7 @@ public final class TutorialManager {
         CompoundTag state = savedData.get(player.getUUID());
         boolean alreadyUnlocked = TransferAccess.hasUnlockTag(player);
         player.addTag(TransferAccess.UNLOCK_TAG);
-        if (state != null) {
+        if (state != null && !state.getBoolean(DONE)) {
             state.putBoolean(USED, true);
             savedData.setDirty();
         }
@@ -115,11 +116,11 @@ public final class TutorialManager {
             return false;
         }
 
-        if (state == null) {
-            player.getMainHandItem().shrink(1);
-        } else {
-            finish(player, state, savedData);
+        if (state == null || state.getBoolean(DONE)) {
+            usedKey.shrink(1);
         }
+        // The right-click/respawn inventory synchronization must finish before restoring Hand.
+        // tick() owns restoration on the following server tick, once the player is in the plot.
         return true;
     }
 
@@ -167,7 +168,8 @@ public final class TutorialManager {
         player.getInventory().selected = state.getInt(SAVED_SLOT);
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.of(state.getCompound(SAVED_HAND)));
         player.getInventory().setChanged();
-        player.containerMenu.broadcastChanges();
+        player.inventoryMenu.sendAllDataToRemote();
+        if (player.containerMenu != player.inventoryMenu) player.containerMenu.sendAllDataToRemote();
         state.remove(SAVED_HAND);
         state.putBoolean(DONE, true);
         savedData.setDirty();

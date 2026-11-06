@@ -15,6 +15,7 @@ public final class MemoryDriveClientEvents {
 
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> MenuScreens.register(DimensionWorksMekStress.CLOUD_DISK_MENU.get(), CloudDiskScreen::new));
         event.enqueueWork(() -> MenuScreens.register(
             DimensionWorksMekStress.MEMORY_DRIVE_MENU.get(), MemoryDriveScreen::new));
         event.enqueueWork(() -> MenuScreens.register(

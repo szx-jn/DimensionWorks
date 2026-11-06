@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/transfer-safety-cloud-disk.md`](design/transfer-safety-cloud-disk.md)：中转物品保护、安全落点、九区块可见范围与 F12 持久云盘回收。
+
 - [`design/twilight-industrial-branch.md`](design/twilight-industrial-branch.md)：暮色森林物品调查、工业支线与第三修复碎片关联提案。
 
 - [`design/twilight-resonance-industry.md`](design/twilight-resonance-industry.md)：暮色共振工艺、冒险与工业替代路线、一次性首领压制及增益设备。

@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.3.26'
+version = '0.3.27'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -138,4 +138,21 @@ sourceSets {
 }
 minecraft.runs.client.mods.dimensionworks_mek_stress {
     sources = [sourceSets.main, sourceSets.clientCheck]
+}
+
+// Targeted cloud recovery checks in a new disposable world; no client or release dependency.
+if (project.hasProperty('cloudRuntimeChecks')) {
+    sourceSets {
+        cloudCheck {
+            java.srcDir 'src/gameTest/java'
+            java.include '**/CloudDiskGameTests.java'
+            resources.srcDir 'src/gameTest/resources'
+            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+        }
+    }
+    minecraft.runs.gameTestServer {
+        workingDirectory project.file('run-gametest-cloud')
+        mods.dimensionworks_mek_stress.sources = [sourceSets.main, sourceSets.cloudCheck]
+    }
 }

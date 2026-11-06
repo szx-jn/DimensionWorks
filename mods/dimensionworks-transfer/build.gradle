@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.3.1'
+version = '0.3.2'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_transfer'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -35,6 +35,16 @@ repositories {
     mavenCentral()
 }
 
+// Opt-in local runtime verification uses pinned installed release JARs, remapped for userdev.
+// These verification dependencies are never embedded in the mod JAR or added to the pack.
+if (project.hasProperty('transferTestModsDir')) {
+    repositories { flatDir { dirs project.property('transferTestModsDir') } }
+    dependencies {
+        runtimeOnly fg.deobf('dw-test:twilightforest:1.20.1-4.3.2508-universal')
+        runtimeOnly fg.deobf('dw-test:create_mobile_packages:1.20.1-0.6.1-dimensionworks.14')
+    }
+}
+
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
@@ -50,6 +60,21 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+// Opt-in Forge runtime checks, excluded from the production and release JAR.
+sourceSets {
+    gameTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+minecraft.runs {
+    gameTestServer {
+        workingDirectory project.file('run-gametest-recovery')
+        property 'forge.enabledGameTestNamespaces', 'dimensionworks_transfer'
+        mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.gameTest]
+    }
 }
 
 mixin { add sourceSets.main, 'dimensionworks_transfer.refmap.json'; config 'dimensionworks_transfer.mixins.json' }

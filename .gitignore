@@ -37,6 +37,7 @@ shaderpacks/*.zip
 build/
 bin/
 run/
+run-gametest*/
 out/
 
 # Local secrets
