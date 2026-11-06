@@ -19,7 +19,7 @@
 	"yggdrasil.apiRootWhitelist" = ["https://skin.mslmc.net/api/yggdrasil/sessionserver/session/minecraft/hasJoined"]
 
 	[auth.recentIpGrace]
-		#每次连接重新校验会话，不沿用同 IP 的历史认证结果。
+		#关闭同 IP 短时重连宽限；1.0.9 另有固定的本地代理宽限，此开关不控制它。
 		enabled = false
 		#退出游戏后允许同 IP 容错重连的秒数。默认 10 秒，避免长期误导为皮肤站/正版登录。
 		#Range: 1 ~ 60
