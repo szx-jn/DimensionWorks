@@ -8,7 +8,8 @@
     "ChunkTeamDataImplMixin",
     "ClaimedChunkManagerImplMixin",
     "ClaimedChunkImplMixin",
-    "FTBChunksExpectedImplMixin"
+    "FTBChunksExpectedImplMixin",
+    "PermissionsHelperMixin"
   ],
   "client": [
     "client.ChunkButtonMixin",
