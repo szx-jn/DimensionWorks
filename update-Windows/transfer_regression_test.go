@@ -15,6 +15,7 @@ import (
 )
 
 func TestIncrementalOverlaysVerifyOnlyFinalBytes(t *testing.T) {
+	requireBundledAria2(t)
 	for _, corruptFinal := range []bool{false, true} {
 		t.Run(fmt.Sprint(corruptFinal), func(t *testing.T) {
 			root := t.TempDir()

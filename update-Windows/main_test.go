@@ -224,6 +224,7 @@ func TestWatchDownloadETAKeepsSourceWhenEstimateWithinLimit(t *testing.T) {
 }
 
 func TestDownloadLimitStopsOversizedBody(t *testing.T) {
+	requireBundledAria2(t)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("123456789"))
@@ -586,8 +587,8 @@ func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
 	defer server.Close()
 
 	destination := filepath.Join(t.TempDir(), "download.bin")
-	if err := downloadOnce(server.URL, destination); err != nil {
-		t.Fatalf("downloadOnce failed: %v", err)
+	if err := downloadGoForTest(server.URL, destination); err != nil {
+		t.Fatalf("ranged download failed: %v", err)
 	}
 	got, err := os.ReadFile(destination)
 	if err != nil { t.Fatal(err) }
@@ -627,7 +628,7 @@ func TestDownloadRangedFallsBackOnInvalidContentRange(t *testing.T) {
 	defer server.Close()
 
 	destination := filepath.Join(t.TempDir(), "invalid-range.bin")
-	if err := downloadOnce(server.URL, destination); err != nil {
+	if err := downloadGoForTest(server.URL, destination); err != nil {
 		t.Fatalf("download should fall back after invalid Content-Range: %v", err)
 	}
 	got, err := os.ReadFile(destination)
@@ -639,6 +640,7 @@ func TestDownloadRangedFallsBackOnInvalidContentRange(t *testing.T) {
 }
 
 func TestDownloadVerifiedRejectsDigestMismatchAfterDownload(t *testing.T) {
+	requireBundledAria2(t)
 	data := bytes.Repeat([]byte("integrity-check"), (9<<20)/15+1)
 	data = data[:9<<20]
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -679,7 +681,7 @@ func TestDownloadRangedFallsBackWhenServerIgnoresRange(t *testing.T) {
 	defer server.Close()
 
 	destination := filepath.Join(t.TempDir(), "fallback.bin")
-	if err := downloadOnce(server.URL, destination); err != nil {
+	if err := downloadGoForTest(server.URL, destination); err != nil {
 		t.Fatalf("download should fall back to a single connection: %v", err)
 	}
 	got, err := os.ReadFile(destination)

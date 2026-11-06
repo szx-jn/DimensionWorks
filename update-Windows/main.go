@@ -43,6 +43,7 @@ var awaitingConsolePrompt bool
 var consoleReadErr error
 var aria2PathOnce sync.Once
 var aria2PathCache string
+var aria2PathError error
 var aria2RuntimeCleanup func()
 var progressMu sync.Mutex
 var downloadProgressUI = newProgressTracker()
@@ -1106,12 +1107,12 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 	for index, candidate := range candidates {
 		progressReset(destination)
 		ctx, cancel := context.WithCancel(context.Background())
-			var etaExceeded atomic.Bool
-			stopETA := watchDownloadETA(ctx, func() {
-				if etaExceeded.CompareAndSwap(false, true) {
-					cancel()
-				}
-			}, newDownloadETAProbe(destination), downloadETAExceedsLimit, downloadETAProbeInterval)
+		var etaExceeded atomic.Bool
+		stopETA := watchDownloadETA(ctx, func() {
+			if etaExceeded.CompareAndSwap(false, true) {
+				cancel()
+			}
+		}, newDownloadETAProbe(destination), downloadETAExceedsLimit, downloadETAProbeInterval)
 		var skipped atomic.Bool
 		skipID := nextDownloadSkipID.Add(1)
 		consoleInputMu.Lock()
@@ -1123,7 +1124,7 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 		consoleInputMu.Unlock()
 		fmt.Printf("[下载] 来源 %d/%d：%s（输入 s 并回车可立即跳过此来源）\n", index+1, len(candidates), safeURLForLog(candidate))
 		err := downloadOnceLimitedContext(ctx, candidate, destination, maxBytes)
-			stopETA()
+		stopETA()
 		consoleInputMu.Lock()
 		delete(activeDownloadSkips, skipID)
 		consoleInputMu.Unlock()
@@ -1133,13 +1134,19 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 			failures = append(failures, fmt.Sprintf("%s: 用户跳过", safeURLForLog(candidate)))
 			continue
 		}
+		if etaExceeded.Load() {
+			fmt.Printf("\n[下载] 来源预计剩余时间超过 1 小时，切换到下一个来源。\n")
+			failures = append(failures, fmt.Sprintf("%s: 预计剩余时间超过 1 小时", safeURLForLog(candidate)))
+			continue
+		}
 		if err == nil {
 			return nil
-			} else if etaExceeded.Load() {
-				fmt.Printf("\n[下载] 来源预计剩余时间超过 1 小时，切换到下一个来源。\n")
-				failures = append(failures, fmt.Sprintf("%s: 预计剩余时间超过 1 小时", safeURLForLog(candidate)))
-				continue
 		} else {
+			fmt.Printf("\n[下载] 当前来源失败：%s\n", safeErrorForLog(err))
+			var engineErr *aria2Error
+			if errors.As(err, &engineErr) && engineErr.localFailure() {
+				return err
+			}
 			failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(candidate), safeErrorForLog(err)))
 		}
 	}
@@ -1167,38 +1174,16 @@ func downloadOnceLimitedContext(parent context.Context, source, destination stri
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
-	if enginePath := aria2ExecutablePath(); enginePath != "" {
-		if err := downloadWithAria2(parent, enginePath, source, destination, maxBytes); err == nil {
-			return nil
-		} else if parent.Err() != nil {
-			return parent.Err()
-		} else {
-			fmt.Printf("[下载] aria2 引擎未完成当前来源，改用内置下载器重试：%s\n", safeErrorForLog(err))
-			progressReset(destination)
-		}
+	enginePath, err := aria2ExecutablePath()
+	if err != nil { return err }
+	err = downloadWithAria2(parent, enginePath, source, destination, maxBytes)
+	var engineErr *aria2Error
+	if parent.Err() == nil && errors.As(err, &engineErr) && engineErr.retrySingleConnection() {
+		fmt.Printf("[下载] %s\n[下载] 使用内嵌 aria2c 单连接重试当前来源。\n", safeErrorForLog(err))
+		progressReset(destination)
+		return downloadWithAria2Connections(parent, enginePath, source, destination, maxBytes, 1)
 	}
-
-	// Range 与单连接回退使用独立 Context，避免 Range 超时后
-	// 把已经过期的 Context 继续传给单连接请求。
-	rangeCtx, cancelRange := context.WithTimeout(parent, downloadAttemptTimeout)
-	rangeErr := downloadRanged(rangeCtx, source, destination, maxBytes)
-	cancelRange()
-	if rangeErr == nil {
-		return nil
-	}
-	if parent.Err() != nil {
-		return parent.Err()
-	}
-	if errors.Is(rangeErr, errSingleConnection) {
-		fmt.Printf("[下载] %s\n", safeErrorForLog(rangeErr))
-	} else {
-		fmt.Printf("[下载] 分段下载失败，保留已校验缓存并使用独立连接重试：%s\n", safeErrorForLog(rangeErr))
-	}
-
-	progressReset(destination)
-	sequentialCtx, cancelSequential := context.WithTimeout(parent, downloadAttemptTimeout)
-	defer cancelSequential()
-	return downloadSequential(sequentialCtx, source, destination, maxBytes)
+	return err
 }
 
 func estimatedDownloadETA(total, downloaded int64, bytesPerSecond float64) (time.Duration, bool) {
@@ -1286,14 +1271,11 @@ func watchDownloadETA(ctx context.Context, cancel context.CancelFunc, estimate f
 	return func() { once.Do(func() { close(done) }) }
 }
 
-func aria2ExecutablePath() string {
+func aria2ExecutablePath() (string, error) {
 	aria2PathOnce.Do(func() {
-		aria2PathCache = findAria2ExecutablePath()
-		if aria2PathCache == "" && hasAria2BuildForRuntime() {
-			fmt.Println("[下载] aria2 sidecar 缺失或 SHA-256 校验失败，将使用内置 Go 下载器。")
-		}
+		aria2PathCache, aria2PathError = findAria2ExecutablePath()
 	})
-	return aria2PathCache
+	return aria2PathCache, aria2PathError
 }
 
 func hasAria2BuildForRuntime() bool {
@@ -1302,66 +1284,74 @@ func hasAria2BuildForRuntime() bool {
 		runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
 }
 
-func findAria2ExecutablePath() string {
+func findAria2ExecutablePath() (string, error) {
+	if !hasAria2BuildForRuntime() {
+		return "", newAria2Error("准备引擎", "", fmt.Errorf("不支持的平台 %s/%s", runtime.GOOS, runtime.GOARCH), "")
+	}
 	executable, err := os.Executable()
-	if err != nil { return "" }
+	if err != nil { return "", newAria2Error("准备引擎", "", err, "") }
 	dir := filepath.Dir(executable)
 	var name, expectedDigest string
 	switch runtime.GOOS {
 	case "windows":
-		if runtime.GOARCH != "amd64" { return "" }
 		name, expectedDigest = "aria2c-windows-amd64.exe", "098a065ab71f639bf7048e790c870756fd6e83de9cc678915bbd07077d473fa2"
 	case "linux":
-		if runtime.GOARCH != "amd64" { return "" }
 		name, expectedDigest = "aria2c-linux-amd64", "6f50816471fbd5e91c04df6cf6f995c6279d295b70187f313e6d3b04f65769fc"
 	case "darwin":
-		if runtime.GOARCH != "arm64" { return "" }
 		name, expectedDigest = "aria2c-macos-arm64", "1527c4d071c16c1266880e93750e385cdd4e9d2a950d7f56cb5a21125e3bd311"
-	default:
-		return ""
 	}
 	if len(bundledAria2) > 0 {
-		candidate, cleanup, err := unpackAria2(dir, name, expectedDigest, bundledAria2)
+		candidate, cleanup, err := prepareBundledAria2(aria2ExtractionRoots(dir), name, expectedDigest, bundledAria2)
 		if err == nil {
 			aria2RuntimeCleanup = cleanup
-			return candidate
+			return candidate, nil
 		}
-		fmt.Printf("[下载] 内置 aria2 引擎准备失败：%s\n", safeErrorForLog(err))
+		return "", err
 	}
 	candidate := filepath.Join(dir, name)
 	info, statErr := os.Lstat(candidate)
 	if statErr != nil || info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
-		return ""
+		return "", newAria2Error("准备引擎", "", errors.New("此构建未内嵌 aria2c，且没有经过校验的同目录引擎；请使用正式发布的单文件更新器"), "")
 	}
 	if err := verifyDigest(candidate, "sha256", expectedDigest); err != nil {
-		return ""
+		return "", newAria2Error("准备引擎", "", err, "")
 	}
 	if runtime.GOOS != "windows" {
-		if err := os.Chmod(candidate, 0700); err != nil { return "" }
+		if err := os.Chmod(candidate, 0700); err != nil { return "", newAria2Error("准备引擎", "", err, "") }
 	}
-	return candidate
+	if err := probeAria2Executable(candidate); err != nil { return "", err }
+	return candidate, nil
 }
 
 func downloadWithAria2(parent context.Context, enginePath, source, destination string, maxBytes int64) error {
-	ctx, cancel := context.WithCancel(parent)
+	return downloadWithAria2Connections(parent, enginePath, source, destination, maxBytes, 8)
+}
+
+func downloadWithAria2Connections(parent context.Context, enginePath, source, destination string, maxBytes int64, connections int) error {
+	ctx, cancel := context.WithTimeout(parent, downloadAttemptTimeout)
 	defer cancel()
+	if err := parent.Err(); err != nil { return err }
+	if info, err := os.Lstat(destination); err == nil && !info.Mode().IsRegular() {
+		return newAria2Error("准备下载文件", "", errors.New("目标不是普通文件"), destination)
+	}
 	defer os.Remove(destination + ".aria2")
 
 	rpcPort, err := reserveAria2RPCPort()
-	if err != nil { return fmt.Errorf("为 aria2 进度接口分配本地端口失败：%w", err) }
+	if err != nil { return newAria2Error("RPC 接口", "", err, "无法分配回环端口") }
 	rpcSecret, err := randomAria2RPCSecret()
-	if err != nil { return fmt.Errorf("生成 aria2 进度接口令牌失败：%w", err) }
+	if err != nil { return newAria2Error("RPC 接口", "", err, "无法生成随机令牌") }
 	args := []string{
 		"--no-conf=true",
-		"--continue=true",
+		"--continue=false",
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
 		"--file-allocation=none",
 		"--check-certificate=true",
-		"--http-accept-gzip=true",
+		"--http-accept-gzip=false",
+		"--async-dns=false",
 		"--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-		"--max-connection-per-server=64",
-		"--split=64",
+		fmt.Sprintf("--max-connection-per-server=%d", connections),
+		fmt.Sprintf("--split=%d", connections),
 		"--min-split-size=1M",
 		"--connect-timeout=10",
 		"--timeout=60",
@@ -1375,44 +1365,82 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 		"--summary-interval=0",
 		"--dir=" + filepath.Dir(destination),
 		"--out=" + filepath.Base(destination),
-		source,
 	}
+	// Match Go's proxy selection, including NO_PROXY, for the engine process.
+	if request, err := http.NewRequest(http.MethodGet, source, nil); err == nil {
+		if proxy, err := http.ProxyFromEnvironment(request); err == nil && proxy != nil {
+			args = append(args, "--all-proxy="+proxy.String())
+		}
+	}
+	args = append(args, source)
 	command := exec.CommandContext(ctx, enginePath, args...)
 	var output limitedOutput
 	command.Stdout = &output
 	command.Stderr = &output
 	if err := command.Start(); err != nil {
-		return fmt.Errorf("启动 aria2 引擎失败：%w", err)
+		return newAria2Error("启动引擎", "", err, output.String())
 	}
+	processDone := make(chan struct{})
+	var waitErr error
+	go func() {
+		waitErr = command.Wait()
+		close(processDone)
+	}()
 	rpcURL := fmt.Sprintf("http://127.0.0.1:%d/jsonrpc", rpcPort)
 	rpcClient := &http.Client{
 		Transport: &http.Transport{Proxy: nil},
 		Timeout:   2 * time.Second,
 	}
-	if err := waitForAria2RPC(ctx, rpcClient, rpcURL, rpcSecret); err != nil {
+	defer func() {
 		cancel()
-		waitErr := command.Wait()
+		<-processDone
 		rpcClient.CloseIdleConnections()
+	}()
+	startupCtx, stopStartup := context.WithCancel(ctx)
+	defer stopStartup()
+	go func() {
+		select {
+		case <-processDone: stopStartup()
+		case <-startupCtx.Done():
+		}
+	}()
+	if err := waitForAria2RPC(startupCtx, rpcClient, rpcURL, rpcSecret); err != nil {
+		cancel()
+		<-processDone
 		if parent.Err() != nil { return parent.Err() }
-		return fmt.Errorf("aria2 进度接口未能启动：%w (process: %v)", err, waitErr)
+		if waitErr != nil && startupCtx.Err() != nil {
+			return newAria2Error("启动引擎", "", waitErr, output.String())
+		}
+		return newAria2Error("RPC 接口", "", err, output.String())
 	}
+	stopStartup()
 
 	monitorDone := make(chan struct{})
 	var tooLarge atomic.Bool
 	var completed atomic.Bool
 	var engineFailure atomic.Value
+	var rpcFailure atomic.Value
 	go func() {
 		defer close(monitorDone)
 		ticker := time.NewTicker(250 * time.Millisecond)
 		defer ticker.Stop()
 		var reported int64
+		var rpcFailedSince time.Time
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
 				status, statusErr := getAria2ActiveStatus(ctx, rpcClient, rpcURL, rpcSecret)
-				if statusErr != nil { continue }
+				if statusErr != nil {
+					if rpcFailedSince.IsZero() { rpcFailedSince = time.Now() }
+					if time.Since(rpcFailedSince) >= 5*time.Second {
+						rpcFailure.Store(statusErr)
+						cancel()
+						return
+					}
+					continue
+				}
 				for _, item := range status {
 					completed, completedErr := strconv.ParseInt(item.CompletedLength, 10, 64)
 					total, totalErr := strconv.ParseInt(item.TotalLength, 10, 64)
@@ -1434,24 +1462,40 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 				// RPC mode keeps aria2 alive after its final download. Observe
 				// the terminal result instead of waiting forever for process exit.
 				var stopped []aria2DownloadResult
-				if err := callAria2RPC(ctx, rpcClient, rpcURL, rpcSecret, "aria2.tellStopped",
-					[]any{0, 1, []string{"status", "errorCode", "errorMessage"}}, &stopped); err == nil && len(stopped) > 0 {
+				stoppedErr := callAria2RPC(ctx, rpcClient, rpcURL, rpcSecret, "aria2.tellStopped",
+					[]any{0, 1, []string{"status", "errorCode", "errorMessage", "totalLength", "completedLength"}}, &stopped)
+				if stoppedErr != nil {
+					if rpcFailedSince.IsZero() { rpcFailedSince = time.Now() }
+					if time.Since(rpcFailedSince) >= 5*time.Second {
+						rpcFailure.Store(stoppedErr)
+						cancel()
+						return
+					}
+				} else {
+					rpcFailedSince = time.Time{}
+				}
+				if stoppedErr == nil && len(stopped) > 0 {
 					if stopped[0].Status == "complete" {
 						completed.Store(true)
 						cancel()
 						return
 					}
 					if stopped[0].Status == "error" || stopped[0].Status == "removed" {
-						engineFailure.Store(fmt.Sprintf("code=%s: %s", stopped[0].ErrorCode, stopped[0].ErrorMessage))
+						engineFailure.Store(stopped[0])
 						cancel()
 						return
 					}
+				}
+				if info, err := os.Stat(destination); err == nil && info.Size() > maxBytes {
+					tooLarge.Store(true)
+					cancel()
+					return
 				}
 			}
 		}
 	}()
 
-	waitErr := command.Wait()
+	<-processDone
 	cancel()
 	<-monitorDone
 	rpcClient.CloseIdleConnections()
@@ -1460,13 +1504,19 @@ func downloadWithAria2(parent context.Context, enginePath, source, destination s
 		return fmt.Errorf("下载超过大小限制：%s", humanSize(maxBytes))
 	}
 	if parent.Err() != nil { return parent.Err() }
+	if failure := rpcFailure.Load(); failure != nil {
+		return newAria2Error("RPC 接口", "", failure.(error), output.String())
+	}
+	if failure := engineFailure.Load(); failure != nil {
+		_ = os.Remove(destination)
+		result := failure.(aria2DownloadResult)
+		return newAria2Error("下载任务", result.ErrorCode, nil, result.ErrorMessage+" "+output.String())
+	}
 	if waitErr != nil && !completed.Load() {
 		_ = os.Remove(destination)
 		message := strings.TrimSpace(output.String())
-		if failure := engineFailure.Load(); failure != nil { message += " " + failure.(string) }
-		if len(message) > 2048 { message = message[len(message)-2048:] }
-		if message != "" { return fmt.Errorf("aria2 下载失败：%s：%w", message, waitErr) }
-		return fmt.Errorf("aria2 下载失败：%w", waitErr)
+		if ctx.Err() != nil { waitErr = ctx.Err() }
+		return newAria2Error("下载任务", "", waitErr, message)
 	}
 	info, err := os.Stat(destination)
 	if err != nil { return fmt.Errorf("aria2 下载结束但未生成目标文件：%w", err) }
@@ -1511,6 +1561,8 @@ type aria2DownloadResult struct {
     Status string `json:"status"`
     ErrorCode string `json:"errorCode"`
     ErrorMessage string `json:"errorMessage"`
+    TotalLength string `json:"totalLength"`
+    CompletedLength string `json:"completedLength"`
 }
 
 type aria2RPCResponse struct {
