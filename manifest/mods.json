@@ -1525,11 +1525,33 @@
       "name": "Sophisticated Core",
       "source": "modrinth",
       "project_id": "nmoqTijg",
-      "version": "1.20.1-1.5.1.2335",
-      "version_id": "1Xl7lP0L",
+      "version": "1.20.1-1.5.26.2457",
+      "version_id": "c90my5iF",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/sophisticated-core"
+    },
+    {
+      "id": "sophisticatedstorage",
+      "name": "Sophisticated Storage",
+      "source": "modrinth",
+      "project_id": "hMlaZH8f",
+      "version": "1.20.1-1.5.15.2220",
+      "version_id": "S0AtW2W5",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/sophisticated-storage"
+    },
+    {
+      "id": "storagedrawers",
+      "name": "Storage Drawers",
+      "source": "modrinth",
+      "project_id": "guitPqEi",
+      "version": "1.20.1-12.15.1",
+      "version_id": "53npfO5m",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/storagedrawers"
     },
     {
       "id": "supplementaries",
