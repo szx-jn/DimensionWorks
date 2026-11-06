@@ -288,8 +288,11 @@ public final class TransferEvents {
         if (!level.dimension().equals(WDKeys.TRANSFER_LEVEL)) {
             return;
         }
-        boolean forbidden = TransferBlockPolicy.forbidden(event.getPlacedBlock())
-            || TransferBlockPolicy.forbidden(level.getBlockState(event.getPos()));
+        boolean forbidden = TransferBlockPolicy.forbidden(level.getBlockState(event.getPos()));
+        // Forge's non-player getPlacedBlock can describe the replaced snapshot instead.
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player) {
+            forbidden |= TransferBlockPolicy.forbidden(event.getPlacedBlock());
+        }
         if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
             forbidden |= multi.getReplacedBlockSnapshots().stream()
                 .anyMatch(snapshot -> TransferBlockPolicy.forbidden(snapshot.getCurrentBlock()));

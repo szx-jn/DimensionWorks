@@ -159,6 +159,59 @@ public final class TransferAeBlockGameTests {
     }
 
     @GameTest(template = "empty")
+    public static void realPackingAndBoxItemPlacementCannotBypassUnboxingGuard(GameTestHelper helper) {
+        var source = helper.getLevel();
+        var level = transfer(helper);
+        var sourcePos = helper.absolutePos(new BlockPos(3, 2, 3));
+        var pos = pos(helper);
+        var packer = player(source);
+        var receiver = player(level);
+        level.setBlockAndUpdate(pos.below(), Blocks.STONE.defaultBlockState());
+        try {
+            for (String itemId : new String[]{"mekanism:cardboard_box", "create_mobile_packages:mobile_packager"}) {
+                source.setBlockAndUpdate(sourcePos, block("ae2:charger").defaultBlockState());
+                source.getBlockEntity(sourcePos).getPersistentData().putString("preserve", "packed-machine-data");
+                var tool = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId)));
+                helper.assertTrue(!tool.isEmpty(), "Actual packing item must exist: " + itemId);
+                packer.setShiftKeyDown(false);
+                packer.setItemInHand(InteractionHand.MAIN_HAND, tool);
+                var packed = tool.getItem().onItemUseFirst(tool, new UseOnContext(packer, InteractionHand.MAIN_HAND, hit(sourcePos)));
+                helper.assertTrue(packed.consumesAction() && source.getBlockState(sourcePos).is(block("mekanism:cardboard_box")),
+                    "Actual item must pack the AE machine: " + itemId);
+                var sourceData = source.getBlockEntity(sourcePos).saveWithoutMetadata().getCompound("data").copy();
+                var sealed = source.getBlockState(sourcePos).getBlock().getCloneItemStack(source.getBlockState(sourcePos),
+                    hit(sourcePos), source, sourcePos, packer);
+                receiver.setShiftKeyDown(false);
+                receiver.setItemInHand(InteractionHand.MAIN_HAND, sealed);
+                var placed = ((BlockItem) sealed.getItem()).place(new BlockPlaceContext(
+                    new UseOnContext(receiver, InteractionHand.MAIN_HAND, hit(pos.below()))));
+                helper.assertTrue(placed.consumesAction(), "Sealed boxes can be placed without unpacking");
+                var tile = level.getBlockEntity(pos);
+                helper.assertTrue(tile != null && sourceData.equals(tile.saveWithoutMetadata().getCompound("data")),
+                    "Real packing and item placement must preserve the original payload");
+                var before = tile.saveWithoutMetadata().copy();
+                receiver.setShiftKeyDown(true);
+                var result = level.getBlockState(pos).use(level, receiver, InteractionHand.MAIN_HAND, hit(pos));
+                helper.assertTrue(result == InteractionResult.FAIL && tile == level.getBlockEntity(pos)
+                    && before.equals(tile.saveWithoutMetadata()), "Both actual packing routes must refuse unboxing without data loss");
+                // The same box may still be unpacked in the source dimension.
+                packer.setShiftKeyDown(true);
+                var outside = source.getBlockState(sourcePos).use(source, packer, InteractionHand.MAIN_HAND, hit(sourcePos));
+                helper.assertTrue(outside.consumesAction() && source.getBlockState(sourcePos).is(block("ae2:charger"))
+                    && source.getBlockEntity(sourcePos).getPersistentData().getString("preserve").equals("packed-machine-data"),
+                    "AE unboxing outside transfer must preserve real machine data");
+                level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            }
+        } finally {
+            packer.discard(); receiver.discard();
+            source.setBlockAndUpdate(sourcePos, Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(pos.below(), Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void allowedUnboxingAndExistingBlockUpdatesStillWork(GameTestHelper helper) {
         var level = transfer(helper);
         var pos = pos(helper);

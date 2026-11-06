@@ -43,3 +43,11 @@ Mekanism 纸箱与 CMP 打包工具共用纸箱恢复入口。允许携带和放
 - Cloud 隔离 Forge GameTest 的 3 项检查通过：完整 NBT 与 UUID 隔离、空间不足与部分领取/重复领取、退还升级拆分与逐次通知。
 - 整合包 Python 脚本单测 74 项通过；JSON、Python 语法、六面模型纹理引用、PNG 全像素不透明性、清单/Gradle/TOML 版本一致性及 `git diff --check` 通过。
 - 未进行真实玩家客户端测试：主手传送同步、CMP 实际包裹进入终端、F12 打开/点击界面、下界与暮色首次落点的玩家交互、实际客户端加载耗时仍需复测。没有触发正式发布或更新服务器。
+
+## 2026-11-06 AE2 限制验证
+
+- Transfer Java 17 / Gradle 8.8 `test build` 通过，17 项 JUnit 全部通过（新增清单附属、必需依赖扩展与自研模块排除检查）。
+- 使用清单固定版本的 AE2 15.4.10、MEGA Cells 2.4.6、Applied Mekanistics 1.4.3、Mekanism/Generators 10.4.16.80、CMP DimensionWorks.14 与暮色 4.3.2508 运行隔离 Forge GameTest。10 项全部通过：原有安全检查 4 项，加上 AE2/附属注册方块的 Level/LevelChunk 写入拒绝、生存/创造物品保留、部件 API 拒绝、纸箱/CMP 标记与完整 NBT 保留、真实纸箱/工具打包→方块物品放置→解包拒绝/主世界正常解包、普通解包与已有方块状态更新/拆除/快照恢复共 6 项。
+- JSON 语法、Mixin 类引用、清单/Gradle/TOML 版本一致性与 `git diff --check` 通过。生产 JAR 不包含 GameTest 类与测试资源。
+- 隔离环境未装 ProjectE，MEGA Cells 的 `mega_emc_interface` 掉落表仍报缺少可选物品；模组在线更新检查另有本机 Java 证书错误。这些不影响上述测试通过，不能据此宣称整包日志无错误或真实客户端已验证。
+- 未运行真实玩家客户端，未发布 Release，未更新正式服务器。

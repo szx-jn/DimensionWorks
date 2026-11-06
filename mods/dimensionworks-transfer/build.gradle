@@ -45,6 +45,7 @@ if (project.hasProperty('transferTestModsDir')) {
         runtimeOnly fg.deobf('dw-test:appliedenergistics2-forge:15.4.10')
         runtimeOnly fg.deobf('dw-test:guideme:20.1.15')
         runtimeOnly fg.deobf('dw-test:Mekanism:1.20.1-10.4.16.80')
+        runtimeOnly fg.deobf('dw-test:MekanismGenerators:1.20.1-10.4.16.80')
         runtimeOnly fg.deobf('dw-test:megacells-forge:2.4.6-1.20.1')
         runtimeOnly fg.deobf('dw-test:Applied-Mekanistics:1.4.3')
         runtimeOnly fg.deobf('dw-test:cloth-config:11.1.136-forge')

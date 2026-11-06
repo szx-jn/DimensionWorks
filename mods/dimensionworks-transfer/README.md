@@ -44,6 +44,6 @@
 
 ## 本地验证
 
-使用 Java 17 与 Gradle 8.8：`gradle test build --no-daemon`。JUnit 覆盖负坐标九区块边界。可选 `gradle -PtransferTestModsDir=<整合包mods目录> runGameTestServer --no-daemon` 使用固定的暮色与 CMP 发行 JAR，检查两格空间、脚下/头顶危险方块、流体与传送门拒绝、终端窒息判定和暮色实例缺失时按需创建。测试使用独立 `run-gametest-recovery` 世界；编译、单测与 GameTest 不代替真实玩家的客户端交互验证。
+使用 Java 17 与 Gradle 8.8：`gradle test build --no-daemon`。JUnit 覆盖负坐标九区块边界和 AE2 附属依赖识别。可选 `gradle -PtransferTestModsDir=<整合包mods目录> runGameTestServer --no-daemon` 使用固定的暮色、CMP、AE2、MEGA Cells、Applied Mekanistics、Mekanism 与所需库发行 JAR，检查安全落点/终端/暮色按需加载，以及受限方块/部件写入、物品保留、真实工具打包与纸箱解包的 NBT 保留。测试使用独立 `run-gametest-recovery` 世界；编译、单测与 GameTest 不代替真实玩家的客户端交互验证。
 
 规格见 [中转维度安全与云盘回收](../../docs/design/transfer-safety-cloud-disk.md)。
