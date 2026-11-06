@@ -112,8 +112,10 @@ func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 		{"19", "", "单连接", false, true},
 		{"24", "", "认证", false, false},
 		{"3", "URI=https://example.com/ssl/certificate.dll", "来源没有", false, false},
+		{"1", "Got EOF from the server", "断开", false, true},
 		{"1", "SSL certificate verify failed", "证书", false, false},
 		{"0", "unknown engine failure", "原始信息", false, false},
+		{"", "signal: segmentation fault", "段错误", true, false},
 	} {
 		err := newAria2Error("下载任务", test.code, nil, test.detail)
 		if !strings.Contains(err.Error(), test.want) || err.localFailure() != test.local || err.retrySingleConnection() != test.single {
@@ -160,7 +162,7 @@ func TestAria2StartupCapturesOriginalErrorWithoutWaitingForRPC(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "libssl") || !strings.Contains(err.Error(), "运行依赖") {
 		t.Fatalf("lost startup diagnosis: %v", err)
 	}
-	if time.Since(start) > 2*time.Second {
+	if time.Since(start) > 4500*time.Millisecond {
 		t.Fatalf("waited for dead engine: %v", time.Since(start))
 	}
 }

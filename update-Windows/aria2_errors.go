@@ -28,7 +28,12 @@ func newAria2Error(stage, code string, cause error, detail string) *aria2Error {
 func (e *aria2Error) Unwrap() error { return e.cause }
 
 func (e *aria2Error) localFailure() bool {
-	return e.stage != "下载任务" || e.code == "9" || e.code == "16" || e.code == "17" || e.code == "18"
+	return e.stage != "下载任务" || e.code == "9" || e.code == "16" || e.code == "17" || e.code == "18" || e.processCrashed()
+}
+
+func (e *aria2Error) processCrashed() bool {
+	detail := e.diagnosticText()
+	return strings.Contains(detail, "segmentation fault") || strings.Contains(detail, "segmentation violation") || strings.Contains(detail, "sigsegv")
 }
 
 func (e *aria2Error) retrySingleConnection() bool {
@@ -84,6 +89,8 @@ func (e *aria2Error) Error() string {
 func (e *aria2Error) explanation() (string, string) {
 	detail := e.diagnosticText()
 	switch {
+	case e.processCrashed():
+		return "引擎进程发生段错误并退出", "这是引擎运行兼容性问题，反复换源无法修复；请保留诊断日志和系统信息。Linux 更新器使用异步 DNS，避免已知的系统解析器崩溃路径。"
 	case errors.Is(e.cause, os.ErrPermission) || strings.Contains(detail, "permission denied") || strings.Contains(detail, "operation not permitted"):
 		return "系统拒绝执行引擎或写入文件", "检查目录权限、noexec 挂载和安全软件；可将更新器移到可写且允许执行的目录后重试。"
 	case strings.Contains(detail, "no space left") || e.code == "9":
@@ -94,6 +101,8 @@ func (e *aria2Error) explanation() (string, string) {
 		return "系统无法加载引擎的运行依赖", "检查原始信息中缺少的系统组件，或换用受支持系统上的对应更新器。"
 	case strings.Contains(detail, "certificate") || strings.Contains(detail, "ssl") || strings.Contains(detail, "tls"):
 		return "HTTPS 握手或证书校验失败", "检查系统时间、受信任根证书和代理证书；更新器保持证书校验，并尝试下一个来源。"
+	case strings.Contains(detail, "got eof") || strings.Contains(detail, "unexpected eof"):
+		return "来源或代理提前断开了连接", "使用 aria2c 单连接重试；仍失败时切换来源，并检查代理是否中断请求。"
 	case strings.Contains(detail, "sha-256"):
 		return "内嵌引擎完整性校验失败", "重新下载正式发布的更新器；损坏的引擎不会执行。"
 	}

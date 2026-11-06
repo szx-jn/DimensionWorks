@@ -10,6 +10,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -50,7 +51,12 @@ func TestBundledAria2DownloadsWithoutSidecar(t *testing.T) {
 		}))
 		destination := filepath.Join(t.TempDir(), "download with spaces.bin")
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-		err := downloadWithAria2(ctx, engine, server.URL+"/probe.bin", destination, int64(size+1))
+		parsed, err := url.Parse(server.URL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		parsed.Host = "localhost:" + parsed.Port()
+		err = downloadWithAria2(ctx, engine, parsed.String()+"/probe.bin", destination, int64(size+1))
 		cancel()
 		server.Close()
 		if err != nil {
