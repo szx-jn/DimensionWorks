@@ -21,10 +21,13 @@ ForgeEvents.onEvent('net.minecraftforge.event.level.ChunkEvent$Load', event => {
   level.getServer().execute(() => {
     if (!level.getChunkSource().hasChunk(chunkPos.x, chunkPos.z)) return
     const sections = chunk.getSections()
-    for (let index = 0; index < sections.length; index++) {
-      const section = sections[index]
+    // Rhino 2001.2.3 can mis-handle block-scoped declarations in repeated loop execution.
+    var section
+    var baseY
+    for (var index = 0; index < sections.length; index++) {
+      section = sections[index]
       if (section.hasOnlyAir() || !section.maybeHas(state => state.is(table))) continue
-      const baseY = level.getMinBuildHeight() + index * 16
+      baseY = level.getMinBuildHeight() + index * 16
       for (let y = 0; y < 16; y++) {
         for (let z = 0; z < 16; z++) {
           for (let x = 0; x < 16; x++) {
