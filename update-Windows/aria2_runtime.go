@@ -42,8 +42,12 @@ func unpackAria2(root, name, expectedDigest string, data []byte) (string, func()
 
 func aria2ExtractionRoots(executableDir string) []string {
 	roots := []string{executableDir}
-	if cwd, err := os.Getwd(); err == nil { roots = append(roots, cwd) }
-	if cache, err := os.UserCacheDir(); err == nil { roots = append(roots, cache) }
+	if cwd, err := os.Getwd(); err == nil {
+		roots = append(roots, cwd)
+	}
+	if cache, err := os.UserCacheDir(); err == nil {
+		roots = append(roots, cache)
+	}
 	return append(roots, os.TempDir())
 }
 
@@ -54,7 +58,9 @@ func probeAria2Executable(path string) error {
 	var output limitedOutput
 	command.Stdout, command.Stderr = &output, &output
 	if err := command.Run(); err != nil {
-		if ctx.Err() != nil { err = ctx.Err() }
+		if ctx.Err() != nil {
+			err = ctx.Err()
+		}
 		return newAria2Error("启动引擎", "", err, output.String())
 	}
 	if !strings.Contains(output.String(), "aria2 version") {
@@ -72,12 +78,16 @@ func prepareBundledAria2(roots []string, name, digest string, data []byte) (stri
 	var failures []string
 	for _, root := range roots {
 		root = filepath.Clean(root)
-		if seen[root] { continue }
+		if seen[root] {
+			continue
+		}
 		seen[root] = true
 		path, cleanup, err := unpackAria2(root, name, digest, data)
 		if err == nil {
 			err = probeAria2Executable(path)
-			if err == nil { return path, cleanup, nil }
+			if err == nil {
+				return path, cleanup, nil
+			}
 			cleanup()
 		}
 		failures = append(failures, fmt.Sprintf("%s: %v", root, err))

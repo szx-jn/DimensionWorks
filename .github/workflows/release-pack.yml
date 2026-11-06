@@ -232,7 +232,7 @@ jobs:
         working-directory: update-Windows
         run: go test -v ./...
 
-      - name: 获取 aria2 sidecar 与 GPL 源码包
+      - name: 获取内嵌 aria2 引擎与 GPL 源码包
         shell: bash
         run: |
           set -euo pipefail
@@ -256,7 +256,7 @@ jobs:
 
       - name: 测试 Linux 内置 aria2 实际下载
         working-directory: update-Windows
-        run: go test -tags bundled_aria2 -run 'TestBundledAria2|TestUnpackAria2' -v ./...
+        run: go test -tags bundled_aria2 ./...
 
 
       - name: 构建 Windows、Linux、macOS Go 更新器
@@ -413,7 +413,7 @@ jobs:
           if entries:
               print("\n".join(entries))
           else:
-            print("更新器：Windows/Linux/macOS 六个更新器全部单文件内置 aria2 引擎；同版提供 GPL 许可证与源码，保留 Go 下载器回退。")
+            print("更新器：Windows/Linux/macOS 六个更新器全部单文件内嵌 aria2c；同版提供 GPL 许可证与源码，下载仅使用 aria2c，并提供错误原因、单连接兼容重试和超一小时切源。")
           PY
           )"
           assets=(

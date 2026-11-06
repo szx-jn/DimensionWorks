@@ -1095,13 +1095,16 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 	if maxBytes <= 0 || maxBytes > maxDownloadBytes {
 		return fmt.Errorf("下载大小限制无效：%d", maxBytes)
 	}
-	progressBegin(destination, filepath.Base(destination))
-	defer func() { progressFinish(destination, resultErr == nil) }()
 	parsed, err := url.Parse(source)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
 		return fmt.Errorf("无效下载 URL：%s", source)
 	}
-	candidates := downloadCandidates(source)
+	return downloadFromCandidates(downloadCandidates(source), destination, maxBytes)
+}
+
+func downloadFromCandidates(candidates []string, destination string, maxBytes int64) (resultErr error) {
+	progressBegin(destination, filepath.Base(destination))
+	defer func() { progressFinish(destination, resultErr == nil) }()
 	startConsoleInput()
 	var failures []string
 	for index, candidate := range candidates {
@@ -1172,7 +1175,7 @@ func downloadOnceLimited(source, destination string, maxBytes int64) error {
 
 func downloadOnceLimitedContext(parent context.Context, source, destination string, maxBytes int64) error {
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
-		return err
+		return newAria2Error("准备下载文件", "", err, "无法创建下载目录")
 	}
 	enginePath, err := aria2ExecutablePath()
 	if err != nil { return err }
@@ -1324,7 +1327,14 @@ func findAria2ExecutablePath() (string, error) {
 }
 
 func downloadWithAria2(parent context.Context, enginePath, source, destination string, maxBytes int64) error {
-	return downloadWithAria2Connections(parent, enginePath, source, destination, maxBytes, 8)
+	for attempt := 0; ; attempt++ {
+		err := downloadWithAria2Connections(parent, enginePath, source, destination, maxBytes, 16)
+		var engineErr *aria2Error
+		if parent.Err() != nil || attempt >= 2 || !errors.As(err, &engineErr) { return err }
+		detail := strings.ToLower(engineErr.detail)
+		if !strings.Contains(detail, "rpc") || (!strings.Contains(detail, "bind") && !strings.Contains(detail, "address already in use")) { return err }
+		fmt.Println("[下载] 本机 RPC 端口被占用，自动选择新端口重试。")
+	}
 }
 
 func downloadWithAria2Connections(parent context.Context, enginePath, source, destination string, maxBytes int64, connections int) error {
@@ -1367,11 +1377,13 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		"--out=" + filepath.Base(destination),
 	}
 	// Match Go's proxy selection, including NO_PROXY, for the engine process.
+	proxyURL := ""
 	if request, err := http.NewRequest(http.MethodGet, source, nil); err == nil {
 		if proxy, err := http.ProxyFromEnvironment(request); err == nil && proxy != nil {
-			args = append(args, "--all-proxy="+proxy.String())
+			proxyURL = proxy.String()
 		}
 	}
+	args = append(args, "--all-proxy="+proxyURL, "--http-proxy="+proxyURL, "--https-proxy="+proxyURL, "--ftp-proxy=")
 	args = append(args, source)
 	command := exec.CommandContext(ctx, enginePath, args...)
 	var output limitedOutput
@@ -1405,10 +1417,15 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		}
 	}()
 	if err := waitForAria2RPC(startupCtx, rpcClient, rpcURL, rpcSecret); err != nil {
+		exited := false
+		select {
+		case <-processDone: exited = true
+		default:
+		}
 		cancel()
 		<-processDone
 		if parent.Err() != nil { return parent.Err() }
-		if waitErr != nil && startupCtx.Err() != nil {
+		if waitErr != nil && exited {
 			return newAria2Error("启动引擎", "", waitErr, output.String())
 		}
 		return newAria2Error("RPC 接口", "", err, output.String())
@@ -1501,7 +1518,7 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 	rpcClient.CloseIdleConnections()
 	if tooLarge.Load() {
 		_ = os.Remove(destination)
-		return fmt.Errorf("下载超过大小限制：%s", humanSize(maxBytes))
+		return newAria2Error("校验下载文件", "", fmt.Errorf("下载超过大小限制：%s", humanSize(maxBytes)), "")
 	}
 	if parent.Err() != nil { return parent.Err() }
 	if failure := rpcFailure.Load(); failure != nil {
@@ -1515,14 +1532,14 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 	if waitErr != nil && !completed.Load() {
 		_ = os.Remove(destination)
 		message := strings.TrimSpace(output.String())
-		if ctx.Err() != nil { waitErr = ctx.Err() }
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) { waitErr = ctx.Err() }
 		return newAria2Error("下载任务", "", waitErr, message)
 	}
 	info, err := os.Stat(destination)
-	if err != nil { return fmt.Errorf("aria2 下载结束但未生成目标文件：%w", err) }
+	if err != nil { return newAria2Error("校验下载文件", "", err, "下载结束但未生成目标文件") }
 	if !info.Mode().IsRegular() || info.Size() <= 0 || info.Size() > maxBytes {
 		_ = os.Remove(destination)
-		return errors.New("aria2 生成的下载文件类型或大小无效")
+		return newAria2Error("校验下载文件", "", errors.New("下载文件类型或大小无效"), "")
 	}
 	progressSetTotal(destination, info.Size())
 	return nil

@@ -18,7 +18,9 @@ type aria2Error struct {
 func newAria2Error(stage, code string, cause error, detail string) *aria2Error {
 	if code == "" {
 		match := regexp.MustCompile(`(?:errorCode=|code=)([0-9]+)`).FindStringSubmatch(detail)
-		if len(match) > 1 { code = match[1] }
+		if len(match) > 1 {
+			code = match[1]
+		}
 	}
 	return &aria2Error{stage: stage, code: code, cause: cause, detail: detail}
 }
@@ -30,6 +32,10 @@ func (e *aria2Error) localFailure() bool {
 }
 
 func (e *aria2Error) retrySingleConnection() bool {
+	detail := e.diagnosticText()
+	if strings.Contains(detail, "certificate") || strings.Contains(detail, "ssl") || strings.Contains(detail, "tls") {
+		return false
+	}
 	switch e.code {
 	case "1", "8", "19", "22", "29":
 		return e.stage == "下载任务"
@@ -37,37 +43,54 @@ func (e *aria2Error) retrySingleConnection() bool {
 	return false
 }
 
+func (e *aria2Error) diagnosticText() string {
+	detail := e.detail
+	if e.cause != nil {
+		detail += " " + e.cause.Error()
+	}
+	return strings.ToLower(regexp.MustCompile(`https?://[^"'\s]+`).ReplaceAllString(detail, "<url>"))
+}
+
 func (e *aria2Error) Error() string {
 	reason, advice := e.explanation()
 	label := "aria2c " + e.stage + "失败"
-	if e.code != "" { label += "（错误码 " + e.code + "）" }
+	if e.code != "" {
+		label += "（错误码 " + e.code + "）"
+	}
 	detail := strings.TrimSpace(e.detail)
-	if e.cause != nil { detail += " " + e.cause.Error() }
+	if e.cause != nil {
+		detail += " " + e.cause.Error()
+	}
 	detail = safeErrorForLog(errors.New(strings.TrimSpace(detail)))
 	// Engine output can contain ANSI controls and RPC secrets; never echo them.
 	detail = regexp.MustCompile(`token:[A-Za-z0-9]+|--rpc-secret=[^\s]+`).ReplaceAllString(detail, "<redacted>")
 	detail = regexp.MustCompile(`\x1b\[[0-?]*[ -/]*[@-~]`).ReplaceAllString(detail, "")
 	detail = strings.Map(func(r rune) rune {
-		if r < 32 || r == 127 { return ' ' }
+		if r < 32 || r == 127 {
+			return ' '
+		}
 		return r
 	}, detail)
-	if len([]rune(detail)) > 2048 { detail = string([]rune(detail)[len([]rune(detail))-2048:]) }
+	if len([]rune(detail)) > 2048 {
+		detail = string([]rune(detail)[len([]rune(detail))-2048:])
+	}
 	message := fmt.Sprintf("%s：%s。%s", label, reason, advice)
-	if detail != "" { message += "\n原始信息：" + detail }
+	if detail != "" {
+		message += "\n原始信息：" + detail
+	}
 	return message
 }
 
 func (e *aria2Error) explanation() (string, string) {
-	detail := strings.ToLower(e.detail)
-	if e.cause != nil { detail += " " + strings.ToLower(e.cause.Error()) }
+	detail := e.diagnosticText()
 	switch {
 	case errors.Is(e.cause, os.ErrPermission) || strings.Contains(detail, "permission denied") || strings.Contains(detail, "operation not permitted"):
 		return "系统拒绝执行引擎或写入文件", "检查目录权限、noexec 挂载和安全软件；可将更新器移到可写且允许执行的目录后重试。"
 	case strings.Contains(detail, "no space left") || e.code == "9":
 		return "磁盘空间不足", "释放实例与临时目录所在磁盘的空间后重试。"
-	case strings.Contains(detail, "exec format") || strings.Contains(detail, "bad cpu"):
+	case strings.Contains(detail, "exec format") || strings.Contains(detail, "bad cpu") || strings.Contains(detail, "not a valid win32 application"):
 		return "引擎与操作系统或 CPU 架构不匹配", "请使用对应 Windows amd64、Linux amd64 或 macOS arm64 的正式更新器。"
-	case strings.Contains(detail, "shared librar") || strings.Contains(detail, "dyld") || strings.Contains(detail, "dll"):
+	case e.stage != "下载任务" && (strings.Contains(detail, "shared librar") || strings.Contains(detail, "dyld") || strings.Contains(detail, "dll")):
 		return "系统无法加载引擎的运行依赖", "检查原始信息中缺少的系统组件，或换用受支持系统上的对应更新器。"
 	case strings.Contains(detail, "certificate") || strings.Contains(detail, "ssl") || strings.Contains(detail, "tls"):
 		return "HTTPS 握手或证书校验失败", "检查系统时间、受信任根证书和代理证书；更新器保持证书校验，并尝试下一个来源。"
@@ -99,6 +122,9 @@ func (e *aria2Error) explanation() (string, string) {
 	}
 	if e.stage == "启动引擎" || e.stage == "准备引擎" {
 		return "内嵌引擎未能完成释放或启动检查", "请根据原始信息检查目录权限、系统兼容性，或重新下载正式单文件更新器。"
+	}
+	if e.stage == "校验下载文件" || e.stage == "准备下载文件" {
+		return "下载文件不符合类型、大小或存在性要求", "该文件不会用于更新；请核对原始信息和发布清单，检查目标目录后重试。"
 	}
 	return "引擎报告了下载异常", "将尝试下一个来源；下面保留了引擎原始信息用于定位原因。"
 }
