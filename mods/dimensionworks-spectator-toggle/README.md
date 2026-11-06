@@ -1,17 +1,30 @@
 # DimensionWorks Spectator Toggle
 
-Forge 1.20.1 mod that lets any player toggle spectator mode with **F4**.
+Minecraft 1.20.1 Forge 自研模组，让玩家通过 **F4** 切换旁观模式。客户端与服务端都需要安装，不需要 OP 权限。
 
-- First press saves the player's exact position, dimension, rotation, and current game mode, then enters spectator mode.
-- Second press returns to the saved point and restores the saved game mode.
-- The key is configurable under **Options → Controls → DimensionWorks**.
-- The server handles the mode change and return point, so the feature does not require OP permissions. Install the mod on both the client and server.
-- Return data is saved per player and copied when a death respawn recreates the player.
+- 第一次按 F4 保存当前维度、精确坐标、朝向和游戏模式，再进入旁观模式。
+- 第二次按 F4 返回保存位置，恢复原游戏模式，然后清除本轮记录。
+- 按键可以在「选项 → 控制 → DimensionWorks」中调整。
+- 返回点按玩家保存，死亡重建玩家实体时复制；同一次开服期间断线重连仍可继续原来的 F4 流程。
 
-If the original dimension is unavailable, the player stays in spectator mode and the saved return point is kept for a later attempt.
+正常 F4 返回时，如果原维度不可用，保留旁观模式与返回点，供之后重试。
 
-## Build
+## 停服与状态恢复
+
+- 正常停服在玩家数据保存前结束在线玩家的 F4 流程：恢复进入旁观前的游戏模式，同时删除返回点与 `active` 状态。清理在当前位置完成，不依赖原维度或点位仍然存在。
+- 每轮返回点带有本次服务端实例的会话标识。离线玩家在下一次登录时清除上一轮开服的记录并恢复原游戏模式；旧版没有会话标识的记录同样清理。异常退出后的旧记录也走此恢复路径。
+- 已经处于旁观模式但返回点丢失时，按 F4 恢复原版记录的上一游戏模式；该模式缺失或仍是旁观时回退生存模式。再按 F4 即可从当前位置开始新一轮流程。
+- 若玩家已被其他命令切换为非旁观模式，清理只删除 F4 记录，保留当前游戏模式。没有 F4 记录的旁观玩家不会在停服或登录时被自动切换。
+- 游戏模式切换被其他模组取消时保留记录，避免再次出现「点位已删、旁观仍未退出」的状态。
+
+清理仅遍历在线玩家，离线记录按登录处理，不扫描或重写全部玩家存档，不增加常驻实体、机器或强制加载区块。切回非旁观模式后会恢复普通碰撞、重力等规则，停服清理不会自动传送到旧点位。
+
+## 本地验证
 
 ```sh
-gradle build --no-daemon
+gradle build --no-daemon # Gradle 8.8、Java 17；本地产物仅用于开发验证
 ```
+
+## 更新记录
+
+- `0.1.1`：停服同步清理返回点和 F4 旁观状态；登录清理过期记录；返回点丢失时允许通过 F4 恢复并重新开始。
