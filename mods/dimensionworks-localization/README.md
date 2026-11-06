@@ -36,7 +36,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 gradle build --no-daemon
 ```
 
-当前产物为 `build/libs/dimensionworks_localization-0.1.4.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
+当前产物为 `build/libs/dimensionworks_localization-0.1.5.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
 
 ## 校验
 
@@ -68,6 +68,10 @@ python3 scripts/check_localization.py
 ## Create 包裹飞机与暮色森林（0.1.4）
 
 补齐 Create More: Package Couriers 2.2.1 的 14 条地址示例与特殊合成说明，以及暮色森林 4.3.2508 的 30 条缺失中文键；不覆盖第三方 Jar 已提供的中文文本。
+
+## Sophisticated Core 创造页签（0.1.5）
+
+补齐 Sophisticated Core 1.5.26.2457 新增的 `itemGroup.sophisticatedcore` 创造页签中文键。
 
 ## 龙之进化及 ECO AE 前置（0.1.2）
 
