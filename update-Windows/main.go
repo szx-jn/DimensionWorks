@@ -63,6 +63,10 @@ const (
 	maxArchiveFileBytes = uint64(4 << 30)
 	maxArchiveTotalBytes = uint64(16 << 30)
 	maxDownloadBytes    = int64(8 << 30)
+	downloadETAExceedsLimit = time.Hour
+	downloadETAProbeInterval = time.Second
+	downloadETAStallGrace = 5 * time.Second
+	maxDownloadETADuration time.Duration = 1<<63 - 1
 )
 
 var versionRE = regexp.MustCompile("^[0-9]+\\.[0-9]+\\.[0-9]+$")
@@ -1102,6 +1106,12 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 	for index, candidate := range candidates {
 		progressReset(destination)
 		ctx, cancel := context.WithCancel(context.Background())
+			var etaExceeded atomic.Bool
+			stopETA := watchDownloadETA(ctx, func() {
+				if etaExceeded.CompareAndSwap(false, true) {
+					cancel()
+				}
+			}, newDownloadETAProbe(destination), downloadETAExceedsLimit, downloadETAProbeInterval)
 		var skipped atomic.Bool
 		skipID := nextDownloadSkipID.Add(1)
 		consoleInputMu.Lock()
@@ -1113,6 +1123,7 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 		consoleInputMu.Unlock()
 		fmt.Printf("[下载] 来源 %d/%d：%s（输入 s 并回车可立即跳过此来源）\n", index+1, len(candidates), safeURLForLog(candidate))
 		err := downloadOnceLimitedContext(ctx, candidate, destination, maxBytes)
+			stopETA()
 		consoleInputMu.Lock()
 		delete(activeDownloadSkips, skipID)
 		consoleInputMu.Unlock()
@@ -1124,6 +1135,10 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 		}
 		if err == nil {
 			return nil
+			} else if etaExceeded.Load() {
+				fmt.Printf("\n[下载] 来源预计剩余时间超过 1 小时，切换到下一个来源。\n")
+				failures = append(failures, fmt.Sprintf("%s: 预计剩余时间超过 1 小时", safeURLForLog(candidate)))
+				continue
 		} else {
 			failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(candidate), safeErrorForLog(err)))
 		}
@@ -1184,6 +1199,91 @@ func downloadOnceLimitedContext(parent context.Context, source, destination stri
 	sequentialCtx, cancelSequential := context.WithTimeout(parent, downloadAttemptTimeout)
 	defer cancelSequential()
 	return downloadSequential(sequentialCtx, source, destination, maxBytes)
+}
+
+func estimatedDownloadETA(total, downloaded int64, bytesPerSecond float64) (time.Duration, bool) {
+	if total <= 0 || downloaded < 0 || downloaded >= total || bytesPerSecond <= 0 {
+		return 0, false
+	}
+	seconds := float64(total-downloaded) / bytesPerSecond
+	if seconds >= float64(maxDownloadETADuration)/float64(time.Second) {
+		return maxDownloadETADuration, true
+	}
+	return time.Duration(seconds * float64(time.Second)), true
+}
+
+func newDownloadETAProbe(key string) func() (time.Duration, bool) {
+	var mu sync.Mutex
+	var previousTime time.Time
+	var previousBytes int64
+	var speed float64
+	return func() (time.Duration, bool) {
+		downloadProgressUI.mu.Lock()
+		file := downloadProgressUI.files[key]
+		var total, written int64
+		if file != nil {
+			total, written = file.total, file.written
+		}
+		downloadProgressUI.mu.Unlock()
+		if file == nil || total <= 0 || written <= 0 || written >= total {
+			mu.Lock()
+			previousTime = time.Time{}
+			previousBytes = 0
+			speed = 0
+			mu.Unlock()
+			return 0, false
+		}
+		now := time.Now()
+		mu.Lock()
+		defer mu.Unlock()
+		if previousTime.IsZero() {
+			previousTime = now
+			previousBytes = written
+			return 0, false
+		}
+		elapsed := now.Sub(previousTime).Seconds()
+		delta := written - previousBytes
+		if elapsed <= 0 {
+			return 0, false
+		}
+		if delta > 0 {
+			speed = float64(delta) / elapsed
+			previousTime = now
+			previousBytes = written
+		} else if now.Sub(previousTime) >= downloadETAStallGrace {
+			return maxDownloadETADuration, true
+		} else {
+			return 0, false
+		}
+		return estimatedDownloadETA(total, written, speed)
+	}
+}
+
+func watchDownloadETA(ctx context.Context, cancel context.CancelFunc, estimate func() (time.Duration, bool), limit, interval time.Duration) func() {
+	if estimate == nil || limit <= 0 || interval <= 0 {
+		return func() {}
+	}
+	done := make(chan struct{})
+	var once sync.Once
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-done:
+				return
+			case <-ticker.C:
+				eta, ok := estimate()
+				if ok && eta > limit {
+					cancel()
+					return
+				}
+			}
+		}
+	}()
+	return func() { once.Do(func() { close(done) }) }
 }
 
 func aria2ExecutablePath() string {

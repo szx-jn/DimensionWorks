@@ -172,6 +172,57 @@ func TestDownloadCandidatesDoNotMirrorNonReleaseURLs(t *testing.T) {
 	}
 }
 
+func TestEstimatedDownloadETAUsesRemainingBytesAndSpeed(t *testing.T) {
+	slow, ok := estimatedDownloadETA(8<<30, 0, 1<<20)
+	if !ok {
+		t.Fatal("expected ETA for a known total and positive speed")
+	}
+	if slow <= time.Hour {
+		t.Fatalf("expected ETA over one hour, got %s", slow)
+	}
+
+	fast, ok := estimatedDownloadETA(1<<30, 0, 1<<20)
+	if !ok {
+		t.Fatal("expected ETA for a known total and positive speed")
+	}
+	if fast >= time.Hour {
+		t.Fatalf("expected ETA under one hour, got %s", fast)
+	}
+}
+
+func TestWatchDownloadETACancelsWhenEstimateExceedsLimit(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var calls int
+	estimate := func() (time.Duration, bool) {
+		calls++
+		return 2 * time.Hour, true
+	}
+	stop := watchDownloadETA(ctx, cancel, estimate, time.Hour, time.Millisecond)
+	select {
+	case <-ctx.Done():
+	case <-time.After(time.Second):
+		t.Fatal("watcher did not cancel a source whose ETA exceeded the limit")
+	}
+	stop()
+	if calls == 0 {
+		t.Fatal("watcher did not sample the ETA")
+	}
+}
+
+func TestWatchDownloadETAKeepsSourceWhenEstimateWithinLimit(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	estimate := func() (time.Duration, bool) { return 30 * time.Minute, true }
+	stop := watchDownloadETA(ctx, cancel, estimate, time.Hour, time.Millisecond)
+	select {
+	case <-ctx.Done():
+		t.Fatal("watcher canceled a source whose ETA was within the limit")
+	case <-time.After(20 * time.Millisecond):
+	}
+	stop()
+}
+
 func TestDownloadLimitStopsOversizedBody(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
