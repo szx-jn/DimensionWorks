@@ -56,18 +56,21 @@ public final class TransferEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             DispatchController.forget(player);
             FROG_RIDES.remove(player.getUUID());
+            FROG_COOLDOWNS.remove(player.getUUID());
             dev.szx.dimensionworks.transfer.territory.PlotChunkLoading.deactivate(player.getUUID());
         }
     }
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        FROG_RIDES.remove(event.getEntity().getUUID());
         if (event.getEntity() instanceof ServerPlayer player && player.level().dimension().equals(WDKeys.TRANSFER_LEVEL))
             TerritoryManager.enter(player);
     }
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        FROG_RIDES.remove(event.getEntity().getUUID());
         if (event.getEntity() instanceof ServerPlayer player && player.level().dimension().equals(WDKeys.TRANSFER_LEVEL))
             TerritoryManager.enter(player);
     }
@@ -76,6 +79,7 @@ public final class TransferEvents {
     public static void onStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
         TerritoryManager.clear();
         FROG_RIDES.clear();
+        FROG_COOLDOWNS.clear();
     }
 
     @SubscribeEvent
@@ -86,9 +90,12 @@ public final class TransferEvents {
         TerritoryBuilder.tick();
     }
 
-    /** Hard confinement: the plot boundary wins over any movement, piston or teleport. */
     private static final java.util.Map<java.util.UUID, FrogRide> FROG_RIDES = new java.util.HashMap<>();
-    private record FrogRide(net.minecraft.core.BlockPos frog, net.minecraft.core.BlockPos chain, float position, net.minecraft.core.BlockPos connection, int ticks) {}
+    private static final java.util.Map<java.util.UUID, Long> FROG_COOLDOWNS = new java.util.HashMap<>();
+    private static final int FROG_COOLDOWN_TICKS = 100;
+    private record FrogRide(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension,
+        net.minecraft.core.BlockPos frog, net.minecraft.core.BlockPos chain, float position,
+        net.minecraft.core.BlockPos connection, int ticks) {}
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -101,10 +108,9 @@ public final class TransferEvents {
         TutorialManager.check(player);
         TutorialManager.tick(player);
         DispatchController.tick(player);
+        // Run cleanup even after escape and inside the transfer dimension.
+        tickFrogport(player);
         if (!player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {
-            if (event.phase == TickEvent.Phase.END && dev.szx.dimensionworks.transfer.compat.PlayerParcel.isPacked(player)) {
-                tickFrogport(player);
-            }
             return;
         }
 
@@ -212,16 +218,41 @@ public final class TransferEvents {
 
 
     /** Frogs swallow a packed player briefly, then hand Create's chain rider to the client. */
-    private static void tickFrogport(ServerPlayer player) {
+    static void tickFrogport(ServerPlayer player) {
+        long now = player.server.overworld().getGameTime();
+        Long cooldown = FROG_COOLDOWNS.get(player.getUUID());
+        if (cooldown != null && now >= cooldown) {
+            FROG_COOLDOWNS.remove(player.getUUID());
+            cooldown = null;
+        }
+        if (!player.isAlive() || !dev.szx.dimensionworks.transfer.compat.PlayerParcel.isPacked(player)
+            || player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {
+            cancelFrogRide(player, now);
+            return;
+        }
         FrogRide active = FROG_RIDES.get(player.getUUID());
         if (active != null) {
-            if (!dev.szx.dimensionworks.transfer.compat.PlayerParcel.isPacked(player)) { FROG_RIDES.remove(player.getUUID()); return; }
+            // Never resume an old pull after a teleport, retarget, broken chain or unloaded chunk.
+            if (!active.dimension().equals(player.level().dimension())
+                || player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(active.frog())) > 16
+                || !player.level().hasChunkAt(active.frog()) || !player.level().hasChunkAt(active.chain())
+                || !(player.level().getBlockEntity(active.frog()) instanceof com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity frogport)
+                || !(frogport.target instanceof com.simibubi.create.content.logistics.packagePort.PackagePortTarget.ChainConveyorFrogportTarget target)
+                || !active.chain().equals(active.frog().offset(target.relativePos))
+                || Float.compare(active.position(), target.chainPos) != 0
+                || !java.util.Objects.equals(active.connection(), target.connection)
+                || !(player.level().getBlockEntity(active.chain()) instanceof com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity conveyor)
+                || Math.abs(conveyor.getSpeed()) <= 0.001f
+                || active.connection() != null && !conveyor.connections.contains(active.connection())) {
+                cancelFrogRide(player, now);
+                return;
+            }
             net.minecraft.core.BlockPos frog = active.frog();
             if (active.ticks() == 0) player.level().playSound(null, frog, net.minecraft.sounds.SoundEvents.SLIME_BLOCK_PLACE, net.minecraft.sounds.SoundSource.BLOCKS, .8f, 1.2f);
             player.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.BUBBLE, frog.getX()+.5, frog.getY()+.8, frog.getZ()+.5, 4, .28, .3, .28, .03);
-            net.minecraft.world.phys.Vec3 target = net.minecraft.world.phys.Vec3.atCenterOf(frog).add(0, 0.4, 0);
-            player.connection.teleport(player.getX() + (target.x-player.getX()) * .35, player.getY() + (target.y-player.getY()) * .35,
-                player.getZ() + (target.z-player.getZ()) * .35, player.getYRot(), player.getXRot());
+            net.minecraft.world.phys.Vec3 mouth = net.minecraft.world.phys.Vec3.atCenterOf(frog).add(0, 0.4, 0);
+            player.connection.teleport(player.getX() + (mouth.x-player.getX()) * .35, player.getY() + (mouth.y-player.getY()) * .35,
+                player.getZ() + (mouth.z-player.getZ()) * .35, player.getYRot(), player.getXRot());
             if (active.ticks() >= 8) {
                 player.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, frog.getX()+.5, frog.getY()+.8, frog.getZ()+.5, 10, .3, .3, .3, .04);
                 player.level().playSound(null, frog, net.minecraft.sounds.SoundEvents.CHAIN_HIT, net.minecraft.sounds.SoundSource.BLOCKS, .8f, 1.4f);
@@ -234,9 +265,12 @@ public final class TransferEvents {
                     dev.szx.dimensionworks.transfer.network.TransferNetwork.chainRide(player, active.chain(), active.position(), active.connection());
                 }
                 FROG_RIDES.remove(player.getUUID());
-            } else FROG_RIDES.put(player.getUUID(), new FrogRide(active.frog(), active.chain(), active.position(), active.connection(), active.ticks()+1));
+                FROG_COOLDOWNS.put(player.getUUID(), now + FROG_COOLDOWN_TICKS);
+            } else FROG_RIDES.put(player.getUUID(), new FrogRide(active.dimension(), active.frog(), active.chain(), active.position(), active.connection(), active.ticks()+1));
             return;
         }
+        if (cooldown != null
+            || com.simibubi.create.content.kinetics.chainConveyor.ServerChainConveyorHandler.hangingPlayers.containsKey(player.getUUID())) return;
         if (player.tickCount % 5 != 0) return;
         net.minecraft.core.BlockPos origin = player.blockPosition();
         for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(origin.offset(-3,-2,-3),origin.offset(3,2,3))) {
@@ -245,10 +279,18 @@ public final class TransferEvents {
             if (!(frog.target instanceof com.simibubi.create.content.logistics.packagePort.PackagePortTarget.ChainConveyorFrogportTarget target)) continue;
             if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) > 16) continue;
             net.minecraft.core.BlockPos chainPos = pos.offset(target.relativePos).immutable();
+            if (!player.level().hasChunkAt(chainPos)) continue;
             if (!(player.level().getBlockEntity(chainPos) instanceof com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity chain)
-                || Math.abs(chain.getSpeed()) <= 0.001f) continue;
-            FROG_RIDES.put(player.getUUID(), new FrogRide(pos.immutable(), chainPos, target.chainPos, target.connection, 0));
+                || Math.abs(chain.getSpeed()) <= 0.001f
+                || target.connection != null && !chain.connections.contains(target.connection)) continue;
+            FROG_RIDES.put(player.getUUID(), new FrogRide(player.level().dimension(), pos.immutable(), chainPos, target.chainPos, target.connection, 0));
             break;
+        }
+    }
+
+    private static void cancelFrogRide(ServerPlayer player, long now) {
+        if (FROG_RIDES.remove(player.getUUID()) != null) {
+            FROG_COOLDOWNS.put(player.getUUID(), now + FROG_COOLDOWN_TICKS);
         }
     }
 
