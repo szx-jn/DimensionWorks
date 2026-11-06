@@ -19,6 +19,20 @@ python3 scripts/package_server.py
 
 服务端包不提交世界存档、日志、密钥、玩家名单或其他运行时私有数据。
 
+## MSL 与正版双重认证
+
+部署服使用已固定的 TrueUUID `1.0.9` 验证 Mojang 正版会话或 MSL 统一身份会话。此路径要求部署服的 `server.properties` 保持 `online-mode=false`，因为 TrueUUID 只在原版离线登录流程中发起自己的认证挑战；不能仅把该值改为 `true`，否则会停用 TrueUUID 的双重认证。完整服务端包的原版在线模式默认值仍为 `true`，服主启用此部署方式时需明确配置。
+
+`config/trueuuid-common.toml` 必须同时满足：
+
+- `allowOfflineOnTimeout=false`、`allowOfflineOnFailure=false`、`allowOfflineForUnknownOnly=false`：超时、失败和新用户名均不得降级离线登录。已核对 1.0.9 的失败决策直接读取 `allowOfflineForUnknownOnly`，仅关闭 `allowOfflineOnFailure` 不够。
+- `auth.recentIpGrace.enabled=false`、`auth.nomojang.enabled=false`：每次连接重新验证会话，不沿用同 IP 历史认证或跳过正版校验。
+- `[auth]` 中的字面键 `"yggdrasil.apiRootWhitelist"` 只列出 MSL 的 `https://skin.mslmc.net/api/yggdrasil/sessionserver/session/minecraft/hasJoined`。该键含点但必须保留引号，不要改写为 `[auth.yggdrasil]`。正版客户端使用的空认证地址由 TrueUUID 走 Mojang 会话服务。
+
+MSLX 面板中的认证地址为 `https://skin.mslmc.net/api/yggdrasil`，其启动命令加载已部署的 `authlib-injector.jar`。玩家客户端也需按账号来源正确登录；只有注册 MSL 账号但用纯离线方式启动游戏仍会被拒绝。
+
+更新器保留已有 `server.properties`、`user_jvm_args.txt` 和 `config/`；缺失的配置才从新包补齐。因此不会覆盖部署服的认证策略，也不会自动纠正旧的离线兜底设置。已有服务器需单独修改 `config/trueuuid-common.toml` 并重新加载或重启。MSLX 的 `ServerList.json` 位于面板数据目录，不在整合包更新范围；面板启动不读取整合包的 `start.sh`，认证代理参数应配置在面板中。
+
 ## FTB Chunks 强加载限制
 
 服务端默认配置将 `max_force_loaded_chunks` 设为 `0`，保留区块认领、保护、地图与路径点，但不向普通玩家提供 FTB Chunks 强加载额度。不要给玩家或玩家组授予 LuckPerms 数值权限 `ftbchunks.max_force_loaded`，因为该权限可以覆盖默认额度。专用的三个强加载方块不受此配置影响。
