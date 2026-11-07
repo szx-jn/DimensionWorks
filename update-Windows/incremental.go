@@ -50,11 +50,7 @@ func humanSizeUint64(size uint64) string {
 	return humanSize(int64(size))
 }
 
-func printTransferPlan(current, target *Manifest, plan TransferPlan) {
-	currentVersion := "未知"
-	if current != nil {
-		currentVersion = current.Version
-	}
+func printTransferPlan(currentVersion string, target *Manifest, plan TransferPlan) {
 	targetVersion := "未知"
 	if target != nil {
 		targetVersion = target.Version
@@ -138,9 +134,6 @@ func incrementalReleaseChainWithLoaders(kind, currentRelease string, target *Man
 	if target == nil || !validReleaseTag(target.Release) {
 		return nil, errors.New("目标清单没有有效发行标签")
 	}
-	if currentRelease == "v0.0.0" {
-		return nil, errors.New("当前版本未知，不遍历历史增量链")
-	}
 	currentVersion := strings.TrimPrefix(currentRelease, "v")
 	if comparison, err := compareVersions(currentVersion, target.Version); err != nil || comparison >= 0 {
 		return nil, errors.New("同版本修复或降级使用完整包，不遍历历史增量链")
@@ -204,7 +197,7 @@ func releaseAssetSize(info *ReleaseInfo, name, source string) (uint64, error) {
 	return uint64(size), nil
 }
 
-func planTransfer(kind string, current, target *Manifest, targetInfo *ReleaseInfo, fullPackageURL, work string) TransferPlan {
+func planTransfer(kind, installedVersion string, target *Manifest, targetInfo *ReleaseInfo, fullPackageURL, work string) TransferPlan {
 	plan := TransferPlan{FullPackageURL: fullPackageURL}
 	if plan.FullPackageURL == "" && target != nil {
 		plan.FullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
@@ -233,11 +226,11 @@ func planTransfer(kind string, current, target *Manifest, targetInfo *ReleaseInf
 		plan.FullPackageSize = fullSize
 	}
 
-	if current == nil {
-		plan.Reason = "无法读取当前版本状态"
+	if _, err := parseVersion(installedVersion); err != nil {
+		plan.Reason = "游戏根目录 VERSION 无效"
 		return plan
 	}
-	chain, err := incrementalReleaseChain(kind, current.Release, target, targetInfo, work)
+	chain, err := incrementalReleaseChain(kind, "v"+installedVersion, target, targetInfo, work)
 	if err != nil {
 		plan.Reason = err.Error()
 		return plan

@@ -1,6 +1,6 @@
 # 本地更新器与游戏关闭交接
 
-版本检查仍在 Forge 登录握手阶段比较客户端与服务端 `VERSION`。玩家点击「立即更新」后，识别操作系统与架构，只在 `FMLPaths.GAMEDIR` 根目录查找对应的本地客户端更新器：Windows amd64 `.exe`、macOS arm64、Linux amd64。Darwin 必须识别为 macOS。此入口不下载或替换本地更新器。
+版本检查在 Forge 登录握手阶段仅比较客户端与服务端实际游戏根目录的 `VERSION`，文件规则与失败处理见 [`root-version-authority.md`](root-version-authority.md)。客户端统一使用 `Minecraft.gameDirectory`，版本文件读取和更新器交接共用该目录。玩家点击「立即更新」后，识别操作系统与架构，只在该根目录查找对应的本地客户端更新器：Windows amd64 `.exe`、macOS arm64、Linux amd64。Darwin 必须识别为 macOS。此入口不下载或替换本地更新器。
 
 更新器使用独立可交互终端：Windows PowerShell 新窗口、macOS Terminal、Linux 已安装的终端。命令以游戏目录为工作目录，传入服务端目标 `--release vX.Y.Z`，正确处理空格、引号与 shell 特殊字符。
 

@@ -4,6 +4,7 @@
 
 已建立：
 
+- [`design/root-version-authority.md`](design/root-version-authority.md)：更新器与登录检测仅以实际游戏根目录 VERSION 判断当前版本、失败处理与文件事务规则。
 - [`validation/2026-11-07-trueuuid-automatic-fork.md`](validation/2026-11-07-trueuuid-automatic-fork.md)：基于 TrueUUID 1.0.9 的自动迁移 fork、玩家数据保全和正式发布范围。
 - [`validation/2026-11-07-trueuuid-login-recovery.md`](validation/2026-11-07-trueuuid-login-recovery.md)：TrueUUID 1.3.0 登录兼容故障、玩家数据冷备份、两端回退及正版登录恢复。
 - [`validation/2026-11-07-trueuuid-migration.md`](validation/2026-11-07-trueuuid-migration.md)：离线转 MSL 登录的重复 UUID 拦截及已撤回的 1.3.0 升级文件事务测试。
