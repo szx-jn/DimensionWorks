@@ -151,6 +151,8 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、六个原生 Go 更新器和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
 
+`skip_tests` 默认关闭。维护者明确要求停止测试时，可在手动发行中设为 `true`：自研 Mod 构建使用 `-x test`，跳过 Go 测试、内嵌 aria2 下载测试和 Linux 更新事务运行验证，仍执行打包静态预检、完整构建和产物格式/摘要检查。该状态会自动写入发行说明。钩子通过 `DIMENSIONWORKS_SKIP_TESTS=true` 接收这一构建选项，未设置时保留原流程。
+
 ## CI 固定 Create 编译依赖
 
 `prepare_create_build_repository.py` 仅允许在 GitHub Actions 中执行。Create Maven 站点证书过期时，从清单固定的 Modrinth Create 6.0.8 原包读取编译依赖；校验固定 SHA-512 和内嵌库版本，将 Flywheel、Ponder、Registrate、MixinExtras 原始 jar 及去掉内嵌依赖的 Create 编译 jar 放入运行器临时 Maven 仓库，并以 Gradle init 脚本限定这些固定坐标的来源。

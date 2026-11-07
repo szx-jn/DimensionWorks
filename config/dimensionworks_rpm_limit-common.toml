@@ -29,12 +29,10 @@
 
 [gearHeart]
     rotationCursedRpm = 32
-    rotationRepairedRpm = 512
+    rotationReleasedRpm = 10240
     createCapacityCursedSu = 4096
     mekOreOperationsCursedPerSecond = 8
-    mekOreOperationsRepairedPerSecond = 64
     aeCraftingJobsCursed = 1
-    aeCraftingJobsRepaired = 80
     crossProcessItemsCursedPerSecond = 16
     crossProcessItemsRepairedPerSecond = 128
     activeMachinesCursed = 8

@@ -9,9 +9,9 @@ class AeCraftingGateTest {
 
     @Test
     void configuredJobLimitUsesPolicyAndConfiguredValues() {
-        assertEquals(1, AeCraftingGate.configuredJobLimit(0, 1, 80));
-        assertEquals(80, AeCraftingGate.configuredJobLimit(
-            GearHeartStateBits.AE_CRAFTING_JOBS, 1, 80));
+        assertEquals(1, AeCraftingGate.configuredJobLimit(0, 1));
+        assertEquals(Integer.MAX_VALUE, AeCraftingGate.configuredJobLimit(
+            GearHeartStateBits.AE_CRAFTING_JOBS, 1));
         assertEquals(8, AeCraftingGate.configuredActiveLimit(0, 8, 64));
         assertEquals(64, AeCraftingGate.configuredActiveLimit(
             GearHeartStateBits.ACTIVE_MACHINES, 8, 64));

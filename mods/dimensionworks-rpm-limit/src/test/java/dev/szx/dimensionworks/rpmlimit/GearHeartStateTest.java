@@ -32,17 +32,47 @@ class GearHeartStateTest {
     }
 
     @Test
+    void everyRepairGetsAnEvenShareOfTheRemainingRotationRange() {
+        int[] expected = {32, 1490, 2949, 4407, 5865, 7323, 8782, 10240};
+        for (int stage = 0; stage < expected.length; stage++) {
+            int mask = (1 << stage) - 1;
+            assertEquals(stage, GearHeartState.repairStage(mask));
+            assertEquals(expected[stage], GearHeartState.rotationLimit(mask, 32, 10240));
+            if (stage > 0) {
+                int increase = expected[stage] - expected[stage - 1];
+                assertTrue(increase == 1458 || increase == 1459);
+            }
+        }
+    }
+
+    @Test
+    void missingEarlierRepairsCannotUnlockLaterRotationStages() {
+        assertEquals(0, GearHeartState.repairStage(0b1111110));
+        assertEquals(2, GearHeartState.repairStage(0b1111011));
+        assertEquals(2949, GearHeartState.rotationLimit(0b1111011, 32, 10240));
+        assertEquals(7, GearHeartState.repairStage(0b11111111));
+    }
+
+    @Test
+    void rotationInterpolationUsesConfiguredEndpoints() {
+        assertEquals(32, GearHeartState.rotationLimit(0, 32, 320));
+        assertEquals(155, GearHeartState.rotationLimit(0b111, 32, 320));
+        assertEquals(320, GearHeartState.rotationLimit(GearHeartState.ALL_CURSES, 32, 320));
+        assertEquals(100, GearHeartState.rotationLimit(GearHeartState.ALL_CURSES, 100, 80));
+    }
+
+    @Test
     void configOnlyContainsTheSevenIndustrialQuotaFamilies() throws IOException {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/RpmLimitConfig.java"));
 
         assertTrue(source.contains("rotationCursedRpm"));
-        assertTrue(source.contains("rotationRepairedRpm"));
+        assertTrue(source.contains("rotationReleasedRpm"));
         assertTrue(source.contains("createCapacityCursedSu"));
         assertTrue(source.contains("mekOreOperationsCursedPerSecond"));
-        assertTrue(source.contains("mekOreOperationsRepairedPerSecond"));
+        assertFalse(source.contains("mekOreOperationsRepairedPerSecond"));
         assertTrue(source.contains("aeCraftingJobsCursed"));
-        assertTrue(source.contains("aeCraftingJobsRepaired"));
+        assertFalse(source.contains("aeCraftingJobsRepaired"));
         assertTrue(source.contains("crossProcessItemsCursedPerSecond"));
         assertTrue(source.contains("crossProcessItemsRepairedPerSecond"));
         assertTrue(source.contains("activeMachinesCursed"));

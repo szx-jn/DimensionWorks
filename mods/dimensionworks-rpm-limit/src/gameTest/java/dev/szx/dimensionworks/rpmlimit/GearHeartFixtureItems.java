@@ -11,6 +11,9 @@ import net.minecraftforge.registries.RegisterEvent;
 @Mod.EventBusSubscriber(modid=DimensionWorksRpmLimit.MOD_ID,bus=Mod.EventBusSubscriber.Bus.MOD)
 public class GearHeartFixtureItems {
     @SubscribeEvent public static void items(RegisterEvent event) {
-        event.register(Registries.ITEM, h -> h.register(new ResourceLocation("kubejs", "gear_heart"), new Item(new Item.Properties())));
+        event.register(Registries.ITEM, h -> {
+            h.register(new ResourceLocation("kubejs", "gear_heart"), new Item(new Item.Properties()));
+            h.register(new ResourceLocation("kubejs", "gear_heart_enchanted"), new Item(new Item.Properties()));
+        });
     }
 }

@@ -33,7 +33,9 @@ public final class GearHeartEffects {
     private static final String RPM_SOURCE = "gear_heart:rpm";
     private static final String BONUS_STATE_KEY = "dimensionworks_gear_heart_bonuses";
     private static final String BONUS_VERSION_KEY = "dimensionworks_gear_heart_bonus_version";
-    private static final int BONUS_VERSION = 3;
+    private static final String BONUS_RELEASED_KEY = "dimensionworks_gear_heart_bonus_released";
+    private static final int BONUS_VERSION = 4;
+    private static final int LEGACY_EFFECT_VERSION = 3;
     private static final FixedIntervalTokenBucket TOKEN_BUCKET = new FixedIntervalTokenBucket();
     private static final Map<UUID, Integer> ACTIVE_QUOTA_MASKS = new ConcurrentHashMap<>();
 
@@ -54,16 +56,16 @@ public final class GearHeartEffects {
 
         ItemStack heart = maybeHeart.get();
         GearHeartMilestones.record(player.getPersistentData(), heart);
-        applyBaseBonuses(player);
-        ensureRepairedRotationLimit(player, heart);
-        if (GearHeartState.isFullyReleased(heart) || !GearHeartState.isCursed(heart)) {
+        boolean fullyReleased = GearHeartState.isFullyReleased(heart);
+        applyBaseBonuses(player, fullyReleased);
+        syncQuotaState(player, heart);
+        if (fullyReleased || !GearHeartState.isCursed(heart)) {
             clearCurses(player);
             updateQuotaMask(player.getUUID(), null);
             return;
         }
 
         updateQuotaMask(player.getUUID(), GearHeartState.getRepairedMask(heart));
-        syncQuotaState(player, heart);
     }
 
     private static void updateQuotaMask(UUID owner, Integer mask) {
@@ -151,7 +153,7 @@ public final class GearHeartEffects {
 
             ItemStack repaired = stack.copy();
             GearHeartState.setRepairedMask(repaired, repairedMask | repairBit);
-            if (repairBit == GearHeartState.FINAL_PRODUCTION) {
+            if (GearHeartState.isFullyReleasedMask(repairedMask | repairBit)) {
                 repaired = GearHeartState.finalizeRepair(repaired);
             }
 
@@ -160,7 +162,7 @@ public final class GearHeartEffects {
                 result.slotContext().index(),
                 repaired
             );
-            GearHeartMilestones.record(player.getPersistentData(), repaired);
+            tickPlayer(player);
             return RepairResult.REPAIRED;
         }
         return RepairResult.NO_TARGET;
@@ -226,29 +228,29 @@ public final class GearHeartEffects {
         return equippedHeart(player).isPresent();
     }
 
-    private static void ensureRepairedRotationLimit(ServerPlayer player, ItemStack heart) {
-        boolean repaired = GearHeartState.isBlessed(heart) && !GearHeartState.isLegacyCursed(heart) || GearHeartState.isRepairApplied(
-            GearHeartState.getRepairedMask(heart), GearHeartState.ROTATION_SPEED);
-        int rpm = RpmLimitConfig.GEAR_HEART_ROTATION_REPAIRED_RPM.get();
-        if (repaired && !RpmLimitManager.hasCommandOverride(player) && RpmLimitApi.getLimit(player) < rpm)
-            RpmLimitManager.setGearHeartDefaultLimit(player, rpm);
+    public static float outgoingDamageMultiplier(ServerPlayer player) {
+        Optional<ItemStack> heart = equippedHeart(player);
+        if (heart.isEmpty()) {
+            return 1.0F;
+        }
+        return GearHeartState.isFullyReleased(heart.get()) ? 1.5F : 0.9F;
     }
 
     private static void syncQuotaState(ServerPlayer player, ItemStack heart) {
-        int repairedMask = GearHeartState.getRepairedMask(heart);
-        boolean rotationRepaired =
-            GearHeartState.isRepairApplied(repairedMask, GearHeartState.ROTATION_SPEED);
-        int rpm = rotationRepaired
-            ? RpmLimitConfig.GEAR_HEART_ROTATION_REPAIRED_RPM.get()
-            : RpmLimitConfig.GEAR_HEART_ROTATION_CURSED_RPM.get();
+        boolean fullyReleased = GearHeartState.isFullyReleased(heart);
+        int repairedMask = fullyReleased ? GearHeartState.ALL_CURSES : GearHeartState.getRepairedMask(heart);
+        int rpm = RpmLimitConfig.gearHeartRotationLimit(repairedMask);
 
-        // Promote the persisted default once when the rotation curse is repaired. An explicit
-        // /dw rpm (or API setLimit) value has higher priority and must survive login unchanged.
-        if (rotationRepaired && !RpmLimitManager.hasCommandOverride(player)
-            && RpmLimitApi.getLimit(player) < rpm) {
+        // Reconcile old saves and every repair stage, including a reopened curse. Explicit
+        // /dw rpm (or API setLimit) values keep their existing priority.
+        if (!RpmLimitManager.hasCommandOverride(player) && RpmLimitApi.getLimit(player) != rpm) {
             RpmLimitManager.setGearHeartDefaultLimit(player, rpm);
         }
-        RpmLimitApi.setExternalLimit(player, RPM_SOURCE, rpm);
+        if (fullyReleased) {
+            clearCurses(player);
+        } else {
+            RpmLimitApi.setExternalLimit(player, RPM_SOURCE, rpm);
+        }
     }
 
     private static void clearCurses(ServerPlayer player) {
@@ -260,20 +262,26 @@ public final class GearHeartEffects {
         removeBaseBonuses(player);
     }
 
-    private static void applyBaseBonuses(ServerPlayer player) {
+    private static void applyBaseBonuses(ServerPlayer player, boolean fullyReleased) {
         // Previous releases supplied infinite Luck I. Migrate once, without clearing
         // finite potion effects or stronger effects supplied by another source.
         if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)
-            && player.getPersistentData().getInt(BONUS_VERSION_KEY) < BONUS_VERSION) {
+            && player.getPersistentData().getInt(BONUS_VERSION_KEY) < LEGACY_EFFECT_VERSION) {
             removeHeartEffect(player, MobEffects.LUCK, 0);
             removeHeartEffect(player, MobEffects.WEAKNESS, 0);
         }
+        boolean previouslyReleased = player.getPersistentData().getBoolean(BONUS_RELEASED_KEY);
+        if (previouslyReleased != fullyReleased) {
+            removeHeartEffect(player, MobEffects.DIG_SPEED, previouslyReleased ? 2 : 1);
+        }
         player.getPersistentData().putBoolean(BONUS_STATE_KEY, true);
         player.getPersistentData().putInt(BONUS_VERSION_KEY, BONUS_VERSION);
-        addModifier(player, ForgeMod.BLOCK_REACH.get(), BLOCK_REACH_ID, "Gear Heart Block Reach", 2.0d);
-        addModifier(player, ForgeMod.ENTITY_REACH.get(), ENTITY_REACH_ID, "Gear Heart Entity Reach", 2.0d);
+        player.getPersistentData().putBoolean(BONUS_RELEASED_KEY, fullyReleased);
+        double reach = fullyReleased ? 4.0D : 2.0D;
+        addModifier(player, ForgeMod.BLOCK_REACH.get(), BLOCK_REACH_ID, "Gear Heart Block Reach", reach);
+        addModifier(player, ForgeMod.ENTITY_REACH.get(), ENTITY_REACH_ID, "Gear Heart Entity Reach", reach);
 
-        ensureHeartEffect(player, MobEffects.DIG_SPEED, 1);
+        ensureHeartEffect(player, MobEffects.DIG_SPEED, fullyReleased ? 2 : 1);
         ensureHeartEffect(player, MobEffects.NIGHT_VISION, 0);
     }
 
@@ -316,14 +324,16 @@ public final class GearHeartEffects {
         }
 
         if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)) {
-            removeHeartEffect(player, MobEffects.DIG_SPEED, 1);
+            removeHeartEffect(player, MobEffects.DIG_SPEED,
+                player.getPersistentData().getBoolean(BONUS_RELEASED_KEY) ? 2 : 1);
             removeHeartEffect(player, MobEffects.WEAKNESS, 0);
             removeHeartEffect(player, MobEffects.NIGHT_VISION, 0);
-            if (player.getPersistentData().getInt(BONUS_VERSION_KEY) < BONUS_VERSION) {
+            if (player.getPersistentData().getInt(BONUS_VERSION_KEY) < LEGACY_EFFECT_VERSION) {
                 removeHeartEffect(player, MobEffects.LUCK, 0);
             }
             player.getPersistentData().remove(BONUS_STATE_KEY);
             player.getPersistentData().remove(BONUS_VERSION_KEY);
+            player.getPersistentData().remove(BONUS_RELEASED_KEY);
         }
     }
 
@@ -340,8 +350,15 @@ public final class GearHeartEffects {
     private static void addModifier(ServerPlayer player, net.minecraft.world.entity.ai.attributes.Attribute attribute,
                                     UUID id, String name, double amount) {
         AttributeInstance instance = player.getAttribute(attribute);
-        if (instance == null || instance.getModifier(id) != null) {
+        if (instance == null) {
             return;
+        }
+        AttributeModifier previous = instance.getModifier(id);
+        if (previous != null) {
+            if (previous.getAmount() == amount && previous.getOperation() == AttributeModifier.Operation.ADDITION) {
+                return;
+            }
+            instance.removeModifier(id);
         }
         instance.addTransientModifier(new AttributeModifier(
             id, name, amount, AttributeModifier.Operation.ADDITION

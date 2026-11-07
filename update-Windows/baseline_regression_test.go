@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestBootstrapUsesVersionButHashesActualLocalFiles(t *testing.T) {
+func TestRootVersionAndFileInventoryAreIndependent(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "VERSION"), []byte("0.2.63\n"), 0644); err != nil {
 		t.Fatal(err)
@@ -17,12 +17,16 @@ func TestBootstrapUsesVersionButHashesActualLocalFiles(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "README.md"), local, 0644); err != nil {
 		t.Fatal(err)
 	}
-	current, err := bootstrapState(root, "server")
+	version, err := readInstalledVersion(root)
+	if err != nil || version != "0.2.63" {
+		t.Fatalf("installed VERSION not read: %q, %v", version, err)
+	}
+	current, err := scanInstalledFiles(root, "server")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if current.Version != "0.2.63" || current.Release != "v0.2.63" {
-		t.Fatalf("installed version lost: %+v", current)
+	if current.Version != "" || current.Release != "" {
+		t.Fatalf("file inventory must not supply an installed version: %+v", current)
 	}
 	if len(current.Entries) != 1 || current.Entries[0].Value != fmt.Sprintf("%x", sha256.Sum256(local)) {
 		t.Fatalf("bootstrap must hash actual local files: %+v", current.Entries)
@@ -33,7 +37,7 @@ func TestBootstrapUsesVersionButHashesActualLocalFiles(t *testing.T) {
 	}
 }
 
-func TestBootstrapMissingOrInvalidVersionRemainsUnknown(t *testing.T) {
+func TestMissingOrInvalidVersionFailsExplicitly(t *testing.T) {
 	for _, version := range []string{"", "invalid", "v0.2.63", "0.2.63-beta"} {
 		t.Run(version, func(t *testing.T) {
 			root := t.TempDir()
@@ -42,12 +46,9 @@ func TestBootstrapMissingOrInvalidVersionRemainsUnknown(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			current, err := bootstrapState(root, "server")
-			if err != nil {
-				t.Fatal(err)
-			}
-			if current.Release != "v0.0.0" {
-				t.Fatalf("invalid baseline accepted: %s", current.Release)
+			version, err := readInstalledVersion(root)
+			if err == nil || version != "" {
+				t.Fatalf("invalid VERSION must fail without a fabricated version: %q, %v", version, err)
 			}
 		})
 	}
@@ -63,7 +64,8 @@ func TestIncrementalHistoryStopsAtInstalledVersion(t *testing.T) {
 		{"one upgrade", "v0.2.64", "v0.2.64", 0, 1, false},
 		{"same version repair", "v0.2.65", "v0.2.64", 0, 0, true},
 		{"downgrade", "v0.2.66", "v0.2.64", 0, 0, true},
-		{"unknown baseline", "v0.0.0", "v0.2.64", 0, 0, true},
+		{"invalid baseline", "", "v0.2.64", 0, 0, true},
+		{"explicit zero version", "v0.0.0", "v0.0.0", 0, 1, false},
 		{"skipped installed baseline", "v0.2.63", "v0.2.62", 0, 0, true},
 		{"broken chain crosses baseline", "v0.2.63", "v0.2.64", 1, 0, true},
 	} {

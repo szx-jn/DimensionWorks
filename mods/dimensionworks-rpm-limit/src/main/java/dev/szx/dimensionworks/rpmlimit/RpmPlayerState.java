@@ -47,13 +47,12 @@ public final class RpmPlayerState {
         boolean legacyCurse = enchanted && heartTag.getInt("CustomModelData") == 2;
         int repairedMask = heartTag.getInt(GearHeartState.REPAIRED_MASK_KEY);
         boolean fullyRepaired = enchanted && !legacyCurse || GearHeartState.isFullyReleasedMask(repairedMask);
-        boolean repaired = !heart.isEmpty() && (fullyRepaired
-            || GearHeartState.isRepairApplied(repairedMask, GearHeartState.ROTATION_SPEED));
-        if (repaired && !override) base = Math.max(base, RpmLimitConfig.GEAR_HEART_ROTATION_REPAIRED_RPM.get());
+        int stageRpm = RpmLimitConfig.gearHeartRotationLimit(
+            fullyRepaired ? GearHeartState.ALL_CURSES : repairedMask);
+        if (!heart.isEmpty() && !override) base = stageRpm;
         int effective = base;
         if (!override && !heart.isEmpty() && !fullyRepaired) {
-            effective = Math.min(base, repaired ? RpmLimitConfig.GEAR_HEART_ROTATION_REPAIRED_RPM.get()
-                : RpmLimitConfig.GEAR_HEART_ROTATION_CURSED_RPM.get());
+            effective = Math.min(base, stageRpm);
         }
         return new Profile(cap(base), cap(effective), override);
     }

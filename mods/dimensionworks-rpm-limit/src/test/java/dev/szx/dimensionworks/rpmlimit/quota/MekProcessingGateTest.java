@@ -21,9 +21,9 @@ class MekProcessingGateTest {
     void configuredRateUsesRepairedPolicyAndNeverRaisesIt() {
         assertEquals(8.0D, MekProcessingGate.configuredRateLimit(
             0, GearHeartQuotaType.MEK_ORE_OPERATIONS, 8, 64));
-        assertEquals(64.0D, MekProcessingGate.configuredRateLimit(
+        assertEquals(Double.POSITIVE_INFINITY, MekProcessingGate.configuredRateLimit(
             GearHeartStateBits.MEK_ORE_OPERATIONS,
-            GearHeartQuotaType.MEK_ORE_OPERATIONS, 8, 64));
+            GearHeartQuotaType.MEK_ORE_OPERATIONS, 8, 1));
         assertEquals(4096.0D, MekProcessingGate.configuredRateLimit(
             0, GearHeartQuotaType.CREATE_CAPACITY, 8, 64));
     }

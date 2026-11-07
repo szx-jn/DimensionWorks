@@ -10,6 +10,8 @@
 	offlineFallbackMessage = "注意：你当前以离线模式进入服务器；如果你是正版账号，可能是网络原因导致无法成功鉴权，请重新登陆重试。"
 	offlineShortSubtitle = "鉴权失败：离线模式"
 	onlineShortSubtitle = "已通过正版校验"
+	#1.0.9 修改版：真实会话认证成功后，备份并自动继承同名离线玩家数据。
+	autoMigrateOfflineData = true
 	#一旦该名字成功验证过正版，后续鉴权失败时禁止以离线身份进入。
 	knownPremiumDenyOffline = true
 	#1.0.9 的未知名字失败决策独立读取此项，必须与其他离线开关一起关闭。

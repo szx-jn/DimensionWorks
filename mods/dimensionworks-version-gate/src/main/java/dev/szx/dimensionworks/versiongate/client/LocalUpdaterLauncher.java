@@ -1,5 +1,6 @@
 package dev.szx.dimensionworks.versiongate.client;
 
+import dev.szx.dimensionworks.versiongate.PackVersion;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -75,8 +76,10 @@ public final class LocalUpdaterLauncher {
 
     static LaunchPlan prepare(Path directory, Path updater, Platform platform, String version,
             long gamePid, Path linuxTerminal) throws IOException {
-        if (version == null || !version.matches("(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)")) {
-            throw new IOException("服务器版本号无效，无法启动更新器。");
+        try {
+            PackVersion.parse(version);
+        } catch (IllegalArgumentException exception) {
+            throw new IOException("服务器版本号无效，无法启动更新器。", exception);
         }
         if (gamePid <= 0) throw new IOException("无法确定当前游戏进程。");
         Path handoff = directory.resolve(".dimensionworks-update/handoff");

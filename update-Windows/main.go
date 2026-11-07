@@ -70,7 +70,6 @@ const (
 	maxDownloadETADuration time.Duration = 1<<63 - 1
 )
 
-var versionRE = regexp.MustCompile("^[0-9]+\\.[0-9]+\\.[0-9]+$")
 var digestRE = regexp.MustCompile("^[0-9a-f]+$")
 
 type Entry struct {
@@ -389,7 +388,10 @@ func run(kind string, args []string) error {
 	if !strings.EqualFold(strings.TrimSpace(answer), "y") {
 		return errors.New("用户取消了更新")
 	}
+	return updateInstance(root, kind, opts)
+}
 
+func updateInstance(root, kind string, opts Options) error {
 	updateRoot := filepath.Join(root, ".dimensionworks-update")
 	if err := os.MkdirAll(updateRoot, 0755); err != nil {
 		return fmt.Errorf("无法创建更新目录：%w", err)
@@ -397,7 +399,9 @@ func run(kind string, args []string) error {
 	if info, err := os.Lstat(updateRoot); err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 		return errors.New(".dimensionworks-update 必须是普通目录，不能是符号链接")
 	}
+	previousCacheRoot := downloadCacheRoot
 	downloadCacheRoot = filepath.Join(updateRoot, "downloads")
+	defer func() { downloadCacheRoot = previousCacheRoot }()
 	if err := os.MkdirAll(downloadCacheRoot, 0700); err != nil {
 		return fmt.Errorf("无法创建断点续传目录：%w", err)
 	}
@@ -417,6 +421,11 @@ func run(kind string, args []string) error {
 	if err := recoverInterruptedTransactions(root, updateRoot); err != nil {
 		return fmt.Errorf("发现未完成的更新事务，自动恢复失败：%w。请勿删除 .dimensionworks-update 下的恢复数据", err)
 	}
+	installedVersion, err := readInstalledVersion(root)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("[版本] %s：%s\n", filepath.Join(root, "VERSION"), installedVersion)
 
 	work, err := os.MkdirTemp(updateRoot, "work-")
 	if err != nil {
@@ -536,16 +545,16 @@ func run(kind string, args []string) error {
 	}
 	legacyState := current == nil
 	if current == nil {
-		current, err = bootstrapState(root, kind)
+		current, err = scanInstalledFiles(root, kind)
 		if err != nil {
 			return fmt.Errorf("无法初始化现有文件状态：%w", err)
 		}
 	}
-	fmt.Printf("当前版本：%s；目标版本：%s（%s）\n", current.Version, target.Version, target.Release)
-	if comparison, compareErr := compareVersions(target.Version, current.Version); compareErr != nil {
+	fmt.Printf("当前版本：%s；目标版本：%s（%s）\n", installedVersion, target.Version, target.Release)
+	if comparison, compareErr := compareVersions(target.Version, installedVersion); compareErr != nil {
 		return fmt.Errorf("无法比较版本号：%w", compareErr)
 	} else if comparison < 0 && !opts.AllowDowngrade {
-		return fmt.Errorf("拒绝将版本从 %s 降级到 %s；如确认需要降级，请显式添加 --allow-downgrade", current.Version, target.Version)
+		return fmt.Errorf("拒绝将版本从 %s 降级到 %s；如确认需要降级，请显式添加 --allow-downgrade", installedVersion, target.Version)
 	}
 
 	selected, deletions, err := selectChanges(root, kind, current, target)
@@ -573,9 +582,9 @@ func run(kind string, args []string) error {
 	for _, entry := range selected { if entry.Action == "archive" { hasArchiveChanges = true; break } }
 	transferPlan := TransferPlan{}
 	if fullPackage == nil && hasArchiveChanges {
-		transferPlan = planTransfer(kind, current, target, releaseInfo, fullPackageURL, work)
+		transferPlan = planTransfer(kind, installedVersion, target, releaseInfo, fullPackageURL, work)
 		fullPackageURL = transferPlan.FullPackageURL
-		printTransferPlan(current, target, transferPlan)
+		printTransferPlan(installedVersion, target, transferPlan)
 		packageDiskBytes := transferPlan.FullPackageSize
 		if transferPlan.UseIncrementals {
 			packageDiskBytes = largestIncrementalSize(transferPlan.Incrementals)
@@ -716,15 +725,25 @@ func run(kind string, args []string) error {
 	signatureStage, err := stagePath(stageRoot, stateSignatureName)
 	if err != nil { return err }
 	if err := os.WriteFile(signatureStage, stateSignature, 0600); err != nil { return err }
-	changes = append(changes, Change{Path: "VERSION", Staged: versionPath})
 	changes = append(changes, Change{Path: stateName, Staged: stateStage})
 	changes = append(changes, Change{Path: stateSignatureName, Staged: signatureStage})
+	changes = append(changes, Change{Path: "VERSION", Staged: versionPath})
 
+	if err := verifyInstalledVersion(root, installedVersion); err != nil {
+		return err
+	}
 	if err := applyTransaction(root, work, changes); err != nil {
 		keepWork = true
 		return fmt.Errorf("%w；恢复数据保留在 %s", err, work)
 	}
-	fmt.Printf("更新成功：%s -> %s\n", current.Version, target.Version)
+	actualVersion, err := readInstalledVersion(root)
+	if err != nil {
+		return fmt.Errorf("更新文件已应用，但 VERSION 核对失败：%w", err)
+	}
+	if actualVersion != target.Version {
+		return fmt.Errorf("更新文件已应用，但游戏根目录 VERSION 为 %s，目标为 %s", actualVersion, target.Version)
+	}
+	fmt.Printf("更新成功：%s -> %s\n", installedVersion, actualVersion)
 	if deltaUsed {
 		fmt.Printf("更新来源：已校验的 %d 个增量包（%s）\n", len(transferPlan.Incrementals), humanSize(int64(transferPlan.IncrementalSize)))
 	} else if len(archiveEntries) > 0 {
@@ -898,29 +917,6 @@ func printUsage(kind string) {
 		fmt.Println("aria2 1.36.0 © Tatsuhiro Tsujikawa and contributors，GPL-2.0-or-later。")
 		fmt.Println("许可证与对应源码：同版 GitHub Release 的 aria2-third-party-source.tar.gz。")
 	}
-}
-
-func compareVersions(left, right string) (int, error) {
-	parse := func(value string) ([3]int, error) {
-		var result [3]int
-		parts := strings.Split(value, ".")
-		if len(parts) != 3 { return result, fmt.Errorf("无效版本号：%s", value) }
-		for i, part := range parts {
-			number, err := strconv.Atoi(part)
-			if err != nil || number < 0 { return result, fmt.Errorf("无效版本号：%s", value) }
-			result[i] = number
-		}
-		return result, nil
-	}
-	a, err := parse(left)
-	if err != nil { return 0, err }
-	b, err := parse(right)
-	if err != nil { return 0, err }
-	for i := range a {
-		if a[i] < b[i] { return -1, nil }
-		if a[i] > b[i] { return 1, nil }
-	}
-	return 0, nil
 }
 
 func validReleaseTag(tag string) bool {
@@ -1377,6 +1373,10 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		"--dir=" + filepath.Dir(destination),
 		"--out=" + filepath.Base(destination),
 	}
+	certificateArgs, cleanupCertificates, err := prepareAria2Certificates(ctx)
+	if err != nil { return newAria2Error("准备证书", "", err, "无法读取系统受信任根证书") }
+	defer cleanupCertificates()
+	args = append(args, certificateArgs...)
 	// Match Go's proxy selection, including NO_PROXY, for the engine process.
 	proxyURL := ""
 	if request, err := http.NewRequest(http.MethodGet, source, nil); err == nil {
@@ -2845,28 +2845,16 @@ func loadOrCreateStateKey(updateRoot string) ([]byte, error) {
 	return key, nil
 }
 
-func bootstrapState(root, kind string) (*Manifest, error) {
+func scanInstalledFiles(root, kind string) (*Manifest, error) {
 	roots := []string{"mods", "config", "defaultconfigs", "kubejs", "libraries"}
 	rootFiles := []string{"README.md", "start.sh", "start.bat", "run.sh", "run.bat"}
 	if kind == "client" {
 		roots = []string{"mods", "shaderpacks", "config", "defaultconfigs", "kubejs", "resourcepacks", "local"}
 		rootFiles = []string{"modrinth.index.json", "options.txt", "log4j2.xml", "rhino.local.properties", "CustomSkinLoader/CustomSkinLoader.json", "minemenu/menu.json"}
 	}
-	state := &Manifest{Kind: kind, Version: "0.0.0", Release: "v0.0.0", Base: "none"}
-	// VERSION locates the incremental baseline only. File hashes are still
-	// scanned below, and the caller keeps legacy deletion protection enabled.
-	versionData, versionErr := readRegularFile(filepath.Join(root, "VERSION"), 64)
-	if versionErr != nil && !os.IsNotExist(versionErr) {
-		return nil, fmt.Errorf("读取实例 VERSION 失败：%w", versionErr)
-	}
-	version := strings.TrimSpace(string(versionData))
-	if versionRE.MatchString(version) {
-		state.Version = version
-		state.Release = "v" + version
-		fmt.Printf("[状态] 首次初始化，从 VERSION 识别当前版本 %s；正在扫描实际文件\n", version)
-	} else {
-		fmt.Println("[状态] 未找到有效 VERSION，不遍历历史增量链，使用完整包更新")
-	}
+	// This inventory is only for file hashes. It cannot supply an installed version.
+	state := &Manifest{Kind: kind}
+	fmt.Println("[状态] 首次初始化，正在扫描实际文件摘要")
 	seen := map[string]bool{}
 	addFile := func(rel string) error {
 		if reservedRelative(rel) || preservePath(root, kind, rel) || strings.EqualFold(rel, "VERSION") {
@@ -2937,7 +2925,6 @@ func bootstrapState(root, kind string) (*Manifest, error) {
 		}
 	}
 	sort.Slice(state.Entries, func(i, j int) bool { return state.Entries[i].Path < state.Entries[j].Path })
-	state.Bytes = renderManifest(state)
 	return state, nil
 }
 

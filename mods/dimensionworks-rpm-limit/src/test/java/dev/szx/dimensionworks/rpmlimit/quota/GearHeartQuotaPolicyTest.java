@@ -20,13 +20,13 @@ class GearHeartQuotaPolicyTest {
 
     @Test
     void appliesRepairedLimitsPerStage() {
-        assertEquals(512.0, GearHeartQuotaPolicy.limit(
+        assertEquals(1490.0, GearHeartQuotaPolicy.limit(
             GearHeartQuotaType.ROTATION_SPEED, GearHeartStateBits.ROTATION_SPEED));
         assertTrue(GearHeartQuotaPolicy.isReleased(
             GearHeartQuotaType.CREATE_CAPACITY, GearHeartStateBits.CREATE_CAPACITY));
-        assertEquals(64.0, GearHeartQuotaPolicy.limit(
+        assertEquals(Double.POSITIVE_INFINITY, GearHeartQuotaPolicy.limit(
             GearHeartQuotaType.MEK_ORE_OPERATIONS, GearHeartStateBits.MEK_ORE_OPERATIONS));
-        assertEquals(80.0, GearHeartQuotaPolicy.limit(
+        assertEquals(Double.POSITIVE_INFINITY, GearHeartQuotaPolicy.limit(
             GearHeartQuotaType.AE_CRAFTING_JOBS, GearHeartStateBits.AE_CRAFTING_JOBS));
         assertEquals(128.0, GearHeartQuotaPolicy.limit(
             GearHeartQuotaType.CROSS_PROCESS, GearHeartStateBits.CROSS_PROCESS));
@@ -34,6 +34,18 @@ class GearHeartQuotaPolicyTest {
             GearHeartQuotaType.ACTIVE_MACHINES, GearHeartStateBits.ACTIVE_MACHINES));
         assertEquals(128.0, GearHeartQuotaPolicy.limit(
             GearHeartQuotaType.FINAL_PRODUCTION, GearHeartStateBits.FINAL_PRODUCTION));
+    }
+
+    @Test
+    void thirdAndFourthRepairsReleaseOnlyTheirOwnQuotas() {
+        int thirdStage = 0b0000111;
+        assertTrue(GearHeartQuotaPolicy.isReleased(GearHeartQuotaType.MEK_ORE_OPERATIONS, thirdStage));
+        assertEquals(1.0, GearHeartQuotaPolicy.limit(GearHeartQuotaType.AE_CRAFTING_JOBS, thirdStage));
+        int fourthStage = 0b0001111;
+        assertTrue(GearHeartQuotaPolicy.isReleased(GearHeartQuotaType.AE_CRAFTING_JOBS, fourthStage));
+        assertEquals(8.0, GearHeartQuotaPolicy.limit(GearHeartQuotaType.ACTIVE_MACHINES, fourthStage));
+        assertEquals(16.0, GearHeartQuotaPolicy.limit(GearHeartQuotaType.CROSS_PROCESS, fourthStage));
+        assertEquals(16.0, GearHeartQuotaPolicy.limit(GearHeartQuotaType.FINAL_PRODUCTION, fourthStage));
     }
 
     @Test
