@@ -46,6 +46,7 @@ class MekanismStorageRetirementTest {
         assertFalse(client.contains("'mekanism:energy_tablet'"), "energy tablet must remain visible");
         assertTrue(server.contains("event.remove({ id: 'mekanism:energy_tablet' })"));
         assertFalse(server.contains("retiredMekanismRecipeMaterialReplacement"));
+        assertFalse(server.contains("event.replaceInput"));
         assertFalse(server.contains("tierDefinition"), "redeclaring a const inside the recipe loop aborts retirement");
         assertTrue(recipe.contains("\"item\": \"mekanism:energy_tablet\""));
         assertFalse(recipe.contains("\"item\": \"kubejs:energy_plate\""));
