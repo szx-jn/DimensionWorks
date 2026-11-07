@@ -29,6 +29,14 @@
       "results": [{ "item": "kubejs:incomplete_energy_plate" }]
     },
     {
+      "type": "create:deploying",
+      "ingredients": [
+        { "item": "kubejs:incomplete_energy_plate" },
+        { "item": "ae2omnicells:complex_link_processor" }
+      ],
+      "results": [{ "item": "kubejs:incomplete_energy_plate" }]
+    },
+    {
       "type": "create:pressing",
       "ingredients": [{ "item": "kubejs:incomplete_energy_plate" }],
       "results": [{ "item": "kubejs:incomplete_energy_plate" }]

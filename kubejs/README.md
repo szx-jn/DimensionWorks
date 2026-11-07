@@ -20,7 +20,7 @@
 
 `startup_scripts/energy_plate.js` 注册普通工业元件 `kubejs:energy_plate` 和顺序装配中间物 `kubejs:incomplete_energy_plate`，均收录到已有「维度工坊」创造页签。新能量板不储电，新增物品需完整重启。
 
-`data/dimensionworks/recipes/energy_plate.json` 提供一次循环、固定产出 1 块能量板的 Create 顺序装配：1 块铜板经注液器消耗 250 mB 熔融金，再由机械手依次消耗 1 红石粉和 1 灌注合金，最后机械压力机定型。`server_scripts/me_memory.js` 将原先使用旧能量板的配方接到新元件；旧能量板、能量立方和感应储能元件继续退役。
+`data/dimensionworks/recipes/energy_plate.json` 提供一次循环、固定产出 1 块能量板的 Create 顺序装配：1 块铜板经注液器消耗 250 mB 熔融金，再由机械手依次消耗 1 红石粉、1 灌注合金和 1 个 AE2 OMNI Cells 复杂链路处理器（`ae2omnicells:complex_link_processor`），最后机械压力机定型。处理器接入下界合金碎片电路板与印制硅的 AE 压印加工链。`server_scripts/me_memory.js` 将原先使用旧能量板的配方接到新元件；旧能量板、能量立方和感应储能元件继续退役。
 
 工艺成本、物流、绕过边界与验证要求见 [能量板工业制造](../docs/design/energy-plate-production.md)。
 
