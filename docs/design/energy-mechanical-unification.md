@@ -4,6 +4,15 @@
 
 整合包生产与消费的机械功率以 `1 FE/t = 2 SU` 为统一换算。Mekanism 的内部单位是 J，必须读取当前 `EnergyUnit.FORGE_ENERGY.convertFrom(ONE)` 的 J/FE 比率后用除法换算，避免原版四位小数逆数缓存的精度和刷新问题，不能把 J 或最大传输上限当作实际 FE/t。SU 是实时网络容量，不是库存，不补算区块卸载期间的输出。
 
+Mekanism: Generators 的配置和内部发电值也是 J/t，不是 FE/t。完整公式为：
+
+```text
+FE/t = J/t ÷ feConversionRate
+SU/t = FE/t × 2
+```
+
+当前 `feConversionRate = 2.5 J/FE`，因此 `SU/t = J/t × 0.8`。例如太阳能 50 J/t 实际是 20 FE/t、40 SU/t；高级太阳能 300 J/t 是 120 FE/t、240 SU/t；生物发电机 350 J/t 是 140 FE/t、280 SU/t。把配置中的 J/t 直接当作 FE/t 会得到高 2.5 倍的错误期望值。
+
 ## 接入范围
 
 - Mekanism 单方块发电机按完整子类服务端更新实际产生的 J 计量，保留原版燃料、环境、红石与热量逻辑；清除旧库存，禁止电缆与能力重复导出。

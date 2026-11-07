@@ -150,7 +150,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 `startup_scripts/mekanism_schema_compat.js` 对当前 KubeJS Mekanism 插件无法正确解析的 rotary、washing、reaction、separating、evaporating 类型使用原始 JSON schema，保留 Mekanism 自身对配方的解析和校验。其余正常工作的类型（包括 crushing、combining）保留插件的类型化接口；上述五种类型的新配方使用 `event.custom`。
 
-部分上游集成配方缺少依赖条件：ComputerCraft 网络监视器、暮色森林酒类配方、已不存在的驴肉配方及未注册的熔岩渔网配方在对应依赖或物品不存在时跳过加载，保留原材料与产出定义。AE2 128³ 空间存储元件配方删除未使用的图案键，修复配方被拒绝加载的问题。
+部分上游集成配方缺少依赖条件：ComputerCraft 网络监视器、暮色森林酒类配方、已不存在的驴肉配方及未注册的熔岩渔网配方在对应依赖或物品不存在时跳过加载，保留原材料与产出定义。AE2 128³ 空间存储元件配方删除未使用的图案键，修复配方被拒绝加载的问题。Cultural Delights 0.16.7 内置的四个原版汤品覆盖 JSON 为 0 字节，KubeJS 以 1.20.1 原版合法配方重新提供同 ID 文件，恢复甜菜根汤、蘑菇煲和两种兔肉煲并消除 EOF 解析报错。
 
 ## 下界岩自增期望
 

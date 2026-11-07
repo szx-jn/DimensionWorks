@@ -77,6 +77,9 @@ class MemoryCardPackContractTest {
         assertFalse(registry.contains("String cardName = \"memory_card_ddr\" + tier.index();"));
         assertTrue(migration.contains("onMissingMappings"));
         assertTrue(migration.contains("MemoryCardMigration.legacyMapping"));
+        assertTrue(migration.contains("Defer capability discovery until a later server tick"));
+        assertTrue(migration.contains("blockEntity.getLevel() == level"));
+        assertFalse(migration.contains("hasItemStorage(blockEntity)"));
         assertTrue(migrationLogic.contains("MemoryCardType.BALANCED"));
         assertTrue(crafting.contains("player instanceof FakePlayer"));
         assertTrue(crafting.contains("player.drop(stack, false)"));

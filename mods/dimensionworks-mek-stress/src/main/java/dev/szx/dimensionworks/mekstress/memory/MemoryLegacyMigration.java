@@ -106,10 +106,9 @@ public final class MemoryLegacyMigration {
             return;
         }
         for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-            if (hasItemStorage(blockEntity)
-                && !enqueue(GlobalPos.of(level.dimension(), blockEntity.getBlockPos().immutable()))) {
-                clearBlockEntity(blockEntity);
-            }
+            // Block entities can still have a null level while the chunk is being
+            // deserialized. Defer capability discovery until a later server tick.
+            enqueue(GlobalPos.of(level.dimension(), blockEntity.getBlockPos().immutable()));
         }
     }
 
@@ -164,8 +163,10 @@ public final class MemoryLegacyMigration {
             ServerLevel level = server.getLevel(pos.dimension());
             if (level != null && level.getChunkSource().getChunkNow(pos.pos().getX() >> 4, pos.pos().getZ() >> 4) != null) {
                 BlockEntity blockEntity = level.getBlockEntity(pos.pos());
-                if (blockEntity != null) {
+                if (blockEntity != null && blockEntity.getLevel() == level && !blockEntity.isRemoved()) {
                     clearBlockEntity(blockEntity);
+                } else if (blockEntity != null && !blockEntity.isRemoved()) {
+                    enqueue(pos);
                 }
             }
             remaining--;
