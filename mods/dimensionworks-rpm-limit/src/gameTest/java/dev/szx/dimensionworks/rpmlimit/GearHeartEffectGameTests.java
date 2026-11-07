@@ -124,7 +124,7 @@ public class GearHeartEffectGameTests {
     public static void everyRepairRaisesRpmAndFinalRepairUpgradesBonuses(GameTestHelper h) {
         var p = equipped(h, new RecordingConnection());
         try {
-            int[] expected = {1490, 2949, 4407, 5865, 7323, 8782, 10240};
+            int[] expected = {512, 1024, 2048, 4096, 5120, 8192, 10240};
             for (int stage = 0; stage < expected.length; stage++) {
                 h.assertTrue(GearHeartEffects.repairEquippedCurse(p, 1 << stage)
                     == GearHeartEffects.RepairResult.REPAIRED, "Repair must take effect immediately");
@@ -185,7 +185,7 @@ public class GearHeartEffectGameTests {
             fullyRepair(h, p);
             var night = p.getEffect(MobEffects.NIGHT_VISION);
             equip(p, GearHeartState.reopenCurse(heart(p), 3));
-            h.assertTrue(RpmLimitManager.getEffectiveLimit(p.getUUID()) == 2949,
+            h.assertTrue(RpmLimitManager.getEffectiveLimit(p.getUUID()) == 1024,
                 "Reopened third curse must restore the RPM of the first two completed stages");
             h.assertTrue(p.getEffect(MobEffects.DIG_SPEED).getAmplifier() == 1,
                 "Reopened curse must downgrade this heart's Haste III to Haste II");
@@ -248,7 +248,7 @@ public class GearHeartEffectGameTests {
             equip(p, legacy);
             h.assertTrue(GearHeartState.isNormalGearHeart(heart(p)) && !GearHeartState.isFullyReleased(heart(p)),
                 "Legacy enchanted placeholder must migrate to the damaged item");
-            h.assertTrue(RpmLimitManager.getEffectiveLimit(p.getUUID()) == 2949
+            h.assertTrue(RpmLimitManager.getEffectiveLimit(p.getUUID()) == 1024
                 && p.getEffect(MobEffects.DIG_SPEED).getAmplifier() == 1,
                 "Legacy placeholder must receive only its actual repaired-stage RPM and base haste");
             near(h, GearHeartEffects.outgoingDamageMultiplier(p), 0.9D,

@@ -38,24 +38,27 @@ public final class RpmPersistenceGameTests {
         helper.succeed();
     }
     @GameTest(template = "empty")
-    public static void oldOfflineSavesRecoverEachRepairedStageAndLegacyPlaceholders(GameTestHelper helper) {
-        int[] expected = {32, 1490, 2949, 4407, 5865, 7323, 8782, 10240};
+    public static void oldOfflineSavesRecoverFixedStagesAndLegacyPlaceholders(GameTestHelper helper) {
+        int[] expected = {32, 512, 1024, 2048, 4096, 5120, 8192, 10240};
+        int[] previousLimits = {32, 1490, 2949, 4407, 5865, 7323, 8782, 10240};
         for (int stage = 0; stage < expected.length; stage++) {
             String item = stage == 7 ? "kubejs:gear_heart_enchanted" : "kubejs:gear_heart";
-            CompoundTag player = offlinePlayerWithHeart(item, (1 << stage) - 1, 0);
-            CompoundTag oldData = new CompoundTag();
-            oldData.putInt(RpmPlayerState.LIMIT, 512);
-            oldData.putBoolean(RpmPlayerState.INITIALIZED, true);
-            player.put("ForgeData", oldData);
-            RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(player);
-            helper.assertTrue(profile.base() == expected[stage] && profile.effective() == expected[stage],
-                "Offline save must migrate the old 512 RPM value to its current repair stage");
+            for (int oldLimit : new int[] {512, previousLimits[stage]}) {
+                CompoundTag player = offlinePlayerWithHeart(item, (1 << stage) - 1, 0);
+                CompoundTag oldData = new CompoundTag();
+                oldData.putInt(RpmPlayerState.LIMIT, oldLimit);
+                oldData.putBoolean(RpmPlayerState.INITIALIZED, true);
+                player.put("ForgeData", oldData);
+                RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(player);
+                helper.assertTrue(profile.base() == expected[stage] && profile.effective() == expected[stage],
+                    "Offline save must replace historical RPM values with the fixed repair-stage limit");
+            }
         }
         var legacy = RpmPlayerState.fromPlayerNbt(offlinePlayerWithHeart("kubejs:gear_heart_enchanted", 3, 2));
-        helper.assertTrue(legacy.base() == 2949 && legacy.effective() == 2949,
+        helper.assertTrue(legacy.base() == 1024 && legacy.effective() == 1024,
             "Legacy placeholder must recover only the first two repair stages");
         var reopened = RpmPlayerState.fromPlayerNbt(offlinePlayerWithHeart("kubejs:gear_heart", 0b1111011, 1));
-        helper.assertTrue(reopened.base() == 2949 && reopened.effective() == 2949,
+        helper.assertTrue(reopened.base() == 1024 && reopened.effective() == 1024,
             "Offline reopened curse must not unlock later RPM stages");
         helper.succeed();
     }
