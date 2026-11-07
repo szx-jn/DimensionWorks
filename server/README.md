@@ -32,6 +32,10 @@ python3 scripts/package_server.py
 
 MSLX 面板中的认证地址为 `https://skin.mslmc.net/api/yggdrasil`，其启动命令加载已部署的 `authlib-injector.jar`。玩家客户端也需按账号来源正确登录；只有注册 MSL 账号但用纯离线方式启动游戏仍会被拒绝。
 
+服务端使用 `authlib-injector` 时，必须在 JVM 参数中加入 `-Dauthlibinjector.ignoredPackages=cn.alini.trueuuid.`，并重启加载。代理会改写模组内的 Mojang 地址为本机 HTTP 代理地址，而 TrueUUID 1.3.0 的会话校验只接受公网 HTTPS 地址；不排除该包会使正版会话校验失败。此参数只排除 TrueUUID 的地址改写，MSL 会话仍由 TrueUUID 根据白名单验证。生成的 `start.sh` / `start.bat` 已携带参数；MSLX 不读取这两个脚本，须在面板的额外 JVM 参数中添加。如果已有 `authlibinjector.ignoredPackages`，将 `cn.alini.trueuuid.` 以逗号追加到原列表，保留其他排除项。
+
+2026-11-07 在部署服相同 Java 17、TrueUUID 1.3.0 与 authlib-injector 1.2.8 下复测：不加载代理的 Mojang 探测返回 HTTP 204；加载代理后因地址被改写为本机地址而失败；排除 TrueUUID 包后恢复 HTTP 204。该网络探测不等于真实玩家登录验证。
+
 1.3.0 的白名单采用精确主机名匹配，自定义接口还受 HTTPS/443、`hasJoined` 路径、DNS/IP 和禁止重定向等限制。此次已核对发布 JAR 与对应源码，并执行迁移文件事务测试；这些检查不等于已完成新版的真实 MSL/Mojang 账号登录验收。
 
 ### 从离线账号继承玩家数据
