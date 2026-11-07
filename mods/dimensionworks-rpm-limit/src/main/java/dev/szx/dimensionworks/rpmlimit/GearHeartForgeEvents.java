@@ -98,19 +98,27 @@ public final class GearHeartForgeEvents {
             return;
         }
 
+        boolean fullyReleased = GearHeartState.isFullyReleased(stack);
+        int repairedMask = fullyReleased ? GearHeartState.ALL_CURSES : GearHeartState.getRepairedMask(stack);
         event.getToolTip().add(Component.empty());
         event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.base")
             .withStyle(ChatFormatting.GREEN));
-        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.reach")
+        event.getToolTip().add(Component.translatable(fullyReleased
+            ? "tooltip.kubejs.gear_heart.blessed_reach" : "tooltip.kubejs.gear_heart.reach")
             .withStyle(ChatFormatting.GREEN));
-        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.haste")
+        event.getToolTip().add(Component.translatable(fullyReleased
+            ? "tooltip.kubejs.gear_heart.blessed_haste" : "tooltip.kubejs.gear_heart.haste")
             .withStyle(ChatFormatting.GREEN));
-        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.damage_penalty")
-            .withStyle(ChatFormatting.RED));
+        event.getToolTip().add(Component.translatable(fullyReleased
+            ? "tooltip.kubejs.gear_heart.damage_bonus" : "tooltip.kubejs.gear_heart.damage_penalty")
+            .withStyle(fullyReleased ? ChatFormatting.GREEN : ChatFormatting.RED));
         event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.night_vision")
             .withStyle(ChatFormatting.GREEN));
+        event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.rotation_stage",
+            GearHeartState.repairStage(repairedMask), RpmLimitConfig.gearHeartRotationLimit(repairedMask))
+            .withStyle(ChatFormatting.AQUA));
 
-        if (GearHeartState.isBlessed(stack)) {
+        if (fullyReleased) {
             event.getToolTip().add(Component.empty());
             event.getToolTip().add(Component.translatable("tooltip.kubejs.gear_heart.blessed_header")
                 .withStyle(ChatFormatting.GOLD));
@@ -130,9 +138,10 @@ public final class GearHeartForgeEvents {
         int repaired = GearHeartState.getRepairedMask(stack);
         for (int i = 0; i < CURSE_KEYS.length; i++) {
             boolean isRepaired = (repaired & CURSE_BITS[i]) != 0;
-            MutableComponent line = Component.translatable(
-                isRepaired ? REPAIRED_KEYS[i] : CURSE_KEYS[i]
-            );
+            String key = isRepaired ? REPAIRED_KEYS[i] : CURSE_KEYS[i];
+            MutableComponent line = i == 0
+                ? Component.translatable(key, RpmLimitConfig.gearHeartRotationLimit(repaired))
+                : Component.translatable(key);
             event.getToolTip().add(line.withStyle(isRepaired ? ChatFormatting.GREEN : ChatFormatting.RED));
         }
     }
@@ -182,10 +191,9 @@ public final class GearHeartForgeEvents {
     }
 
     @SubscribeEvent
-    public static void reduceOutgoingDamage(LivingHurtEvent event) {
-        if (event.getSource().getEntity() instanceof ServerPlayer attacker
-            && GearHeartEffects.hasEquippedHeart(attacker)) {
-            event.setAmount(event.getAmount() * 0.9F);
+    public static void applyOutgoingDamageMultiplier(LivingHurtEvent event) {
+        if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
+            event.setAmount(event.getAmount() * GearHeartEffects.outgoingDamageMultiplier(attacker));
         }
     }
 

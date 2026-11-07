@@ -2,6 +2,8 @@
 
 日期：2026-10-13
 
+更新：2026-11-07。七次修复均提升转速；第三、第四项修复直接移除对应额度；全链状态升级个人效果。本次不调整碎片的能力考核、产线或配方。
+
 ## 目标
 
 将齿轮之心从随机惩罚饰品改为七个工业瓶颈组成的固定修复线。修复过程必须对应整合包现有的 Create、Mekanism、AE2 与自研机械动力/Mek 桥接流程，并满足以下约束：
@@ -21,21 +23,30 @@
 
 ## 七项诅咒与修复祝福
 
-| 顺序 | 物品 ID 后缀 | 显示名 | 诅咒 | 单项修复祝福 |
-| --- | --- | --- | --- | --- |
-| 1 | `gear_heart_repair_fragment_1` | 安山校准齿片 | 齿轮之心把装备者网络转速限制为 32 RPM | 恢复 512 RPM |
-| 2 | `gear_heart_repair_fragment_2` | 黄铜应力垫片 | 装备者全部活跃 Create 网络合计容量上限 4,096 SU | 立即移除齿轮之心的 Create 容量上限 |
-| 3 | `gear_heart_repair_fragment_3` | 冶化同步环 | 装备者全部活跃矿物处理机器合计不超过 8 次操作/秒 | 上限提高到 64 次操作/秒 |
-| 4 | `gear_heart_repair_fragment_4` | ME 调度芯片 | 装备者全部 ME 网络同时执行的自动合成任务不超过 1 个 | 上限提高到 80 个 |
-| 5 | `gear_heart_repair_fragment_5` | 跨域耦合环 | `gear_heart:cross_process` 桥接物进入 Mek 后处理不超过 16 件/秒 | 上限提高到 128 件/秒 |
-| 6 | `gear_heart_repair_fragment_6` | 供能稳压芯 | 同时活跃的 Mek 加工机与 AE2 工作设备各不超过 8 台 | 分别提高到 64 台 |
-| 7 | `gear_heart_repair_fragment_7` | 矩阵调度核 | `gear_heart:final_production` 白名单高阶产物不超过 16 件/秒 | 上限提高到 128 件/秒 |
+| 顺序 | 物品 ID 后缀 | 显示名 | 诅咒 | 单项修复祝福 | 修复后转速上限 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `gear_heart_repair_fragment_1` | 安山校准齿片 | 装备者初始网络转速限制为 32 RPM | 开始按修复阶段提高转速 | 1,490 RPM |
+| 2 | `gear_heart_repair_fragment_2` | 黄铜应力垫片 | 装备者全部活跃 Create 网络合计容量上限 4,096 SU | 立即移除齿轮之心的 Create 容量上限 | 2,949 RPM |
+| 3 | `gear_heart_repair_fragment_3` | 冶化同步环 | 装备者全部活跃矿物处理机器合计不超过 8 次操作/秒 | 立即移除齿轮之心的矿物处理次数额度 | 4,407 RPM |
+| 4 | `gear_heart_repair_fragment_4` | ME 调度芯片 | 装备者全部 ME 网络同时执行的自动合成任务不超过 1 个 | 立即移除齿轮之心的 AE2 自动合成并发额度 | 5,865 RPM |
+| 5 | `gear_heart_repair_fragment_5` | 跨域耦合环 | `gear_heart:cross_process` 桥接物进入 Mek 后处理不超过 16 件/秒 | 上限提高到 128 件/秒 | 7,323 RPM |
+| 6 | `gear_heart_repair_fragment_6` | 供能稳压芯 | 同时活跃的 Mek 加工机与 AE2 工作设备各不超过 8 台 | 分别提高到 64 台 | 8,782 RPM |
+| 7 | `gear_heart_repair_fragment_7` | 矩阵调度核 | `gear_heart:final_production` 白名单高阶产物不超过 16 件/秒 | 转换为全链齿轮之心并移除全部工业额度 | 10,240 RPM |
 
-齿轮之心的 RPM 限额优先级低于管理员通过 `/dw rpm <player> <limit>` 设置的玩家上限。命令设置后，齿轮之心不得继续压低该上限；未执行过命令设置时，第一项修复仍可把默认玩家上限从 32 RPM 提升到 512 RPM。Create 配置与仓库硬上限继续生效。
+转速按 `round(初始 RPM + (全链 RPM - 初始 RPM) × 已连续修复阶段 / 7)` 计算，默认从 32 到 10,240 RPM 等分七次，四舍五入到整数。未按顺序修复的位不提前解锁转速；管理员恢复某项诅咒后，按第一个未修复项之前的连续进度重算。
+
+齿轮之心的 RPM 限额优先级低于管理员通过 `/dw rpm <player> <limit>` 设置的玩家上限。未设置命令覆盖时，在线玩家、旧存档迁移和离线所有者均按当前修复阶段恢复默认上限，全链自动提升到 10,240 RPM。已有命令设置保持原值。Create 配置、其他外部限制与仓库硬上限继续生效。
 
 修复必须严格按 1 到 7 的顺序进行。每个碎片使用后立即写入对应修复位并生效，不等待全部完成。
 
 第七项完成后，`kubejs:gear_heart` 自动替换为 `kubejs:gear_heart_enchanted`，显示名改为“全链齿轮之心”。最终状态关闭第一至第七项由齿轮之心添加的全部额度，获得“全链释限”效果。
+
+## 个人效果
+
+- 未完全修复：方块与实体交互距离 +2、急迫 II、夜视 I，造成伤害乘以 0.9。
+- 全链：方块与实体交互距离 +4、急迫 III、夜视 I，造成伤害乘以 1.5；不再叠加原伤害惩罚。
+- 急迫和夜视保持无限时长、隐藏粒子、显示图标。状态升级或重新启用诅咒时更新既有距离修饰符和本饰品的急迫等级，保留其他来源的更强效果。
+- 不装备齿轮之心时清除本饰品的属性与效果，伤害恢复原倍率。跨维度同步沿用既有事件，不增加每 tick 发包。
 
 ## 原模组限制
 
@@ -164,12 +175,10 @@
 删除旧的攻击伤害、产出失败、随机冻结和夜晚饥饿配置，新增 `[gearHeart]` 额度配置：
 
 - `rotationCursedRpm = 32`
-- `rotationRepairedRpm = 512`
+- `rotationReleasedRpm = 10240`；替代旧的 `rotationRepairedRpm`，避免旧第一阶段 512 RPM 配置限制全链状态
 - `createCapacityCursedSu = 4096`
 - `mekOreOperationsCursedPerSecond = 8`
-- `mekOreOperationsRepairedPerSecond = 64`
 - `aeCraftingJobsCursed = 1`
-- `aeCraftingJobsRepaired = 80`
 - `crossProcessItemsCursedPerSecond = 16`
 - `crossProcessItemsRepairedPerSecond = 128`
 - `activeMachinesCursed = 8`
@@ -179,11 +188,15 @@
 
 更新 `dimensionworks-rpm-limit/README.md`、`kubejs/README.md` 与脚本 README，说明修复流程、额度边界、贴图和配方。
 
+第三、第四项不再保留修复后的数值配置；对应修复位生效后移除该额度。其他尚未修复的诅咒继续独立生效。
+
+本次沿用当前装备 tick、属性修饰符和离线档案缓存。仅在修复阶段或状态改变时更新转速及属性，不新增机器、实体、区块加载或常驻扫描。较高转速仍按现有超速应力规则付费；生产线设计应优先提高单机利用率，避免通过扩大机器阵列增加长期开销。
+
 ## 依赖与版本
 
 `dimensionworks-rpm-limit` 增加 Mekanism 与 AE2 编译/运行依赖和 `mods.toml` 依赖声明。现有 Create 与 Curios 依赖保留。
 
-实现完成后将自研 Mod 版本从 `0.4.4` 提升为 `0.4.5`，同步 `build.gradle`、`mods.toml` 与 `manifest/mods.json` 中已有条目。根 `VERSION` 不手工修改，留给打包脚本处理。
+历史初次实现使用 `0.4.5`。本次将 RPM Limit 从 `0.4.19` 提升为 `0.4.20`，同步 `build.gradle`、`mods.toml` 与 `manifest/mods.json` 中已有条目；根 `VERSION` 按普通补丁更新为 `0.3.17`。本地验证后提交推送，正式发布仍需另行明确要求。
 
 ## 测试
 
@@ -191,11 +204,13 @@
 
 - 七项顺序、位掩码、单项修复与第七项最终转化。
 - 第二项修复立即释放 Create 自身额度。
-- 第四项修复额度为 80，最终释限时完全移除。
+- 第三、第四项修复立即移除对应额度，其他未修复项继续生效。
+- 七阶段整数转速等分、非连续位和全链端点。
 - 令牌桶在整数速率、零速率、超额请求和跨 tick 补充时确定性工作。
 - 所有者聚合、共享后备额度与多玩家隔离。
 - `min(齿轮之心额度, 原生能力)` 永远不提高原生能力。
 - 旧 NBT 和旧祝福占位物品迁移。
+- 真实 Curios 装备顺序修复、全链增益、重新启用诅咒、跨维度同步与管理员命令覆盖。
 
 ### 合同测试
 

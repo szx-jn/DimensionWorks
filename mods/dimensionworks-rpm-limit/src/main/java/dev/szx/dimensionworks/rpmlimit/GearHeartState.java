@@ -11,6 +11,7 @@ public final class GearHeartState {
 
     public static final String SLOT_ID = "gear_heart";
     public static final String REPAIRED_MASK_KEY = "DimensionWorksGearHeartRepaired";
+    public static final int REPAIR_STAGES = 7;
 
     public static final int ROTATION_SPEED = 1;
     public static final int CREATE_CAPACITY = 1 << 1;
@@ -140,12 +141,24 @@ public final class GearHeartState {
             && nextRepairIndex(repairedMask) == fragmentIndex;
     }
 
+    public static int repairStage(int repairedMask) {
+        int next = nextRepairIndex(repairedMask);
+        return next == 0 ? REPAIR_STAGES : next - 1;
+    }
+
+    public static int rotationLimit(int repairedMask, int initialRpm, int releasedRpm) {
+        int stage = repairStage(repairedMask);
+        long span = Math.max(0L, (long) releasedRpm - initialRpm);
+        return initialRpm + (int) Math.round(span * stage / (double) REPAIR_STAGES);
+    }
+
     public static boolean isFullyReleasedMask(int repairedMask) {
         return normalizeLegacyMask(repairedMask) == ALL_CURSES;
     }
 
     public static boolean isFullyReleased(ItemStack stack) {
-        return isBlessed(stack) || isFullyReleasedMask(getRepairedMask(stack));
+        return isBlessed(stack) && !isLegacyCursed(stack)
+            || isFullyReleasedMask(getRepairedMask(stack));
     }
 
     public static boolean isRepairApplied(int repairedMask, int repairBit) {

@@ -20,12 +20,10 @@ public final class RpmLimitConfig {
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> OVERSPEED_CLASS_WHITELIST;
 
     public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_CURSED_RPM;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_REPAIRED_RPM;
+    public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_RELEASED_RPM;
     public static final ForgeConfigSpec.IntValue GEAR_HEART_CREATE_CAPACITY_CURSED_SU;
     public static final ForgeConfigSpec.IntValue GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_MEK_ORE_OPERATIONS_REPAIRED_PER_SECOND;
     public static final ForgeConfigSpec.IntValue GEAR_HEART_AE_CRAFTING_JOBS_CURSED;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_AE_CRAFTING_JOBS_REPAIRED;
     public static final ForgeConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_CURSED_PER_SECOND;
     public static final ForgeConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_REPAIRED_PER_SECOND;
     public static final ForgeConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_CURSED;
@@ -78,18 +76,15 @@ public final class RpmLimitConfig {
         builder.push("gearHeart");
         GEAR_HEART_ROTATION_CURSED_RPM = builder
             .defineInRange("rotationCursedRpm", 32, 1, 10240);
-        GEAR_HEART_ROTATION_REPAIRED_RPM = builder
-            .defineInRange("rotationRepairedRpm", 512, 1, 10240);
+        GEAR_HEART_ROTATION_RELEASED_RPM = builder
+            .comment("Final RPM after seven evenly spaced repairs; replaces the old first-repair RPM setting.")
+            .defineInRange("rotationReleasedRpm", 10240, 1, 10240);
         GEAR_HEART_CREATE_CAPACITY_CURSED_SU = builder
             .defineInRange("createCapacityCursedSu", 4096, 1, Integer.MAX_VALUE);
         GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND = builder
             .defineInRange("mekOreOperationsCursedPerSecond", 8, 1, 1_000_000);
-        GEAR_HEART_MEK_ORE_OPERATIONS_REPAIRED_PER_SECOND = builder
-            .defineInRange("mekOreOperationsRepairedPerSecond", 64, 1, 1_000_000);
         GEAR_HEART_AE_CRAFTING_JOBS_CURSED = builder
             .defineInRange("aeCraftingJobsCursed", 1, 1, 1024);
-        GEAR_HEART_AE_CRAFTING_JOBS_REPAIRED = builder
-            .defineInRange("aeCraftingJobsRepaired", 80, 1, 1024);
         GEAR_HEART_CROSS_PROCESS_CURSED_PER_SECOND = builder
             .defineInRange("crossProcessItemsCursedPerSecond", 16, 1, 1_000_000);
         GEAR_HEART_CROSS_PROCESS_REPAIRED_PER_SECOND = builder
@@ -105,6 +100,11 @@ public final class RpmLimitConfig {
         builder.pop();
 
         SPEC = builder.build();
+    }
+
+    public static int gearHeartRotationLimit(int repairedMask) {
+        return Math.min(MAX_RPM.get(), GearHeartState.rotationLimit(repairedMask,
+            GEAR_HEART_ROTATION_CURSED_RPM.get(), GEAR_HEART_ROTATION_RELEASED_RPM.get()));
     }
 
     private RpmLimitConfig() {}

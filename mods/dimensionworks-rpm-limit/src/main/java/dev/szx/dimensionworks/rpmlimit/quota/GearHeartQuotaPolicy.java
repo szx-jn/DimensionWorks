@@ -13,15 +13,14 @@ public final class GearHeartQuotaPolicy {
         }
 
         return switch (type) {
-            case ROTATION_SPEED -> GearHeartState.isRepairApplied(
-                repairedMask, GearHeartState.ROTATION_SPEED) ? 512.0D : 32.0D;
+            case ROTATION_SPEED -> GearHeartState.rotationLimit(repairedMask, 32, 10240);
             case CREATE_CAPACITY -> GearHeartState.isRepairApplied(
                 repairedMask, GearHeartState.CREATE_CAPACITY)
                 ? Double.POSITIVE_INFINITY : 4096.0D;
             case MEK_ORE_OPERATIONS -> GearHeartState.isRepairApplied(
-                repairedMask, GearHeartState.MEK_ORE_OPERATIONS) ? 64.0D : 8.0D;
+                repairedMask, GearHeartState.MEK_ORE_OPERATIONS) ? Double.POSITIVE_INFINITY : 8.0D;
             case AE_CRAFTING_JOBS -> GearHeartState.isRepairApplied(
-                repairedMask, GearHeartState.AE_CRAFTING_JOBS) ? 80.0D : 1.0D;
+                repairedMask, GearHeartState.AE_CRAFTING_JOBS) ? Double.POSITIVE_INFINITY : 1.0D;
             case CROSS_PROCESS -> GearHeartState.isRepairApplied(
                 repairedMask, GearHeartState.CROSS_PROCESS) ? 128.0D : 16.0D;
             case ACTIVE_MACHINES -> GearHeartState.isRepairApplied(

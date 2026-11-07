@@ -1,5 +1,7 @@
 # 齿轮之心工业瓶颈与修复祝福实施计划
 
+> 本文件保留 2026-10-13 的历史实施记录。2026-11-07 起，七阶段转速、第三/第四项释限与全链个人增益以对应设计规格及 `mods/dimensionworks-rpm-limit/README.md` 的最新说明为准；下文旧 512 RPM、64 次/秒和 80 个并发目标已被替代。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 把齿轮之心改为七阶段固定修复线，按装备者 UUID 聚合 Create、Mekanism 与 AE2 的工业额度，并保留双向机械供能。

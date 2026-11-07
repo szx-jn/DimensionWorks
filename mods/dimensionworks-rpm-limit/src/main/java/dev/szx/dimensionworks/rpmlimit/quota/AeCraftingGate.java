@@ -33,8 +33,7 @@ public final class AeCraftingGate {
                 GearHeartEffects.unreleasedOwners(GearHeartState.AE_CRAFTING_JOBS),
                 GearHeartQuotaType.AE_CRAFTING_JOBS,
                 configuredJobLimit(0,
-                    RpmLimitConfig.GEAR_HEART_AE_CRAFTING_JOBS_CURSED.get(),
-                    RpmLimitConfig.GEAR_HEART_AE_CRAFTING_JOBS_REPAIRED.get()))
+                    RpmLimitConfig.GEAR_HEART_AE_CRAFTING_JOBS_CURSED.get()))
                 && allowSharedCounts(
                     GearHeartEffects.unreleasedOwners(GearHeartState.ACTIVE_MACHINES),
                     GearHeartQuotaType.ACTIVE_MACHINES,
@@ -47,8 +46,7 @@ public final class AeCraftingGate {
         int busy = AeCraftingRegistry.busyCountForOwner(owner);
         if (!GearHeartState.isRepairApplied(repairedMask, GearHeartState.AE_CRAFTING_JOBS)) {
             int jobLimit = configuredJobLimit(repairedMask,
-                RpmLimitConfig.GEAR_HEART_AE_CRAFTING_JOBS_CURSED.get(),
-                RpmLimitConfig.GEAR_HEART_AE_CRAFTING_JOBS_REPAIRED.get());
+                RpmLimitConfig.GEAR_HEART_AE_CRAFTING_JOBS_CURSED.get());
             if (busy >= jobLimit) {
                 return false;
             }
@@ -94,14 +92,12 @@ public final class AeCraftingGate {
             owner, GearHeartQuotaType.FINAL_PRODUCTION, amount, rate, tick);
     }
 
-    static int configuredJobLimit(int repairedMask, int cursedLimit, int repairedLimit) {
+    static int configuredJobLimit(int repairedMask, int cursedLimit) {
         double policy = GearHeartQuotaPolicy.limit(GearHeartQuotaType.AE_CRAFTING_JOBS, repairedMask);
         if (Double.isInfinite(policy)) {
             return Integer.MAX_VALUE;
         }
-        int configured = GearHeartState.isRepairApplied(
-            repairedMask, GearHeartState.AE_CRAFTING_JOBS) ? repairedLimit : cursedLimit;
-        return (int) Math.min(configured, policy);
+        return (int) Math.min(cursedLimit, policy);
     }
 
     static int configuredActiveLimit(int repairedMask, int cursedLimit, int repairedLimit) {

@@ -61,7 +61,7 @@ public final class MekProcessingGate {
             addRateRequests(requests, owner, GearHeartQuotaType.MEK_ORE_OPERATIONS,
                 requested, repairedMask,
                 RpmLimitConfig.GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND.get(),
-                RpmLimitConfig.GEAR_HEART_MEK_ORE_OPERATIONS_REPAIRED_PER_SECOND.get(),
+                Integer.MAX_VALUE,
                 context.tick());
         }
         if (hasCrossProcessInput(recipe)) {
