@@ -78,5 +78,7 @@
   "fluid.dimensionworks.molten_sculkium": "Molten Sculkium",
   "fluid.dimensionworks.molten_eternium": "Molten Eternium",
   "item.kubejs.crude_sulfur": "Crude Sulfur",
-  "item.kubejs.crude_sulfur.tooltip": "Thermally separated from sulfur-bearing volcanic material. Mill into sulfur dust."
+  "item.kubejs.crude_sulfur.tooltip": "Thermally separated from sulfur-bearing volcanic material. Mill into sulfur dust.",
+  "fluid.dimensionworks.forest_extract": "Forest Extract",
+  "item.dimensionworks.forest_extract_bucket": "Forest Extract Bucket"
 }

@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "dimensionworks_cave_factory:block/boar_conditioner"
+    },
+    "axis=z": {
+      "model": "dimensionworks_cave_factory:block/boar_conditioner",
+      "y": 90
+    }
+  }
+}

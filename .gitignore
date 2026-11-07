@@ -52,3 +52,4 @@ update-Windows/aria2-runtime/
 
 # Optional local fluid rendering verification
 run-crystal-check/
+run-twilight-check/

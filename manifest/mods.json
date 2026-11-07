@@ -522,7 +522,7 @@
       "name": "DimensionWorks Cave Factory",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-cave-factory",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-cave-factory"

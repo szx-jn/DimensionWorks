@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:rooted_dirt",
+    "twilightforest:root",
+    "twilightforest:liveroot_block"
+  ]
+}

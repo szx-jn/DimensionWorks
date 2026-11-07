@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.1.5'
+version = '0.1.6'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_cave_factory'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -129,4 +129,46 @@ if (project.hasProperty('crystalCheck')) {
             mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.crystalCheck] }
         }
     }
+}
+
+// Explicit, disposable server verification using the pack's pinned local runtime jars.
+if (project.hasProperty('twilightCheck')) {
+    if (!project.hasProperty('twilightMods')) {
+        throw new GradleException('Supply -PtwilightMods=<DimensionWorks mods directory> for twilightCheck')
+    }
+    repositories { flatDir { dirs project.property('twilightMods') } }
+    dependencies {
+        runtimeOnly files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}-dev.jar")
+        [
+            'twilightforest:1.20.1-4.3.2508-universal', 'alexscaves:2.0.2',
+            "Dimensions-of-Alex's-Caves:1.20.1-1.0.4", 'citadel:2.6.3-1.20.1',
+            'Mekanism:1.20.1-10.4.16.80', 'appliedenergistics2-forge:15.4.10',
+            'guideme:20.1.15',
+            'curios-forge:5.14.1+1.20.1', 'kubejs-forge:2001.6.5-build.26',
+            'rhino-forge:2001.2.3-build.10', 'architectury:9.2.14-forge'
+        ].each { coordinate -> runtimeOnly fg.deobf("dw-test:${coordinate}") }
+    }
+    sourceSets {
+        twilightCheck {
+            compileClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+        }
+    }
+    minecraft.runs.gameTestServer {
+        workingDirectory project.file('run-twilight-check')
+        property 'forge.enabledGameTestNamespaces', 'dimensionworks_cave_factory'
+        mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.twilightCheck] }
+    }
+    tasks.register('prepareTwilightCheck', Copy) {
+        dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':devJar')
+        from('../../kubejs') {
+            include 'startup_scripts/twilight_industry.js'
+            include 'data/dimensionworks_cave_factory/recipes/twilight/**'
+            include 'data/dimensionworks_cave_factory/tags/items/twilight_leaves.json'
+            include 'data/dimensionworks_cave_factory/tags/items/boar_feed.json'
+            include 'data/dimensionworks_cave_factory/tags/blocks/root_bed.json'
+        }
+        into 'run-twilight-check/kubejs'
+    }
+    tasks.matching { it.name == 'runGameTestServer' }.configureEach { dependsOn 'prepareTwilightCheck' }
 }

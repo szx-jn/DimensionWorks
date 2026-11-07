@@ -63,7 +63,7 @@ gradle test --no-daemon
 gradle build --no-daemon
 ```
 
-GameTest 源码已随工程编译，但本仓库的开发运行配置不携带 Alex's Caves 与洞穴维度运行依赖，因此当前不声称 GameTest、客户端或专用服已完成真实运行验证。
+默认开发运行不携带全部洞穴维度依赖；专项检查通过显式 profile 提供运行依赖，实际结果见下方版本记录。
 
 ## 0.1.2：共享维度工坊页签
 
@@ -85,3 +85,31 @@ GameTest 源码已随工程编译，但本仓库的开发运行配置不携带 A
 ## 暮色传送兼容
 
 暮色入口限制允许已持有 `dimensionworks_transfer.unlocked` 永久标记的玩家使用 TP，以及中转终端当次临时授权。未解锁玩家仍被拦截；传统暮色门由 Transfer 按传送器单独禁用。
+
+
+## 0.1.6：暮色林地生产
+
+新增林地浸出槽、生物调理槽、林地树脂、根系纤维、熟化腐殖料、铁木框架和林地滤芯；KubeJS 注册 `dimensionworks:forest_extract` 林地原液。全部收录到已有「维度工坊」页签。主世界机器与材料可支援建设，新品只供暮色工艺。
+
+- 浸出槽：只在暮色工作，下方同一层完整 3×3 接触床（缠根泥土、根、活根方块可混用）。每批消耗 8 暮色树叶、1 腐殖料和 1,000 mB 水，产 1,000 mB 原液。
+- 生物槽：只在暮色工作，附近需要 2 只成年野猪，每批消耗 8 树叶、1 胡萝卜/土豆/甜菜根、250 mB 水，产 4 腐殖料。每只野猪独占一个工位，完工休息 200 个加载刻。打包不工作，休息与工位记录保存在实体 ForgeData。
+- 动力：接水平轴，最低 32 RPM，128 RPM 时每批 10 秒；更高 RPM 不加快工作。每台消耗 4 SU/RPM，沿用现有 RPM/应力网络和成品生产额度。
+- 接口：上方输入两类物品，下方输出产物，侧面接水；水罐与原液罐各 10 B。水桶灌水、空桶取原液，空手右键打开界面。缺料、满仓、断动力、红石暂停等有可见原因且不扣输入。
+- 原液在加热工作盆分出 2 树脂和 2 纤维；消耗一个滤芯的精制路线分出 4 树脂和 2 纤维。框架、滤芯用现有压块工艺；启动腐殖料有手工与植物混合路线。
+- 库存与液体随实际掉落的设施物品保存；便携物品不携带未完成进度。环境每秒查 9 个局部方块，动物每秒局部查询；不强制加载、不结算离线产量、不产生周期掉落实体。
+
+配方与标签位于 `kubejs/data/dimensionworks_cave_factory/recipes/twilight/` 和相应 tags。`twilight_work` JSON 的 `station` 为 `leaching` 或 `conditioning`；`first`、`second` 各含 `ingredient` 与 `count`，`water` 为 mB，`duration` 为 128 RPM 下的工作刻。前者使用 `fluid_result`，后者使用 `result`。输入槽种类分别由树叶、饲料标签与腐殖料物品限定。JEI 显示现场配方与环境条件。
+
+本地验证入口：
+
+```sh
+python3 scripts/check_twilight_industry.py
+node --check kubejs/startup_scripts/twilight_industry.js
+cd mods/dimensionworks-cave-factory
+gradle test build --offline --no-daemon
+gradle -PtwilightCheck -PtwilightMods='<整合包 mods 目录>' runGameTestServer --offline --no-daemon
+```
+
+专项 GameTest 使用真实暮色、KubeJS 与 Create，在忽略的 `run-twilight-check/` 临时世界中验证。测试夹具会加载测试区块，生产实现不会。测试源码不进入正式 JAR。图像由 `scripts/draw_twilight_assets.py` 的标准库像素绘图生成，无生图调用。
+
+本次构建、31 项 JUnit、16 项服务器 GameTest 与静态预检通过。客户端显示、实际 CMP 打包操作、完整自动林场和长期平衡尚未验证，详见 [验证记录](../../docs/validation/2026-11-07-twilight-first-production.md)。

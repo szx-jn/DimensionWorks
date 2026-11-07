@@ -40,6 +40,8 @@ public final class CaveFactoryClientEvents {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> MenuScreens.register(
+            dev.szx.dimensionworks.cavefactory.twilight.TwilightIndustry.MENU.get(), TwilightWorkstationScreen::new));
+        event.enqueueWork(() -> MenuScreens.register(
             CFMenus.factoryMachine(),
             FactoryMachineScreen::new
         ));

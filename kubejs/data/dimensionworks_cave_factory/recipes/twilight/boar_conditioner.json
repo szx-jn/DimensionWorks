@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "F F",
+    "CBC",
+    "III"
+  ],
+  "key": {
+    "F": {
+      "item": "dimensionworks_cave_factory:ironwood_frame"
+    },
+    "C": {
+      "item": "create:copper_sheet"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "item": "dimensionworks_cave_factory:boar_conditioner"
+  }
+}

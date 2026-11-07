@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "twilightforest:twilight_oak_leaves",
+    "twilightforest:canopy_leaves",
+    "twilightforest:mangrove_leaves",
+    "twilightforest:dark_leaves",
+    "twilightforest:rainbow_oak_leaves"
+  ]
+}

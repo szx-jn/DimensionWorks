@@ -1,0 +1,22 @@
+{
+  "type": "dimensionworks_cave_factory:twilight_work",
+  "station": "conditioning",
+  "first": {
+    "ingredient": {
+      "tag": "dimensionworks_cave_factory:twilight_leaves"
+    },
+    "count": 8
+  },
+  "second": {
+    "ingredient": {
+      "tag": "dimensionworks_cave_factory:boar_feed"
+    },
+    "count": 1
+  },
+  "water": 250,
+  "duration": 200,
+  "result": {
+    "item": "dimensionworks_cave_factory:mature_humus",
+    "count": 4
+  }
+}
