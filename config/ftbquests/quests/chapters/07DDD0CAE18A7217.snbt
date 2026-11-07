@@ -28,7 +28,7 @@
 			dependencies: ["40917E4DCDE7F6E5"]
 			hide_dependency_lines: false
 			id: "C405363F17B9E624"
-				subtitle: "诅咒：32 RPM；修复后转速上限 1,490 RPM"
+				subtitle: "诅咒：32 RPM；修复后转速上限 512 RPM"
 			tasks: [{
 				id: "5BE1924C8B650807"
 				item: "kubejs:gear_heart_repair_fragment_1"
@@ -42,7 +42,7 @@
 			dependencies: ["C405363F17B9E624"]
 			hide_dependency_lines: false
 			id: "8E1C4BA4D5D33391"
-				subtitle: "解除 Create 容量额度；转速上限 2,949 RPM"
+				subtitle: "解除 Create 容量额度；转速上限 1,024 RPM"
 			tasks: [{
 				id: "062074DDA749C95D"
 				item: "kubejs:gear_heart_repair_fragment_2"
@@ -56,7 +56,7 @@
 			dependencies: ["8E1C4BA4D5D33391"]
 			hide_dependency_lines: false
 			id: "755C22E10F4965B3"
-				subtitle: "解除矿物处理次数额度；转速上限 4,407 RPM"
+				subtitle: "解除矿物处理次数额度；转速上限 2,048 RPM"
 			tasks: [{
 				id: "5B04C74795E0C209"
 				item: "kubejs:gear_heart_repair_fragment_3"
@@ -70,7 +70,7 @@
 			dependencies: ["755C22E10F4965B3"]
 			hide_dependency_lines: false
 			id: "DF25F0301998CAA9"
-				subtitle: "解除 AE2 自动合成并发额度；转速上限 5,865 RPM"
+				subtitle: "解除 AE2 自动合成并发额度；转速上限 4,096 RPM"
 			tasks: [{
 				id: "1F7D253008B0A3FF"
 				item: "kubejs:gear_heart_repair_fragment_4"
@@ -84,7 +84,7 @@
 			dependencies: ["DF25F0301998CAA9"]
 			hide_dependency_lines: false
 			id: "A565E569C5BD20F6"
-				subtitle: "跨工序额度提高到 128 件/秒；转速上限 7,323 RPM"
+				subtitle: "跨工序额度提高到 128 件/秒；转速上限 5,120 RPM"
 			tasks: [{
 				id: "8C303BA45C85A140"
 				item: "kubejs:gear_heart_repair_fragment_5"
@@ -98,7 +98,7 @@
 			dependencies: ["A565E569C5BD20F6"]
 			hide_dependency_lines: false
 			id: "328F8A40F4E27C24"
-				subtitle: "活跃机器额度提高到 64 台；转速上限 8,782 RPM"
+				subtitle: "活跃机器额度提高到 64 台；转速上限 8,192 RPM"
 			tasks: [{
 				id: "ABB6D2C279CD0038"
 				item: "kubejs:gear_heart_repair_fragment_6"

@@ -77,7 +77,7 @@ public final class RpmLimitConfig {
         GEAR_HEART_ROTATION_CURSED_RPM = builder
             .defineInRange("rotationCursedRpm", 32, 1, 10240);
         GEAR_HEART_ROTATION_RELEASED_RPM = builder
-            .comment("Final RPM after seven evenly spaced repairs; replaces the old first-repair RPM setting.")
+            .comment("Final RPM ceiling; stages 1-6 use fixed limits of 512, 1024, 2048, 4096, 5120 and 8192 RPM.")
             .defineInRange("rotationReleasedRpm", 10240, 1, 10240);
         GEAR_HEART_CREATE_CAPACITY_CURSED_SU = builder
             .defineInRange("createCapacityCursedSu", 4096, 1, Integer.MAX_VALUE);

@@ -28,6 +28,7 @@
 
 [gearHeart]
     rotationCursedRpm = 32
+    #修复转速固定为 512、1024、2048、4096、5120、8192、10240 RPM；此值限制修复档位上限。
     rotationReleasedRpm = 10240
     createCapacityCursedSu = 4096
     mekOreOperationsCursedPerSecond = 8
