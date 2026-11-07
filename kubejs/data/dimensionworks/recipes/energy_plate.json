@@ -42,5 +42,5 @@
       "results": [{ "item": "kubejs:incomplete_energy_plate" }]
     }
   ],
-  "results": [{ "item": "kubejs:energy_plate", "count": 1 }]
+  "results": [{ "item": "mekanism:energy_tablet", "count": 1 }]
 }

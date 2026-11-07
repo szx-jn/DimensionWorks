@@ -25,6 +25,7 @@
     "mek.LaserEnergyContainerMixin",
     "mek.TeleporterPowerMixin",
     "mek.OutputHelperMixin",
+    "mek.ItemEnergizedEnergyTabletMixin",
     "mek.JadeDataProviderMixin",
     "mek.JadeUniversalEnergyProviderMixin",
     "mek.MachineEnergyContainerAccessor",

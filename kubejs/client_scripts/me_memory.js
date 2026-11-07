@@ -30,7 +30,6 @@ const retiredMekanismStorageItems = [
   'mekanism:elite_energy_cube',
   'mekanism:ultimate_energy_cube',
   'mekanism:creative_energy_cube',
-  'mekanism:energy_tablet',
   'mekanism:basic_induction_cell',
   'mekanism:advanced_induction_cell',
   'mekanism:elite_induction_cell',

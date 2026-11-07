@@ -154,7 +154,7 @@ Mekanism: Generators 发电机的原生能量输出面（包括太阳能底面�
 
 机器作为虚拟成员加入真实 Create 应力网络。低于目标时按 RPM 比例减速，超过目标时按比例放大配方吞吐，输出边界仍检查容量和最终产物额度。FE/J 供能和旧储能元件保持退役，Jade 隐藏 Mekanism 原生能量条。虚拟能量使用有限的每 tick 预算且不写入 NBT；动力路线仅检查已加载区块并在单台机器当前 tick 内复用，避免存档时递归触发区块读取。
 
-旧 `mekanism:energy_tablet` 的下游配方改用普通工业元件 `kubejs:energy_plate`，不再统一替换为灌注合金。新元件采用 Create 金属注液与顺序装配，不提供 FE/J 储能；原有储能物品的退役规则继续有效。配方与边界见 [能量板工业制造](../../docs/design/energy-plate-production.md)。
+`mekanism:energy_tablet` 的原生工作台配方被替换为 Create 金属注液与顺序装配，成品仍使用 Mekanism 能量板并保持 FE/J 恒为 0；下游配方继续消耗该物品，不再使用 `kubejs:energy_plate`。能量立方与感应储能元件的退役规则继续有效。配方与边界见 [能量板工业制造](../../docs/design/energy-plate-production.md)。
 
 ## 性能与配置
 

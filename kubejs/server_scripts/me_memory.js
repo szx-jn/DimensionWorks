@@ -38,7 +38,6 @@ const retiredMekanismStorageItems = [
   'mekanism:elite_energy_cube',
   'mekanism:ultimate_energy_cube',
   'mekanism:creative_energy_cube',
-  'mekanism:energy_tablet',
   'mekanism:basic_induction_cell',
   'mekanism:advanced_induction_cell',
   'mekanism:elite_induction_cell',
@@ -50,7 +49,6 @@ const retiredMekanismStorageItems = [
 ]
 
 const retiredMekanismStorageItemSet = new Set(retiredMekanismStorageItems)
-const retiredMekanismRecipeMaterialReplacement = 'kubejs:energy_plate'
 
 ServerEvents.recipes(event => {
   memoryTiers.forEach(definition => {
@@ -141,7 +139,7 @@ ServerEvents.recipes(event => {
 
   retiredAppliedCreateItems.forEach(id => event.remove({ output: id }))
   retiredMekanismStorageItems.forEach(id => event.remove({ output: id }))
-  event.replaceInput({}, 'mekanism:energy_tablet', retiredMekanismRecipeMaterialReplacement)
+  event.remove({ id: 'mekanism:energy_tablet' })
   event.remove({ id: 'appliedcreate:creative_motor_from_stress_cell' })
 })
 

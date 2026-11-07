@@ -1,6 +1,4 @@
 {
-  "item.kubejs.energy_plate": "Energy Plate",
-  "item.kubejs.energy_plate.tooltip": "An industrial component for manufacturing machines and equipment.",
   "item.kubejs.incomplete_energy_plate": "Incomplete Energy Plate",
   "item.kubejs.incomplete_energy_plate.tooltip": "Continue the filling, material assembly, and pressing steps.",
   "item.kubejs.dimension_key": "Dimension Key",

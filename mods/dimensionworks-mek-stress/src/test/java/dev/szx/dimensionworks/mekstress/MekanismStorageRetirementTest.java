@@ -16,7 +16,6 @@ class MekanismStorageRetirementTest {
         "mekanism:elite_energy_cube",
         "mekanism:ultimate_energy_cube",
         "mekanism:creative_energy_cube",
-        "mekanism:energy_tablet",
         "mekanism:basic_induction_cell",
         "mekanism:advanced_induction_cell",
         "mekanism:elite_induction_cell",
@@ -32,6 +31,8 @@ class MekanismStorageRetirementTest {
         String startup = Files.readString(Path.of("..", "..", "kubejs", "startup_scripts", "me_memory.js"));
         String server = Files.readString(Path.of("..", "..", "kubejs", "server_scripts", "me_memory.js"));
         String client = Files.readString(Path.of("..", "..", "kubejs", "client_scripts", "me_memory.js"));
+        String recipe = Files.readString(Path.of("..", "..", "kubejs", "data", "dimensionworks", "recipes", "energy_plate.json"));
+        String itemStartup = Files.readString(Path.of("..", "..", "kubejs", "startup_scripts", "energy_plate.js"));
 
         for (String id : STORAGE_ITEMS) {
             assertTrue(startup.contains("'" + id + "'"), "startup script must retire " + id);
@@ -41,8 +42,15 @@ class MekanismStorageRetirementTest {
         assertTrue(startup.contains("StartupEvents.modifyCreativeTab('mekanism:mekanism'"));
         assertTrue(server.contains("event.remove({ output: id })"));
         assertTrue(client.contains("retiredMekanismStorageItems.forEach(id => event.hide(id))"));
-        assertTrue(server.contains("event.replaceInput({}, 'mekanism:energy_tablet', retiredMekanismRecipeMaterialReplacement)"));
+        assertFalse(startup.contains("'mekanism:energy_tablet'"), "energy tablet must remain available");
+        assertFalse(client.contains("'mekanism:energy_tablet'"), "energy tablet must remain visible");
+        assertTrue(server.contains("event.remove({ id: 'mekanism:energy_tablet' })"));
+        assertFalse(server.contains("retiredMekanismRecipeMaterialReplacement"));
         assertFalse(server.contains("tierDefinition"), "redeclaring a const inside the recipe loop aborts retirement");
+        assertTrue(recipe.contains("\"item\": \"mekanism:energy_tablet\""));
+        assertFalse(recipe.contains("\"item\": \"kubejs:energy_plate\""));
+        assertFalse(itemStartup.contains("event.create('energy_plate')"));
+        assertTrue(itemStartup.contains("event.create('incomplete_energy_plate', 'create:sequenced_assembly')"));
         assertTrue(server.contains("memoryTiers[tier - 1].alloy"));
     }
 }
