@@ -1344,7 +1344,9 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 	if err != nil { return newAria2Error("RPC 接口", "", err, "无法分配回环端口") }
 	rpcSecret, err := randomAria2RPCSecret()
 	if err != nil { return newAria2Error("RPC 接口", "", err, "无法生成随机令牌") }
-	// Linux's bundled libc resolver can crash; native DNS elsewhere also handles OS-only local names.
+	// Choose DNS by the source host type on every platform. Remote downloads
+	// must also work when native DNS retains a loopback or fake-IP answer that
+	// bypasses the active system route or TUN.
 	args := []string{
 		"--no-conf=true",
 		"--continue=false",
@@ -1353,7 +1355,7 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		"--file-allocation=none",
 		"--check-certificate=true",
 		"--http-accept-gzip=false",
-		"--async-dns=" + strconv.FormatBool(runtime.GOOS == "linux"),
+		"--async-dns=" + strconv.FormatBool(aria2AsyncDNS(source)),
 		"--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
 		fmt.Sprintf("--max-connection-per-server=%d", connections),
 		fmt.Sprintf("--split=%d", connections),
