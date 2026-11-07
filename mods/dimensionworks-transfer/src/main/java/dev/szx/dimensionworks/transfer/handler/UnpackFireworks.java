@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
@@ -18,8 +19,8 @@ import org.joml.Vector3f;
 public final class UnpackFireworks {
     static final int DURATION_TICKS = 60;
     static final int BURST_INTERVAL_TICKS = 5;
-    static final int DUST_PER_BURST = 8;
-    static final int FIREWORK_PER_BURST = 4;
+    static final int DUST_PER_BURST = 24;
+    static final int FIREWORK_PER_BURST = 12;
     private static final double HALF_EXTENT = 1.5D;
     private static final Map<UUID, Active> ACTIVE = new HashMap<>();
 
@@ -28,9 +29,10 @@ public final class UnpackFireworks {
 
     public static void start(ServerPlayer player) {
         long now = player.server.overworld().getGameTime();
-        Active active = new Active(now, now + DURATION_TICKS, now + BURST_INTERVAL_TICKS);
+        Active active = new Active(player.serverLevel(), player.position().add(0, player.getBbHeight() / 2, 0),
+            now, now + DURATION_TICKS, now + BURST_INTERVAL_TICKS);
         ACTIVE.put(player.getUUID(), active);
-        spawnBurst(player, active);
+        spawnBurst(active, now);
         player.serverLevel().playSound(
             null,
             player.blockPosition(),
@@ -55,7 +57,7 @@ public final class UnpackFireworks {
             if (now < active.nextBurstTick()) {
                 continue;
             }
-            spawnBurst(player, active);
+            spawnBurst(active, now);
             entry.setValue(active.withNextBurst(now + BURST_INTERVAL_TICKS));
         }
     }
@@ -68,10 +70,11 @@ public final class UnpackFireworks {
         ACTIVE.clear();
     }
 
-    private static void spawnBurst(ServerPlayer player, Active active) {
-        ServerLevel level = player.serverLevel();
-        Vec3 center = player.position().add(0, player.getBbHeight() / 2, 0);
-        long burstIndex = (level.getGameTime() - active.startTick()) / BURST_INTERVAL_TICKS;
+    private static void spawnBurst(Active active, long now) {
+        ServerLevel level = active.level();
+        Vec3 center = active.center();
+        if (!level.hasChunkAt(BlockPos.containing(center))) return;
+        long burstIndex = (now - active.startTick()) / BURST_INTERVAL_TICKS;
         for (int i = 0; i < DUST_PER_BURST; i++) {
             Vec3 offset = randomOffset(level);
             float hue = (burstIndex + i / (float) DUST_PER_BURST) % 1.0F;
@@ -127,9 +130,9 @@ public final class UnpackFireworks {
         };
     }
 
-    private record Active(long startTick, long endTick, long nextBurstTick) {
+    private record Active(ServerLevel level, Vec3 center, long startTick, long endTick, long nextBurstTick) {
         private Active withNextBurst(long nextBurstTick) {
-            return new Active(startTick, endTick, nextBurstTick);
+            return new Active(level, center, startTick, endTick, nextBurstTick);
         }
     }
 }
