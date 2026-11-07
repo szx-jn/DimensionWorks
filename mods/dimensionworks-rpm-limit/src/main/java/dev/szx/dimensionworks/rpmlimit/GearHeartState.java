@@ -147,9 +147,17 @@ public final class GearHeartState {
     }
 
     public static int rotationLimit(int repairedMask, int initialRpm, int releasedRpm) {
-        int stage = repairStage(repairedMask);
-        long span = Math.max(0L, (long) releasedRpm - initialRpm);
-        return initialRpm + (int) Math.round(span * stage / (double) REPAIR_STAGES);
+        int stageRpm = switch (repairStage(repairedMask)) {
+            case 0 -> initialRpm;
+            case 1 -> 512;
+            case 2 -> 1024;
+            case 3 -> 2048;
+            case 4 -> 4096;
+            case 5 -> 5120;
+            case 6 -> 8192;
+            default -> releasedRpm;
+        };
+        return Math.max(initialRpm, Math.min(stageRpm, releasedRpm));
     }
 
     public static boolean isFullyReleasedMask(int repairedMask) {

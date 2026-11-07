@@ -32,16 +32,12 @@ class GearHeartStateTest {
     }
 
     @Test
-    void everyRepairGetsAnEvenShareOfTheRemainingRotationRange() {
-        int[] expected = {32, 1490, 2949, 4407, 5865, 7323, 8782, 10240};
+    void everyRepairUsesItsSpecifiedRotationLimit() {
+        int[] expected = {32, 512, 1024, 2048, 4096, 5120, 8192, 10240};
         for (int stage = 0; stage < expected.length; stage++) {
             int mask = (1 << stage) - 1;
             assertEquals(stage, GearHeartState.repairStage(mask));
             assertEquals(expected[stage], GearHeartState.rotationLimit(mask, 32, 10240));
-            if (stage > 0) {
-                int increase = expected[stage] - expected[stage - 1];
-                assertTrue(increase == 1458 || increase == 1459);
-            }
         }
     }
 
@@ -49,14 +45,16 @@ class GearHeartStateTest {
     void missingEarlierRepairsCannotUnlockLaterRotationStages() {
         assertEquals(0, GearHeartState.repairStage(0b1111110));
         assertEquals(2, GearHeartState.repairStage(0b1111011));
-        assertEquals(2949, GearHeartState.rotationLimit(0b1111011, 32, 10240));
+        assertEquals(1024, GearHeartState.rotationLimit(0b1111011, 32, 10240));
         assertEquals(7, GearHeartState.repairStage(0b11111111));
     }
 
     @Test
-    void rotationInterpolationUsesConfiguredEndpoints() {
+    void rotationStagesRespectConfiguredBoundsWithoutRescaling() {
         assertEquals(32, GearHeartState.rotationLimit(0, 32, 320));
-        assertEquals(155, GearHeartState.rotationLimit(0b111, 32, 320));
+        assertEquals(320, GearHeartState.rotationLimit(0b111, 32, 320));
+        assertEquals(1024, GearHeartState.rotationLimit(0b11, 32, 4096));
+        assertEquals(4096, GearHeartState.rotationLimit(0b11111, 32, 4096));
         assertEquals(320, GearHeartState.rotationLimit(GearHeartState.ALL_CURSES, 32, 320));
         assertEquals(100, GearHeartState.rotationLimit(GearHeartState.ALL_CURSES, 100, 80));
     }

@@ -20,7 +20,7 @@ class GearHeartQuotaPolicyTest {
 
     @Test
     void appliesRepairedLimitsPerStage() {
-        assertEquals(1490.0, GearHeartQuotaPolicy.limit(
+        assertEquals(512.0, GearHeartQuotaPolicy.limit(
             GearHeartQuotaType.ROTATION_SPEED, GearHeartStateBits.ROTATION_SPEED));
         assertTrue(GearHeartQuotaPolicy.isReleased(
             GearHeartQuotaType.CREATE_CAPACITY, GearHeartStateBits.CREATE_CAPACITY));
