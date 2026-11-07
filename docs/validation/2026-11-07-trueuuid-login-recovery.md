@@ -2,7 +2,7 @@
 
 ## 结论
 
-TrueUUID 1.3.0 在现有 Forge 1.20.1、LuckPerms 5.4.102、MSLX authlib-injector 1.2.8 环境中未通过真实登录验收。仓库清单回退并固定官方 TrueUUID 1.0.9（Modrinth `Ix9wU2uu`），客户端与服务端统一版本，保持认证失败拒绝登录。
+TrueUUID 1.3.0 在现有 Forge 1.20.1、LuckPerms 5.4.102、MSLX authlib-injector 1.2.8 环境中未通过真实登录验收。此次恢复先回退并固定官方 TrueUUID 1.0.9（Modrinth `Ix9wU2uu`），客户端与服务端统一版本，保持认证失败拒绝登录。后续整合包改用基于 1.0.9 的 [自动继承 fork](2026-11-07-trueuuid-automatic-fork.md)；本页记录官方 1.0.9 的恢复过程，其登录验收结果不能直接当作修改版已经验收。
 
 现网与 HMCL 的 DimensionWorks 实例各只保留一份官方 `trueuuid-1.0.9-forge1.20.1.jar`，SHA-256 为 `775c8a97af77ca5d1bd2f83ce04ddaf1eb7685ebfbd2acec8a2f6f6d274cfd4a`。两端原 1.3.0 JAR 及配置均已备份。
 
@@ -44,4 +44,4 @@ HMCL 使用已登录的 Microsoft 账号启动 DimensionWorks；本地确认实�
 
 本次实际证明匹配的 1.0.9 客户端与服务端可恢复该正版账号；先前 MSL 账号在 1.0.9 下归档重复旧 UUID 文件后也已实际登录。没有声称 1.3.0 的登录顺序问题已修复，亦未在恢复后重新测试全部账号来源。后续升级必须同时验证 Mojang/MSL 登录、LuckPerms 预加载及离线继承全过程。
 
-回退提交前本地执行 `git diff --check`、清单 JSON 与 TOML 解析、固定版本及认证策略断言，全部通过；`python3 scripts/pack_hook.py --skip-build` 的 12 项检查通过。该回退用于维持现网可用，后续继续在独立 fork 中修复新版兼容问题。
+回退提交前本地执行 `git diff --check`、清单 JSON 与 TOML 解析、固定版本及认证策略断言，全部通过；`python3 scripts/pack_hook.py --skip-build` 的 12 项检查通过。该回退用于维持现网可用；后续按维护者要求在独立 fork 中基于 1.0.9 添加自动迁移，不继续升级 1.3.0。

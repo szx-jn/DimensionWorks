@@ -12,6 +12,11 @@ on:
         required: false
         default: false
         type: boolean
+      skip_tests:
+        description: "跳过测试，仅执行构建和静态产物校验；发行说明记录此状态"
+        required: false
+        default: false
+        type: boolean
       release_features:
         description: "新增功能；每行一条，如 feat(create): 新增独立客户端遮挡剔除模组"
         required: false
@@ -118,6 +123,7 @@ jobs:
           PACK_VERSION: ${{ steps.version.outputs.version }}
           LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
           DIMENSION_COMPLETE: ${{ inputs.dimension_complete }}
+          DIMENSIONWORKS_SKIP_TESTS: ${{ inputs.skip_tests }}
         run: |
           set -euo pipefail
           mkdir -p dist
@@ -229,6 +235,7 @@ jobs:
           cache-dependency-path: update-Windows/go.mod
 
       - name: 测试 Windows 更新器
+        if: ${{ !inputs.skip_tests }}
         working-directory: update-Windows
         run: go test -v ./...
 
@@ -255,6 +262,7 @@ jobs:
           python3 scripts/prepare_aria2.py
 
       - name: 测试 Linux 内置 aria2 实际下载
+        if: ${{ !inputs.skip_tests }}
         working-directory: update-Windows
         run: go test -tags bundled_aria2 ./...
 
@@ -292,6 +300,7 @@ jobs:
           TARGETS
 
       - name: 验证 Linux 单文件更新事务
+        if: ${{ !inputs.skip_tests }}
         run: python3 scripts/integration/updater_linux_e2e.py dist/update-dimensionworks-server-linux-amd64
 
       - name: 检查发布文件
@@ -391,6 +400,7 @@ jobs:
           RELEASE_FIXES: ${{ inputs.release_fixes }}
           RELEASE_PERFORMANCE: ${{ inputs.release_performance }}
           RELEASE_OTHER: ${{ inputs.release_other }}
+          SKIP_TESTS: ${{ inputs.skip_tests }}
         run: |
           set -euo pipefail
           title="DimensionWorks ${PACK_VERSION}"
@@ -414,6 +424,8 @@ jobs:
               print("\n".join(entries))
           else:
             print("更新器：Windows/Linux/macOS 六个更新器全部单文件内嵌 aria2c；同版提供 GPL 许可证与源码，下载仅使用 aria2c，并提供错误原因、单连接兼容重试和超一小时切源。")
+          if os.environ.get("SKIP_TESTS", "").lower() == "true":
+              print("本次按维护者要求跳过测试，仅执行构建及静态产物校验；未进行游戏内登录或迁移验收。")
           PY
           )"
           assets=(

@@ -1611,14 +1611,15 @@
     },
     {
       "id": "trueuuid",
-      "name": "TrueUUID",
-      "source": "modrinth",
-      "project_id": "fMgRLYNA",
-      "version": "1.0.9",
-      "version_id": "Ix9wU2uu",
+      "name": "TrueUUID — DimensionWorks",
+      "source": "github-release",
+      "repository": "szx-jn/TrueUUID-DimensionWorks",
+      "release": "v1.0.9-dimensionworks.1",
+      "asset": "trueuuid-1.0.9-dimensionworks.1-forge1.20.1.jar",
+      "version": "1.0.9-dimensionworks.1",
       "required": true,
       "environment": "both",
-      "url": "https://modrinth.com/mod/trueuuid"
+      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/releases/tag/v1.0.9-dimensionworks.1"
     },
     {
       "id": "twilightforest",

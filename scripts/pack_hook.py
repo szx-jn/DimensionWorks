@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -453,8 +454,11 @@ def check_builds() -> CheckResult:
     built: list[str] = []
     for mod in mods:
         project = ROOT / str(mod["project_path"])
-        code, output = run(["gradle", "build", "--no-daemon"], project)
-        log.extend([f"$ gradle build --no-daemon  ({project.relative_to(ROOT)})", *output])
+        command = ["gradle", "build", "--no-daemon"]
+        if os.environ.get("DIMENSIONWORKS_SKIP_TESTS", "").lower() == "true":
+            command.extend(["-x", "test"])
+        code, output = run(command, project)
+        log.extend([f"$ {' '.join(command)}  ({project.relative_to(ROOT)})", *output])
         jar = project / "build" / "libs" / f"{mod['id']}-{mod['version']}.jar"
         if code != 0:
             return CheckResult("in-repo-build", False, f"{mod['id']}: gradle exited {code}", log)
