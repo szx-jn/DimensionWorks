@@ -66,7 +66,6 @@ const (
 	maxDownloadBytes    = int64(8 << 30)
 	downloadETAExceedsLimit = time.Hour
 	downloadETAProbeInterval = time.Second
-	downloadETAStallGrace = 5 * time.Second
 	maxDownloadETADuration time.Duration = 1<<63 - 1
 )
 
@@ -1095,7 +1094,7 @@ func downloadFileWithLimit(source, destination string, maxBytes int64) (resultEr
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
 		return fmt.Errorf("无效下载 URL：%s", source)
 	}
-	return downloadFromCandidates(downloadCandidates(source), destination, maxBytes)
+	return downloadFromCandidates(downloadSourceOrder.order(downloadCandidates(source)), destination, maxBytes)
 }
 
 func downloadFromCandidates(candidates []string, destination string, maxBytes int64) (resultErr error) {
@@ -1139,6 +1138,9 @@ func downloadFromCandidates(candidates []string, destination string, maxBytes in
 			continue
 		}
 		if err == nil {
+			if len(candidates) > 1 {
+				downloadSourceOrder.remember(candidate)
+			}
 			return nil
 		} else {
 			fmt.Printf("\n[下载] 当前来源失败：%s\n", safeErrorForLog(err))
@@ -1200,7 +1202,6 @@ func newDownloadETAProbe(key string) func() (time.Duration, bool) {
 	var mu sync.Mutex
 	var previousTime time.Time
 	var previousBytes int64
-	var speed float64
 	return func() (time.Duration, bool) {
 		downloadProgressUI.mu.Lock()
 		file := downloadProgressUI.files[key]
@@ -1213,14 +1214,13 @@ func newDownloadETAProbe(key string) func() (time.Duration, bool) {
 			mu.Lock()
 			previousTime = time.Time{}
 			previousBytes = 0
-			speed = 0
 			mu.Unlock()
 			return 0, false
 		}
 		now := time.Now()
 		mu.Lock()
 		defer mu.Unlock()
-		if previousTime.IsZero() {
+		if previousTime.IsZero() || written < previousBytes {
 			previousTime = now
 			previousBytes = written
 			return 0, false
@@ -1230,16 +1230,14 @@ func newDownloadETAProbe(key string) func() (time.Duration, bool) {
 		if elapsed <= 0 {
 			return 0, false
 		}
-		if delta > 0 {
-			speed = float64(delta) / elapsed
-			previousTime = now
-			previousBytes = written
-		} else if now.Sub(previousTime) >= downloadETAStallGrace {
-			return maxDownloadETADuration, true
-		} else {
+		if delta == 0 {
+			// A short pause has no measurable ETA. Let aria2's transfer idle
+			// timeout handle stalls instead of treating them as an hour-long ETA.
 			return 0, false
 		}
-		return estimatedDownloadETA(total, written, speed)
+		previousTime = now
+		previousBytes = written
+		return estimatedDownloadETA(total, written, float64(delta)/elapsed)
 	}
 }
 
@@ -1369,6 +1367,7 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		fmt.Sprintf("--rpc-listen-port=%d", rpcPort),
 		"--rpc-secret=" + rpcSecret,
 		"--console-log-level=warn",
+		"--show-console-readout=false",
 		"--summary-interval=0",
 		"--dir=" + filepath.Dir(destination),
 		"--out=" + filepath.Base(destination),

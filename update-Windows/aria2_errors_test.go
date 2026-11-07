@@ -113,6 +113,8 @@ func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 		{"24", "", "认证", false, false},
 		{"3", "URI=https://example.com/ssl/certificate.dll", "来源没有", false, false},
 		{"1", "Got EOF from the server", "断开", false, true},
+		{"1", "Failed to establish connection, cause: Connection refused", "连接被拒绝", false, false},
+		{"1", "unknown download failure", "原始信息", false, false},
 		{"1", "SSL certificate verify failed", "证书", false, false},
 		{"0", "unknown engine failure", "原始信息", false, false},
 		{"", "signal: segmentation fault", "段错误", true, false},
@@ -121,11 +123,22 @@ func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 		if !strings.Contains(err.Error(), test.want) || err.localFailure() != test.local || err.retrySingleConnection() != test.single {
 			t.Errorf("code %s: %s, local=%v single=%v", test.code, err, err.localFailure(), err.retrySingleConnection())
 		}
+		if test.local && strings.Contains(err.Error(), "下载来源失败") {
+			t.Errorf("local engine or disk failure was mislabeled as a source failure: %s", err)
+		}
 	}
 	cause := &os.PathError{Op: "exec", Path: "aria2c", Err: os.ErrPermission}
 	err := newAria2Error("启动引擎", "", cause, "")
 	if !errors.Is(err, os.ErrPermission) || !strings.Contains(err.Error(), "noexec") {
 		t.Fatal(err)
+	}
+}
+
+func TestAria2SourceErrorKeepsCauseWithoutConsoleProgress(t *testing.T) {
+	err := newAria2Error("下载任务", "2", nil, strings.Repeat("[#8188f0 0B/0B CN:1 DL:0B] ", 100)+"errorCode=2 Timeout.")
+	message := err.Error()
+	if !strings.Contains(message, "下载来源失败") || !strings.Contains(message, "errorCode=2 Timeout.") || strings.Contains(message, "CN:1") {
+		t.Fatalf("source error lost its cause or retained progress noise: %s", message)
 	}
 }
 

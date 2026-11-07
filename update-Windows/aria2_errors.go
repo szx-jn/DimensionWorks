@@ -42,7 +42,9 @@ func (e *aria2Error) retrySingleConnection() bool {
 		return false
 	}
 	switch e.code {
-	case "1", "8", "19", "22", "29":
+	case "1":
+		return e.stage == "下载任务" && (strings.Contains(detail, "got eof") || strings.Contains(detail, "unexpected eof"))
+	case "8", "19", "22", "29":
 		return e.stage == "下载任务"
 	}
 	return false
@@ -59,6 +61,9 @@ func (e *aria2Error) diagnosticText() string {
 func (e *aria2Error) Error() string {
 	reason, advice := e.explanation()
 	label := "aria2c " + e.stage + "失败"
+	if e.stage == "下载任务" && !e.localFailure() {
+		label = "下载来源失败"
+	}
 	if e.code != "" {
 		label += "（错误码 " + e.code + "）"
 	}
@@ -70,6 +75,8 @@ func (e *aria2Error) Error() string {
 	// Engine output can contain ANSI controls and RPC secrets; never echo them.
 	detail = regexp.MustCompile(`token:[A-Za-z0-9]+|--rpc-secret=[^\s]+`).ReplaceAllString(detail, "<redacted>")
 	detail = regexp.MustCompile(`\x1b\[[0-?]*[ -/]*[@-~]`).ReplaceAllString(detail, "")
+	// Console progress is not diagnostic information and can bury the cause.
+	detail = regexp.MustCompile(`\[#[0-9a-fA-F]+\s[^\]\r\n]*\]`).ReplaceAllString(detail, "")
 	detail = strings.Map(func(r rune) rune {
 		if r < 32 || r == 127 {
 			return ' '
@@ -99,6 +106,8 @@ func (e *aria2Error) explanation() (string, string) {
 		return "引擎与操作系统或 CPU 架构不匹配", "请使用对应 Windows amd64、Linux amd64 或 macOS arm64 的正式更新器。"
 	case e.stage != "下载任务" && (strings.Contains(detail, "shared librar") || strings.Contains(detail, "dyld") || strings.Contains(detail, "dll")):
 		return "系统无法加载引擎的运行依赖", "检查原始信息中缺少的系统组件，或换用受支持系统上的对应更新器。"
+	case strings.Contains(detail, "connection refused"):
+		return "连接被拒绝", "当前来源或代理无法建立连接，将尝试下一个来源；检查域名解析、网络和代理设置。"
 	case strings.Contains(detail, "certificate") || strings.Contains(detail, "ssl") || strings.Contains(detail, "tls"):
 		return "HTTPS 握手或证书校验失败", "检查系统时间、受信任根证书和代理证书；更新器保持证书校验，并尝试下一个来源。"
 	case strings.Contains(detail, "got eof") || strings.Contains(detail, "unexpected eof"):
