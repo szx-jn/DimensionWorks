@@ -19,6 +19,8 @@
 
 - [`design/twilight-ecological-production.md`](design/twilight-ecological-production.md)：暮色环境与生物供料、二次加工、回用优化及 20～30 小时主动工业游玩提案。
 
+- [`design/twilight-progression-survey.md`](design/twilight-progression-survey.md)：暮色 4.3.2508 入门至毕业、三分支进度、区域保护、原生再生资源与全部非配方进度调查；后续产线分期依据。
+
 - [`design/energy-mechanical-unification.md`](design/energy-mechanical-unification.md)：FE/t 与 SU 统一计量、跨模组供能范围与生命周期约束。
 - [`design/energy-plate-production.md`](design/energy-plate-production.md)：新能量板的金属注液、机械装配工艺与下游材料接回。
 - [`validation/2026-11-03-energy-unification.md`](validation/2026-11-03-energy-unification.md)：能源审查范围、独立客户端验证与存档恢复回归。
