@@ -5,7 +5,9 @@ import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.core.EnergyPowerMath;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -142,9 +144,29 @@ public final class GeneratorPowerBridge {
             Production production = PRODUCTION.get(owner);
             if (production != null && EnergyPowerMath.isLive(production.tick(), level.getGameTime())
                 && production.shafts().contains(shaft.getBlockPos())) {
-                coefficient += EnergyPowerMath.coefficient(production.su(), outputRpm(), production.shafts().size());
+                coefficient += networkCoefficient(production, level, shaft.getBlockPos());
             }
         }
         return EnergyPowerMath.coefficient(coefficient, 1, 1);
+    }
+
+    private static double networkCoefficient(Production production, Level level, BlockPos target) {
+        Map<Object, List<BlockPos>> networks = new HashMap<>();
+        Map<BlockPos, Object> networkByShaft = new HashMap<>();
+        for (BlockPos pos : production.shafts()) {
+            if (!level.hasChunkAt(pos)
+                || !(level.getBlockEntity(pos) instanceof KineticBlockEntity shaft)
+                || (shaft.getTheoreticalSpeed() != 0
+                    && Math.abs(shaft.getTheoreticalSpeed()) != outputRpm())) {
+                continue;
+            }
+            Object network = shaft.hasNetwork() ? shaft.getOrCreateNetwork() : pos.immutable();
+            networkByShaft.put(pos, network);
+            networks.computeIfAbsent(network, ignored -> new java.util.ArrayList<>()).add(pos);
+        }
+        Object network = networkByShaft.get(target);
+        if (network == null) return 0;
+        return EnergyPowerMath.networkCoefficient(
+            production.su(), outputRpm(), networks.size(), networks.get(network).size());
     }
 }

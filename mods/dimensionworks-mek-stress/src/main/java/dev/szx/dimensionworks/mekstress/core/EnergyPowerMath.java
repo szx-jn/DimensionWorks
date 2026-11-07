@@ -16,6 +16,12 @@ public final class EnergyPowerMath {
         return rounded > exact ? Math.nextDown(rounded) : rounded;
     }
 
+    /** A generator's output pool is shared by connected networks, then by shafts in each network. */
+    public static float networkCoefficient(double su, float rpm, int networks, int shaftsInNetwork) {
+        if (!Double.isFinite(su) || su <= 0 || networks <= 0 || shaftsInNetwork <= 0) return 0;
+        return coefficient(su / networks, rpm, shaftsInNetwork);
+    }
+
     public static float demandCoefficient(double su, float rpm) {
         if (!Double.isFinite(su) || su <= 0 || !Float.isFinite(rpm) || rpm == 0) return 0;
         double exact = Math.min(Float.MAX_VALUE / 65536.0D, su / Math.abs((double) rpm));

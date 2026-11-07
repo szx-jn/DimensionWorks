@@ -20,6 +20,24 @@ class EnergyPowerMathTest {
         }
     }
 
+    @Test void outputNetworksShareThePoolBeforeInternalShaftsSplitIt() {
+        double total = 240;
+        float rpm = 32;
+        double oneNetworkTwoShafts =
+            EnergyPowerMath.networkCoefficient(total, rpm, 1, 2) * rpm * 2;
+        double twoNetworks =
+            EnergyPowerMath.networkCoefficient(total, rpm, 2, 1) * rpm * 2;
+        assertEquals(total, oneNetworkTwoShafts, 0.005);
+        assertEquals(total, twoNetworks, 0.005);
+
+        double firstNetwork =
+            EnergyPowerMath.networkCoefficient(total, rpm, 2, 2) * rpm * 2;
+        double secondNetwork =
+            EnergyPowerMath.networkCoefficient(total, rpm, 2, 3) * rpm * 3;
+        assertEquals(total / 2, firstNetwork, 0.005);
+        assertEquals(total / 2, secondNetwork, 0.005);
+    }
+
     @Test void invalidPowerAndExpiredTicksCannotGenerate() {
         for (double value : new double[]{0, -1, Double.NaN, Double.POSITIVE_INFINITY}) {
             assertEquals(0, EnergyPowerMath.coefficient(value, 32, 1));
