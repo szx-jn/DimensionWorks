@@ -1503,8 +1503,8 @@
       "name": "Sophisticated Backpacks Create Integration",
       "source": "modrinth",
       "project_id": "s85zLEDe",
-      "version": "1.20.1-0.1.10.167",
-      "version_id": "gzpoJdRt",
+      "version": "1.20.1-0.1.13.193",
+      "version_id": "E16cU80t",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/sophisticated-backpacks-create-integration"
@@ -1514,8 +1514,8 @@
       "name": "Sophisticated Backpacks",
       "source": "modrinth",
       "project_id": "TyCTlI4b",
-      "version": "1.20.1-3.26.3.2157",
-      "version_id": "XxOZuQnU",
+      "version": "1.20.1-3.26.19.2239",
+      "version_id": "VjliRs3R",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/sophisticated-backpacks"

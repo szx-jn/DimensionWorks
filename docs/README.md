@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`validation/2026-11-07-sophisticated-core-compatibility.md`](validation/2026-11-07-sophisticated-core-compatibility.md)：0.3.10 背包与新 Core 的启动兼容性修复、固定版本组合及静态验证边界。
+
 - [`design/transfer-safety-cloud-disk.md`](design/transfer-safety-cloud-disk.md)：中转物品保护、安全落点、九区块可见范围与 F12 持久云盘回收。
 
 - [`design/twilight-industrial-branch.md`](design/twilight-industrial-branch.md)：暮色森林物品调查、工业支线与第三修复碎片关联提案。
