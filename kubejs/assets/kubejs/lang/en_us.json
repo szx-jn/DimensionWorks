@@ -1,4 +1,8 @@
 {
+  "item.kubejs.energy_plate": "Energy Plate",
+  "item.kubejs.energy_plate.tooltip": "An industrial component for manufacturing machines and equipment.",
+  "item.kubejs.incomplete_energy_plate": "Incomplete Energy Plate",
+  "item.kubejs.incomplete_energy_plate.tooltip": "Continue the filling, material assembly, and pressing steps.",
   "item.kubejs.dimension_key": "Dimension Key",
   "item.kubejs.dimension_key.tooltip": "Right-click to enter the logistics dimension; your original main-hand item is returned on arrival.",
   "item.kubejs.gear_heart": "Gear Heart",

@@ -1,4 +1,8 @@
 {
+  "item.kubejs.energy_plate": "能量板",
+  "item.kubejs.energy_plate.tooltip": "用于机器与设备制造的工业元件。",
+  "item.kubejs.incomplete_energy_plate": "未完成的能量板",
+  "item.kubejs.incomplete_energy_plate.tooltip": "继续完成注液、材料装配与压制定型工序。",
   "item.kubejs.dimension_key": "维度钥匙",
   "item.kubejs.dimension_key.tooltip": "右键进入物流维度，成功抵达后归还原主手物品。",
   "item.kubejs.gear_heart": "齿轮之心",

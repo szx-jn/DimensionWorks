@@ -1,0 +1,38 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": { "item": "create:copper_sheet" },
+  "transitionalItem": { "item": "kubejs:incomplete_energy_plate" },
+  "loops": 1,
+  "sequence": [
+    {
+      "type": "create:filling",
+      "ingredients": [
+        { "item": "kubejs:incomplete_energy_plate" },
+        { "fluid": "dimensionworks:molten_gold", "amount": 250 }
+      ],
+      "results": [{ "item": "kubejs:incomplete_energy_plate" }]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        { "item": "kubejs:incomplete_energy_plate" },
+        { "item": "minecraft:redstone" }
+      ],
+      "results": [{ "item": "kubejs:incomplete_energy_plate" }]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        { "item": "kubejs:incomplete_energy_plate" },
+        { "item": "mekanism:alloy_infused" }
+      ],
+      "results": [{ "item": "kubejs:incomplete_energy_plate" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_energy_plate" }],
+      "results": [{ "item": "kubejs:incomplete_energy_plate" }]
+    }
+  ],
+  "results": [{ "item": "kubejs:energy_plate", "count": 1 }]
+}

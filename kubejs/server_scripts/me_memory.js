@@ -50,7 +50,7 @@ const retiredMekanismStorageItems = [
 ]
 
 const retiredMekanismStorageItemSet = new Set(retiredMekanismStorageItems)
-const retiredMekanismRecipeMaterialReplacement = '#mekanism:alloys/infused'
+const retiredMekanismRecipeMaterialReplacement = 'kubejs:energy_plate'
 
 ServerEvents.recipes(event => {
   memoryTiers.forEach(definition => {

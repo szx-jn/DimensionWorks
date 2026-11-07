@@ -18,6 +18,7 @@
 - [`design/twilight-resonance-industry.md`](design/twilight-resonance-industry.md)：暮色共振工艺、冒险与工业替代路线、一次性首领压制及增益设备。
 
 - [`design/energy-mechanical-unification.md`](design/energy-mechanical-unification.md)：FE/t 与 SU 统一计量、跨模组供能范围与生命周期约束。
+- [`design/energy-plate-production.md`](design/energy-plate-production.md)：新能量板的金属注液、机械装配工艺与下游材料接回。
 - [`validation/2026-11-03-energy-unification.md`](validation/2026-11-03-energy-unification.md)：能源审查范围、独立客户端验证与存档恢复回归。
 
 - [`design/food-addon-expansion.md`](design/food-addon-expansion.md)：20 项森罗/农夫附属、兼容版本选择、必需库与 Curios 3/1 默认容量。

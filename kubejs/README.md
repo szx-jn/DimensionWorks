@@ -16,6 +16,14 @@
 
 `data/dimensionworks/recipes/advanced_speed_controller.json` 保留 5×5 动力合成图案，将原四个粉碎轮和四个电子管分别换为四个工程处理器、四个强化合金，使两条路线共用中后期工业材料。实时 SU/RPM 规则见 [`../docs/design/me-live-stress-network.md`](../docs/design/me-live-stress-network.md)。
 
+## 能量板工业制造
+
+`startup_scripts/energy_plate.js` 注册普通工业元件 `kubejs:energy_plate` 和顺序装配中间物 `kubejs:incomplete_energy_plate`，均收录到已有「维度工坊」创造页签。新能量板不储电，新增物品需完整重启。
+
+`data/dimensionworks/recipes/energy_plate.json` 提供一次循环、固定产出 1 块能量板的 Create 顺序装配：1 块铜板经注液器消耗 250 mB 熔融金，再由机械手依次消耗 1 红石粉和 1 灌注合金，最后机械压力机定型。`server_scripts/me_memory.js` 将原先使用旧能量板的配方接到新元件；旧能量板、能量立方和感应储能元件继续退役。
+
+工艺成本、物流、绕过边界与验证要求见 [能量板工业制造](../docs/design/energy-plate-production.md)。
+
 ## 天境装备规则
 
 `server_scripts/aether_equipment_lock.js` 禁用天境装备的制作、修复和正常获取流程，保留流程功能物。
