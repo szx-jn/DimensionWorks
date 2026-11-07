@@ -2,28 +2,31 @@
 [auth]
 	#Range: 1000 ~ 600000
 	timeoutMs = 30000
-	#1.3.0 的超时始终拒绝；此项仅为兼容旧配置而保留。
+	#认证超时必须踢出，不允许改用离线身份。
 	allowOfflineOnTimeout = false
-	#关闭客户端明确报告没有登录会话时的离线登录；校验失败本身在 1.3.0 中始终拒绝。
+	#任何鉴权失败均拒绝登录。
 	allowOfflineOnFailure = false
-	timeoutKickMessage = "trueuuid.disconnect.timeout"
-	offlineFallbackMessage = "trueuuid.chat.offline_fallback"
-	offlineShortSubtitle = "trueuuid.subtitle.offline"
-	onlineShortSubtitle = "trueuuid.subtitle.online"
+	timeoutKickMessage = "登录超时，未完成账号校验"
+	offlineFallbackMessage = "注意：你当前以离线模式进入服务器；如果你是正版账号，可能是网络原因导致无法成功鉴权，请重新登陆重试。"
+	offlineShortSubtitle = "鉴权失败：离线模式"
+	onlineShortSubtitle = "已通过正版校验"
 	#一旦该名字成功验证过正版，后续鉴权失败时禁止以离线身份进入。
 	knownPremiumDenyOffline = true
-	#不允许未知名字以离线身份进入；与 allowOfflineOnFailure=false 一起保持双重认证策略。
+	#1.0.9 的未知名字失败决策独立读取此项，必须与其他离线开关一起关闭。
 	allowOfflineForUnknownOnly = false
 	#启用调试日志输出
 	debug = false
-	[auth.yggdrasil]
-		#1.3.0 使用真正的嵌套配置路径，并按精确主机名匹配；仅信任 MSL 皮肤站。
-		apiRootWhitelist = ["skin.mslmc.net"]
+	#1.0.9 读取包含点号的字面键，不能改写为嵌套表；固定 MSL 会话校验地址。
+	"yggdrasil.apiRootWhitelist" = ["https://skin.mslmc.net/api/yggdrasil/sessionserver/session/minecraft/hasJoined"]
 
 	[auth.recentIpGrace]
-		#1.3.0 已移除同 IP 重连宽限；保留关闭值供旧配置兼容，重连必须重新验证。
+		#关闭同 IP 短时重连宽限；1.0.9 另有固定的本地代理宽限，此开关不控制它。
 		enabled = false
-		#旧版兼容值；1.3.0 不再使用此窗口。
+		#关闭宽限后此窗口不用于普通同 IP 重连。
 		#Range: 1 ~ 60
 		ttlSeconds = 10
+
+	[auth.nomojang]
+		#保持 Mojang 在线会话校验，禁止按历史登录或离线身份放行。
+		enabled = false
 

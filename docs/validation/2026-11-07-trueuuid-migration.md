@@ -1,5 +1,7 @@
 # TrueUUID 离线数据迁移故障与升级验证
 
+**最终状态：1.3.0 升级已撤回，仓库与现网使用 1.0.9。** 本页保留升级前的文件事务测试记录；后续真实登录失败、完整冷备份和两端回退验收见 [TrueUUID 登录恢复](2026-11-07-trueuuid-login-recovery.md)。
+
 ## 现网故障
 
 一名玩家从离线启动切换为同名 MSL 统一认证账号后，服务端已识别其皮肤站身份，却因“检测到重复 UUID 玩家数据”拒绝登录。管理员执行 `trueuuid migrateuuid <玩家名>` 后得到成功提示，仍不能进入。
@@ -10,11 +12,11 @@
 
 此次现网恢复发生在 **1.0.9 加归档清理** 的环境，不能当作 1.3.0 已部署或真实账号验证通过的证据。
 
-## 固定升级目标
+## 已撤回的升级目标
 
 - 上游正式版：[TrueUUID v1.3.0](https://github.com/YuWan-030/TrueUUID/releases/tag/v1.3.0)。
 - 对应源码提交：`fa91c727c049df67efba1a0b0c0bc0d79c00dd5b`，从 `v1.3.0` 标签检出，仅用于读取和验证。
-- Modrinth 固定版本 ID：`DBcYjyan`；清单版本号：`1.3.0+forge-1.20.1`。
+- 当时的 Modrinth 固定版本 ID：`DBcYjyan`；当时的清单版本号：`1.3.0+forge-1.20.1`。
 - 正式文件：[trueuuid-1.3.0-forge-1.20.1.jar](https://cdn.modrinth.com/data/fMgRLYNA/versions/DBcYjyan/trueuuid-1.3.0-forge-1.20.1.jar)。
 - 发布 JAR 的 SHA-256：`4ad014cf05a9a14620579b54b01f5ee14a306c58665c7b632d84ba1f116eee88`，与 GitHub Release 资产摘要一致；SHA-1、SHA-512 和大小也已对照 Modrinth 校验。
 - JAR 的全部类文件版本为 61，符合 Java 17；元数据要求 Forge 47+ 和 Minecraft `[1.20.1,1.20.2)`。
@@ -23,9 +25,9 @@
 
 进度与统计都使用 `<UUID>.json`，新版把进度备份单独放入 `vanilla/advancements/`，避免二者相互覆盖。该修改同样已从对应源码及发布 JAR 字节码核对。
 
-## 配置兼容
+## 1.3.0 配置兼容记录
 
-1.0.9 的 `[auth]` 字面键 `"yggdrasil.apiRootWhitelist"` 必须改为 `[auth.yggdrasil]` 下的 `apiRootWhitelist`。仓库配置固定精确主机名 `skin.mslmc.net`，继续关闭离线登录，保留已验证名称保护；旧 `auth.nomojang` 项移除，同 IP 重连键只保留关闭的兼容值。
+当时升级 1.3.0 时，将 1.0.9 的 `[auth]` 字面键 `"yggdrasil.apiRootWhitelist"` 改为 `[auth.yggdrasil]` 下的 `apiRootWhitelist`，固定精确主机名 `skin.mslmc.net`，继续关闭离线登录，保留已验证名称保护；旧 `auth.nomojang` 项移除，同 IP 重连键只保留关闭的兼容值。该嵌套配置不能用于现已回退的 1.0.9，当前配置以仓库 TOML 和服务端说明为准。
 
 Forge 1.20.1 的 `NameRegistry` 仍读取 `config/trueuuid-registry.json` 的 `premiumUuid`、验证时间、`authSource` 和 `authDisplayName` 等旧字段，字段结构已静态核对。升级应保留此注册表及现有存档。更新器保留既有配置，因此旧服务器必须同步迁移白名单键，并让客户端与服务端一起替换 TrueUUID JAR，再重启加载。
 
@@ -57,4 +59,4 @@ REA 包检查只提供静态 ZIP 清单，不执行目标。迁移结论结合�
 - 1.0.9 包证据：`ev_d25b5a9f0037b44ae7a481417e944a02bcc1b5e0420e530a84b5c1ac33cfe860`。
 - 1.3.0 包证据：`ev_ce5bd991582f080b7f7f76597482f4a9c57af9e60fe2b22a6874936df05e96e5`。
 
-未触发本次整合包正式发布，未将 1.3.0 替换到现网；新版本的完整登录验收仍需在客户端与服务端同时升级后进行。
+上述静态检查和文件事务测试在正式发布前执行。后续 v0.3.13 正式发布及现网部署暴露了真实登录兼容问题，最终回退到 1.0.9；这些迁移测试通过不能视为 1.3.0 的完整登录验收通过。

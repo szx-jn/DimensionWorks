@@ -4,7 +4,8 @@
 
 已建立：
 
-- [`validation/2026-11-07-trueuuid-migration.md`](validation/2026-11-07-trueuuid-migration.md)：离线转 MSL 登录的重复 UUID 拦截、TrueUUID 1.3.0 升级及发布 JAR 迁移测试。
+- [`validation/2026-11-07-trueuuid-login-recovery.md`](validation/2026-11-07-trueuuid-login-recovery.md)：TrueUUID 1.3.0 登录兼容故障、玩家数据冷备份、两端回退及正版登录恢复。
+- [`validation/2026-11-07-trueuuid-migration.md`](validation/2026-11-07-trueuuid-migration.md)：离线转 MSL 登录的重复 UUID 拦截及已撤回的 1.3.0 升级文件事务测试。
 
 - [`validation/2026-11-07-sophisticated-core-compatibility.md`](validation/2026-11-07-sophisticated-core-compatibility.md)：0.3.10 背包与新 Core 的启动兼容性修复、固定版本组合及静态验证边界。
 
