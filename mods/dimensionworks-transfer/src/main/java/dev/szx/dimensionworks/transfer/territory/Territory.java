@@ -91,6 +91,12 @@ public record Territory(int spiralIndex, int gridX, int gridZ) {
         return x >= minX() && x <= maxX() && z >= minZ() && z <= maxZ();
     }
 
+    /** One empty neighbour ring lets all nine plot chunks become render-ready. */
+    public boolean containsRenderChunk(int x, int z) {
+        return x >= chunkX() - 1 && x <= chunkX() + TERRITORY_CHUNKS
+            && z >= chunkZ() - 1 && z <= chunkZ() + TERRITORY_CHUNKS;
+    }
+
     public boolean containsChunk(int x, int z) {
         return x >= chunkX() && x < chunkX() + TERRITORY_CHUNKS
             && z >= chunkZ() && z < chunkZ() + TERRITORY_CHUNKS;

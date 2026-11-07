@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 abstract class PackedPlayerStateMixin {
     @Inject(method = "setPacked", at = @At("HEAD"), remap = false)
-    private void dimensionworks$startUnpackFireworks(
+    private static void dimensionworks$startUnpackFireworks(
         ServerPlayer player,
         boolean value,
         boolean byOther,

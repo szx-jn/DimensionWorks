@@ -91,6 +91,7 @@ public final class TransferEvents {
             return;
         }
         TerritoryBuilder.tick();
+        dev.szx.dimensionworks.transfer.territory.PlotChunkLoading.sendReadyChunks();
         UnpackFireworks.tick(event.getServer());
     }
 
@@ -182,7 +183,8 @@ public final class TransferEvents {
     public static void blockOldTwilightPortal(EntityTravelToDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player
             && event.getDimension().location().toString().equals("twilightforest:twilight_forest")
-            && !DispatchController.authorized(player)) event.setCanceled(true);
+            && !DispatchController.authorized(player)
+            && !dev.szx.dimensionworks.transfer.access.TransferAccess.hasUnlockTag(player)) event.setCanceled(true);
     }
 
     private static void confine(ServerPlayer player, Territory territory) {
