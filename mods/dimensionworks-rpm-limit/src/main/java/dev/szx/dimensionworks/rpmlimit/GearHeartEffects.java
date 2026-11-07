@@ -273,18 +273,36 @@ public final class GearHeartEffects {
         addModifier(player, ForgeMod.BLOCK_REACH.get(), BLOCK_REACH_ID, "Gear Heart Block Reach", 2.0d);
         addModifier(player, ForgeMod.ENTITY_REACH.get(), ENTITY_REACH_ID, "Gear Heart Entity Reach", 2.0d);
 
-        if (!hasInfiniteEffect(player, MobEffects.DIG_SPEED, 1)) {
-            player.addEffect(new MobEffectInstance(
-                MobEffects.DIG_SPEED, MobEffectInstance.INFINITE_DURATION, 1,
-                false, false, true
-            ));
+        ensureHeartEffect(player, MobEffects.DIG_SPEED, 1);
+        ensureHeartEffect(player, MobEffects.NIGHT_VISION, 0);
+    }
+
+    private static void ensureHeartEffect(ServerPlayer player, net.minecraft.world.effect.MobEffect effect, int amplifier) {
+        MobEffectInstance current = player.getEffect(effect);
+        // Stronger effects belong to another source; preserve their duration and display flags.
+        if (current != null && current.getAmplifier() > amplifier) return;
+        if (current != null && current.getAmplifier() == amplifier && current.isInfiniteDuration()
+            && !current.isVisible() && current.showIcon()) return;
+        player.addEffect(new MobEffectInstance(effect, MobEffectInstance.INFINITE_DURATION, amplifier,
+            false, false, true));
+    }
+
+    /** The command teleport path rebuilds the client player without resending active effects. */
+    public static void synchronizeAfterDimensionChange(ServerPlayer player) {
+        tickPlayer(player);
+        if (!hasEquippedHeart(player)) return;
+        for (var effect : java.util.List.of(MobEffects.DIG_SPEED, MobEffects.NIGHT_VISION)) {
+            MobEffectInstance instance = player.getEffect(effect);
+            if (instance != null) player.connection.send(
+                new net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket(player.getId(), instance));
         }
-        if (!hasInfiniteEffect(player, MobEffects.NIGHT_VISION, 0)) {
-            player.addEffect(new MobEffectInstance(
-                MobEffects.NIGHT_VISION, MobEffectInstance.INFINITE_DURATION, 0,
-                false, false, true
-            ));
+        var attributes = new java.util.ArrayList<AttributeInstance>();
+        for (var attribute : java.util.List.of(ForgeMod.BLOCK_REACH.get(), ForgeMod.ENTITY_REACH.get())) {
+            AttributeInstance instance = player.getAttribute(attribute);
+            if (instance != null) attributes.add(instance);
         }
+        if (!attributes.isEmpty()) player.connection.send(
+            new net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket(player.getId(), attributes));
     }
 
     private static void removeBaseBonuses(ServerPlayer player) {
@@ -330,10 +348,4 @@ public final class GearHeartEffects {
         ));
     }
 
-    private static boolean hasInfiniteEffect(ServerPlayer player, net.minecraft.world.effect.MobEffect effect,
-                                             int amplifier) {
-        MobEffectInstance instance = player.getEffect(effect);
-        return instance != null && instance.getAmplifier() >= amplifier
-            && instance.getDuration() == MobEffectInstance.INFINITE_DURATION;
-    }
 }

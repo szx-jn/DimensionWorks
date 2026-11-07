@@ -71,6 +71,12 @@ public final class GearHeartForgeEvents {
         server.execute(() -> GearHeartEffects.ensureGearHeartSlots(player));
     }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void restoreAfterDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player)
+            GearHeartEffects.synchronizeAfterDimensionChange(player);
+    }
+
     @SubscribeEvent
     public static void attachCurioCapability(AttachCapabilitiesEvent<ItemStack> event) {
         ItemStack stack = event.getObject();
