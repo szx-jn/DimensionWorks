@@ -26,6 +26,9 @@
 
 - Mekanism 纸箱与 CMP 打包工具封装的方块同样检查内层内容。封装纸箱可携带/放置，解开 AE2 内容时返回失败并显示红色提示，保留纸箱、完整 NBT 和 CMP 来源标记，不掉落空箱。
 - 普通方块、普通纸箱解包、其他维度的 AE2 网络和随身无线终端照常使用。存档已有方块不扫描删除，状态更新、拆除及 Forge 快照恢复仍可用。
+- CMP fork 0.6.1-dimensionworks.15 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。
+
+可用 `-PtransferGameTestNamespaces=dimensionworks_cardboard` 配合现有 `runGameTestServer` 单独运行全方块纸箱集成测试：真实打包/拆包、黑名单覆盖、分体方块、搬运后的物品与来源保留，以及禁包和破坏权限拦截。测试用黑名单标签仅位于 `src/gameTest/resources`，不会进入发行 JAR。
 - 数据包可用 `dimensionworks_transfer:forbidden_transfer_blocks` 追加受限方块。检查不轮询、不新增区块加载票据。
 
 ## 发运

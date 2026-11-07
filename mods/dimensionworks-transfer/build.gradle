@@ -41,7 +41,7 @@ if (project.hasProperty('transferTestModsDir')) {
     repositories { flatDir { dirs project.property('transferTestModsDir') } }
     dependencies {
         runtimeOnly fg.deobf('dw-test:twilightforest:1.20.1-4.3.2508-universal')
-        runtimeOnly fg.deobf('dw-test:create_mobile_packages:1.20.1-0.6.1-dimensionworks.14')
+        runtimeOnly fg.deobf('dw-test:create_mobile_packages:1.20.1-0.6.1-dimensionworks.15')
         runtimeOnly fg.deobf('dw-test:appliedenergistics2-forge:15.4.10')
         runtimeOnly fg.deobf('dw-test:guideme:20.1.15')
         runtimeOnly fg.deobf('dw-test:Mekanism:1.20.1-10.4.16.80')
@@ -79,7 +79,7 @@ sourceSets {
 minecraft.runs {
     gameTestServer {
         workingDirectory project.file('run-gametest-recovery')
-        property 'forge.enabledGameTestNamespaces', 'dimensionworks_transfer'
+        property 'forge.enabledGameTestNamespaces', project.findProperty('transferGameTestNamespaces') ?: 'dimensionworks_transfer'
         mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.gameTest]
     }
 }
