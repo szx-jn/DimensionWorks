@@ -149,25 +149,25 @@
 			basicCapacity = 2000
 			#Pump rate of Basic mechanical pipes in mB/t.
 			#Range: > 1
-			basicPullAmount = 250
+			basicPullAmount = 256
 			#Capacity of Advanced mechanical pipes in mB.
 			#Range: > 1
 			advancedCapacity = 8000
 			#Pump rate of Advanced mechanical pipes in mB/t.
 			#Range: > 1
-			advancedPullAmount = 1000
+			advancedPullAmount = 512
 			#Capacity of Elite mechanical pipes in mB.
 			#Range: > 1
 			eliteCapacity = 32000
 			#Pump rate of Elite mechanical pipes in mB/t.
 			#Range: > 1
-			elitePullAmount = 8000
+			elitePullAmount = 1024
 			#Capacity of Ultimate mechanical pipes in mB.
 			#Range: > 1
 			ultimateCapacity = 128000
 			#Pump rate of Ultimate mechanical pipes in mB/t.
 			#Range: > 1
-			ultimatePullAmount = 32000
+			ultimatePullAmount = 2560
 
 		#Pressurized Tubes
 		[tier.transmitters.chemical]
