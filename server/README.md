@@ -21,7 +21,7 @@ python3 scripts/package_server.py
 
 ## MSL 与正版双重认证
 
-整合包固定使用 [TrueUUID `1.0.9-dimensionworks.1`](https://github.com/szx-jn/TrueUUID-DimensionWorks/releases/tag/v1.0.9-dimensionworks.1) 的 Forge 1.20.1 修改版，基于社区版 1.0.9 保留 Mojang/MSL 会话认证和客户端协议，增加自动继承离线存档。**客户端与服务端同步使用这一修改版，且各自 `mods/` 中只保留一份 TrueUUID。** 1.3.0 在现有 Forge/LuckPerms 环境中存在登录顺序兼容问题，该升级已撤回。启用此策略时，部署服的 `server.properties` 保持 `online-mode=false`，由 TrueUUID 接管登录认证。完整服务端包的原版在线模式默认值仍为 `true`，服主启用此部署方式时需明确配置。
+整合包固定使用 [TrueUUID `1.0.9-dimensionworks.2`](https://github.com/szx-jn/TrueUUID-DimensionWorks/releases/tag/v1.0.9-dimensionworks.2) 的 Forge 1.20.1 修改版，基于社区版 1.0.9 保留 Mojang/MSL 会话认证和客户端协议，增加自动继承离线存档与自动生效的鉴权连接设置。**客户端与服务端同步使用这一修改版，且各自 `mods/` 中只保留一份 TrueUUID。** 1.3.0 在现有 Forge/LuckPerms 环境中存在登录顺序兼容问题，该升级已撤回。启用此策略时，部署服的 `server.properties` 保持 `online-mode=false`，由 TrueUUID 接管登录认证。完整服务端包的原版在线模式默认值仍为 `true`，服主启用此部署方式时需明确配置。
 
 `config/trueuuid-common.toml` 必须同时满足：
 
@@ -34,9 +34,13 @@ python3 scripts/package_server.py
 
 MSLX 面板中的认证地址为 `https://skin.mslmc.net/api/yggdrasil`，其启动命令加载已部署的 `authlib-injector.jar`。玩家客户端也需按账号来源正确登录；只有注册 MSL 账号但用纯离线方式启动游戏仍会被拒绝。
 
-服务端使用 `authlib-injector` 时，必须在 JVM 参数中加入 `-Dauthlibinjector.ignoredPackages=cn.alini.trueuuid.`，并重启加载。代理会改写模组内的 Mojang 地址为本机 HTTP 代理地址，而 TrueUUID 1.3.0 的会话校验只接受公网 HTTPS 地址；不排除该包会使正版会话校验失败。此参数只排除 TrueUUID 的地址改写，MSL 会话仍由 TrueUUID 根据白名单验证。生成的 `start.sh` / `start.bat` 已携带参数；MSLX 不读取这两个脚本，须在面板的额外 JVM 参数中添加。如果已有 `authlibinjector.ignoredPackages`，将 `cn.alini.trueuuid.` 以逗号追加到原列表，保留其他排除项。
+### 自动生效的鉴权连接设置
 
-该参数解决认证地址改写，不能解决 1.3.0 与 LuckPerms 的预登录 UUID 不一致。2026-11-07 11:32:45（北京时间），两端统一为 1.0.9 后，现网 Mojang 会话校验返回 HTTP 200，玩家以原正版 UUID 和原坐标进入，玩家确认背包、位置及任务数据完整。故障原因、冷备份和验证边界见 [TrueUUID 登录恢复](../docs/validation/2026-11-07-trueuuid-login-recovery.md)。
+从 `1.0.9-dimensionworks.2` 起，TrueUUID 自己的异步鉴权客户端使用 TLS 1.2，连接超时为 5 秒、单次请求超时为 8 秒，连接中断或超时最多重试一次。证书信任与 HTTPS 主机名校验保持开启。设置随模组加载，适用于 `start.sh`、`start.bat`、MSLX 及其他直接启动 Forge 的面板；服主无需额外填写 `java.net.preferIPv4Stack` 或 `authlibinjector.ignoredPackages`。已有启动参数可继续保留。
+
+连接错误会在服务端日志保留异常原因，客户端显示“服务器暂时无法连接账号认证服务”，便于判断应检查服务器网络。HTTP 204 等正常的无效会话响应不会重试，已绑定正版 UUID 的保护规则继续生效。认证服务停机、DNS 错误或网络封锁仍需恢复对应网络；本改动提供启动方式无关的连接设置，不能代替网络连通。具体故障证据与验证边界见 [鉴权网络设置自动生效](../docs/validation/2026-11-07-trueuuid-auth-network.md)。
+
+旧的 1.3.0 曾需要 `-Dauthlibinjector.ignoredPackages=cn.alini.trueuuid.` 防止认证代理改写 Mojang 地址，但该参数无法解决其与 LuckPerms 的预登录 UUID 不一致。2026-11-07 11:32:45（北京时间），两端统一为社区版 1.0.9 后，现网 Mojang 会话校验返回 HTTP 200，玩家以原正版 UUID 和原坐标进入，玩家确认背包、位置及任务数据完整。该历史故障、冷备份和验证边界见 [TrueUUID 登录恢复](../docs/validation/2026-11-07-trueuuid-login-recovery.md)。
 
 ### 从离线账号继承玩家数据
 
@@ -54,7 +58,7 @@ MSLX 面板中的认证地址为 `https://skin.mslmc.net/api/yggdrasil`，其启
 
 迁移只检查已知玩家路径和有界的 FTB 文本目录，不扫描区块文件、不加载区块、不生成实体，没有常驻扫描。开发阶段文件事务与 NBT 测试已通过；按维护者要求，修改版未完成游戏内登录和 FTB 缓存验收。修改范围及验证边界见 [1.0.9 自动继承 fork](../docs/validation/2026-11-07-trueuuid-automatic-fork.md)，原始故障记录见 [TrueUUID 迁移验证](../docs/validation/2026-11-07-trueuuid-migration.md)。
 
-更新器保留已有 `server.properties`、`user_jvm_args.txt` 和 `config/`；缺失的配置才从新包补齐。因此不会覆盖部署服的认证策略，也不会自动迁移上述白名单键或纠正旧的离线兜底设置。已有服务器升级时需同步修改 `config/trueuuid-common.toml`，安排客户端与服务端一同更新 TrueUUID，并重启服务端加载新 JAR。MSLX 的 `ServerList.json` 位于面板数据目录，不在整合包更新范围；面板启动不读取整合包的 `start.sh`，认证代理参数应配置在面板中。
+更新器保留已有 `server.properties`、`user_jvm_args.txt` 和 `config/`；缺失的配置才从新包补齐。因此不会覆盖部署服的认证策略，也不会自动迁移上述白名单键或纠正旧的离线兜底设置。已有服务器升级时需核对 `config/trueuuid-common.toml` 的认证策略，安排客户端与服务端一同更新 TrueUUID，并重启服务端加载新 JAR；本次连接设置随新 JAR 自动生效。MSLX 的 `ServerList.json` 位于面板数据目录，升级到上述修改版即可使用模组内的连接设置。
 
 ## FTB Chunks 强加载限制
 

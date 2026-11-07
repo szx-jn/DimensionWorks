@@ -1614,12 +1614,12 @@
       "name": "TrueUUID — DimensionWorks",
       "source": "github-release",
       "repository": "szx-jn/TrueUUID-DimensionWorks",
-      "release": "v1.0.9-dimensionworks.1",
-      "asset": "trueuuid-1.0.9-dimensionworks.1-forge1.20.1.jar",
-      "version": "1.0.9-dimensionworks.1",
+      "release": "v1.0.9-dimensionworks.2",
+      "asset": "trueuuid-1.0.9-dimensionworks.2-forge1.20.1.jar",
+      "version": "1.0.9-dimensionworks.2",
       "required": true,
       "environment": "both",
-      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/releases/tag/v1.0.9-dimensionworks.1"
+      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/releases/tag/v1.0.9-dimensionworks.2"
     },
     {
       "id": "twilightforest",
