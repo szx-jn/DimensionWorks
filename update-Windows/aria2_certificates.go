@@ -14,8 +14,15 @@ import (
 // Windows OpenSSL does not automatically read the operating system's roots.
 func prepareAria2Certificates(parent context.Context) ([]string, func(), error) {
 	noop := func() {}
-	if runtime.GOOS != "windows" {
+	switch runtime.GOOS {
+	case "darwin":
+		// Pinned engine uses Apple Security/Keychain, not OpenSSL PEM bundles.
 		return nil, noop, nil
+	case "linux":
+		return prepareLinuxAria2Certificates()
+	case "windows":
+	default:
+		return nil, noop, fmt.Errorf("不支持的证书平台：%s", runtime.GOOS)
 	}
 	root := os.Getenv("SystemRoot")
 	if root == "" || !filepath.IsAbs(root) {
@@ -49,4 +56,28 @@ func prepareAria2Certificates(parent context.Context) ([]string, func(), error) 
 		return nil, noop, closeErr
 	}
 	return []string{"--ca-certificate=" + file.Name()}, cleanup, nil
+}
+
+// Cover common distribution paths instead of the engine's Debian-only default.
+func prepareLinuxAria2Certificates() ([]string, func(), error) {
+	noop := func() {}
+	paths := []string{"/etc/ssl/certs/ca-certificates.crt", "/etc/pki/tls/certs/ca-bundle.crt", "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem", "/etc/ssl/ca-bundle.pem", "/etc/ssl/cert.pem"}
+	if override := os.Getenv("SSL_CERT_FILE"); override != "" {
+		if !filepath.IsAbs(override) {
+			return nil, noop, fmt.Errorf("SSL_CERT_FILE 必须是绝对路径")
+		}
+		paths = []string{override}
+	}
+	for _, path := range paths {
+		info, err := os.Stat(path)
+		if err != nil || !info.Mode().IsRegular() || info.Size() > 4*1024*1024 {
+			continue
+		}
+		data, err := os.ReadFile(path)
+		if err != nil || !x509.NewCertPool().AppendCertsFromPEM(data) {
+			continue
+		}
+		return []string{"--ca-certificate=" + path}, noop, nil
+	}
+	return nil, noop, fmt.Errorf("找不到有效的 Linux 系统根证书；请安装或更新 ca-certificates，或设置 SSL_CERT_FILE 指向受信任 PEM 文件")
 }

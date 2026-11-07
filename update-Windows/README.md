@@ -93,3 +93,5 @@ aria2c 使用 Motrix 同源的 aria2 1.36.0 引擎：每个文件最多 16 个�
 - 默认拒绝版本降级；确需降级时显式使用 `--allow-downgrade`。
 
 Windows 下载保持 HTTPS 证书校验开启。更新器通过系统 Windows PowerShell 导出本机及当前用户受信任根证书到临时 PEM，传给内嵌 aria2；下载结束后删除。不将中间证书提升为信任根，导出失败明确报错。用于解决 OpenSSL 无法直接读取 Windows 证书库的问题，尚未进行 Windows 实机验证。
+
+跨平台证书策略：macOS 固定引擎使用 Apple Security/钥匙串，由系统验证证书链及主机名，不传不受支持的 PEM 参数。Linux OpenSSL 引擎显式读取 Debian/Ubuntu、RHEL/Fedora、SUSE、Alpine 常见系统 CA 文件，可使用绝对路径 SSL_CERT_FILE；证书缺失或无效明确报错，建议安装 ca-certificates。三个平台始终保持 --check-certificate=true；发行 API 的 Go HTTP 客户端同样保持系统证书及主机名校验。上述结论来自源码及二进制静态审查，不代表所有玩家环境均已实机验证。
