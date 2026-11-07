@@ -12,6 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "de.theidler.create_mobile_packages.items.mobile_packager.PackedPlayerState", remap = false)
 @Pseudo
 abstract class PackedPlayerStateMixin {
+    @Inject(method = "setPacked", at = @At("TAIL"), remap = false)
+    private static void dimensionworks$updatePackedTag(ServerPlayer player, boolean value, boolean byOther, CallbackInfo ci) {
+        dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport.synchronize(player);
+        if (!value) com.simibubi.create.content.kinetics.chainConveyor.ServerChainConveyorHandler.handleStopRidingPacket(player);
+    }
+
     @Inject(method = "setPacked", at = @At("HEAD"), remap = false)
     private static void dimensionworks$startUnpackFireworks(
         ServerPlayer player,

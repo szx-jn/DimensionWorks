@@ -103,6 +103,37 @@ public final class TransferEvents {
         net.minecraft.core.BlockPos connection, int ticks) {}
 
     @SubscribeEvent
+    public static void synchronizeParcelTag(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START)
+            dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport.synchronize(event.player);
+    }
+
+    @SubscribeEvent
+    public static void parcelDamage(net.minecraftforge.event.entity.living.LivingAttackEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+            || !dev.szx.dimensionworks.transfer.compat.PlayerParcel.isPacked(player)) return;
+        if (event.getSource().is(net.minecraft.tags.DamageTypeTags.IS_FALL)
+            || (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.IN_WALL)
+                && dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport.ignoresBlocks(player))) {
+            event.setCanceled(true);
+            return;
+        }
+        if (!event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)
+            && !TutorialManager.locked(player) && dev.szx.dimensionworks.transfer.compat.PlayerParcel.unpack(player))
+            event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void usePackager(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntity() instanceof ServerPlayer player
+            && player.level().getBlockEntity(event.getPos()) instanceof com.simibubi.create.content.logistics.packager.PackagerBlockEntity packager
+            && dev.szx.dimensionworks.transfer.compat.PackedPlayerInteractions.unpackAt(player, packager)) {
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
             return;
@@ -113,6 +144,7 @@ public final class TransferEvents {
         TutorialManager.check(player);
         TutorialManager.tick(player);
         DispatchController.tick(player);
+        dev.szx.dimensionworks.transfer.compat.PackedPlayerInteractions.tick(player);
         // Run cleanup even after escape and inside the transfer dimension.
         tickFrogport(player);
         if (!player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {

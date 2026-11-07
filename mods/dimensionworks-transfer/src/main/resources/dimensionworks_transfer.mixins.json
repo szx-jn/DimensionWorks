@@ -4,9 +4,26 @@
   "package": "dev.szx.dimensionworks.transfer.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "dimensionworks_transfer.refmap.json",
-  "mixins": ["TutorialConnectionMixin", "TutorialPackedEscapeMixin", "PackedPlayerStateMixin", "PlotChunkMapMixin", "TwilightPortalMixin", "MinecraftServerAccess",
-    "TransferBlockPlacementMixin", "TransferLevelPlacementMixin", "TransferChunkPlacementMixin",
-    "TransferCardboardBoxMixin", "TransferAePartPlacementMixin"],
-  "client": [],
-  "injectors": { "defaultRequire": 1 }
+  "mixins": [
+    "TutorialConnectionMixin",
+    "TutorialPackedEscapeMixin",
+    "PackedPlayerStateMixin",
+    "PlotChunkMapMixin",
+    "TwilightPortalMixin",
+    "MinecraftServerAccess",
+    "TransferBlockPlacementMixin",
+    "TransferLevelPlacementMixin",
+    "TransferChunkPlacementMixin",
+    "TransferCardboardBoxMixin",
+    "TransferAePartPlacementMixin",
+    "PackedPlayerMovementMixin",
+    "PackedPlayerConnectionMixin"
+  ],
+  "client": [
+    "PackedPlayerPushMixin",
+    "PackedPlayerSyncMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
