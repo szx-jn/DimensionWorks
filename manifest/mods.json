@@ -1614,8 +1614,8 @@
       "name": "TrueUUID",
       "source": "modrinth",
       "project_id": "fMgRLYNA",
-      "version": "1.0.9",
-      "version_id": "Ix9wU2uu",
+      "version": "1.3.0+forge-1.20.1",
+      "version_id": "DBcYjyan",
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/trueuuid"

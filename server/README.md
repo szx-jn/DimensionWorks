@@ -21,19 +21,28 @@ python3 scripts/package_server.py
 
 ## MSL 与正版双重认证
 
-部署服使用已固定的 TrueUUID `1.0.9` 验证 Mojang 正版会话或 MSL 统一身份会话。此路径要求部署服的 `server.properties` 保持 `online-mode=false`，因为 TrueUUID 只在原版离线登录流程中发起自己的认证挑战；不能仅把该值改为 `true`，否则会停用 TrueUUID 的双重认证。完整服务端包的原版在线模式默认值仍为 `true`，服主启用此部署方式时需明确配置。
+整合包固定使用 TrueUUID `1.3.0` 的 Forge 1.20.1 正式构建，验证 Mojang 正版会话或 MSL 统一身份会话。启用此策略时，客户端与服务端都必须安装该构建，部署服的 `server.properties` 保持 `online-mode=false`，由 TrueUUID 接管登录认证。完整服务端包的原版在线模式默认值仍为 `true`，服主启用此部署方式时需明确配置。
 
 `config/trueuuid-common.toml` 必须同时满足：
 
-- `allowOfflineOnTimeout=false`、`allowOfflineOnFailure=false`、`allowOfflineForUnknownOnly=false`：超时、失败和新用户名均不得降级离线登录。已核对 1.0.9 的失败决策直接读取 `allowOfflineForUnknownOnly`，仅关闭 `allowOfflineOnFailure` 不够。
-- `auth.recentIpGrace.enabled=false`、`auth.nomojang.enabled=false`：关闭同 IP 短时重连宽限和跳过正版校验模式。
-- `[auth]` 中的字面键 `"yggdrasil.apiRootWhitelist"` 只列出 MSL 的 `https://skin.mslmc.net/api/yggdrasil/sessionserver/session/minecraft/hasJoined`。该键含点但必须保留引号，不要改写为 `[auth.yggdrasil]`。正版客户端使用的空认证地址由 TrueUUID 走 Mojang 会话服务。
+- `allowOfflineOnTimeout=false`、`allowOfflineOnFailure=false`、`allowOfflineForUnknownOnly=false`：禁止离线登录。1.3.0 的超时和会话校验失败始终拒绝；`allowOfflineOnFailure` 只控制客户端明确报告没有登录会话时是否允许申请离线身份。
+- `knownPremiumDenyOffline=true`：保护已经验证过的玩家名。
+- `[auth.yggdrasil]` 下的 `apiRootWhitelist=["skin.mslmc.net"]`：按精确主机名信任 MSL。1.3.0 已修正配置路径，**升级时必须将 1.0.9 的字面键 `"yggdrasil.apiRootWhitelist"` 改为此嵌套表**。正版客户端使用的空认证地址仍走 Mojang 会话服务。
+- `auth.recentIpGrace.enabled=false` 和 `ttlSeconds=10` 仅保留旧配置兼容值；1.3.0 已移除同 IP 重连宽限。旧 `auth.nomojang` 项已删除。
 
 MSLX 面板中的认证地址为 `https://skin.mslmc.net/api/yggdrasil`，其启动命令加载已部署的 `authlib-injector.jar`。玩家客户端也需按账号来源正确登录；只有注册 MSL 账号但用纯离线方式启动游戏仍会被拒绝。
 
-上述配置关闭常规离线兜底，但不能消除 TrueUUID 1.0.9 中两条固定行为：认证地址白名单使用 `String.contains` 子串匹配，不能作为严格的 URL 信任边界；已知正版用户名从本地回环地址连接时仍有固定代理宽限，独立于 `recentIpGrace.enabled`。因此不能声称仅靠这些配置已经防住任意伪造认证端点或本地代理绕过；严格限制认证来源还需要修复对应代码。当前核对依据为部署 JAR 字节码，未完成真实账号登录测试。
+1.3.0 的白名单采用精确主机名匹配，自定义接口还受 HTTPS/443、`hasJoined` 路径、DNS/IP 和禁止重定向等限制。此次已核对发布 JAR 与对应源码，并执行迁移文件事务测试；这些检查不等于已完成新版的真实 MSL/Mojang 账号登录验收。
 
-更新器保留已有 `server.properties`、`user_jvm_args.txt` 和 `config/`；缺失的配置才从新包补齐。因此不会覆盖部署服的认证策略，也不会自动纠正旧的离线兜底设置。已有服务器需单独修改 `config/trueuuid-common.toml` 并重新加载或重启。MSLX 的 `ServerList.json` 位于面板数据目录，不在整合包更新范围；面板启动不读取整合包的 `start.sh`，认证代理参数应配置在面板中。
+### 从离线账号继承玩家数据
+
+玩家切换到同名正版或 MSL 账号后，1.3.0 会在会话验证成功后显示继承确认。管理员也可在玩家离线时执行 `trueuuid migrateuuid <玩家名>`，明确批准将旧离线数据迁移到该名字已验证的 UUID。迁移会备份旧数据和已有目标数据，完成写入后删除原目录内的旧 UUID 文件，并记录事务日志；失败时回滚。因此，成功迁移后再次登录不再因残留的离线文件重复进入迁移流程。
+
+1.0.9 的继承命令只复制文件，原目录内的旧文件会继续触发“检测到重复 UUID 玩家数据”。已经执行过该旧版命令的服务器，须先核对新 UUID 下的数据确实继承完整，再执行 `trueuuid cleanupuuid <玩家名>`，将重复旧文件移入 `world/trueuuid-backups/offline-cleanups/`。不要在尚未继承数据时清理唯一的旧存档。新版本的正常迁移成功后无需追加清理命令。
+
+原版进度与统计使用相同的 `<UUID>.json` 文件名；1.3.0 将进度备份单独放在 `vanilla/advancements/`，避免被统计备份覆盖。迁移只处理该玩家的已知文件路径，不加载区块、不生成实体，也不增加机器或常驻扫描。此次故障记录和验证范围见 [TrueUUID 迁移验证](../docs/validation/2026-11-07-trueuuid-migration.md)。
+
+更新器保留已有 `server.properties`、`user_jvm_args.txt` 和 `config/`；缺失的配置才从新包补齐。因此不会覆盖部署服的认证策略，也不会自动迁移上述白名单键或纠正旧的离线兜底设置。已有服务器升级时需同步修改 `config/trueuuid-common.toml`，安排客户端与服务端一同更新 TrueUUID，并重启服务端加载新 JAR。MSLX 的 `ServerList.json` 位于面板数据目录，不在整合包更新范围；面板启动不读取整合包的 `start.sh`，认证代理参数应配置在面板中。
 
 ## FTB Chunks 强加载限制
 
