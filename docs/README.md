@@ -21,6 +21,8 @@
 
 - [`design/twilight-progression-survey.md`](design/twilight-progression-survey.md)：暮色 4.3.2508 入门至毕业、三分支进度、区域保护、原生再生资源与全部非配方进度调查；后续产线分期依据。
 
+- [`design/twilight-first-arrival.md`](design/twilight-first-arrival.md)：单向承接主世界工业基础的暮色开场、原生可制物、林地取液与野猪调理起步草案。
+
 - [`design/energy-mechanical-unification.md`](design/energy-mechanical-unification.md)：FE/t 与 SU 统一计量、跨模组供能范围与生命周期约束。
 - [`design/energy-plate-production.md`](design/energy-plate-production.md)：新能量板的金属注液、机械装配工艺与下游材料接回。
 - [`validation/2026-11-03-energy-unification.md`](validation/2026-11-03-energy-unification.md)：能源审查范围、独立客户端验证与存档恢复回归。
