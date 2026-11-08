@@ -172,6 +172,65 @@ func TestDownloadCandidatesDoNotMirrorNonReleaseURLs(t *testing.T) {
 	}
 }
 
+func TestGitHubReleaseAssetParts(t *testing.T) {
+	owner, repository, tag, filename, ok := githubReleaseAssetParts(
+		"https://github.com/szx-jn/DimensionWorks/releases/download/v0.3.28/DimensionWorks-Server-0.3.28-update-manifest.tsv",
+	)
+	if !ok || owner != "szx-jn" || repository != "DimensionWorks" || tag != "v0.3.28" ||
+		filename != "DimensionWorks-Server-0.3.28-update-manifest.tsv" {
+		t.Fatalf("unexpected GitHub release parts: %q %q %q %q %v", owner, repository, tag, filename, ok)
+	}
+	for _, source := range []string{
+		"https://api.github.com/repos/szx-jn/DimensionWorks/releases/latest",
+		"https://ghproxy.net/https://github.com/szx-jn/DimensionWorks/releases/download/v0.3.28/file",
+		"https://example.com/szx-jn/DimensionWorks/releases/download/v0.3.28/file",
+	} {
+		if _, _, _, _, ok := githubReleaseAssetParts(source); ok {
+			t.Fatalf("non-release URL accepted: %s", source)
+		}
+	}
+}
+
+func TestGitHubReleaseSourceSurvivesMirrorReordering(t *testing.T) {
+	source := "https://github.com/szx-jn/DimensionWorks/releases/download/v0.3.28/manifest.tsv"
+	candidates := []string{"https://gh-proxy.com/" + source, source, "https://ghproxy.net/" + source}
+	if got := githubReleaseSource(candidates); got != source {
+		t.Fatalf("GitHub release source = %q, want %q", got, source)
+	}
+}
+
+func TestResolveGitHubAPIAssetURLUsesSignedRedirect(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		baseURL := "http://" + r.Host
+		switch r.URL.Path {
+		case "/repos/szx-jn/DimensionWorks/releases/tags/v0.3.28":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprintf(w, `{"assets":[{"name":"manifest.tsv","url":"%s/assets/42"}]}`, baseURL)
+		case "/assets/42":
+			http.Redirect(w, r, baseURL+"/signed/manifest.tsv", http.StatusFound)
+		case "/signed/manifest.tsv":
+			w.WriteHeader(http.StatusOK)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+	previous := githubAPIBaseURL
+	githubAPIBaseURL = server.URL
+	defer func() { githubAPIBaseURL = previous }()
+
+	got, err := resolveGitHubAPIAssetURL(
+		"https://github.com/szx-jn/DimensionWorks/releases/download/v0.3.28/manifest.tsv",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := server.URL + "/signed/manifest.tsv"
+	if got != want {
+		t.Fatalf("signed asset URL = %q, want %q", got, want)
+	}
+}
+
 func TestEstimatedDownloadETAUsesRemainingBytesAndSpeed(t *testing.T) {
 	slow, ok := estimatedDownloadETA(8<<30, 0, 1<<20)
 	if !ok {

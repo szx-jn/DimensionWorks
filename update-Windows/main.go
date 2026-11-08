@@ -1151,6 +1151,16 @@ func downloadFromCandidates(candidates []string, destination string, maxBytes in
 			failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(candidate), safeErrorForLog(err)))
 		}
 	}
+	if assetURL, fallbackErr := resolveGitHubAPIAssetURL(githubReleaseSource(candidates)); fallbackErr == nil {
+		fmt.Printf("\n[下载] 常规来源失败，尝试 GitHub 资产 API 回退。\n")
+		ctx, cancel := context.WithTimeout(context.Background(), downloadAttemptTimeout)
+		defer cancel()
+		if err := downloadOnceLimitedContext(ctx, assetURL, destination, maxBytes); err == nil {
+			return nil
+		} else {
+			failures = append(failures, fmt.Sprintf("GitHub 资产 API: %s", safeErrorForLog(err)))
+		}
+	}
 	return errors.New(strings.Join(failures, "\n"))
 }
 
@@ -1162,6 +1172,95 @@ const (
 const downloadAttemptTimeout = 6 * time.Hour
 
 var errSingleConnection = errors.New("使用单连接下载")
+var githubAPIBaseURL = "https://api.github.com"
+
+func githubReleaseAssetParts(source string) (string, string, string, string, bool) {
+	parsed, err := url.Parse(source)
+	if err != nil || parsed.Scheme != "https" || parsed.Host != "github.com" {
+		return "", "", "", "", false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 6 || parts[2] != "releases" || parts[3] != "download" {
+		return "", "", "", "", false
+	}
+	return parts[0], parts[1], parts[4], parts[5], true
+}
+
+func githubReleaseSource(candidates []string) string {
+	for _, candidate := range candidates {
+		if _, _, _, _, ok := githubReleaseAssetParts(candidate); ok {
+			return candidate
+		}
+	}
+	return ""
+}
+
+func resolveGitHubAPIAssetURL(source string) (string, error) {
+	owner, repository, tag, filename, ok := githubReleaseAssetParts(source)
+	if !ok {
+		return "", errors.New("不是 GitHub Release 资产链接")
+	}
+	client := newHTTPClient(20*time.Second, 10*time.Second)
+	releaseURL := fmt.Sprintf(
+		"%s/repos/%s/%s/releases/tags/%s",
+		strings.TrimRight(githubAPIBaseURL, "/"),
+		url.PathEscape(owner),
+		url.PathEscape(repository),
+		url.PathEscape(tag),
+	)
+	req, err := http.NewRequest(http.MethodGet, releaseURL, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("Accept", "application/vnd.github+json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", fmt.Errorf("GitHub Release API 返回 HTTP %d", resp.StatusCode)
+	}
+	var release struct {
+		Assets []struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"assets"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 4<<20)).Decode(&release); err != nil {
+		return "", fmt.Errorf("解析 GitHub Release API 失败：%w", err)
+	}
+	var assetURL string
+	for _, asset := range release.Assets {
+		if asset.Name == filename {
+			assetURL = asset.URL
+			break
+		}
+	}
+	if assetURL == "" {
+		return "", fmt.Errorf("GitHub Release 中找不到资产：%s", filename)
+	}
+	assetReq, err := http.NewRequest(http.MethodGet, assetURL, nil)
+	if err != nil {
+		return "", err
+	}
+	assetReq.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	assetReq.Header.Set("Accept", "application/octet-stream")
+	assetResp, err := client.Do(assetReq)
+	if err != nil {
+		return "", err
+	}
+	defer assetResp.Body.Close()
+	if assetResp.StatusCode < 200 || assetResp.StatusCode >= 400 {
+		return "", fmt.Errorf("GitHub 资产 API 返回 HTTP %d", assetResp.StatusCode)
+	}
+	finalURL := assetResp.Request.URL
+	if finalURL == nil || strings.EqualFold(finalURL.Host, "api.github.com") {
+		return "", errors.New("GitHub 资产 API 未返回可下载的重定向地址")
+	}
+	return finalURL.String(), nil
+}
 
 func downloadOnce(source, destination string) error {
 	return downloadOnceLimited(source, destination, maxDownloadBytes)
@@ -3564,4 +3663,3 @@ func copyFileAtomic(source, destination string, mode os.FileMode, maxBytes int64
 	if err := temp.Close(); err != nil { return err }
 	return replaceExistingFile(tempPath, destination)
 }
-
