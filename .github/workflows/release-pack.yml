@@ -241,13 +241,35 @@ jobs:
         run: go test -v ./...
 
       - name: 获取内嵌 aria2 引擎与 GPL 源码包
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
+          download_github_release() {
+            local repository="$1"
+            local tag="$2"
+            local asset="$3"
+            local output="$4"
+            local browser_url="https://github.com/${repository}/releases/download/${tag}/${asset}"
+            if curl -fL --retry 3 "$browser_url" -o "$output"; then
+              return
+            fi
+            local asset_api
+            asset_api="$(curl -fsS \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${repository}/releases/tags/${tag}" |
+              jq -er --arg name "$asset" '.assets[] | select(.name == $name) | .url')"
+            curl -fL --retry 3 \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/octet-stream' \
+              "$asset_api" -o "$output"
+          }
           motrix_commit=7012040fec926e16fe8f6c403cf038527f5c18b9
-          aria2_source=https://github.com/aria2/aria2/releases/download/release-1.36.0/aria2-1.36.0.tar.xz
           mkdir -p dist/aria2-source
-          curl -fL --retry 3 "$aria2_source" -o dist/aria2-source/aria2-1.36.0.tar.xz
+          download_github_release aria2/aria2 release-1.36.0 aria2-1.36.0.tar.xz \
+            dist/aria2-source/aria2-1.36.0.tar.xz
           echo "58d1e7608c12404f0229a3d9a4953d0d00c18040504498b483305bcb3de907a5  dist/aria2-source/aria2-1.36.0.tar.xz" | sha256sum -c -
           curl -fL --retry 3 https://codeload.github.com/agalwood/aria2/tar.gz/905073c6990ee9621a27cf8341ca54de7816bdc5 -o dist/aria2-source/agalwood-aria2-source.tar.gz
           echo "a26bbde0b40f8941e0799365eb56194ff086abd73cbcbca0c7a05863cfe1a467  dist/aria2-source/agalwood-aria2-source.tar.gz" | sha256sum -c -

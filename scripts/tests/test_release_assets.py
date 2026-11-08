@@ -56,6 +56,16 @@ class ReleaseWorkflowTest(unittest.TestCase):
         self.assertNotIn("release-updaters/**", text)
         self.assertIn("scripts/package_mrpack.py", text)
 
+    def test_aria2_source_download_falls_back_to_github_asset_api(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("download_github_release()", text)
+        self.assertIn("Accept: application/octet-stream", text)
+        self.assertIn(
+            "download_github_release aria2/aria2 release-1.36.0 "
+            "aria2-1.36.0.tar.xz",
+            text,
+        )
+
     def test_workflow_keeps_updater_scripts_out_of_packages(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("Updater script embedded in client package", text)
