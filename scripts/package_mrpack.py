@@ -32,6 +32,10 @@ DEFAULT_INSTANCE_DIR = (
 FORGE_VERSION = "47.4.23"
 USER_AGENT = "DimensionWorks-Packager/0.1"
 CF_API_KEY = os.environ.get("CF_API_KEY", "").strip()
+GITHUB_TOKEN = (
+    os.environ.get("GH_TOKEN", "").strip()
+    or os.environ.get("GITHUB_TOKEN", "").strip()
+)
 OVERRIDE_DIRS = ("defaultconfigs", "kubejs", "resourcepacks")
 VERBOSE = False
 REPO_CONFIG_OVERRIDE_DIRS = ("config",)
@@ -53,7 +57,10 @@ REPO_OVERRIDE_FILES = (Path("options.txt"),)
 
 
 def request_json(url: str) -> Any:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    headers = {"User-Agent": USER_AGENT}
+    if (urllib.parse.urlparse(url).hostname or "") == "api.github.com" and GITHUB_TOKEN:
+        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+    request = urllib.request.Request(url, headers=headers)
     last_error: Exception | None = None
     for attempt in range(4):
         try:
@@ -73,6 +80,46 @@ def request_json(url: str) -> Any:
     raise RuntimeError(f"Unable to fetch JSON from {url}")
 
 
+def github_release_download_parts(url: str) -> tuple[str, str, str, str] | None:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.hostname != "github.com":
+        return None
+    parts = [urllib.parse.unquote(part) for part in parsed.path.strip("/").split("/")]
+    if len(parts) != 6 or parts[2:4] != ["releases", "download"]:
+        return None
+    return parts[0], parts[1], parts[4], parts[5]
+
+
+def download_github_release_api(url: str, destination: Path) -> bool:
+    parts = github_release_download_parts(url)
+    if parts is None:
+        return False
+    owner, repository, tag, filename = parts
+    release_url = (
+        f"https://api.github.com/repos/{owner}/{repository}/releases/tags/"
+        f"{urllib.parse.quote(tag, safe='')}"
+    )
+    release = request_json(release_url)
+    asset = next(
+        (entry for entry in release.get("assets", []) if entry.get("name") == filename),
+        None,
+    )
+    if asset is None or not asset.get("url"):
+        raise RuntimeError(f"GitHub release asset not found: {owner}/{repository} {tag} {filename}")
+
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/octet-stream",
+    }
+    if GITHUB_TOKEN:
+        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+    request = urllib.request.Request(asset["url"], headers=headers)
+    with urllib.request.urlopen(request, timeout=180) as response:
+        with destination.open("wb") as output:
+            shutil.copyfileobj(response, output)
+    return True
+
+
 def download(url: str, destination: Path) -> None:
     headers = {"User-Agent": USER_AGENT}
     host = urllib.parse.urlparse(url).hostname or ""
@@ -90,9 +137,15 @@ def download(url: str, destination: Path) -> None:
         except (OSError, TimeoutError, urllib.error.URLError) as error:
             last_error = error
             if attempt == 3:
-                raise
+                break
             time.sleep(2**attempt)
     if last_error is not None:
+        if (
+            isinstance(last_error, urllib.error.HTTPError)
+            and 500 <= last_error.code < 600
+            and download_github_release_api(url, destination)
+        ):
+            return
         raise last_error
 
 
