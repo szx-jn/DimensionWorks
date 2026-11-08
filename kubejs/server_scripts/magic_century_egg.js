@@ -1,10 +1,8 @@
-const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
-const $DWMagicEggMobEffects = Java.loadClass('net.minecraft.world.effect.MobEffects')
-const $DWMagicEggBuiltInRegistries = Java.loadClass('net.minecraft.core.registries.BuiltInRegistries')
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
 const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60
+const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
 const DW_MAGIC_EGG_DAMAGE = 9999999999999
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
 const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
@@ -12,46 +10,17 @@ const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
 let dwMagicEggFireworkShows = []
 
 ServerEvents.recipes(event => {
-  event.remove({ id: 'kaleidoscope_chinesefood:pickle_jar/century_egg' })
-  event.remove({
-    type: 'kaleidoscope_chinesefood:pickle_jar',
-    output: 'kaleidoscope_chinesefood:century_egg'
-  })
+  event.remove({ output: DW_ORIGINAL_CENTURY_EGG_ID })
+  event.remove({ output: 'kaleidoscope_chinesefood:century_egg_congee' })
 })
 
-function dwApplyMagicEggEffects(player) {
-  const effects = $DWMagicEggBuiltInRegistries.MOB_EFFECT.iterator()
-  while (effects.hasNext()) {
-    const effect = effects.next()
-    if (!effect.isBeneficial()) continue
-
-    player.addEffect(new $DWMagicEggMobEffectInstance(
-      effect,
-      DW_MAGIC_EGG_DURATION_TICKS,
-      4,
-      false,
-      true,
-      true
-    ))
+function dwPurgeOriginalCenturyEgg(player) {
+  for (let slot = 0; slot <= 40; slot++) {
+    const stack = player.inventory.getStackInSlot(slot)
+    if (stack && stack.id === DW_ORIGINAL_CENTURY_EGG_ID) {
+      stack.setCount(0)
+    }
   }
-
-  const explicitEffects = [
-    [$DWMagicEggMobEffects.ABSORPTION, 9],
-    [$DWMagicEggMobEffects.LEVITATION, 1],
-    [$DWMagicEggMobEffects.JUMP, 4],
-    [$DWMagicEggMobEffects.MOVEMENT_SPEED, 4],
-    [$DWMagicEggMobEffects.FIRE_RESISTANCE, 4]
-  ]
-  explicitEffects.forEach(([effect, amplifier]) => {
-    player.addEffect(new $DWMagicEggMobEffectInstance(
-      effect,
-      DW_MAGIC_EGG_DURATION_TICKS,
-      amplifier,
-      false,
-      true,
-      true
-    ))
-  })
 }
 
 function dwStartMagicEggFireworks(level, x, y, z) {
@@ -120,13 +89,23 @@ function dwTickMagicEggFireworks(event) {
 
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
-  dwApplyMagicEggEffects(player)
   player.persistentData.putBoolean(DW_MAGIC_EGG_PENDING, true)
   player.persistentData.putLong(DW_MAGIC_EGG_DEADLINE, player.age + DW_MAGIC_EGG_DURATION_TICKS)
 })
 
+PlayerEvents.inventoryChanged(event => {
+  if (event.item.id === DW_ORIGINAL_CENTURY_EGG_ID) {
+    event.item.setCount(0)
+  }
+})
+
+PlayerEvents.loggedIn(event => dwPurgeOriginalCenturyEgg(event.player))
+
 PlayerEvents.tick(event => {
   const player = event.player
+  if (player.age % 20 === 0) {
+    dwPurgeOriginalCenturyEgg(player)
+  }
   const data = player.persistentData
   if (!data.getBoolean(DW_MAGIC_EGG_PENDING)) return
   if (player.age < data.getLong(DW_MAGIC_EGG_DEADLINE)) return

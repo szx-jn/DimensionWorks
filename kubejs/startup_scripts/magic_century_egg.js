@@ -1,17 +1,28 @@
-const $DWMagicEggTextColor = Java.loadClass('net.minecraft.network.chat.TextColor')
-const $DWMagicEggAwtColor = Java.loadClass('java.awt.Color')
+const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
+const $DWMagicEggBuiltInRegistries = Java.loadClass('net.minecraft.core.registries.BuiltInRegistries')
 
-function dwRainbowItemName() {
-  const label = Text.translate('item.kubejs.magic_century_egg').getString()
-  const result = Text.empty()
-  const timeOffset = (Date.now() % 3000) / 3000
+const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60
+const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
+const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
 
-  for (let index = 0; index < label.length; index++) {
-    const hue = (timeOffset + index * 0.05) % 1
-    const rgb = $DWMagicEggAwtColor.HSBtoRGB(hue, 1, 1) & 0xFFFFFF
-    result.append(Text.string(label.charAt(index)).color($DWMagicEggTextColor.fromRgb(rgb)))
+function dwApplyMagicEggEffects(player) {
+  const effects = $DWMagicEggBuiltInRegistries.MOB_EFFECT.iterator()
+  while (effects.hasNext()) {
+    const effect = effects.next()
+    if (!effect.isBeneficial()) continue
+
+    const effectId = $DWMagicEggBuiltInRegistries.MOB_EFFECT.getKey(effect)
+    const id = effectId == null ? '' : effectId.toString()
+    if (id === 'minecraft:absorption' || id === 'minecraft:levitation') continue
+    player.addEffect(new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true, true))
   }
-  return result
+}
+
+function dwMarkMagicEggEaten(event) {
+  const player = event.player
+  dwApplyMagicEggEffects(player)
+  player.persistentData.putBoolean(DW_MAGIC_EGG_PENDING, true)
+  player.persistentData.putLong(DW_MAGIC_EGG_DEADLINE, player.age + DW_MAGIC_EGG_DURATION_TICKS)
 }
 
 StartupEvents.registry('item', event => {
@@ -27,20 +38,42 @@ StartupEvents.registry('item', event => {
     .displayName(Text.translate('item.kubejs.century_egg_washed'))
     .texture('kaleidoscope_chinesefood:item/century_egg')
 
+  event.create('century_egg_pressed')
+    .displayName(Text.translate('item.kubejs.century_egg_pressed'))
+    .texture('kaleidoscope_chinesefood:item/century_egg')
+
   event.create('incomplete_magic_century_egg', 'create:sequenced_assembly')
     .displayName(Text.translate('item.kubejs.incomplete_magic_century_egg'))
     .tooltip(Text.translate('item.kubejs.incomplete_magic_century_egg.tooltip'))
     .texture('kaleidoscope_chinesefood:item/century_egg')
     .maxStackSize(1)
 
+  event.create('incomplete_magic_century_egg_final', 'create:sequenced_assembly')
+    .displayName(Text.translate('item.kubejs.incomplete_magic_century_egg_final'))
+    .tooltip(Text.translate('item.kubejs.incomplete_magic_century_egg_final.tooltip'))
+    .texture('kaleidoscope_chinesefood:item/century_egg')
+    .maxStackSize(1)
+
   event.create('magic_century_egg')
-    .name(() => dwRainbowItemName())
-    .tooltip(Text.translate('item.kubejs.magic_century_egg.tooltip'))
+    .displayName(Text.translate('item.kubejs.magic_century_egg'))
+    .tooltip(Text.translate('item.kubejs.magic_century_egg.tooltip.1'))
+    .tooltip(Text.translate('item.kubejs.magic_century_egg.tooltip.2'))
     .texture('kaleidoscope_chinesefood:item/century_egg')
     .rarity('epic')
+    .glow(true)
     .food(food => food
-      .hunger(99999)
-      .saturation(99999)
+      .hunger(20)
+      .saturation(20)
       .alwaysEdible()
+      .effect('minecraft:absorption', DW_MAGIC_EGG_DURATION_TICKS, 9, 1)
+      .effect('minecraft:levitation', DW_MAGIC_EGG_DURATION_TICKS, 1, 1)
+      .effect('minecraft:jump_boost', DW_MAGIC_EGG_DURATION_TICKS, 4, 1)
+      .effect('minecraft:speed', DW_MAGIC_EGG_DURATION_TICKS, 4, 1)
+      .effect('minecraft:fire_resistance', DW_MAGIC_EGG_DURATION_TICKS, 4, 1)
+      .eaten(dwMarkMagicEggEaten)
     )
+})
+
+StartupEvents.modifyCreativeTab('kaleidoscope_chinesefood:kaleidoscope_chinesefood_tab', event => {
+  event.remove('kaleidoscope_chinesefood:century_egg')
 })

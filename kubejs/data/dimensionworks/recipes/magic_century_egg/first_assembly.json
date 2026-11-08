@@ -1,0 +1,44 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": { "item": "kubejs:century_egg_washed" },
+  "transitionalItem": { "item": "kubejs:incomplete_magic_century_egg" },
+  "loops": 8,
+  "sequence": [
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg" }],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    }
+  ],
+  "results": [{ "item": "kubejs:century_egg_pressed" }]
+}
