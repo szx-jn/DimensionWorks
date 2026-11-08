@@ -59,7 +59,7 @@ public abstract class BasinGasIntegrationMixin {
 
         ItemStack marker = markers.get(0);
         CompoundTag tag = marker.getTag();
-        if (tag == null || !tag.contains("Gas", Tag.TAG_STRING) || !tag.contains("Amount", Tag.TAG_ANY_NUMERIC)) {
+        if (tag == null) {
             cir.setReturnValue(false);
             return;
         }
@@ -73,17 +73,26 @@ public abstract class BasinGasIntegrationMixin {
             return;
         }
 
-        ResourceLocation gasId = ResourceLocation.tryParse(tag.getString("Gas"));
-        Gas gas = gasId == null ? null : MekanismAPI.gasRegistry().getValue(gasId);
-        long amount = dimensionworks$scaledAmount(tag, "Amount", marker.getCount());
-        if (gas == null || gas.isEmptyType() || amount <= 0) {
-            cir.setReturnValue(false);
-            return;
+        boolean inputOnly = tag.getBoolean("InputOnly");
+        Gas gas = null;
+        long amount = 0L;
+        if (!inputOnly) {
+            if (!tag.contains("Gas", Tag.TAG_STRING) || !tag.contains("Amount", Tag.TAG_ANY_NUMERIC)) {
+                cir.setReturnValue(false);
+                return;
+            }
+            ResourceLocation gasId = ResourceLocation.tryParse(tag.getString("Gas"));
+            gas = gasId == null ? null : MekanismAPI.gasRegistry().getValue(gasId);
+            amount = dimensionworks$scaledAmount(tag, "Amount", marker.getCount());
+            if (gas == null || gas.isEmptyType() || amount <= 0) {
+                cir.setReturnValue(false);
+                return;
+            }
         }
 
         Gas inputGas = null;
         long inputAmount = 0L;
-        if (tag.contains("InputGas") || tag.contains("InputAmount")) {
+        if (inputOnly || tag.contains("InputGas") || tag.contains("InputAmount")) {
             ResourceLocation inputId = ResourceLocation.tryParse(tag.getString("InputGas"));
             inputGas = inputId == null ? null : MekanismAPI.gasRegistry().getValue(inputId);
             inputAmount = dimensionworks$scaledAmount(tag, "InputAmount", marker.getCount());

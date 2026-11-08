@@ -1,0 +1,37 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:egg"
+    },
+    {
+      "amount": 100,
+      "fluid": "minecraft:water",
+      "nbt": {}
+    },
+    {
+      "amount": 100,
+      "fluid": "dimensionworks:molten_iron",
+      "nbt": {}
+    }
+  ],
+  "results": [
+    {
+      "item": "kubejs:century_egg_mixture"
+    },
+    {
+      "item": "dimensionworks_mek_stress:gas_output",
+      "nbt": {
+        "InputOnly": true,
+        "InputGas": "mekanism:spent_nuclear_waste",
+        "InputAmount": 100,
+        "display": {
+          "Name": "{\"text\":\"消耗 100 mB 用尽的核废料\",\"italic\":false}",
+          "Lore": [
+            "{\"text\":\"从工作盆进气缓冲扣除\",\"italic\":false,\"color\":\"gray\"}"
+          ]
+        }
+      }
+    }
+  ]
+}

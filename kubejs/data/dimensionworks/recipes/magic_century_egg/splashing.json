@@ -1,0 +1,13 @@
+{
+  "type": "create:splashing",
+  "ingredients": [
+    {
+      "item": "kubejs:century_egg_smelted"
+    }
+  ],
+  "results": [
+    {
+      "item": "kubejs:century_egg_washed"
+    }
+  ]
+}

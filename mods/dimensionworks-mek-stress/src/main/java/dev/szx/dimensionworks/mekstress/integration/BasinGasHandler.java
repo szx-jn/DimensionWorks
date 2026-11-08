@@ -44,10 +44,14 @@ public final class BasinGasHandler implements IGasHandler {
         return processRecipeGas(null, 0L, producedGas, amount, simulate);
     }
 
-    /** Validates both buffers before consuming input or storing a recipe output. */
+    /** Validates both buffers before consuming input or storing an optional recipe output. */
     public boolean processRecipeGas(Gas requiredGas, long requiredAmount,
                                    Gas producedGas, long amount, boolean simulate) {
-        if (amount <= 0 || amount > CAPACITY) {
+        boolean hasOutput = producedGas != null && amount > 0;
+        if (!hasOutput && (producedGas != null || amount != 0)) {
+            return false;
+        }
+        if (!hasOutput && requiredAmount <= 0) {
             return false;
         }
         if (requiredAmount < 0 || (requiredGas == null && requiredAmount != 0)
@@ -55,11 +59,11 @@ public final class BasinGasHandler implements IGasHandler {
                 || !inputGas.getType().equals(requiredGas) || inputGas.getAmount() < requiredAmount))) {
             return false;
         }
-        if (!gas.isEmpty() && !gas.getType().equals(producedGas)) {
-            return false;
-        }
-        if (amount > CAPACITY - gas.getAmount()) {
-            return false;
+        if (hasOutput) {
+            if (amount > CAPACITY || (!gas.isEmpty() && !gas.getType().equals(producedGas))
+                || amount > CAPACITY - gas.getAmount()) {
+                return false;
+            }
         }
         if (simulate) {
             return true;
@@ -69,7 +73,9 @@ public final class BasinGasHandler implements IGasHandler {
             long remainingInput = inputGas.getAmount() - requiredAmount;
             inputGas = remainingInput == 0 ? GasStack.EMPTY : new GasStack(inputGas, remainingInput);
         }
-        gas = new GasStack(producedGas, gas.getAmount() + amount);
+        if (hasOutput) {
+            gas = new GasStack(producedGas, gas.getAmount() + amount);
+        }
         owner.setChanged();
         owner.notifyChangeOfContents();
         owner.notifyUpdate();

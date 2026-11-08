@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "kubejs:century_egg_mixture"
+  },
+  "result": "kubejs:century_egg_smelted",
+  "experience": 0.35,
+  "cookingtime": 200
+}

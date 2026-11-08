@@ -132,7 +132,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 ## Create 工作盆 Mekanism 气体输入与输出
 
 - 工作盆拥有独立的进气、出气缓冲，各 10,000 mB、每个缓冲只存一种气体。管道灌入进气缓冲、抽取出气缓冲；制气盆的 CO 需要通过管道送入反应盆。
-- Create 配方以内部物品 `dimensionworks_mek_stress:gas_output` 的 NBT `Gas`（注册 ID）和 `Amount`（mB）指定气体产出，可与普通物品同时产出，标记不会掉落。可选的 `InputGas` 与 `InputAmount` 指定进气消耗；气体不足、气体类型不匹配或产物无空间时不能加工。可选 `ExcludeSuperheated: true` 限制配方不能在超级加热时执行，匹配与实际执行都检查。
+- Create 配方以内部物品 `dimensionworks_mek_stress:gas_output` 的 NBT `Gas`（注册 ID）和 `Amount`（mB）指定气体产出，可与普通物品同时产出，标记不会掉落。可选的 `InputGas` 与 `InputAmount` 指定进气消耗；`InputOnly: true` 表示只消耗进气、不占用出气缓冲。气体不足、气体类型不匹配或产物无空间时不能加工。可选 `ExcludeSuperheated: true` 限制配方不能在超级加热时执行，匹配与实际执行都检查。
 - `server_scripts/chemistry_gas_recipes.js` 提供木炭熔炼配方：工作盆普通加热每消耗 1 个木炭产出 125 mB 一氧化碳，超级加热每消耗 1 个木炭产出 250 mB 二氧化碳，由 Mekanism 气体管道抽取。木炭化学氧化室产一氧化碳入口已移除。煤炭增殖及煤炭制二氧化碳入口已移除；后续制煤工序待定。
 - 工作盆无盖或开盖时，每 20 游戏刻合计流失 200 mB，按进气、出气缓冲存量比例分摊；总量不足时清空。只有盆正上方关闭的柴油动力工作盆盖（`createdieselgenerators:basin_lid`）能阻止流失；屋顶、普通方块和搅拌器不视作密封盖。所有盆内 Mekanism 气体均遵循此规则，与气体种类无关，液体不受影响。
 
@@ -159,6 +159,12 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 ## 森罗物语配方接口
 
 清单加入 KubeJS Kaleidoscope 1.1.0，提供上游森罗配方联动接口；本次保留附属原生配方，未新增自定义配方脚本。附属清单、依赖与兼容性边界见 [食物附属扩展](../docs/design/food-addon-expansion.md)。
+
+## 魔法皮蛋
+
+`server_scripts/magic_century_egg.js` 移除原腌菜罐皮蛋配方。新链先在工作盆中用 1 个鸡蛋、100 mB 水、100 mB 熔融铁和 100 mB `mekanism:spent_nuclear_waste` 搅拌；用尽的核废料通过工作盆进气缓冲纯消耗。产物随后熔炼、洗涤，再进入一条 8 轮 Create 序列组装，每轮冲压 10 次、切割 1 次、注入 1 B 熔融下界合金，并依次装配暮色森林任意原木和 `ae2omnicells:quantum_omni_cell_component_1k`。
+
+成品 `kubejs:magic_century_egg` 使用动态彩色名称，食用后提供 60 秒增益：伤害吸收 X、漂浮 II，其余增益均为 V。倒计时结束时造成一次 `9,999,999,999,999` 点 `genericKill` 伤害，并在死亡位置播放三轮各 5 秒、覆盖 9×9×9 范围的浓密烟花粒子。生存模式饥饿值仍受原版上限 20 点限制，食物属性中的 99,999 代表配方数值，不突破 HUD 上限。
 
 ## AE2 能源接入
 

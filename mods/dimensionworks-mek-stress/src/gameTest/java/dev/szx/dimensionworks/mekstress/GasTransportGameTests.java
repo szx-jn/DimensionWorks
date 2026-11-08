@@ -4,6 +4,7 @@ import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.OpenEndedPipe;
 import com.simibubi.create.content.fluids.transfer.FluidFillingBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import net.minecraft.world.level.block.Blocks;
 import com.simibubi.create.content.logistics.filter.FilterItemStack;
 import mekanism.api.Action;
@@ -13,6 +14,7 @@ import com.simibubi.create.content.fluids.pump.PumpBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.kinetics.motor.CreativeMotorBlock;
 import com.simibubi.create.content.kinetics.simpleRelays.CogWheelBlock;
+import dev.szx.dimensionworks.mekstress.integration.BasinGasHandler;
 import dev.szx.dimensionworks.mekstress.integration.gas.GasFluid;
 import dev.szx.dimensionworks.mekstress.integration.gas.GasFluidHandler;
 import mekanism.api.chemical.gas.GasStack;
@@ -112,6 +114,27 @@ public class GasTransportGameTests {
         helper.assertTrue(helper.getLevel().getBlockState(pipePos.east()).is(Blocks.STONE), "Gas must not replace a solid block");
         basin.setRemoved();
         helper.assertTrue(!bridgeCapability.isPresent(), "Bridge must invalidate with its endpoint");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void inputOnlyGasRecipeConsumesGasWithoutOutput(GameTestHelper helper) {
+        BlockPos relative = new BlockPos(2, 2, 2);
+        helper.setBlock(relative, ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:basin")).defaultBlockState());
+        BasinGasHandler handler = new BasinGasHandler((BasinBlockEntity) helper.getBlockEntity(relative));
+        GasStack spentWaste = new GasStack(MekanismGases.SPENT_NUCLEAR_WASTE, 100);
+        handler.setChemicalInTank(1, spentWaste);
+
+        helper.assertTrue(handler.processRecipeGas(spentWaste.getType(), 100, null, 0, true),
+            "Input-only simulation must accept sufficient spent nuclear waste");
+        helper.assertTrue(handler.processRecipeGas(spentWaste.getType(), 101, null, 0, true) == false,
+            "Input-only recipe must reject a shortage");
+        helper.assertTrue(handler.processRecipeGas(MekanismGases.NUCLEAR_WASTE.get(), 100, null, 0, true) == false,
+            "Input-only recipe must reject the wrong gas");
+        helper.assertTrue(handler.processRecipeGas(spentWaste.getType(), 100, null, 0, false),
+            "Input-only execution must accept the exact input");
+        helper.assertTrue(handler.getChemicalInTank(1).isEmpty(), "Input-only execution must consume all required gas");
+        helper.assertTrue(handler.getChemicalInTank(0).isEmpty(), "Input-only execution must not occupy the output buffer");
         helper.succeed();
     }
 }
