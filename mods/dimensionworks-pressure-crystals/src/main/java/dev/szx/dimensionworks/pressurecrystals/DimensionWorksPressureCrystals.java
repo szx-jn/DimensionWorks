@@ -12,6 +12,7 @@ import net.minecraftforge.registries.RegistryObject;
 public final class DimensionWorksPressureCrystals {
     public static final String MOD_ID = "dimensionworks_pressure_crystals";
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
+    public static final RegistryObject<Item> USELESS_CRYSTAL = registerCrystal("useless_crystal");
     public static final RegistryObject<Item> LOW_PRESSURE_CRYSTAL = registerCrystal("low_pressure_crystal");
     public static final RegistryObject<Item> MEDIUM_PRESSURE_CRYSTAL = registerCrystal("medium_pressure_crystal");
     public static final RegistryObject<Item> HIGH_PRESSURE_CRYSTAL = registerCrystal("high_pressure_crystal");

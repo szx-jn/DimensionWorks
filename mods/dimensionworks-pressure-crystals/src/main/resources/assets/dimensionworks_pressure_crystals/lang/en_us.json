@@ -1,5 +1,6 @@
 {
   "itemGroup.dimensionworks_pressure_crystals": "DimensionWorks: Pressure Crystals",
+  "item.dimensionworks_pressure_crystals.useless_crystal": "A Crystal That Looks Completely Useless",
   "item.dimensionworks_pressure_crystals.low_pressure_crystal": "Low-pressure Wonder Crystal",
   "item.dimensionworks_pressure_crystals.medium_pressure_crystal": "Medium-pressure Wonder Crystal",
   "item.dimensionworks_pressure_crystals.high_pressure_crystal": "High-pressure Wonder Crystal"
