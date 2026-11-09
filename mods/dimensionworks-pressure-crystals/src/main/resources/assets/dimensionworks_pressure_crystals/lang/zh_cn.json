@@ -1,5 +1,6 @@
 {
   "itemGroup.dimensionworks_pressure_crystals": "维度工坊：压力结晶",
+  "item.dimensionworks_pressure_crystals.useless_crystal": "看起来一点用也没有的结晶",
   "item.dimensionworks_pressure_crystals.low_pressure_crystal": "低压奇妙结晶",
   "item.dimensionworks_pressure_crystals.medium_pressure_crystal": "中压奇妙结晶",
   "item.dimensionworks_pressure_crystals.high_pressure_crystal": "高压奇妙结晶"
