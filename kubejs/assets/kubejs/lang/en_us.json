@@ -63,8 +63,8 @@
   "item.kubejs.incomplete_magic_century_egg_final": "Magic Century Egg Final Assembly",
   "item.kubejs.incomplete_magic_century_egg_final.tooltip": "Complete eight cycles of final pressing, cutting, filling, and assembly.",
   "item.kubejs.magic_century_egg": "Magic Century Egg",
-  "item.kubejs.magic_century_egg.tooltip.1": "Grants every beneficial effect for 60 seconds.",
-  "item.kubejs.magic_century_egg.tooltip.2": "When the effect ends, it deals lethal damage and releases three firework waves.",
+  "item.kubejs.magic_century_egg.tooltip.1": "Grants every beneficial effect for 3 minutes.",
+  "item.kubejs.magic_century_egg.tooltip.2": "Eating it starts a death countdown; eating again during it kills immediately.",
   "fluid.dimensionworks.molten_iron": "Molten Iron",
   "fluid.dimensionworks.molten_copper": "Molten Copper",
   "fluid.dimensionworks.molten_gold": "Molten Gold",
@@ -89,5 +89,10 @@
   "item.kubejs.crude_sulfur": "Crude Sulfur",
   "item.kubejs.crude_sulfur.tooltip": "Thermally separated from sulfur-bearing volcanic material. Mill into sulfur dust.",
   "fluid.dimensionworks.forest_extract": "Forest Extract",
-  "item.dimensionworks.forest_extract_bucket": "Forest Extract Bucket"
+  "item.dimensionworks.forest_extract_bucket": "Forest Extract Bucket",
+  "item.kubejs.century_egg_vanilla_enriched": "Vanilla-Material-Infused Century Egg Core",
+  "item.kubejs.century_egg_industrial_enriched": "Industrial-Matrix-Infused Century Egg Core",
+  "item.kubejs.century_egg_ae_enriched": "AE Crystal-Matrix-Infused Century Egg Core",
+  "item.kubejs.century_egg_eco_enriched": "ECO Superconductive-Core-Infused Century Egg Core",
+  "item.kubejs.century_egg_eco_components_enriched": "ECO Component Matrix-Infused Century Egg Core"
 }

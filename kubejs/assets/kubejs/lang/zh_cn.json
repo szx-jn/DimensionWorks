@@ -63,8 +63,8 @@
   "item.kubejs.incomplete_magic_century_egg_final": "魔法皮蛋终装件",
   "item.kubejs.incomplete_magic_century_egg_final.tooltip": "完成八轮终压、切割、注液与装配。",
   "item.kubejs.magic_century_egg": "魔法皮蛋",
-  "item.kubejs.magic_century_egg.tooltip.1": "食用后获得 60 秒全增益。",
-  "item.kubejs.magic_century_egg.tooltip.2": "效果结束后受到致命伤害，并释放三轮烟花。",
+  "item.kubejs.magic_century_egg.tooltip.1": "食用后获得 3 分钟全增益。",
+  "item.kubejs.magic_century_egg.tooltip.2": "首次食用启动死亡倒计时；倒计时内再次食用会立即死亡。",
   "item.kubejs.iron_concentrate": "铁质活化料",
   "item.kubejs.iron_concentrate.tooltip": "经机械压制形成的铁矿中间物，需在 Mekanism 结合器中继续处理。",
   "fluid.dimensionworks.molten_iron": "熔融铁",
@@ -91,5 +91,10 @@
   "item.kubejs.crude_sulfur": "粗硫",
   "item.kubejs.crude_sulfur.tooltip": "含硫火山物料热分离产物，可在磨石中制成硫粉。",
   "fluid.dimensionworks.forest_extract": "林地原液",
-  "item.dimensionworks.forest_extract_bucket": "林地原液桶"
+  "item.dimensionworks.forest_extract_bucket": "林地原液桶",
+  "item.kubejs.century_egg_vanilla_enriched": "原版珍材嵌合皮蛋芯",
+  "item.kubejs.century_egg_industrial_enriched": "工业矩阵嵌合皮蛋芯",
+  "item.kubejs.century_egg_ae_enriched": "AE 水晶矩阵嵌合皮蛋芯",
+  "item.kubejs.century_egg_eco_enriched": "ECO 超导核心嵌合皮蛋芯",
+  "item.kubejs.century_egg_eco_components_enriched": "ECO 组件矩阵嵌合皮蛋芯"
 }

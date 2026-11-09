@@ -1,0 +1,129 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "kubejs:century_egg_eco_enriched"
+  },
+  "transitionalItem": {
+    "item": "kubejs:incomplete_magic_century_egg"
+  },
+  "loops": 1,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_cell_component_64m"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_cell_component_256m"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_computation_cell_l4"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_computation_cell_l6"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_computation_cell_l9"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_complex_omni_cell_housing"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_quantum_omni_cell_housing"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "item": "kubejs:century_egg_eco_components_enriched"
+    }
+  ]
+}
