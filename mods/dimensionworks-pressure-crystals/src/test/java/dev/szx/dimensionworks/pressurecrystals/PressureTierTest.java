@@ -6,32 +6,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PressureTierTest {
     @Test
-    void belowCompressorMinimumHasNoPressure() {
-        assertEquals(PressureTier.NONE, PressureTier.fromRpm(31.99F));
+    void stoppedCompressorHasNoPressure() {
+        assertEquals(PressureTier.NONE, PressureTier.fromRpm(0.0F));
     }
 
     @Test
-    void minimumRunningSpeedIsLowPressure() {
+    void anyPositiveSpeedUpTo512IsLowPressure() {
+        assertEquals(PressureTier.LOW, PressureTier.fromRpm(1.0F));
         assertEquals(PressureTier.LOW, PressureTier.fromRpm(32.0F));
-    }
-
-    @Test
-    void fiveHundredTwelveRpmIsLowPressure() {
         assertEquals(PressureTier.LOW, PressureTier.fromRpm(512.0F));
     }
 
     @Test
-    void aboveFiveHundredTwelveRpmIsMediumPressure() {
+    void above512Through2048IsMediumPressure() {
         assertEquals(PressureTier.MEDIUM, PressureTier.fromRpm(512.01F));
-    }
-
-    @Test
-    void twoThousandFortyEightRpmIsMediumPressure() {
         assertEquals(PressureTier.MEDIUM, PressureTier.fromRpm(2048.0F));
     }
 
     @Test
-    void aboveTwoThousandFortyEightRpmIsHighPressure() {
+    void above2048IsHighPressure() {
         assertEquals(PressureTier.HIGH, PressureTier.fromRpm(2048.01F));
+        assertEquals(PressureTier.HIGH, PressureTier.fromRpm(4096.0F));
     }
 }
