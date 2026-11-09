@@ -94,5 +94,7 @@
   "item.kubejs.century_egg_industrial_enriched": "Industrial-Matrix-Infused Century Egg Core",
   "item.kubejs.century_egg_ae_enriched": "AE Crystal-Matrix-Infused Century Egg Core",
   "item.kubejs.century_egg_eco_enriched": "ECO Superconductive-Core-Infused Century Egg Core",
-  "item.kubejs.century_egg_eco_components_enriched": "ECO Component Matrix-Infused Century Egg Core"
+  "item.kubejs.century_egg_eco_components_enriched": "ECO Component Matrix-Infused Century Egg Core",
+  "item.kubejs.incomplete_netherite_scrap": "Incomplete Netherite Scrap",
+  "item.kubejs.incomplete_netherite_scrap.tooltip": "Six-stage sequence assembly intermediate. The metal trait must match every high-pressure crystal used."
 }
