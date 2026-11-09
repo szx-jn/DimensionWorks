@@ -49,7 +49,9 @@ public final class PressureCrystallization {
                 new ResourceLocation("dimensionworks", "molten_" + metal));
             if (molten == null) continue;
 
-            List<ItemStack> output = List.of(new ItemStack(crystal, CRYSTAL_OUTPUT));
+            ItemStack crystalStack = new ItemStack(crystal, CRYSTAL_OUTPUT);
+            crystalStack.getOrCreateTagElement("DimensionWorks").putString("Metal", metal);
+            List<ItemStack> output = List.of(crystalStack);
             if (!basin.acceptOutputs(output, List.of(), true)) return;
             if (!basin.acceptOutputs(output, List.of(), false)) return;
 
