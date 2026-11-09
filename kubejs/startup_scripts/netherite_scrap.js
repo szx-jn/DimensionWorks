@@ -2,7 +2,7 @@ StartupEvents.registry('item', event => {
   event.create('mixed_metal')
     .displayName(Text.translate('item.kubejs.mixed_metal'))
     .tooltip(Text.translate('item.kubejs.mixed_metal.tooltip'))
-    .texture('kubejs:item/mixed_metal')
+    .texture('minecraft:item/netherite_ingot')
 
   event.create('incomplete_netherite_scrap')
     .displayName(Text.translate('item.kubejs.incomplete_netherite_scrap'))
