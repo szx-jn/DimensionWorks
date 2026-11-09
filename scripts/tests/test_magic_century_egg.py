@@ -22,13 +22,18 @@ class MagicCenturyEggContractTest(unittest.TestCase):
             if recipe["type"] == "create:sequenced_assembly":
                 self.assertLessEqual(len(recipe["sequence"]), 7)
 
-        by_result = {recipe["results"][0]["item"]: recipe for recipe in recipes}
+        by_result = {
+            recipe["results"][0]["item"]: recipe
+            for recipe in recipes
+            if "results" in recipe
+        }
+        smelting = next(recipe for recipe in recipes if recipe["type"] == "minecraft:smelting")
         self.assertEqual(by_result["kubejs:century_egg_pressed"]["loops"], 8)
         self.assertEqual(by_result["kubejs:century_egg_vanilla_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:century_egg_industrial_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:magic_century_egg"]["loops"], 8)
         self.assertEqual(by_result["kubejs:century_egg_washed"]["type"], "create:splashing")
-        self.assertEqual(by_result["kubejs:century_egg_smelted"]["type"], "minecraft:smelting")
+        self.assertEqual(smelting["result"], "kubejs:century_egg_smelted")
         self.assertEqual(by_result["kubejs:century_egg_mixture"]["type"], "create:mixing")
 
         vanilla = by_result["kubejs:century_egg_vanilla_enriched"]
