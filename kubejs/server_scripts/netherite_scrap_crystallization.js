@@ -16,32 +16,21 @@ ServerEvents.recipes(event => {
     ]
   ).heated().id('dimensionworks:netherite_scrap/mixed_metal')
 
+  const netheriteTrait = { 'DimensionWorks': { 'Metal': 'netherite' } }
   const crystal = {
-  'type': 'forge:partial_nbt',
-  'item': 'dimensionworks_pressure_crystals:high_pressure_crystal',
-  'nbt': {
-    'DimensionWorks': {
-      'Metal': 'netherite'
-    }
+    type: 'forge:partial_nbt',
+    item: 'dimensionworks_pressure_crystals:high_pressure_crystal',
+    nbt: netheriteTrait
   }
-}
   const transitional = {
-  'item': 'kubejs:incomplete_netherite_scrap',
-  'nbt': {
-    'DimensionWorks': {
-      'Metal': 'netherite'
-    }
+    item: 'kubejs:incomplete_netherite_scrap',
+    nbt: netheriteTrait
   }
-}
   const incompleteIngredient = {
-  'type': 'forge:partial_nbt',
-  'item': 'kubejs:incomplete_netherite_scrap',
-  'nbt': {
-    'DimensionWorks': {
-      'Metal': 'netherite'
-    }
+    type: 'forge:partial_nbt',
+    item: 'kubejs:incomplete_netherite_scrap',
+    nbt: netheriteTrait
   }
-}
 
   event.custom(JsonIO.of({
     type: 'create:sequenced_assembly',
