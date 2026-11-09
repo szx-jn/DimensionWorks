@@ -11,7 +11,7 @@ ServerEvents.recipes(event => {
       'minecraft:iron_ingot',
       'minecraft:gold_ingot',
       'minecraft:copper_ingot',
-      '#forge:ingots/enderium',
+      'ae2:ender_dust',
       'create:sturdy_sheet'
     ]
   ).heated().id('dimensionworks:netherite_scrap/mixed_metal')
