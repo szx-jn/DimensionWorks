@@ -1963,6 +1963,28 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/create-more-package-couriers"
+    },
+    {
+      "id": "vintageimprovements",
+      "name": "Create: Vintage Improvements",
+      "source": "curseforge",
+      "project_slug": "vintage-improvenents-ssw-edition",
+      "file_id": 8941689,
+      "file_name": "vintageimprovements-1.20.1-0.3.7.9.jar",
+      "version": "1.20.1-0.3.7.9",
+      "required": true,
+      "environment": "both",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/vintage-improvenents-ssw-edition"
+    },
+    {
+      "id": "dimensionworks_pressure_crystals",
+      "name": "DimensionWorks Pressure Crystals",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-pressure-crystals",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-pressure-crystals"
     }
   ]
 }

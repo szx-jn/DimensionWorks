@@ -1,0 +1,43 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+    id 'eclipse'
+    id 'idea'
+}
+version = '0.1.0'
+group = 'dev.szx.dimensionworks'
+base.archivesName = 'dimensionworks_pressure_crystals'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            mods { dimensionworks_pressure_crystals { source sourceSets.main } }
+        }
+        client {}
+        server { args '--nogui' }
+    }
+}
+repositories {
+    maven { name = 'Create'; url = 'https://maven.createmod.net' }
+    mavenCentral()
+}
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
+    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
+    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
+    runtimeOnly fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
+    runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+mixin {
+    add sourceSets.main, 'dimensionworks_pressure_crystals.refmap.json'
+    config 'dimensionworks_pressure_crystals.mixins.json'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+jar {
+    manifest.attributes(['MixinConfigs': 'dimensionworks_pressure_crystals.mixins.json'])
+    finalizedBy 'reobfJar'
+}
