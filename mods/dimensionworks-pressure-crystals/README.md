@@ -28,3 +28,8 @@ gradle build --no-daemon
 ```
 
 压力边界由 `PressureTierTest` 覆盖；完整构建还会检查 Forge、Create 与 Mixin 编译配置。实际游戏内的三档转速、产物空间与服务器运行测试仍需在整合包实例中验收。
+
+
+## 金属来源特质
+
+每次结晶产出的低压、中压、高压结晶都会写入 `DimensionWorks.Metal` 字符串 NBT，值为来源金属 ID（例如 `netherite`、`azure_neodymium`）。相同压力等级、不同金属来源的结晶因此不会堆叠为同一物品栈；KubeJS 下界合金碎片序列组装使用该字段进行部分 NBT 匹配，禁止混用不同来源。
