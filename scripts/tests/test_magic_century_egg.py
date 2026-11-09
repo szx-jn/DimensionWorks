@@ -123,11 +123,11 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertNotIn(".hunger(99999)", startup)
         self.assertIn(".rarity('epic')", startup)
         self.assertIn(".hunger(20)", startup)
-        self.assertIn(".effect('minecraft:absorption'", startup)
-        self.assertIn(".effect('minecraft:levitation'", startup)
-        self.assertIn(".eaten(dwMarkMagicEggEaten)", startup)
-        self.assertIn("isBeneficial()", startup)
-        self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", startup)
+        self.assertNotIn(".effect(", startup)
+        self.assertNotIn(".eaten(", startup)
+        self.assertIn("isBeneficial()", server)
+        self.assertIn("minecraft:levitation", server)
+        self.assertIn("new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4", server)
         self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", server)
 
     def test_eating_again_triggers_death_immediately(self) -> None:
@@ -138,7 +138,8 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertNotIn("DW_MAGIC_EGG_DEADLINE", startup)
         self.assertIn("if (data.getBoolean(DW_MAGIC_EGG_PENDING))", server)
         self.assertIn("dwStartMagicEggFireworks(level, player.x, player.y, player.z)", server)
-        self.assertIn("player.hurt(level.damageSources().genericKill(), DW_MAGIC_EGG_DAMAGE)", server)
+        self.assertIn("player.kill()", server)
+        self.assertNotIn("DW_MAGIC_EGG_DAMAGE", server)
 
 
 if __name__ == "__main__":
