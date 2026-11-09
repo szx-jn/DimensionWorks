@@ -44,7 +44,7 @@ class NetheriteScrapRecipeContractTest(unittest.TestCase):
 
     def test_native_mekanism_fluids_are_not_duplicated(self) -> None:
         startup_files = list((ROOT / "kubejs/startup_scripts").glob("*.js"))
-        combined = "\\n".join(path.read_text(encoding="utf-8") for path in startup_files)
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in startup_files)
         self.assertNotIn("event.create('liquid_sulfur_dioxide')", combined)
         self.assertNotIn("event.create('liquid_sulfuric_acid')", combined)
 
