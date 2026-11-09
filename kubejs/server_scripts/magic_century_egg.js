@@ -1,7 +1,7 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
-const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60
+const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
 const DW_MAGIC_EGG_DAMAGE = 9999999999999
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
@@ -89,8 +89,20 @@ function dwTickMagicEggFireworks(event) {
 
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
-  player.persistentData.putBoolean(DW_MAGIC_EGG_PENDING, true)
-  player.persistentData.putLong(DW_MAGIC_EGG_DEADLINE, player.age + DW_MAGIC_EGG_DURATION_TICKS)
+  const data = player.persistentData
+
+  if (data.getBoolean(DW_MAGIC_EGG_PENDING)) {
+    data.putBoolean(DW_MAGIC_EGG_PENDING, false)
+    data.putLong(DW_MAGIC_EGG_DEADLINE, 0)
+
+    const level = player.level()
+    dwStartMagicEggFireworks(level, player.x, player.y, player.z)
+    player.hurt(level.damageSources().genericKill(), DW_MAGIC_EGG_DAMAGE)
+    return
+  }
+
+  data.putBoolean(DW_MAGIC_EGG_PENDING, true)
+  data.putLong(DW_MAGIC_EGG_DEADLINE, player.age + DW_MAGIC_EGG_DURATION_TICKS)
 })
 
 PlayerEvents.inventoryChanged(event => {
