@@ -16,7 +16,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
             for path in sorted(RECIPE_DIR.glob("*.json"))
         ]
 
-        self.assertEqual(len(recipes), 9)
+        self.assertEqual(len(recipes), 10)
         self.assertFalse((RECIPE_DIR / "sequenced_assembly.json").exists())
         for recipe in recipes:
             if recipe["type"] == "create:sequenced_assembly":
@@ -33,6 +33,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertEqual(by_result["kubejs:century_egg_industrial_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:century_egg_ae_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:century_egg_eco_enriched"]["loops"], 1)
+        self.assertEqual(by_result["kubejs:century_egg_eco_components_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:magic_century_egg"]["loops"], 8)
         self.assertEqual(by_result["kubejs:century_egg_washed"]["type"], "create:splashing")
         self.assertEqual(smelting["result"], "kubejs:century_egg_smelted")
@@ -67,12 +68,12 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         }
         self.assertEqual(ae_inputs, {
             "ae2:cell_component_1k",
+            "ae2omnicells:omni_cell_component_1k",
             "ae2omnicells:complex_omni_cell_component_1k",
             "ae2omnicells:quantum_omni_cell_component_1k",
             "ae2:fluix_crystal",
             "ae2:charged_certus_quartz_crystal",
-            "neoecoae:crystal_matrix",
-            "neoecoae:crystal_ingot",
+            "ae2:certus_quartz_crystal",
         })
 
         eco_inputs = {
@@ -80,9 +81,27 @@ class MagicCenturyEggContractTest(unittest.TestCase):
             for step in by_result["kubejs:century_egg_eco_enriched"]["sequence"]
         }
         self.assertEqual(eco_inputs, {
+            "neoecoae:energized_crystal",
             "neoecoae:energized_fluix_crystal",
+            "neoecoae:crystal_ingot",
+            "neoecoae:crystal_matrix",
             "neoecoae:energized_superconductive_ingot",
             "neoecoae:superconducting_processor",
+            "neoecoae:eco_cell_component_16m",
+        })
+
+        eco_component_inputs = {
+            step["ingredients"][1]["item"]
+            for step in by_result["kubejs:century_egg_eco_components_enriched"]["sequence"]
+        }
+        self.assertEqual(eco_component_inputs, {
+            "neoecoae:eco_cell_component_64m",
+            "neoecoae:eco_cell_component_256m",
+            "neoecoae:eco_computation_cell_l4",
+            "neoecoae:eco_computation_cell_l6",
+            "neoecoae:eco_computation_cell_l9",
+            "neoecoae:computation_parallel_core_l4",
+            "neoecoae:computation_threading_core_l4",
         })
 
     def test_original_century_egg_is_removed_and_hidden(self) -> None:

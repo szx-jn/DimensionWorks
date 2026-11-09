@@ -31,6 +31,22 @@
           "item": "kubejs:incomplete_magic_century_egg"
         },
         {
+          "item": "ae2omnicells:omni_cell_component_1k"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
           "item": "ae2omnicells:complex_omni_cell_component_1k"
         }
       ],
@@ -95,23 +111,7 @@
           "item": "kubejs:incomplete_magic_century_egg"
         },
         {
-          "item": "neoecoae:crystal_matrix"
-        }
-      ],
-      "results": [
-        {
-          "item": "kubejs:incomplete_magic_century_egg"
-        }
-      ]
-    },
-    {
-      "type": "create:deploying",
-      "ingredients": [
-        {
-          "item": "kubejs:incomplete_magic_century_egg"
-        },
-        {
-          "item": "neoecoae:crystal_ingot"
+          "item": "ae2:certus_quartz_crystal"
         }
       ],
       "results": [
