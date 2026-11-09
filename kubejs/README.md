@@ -113,7 +113,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 ## 下界合金碎片工业制造
 
 - `startup_scripts/netherite_scrap.js` 注册无特质混合金属与特质混合金属中间物。
-- `server_scripts/netherite_scrap_crystallization.js` 先用液态硫酸、液态二氧化硫、铁锭、金锭、铜锭、末影锭和坚固板在加热工作盆中混合，产出无特质混合金属；再以一颗带 `DimensionWorks.Metal = "netherite"` 的下界合金高压结晶进行序列组装，最后冲压得到 2 个下界合金碎片。
+- `server_scripts/netherite_scrap_crystallization.js` 先用液态硫酸、液态二氧化硫、铁锭、金锭、铜锭、AE2 末影粉（`ae2:ender_dust`）和坚固板在加热工作盆中混合，产出无特质混合金属；再以一颗带 `DimensionWorks.Metal = "netherite"` 的下界合金高压结晶进行序列组装，最后冲压得到 2 个下界合金碎片。
 - 两种化学液体均使用 Mekanism 10.4 原生流体与原生贴图；二氧化硫可由原生旋转浓缩器从气体冷凝，硫酸使用 Mekanism 液态硫酸生产链。无需自定义流体或额外贴图。
 - 完整材料、配方和验收要求见 [下界合金碎片生产设计](../docs/design/netherite-scrap-production.md)。
 
