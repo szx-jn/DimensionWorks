@@ -1,6 +1,6 @@
 {
   "type": "create:sequenced_assembly",
-  "ingredient": { "item": "kubejs:century_egg_pressed" },
+  "ingredient": { "item": "kubejs:century_egg_industrial_enriched" },
   "transitionalItem": { "item": "kubejs:incomplete_magic_century_egg_final" },
   "loops": 8,
   "sequence": [

@@ -1,0 +1,33 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": { "item": "kubejs:century_egg_pressed" },
+  "transitionalItem": { "item": "kubejs:incomplete_magic_century_egg" },
+  "loops": 1,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        { "item": "kubejs:incomplete_magic_century_egg" },
+        { "item": "minecraft:golden_apple" }
+      ],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        { "item": "kubejs:incomplete_magic_century_egg" },
+        { "item": "minecraft:ender_pearl" }
+      ],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        { "item": "kubejs:incomplete_magic_century_egg" },
+        { "item": "minecraft:diamond" }
+      ],
+      "results": [{ "item": "kubejs:incomplete_magic_century_egg" }]
+    }
+  ],
+  "results": [{ "item": "kubejs:century_egg_vanilla_enriched" }]
+}
