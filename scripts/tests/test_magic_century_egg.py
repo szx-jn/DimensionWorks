@@ -100,8 +100,8 @@ class MagicCenturyEggContractTest(unittest.TestCase):
             "neoecoae:eco_computation_cell_l4",
             "neoecoae:eco_computation_cell_l6",
             "neoecoae:eco_computation_cell_l9",
-            "neoecoae:computation_parallel_core_l4",
-            "neoecoae:computation_threading_core_l4",
+            "neoecoae:eco_complex_omni_cell_housing",
+            "neoecoae:eco_quantum_omni_cell_housing",
         })
 
     def test_original_century_egg_is_removed_and_hidden(self) -> None:
