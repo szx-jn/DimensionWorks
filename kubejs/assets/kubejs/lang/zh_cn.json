@@ -96,5 +96,7 @@
   "item.kubejs.century_egg_industrial_enriched": "工业矩阵嵌合皮蛋芯",
   "item.kubejs.century_egg_ae_enriched": "AE 水晶矩阵嵌合皮蛋芯",
   "item.kubejs.century_egg_eco_enriched": "ECO 超导核心嵌合皮蛋芯",
-  "item.kubejs.century_egg_eco_components_enriched": "ECO 组件矩阵嵌合皮蛋芯"
+  "item.kubejs.century_egg_eco_components_enriched": "ECO 组件矩阵嵌合皮蛋芯",
+  "item.kubejs.incomplete_netherite_scrap": "未完成的下界合金碎片",
+  "item.kubejs.incomplete_netherite_scrap.tooltip": "六步序列组装中间件。内部金属特质必须与投入的高压结晶一致。"
 }
