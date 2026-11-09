@@ -45,6 +45,14 @@ StartupEvents.registry('item', event => {
     .displayName(Text.translate('item.kubejs.century_egg_industrial_enriched'))
     .texture('kaleidoscope_chinesefood:item/century_egg')
 
+  event.create('century_egg_ae_enriched')
+    .displayName(Text.translate('item.kubejs.century_egg_ae_enriched'))
+    .texture('kaleidoscope_chinesefood:item/century_egg')
+
+  event.create('century_egg_eco_enriched')
+    .displayName(Text.translate('item.kubejs.century_egg_eco_enriched'))
+    .texture('kaleidoscope_chinesefood:item/century_egg')
+
   event.create('incomplete_magic_century_egg', 'create:sequenced_assembly')
     .displayName(Text.translate('item.kubejs.incomplete_magic_century_egg'))
     .tooltip(Text.translate('item.kubejs.incomplete_magic_century_egg.tooltip'))

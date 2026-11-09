@@ -93,5 +93,7 @@
   "fluid.dimensionworks.forest_extract": "林地原液",
   "item.dimensionworks.forest_extract_bucket": "林地原液桶",
   "item.kubejs.century_egg_vanilla_enriched": "原版珍材嵌合皮蛋芯",
-  "item.kubejs.century_egg_industrial_enriched": "工业矩阵嵌合皮蛋芯"
+  "item.kubejs.century_egg_industrial_enriched": "工业矩阵嵌合皮蛋芯",
+  "item.kubejs.century_egg_ae_enriched": "AE 水晶矩阵嵌合皮蛋芯",
+  "item.kubejs.century_egg_eco_enriched": "ECO 超导核心嵌合皮蛋芯"
 }

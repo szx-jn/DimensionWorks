@@ -16,7 +16,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
             for path in sorted(RECIPE_DIR.glob("*.json"))
         ]
 
-        self.assertEqual(len(recipes), 7)
+        self.assertEqual(len(recipes), 9)
         self.assertFalse((RECIPE_DIR / "sequenced_assembly.json").exists())
         for recipe in recipes:
             if recipe["type"] == "create:sequenced_assembly":
@@ -31,6 +31,8 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertEqual(by_result["kubejs:century_egg_pressed"]["loops"], 8)
         self.assertEqual(by_result["kubejs:century_egg_vanilla_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:century_egg_industrial_enriched"]["loops"], 1)
+        self.assertEqual(by_result["kubejs:century_egg_ae_enriched"]["loops"], 1)
+        self.assertEqual(by_result["kubejs:century_egg_eco_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:magic_century_egg"]["loops"], 8)
         self.assertEqual(by_result["kubejs:century_egg_washed"]["type"], "create:splashing")
         self.assertEqual(smelting["result"], "kubejs:century_egg_smelted")
@@ -58,6 +60,30 @@ class MagicCenturyEggContractTest(unittest.TestCase):
             "mekanism:ultimate_control_circuit",
             "mekanism:alloy_atomic",
             "create:precision_mechanism",
+        })
+
+        ae_inputs = {
+            step["ingredients"][1]["item"]
+            for step in by_result["kubejs:century_egg_ae_enriched"]["sequence"]
+        }
+        self.assertEqual(ae_inputs, {
+            "ae2:cell_component_1k",
+            "ae2omnicells:complex_omni_cell_component_1k",
+            "ae2omnicells:quantum_omni_cell_component_1k",
+            "ae2:fluix_crystal",
+            "ae2:charged_certus_quartz_crystal",
+            "neoecoae:crystal_matrix",
+            "neoecoae:crystal_ingot",
+        })
+
+        eco_inputs = {
+            step["ingredients"][1]["item"]
+            for step in by_result["kubejs:century_egg_eco_enriched"]["sequence"]
+        }
+        self.assertEqual(eco_inputs, {
+            "neoecoae:energized_fluix_crystal",
+            "neoecoae:energized_superconductive_ingot",
+            "neoecoae:superconducting_processor",
         })
 
     def test_original_century_egg_is_removed_and_hidden(self) -> None:

@@ -1,53 +1,120 @@
 {
   "type": "create:sequenced_assembly",
-  "ingredient": { "item": "kubejs:century_egg_industrial_enriched" },
-  "transitionalItem": { "item": "kubejs:incomplete_magic_century_egg_final" },
+  "ingredient": {
+    "item": "kubejs:century_egg_eco_enriched"
+  },
+  "transitionalItem": {
+    "item": "kubejs:incomplete_magic_century_egg_final"
+  },
   "loops": 8,
   "sequence": [
     {
       "type": "create:pressing",
-      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg_final" }],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     },
     {
       "type": "create:pressing",
-      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg_final" }],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     },
     {
       "type": "create:pressing",
-      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg_final" }],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     },
     {
       "type": "create:cutting",
-      "ingredients": [{ "item": "kubejs:incomplete_magic_century_egg_final" }],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     },
     {
       "type": "create:filling",
       "ingredients": [
-        { "item": "kubejs:incomplete_magic_century_egg_final" },
-        { "amount": 1000, "fluid": "dimensionworks:molten_netherite", "nbt": {} }
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        },
+        {
+          "amount": 1000,
+          "fluid": "dimensionworks:molten_netherite",
+          "nbt": {}
+        }
       ],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     },
     {
       "type": "create:deploying",
       "ingredients": [
-        { "item": "kubejs:incomplete_magic_century_egg_final" },
-        { "tag": "twilightforest:logs" }
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        },
+        {
+          "tag": "twilightforest:logs"
+        }
       ],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     },
     {
       "type": "create:deploying",
       "ingredients": [
-        { "item": "kubejs:incomplete_magic_century_egg_final" },
-        { "item": "ae2omnicells:quantum_omni_cell_component_1k" }
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        },
+        {
+          "item": "ae2omnicells:quantum_omni_cell_component_1k"
+        }
       ],
-      "results": [{ "item": "kubejs:incomplete_magic_century_egg_final" }]
+      "results": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
     }
   ],
-  "results": [{ "item": "kubejs:magic_century_egg", "count": 1 }]
+  "results": [
+    {
+      "item": "kubejs:magic_century_egg",
+      "count": 1
+    }
+  ]
 }
