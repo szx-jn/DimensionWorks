@@ -46,6 +46,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
 
     def test_magic_egg_uses_stable_food_definition(self) -> None:
         startup = (ROOT / "kubejs" / "startup_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")
+        server = (ROOT / "kubejs" / "server_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")
 
         self.assertNotIn(".name(", startup)
         self.assertNotIn(".hunger(99999)", startup)
@@ -55,6 +56,18 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertIn(".effect('minecraft:levitation'", startup)
         self.assertIn(".eaten(dwMarkMagicEggEaten)", startup)
         self.assertIn("isBeneficial()", startup)
+        self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", startup)
+        self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", server)
+
+    def test_eating_again_triggers_death_immediately(self) -> None:
+        startup = (ROOT / "kubejs" / "startup_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")
+        server = (ROOT / "kubejs" / "server_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")
+
+        self.assertNotIn("DW_MAGIC_EGG_PENDING", startup)
+        self.assertNotIn("DW_MAGIC_EGG_DEADLINE", startup)
+        self.assertIn("if (data.getBoolean(DW_MAGIC_EGG_PENDING))", server)
+        self.assertIn("dwStartMagicEggFireworks(level, player.x, player.y, player.z)", server)
+        self.assertIn("player.hurt(level.damageSources().genericKill(), DW_MAGIC_EGG_DAMAGE)", server)
 
 
 if __name__ == "__main__":
