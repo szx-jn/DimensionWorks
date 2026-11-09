@@ -1,9 +1,10 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
+const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
+const $DWMagicEggBuiltInRegistries = Java.loadClass('net.minecraft.core.registries.BuiltInRegistries')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
 const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
-const DW_MAGIC_EGG_DAMAGE = 9999999999999
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
 const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
 
@@ -89,6 +90,15 @@ function dwTickMagicEggFireworks(event) {
 
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
+  const effects = $DWMagicEggBuiltInRegistries.MOB_EFFECT.iterator()
+  while (effects.hasNext()) {
+    const effect = effects.next()
+    if (!effect.isBeneficial()) continue
+    const effectId = $DWMagicEggBuiltInRegistries.MOB_EFFECT.getKey(effect)
+    if (effectId != null && effectId.toString() === 'minecraft:levitation') continue
+    player.addEffect(new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true, true))
+  }
+
   const data = player.persistentData
 
   if (data.getBoolean(DW_MAGIC_EGG_PENDING)) {
@@ -97,7 +107,7 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
 
     const level = player.level()
     dwStartMagicEggFireworks(level, player.x, player.y, player.z)
-    player.hurt(level.damageSources().genericKill(), DW_MAGIC_EGG_DAMAGE)
+    player.kill()
     return
   }
 
@@ -130,7 +140,7 @@ PlayerEvents.tick(event => {
   const y = player.y
   const z = player.z
   dwStartMagicEggFireworks(level, x, y, z)
-  player.hurt(level.damageSources().genericKill(), DW_MAGIC_EGG_DAMAGE)
+  player.kill()
 })
 
 ServerEvents.tick(event => dwTickMagicEggFireworks(event))
