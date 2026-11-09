@@ -15,7 +15,7 @@ class NetheriteScrapRecipeContractTest(unittest.TestCase):
             "minecraft:iron_ingot",
             "minecraft:gold_ingot",
             "minecraft:copper_ingot",
-            "#forge:ingots/enderium",
+            "ae2:ender_dust",
             "create:sturdy_sheet",
         ):
             self.assertIn(expected, script)
