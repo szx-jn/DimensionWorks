@@ -1,9 +1,7 @@
 const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
 const $DWMagicEggBuiltInRegistries = Java.loadClass('net.minecraft.core.registries.BuiltInRegistries')
 
-const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60
-const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
-const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
+const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
 
 function dwApplyMagicEggEffects(player) {
   const effects = $DWMagicEggBuiltInRegistries.MOB_EFFECT.iterator()
@@ -19,10 +17,7 @@ function dwApplyMagicEggEffects(player) {
 }
 
 function dwMarkMagicEggEaten(event) {
-  const player = event.player
-  dwApplyMagicEggEffects(player)
-  player.persistentData.putBoolean(DW_MAGIC_EGG_PENDING, true)
-  player.persistentData.putLong(DW_MAGIC_EGG_DEADLINE, player.age + DW_MAGIC_EGG_DURATION_TICKS)
+  dwApplyMagicEggEffects(event.player)
 }
 
 StartupEvents.registry('item', event => {
