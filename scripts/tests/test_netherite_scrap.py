@@ -23,6 +23,8 @@ class NetheriteScrapRecipeContractTest(unittest.TestCase):
         self.assertIn("Fluid.of('mekanism:sulfur_dioxide', 250)", script)
         self.assertIn("'kubejs:mixed_metal'", script)
         self.assertIn(".heated()", script)
+        self.assertNotIn("#forge:ingots/enderium", script)
+        self.assertIn("dimensionworks:netherite_scrap/mixed_metal", script)
 
     def test_only_netherite_high_pressure_crystal_assigns_the_trait(self) -> None:
         script = (ROOT / "kubejs/server_scripts/netherite_scrap_crystallization.js").read_text(encoding="utf-8")
@@ -32,6 +34,7 @@ class NetheriteScrapRecipeContractTest(unittest.TestCase):
         self.assertIn("type: 'create:deploying'", script)
         self.assertIn("type: 'create:pressing'", script)
         self.assertIn("count: 2", script)
+        self.assertIn("dimensionworks:netherite_scrap/from_mixed_metal", script)
         self.assertNotIn("DW_NETHERITE_CRYSTAL_METALS", script)
         self.assertNotIn("minecraft:echo_shard", script)
         self.assertNotIn("ae2:engineering_processor", script)
