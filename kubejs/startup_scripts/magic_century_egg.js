@@ -1,25 +1,3 @@
-const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
-const $DWMagicEggBuiltInRegistries = Java.loadClass('net.minecraft.core.registries.BuiltInRegistries')
-
-const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
-
-function dwApplyMagicEggEffects(player) {
-  const effects = $DWMagicEggBuiltInRegistries.MOB_EFFECT.iterator()
-  while (effects.hasNext()) {
-    const effect = effects.next()
-    if (!effect.isBeneficial()) continue
-
-    const effectId = $DWMagicEggBuiltInRegistries.MOB_EFFECT.getKey(effect)
-    const id = effectId == null ? '' : effectId.toString()
-    if (id === 'minecraft:absorption' || id === 'minecraft:levitation') continue
-    player.addEffect(new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true, true))
-  }
-}
-
-function dwMarkMagicEggEaten(event) {
-  dwApplyMagicEggEffects(event.player)
-}
-
 StartupEvents.registry('item', event => {
   event.create('century_egg_mixture')
     .displayName(Text.translate('item.kubejs.century_egg_mixture'))
@@ -80,12 +58,6 @@ StartupEvents.registry('item', event => {
       .hunger(20)
       .saturation(20)
       .alwaysEdible()
-      .effect('minecraft:absorption', DW_MAGIC_EGG_DURATION_TICKS, 9, 1)
-      .effect('minecraft:levitation', DW_MAGIC_EGG_DURATION_TICKS, 1, 1)
-      .effect('minecraft:jump_boost', DW_MAGIC_EGG_DURATION_TICKS, 4, 1)
-      .effect('minecraft:speed', DW_MAGIC_EGG_DURATION_TICKS, 4, 1)
-      .effect('minecraft:fire_resistance', DW_MAGIC_EGG_DURATION_TICKS, 4, 1)
-      .eaten(dwMarkMagicEggEaten)
     )
 })
 
