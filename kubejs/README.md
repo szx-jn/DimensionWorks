@@ -110,6 +110,14 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 `server_scripts/blaze_cake_redstone_cost.js` 统一替换所有产出 `create:blaze_cake_base` 的配方，要求鸡蛋、糖、灰烬粉（Create Cinder Flour）和 1 份红石粉经机械压制合成底料。原版将底料注入 250 mB 熔岩制成烈焰蛋糕的配方保留不变；这样附属模组若提供其他底料配方，也不会绕过红石成本。
 
+## 高压结晶制造下界合金碎片
+
+- `startup_scripts/netherite_scrap.js` 注册未完成的下界合金碎片中间物。
+- `server_scripts/netherite_scrap_crystallization.js` 为 21 种金属特质分别注册一条六步 Create 序列组装配方。
+- 每份高压结晶写入 `DimensionWorks.Metal` NBT，记录其来源金属；配方使用 Forge `partial_nbt` 精确限制该字段，起始结晶、追加结晶与中间物必须是同一种金属特质，不能混用。
+- 六步依次为：追加同特质高压结晶、装配原子合金、注入 500 mB 熔融下界合金、装配 AE2 工程处理器、装配回声碎片、机械压制定型，产出 1 个下界合金碎片。
+- 结晶物品 ID 不变，旧结晶没有来源 NBT 时不会匹配新配方；需要重新通过工作盆结晶获得。
+
 ## 熔融金属与特殊材料
 
 `startup_scripts/molten_metals.js` 通过可复用的 `MoltenMetalFluidDefinition` 注册 21 种熔融金属、合金与特殊材料流体，使用 `dimensionworks:` 命名空间并提供中英文名称。该脚本只注册流体，不自动添加熔炼、浇注或材料加工配方；这些配方应在后续服务端脚本中按各机器的实际能力分别实现。
