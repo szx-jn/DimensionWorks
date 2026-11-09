@@ -25,15 +25,12 @@ public final class PressureCrystallization {
 
     public static void process(BasinBlockEntity basin) {
         PressureTier tier = getPressureTier(basin);
-        if (tier == PressureTier.NONE) return;
-
         Item crystal = switch (tier) {
+            case NONE -> DimensionWorksPressureCrystals.USELESS_CRYSTAL.get();
             case LOW -> DimensionWorksPressureCrystals.LOW_PRESSURE_CRYSTAL.get();
             case MEDIUM -> DimensionWorksPressureCrystals.MEDIUM_PRESSURE_CRYSTAL.get();
             case HIGH -> DimensionWorksPressureCrystals.HIGH_PRESSURE_CRYSTAL.get();
-            case NONE -> null;
         };
-        if (crystal == null) return;
 
         for (var segment : basin.inputTank.getTanks()) {
             SmartFluidTank tank = ((BasinTankAccessor) (Object) segment).dimensionworks$getTank();
@@ -50,7 +47,9 @@ public final class PressureCrystallization {
             if (molten == null) continue;
 
             ItemStack crystalStack = new ItemStack(crystal, CRYSTAL_OUTPUT);
-            crystalStack.getOrCreateTagElement("DimensionWorks").putString("Metal", metal);
+            if (tier != PressureTier.NONE) {
+                crystalStack.getOrCreateTagElement("DimensionWorks").putString("Metal", metal);
+            }
             List<ItemStack> output = List.of(crystalStack);
             if (!basin.acceptOutputs(output, List.of(), true)) return;
             if (!basin.acceptOutputs(output, List.of(), false)) return;
