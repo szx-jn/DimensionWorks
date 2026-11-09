@@ -55,7 +55,6 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertEqual(industrial_inputs, {
             "ae2:engineering_processor",
             "ae2:cell_component_256k",
-            "ae2omnicells:quantum_omni_cell_component_1k",
             "mekanism:pellet_polonium",
             "mekanism:ultimate_control_circuit",
             "mekanism:alloy_atomic",

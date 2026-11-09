@@ -93,22 +93,6 @@
           "item": "kubejs:incomplete_magic_century_egg_final"
         }
       ]
-    },
-    {
-      "type": "create:deploying",
-      "ingredients": [
-        {
-          "item": "kubejs:incomplete_magic_century_egg_final"
-        },
-        {
-          "item": "ae2omnicells:quantum_omni_cell_component_1k"
-        }
-      ],
-      "results": [
-        {
-          "item": "kubejs:incomplete_magic_century_egg_final"
-        }
-      ]
     }
   ],
   "results": [
