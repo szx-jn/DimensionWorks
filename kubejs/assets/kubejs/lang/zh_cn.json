@@ -97,6 +97,8 @@
   "item.kubejs.century_egg_ae_enriched": "AE 水晶矩阵嵌合皮蛋芯",
   "item.kubejs.century_egg_eco_enriched": "ECO 超导核心嵌合皮蛋芯",
   "item.kubejs.century_egg_eco_components_enriched": "ECO 组件矩阵嵌合皮蛋芯",
-  "item.kubejs.incomplete_netherite_scrap": "未完成的下界合金碎片",
-  "item.kubejs.incomplete_netherite_scrap.tooltip": "六步序列组装中间件。内部金属特质必须与投入的高压结晶一致。"
+  "item.kubejs.incomplete_netherite_scrap": "下界合金特质混合金属",
+  "item.kubejs.incomplete_netherite_scrap.tooltip": "已由下界合金高压结晶赋予 netherite 特质，等待最终机械冲压。",
+  "item.kubejs.mixed_metal": "混合金属锭",
+  "item.kubejs.mixed_metal.tooltip": "由硫酸、二氧化硫与多种金属原料经化学冶金混合制成，尚未赋予金属特质。"
 }
