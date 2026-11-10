@@ -1064,9 +1064,9 @@ func downloadCandidates(source string) []string {
 	if err != nil || parsed.Scheme != "https" {
 		return candidates
 	}
-	if strings.EqualFold(parsed.Hostname(), "edge.forgecdn.net") {
-		// Match HMCL's CurseForge resolver: keep the official URL first,
-		// then retry the same path through MCIM if the CDN is unavailable.
+	if strings.EqualFold(parsed.Host, "edge.forgecdn.net") {
+		// Follow HMCL's MirrorRule pattern: preserve the official URL and add
+		// the MCIM equivalent as a fallback, keeping path and query unchanged.
 		mirror := *parsed
 		mirror.Host = "mod.mcimirror.top"
 		candidates = append(candidates, mirror.String())
