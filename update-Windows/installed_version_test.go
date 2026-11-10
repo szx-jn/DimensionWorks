@@ -161,13 +161,20 @@ func writeVersionTestPackage(t *testing.T, kind, version string, corrupt bool) s
 	if corrupt {
 		payload = "corrupt file"
 	}
-	for _, item := range []struct {
+	items := []struct {
 		name string
 		data []byte
 	}{
 		{manifestName, manifestBytes(kind, version, "none", []Entry{entry})},
 		{source, []byte(payload)},
-	} {
+	}
+	if kind == "client" {
+		items = append(items, struct {
+			name string
+			data []byte
+		}{"modrinth.index.json", []byte(`{"formatVersion":1,"game":"minecraft","files":[]}`)})
+	}
+	for _, item := range items {
 		member, err := writer.Create(item.name)
 		if err != nil {
 			t.Fatal(err)
