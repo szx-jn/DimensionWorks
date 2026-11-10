@@ -53,7 +53,6 @@ var errHTTPSDowngrade = errors.New("拒绝 HTTPS 下载重定向到不安全的 
 
 const (
 	repository          = "szx-jn/DimensionWorks"
-	manifestName        = "dimensionworks-update-manifest.tsv"
 	stateName           = ".dimensionworks-update/state.tsv"
 	stateSignatureName  = ".dimensionworks-update/state.tsv.hmac"
 	stateKeyName        = ".dimensionworks-update/state.key"
@@ -455,7 +454,7 @@ func updateInstance(root, kind string, opts Options) error {
 			return fmt.Errorf("无法打开本地更新包：%w", err)
 		}
 		defer fullPackage.Close()
-		target, err = embeddedManifest(fullPackage, kind)
+		target, err = packageManifest(packagePath, kind)
 		if err != nil {
 			return err
 		}
@@ -529,7 +528,7 @@ func updateInstance(root, kind string, opts Options) error {
 		return fmt.Errorf("更新清单类型错误：需要 %s，实际为 %s", kind, target.Kind)
 	}
 	if fullPackage != nil {
-		pkgManifest, err := embeddedManifest(fullPackage, kind)
+		pkgManifest, err := packageManifest(packagePath, kind)
 		if err != nil {
 			return err
 		}
@@ -584,7 +583,7 @@ func updateInstance(root, kind string, opts Options) error {
 			return fmt.Errorf("MRPack 无效：%w", err)
 		}
 		defer fullPackage.Close()
-		pkgManifest, err := embeddedManifest(fullPackage, kind)
+		pkgManifest, err := packageManifest(packagePath, kind)
 		if err != nil {
 			return err
 		}
@@ -734,7 +733,7 @@ func updateInstance(root, kind string, opts Options) error {
 				return fmt.Errorf("完整更新包无效：%w", err)
 			}
 			defer fullPackage.Close()
-			pkgManifest, err := embeddedManifest(fullPackage, kind)
+			pkgManifest, err := packageManifest(packagePath, kind)
 			if err != nil {
 				return err
 			}
@@ -2738,25 +2737,11 @@ func (a *Archive) Close() error {
 	return a.reader.Close()
 }
 
-func embeddedManifest(archive *Archive, kind string) (*Manifest, error) {
-	file := archive.entries[strings.ToLower(manifestName)]
-	if file == nil {
-		return nil, errors.New("完整更新包缺少内嵌更新清单")
-	}
-	if file.UncompressedSize64 > maxManifestBytes {
-		return nil, fmt.Errorf("完整包内的更新清单超过大小限制：%s", humanSize(int64(file.UncompressedSize64)))
-	}
-	reader, err := file.Open()
+func packageManifest(packagePath, kind string) (*Manifest, error) {
+	manifestPath := strings.TrimSuffix(packagePath, filepath.Ext(packagePath)) + "-update-manifest.tsv"
+	data, err := os.ReadFile(manifestPath)
 	if err != nil {
-		return nil, err
-	}
-	data, readErr := io.ReadAll(io.LimitReader(reader, maxManifestBytes+1))
-	closeErr := reader.Close()
-	if readErr != nil {
-		return nil, readErr
-	}
-	if closeErr != nil {
-		return nil, closeErr
+		return nil, fmt.Errorf("读取完整包配套的独立更新清单失败（%s）：%w", manifestPath, err)
 	}
 	return parseManifest(data, kind)
 }
