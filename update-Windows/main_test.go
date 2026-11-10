@@ -176,11 +176,22 @@ func TestDownloadCandidatesDoNotMirrorNonReleaseURLs(t *testing.T) {
 		"http://github.com/szx-jn/DimensionWorks/releases/download/v0.2.20/asset.zip",
 		"https://example.com/szx-jn/DimensionWorks/releases/download/v0.2.20/asset.zip",
 		"https://cdn.modrinth.com/data/example/versions/example/mod.jar",
+		"https://edge.forgecdn.net:8443/files/8941/689/mod.jar",
+		"https://sub.edge.forgecdn.net/files/8941/689/mod.jar",
 	} {
 		got := downloadCandidates(source)
 		if len(got) != 1 || got[0] != source {
 			t.Errorf("unrelated URL unexpectedly gained mirror candidates: %v", got)
 		}
+	}
+}
+
+func TestCurseForgeMirrorPreservesURLPathAndQuery(t *testing.T) {
+	source := "https://edge.forgecdn.net/files/8941/689/mod.jar?download=1"
+	got := downloadCandidates(source)
+	want := "https://mod.mcimirror.top/files/8941/689/mod.jar?download=1"
+	if len(got) != 2 || got[1] != want {
+		t.Fatalf("mirror URL = %v, want second candidate %q", got, want)
 	}
 }
 
