@@ -533,7 +533,7 @@ func updateInstance(root, kind string, opts Options) error {
 			return err
 		}
 		if pkgManifest.Version != target.Version || !bytes.Equal(pkgManifest.Bytes, target.Bytes) {
-			return errors.New("本地更新包中的清单与目标清单不一致")
+			return errors.New("本地完整包配套的独立清单与目标清单不一致")
 		}
 		if kind == "client" {
 			if _, err := validateClientMRPackIndex(fullPackage, target); err != nil {
@@ -583,14 +583,6 @@ func updateInstance(root, kind string, opts Options) error {
 			return fmt.Errorf("MRPack 无效：%w", err)
 		}
 		defer fullPackage.Close()
-		pkgManifest, err := packageManifest(packagePath, kind)
-		if err != nil {
-			return err
-		}
-		if pkgManifest.Version != target.Version || pkgManifest.Release != target.Release ||
-			!bytes.Equal(pkgManifest.Bytes, target.Bytes) {
-			return errors.New("MRPack 内嵌更新清单与目标清单不一致")
-		}
 		indexedFiles, err := validateClientMRPackIndex(fullPackage, target)
 		if err != nil {
 			return fmt.Errorf("MRPack 索引校验失败：%w", err)
@@ -733,14 +725,6 @@ func updateInstance(root, kind string, opts Options) error {
 				return fmt.Errorf("完整更新包无效：%w", err)
 			}
 			defer fullPackage.Close()
-			pkgManifest, err := packageManifest(packagePath, kind)
-			if err != nil {
-				return err
-			}
-			if pkgManifest.Version != target.Version || pkgManifest.Release != target.Release ||
-				!bytes.Equal(pkgManifest.Bytes, target.Bytes) {
-				return errors.New("完整更新包中的清单与目标清单不一致")
-			}
 		}
 		unpackedBytes, sizeErr := estimateArchiveBytes(fullPackage, archiveEntries)
 		if sizeErr != nil { return sizeErr }
