@@ -105,6 +105,8 @@ func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 		local, single      bool
 	}{
 		{"2", "", "超时", false, false},
+		{"22", "HTTP/1.1 403 Forbidden", "HTTP 403", false, true},
+		{"22", "HTTP/1.1 404 Not Found", "HTTP 404", false, true},
 		{"6", "", "域名解析", false, false},
 		{"7", "", "无法连接", false, false},
 		{"9", "", "磁盘空间", true, false},
