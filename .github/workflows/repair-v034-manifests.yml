@@ -1,0 +1,81 @@
+name: 修复 v0.3.34 独立更新清单
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/repair-v034-manifests.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 提取并验证历史清单
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          gh release download v0.3.34 --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'DimensionWorks-0.3.34.mrpack' --dir dist
+          gh release download v0.3.34 --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'DimensionWorks-Server-0.3.34.zip' --dir dist
+
+          extract_manifest() {
+            local archive="$1"
+            local kind="$2"
+            local output="$3"
+            mapfile -t paths < <(unzip -Z1 "$archive" | grep -E '(^|/)dimensionworks-update-manifest.tsv$' || true)
+            if [[ "${#paths[@]}" -ne 1 ]]; then
+              echo "Expected exactly one embedded manifest in $archive, found ${#paths[@]}" >&2
+              exit 1
+            fi
+            unzip -p "$archive" "${paths[0]}" > "$output"
+            python3 - "$kind" "$output" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          import pack_manifest
+          manifest = pack_manifest.parse_manifest(Path(sys.argv[2]).read_bytes(), expected_kind=sys.argv[1])
+          if manifest.version != "0.3.34" or manifest.release != "v0.3.34":
+              raise SystemExit(f"Unexpected manifest identity: {manifest.kind} {manifest.version} {manifest.release}")
+          print(f"Validated {manifest.kind} manifest: {manifest.version}, {len(manifest.entries)} entries")
+          PY
+          }
+
+          extract_manifest \
+            dist/DimensionWorks-0.3.34.mrpack client \
+            dist/DimensionWorks-0.3.34-update-manifest.tsv
+          extract_manifest \
+            dist/DimensionWorks-Server-0.3.34.zip server \
+            dist/DimensionWorks-Server-0.3.34-update-manifest.tsv
+          test -s dist/DimensionWorks-0.3.34-update-manifest.tsv
+          test -s dist/DimensionWorks-Server-0.3.34-update-manifest.tsv
+
+      - name: 补充 v0.3.34 独立 Release 资产
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload v0.3.34 \
+            dist/DimensionWorks-0.3.34-update-manifest.tsv \
+            dist/DimensionWorks-Server-0.3.34-update-manifest.tsv \
+            --repo "${GITHUB_REPOSITORY}" --clobber
+
+      - name: 验证 Release 资产
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view v0.3.34 --repo "${GITHUB_REPOSITORY}" --json assets \
+            --jq '.assets[].name' | grep -Fx 'DimensionWorks-0.3.34-update-manifest.tsv'
+          gh release view v0.3.34 --repo "${GITHUB_REPOSITORY}" --json assets \
+            --jq '.assets[].name' | grep -Fx 'DimensionWorks-Server-0.3.34-update-manifest.tsv'
