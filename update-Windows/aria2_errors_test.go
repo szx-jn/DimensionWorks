@@ -204,7 +204,11 @@ func TestPrepareAria2TriesNextWritableRoot(t *testing.T) {
 func TestPrepareAria2CleansUpFailedExecution(t *testing.T) {
 	root := t.TempDir()
 	data := []byte("invalid executable")
-	_, _, err := prepareBundledAria2([]string{root}, "aria2c", sha256Text(string(data)), data)
+	name := "aria2c"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	_, _, err := prepareBundledAria2([]string{root}, name, sha256Text(string(data)), data)
 	if err == nil || !strings.Contains(err.Error(), "架构") {
 		t.Fatalf("missing format error: %v", err)
 	}
