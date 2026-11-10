@@ -77,6 +77,7 @@ type Entry struct {
 	Algorithm string
 	Value     string
 	Source    string
+	Sources   []string
 }
 
 type Manifest struct {
@@ -687,7 +688,7 @@ func updateInstance(root, kind string, opts Options) error {
 					progressMu.Lock()
 					fmt.Printf("[下载] 远程文件：%s\n", entry.Path)
 					progressMu.Unlock()
-					if downloadErr := downloadVerified(entry.Source, stage, entry.Algorithm, entry.Value); downloadErr != nil {
+					if downloadErr := downloadVerifiedEntry(entry, stage); downloadErr != nil {
 						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
 					}
 				}
@@ -2461,6 +2462,22 @@ func humanSize(size int64) string {
 	return fmt.Sprintf("%d B", size)
 }
 
+func downloadVerifiedEntry(entry Entry, destination string) error {
+	if len(entry.Sources) == 0 {
+		return downloadVerified(entry.Source, destination, entry.Algorithm, entry.Value)
+	}
+	var failures []string
+	for _, source := range entry.Sources {
+		if err := downloadVerified(source, destination, entry.Algorithm, entry.Value); err == nil {
+			return nil
+		} else {
+			failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(source), safeErrorForLog(err)))
+			_ = os.Remove(destination)
+		}
+	}
+	return fmt.Errorf("MRPack 的 %d 个下载候选均失败：%s", len(entry.Sources), strings.Join(failures, "；"))
+}
+
 func downloadVerified(source, destination, algorithm, expected string) error {
 	if err := downloadFile(source, destination); err != nil {
 		return err
@@ -2784,10 +2801,10 @@ func validateClientMRPackIndex(archive *Archive, target *Manifest) (int, error) 
 		return 0, errors.New("MRPack 索引格式版本或游戏标识不受支持")
 	}
 
-	manifestFiles := make(map[string]Entry)
-	for _, entry := range target.Entries {
-		if entry.Action == "remote" {
-			manifestFiles[strings.ToLower(entry.Path)] = entry
+	manifestFiles := make(map[string]int)
+	for i := range target.Entries {
+		if target.Entries[i].Action == "remote" {
+			manifestFiles[strings.ToLower(target.Entries[i].Path)] = i
 		}
 	}
 	seen := make(map[string]bool)
@@ -2805,20 +2822,34 @@ func validateClientMRPackIndex(archive *Archive, target *Manifest) (int, error) 
 		}
 		seen[key] = true
 		sha512Value := strings.ToLower(item.Hashes["sha512"])
-		if len(item.Downloads) == 0 || item.Downloads[0] == "" {
+		if len(item.Downloads) == 0 {
 			return 0, fmt.Errorf("%s 缺少下载地址", item.Path)
+		}
+		sources := make([]string, 0, len(item.Downloads))
+		seenSources := make(map[string]bool)
+		for _, source := range item.Downloads {
+			candidate := Entry{
+				Action: "remote", Path: item.Path, Algorithm: "sha512",
+				Value: sha512Value, Source: source,
+			}
+			if err := validateEntry(candidate); err != nil {
+				return 0, fmt.Errorf("%s 下载候选地址无效：%w", item.Path, err)
+			}
+			if !seenSources[source] {
+				seenSources[source] = true
+				sources = append(sources, source)
+			}
 		}
 		candidate := Entry{
 			Action: "remote", Path: item.Path, Algorithm: "sha512",
-			Value: sha512Value, Source: item.Downloads[0],
+			Value: sha512Value, Source: sources[0],
 		}
-		if err := validateEntry(candidate); err != nil {
-			return 0, fmt.Errorf("%s：%w", item.Path, err)
-		}
-		entry, ok := manifestFiles[key]
-		if !ok || entry.Value != candidate.Value || entry.Source != candidate.Source {
+		entryIndex, ok := manifestFiles[key]
+		if !ok || target.Entries[entryIndex].Value != candidate.Value ||
+			target.Entries[entryIndex].Source != candidate.Source {
 			return 0, fmt.Errorf("MRPack 索引与更新清单不一致：%s", item.Path)
 		}
+		target.Entries[entryIndex].Sources = sources
 		indexed++
 	}
 	if indexed != len(manifestFiles) {
