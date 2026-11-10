@@ -17,6 +17,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"os"
+	"reflect"
 	"path/filepath"
 	"runtime"
 	"strings"
