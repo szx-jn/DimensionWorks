@@ -302,6 +302,9 @@ jobs:
           [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip" ]] || { echo "Missing server delta package" >&2; exit 1; }
           [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}.zip" ]] || { echo "Missing server full package" >&2; exit 1; }
           [[ -s "dist/DimensionWorks-${PACK_VERSION}.mrpack" ]] || { echo "Missing client MRPack" >&2; exit 1; }
+          [[ -s "dist/aria2-third-party-source.tar.gz" ]] || { echo "Missing aria2 corresponding source and license bundle" >&2; exit 1; }
+          [[ -s "dist/SHA256SUMS" ]] || { echo "Missing SHA256SUMS" >&2; exit 1; }
+          (cd dist && sha256sum --check SHA256SUMS)
           if compgen -G 'dist/aria2c-*' >/dev/null; then
             echo "Loose aria2 engines must not be published" >&2
             exit 1
@@ -349,6 +352,7 @@ jobs:
               "DimensionWorks-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
+              aria2-third-party-source.tar.gz \
               update-dimensionworks-client-windows-amd64.exe \
               update-dimensionworks-server-windows-amd64.exe \
               update-dimensionworks-client-linux-amd64 \
@@ -407,6 +411,8 @@ jobs:
             "dist/DimensionWorks-${PACK_VERSION}.mrpack"
             "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
             "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
+            "dist/aria2-third-party-source.tar.gz"
+            "dist/SHA256SUMS"
             "dist/update-dimensionworks-client-windows-amd64.exe"
             "dist/update-dimensionworks-server-windows-amd64.exe"
             "dist/update-dimensionworks-client-linux-amd64"
