@@ -18,7 +18,7 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def write_zip(path: Path, files: dict[str, bytes], manifest_version: str) -> None:
+def write_zip(path: Path, files: dict[str, bytes], manifest_version: str) -> pack_manifest.UpdateManifest:
     entries = tuple(
         pack_manifest.ManifestEntry(
             "archive",
@@ -39,7 +39,7 @@ def write_zip(path: Path, files: dict[str, bytes], manifest_version: str) -> Non
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
         for name, data in sorted(files.items()):
             archive.writestr(name, data)
-        archive.writestr(pack_manifest.MANIFEST_NAME, pack_manifest.render_manifest(manifest))
+    return manifest
 
 
 class ServerDeltaTest(unittest.TestCase):
@@ -50,12 +50,12 @@ class ServerDeltaTest(unittest.TestCase):
             new = root / "new.zip"
             output = root / "delta.zip"
             write_zip(base, {"mods/old.jar": b"old", "config/same.cfg": b"same"}, "0.0.1")
-            write_zip(
+            new_manifest = write_zip(
                 new,
                 {"mods/new.jar": b"new", "config/same.cfg": b"same", "config/changed.cfg": b"changed"},
                 "0.0.2",
             )
-            build_server_delta.build_server_delta(base, new, output)
+            build_server_delta.build_server_delta(base, new, output, new_manifest)
             with zipfile.ZipFile(output) as archive:
                 self.assertEqual(
                     sorted(archive.namelist()),
@@ -70,18 +70,17 @@ class ServerDeltaTest(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 self.assertEqual(archive.namelist(), [])
 
-    def test_rejects_new_zip_without_manifest(self) -> None:
+    def test_delta_does_not_require_or_embed_a_manifest_in_packages(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             base = root / "base.zip"
             new = root / "new.zip"
             output = root / "delta.zip"
-            with zipfile.ZipFile(base, "w") as archive:
-                archive.writestr("mods/a.jar", b"a")
-            with zipfile.ZipFile(new, "w") as archive:
-                archive.writestr("mods/a.jar", b"b")
-            with self.assertRaisesRegex(build_server_delta.DeltaError, "manifest"):
-                build_server_delta.build_server_delta(base, new, output)
+            write_zip(base, {"mods/a.jar": b"a"}, "0.0.1")
+            manifest = write_zip(new, {"mods/a.jar": b"b"}, "0.0.2")
+            build_server_delta.build_server_delta(base, new, output, manifest)
+            with zipfile.ZipFile(new) as archive:
+                self.assertNotIn(pack_manifest.MANIFEST_NAME, archive.namelist())
 
     def test_client_delta_contains_changed_archive_but_not_remote_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -118,8 +117,7 @@ class ServerDeltaTest(unittest.TestCase):
             ):
                 with zipfile.ZipFile(path, "w") as archive:
                     archive.writestr("overrides/config/value.cfg", data)
-                    archive.writestr(pack_manifest.MANIFEST_NAME, pack_manifest.render_manifest(manifest))
-            build_server_delta.build_client_delta(base, new, output)
+            build_server_delta.build_client_delta(base, new, output, manifest)
             with zipfile.ZipFile(output) as archive:
                 self.assertEqual(archive.namelist(), ["overrides/config/value.cfg"])
                 self.assertEqual(archive.read("overrides/config/value.cfg"), b"new")
