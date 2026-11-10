@@ -275,13 +275,16 @@
     {
       "id": "colorwheel",
       "name": "Colorwheel",
-      "source": "modrinth",
+      "source": "curseforge",
       "project_id": "BzHgFoGz",
-      "version": "1.2.1+mc1.20.1",
+      "version": "1.3.0+mc1.20.1",
       "version_id": "UGEPiYlo",
       "required": true,
       "environment": "client",
-      "url": "https://modrinth.com/mod/colorwheel"
+      "url": "https://www.curseforge.com/minecraft/mc-mods/colorwheel",
+      "project_slug": "colorwheel",
+      "file_id": 8990882,
+      "file_name": "colorwheel-forge-1.3.0+mc1.20.1.jar"
     },
     {
       "id": "colorwheel_patcher",
@@ -326,6 +329,17 @@
       "required": true,
       "environment": "both",
       "url": "https://modrinth.com/mod/create"
+    },
+    {
+      "id": "create_nowheel",
+      "name": "Create: Nowheel",
+      "source": "modrinth",
+      "project_id": "c47YxuuI",
+      "version": "2.1.1+1.20.1forge",
+      "version_id": "CkJBSEnO",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/create-nowheel"
     },
     {
       "id": "create_additional_logistics",
@@ -658,6 +672,17 @@
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/drippy-loading-screen"
+    },
+    {
+      "id": "entity_culling",
+      "name": "Entity Culling",
+      "source": "modrinth",
+      "project_id": "NNAgCjsB",
+      "version": "1.8.1-1.20.1",
+      "version_id": "UOhdZxPT",
+      "required": true,
+      "environment": "client",
+      "url": "https://modrinth.com/mod/entityculling"
     },
     {
       "id": "embeddium",
