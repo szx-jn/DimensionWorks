@@ -46,7 +46,6 @@ def main() -> None:
             manifest = manifest.encode()
         (web / "DimensionWorks-Server-0.2.73-update-manifest.tsv").write_bytes(manifest)
         with zipfile.ZipFile(web / "DimensionWorks-Server-0.2.73.zip", "w") as archive:
-            archive.writestr(pack_manifest.MANIFEST_NAME, manifest)
             for name, data in files.items():
                 archive.writestr(name, data)
 
