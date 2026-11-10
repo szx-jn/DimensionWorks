@@ -61,7 +61,7 @@ archive	config/example.cfg	sha256	<hash>	overrides/config/example.cfg
 
 路径必须是规范相对路径，禁止绝对路径、`..`、反斜杠、控制字符、符号链接与重复项。服务端清单中的所有文件均为 `archive`；客户端远程 Mod 和光影为 `remote`，`overrides/` 与元数据为 `archive`。
 
-`.mrpack` 与完整服务端 ZIP 内各自携带同一格式的 `dimensionworks-update-manifest.tsv`，便于使用本地包更新。发布的独立清单与包内清单内容一致。清单自身不列为受管文件。
+更新清单必须作为独立 Release 资产发布，客户端和服务端完整包均严禁内嵌 TSV。使用本地完整包更新时，更新器读取与包同目录、同版本命名的 `*-update-manifest.tsv` 配套文件；远程更新从 Release 下载该独立资产。清单自身不列为受管文件。
 
 ## 客户端受管范围
 
