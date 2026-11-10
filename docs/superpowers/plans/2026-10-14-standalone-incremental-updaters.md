@@ -51,7 +51,7 @@
 1. 清单库校验 TSV 头部、字段数、action、算法、摘要长度、路径安全、kind、版本和重复路径。
 2. `make_client_manifest` 把远程 Mod/光影转为 `remote`，把 `overrides/` 内容和 `modrinth.index.json` 转为 `archive`；远程条目使用现有 SHA-512，归档条目计算 SHA-256。
 3. `make_server_manifest` 扫描 staging 中所有文件，排除 `dimensionworks-update-manifest.tsv`，全部生成 `archive`。
-4. `package_mrpack.py --manifest-output` 写独立客户端清单，且 `.mrpack` 根目录写 `dimensionworks-update-manifest.tsv`；`package_server.py` 同样提供 `--manifest-output`。
+4. `package_mrpack.py --manifest-output` 与 `package_server.py --manifest-output` 只写独立 TSV；客户端 MRPack 和服务端 ZIP 均禁止内嵌清单。
 5. 打包输出前验证归档中不存在四个更新脚本名；`pack_hook.py` 增加清单格式、脚本源文件存在、禁止内嵌脚本和资产命名检查。
 6. 测试覆盖：正常 round-trip、非法路径、重复路径、错误 kind、错误摘要、客户端远程/归档映射、服务端排除清单文件、脚本禁止内嵌。
 
