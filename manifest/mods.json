@@ -331,7 +331,7 @@
       "url": "https://modrinth.com/mod/create"
     },
     {
-      "id": "create_nowheel",
+      "id": "nowheel",
       "name": "Create: Nowheel",
       "source": "modrinth",
       "project_id": "c47YxuuI",
@@ -674,7 +674,7 @@
       "url": "https://modrinth.com/mod/drippy-loading-screen"
     },
     {
-      "id": "entity_culling",
+      "id": "entityculling",
       "name": "Entity Culling",
       "source": "modrinth",
       "project_id": "NNAgCjsB",
