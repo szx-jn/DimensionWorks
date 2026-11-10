@@ -1061,10 +1061,21 @@ func downloadFile(source, destination string) error {
 func downloadCandidates(source string) []string {
 	candidates := []string{source}
 	parsed, err := url.Parse(source)
-	if err != nil || parsed.Scheme != "https" || parsed.Host != "github.com" || !strings.Contains(parsed.Path, "/releases/download/") {
+	if err != nil || parsed.Scheme != "https" {
 		return candidates
 	}
-	return append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
+	if strings.EqualFold(parsed.Hostname(), "edge.forgecdn.net") {
+		// Match HMCL's CurseForge resolver: keep the official URL first,
+		// then retry the same path through MCIM if the CDN is unavailable.
+		mirror := *parsed
+		mirror.Host = "mod.mcimirror.top"
+		candidates = append(candidates, mirror.String())
+		return candidates
+	}
+	if parsed.Host == "github.com" && strings.Contains(parsed.Path, "/releases/download/") {
+		return append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
+	}
+	return candidates
 }
 
 func safeURLForLog(raw string) string {
@@ -1420,14 +1431,8 @@ func findAria2ExecutablePath() (string, error) {
 }
 
 func downloadWithAria2(parent context.Context, enginePath, source, destination string, maxBytes int64) error {
-	connections := 16
-	if parsed, err := url.Parse(source); err == nil && strings.EqualFold(parsed.Hostname(), "edge.forgecdn.net") {
-		// CurseForge's edge endpoint can return 404 for ranged requests.
-		// Keep its downloads single-connection; other sources retain parallelism.
-		connections = 1
-	}
 	for attempt := 0; ; attempt++ {
-		err := downloadWithAria2Connections(parent, enginePath, source, destination, maxBytes, connections)
+		err := downloadWithAria2Connections(parent, enginePath, source, destination, maxBytes, 16)
 		var engineErr *aria2Error
 		if parent.Err() != nil || attempt >= 2 || !errors.As(err, &engineErr) { return err }
 		detail := strings.ToLower(engineErr.detail)
