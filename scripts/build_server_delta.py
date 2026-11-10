@@ -50,27 +50,19 @@ def _digest(archive: zipfile.ZipFile, info: zipfile.ZipInfo, algorithm: str) -> 
     return digest.hexdigest()
 
 
-def _manifest(archive: zipfile.ZipFile, kind: str) -> pack_manifest.UpdateManifest:
-    try:
-        data = archive.read(pack_manifest.MANIFEST_NAME)
-    except KeyError as error:
-        raise DeltaError(f"{kind} package has no update manifest") from error
-    return pack_manifest.parse_manifest(data, expected_kind=kind)
-
-
 def build_delta(
     base_zip: Path,
     new_zip: Path,
     output: Path,
     *,
     kind: str,
-    manifest: pack_manifest.UpdateManifest | None = None,
+    manifest: pack_manifest.UpdateManifest,
 ) -> Path:
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(base_zip) as base, zipfile.ZipFile(new_zip) as new:
         base_members = _members(base)
         new_members = _members(new)
-        update_manifest = manifest or _manifest(new, kind)
+        update_manifest = manifest
         if update_manifest.kind != kind:
             raise DeltaError(f"delta manifest must be a {kind} manifest")
         changed: list[str] = []
@@ -142,19 +134,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", type=Path)
     parser.add_argument("--new", type=Path, required=True)
+    parser.add_argument("--manifest", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--kind", choices=("client", "server"), default="server")
     parser.add_argument("--empty", action="store_true")
     args = parser.parse_args()
     try:
         if args.empty:
-            if args.base is not None:
-                raise DeltaError("--empty cannot be combined with --base")
+            if args.base is not None or args.manifest is not None:
+                raise DeltaError("--empty cannot be combined with --base or --manifest")
             write_empty_delta(args.output)
         else:
-            if args.base is None:
-                raise DeltaError("--base is required unless --empty is used")
-            build_delta(args.base, args.new, args.output, kind=args.kind)
+            if args.base is None or args.manifest is None:
+                raise DeltaError("--base and --manifest are required unless --empty is used")
+            update_manifest = pack_manifest.parse_manifest(
+                args.manifest.read_bytes(), expected_kind=args.kind
+            )
+            build_delta(args.base, args.new, args.output, kind=args.kind, manifest=update_manifest)
     except (OSError, ValueError, zipfile.BadZipFile, DeltaError) as error:
         print(f"DELTA FAIL: {error}")
         return 1
