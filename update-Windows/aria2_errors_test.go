@@ -116,6 +116,7 @@ func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 		{"1", "Failed to establish connection, cause: Connection refused", "连接被拒绝", false, false},
 		{"1", "unknown download failure", "原始信息", false, false},
 		{"1", "SSL certificate verify failed", "证书", false, false},
+		{"", "This version of %1 is not compatible with the version of Windows.", "架构", true, false},
 		{"0", "unknown engine failure", "原始信息", false, false},
 		{"", "signal: segmentation fault", "段错误", true, false},
 	} {
