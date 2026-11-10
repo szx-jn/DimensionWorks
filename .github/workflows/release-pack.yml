@@ -189,46 +189,6 @@ jobs:
             "${dimension_args[@]}" \
             --skip-build
 
-      - name: 生成客户端增量更新包
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PACK_VERSION: ${{ steps.version.outputs.version }}
-          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
-        run: |
-          set -euo pipefail
-          delta="dist/DimensionWorks-${PACK_VERSION}-delta.zip"
-          if [[ -n "$LATEST_TAG" ]]; then
-            previous_version="${LATEST_TAG#v}"
-            previous="$RUNNER_TEMP/DimensionWorks-${previous_version}.mrpack"
-            gh release download "$LATEST_TAG" \
-              --pattern "DimensionWorks-${previous_version}.mrpack" \
-              --dir "$(dirname "$previous")" \
-              --clobber
-            python3 scripts/build_server_delta.py \
-              --kind client \
-              --base "$previous" \
-              --new "dist/DimensionWorks-${PACK_VERSION}.mrpack" \
-              --output "$delta"
-          else
-            python3 scripts/build_server_delta.py \
-              --kind client \
-              --new "dist/DimensionWorks-${PACK_VERSION}.mrpack" \
-              --output "$delta" \
-              --empty
-          fi
-
-      - name: 收集独立遮挡优化模组
-        run: |
-          set -euo pipefail
-          jar="mods/dimensionworks-create-culling/build/libs/dimensionworks_create_culling-0.1.0.jar"
-          test -s "$jar"
-          unzip -t "$jar" >/dev/null
-          if unzip -Z1 "$jar" | grep -q 'ClientRenderProbe'; then
-            echo "Test probe must not be included in the release mod" >&2
-            exit 1
-          fi
-          cp "$jar" dist/
-
       - name: 配置 Go 环境
         uses: actions/setup-go@v5
         with:
@@ -339,6 +299,9 @@ jobs:
           [[ "$server_version" == "$PACK_VERSION" ]] || { echo "Server VERSION mismatch: $server_version != $PACK_VERSION" >&2; exit 1; }
           echo "Client and server VERSION verified: $PACK_VERSION"
           [[ "$(find dist -maxdepth 1 -type f -name 'update-dimensionworks-*' | wc -l)" -eq 6 ]] || { echo "Expected exactly six updater binaries" >&2; exit 1; }
+          [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip" ]] || { echo "Missing server delta package" >&2; exit 1; }
+          [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}.zip" ]] || { echo "Missing server full package" >&2; exit 1; }
+          [[ -s "dist/DimensionWorks-${PACK_VERSION}.mrpack" ]] || { echo "Missing client MRPack" >&2; exit 1; }
           if compgen -G 'dist/aria2c-*' >/dev/null; then
             echo "Loose aria2 engines must not be published" >&2
             exit 1
@@ -362,9 +325,6 @@ jobs:
           file update-Windows/aria2-runtime/aria2c-linux-amd64 | grep -q 'ELF 64-bit'
           file update-Windows/aria2-runtime/aria2c-macos-arm64 | grep -q 'Mach-O 64-bit'
           tar -tzf dist/aria2-third-party-source.tar.gz >/dev/null
-          if [[ "$(wc -c < "dist/DimensionWorks-${PACK_VERSION}-delta.zip")" -gt 22 ]]; then
-            unzip -t "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
-          fi
           if [[ "$(wc -c < "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip")" -gt 22 ]]; then
             unzip -t "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
           fi
@@ -390,7 +350,6 @@ jobs:
             cd dist
             sha256sum \
               "DimensionWorks-${PACK_VERSION}.mrpack" \
-              "DimensionWorks-${PACK_VERSION}-delta.zip" \
               "DimensionWorks-Server-${PACK_VERSION}.zip" \
               "DimensionWorks-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
@@ -401,8 +360,6 @@ jobs:
               update-dimensionworks-server-linux-amd64 \
               update-dimensionworks-client-macos-arm64 \
               update-dimensionworks-server-macos-arm64 \
-              aria2-third-party-source.tar.gz \
-              dimensionworks_create_culling-0.1.0.jar \
               > SHA256SUMS
           )
 
@@ -453,10 +410,7 @@ jobs:
           )"
           assets=(
             "dist/DimensionWorks-${PACK_VERSION}.mrpack"
-            "dist/DimensionWorks-${PACK_VERSION}-delta.zip"
             "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
-            "dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv"
-            "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"
             "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
             "dist/update-dimensionworks-client-windows-amd64.exe"
             "dist/update-dimensionworks-server-windows-amd64.exe"
@@ -464,9 +418,6 @@ jobs:
             "dist/update-dimensionworks-server-linux-amd64"
             "dist/update-dimensionworks-client-macos-arm64"
             "dist/update-dimensionworks-server-macos-arm64"
-            "dist/aria2-third-party-source.tar.gz"
-            "dist/dimensionworks_create_culling-0.1.0.jar"
-            dist/SHA256SUMS
           )
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists; refusing to overwrite it." >&2
