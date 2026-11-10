@@ -46,6 +46,8 @@ class ReleaseWorkflowTest(unittest.TestCase):
         self.assertEqual(len(updaters), 6)
         self.assertEqual(len(set(updaters)), 6)
         self.assertNotIn('"dist/aria2c-', assets)
+        self.assertIn('"dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv"', assets)
+        self.assertIn('"dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"', assets)
         self.assertIn("go build -tags bundled_aria2", text)
         self.assertIn("python3 scripts/prepare_aria2.py", text)
 
