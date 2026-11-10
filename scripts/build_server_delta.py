@@ -112,12 +112,16 @@ def build_delta(
     return output
 
 
-def build_server_delta(base_zip: Path, new_zip: Path, output: Path) -> Path:
-    return build_delta(base_zip, new_zip, output, kind="server")
+def build_server_delta(
+    base_zip: Path, new_zip: Path, output: Path, manifest: pack_manifest.UpdateManifest
+) -> Path:
+    return build_delta(base_zip, new_zip, output, kind="server", manifest=manifest)
 
 
-def build_client_delta(base_zip: Path, new_zip: Path, output: Path) -> Path:
-    return build_delta(base_zip, new_zip, output, kind="client")
+def build_client_delta(
+    base_zip: Path, new_zip: Path, output: Path, manifest: pack_manifest.UpdateManifest
+) -> Path:
+    return build_delta(base_zip, new_zip, output, kind="client", manifest=manifest)
 
 
 def write_empty_delta(output: Path) -> Path:
