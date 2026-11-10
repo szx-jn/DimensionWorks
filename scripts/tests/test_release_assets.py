@@ -70,7 +70,14 @@ class ReleaseWorkflowTest(unittest.TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("Updater script embedded in client package", text)
         self.assertIn("Updater script embedded in server package", text)
-        self.assertIn("cmp \"dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv\"", text)
+        self.assertIn('--manifest "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"', text)
+        self.assertIn("must remain a standalone Release asset", text)
+        self.assertNotIn("unzip -p \"dist/DimensionWorks-${PACK_VERSION}.mrpack\"", text)
+        self.assertNotIn("unzip -p \"dist/DimensionWorks-Server-${PACK_VERSION}.zip\"", text)
+        client_packager = (ROOT / "scripts" / "package_mrpack.py").read_text(encoding="utf-8")
+        server_packager = (ROOT / "scripts" / "package_server.py").read_text(encoding="utf-8")
+        self.assertNotIn("archive.write(staging / pack_manifest.MANIFEST_NAME", client_packager)
+        self.assertNotIn("(staging / pack_manifest.MANIFEST_NAME).write_bytes", server_packager)
 
     def test_server_packager_supports_explicit_minor_release(self) -> None:
         text = (ROOT / "scripts" / "package_server.py").read_text(encoding="utf-8")
