@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"errors"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"os"
 	"path/filepath"
@@ -613,6 +614,43 @@ func writeTestMRPack(t *testing.T, index string) *Archive {
 	if err != nil { t.Fatal(err) }
 	t.Cleanup(func() { _ = archive.Close() })
 	return archive
+}
+
+func TestSelectChangesDownloadsOnlyChangedMRPackFiles(t *testing.T) {
+	root := t.TempDir()
+	unchangedData := []byte("same-mod-content")
+	oldChangedData := []byte("old-mod-content")
+	newChangedData := []byte("new-mod-content")
+	for name, data := range map[string][]byte{
+		"unchanged.jar": unchangedData,
+		"changed.jar": oldChangedData,
+	} {
+		path := filepath.Join(root, "mods", name)
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil { t.Fatal(err) }
+		if err := os.WriteFile(path, data, 0644); err != nil { t.Fatal(err) }
+	}
+	sum := func(data []byte) string {
+		digest := sha512.Sum512(data)
+		return hex.EncodeToString(digest[:])
+	}
+	currentEntries := []Entry{
+		{Action: "remote", Path: "mods/unchanged.jar", Algorithm: "sha512", Value: sum(unchangedData), Source: "https://example.com/unchanged.jar"},
+		{Action: "remote", Path: "mods/changed.jar", Algorithm: "sha512", Value: sum(oldChangedData), Source: "https://example.com/old.jar"},
+	}
+	targetEntries := []Entry{
+		{Action: "remote", Path: "mods/unchanged.jar", Algorithm: "sha512", Value: sum(unchangedData), Source: "https://example.com/unchanged.jar"},
+		{Action: "remote", Path: "mods/changed.jar", Algorithm: "sha512", Value: sum(newChangedData), Source: "https://example.com/new.jar"},
+	}
+	current, err := parseManifest(manifestBytes("client", "1.0.0", "v0.9.9", currentEntries), "client")
+	if err != nil { t.Fatal(err) }
+	target, err := parseManifest(manifestBytes("client", "1.0.1", "v1.0.0", targetEntries), "client")
+	if err != nil { t.Fatal(err) }
+	selected, deleted, err := selectChanges(root, "client", current, target)
+	if err != nil { t.Fatal(err) }
+	if len(selected) != 1 || selected[0].Path != "mods/changed.jar" {
+		t.Fatalf("expected only changed.jar to be selected, got %#v", selected)
+	}
+	if len(deleted) != 0 { t.Fatalf("unexpected deletions: %v", deleted) }
 }
 
 func TestValidateClientMRPackIndexMatchesManifest(t *testing.T) {
