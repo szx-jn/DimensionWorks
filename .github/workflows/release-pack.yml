@@ -291,6 +291,21 @@ jobs:
           PACK_VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
+          (
+            cd dist
+            sha256sum \
+              "DimensionWorks-${PACK_VERSION}.mrpack" \
+              "DimensionWorks-Server-${PACK_VERSION}.zip" \
+              "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
+              aria2-third-party-source.tar.gz \
+              update-dimensionworks-client-windows-amd64.exe \
+              update-dimensionworks-server-windows-amd64.exe \
+              update-dimensionworks-client-linux-amd64 \
+              update-dimensionworks-server-linux-amd64 \
+              update-dimensionworks-client-macos-arm64 \
+              update-dimensionworks-server-macos-arm64 \
+              > SHA256SUMS
+          )
           unzip -t "dist/DimensionWorks-${PACK_VERSION}.mrpack"
           unzip -t "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
           client_version="$(unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" overrides/VERSION | tr -d '\r\n')"
@@ -344,22 +359,6 @@ jobs:
             echo "Updater script embedded in server package" >&2
             exit 1
           fi
-          (
-            cd dist
-            sha256sum \
-              "DimensionWorks-${PACK_VERSION}.mrpack" \
-              "DimensionWorks-Server-${PACK_VERSION}.zip" \
-              "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
-              aria2-third-party-source.tar.gz \
-              update-dimensionworks-client-windows-amd64.exe \
-              update-dimensionworks-server-windows-amd64.exe \
-              update-dimensionworks-client-linux-amd64 \
-              update-dimensionworks-server-linux-amd64 \
-              update-dimensionworks-client-macos-arm64 \
-              update-dimensionworks-server-macos-arm64 \
-              > SHA256SUMS
-          )
-
       - name: 上传打包产物
         uses: actions/upload-artifact@v4
         with:
