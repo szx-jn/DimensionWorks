@@ -1543,10 +1543,12 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		"--dir=" + filepath.Dir(destination),
 		"--out=" + filepath.Base(destination),
 	}
-	certificateArgs, cleanupCertificates, err := prepareAria2Certificates(ctx)
-	if err != nil { return newAria2Error("准备证书", "", err, "无法读取系统受信任根证书") }
-	defer cleanupCertificates()
-	args = append(args, certificateArgs...)
+	if strings.HasPrefix(source, "https://") {
+		certificateArgs, cleanupCertificates, err := prepareAria2Certificates(ctx)
+		if err != nil { return newAria2Error("准备证书", "", err, "无法读取系统受信任根证书") }
+		defer cleanupCertificates()
+		args = append(args, certificateArgs...)
+	}
 	// Match Go's proxy selection, including NO_PROXY, for the engine process.
 	proxyURL := ""
 	if request, err := http.NewRequest(http.MethodGet, source, nil); err == nil {
