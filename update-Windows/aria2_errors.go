@@ -102,7 +102,7 @@ func (e *aria2Error) explanation() (string, string) {
 		return "系统拒绝执行引擎或写入文件", "检查目录权限、noexec 挂载和安全软件；可将更新器移到可写且允许执行的目录后重试。"
 	case strings.Contains(detail, "no space left") || e.code == "9":
 		return "磁盘空间不足", "释放实例与临时目录所在磁盘的空间后重试。"
-	case strings.Contains(detail, "exec format") || strings.Contains(detail, "bad cpu") || strings.Contains(detail, "not a valid win32 application"):
+	case strings.Contains(detail, "exec format") || strings.Contains(detail, "bad cpu") || strings.Contains(detail, "not a valid win32 application") || strings.Contains(detail, "not compatible with the version of windows"):
 		return "引擎与操作系统或 CPU 架构不匹配", "请使用对应 Windows amd64、Linux amd64 或 macOS arm64 的正式更新器。"
 	case e.stage != "下载任务" && (strings.Contains(detail, "shared librar") || strings.Contains(detail, "dyld") || strings.Contains(detail, "dll")):
 		return "系统无法加载引擎的运行依赖", "检查原始信息中缺少的系统组件，或换用受支持系统上的对应更新器。"
