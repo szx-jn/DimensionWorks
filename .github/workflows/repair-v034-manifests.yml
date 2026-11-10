@@ -79,3 +79,5 @@ jobs:
             --jq '.assets[].name' | grep -Fx 'DimensionWorks-0.3.34-update-manifest.tsv'
           gh release view v0.3.34 --repo "${GITHUB_REPOSITORY}" --json assets \
             --jq '.assets[].name' | grep -Fx 'DimensionWorks-Server-0.3.34-update-manifest.tsv'
+
+# Trigger repair workflow after it is present on the default branch.
