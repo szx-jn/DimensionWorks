@@ -535,6 +535,11 @@ func updateInstance(root, kind string, opts Options) error {
 		if pkgManifest.Version != target.Version || !bytes.Equal(pkgManifest.Bytes, target.Bytes) {
 			return errors.New("本地更新包中的清单与目标清单不一致")
 		}
+		if kind == "client" {
+			if _, err := validateClientMRPackIndex(fullPackage, target); err != nil {
+				return fmt.Errorf("MRPack 索引校验失败：%w", err)
+			}
+		}
 	}
 
 	statePath := filepath.Join(root, filepath.FromSlash(stateName))
@@ -554,6 +559,38 @@ func updateInstance(root, kind string, opts Options) error {
 		return fmt.Errorf("无法比较版本号：%w", compareErr)
 	} else if comparison < 0 && !opts.AllowDowngrade {
 		return fmt.Errorf("拒绝将版本从 %s 降级到 %s；如确认需要降级，请显式添加 --allow-downgrade", installedVersion, target.Version)
+	}
+
+	// Client MRPack archives contain the authoritative file index and overrides,
+	// not every third-party mod JAR. Download the archive first, then use its
+	// index to validate the target manifest and fetch only files whose hashes differ.
+	if kind == "client" && fullPackage == nil {
+		if fullPackageURL == "" {
+			fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
+		}
+		packagePath := filepath.Join(work, "full-package.mrpack")
+		fmt.Println("[下载] 获取完整 MRPack 文件索引与配置覆盖包：", filepath.Base(fullPackageURL))
+		if err := downloadArchiveWithManualFallback(fullPackageURL, packagePath); err != nil {
+			return err
+		}
+		fullPackage, err = openArchive(packagePath)
+		if err != nil {
+			return fmt.Errorf("MRPack 无效：%w", err)
+		}
+		defer fullPackage.Close()
+		pkgManifest, err := embeddedManifest(fullPackage, kind)
+		if err != nil {
+			return err
+		}
+		if pkgManifest.Version != target.Version || pkgManifest.Release != target.Release ||
+			!bytes.Equal(pkgManifest.Bytes, target.Bytes) {
+			return errors.New("MRPack 内嵌更新清单与目标清单不一致")
+		}
+		indexedFiles, err := validateClientMRPackIndex(fullPackage, target)
+		if err != nil {
+			return fmt.Errorf("MRPack 索引校验失败：%w", err)
+		}
+		fmt.Printf("[MRPack] 已核对 %d 个客户端文件；接下来只下载本地缺失或摘要不同的文件。\n", indexedFiles)
 	}
 
 	selected, deletions, err := selectChanges(root, kind, current, target)
@@ -599,6 +636,22 @@ func updateInstance(root, kind string, opts Options) error {
 	}
 	if userBackup != "" {
 		fmt.Println("[保护] 已备份被更新覆盖的本地修改：", userBackup)
+	}
+	if kind == "client" {
+		selectedRemote := 0
+		totalRemote := 0
+		for _, entry := range target.Entries {
+			if entry.Action == "remote" {
+				totalRemote++
+			}
+		}
+		for _, entry := range selected {
+			if entry.Action == "remote" {
+				selectedRemote++
+			}
+		}
+		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件，仅需下载 %d 个；%d 个保持原样。\n",
+			totalRemote, selectedRemote, totalRemote-selectedRemote)
 	}
 	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
 	stageRoot := filepath.Join(work, "stage")
@@ -2682,6 +2735,96 @@ func embeddedManifest(archive *Archive, kind string) (*Manifest, error) {
 		return nil, closeErr
 	}
 	return parseManifest(data, kind)
+}
+
+type modrinthIndex struct {
+	FormatVersion int                 `json:"formatVersion"`
+	Game          string              `json:"game"`
+	Files         []modrinthIndexFile `json:"files"`
+}
+
+type modrinthIndexFile struct {
+	Path      string            `json:"path"`
+	Hashes    map[string]string `json:"hashes"`
+	Downloads []string          `json:"downloads"`
+	Env       map[string]string `json:"env"`
+}
+
+func validateClientMRPackIndex(archive *Archive, target *Manifest) (int, error) {
+	if archive == nil {
+		return 0, errors.New("缺少 MRPack")
+	}
+	file := archive.entries["modrinth.index.json"]
+	if file == nil {
+		return 0, errors.New("MRPack 缺少 modrinth.index.json")
+	}
+	if file.UncompressedSize64 > maxManifestBytes {
+		return 0, fmt.Errorf("MRPack 索引超过大小限制：%s", humanSize(int64(file.UncompressedSize64)))
+	}
+	reader, err := file.Open()
+	if err != nil {
+		return 0, err
+	}
+	data, readErr := io.ReadAll(io.LimitReader(reader, maxManifestBytes+1))
+	closeErr := reader.Close()
+	if readErr != nil {
+		return 0, readErr
+	}
+	if closeErr != nil {
+		return 0, closeErr
+	}
+	if int64(len(data)) > maxManifestBytes {
+		return 0, errors.New("MRPack 索引超过大小限制")
+	}
+	var index modrinthIndex
+	if err := json.Unmarshal(data, &index); err != nil {
+		return 0, fmt.Errorf("解析 modrinth.index.json 失败：%w", err)
+	}
+	if index.FormatVersion != 1 || index.Game != "minecraft" {
+		return 0, errors.New("MRPack 索引格式版本或游戏标识不受支持")
+	}
+
+	manifestFiles := make(map[string]Entry)
+	for _, entry := range target.Entries {
+		if entry.Action == "remote" {
+			manifestFiles[strings.ToLower(entry.Path)] = entry
+		}
+	}
+	seen := make(map[string]bool)
+	indexed := 0
+	for _, item := range index.Files {
+		if item.Env["client"] == "unsupported" {
+			continue
+		}
+		if err := validateRelative(item.Path); err != nil {
+			return 0, fmt.Errorf("MRPack 文件路径无效：%w", err)
+		}
+		key := strings.ToLower(item.Path)
+		if seen[key] {
+			return 0, fmt.Errorf("MRPack 索引包含重复路径：%s", item.Path)
+		}
+		seen[key] = true
+		sha512Value := strings.ToLower(item.Hashes["sha512"])
+		if len(item.Downloads) == 0 || item.Downloads[0] == "" {
+			return 0, fmt.Errorf("%s 缺少下载地址", item.Path)
+		}
+		candidate := Entry{
+			Action: "remote", Path: item.Path, Algorithm: "sha512",
+			Value: sha512Value, Source: item.Downloads[0],
+		}
+		if err := validateEntry(candidate); err != nil {
+			return 0, fmt.Errorf("%s：%w", item.Path, err)
+		}
+		entry, ok := manifestFiles[key]
+		if !ok || entry.Value != candidate.Value || entry.Source != candidate.Source {
+			return 0, fmt.Errorf("MRPack 索引与更新清单不一致：%s", item.Path)
+		}
+		indexed++
+	}
+	if indexed != len(manifestFiles) {
+		return 0, fmt.Errorf("MRPack 索引文件数与更新清单不一致：索引 %d，清单 %d", indexed, len(manifestFiles))
+	}
+	return indexed, nil
 }
 
 func stageArchiveEntries(archive *Archive, entries []Entry, stageRoot string) error {
