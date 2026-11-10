@@ -495,7 +495,6 @@ def build_server_pack(
             base_release,
         )
         manifest_bytes = pack_manifest.render_manifest(update_manifest)
-        (staging / pack_manifest.MANIFEST_NAME).write_bytes(manifest_bytes)
         if manifest_output is not None:
             manifest_output.parent.mkdir(parents=True, exist_ok=True)
             manifest_output.write_bytes(manifest_bytes)
