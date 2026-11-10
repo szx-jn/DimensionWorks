@@ -159,15 +159,27 @@ func TestDownloadCandidatesUseMirrorsForGitHubReleaseAssets(t *testing.T) {
 	}
 }
 
+func TestDownloadCandidatesUseHMCLStyleCurseForgeMirror(t *testing.T) {
+	source := "https://edge.forgecdn.net/files/8941/689/vintageimprovements-1.20.1-0.3.7.9.jar"
+	want := []string{
+		source,
+		"https://mod.mcimirror.top/files/8941/689/vintageimprovements-1.20.1-0.3.7.9.jar",
+	}
+	if got := downloadCandidates(source); !reflect.DeepEqual(got, want) {
+		t.Fatalf("CurseForge candidates = %v, want %v", got, want)
+	}
+}
+
 func TestDownloadCandidatesDoNotMirrorNonReleaseURLs(t *testing.T) {
 	for _, source := range []string{
 		"https://api.github.com/repos/szx-jn/DimensionWorks/releases/latest",
 		"http://github.com/szx-jn/DimensionWorks/releases/download/v0.2.20/asset.zip",
 		"https://example.com/szx-jn/DimensionWorks/releases/download/v0.2.20/asset.zip",
+		"https://cdn.modrinth.com/data/example/versions/example/mod.jar",
 	} {
 		got := downloadCandidates(source)
 		if len(got) != 1 || got[0] != source {
-			t.Errorf("non-release URL unexpectedly gained mirror candidates: %v", got)
+			t.Errorf("unrelated URL unexpectedly gained mirror candidates: %v", got)
 		}
 	}
 }
