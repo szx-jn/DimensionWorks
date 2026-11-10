@@ -1,4 +1,4 @@
-## Select Colorwheel indirect rendering: the pack ships with Complementary Unbound shaders enabled.
+# Select Colorwheel indirect rendering: the pack ships with Complementary Unbound shaders enabled.
 # This is required for Create: Nowheel's shader-compatible culling optimization.
 backend = "colorwheel:indirect"
 #Enable or disable instance update limiting with distance.
