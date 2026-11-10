@@ -115,6 +115,12 @@ func (e *aria2Error) explanation() (string, string) {
 	case strings.Contains(detail, "sha-256"):
 		return "内嵌引擎完整性校验失败", "重新下载正式发布的更新器；损坏的引擎不会执行。"
 	}
+	if strings.Contains(detail, "http/1.1 403") || strings.Contains(detail, "http 403") || strings.Contains(detail, "error 403") || strings.Contains(detail, "status=403") || strings.Contains(detail, "status code: 403") {
+		return "下载服务器拒绝访问（HTTP 403）", "检查镜像白名单、请求 UA、访问策略及 CDN 重定向目标；更新器会继续尝试其他来源。"
+	}
+	if strings.Contains(detail, "http/1.1 404") || strings.Contains(detail, "http 404") || strings.Contains(detail, "error 404") || strings.Contains(detail, "status=404") || strings.Contains(detail, "status code: 404") {
+		return "下载服务器没有该文件（HTTP 404）", "核对文件版本、路径及 CDN 资产状态；这不是认证问题，切换镜像后仍失败应检查上游文件是否已下架。"
+	}
 	switch e.code {
 	case "2":
 		return "连接或传输超时", "当前来源未及时响应，将尝试下一个来源；检查网络或代理连通性。"
