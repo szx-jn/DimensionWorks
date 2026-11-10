@@ -18,7 +18,7 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(create): 新增独立客户端遮挡剔除模组"
+        description: "新增功能；每行一条，如 feat(create): 新增机器或配方"
         required: false
         type: string
       release_fixes:
