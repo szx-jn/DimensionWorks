@@ -291,21 +291,7 @@ jobs:
           PACK_VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          (
-            cd dist
-            sha256sum \
-              "DimensionWorks-${PACK_VERSION}.mrpack" \
-              "DimensionWorks-Server-${PACK_VERSION}.zip" \
-              "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
-              aria2-third-party-source.tar.gz \
-              update-dimensionworks-client-windows-amd64.exe \
-              update-dimensionworks-server-windows-amd64.exe \
-              update-dimensionworks-client-linux-amd64 \
-              update-dimensionworks-server-linux-amd64 \
-              update-dimensionworks-client-macos-arm64 \
-              update-dimensionworks-server-macos-arm64 \
-              > SHA256SUMS
-          )
+
           unzip -t "dist/DimensionWorks-${PACK_VERSION}.mrpack"
           unzip -t "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
           client_version="$(unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" overrides/VERSION | tr -d '\r\n')"
@@ -318,8 +304,6 @@ jobs:
           [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}.zip" ]] || { echo "Missing server full package" >&2; exit 1; }
           [[ -s "dist/DimensionWorks-${PACK_VERSION}.mrpack" ]] || { echo "Missing client MRPack" >&2; exit 1; }
           [[ -s "dist/aria2-third-party-source.tar.gz" ]] || { echo "Missing aria2 corresponding source and license bundle" >&2; exit 1; }
-          [[ -s "dist/SHA256SUMS" ]] || { echo "Missing SHA256SUMS" >&2; exit 1; }
-          (cd dist && sha256sum --check SHA256SUMS)
           if compgen -G 'dist/aria2c-*' >/dev/null; then
             echo "Loose aria2 engines must not be published" >&2
             exit 1
@@ -359,6 +343,23 @@ jobs:
             echo "Updater script embedded in server package" >&2
             exit 1
           fi
+          (
+            cd dist
+            sha256sum \
+              "DimensionWorks-${PACK_VERSION}.mrpack" \
+              "DimensionWorks-Server-${PACK_VERSION}.zip" \
+              "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
+              aria2-third-party-source.tar.gz \
+              update-dimensionworks-client-windows-amd64.exe \
+              update-dimensionworks-server-windows-amd64.exe \
+              update-dimensionworks-client-linux-amd64 \
+              update-dimensionworks-server-linux-amd64 \
+              update-dimensionworks-client-macos-arm64 \
+              update-dimensionworks-server-macos-arm64 \
+              > SHA256SUMS
+          )
+          [[ -s "dist/SHA256SUMS" ]] || { echo "Missing SHA256SUMS" >&2; exit 1; }
+          (cd dist && sha256sum --check SHA256SUMS)
       - name: 上传打包产物
         uses: actions/upload-artifact@v4
         with:
