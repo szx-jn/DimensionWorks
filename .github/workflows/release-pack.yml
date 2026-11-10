@@ -349,8 +349,6 @@ jobs:
             sha256sum \
               "DimensionWorks-${PACK_VERSION}.mrpack" \
               "DimensionWorks-Server-${PACK_VERSION}.zip" \
-              "DimensionWorks-${PACK_VERSION}-update-manifest.tsv" \
-              "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" \
               "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
               aria2-third-party-source.tar.gz \
               update-dimensionworks-client-windows-amd64.exe \
