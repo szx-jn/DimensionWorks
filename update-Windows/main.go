@@ -440,6 +440,7 @@ func updateInstance(root, kind string, opts Options) error {
 	var target *Manifest
 	var fullPackage *Archive
 	var fullPackageURL string
+	var localPackagePath string
 	var releaseInfo *ReleaseInfo
 	releaseTag := ""
 
@@ -454,6 +455,7 @@ func updateInstance(root, kind string, opts Options) error {
 			return fmt.Errorf("无法打开本地更新包：%w", err)
 		}
 		defer fullPackage.Close()
+		localPackagePath = packagePath
 		target, err = packageManifest(packagePath, kind)
 		if err != nil {
 			return err
@@ -527,18 +529,18 @@ func updateInstance(root, kind string, opts Options) error {
 	if target.Kind != kind {
 		return fmt.Errorf("更新清单类型错误：需要 %s，实际为 %s", kind, target.Kind)
 	}
-	if fullPackage != nil {
-		pkgManifest, err := packageManifest(packagePath, kind)
+	if localPackagePath != "" {
+		pkgManifest, err := packageManifest(localPackagePath, kind)
 		if err != nil {
 			return err
 		}
 		if pkgManifest.Version != target.Version || !bytes.Equal(pkgManifest.Bytes, target.Bytes) {
 			return errors.New("本地完整包配套的独立清单与目标清单不一致")
 		}
-		if kind == "client" {
-			if _, err := validateClientMRPackIndex(fullPackage, target); err != nil {
-				return fmt.Errorf("MRPack 索引校验失败：%w", err)
-			}
+	}
+	if fullPackage != nil && kind == "client" {
+		if _, err := validateClientMRPackIndex(fullPackage, target); err != nil {
+			return fmt.Errorf("MRPack 索引校验失败：%w", err)
 		}
 	}
 
