@@ -995,6 +995,30 @@ func TestValidateRelativePath(t *testing.T) {
 	}
 }
 
+func TestPackageManifestUsesStandaloneSidecar(t *testing.T) {
+	dir := t.TempDir()
+	packagePath := filepath.Join(dir, "DimensionWorks-1.2.3.mrpack")
+	manifestPath := filepath.Join(dir, "DimensionWorks-1.2.3-update-manifest.tsv")
+	data := manifestBytes("client", "1.2.3", "v1.2.2", nil)
+	if err := os.WriteFile(manifestPath, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := packageManifest(packagePath, "client")
+	if err != nil {
+		t.Fatalf("read standalone package manifest: %v", err)
+	}
+	if manifest.Version != "1.2.3" {
+		t.Fatalf("unexpected manifest version: %s", manifest.Version)
+	}
+}
+
+func TestPackageManifestRejectsMissingSidecar(t *testing.T) {
+	_, err := packageManifest(filepath.Join(t.TempDir(), "DimensionWorks-1.2.3.mrpack"), "client")
+	if err == nil {
+		t.Fatal("expected missing standalone manifest to fail")
+	}
+}
+
 func TestManifestURLFromPackageURL(t *testing.T) {
 	cases := map[string]string{
 		"https://host.example/release/DimensionWorks-0.1.39.mrpack": "https://host.example/release/DimensionWorks-0.1.39-update-manifest.tsv",
