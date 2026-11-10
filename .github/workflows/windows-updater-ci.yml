@@ -1,6 +1,11 @@
 name: Go 跨平台更新器构建与测试
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'update-Windows/**'
+      - '.github/workflows/windows-updater-ci.yml'
   pull_request:
     paths:
       - 'update-Windows/**'
