@@ -659,11 +659,15 @@ func TestValidateClientMRPackIndexMatchesManifest(t *testing.T) {
 	entry := Entry{Action: "remote", Path: "mods/test.jar", Algorithm: "sha512", Value: digest, Source: source}
 	target, err := parseManifest(manifestBytes("client", "1.0.0", "v0.9.9", []Entry{entry}), "client")
 	if err != nil { t.Fatal(err) }
-	index := `{"formatVersion":1,"game":"minecraft","files":[{"path":"mods/test.jar","hashes":{"sha512":"`+digest+`"},"downloads":["`+source+`"],"env":{"client":"required"}}],"dependencies":{"minecraft":"1.20.1"}}`
+	fallback := "https://mirror.example.com/test.jar"
+	index := `{"formatVersion":1,"game":"minecraft","files":[{"path":"mods/test.jar","hashes":{"sha512":"`+digest+`"},"downloads":["`+source+`","`+fallback+`"],"env":{"client":"required"}}],"dependencies":{"minecraft":"1.20.1"}}`
 	archive := writeTestMRPack(t, index)
 	count, err := validateClientMRPackIndex(archive, target)
 	if err != nil { t.Fatalf("valid MRPack index rejected: %v", err) }
 	if count != 1 { t.Fatalf("indexed file count = %d, want 1", count) }
+	if len(target.Entries[0].Sources) != 2 || target.Entries[0].Sources[1] != fallback {
+		t.Fatalf("ordered MRPack download candidates not retained: %#v", target.Entries[0].Sources)
+	}
 }
 
 func TestValidateClientMRPackIndexRejectsManifestMismatch(t *testing.T) {
