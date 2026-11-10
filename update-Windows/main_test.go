@@ -598,6 +598,61 @@ func sha256Text(text string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+func writeTestMRPack(t *testing.T, index string) *Archive {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "test.mrpack")
+	file, err := os.Create(path)
+	if err != nil { t.Fatal(err) }
+	writer := zip.NewWriter(file)
+	member, err := writer.Create("modrinth.index.json")
+	if err != nil { t.Fatal(err) }
+	if _, err := io.WriteString(member, index); err != nil { t.Fatal(err) }
+	if err := writer.Close(); err != nil { t.Fatal(err) }
+	if err := file.Close(); err != nil { t.Fatal(err) }
+	archive, err := openArchive(path)
+	if err != nil { t.Fatal(err) }
+	t.Cleanup(func() { _ = archive.Close() })
+	return archive
+}
+
+func TestValidateClientMRPackIndexMatchesManifest(t *testing.T) {
+	source := "https://cdn.modrinth.com/data/example/versions/test/test.jar"
+	digest := strings.Repeat("a", 128)
+	entry := Entry{Action: "remote", Path: "mods/test.jar", Algorithm: "sha512", Value: digest, Source: source}
+	target, err := parseManifest(manifestBytes("client", "1.0.0", "v0.9.9", []Entry{entry}), "client")
+	if err != nil { t.Fatal(err) }
+	index := `{"formatVersion":1,"game":"minecraft","files":[{"path":"mods/test.jar","hashes":{"sha512":"`+digest+`"},"downloads":["`+source+`"],"env":{"client":"required"}}],"dependencies":{"minecraft":"1.20.1"}}`
+	archive := writeTestMRPack(t, index)
+	count, err := validateClientMRPackIndex(archive, target)
+	if err != nil { t.Fatalf("valid MRPack index rejected: %v", err) }
+	if count != 1 { t.Fatalf("indexed file count = %d, want 1", count) }
+}
+
+func TestValidateClientMRPackIndexRejectsManifestMismatch(t *testing.T) {
+	source := "https://cdn.modrinth.com/data/example/versions/test/test.jar"
+	digest := strings.Repeat("a", 128)
+	entry := Entry{Action: "remote", Path: "mods/test.jar", Algorithm: "sha512", Value: digest, Source: source}
+	target, err := parseManifest(manifestBytes("client", "1.0.0", "v0.9.9", []Entry{entry}), "client")
+	if err != nil { t.Fatal(err) }
+	index := `{"formatVersion":1,"game":"minecraft","files":[{"path":"mods/test.jar","hashes":{"sha512":"`+strings.Repeat("b",128)+`"},"downloads":["`+source+`"]}]}`
+	archive := writeTestMRPack(t, index)
+	if _, err := validateClientMRPackIndex(archive, target); err == nil {
+		t.Fatal("MRPack index with a different SHA-512 must be rejected")
+	}
+}
+
+func TestValidateClientMRPackIndexSkipsServerOnlyFiles(t *testing.T) {
+	source := "https://cdn.modrinth.com/data/example/versions/test/test.jar"
+	digest := strings.Repeat("a", 128)
+	target, err := parseManifest(manifestBytes("client", "1.0.0", "v0.9.9", nil), "client")
+	if err != nil { t.Fatal(err) }
+	index := `{"formatVersion":1,"game":"minecraft","files":[{"path":"mods/server-only.jar","hashes":{"sha512":"`+digest+`"},"downloads":["`+source+`"],"env":{"client":"unsupported"}}]}`
+	archive := writeTestMRPack(t, index)
+	count, err := validateClientMRPackIndex(archive, target)
+	if err != nil { t.Fatalf("server-only entry should be ignored for clients: %v", err) }
+	if count != 0 { t.Fatalf("indexed client file count = %d, want 0", count) }
+}
+
 func manifestBytes(kind, version, base string, entries []Entry) []byte {
 	m := &Manifest{
 		Kind: kind, Version: version, Release: "v" + version, Base: base, Entries: entries,
