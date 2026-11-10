@@ -570,6 +570,11 @@ func updateInstance(root, kind string, opts Options) error {
 			fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
 		}
 		packagePath := filepath.Join(work, "full-package.mrpack")
+		if size, sizeErr := remoteContentLength(fullPackageURL); sizeErr == nil && size > 0 {
+			if spaceErr := ensureDiskSpace(root, saturatingAdd(uint64(size), 256<<20)); spaceErr != nil {
+				return fmt.Errorf("下载完整 MRPack 前磁盘空间不足：%w", spaceErr)
+			}
+		}
 		fmt.Println("[下载] 获取完整 MRPack 文件索引与配置覆盖包：", filepath.Base(fullPackageURL))
 		if err := downloadArchiveWithManualFallback(fullPackageURL, packagePath); err != nil {
 			return err
