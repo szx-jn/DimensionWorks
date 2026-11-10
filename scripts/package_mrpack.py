@@ -480,7 +480,6 @@ def build_pack(
         base_release,
     )
     manifest_bytes = pack_manifest.render_manifest(update_manifest)
-    (staging / pack_manifest.MANIFEST_NAME).write_bytes(manifest_bytes)
     if manifest_output is not None:
         manifest_output.parent.mkdir(parents=True, exist_ok=True)
         manifest_output.write_bytes(manifest_bytes)
@@ -488,7 +487,6 @@ def build_pack(
     output.parent.mkdir(parents=True, exist_ok=True)
     archive_paths = [
         "modrinth.index.json",
-        pack_manifest.MANIFEST_NAME,
         *(
             path.relative_to(staging).as_posix()
             for path in sorted(overrides.rglob("*"))
@@ -498,7 +496,6 @@ def build_pack(
     pack_manifest.validate_no_updater_scripts(archive_paths)
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.write(staging / "modrinth.index.json", "modrinth.index.json")
-        archive.write(staging / pack_manifest.MANIFEST_NAME, pack_manifest.MANIFEST_NAME)
         for path in sorted(overrides.rglob("*")):
             if path.is_file():
                 archive.write(path, path.relative_to(staging).as_posix())
