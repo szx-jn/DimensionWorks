@@ -407,7 +407,9 @@ jobs:
           )"
           assets=(
             "dist/DimensionWorks-${PACK_VERSION}.mrpack"
+            "dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv"
             "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
+            "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"
             "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
             "dist/aria2-third-party-source.tar.gz"
             "dist/SHA256SUMS"
