@@ -844,7 +844,7 @@ func remoteContentLengthFrom(source string) (int64, error) {
 	client := newHTTPClient(10*time.Second, 5*time.Second)
 	req, err := http.NewRequest(http.MethodHead, source, nil)
 	if err == nil {
-		req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+		req.Header.Set("User-Agent", updaterUserAgent)
 		if resp, headErr := client.Do(req); headErr == nil {
 			resp.Body.Close()
 			if resp.StatusCode >= 200 && resp.StatusCode < 300 && resp.ContentLength > 0 {
@@ -854,7 +854,7 @@ func remoteContentLengthFrom(source string) (int64, error) {
 	}
 	probe, err := http.NewRequest(http.MethodGet, source, nil)
 	if err != nil { return 0, err }
-	probe.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	probe.Header.Set("User-Agent", updaterUserAgent)
 	probe.Header.Set("Range", "bytes=0-0")
 	resp, err := client.Do(probe)
 	if err != nil { return 0, err }
@@ -1047,7 +1047,7 @@ func latestReleaseFrom(client *http.Client, sources []string) (ReleaseInfo, erro
 			failures = append(failures, fmt.Sprintf("%s: %v", safeURLForLog(source), err))
 			continue
 		}
-		req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+		req.Header.Set("User-Agent", updaterUserAgent)
 		req.Header.Set("Accept", "application/vnd.github+json")
 		resp, err := client.Do(req)
 		if err != nil {
@@ -1219,6 +1219,8 @@ func downloadFromCandidates(candidates []string, destination string, maxBytes in
 	return errors.New(strings.Join(failures, "\n"))
 }
 
+const updaterUserAgent = "DimensionWorks-Updater/1.1"
+
 const (
 	parallelDownloadThreshold int64 = 3 << 20
 	parallelDownloadWorkers = 8
@@ -1267,7 +1269,7 @@ func resolveGitHubAPIAssetURL(source string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("User-Agent", updaterUserAgent)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	resp, err := client.Do(req)
 	if err != nil {
@@ -1300,7 +1302,7 @@ func resolveGitHubAPIAssetURL(source string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	assetReq.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	assetReq.Header.Set("User-Agent", updaterUserAgent)
 	assetReq.Header.Set("Accept", "application/octet-stream")
 	assetResp, err := client.Do(assetReq)
 	if err != nil {
@@ -1510,7 +1512,7 @@ func downloadWithAria2Connections(parent context.Context, enginePath, source, de
 		"--check-certificate=true",
 		"--http-accept-gzip=false",
 		"--async-dns=" + strconv.FormatBool(aria2AsyncDNS(source)),
-		"--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+		"--user-agent=" + updaterUserAgent,
 		fmt.Sprintf("--max-connection-per-server=%d", connections),
 		fmt.Sprintf("--split=%d", connections),
 		"--min-split-size=1M",
@@ -1957,7 +1959,7 @@ func downloadSequential(ctx context.Context, source, destination string, maxByte
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("User-Agent", updaterUserAgent)
 	if offset > 0 && meta != nil {
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", offset))
 		if meta.ETag != "" { req.Header.Set("If-Range", meta.ETag) } else { req.Header.Set("If-Range", meta.LastModified) }
@@ -2057,7 +2059,7 @@ func downloadRanged(ctx context.Context, source, destination string, maxBytes in
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("User-Agent", updaterUserAgent)
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Range", "bytes=0-0")
 	resp, err := newHTTPClient(0, 20*time.Second).Do(req)
@@ -2235,7 +2237,7 @@ func downloadRangeSegment(ctx context.Context, source, destination, progressKey 
 	defer stopIdle()
 	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
 	if err != nil { return err }
-	req.Header.Set("User-Agent", "DimensionWorks-Go-Updater/1.1")
+	req.Header.Set("User-Agent", updaterUserAgent)
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
 	if validator != "" { req.Header.Set("If-Range", validator) }
