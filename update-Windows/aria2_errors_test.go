@@ -116,7 +116,7 @@ func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 		{"1", "Failed to establish connection, cause: Connection refused", "连接被拒绝", false, false},
 		{"1", "unknown download failure", "原始信息", false, false},
 		{"1", "SSL certificate verify failed", "证书", false, false},
-		{"", "This version of %1 is not compatible with the version of Windows.", "架构", true, false},
+		{"", "This version of %1 is not compatible with the version of Windows.", "架构", false, false},
 		{"0", "unknown engine failure", "原始信息", false, false},
 		{"", "signal: segmentation fault", "段错误", true, false},
 	} {
@@ -212,6 +212,10 @@ func TestPrepareAria2CleansUpFailedExecution(t *testing.T) {
 	_, _, err := prepareBundledAria2([]string{root}, name, sha256Text(string(data)), data)
 	if err == nil || !strings.Contains(err.Error(), "架构") {
 		t.Fatalf("missing format error: %v", err)
+	}
+	var engineErr *aria2Error
+	if !errors.As(err, &engineErr) || !engineErr.localFailure() {
+		t.Fatalf("engine preparation failure must be classified as local: %v", err)
 	}
 	entries, err := os.ReadDir(root)
 	if err != nil || len(entries) != 0 {
