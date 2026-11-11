@@ -719,7 +719,7 @@ func updateInstance(root, kind string, opts Options) error {
 					stage, stageErr := stagePath(stageRoot, entry.Path)
 					if stageErr != nil { errs <- stageErr; continue }
 					progressMu.Lock()
-					fmt.Printf("[下载] 远程文件：%s\\n", entry.Path)
+					fmt.Printf("[下载] 远程文件：%s\n", entry.Path)
 					progressMu.Unlock()
 					if downloadErr := downloadVerifiedEntry(entry, stage); downloadErr != nil {
 						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
