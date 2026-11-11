@@ -99,7 +99,7 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 		fmt.Println("请将下面的 MRPack 导入 HMCL 或其他支持 Modrinth 的启动器，等待启动器显示安装成功：")
 		fmt.Println(packagePath)
 	}
-	fmt.Println("随后在启动器中打开这次新建实例的游戏文件夹，复制其完整路径。")
+	fmt.Println("安装成功后退出启动器，再打开这次新建实例的游戏文件夹，复制其完整路径。")
 	fmt.Println("注意：请只选择本次新建的临时实例；更新成功后，更新器会自动删除这个目录。")
 	if savedPath != "" {
 		fmt.Println("上次使用的临时实例路径仍然有效，直接按回车可继续使用：", savedPath)
@@ -116,6 +116,13 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 	validated, err := validateLauncherInstanceRoot(path, updaterRoot)
 	if err != nil {
 		return "", err
+	}
+	if info, statErr := os.Lstat(savedPathFile); statErr == nil {
+		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+			return "", errors.New("已保存的启动器实例路径记录不是普通文件")
+		}
+	} else if !os.IsNotExist(statErr) {
+		return "", statErr
 	}
 	if err := os.WriteFile(savedPathFile, []byte(validated+"\n"), 0600); err != nil {
 		return "", fmt.Errorf("无法记住启动器实例路径：%w", err)
