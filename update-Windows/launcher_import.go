@@ -112,7 +112,7 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 		fmt.Println(packagePath)
 	}
 	fmt.Println("安装成功后退出启动器，再打开这次新建实例的游戏文件夹，复制其完整路径。")
-	fmt.Println("注意：请只选择本次新建的临时实例；更新成功后，更新器会自动删除这个目录。")
+	fmt.Println("注意：请只选择本次新建的临时实例；更新成功后，更新器会再次要求输入 DELETE 才会删除，否则保留目录。")
 	if savedPath != "" {
 		fmt.Println("上次使用的临时实例路径仍然有效，直接按回车可继续使用：", savedPath)
 	}
