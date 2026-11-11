@@ -107,3 +107,31 @@ func TestRemoveLauncherInstance(t *testing.T) {
 		t.Fatalf("temporary launcher instance was not removed: %v", err)
 	}
 }
+
+func TestLauncherEntrySourceRejectsMissingFile(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	entry := Entry{Action: "remote", Path: "mods/missing.jar", Algorithm: "sha512", Value: strings.Repeat("0", 128)}
+	if _, _, err := launcherEntrySource(root, entry); err == nil || !strings.Contains(err.Error(), "缺少文件") {
+		t.Fatalf("expected missing launcher file error, got %v", err)
+	}
+}
+
+func TestRemoveLauncherInstanceRejectsUpdaterParent(t *testing.T) {
+	base := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(base, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	updater := filepath.Join(base, "DimensionWorks")
+	if err := os.MkdirAll(updater, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := removeLauncherInstance(base, updater); err == nil {
+		t.Fatal("must not remove a directory containing the active updater instance")
+	}
+	if _, err := os.Stat(updater); err != nil {
+		t.Fatalf("active updater directory was damaged: %v", err)
+	}
+}
