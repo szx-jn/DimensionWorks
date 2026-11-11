@@ -30,12 +30,14 @@ func validateLauncherInstanceRoot(path, updaterRoot string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	relative, err := filepath.Rel(abs, updaterAbs)
-	if err != nil {
-		return "", err
-	}
-	if relative == "." || (relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator))) {
-		return "", errors.New("不能选择包含 DimensionWorks 当前实例的目录")
+	if strings.EqualFold(filepath.VolumeName(abs), filepath.VolumeName(updaterAbs)) {
+		relative, err := filepath.Rel(abs, updaterAbs)
+		if err != nil {
+			return "", err
+		}
+		if relative == "." || (relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator))) {
+			return "", errors.New("不能选择包含 DimensionWorks 当前实例的目录")
+		}
 	}
 	modsInfo, err := os.Lstat(filepath.Join(abs, "mods"))
 	if err != nil || modsInfo.Mode()&os.ModeSymlink != 0 || !modsInfo.IsDir() {
