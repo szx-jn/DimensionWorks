@@ -673,7 +673,7 @@ func updateInstance(root, kind string, opts Options) error {
 				selectedRemote++
 			}
 		}
-		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件，仅需下载 %d 个；%d 个保持原样。\n",
+		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件，需要从启动器接管 %d 个；%d 个保持原样。\n",
 			totalRemote, selectedRemote, totalRemote-selectedRemote)
 	}
 	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
