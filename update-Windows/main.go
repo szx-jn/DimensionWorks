@@ -823,8 +823,16 @@ func updateInstance(root, kind string, opts Options) error {
 	}
 	fmt.Printf("更新成功：%s -> %s\n", installedVersion, actualVersion)
 	if launcherInstanceRoot != "" {
-		if cleanupErr := removeLauncherInstance(launcherInstanceRoot, root); cleanupErr != nil {
-			fmt.Printf("[清理警告] 更新已成功，但临时启动器实例未能删除：%v\n请手动确认并删除：%s\n", cleanupErr, launcherInstanceRoot)
+		fmt.Println("[清理确认] 更新已经成功。为避免误删，请确认下面这个目录确实是本次由启动器新建的临时实例：")
+		fmt.Println(launcherInstanceRoot)
+		fmt.Print("确认永久删除该目录？请输入 DELETE（其他输入均保留目录）：")
+		answer, confirmErr := readConsoleLine()
+		if confirmErr != nil && strings.TrimSpace(answer) == "" {
+			fmt.Printf("[清理警告] 无法读取删除确认，临时启动器实例已保留：%s\\n", launcherInstanceRoot)
+		} else if strings.TrimSpace(answer) != "DELETE" {
+			fmt.Println("[清理] 未确认删除，临时启动器实例已保留：", launcherInstanceRoot)
+		} else if cleanupErr := removeLauncherInstance(launcherInstanceRoot, root); cleanupErr != nil {
+			fmt.Printf("[清理警告] 更新已成功，但临时启动器实例未能删除：%v\\n请手动确认并删除：%s\\n", cleanupErr, launcherInstanceRoot)
 		} else {
 			fmt.Println("[清理] 已删除临时启动器实例：", launcherInstanceRoot)
 		}
