@@ -622,7 +622,10 @@ func updateInstance(root, kind string, opts Options) error {
 	backupBytes = saturatingAdd(backupBytes, deletionBackupBytes)
 	remoteBytes := uint64(0)
 	for _, entry := range selected {
-		if entry.Action == "remote" {
+		if entry.Action != "remote" {
+			continue
+		}
+		if kind == "client" {
 			_, size, sourceErr := launcherEntrySource(launcherInstanceRoot, entry)
 			if sourceErr != nil {
 				return sourceErr
@@ -630,6 +633,8 @@ func updateInstance(root, kind string, opts Options) error {
 			if size > 0 {
 				remoteBytes = saturatingAdd(remoteBytes, uint64(size))
 			}
+		} else if size, sizeErr := remoteContentLength(entry.Source); sizeErr == nil && size > 0 {
+			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
 		}
 	}
 	hasArchiveChanges := false
@@ -686,16 +691,48 @@ func updateInstance(root, kind string, opts Options) error {
 			archiveEntries = append(archiveEntries, entry)
 		}
 	}
-	// 第三方文件由启动器下载；更新器只从临时实例复制并校验，不再请求 Mod 下载源。
-	for _, entry := range remoteEntries {
-		stage, stageErr := stagePath(stageRoot, entry.Path)
-		if stageErr != nil {
-			return stageErr
+	if kind == "client" {
+		// 第三方文件由启动器下载；更新器只从临时实例复制并校验，不再请求 Mod 下载源。
+		for _, entry := range remoteEntries {
+			stage, stageErr := stagePath(stageRoot, entry.Path)
+			if stageErr != nil {
+				return stageErr
+			}
+			fmt.Printf("[接管] 启动器文件：%s\n", entry.Path)
+			if copyErr := copyVerifiedLauncherEntry(launcherInstanceRoot, entry, stage); copyErr != nil {
+				return copyErr
+			}
 		}
-		fmt.Printf("[接管] 启动器文件：%s\n", entry.Path)
-		if copyErr := copyVerifiedLauncherEntry(launcherInstanceRoot, entry, stage); copyErr != nil {
-			return copyErr
+	} else if len(remoteEntries) > 0 {
+		const maxConcurrentDownloads = 4
+		workers := maxConcurrentDownloads
+		if len(remoteEntries) < workers { workers = len(remoteEntries) }
+		parallelDownloadLimit.Store(int64(parallelDownloadWorkers / workers))
+		jobs := make(chan Entry)
+		errs := make(chan error, len(remoteEntries))
+		var wg sync.WaitGroup
+		for i := 0; i < workers; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				for entry := range jobs {
+					stage, stageErr := stagePath(stageRoot, entry.Path)
+					if stageErr != nil { errs <- stageErr; continue }
+					progressMu.Lock()
+					fmt.Printf("[下载] 远程文件：%s\\n", entry.Path)
+					progressMu.Unlock()
+					if downloadErr := downloadVerifiedEntry(entry, stage); downloadErr != nil {
+						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
+					}
+				}
+			}()
 		}
+		for _, entry := range remoteEntries { jobs <- entry }
+		close(jobs)
+		wg.Wait()
+		parallelDownloadLimit.Store(parallelDownloadWorkers)
+		close(errs)
+		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
 	}
 
 	deltaUsed := false
