@@ -1,4 +1,5 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
+const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
 const $DWMagicEggMobEffects = Java.loadClass('net.minecraftforge.registries.ForgeRegistries')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
@@ -95,7 +96,7 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
     if (!effect.isBeneficial()) continue
     const effectId = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect)
     if (effectId == null || effectId.toString() === 'minecraft:levitation') continue
-    player.potionEffects.add(effectId.toString(), DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
+    player.addEffect(new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true, true))
   }
 
   const data = player.persistentData
