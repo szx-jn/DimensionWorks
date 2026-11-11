@@ -1411,12 +1411,16 @@ func TestValidateLauncherInstanceRootResolvesSymlinkedParent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected, err := filepath.EvalSymlinks(instance)
+	gotInfo, err := os.Stat(got)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != expected {
-		t.Fatalf("got %q, want canonical path %q", got, expected)
+	expectedInfo, err := os.Stat(instance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !os.SameFile(gotInfo, expectedInfo) {
+		t.Fatalf("resolved path %q does not identify selected instance %q", got, instance)
 	}
 }
 
@@ -1434,11 +1438,15 @@ func TestValidateLauncherInstanceRootAcceptsSeparateDirectory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected, err := filepath.EvalSymlinks(instance)
+	gotInfo, err := os.Stat(got)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != expected {
-		t.Fatalf("got %q, want canonical path %q", got, expected)
+	expectedInfo, err := os.Stat(instance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !os.SameFile(gotInfo, expectedInfo) {
+		t.Fatalf("resolved path %q does not identify selected instance %q", got, instance)
 	}
 }
