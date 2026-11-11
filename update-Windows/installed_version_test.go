@@ -161,11 +161,11 @@ func writeVersionTestPackage(t *testing.T, kind, version string, corrupt bool) s
 	if corrupt {
 		payload = "corrupt file"
 	}
+	manifest := manifestBytes(kind, version, "none", []Entry{entry})
 	items := []struct {
 		name string
 		data []byte
 	}{
-		{manifestName, manifestBytes(kind, version, "none", []Entry{entry})},
 		{source, []byte(payload)},
 	}
 	if kind == "client" {
@@ -187,6 +187,10 @@ func writeVersionTestPackage(t *testing.T, kind, version string, corrupt bool) s
 		t.Fatal(err)
 	}
 	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	manifestPath := strings.TrimSuffix(path, filepath.Ext(path)) + "-update-manifest.tsv"
+	if err := os.WriteFile(manifestPath, manifest, 0644); err != nil {
 		t.Fatal(err)
 	}
 	return path
