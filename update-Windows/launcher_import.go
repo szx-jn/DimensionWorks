@@ -23,12 +23,24 @@ func validateLauncherInstanceRoot(path, updaterRoot string) (string, error) {
 	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 		return "", errors.New("启动器实例路径必须是普通目录，不能是符号链接")
 	}
+	canonical, err := filepath.EvalSymlinks(abs)
+	if err != nil {
+		return "", fmt.Errorf("无法解析启动器实例真实路径：%w", err)
+	}
+	abs, err = filepath.Abs(canonical)
+	if err != nil {
+		return "", err
+	}
 	if filepath.Dir(abs) == abs {
 		return "", errors.New("不能把磁盘根目录作为临时实例")
 	}
 	updaterAbs, err := filepath.Abs(updaterRoot)
 	if err != nil {
 		return "", err
+	}
+	updaterAbs, err = filepath.EvalSymlinks(updaterAbs)
+	if err != nil {
+		return "", fmt.Errorf("无法解析 DimensionWorks 实例真实路径：%w", err)
 	}
 	if strings.EqualFold(filepath.VolumeName(abs), filepath.VolumeName(updaterAbs)) {
 		relative, err := filepath.Rel(abs, updaterAbs)
