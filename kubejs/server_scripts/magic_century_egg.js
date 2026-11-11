@@ -5,7 +5,7 @@ const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
 const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
-const DW_MAGIC_EGG_DEADLINE = 'dw_magic_egg_deadline'
+const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
 
 let dwMagicEggFireworkShows = []
 
