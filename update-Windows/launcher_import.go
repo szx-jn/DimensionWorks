@@ -94,7 +94,7 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 	fmt.Println()
 	fmt.Println("第三方文件将由启动器下载，更新器不会再直接请求这些 Mod 的下载源。")
 	if packagePath != "" {
-		fmt.Println("请将下面的 MRPack 导入 HMCL/PCL，等待启动器显示安装成功：")
+		fmt.Println("请将下面的 MRPack 导入 HMCL 或其他支持 Modrinth 的启动器，等待启动器显示安装成功：")
 		fmt.Println(packagePath)
 	}
 	fmt.Println("随后在启动器中打开这次新建实例的游戏文件夹，复制其完整路径。")
