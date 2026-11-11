@@ -1,12 +1,11 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
-const $DWMagicEggMobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
 const $DWMagicEggMobEffects = Java.loadClass('net.minecraftforge.registries.ForgeRegistries')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
 const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
-const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
+const DW_MAGIC_EGG_DEADLINE = 'dw_magic_egg_deadline'
 
 let dwMagicEggFireworkShows = []
 
@@ -90,14 +89,22 @@ function dwTickMagicEggFireworks(event) {
 
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
+  let attempted = 0
+  let applied = 0
+
   const effects = $DWMagicEggMobEffects.MOB_EFFECTS.iterator()
   while (effects.hasNext()) {
     const effect = effects.next()
     if (!effect.isBeneficial()) continue
     const effectId = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect)
     if (effectId == null || effectId.toString() === 'minecraft:levitation') continue
-    player.addEffect(new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true, true))
+
+    attempted++
+    player.potionEffects.add(effectId.toString(), DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
+    if (player.hasEffect(effect)) applied++
   }
+
+  console.info('[Magic Century Egg] Beneficial effects applied: ' + applied + '/' + attempted)
 
   const data = player.persistentData
 
