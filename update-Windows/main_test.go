@@ -1376,3 +1376,61 @@ func TestProgressTrackerTracksParallelTransfersAndRetries(t *testing.T) {
 		t.Fatalf("retry should reset attempt total, got %d", got)
 	}
 }
+
+
+func TestValidateLauncherInstanceRootRejectsContainingDirectory(t *testing.T) {
+	base := t.TempDir()
+	updater := filepath.Join(base, "current")
+	if err := os.MkdirAll(filepath.Join(updater, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(base, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := validateLauncherInstanceRoot(base, updater); err == nil {
+		t.Fatal("directory containing the current instance must be rejected")
+	}
+}
+
+func TestValidateLauncherInstanceRootResolvesSymlinkedParent(t *testing.T) {
+	base := t.TempDir()
+	realParent := filepath.Join(base, "real-parent")
+	instance := filepath.Join(realParent, "temporary")
+	updater := filepath.Join(realParent, "current")
+	if err := os.MkdirAll(filepath.Join(instance, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(updater, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	linkParent := filepath.Join(base, "linked-parent")
+	if err := os.Symlink(realParent, linkParent); err != nil {
+		t.Skipf("symlink unavailable: %v", err)
+	}
+	got, err := validateLauncherInstanceRoot(filepath.Join(linkParent, "temporary"), filepath.Join(linkParent, "current"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != instance {
+		t.Fatalf("got %q, want canonical path %q", got, instance)
+	}
+}
+
+func TestValidateLauncherInstanceRootAcceptsSeparateDirectory(t *testing.T) {
+	base := t.TempDir()
+	updater := filepath.Join(base, "current")
+	instance := filepath.Join(base, "temporary")
+	if err := os.MkdirAll(filepath.Join(updater, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(instance, "mods"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	got, err := validateLauncherInstanceRoot(instance, updater)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != instance {
+		t.Fatalf("got %q, want %q", got, instance)
+	}
+}
