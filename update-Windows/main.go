@@ -441,6 +441,7 @@ func updateInstance(root, kind string, opts Options) error {
 	var fullPackage *Archive
 	var fullPackageURL string
 	var localPackagePath string
+	var fullPackagePath string
 	var releaseInfo *ReleaseInfo
 	releaseTag := ""
 
@@ -456,6 +457,7 @@ func updateInstance(root, kind string, opts Options) error {
 		}
 		defer fullPackage.Close()
 		localPackagePath = packagePath
+		fullPackagePath = packagePath
 		target, err = packageManifest(packagePath, kind)
 		if err != nil {
 			return err
@@ -571,6 +573,7 @@ func updateInstance(root, kind string, opts Options) error {
 			fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
 		}
 		packagePath := filepath.Join(work, "full-package.mrpack")
+		fullPackagePath = packagePath
 		if size, sizeErr := remoteContentLength(fullPackageURL); sizeErr == nil && size > 0 {
 			if spaceErr := ensureDiskSpace(root, saturatingAdd(uint64(size), 256<<20)); spaceErr != nil {
 				return fmt.Errorf("下载完整 MRPack 前磁盘空间不足：%w", spaceErr)
@@ -589,7 +592,7 @@ func updateInstance(root, kind string, opts Options) error {
 		if err != nil {
 			return fmt.Errorf("MRPack 索引校验失败：%w", err)
 		}
-		fmt.Printf("[MRPack] 已核对 %d 个客户端文件；接下来只下载本地缺失或摘要不同的文件。\n", indexedFiles)
+		fmt.Printf("[MRPack] 已核对 %d 个客户端文件；缺失或变化的第三方文件将由启动器下载。\n", indexedFiles)
 	}
 
 	selected, deletions, err := selectChanges(root, kind, current, target)
@@ -600,6 +603,18 @@ func updateInstance(root, kind string, opts Options) error {
 		fmt.Println("[保护] 首次建立签名状态时跳过旧文件清理，避免误删无法验证归属的本地文件")
 		deletions = nil
 	}
+	launcherInstanceRoot := ""
+	if kind == "client" {
+		for _, entry := range selected {
+			if entry.Action == "remote" {
+				launcherInstanceRoot, err = promptLauncherInstance(updateRoot, root, fullPackagePath)
+				if err != nil {
+					return err
+				}
+				break
+			}
+		}
+	}
 	backupBytes, err := estimateExistingBytes(root, selected)
 	if err != nil { return fmt.Errorf("估算本地备份空间失败：%w", err) }
 	deletionBackupBytes, err := estimateDeletionBytes(root, deletions)
@@ -607,10 +622,19 @@ func updateInstance(root, kind string, opts Options) error {
 	backupBytes = saturatingAdd(backupBytes, deletionBackupBytes)
 	remoteBytes := uint64(0)
 	for _, entry := range selected {
-		if entry.Action == "remote" {
-			if size, sizeErr := remoteContentLength(entry.Source); sizeErr == nil && size > 0 {
+		if entry.Action != "remote" {
+			continue
+		}
+		if kind == "client" {
+			_, size, sourceErr := launcherEntrySource(launcherInstanceRoot, entry)
+			if sourceErr != nil {
+				return sourceErr
+			}
+			if size > 0 {
 				remoteBytes = saturatingAdd(remoteBytes, uint64(size))
 			}
+		} else if size, sizeErr := remoteContentLength(entry.Source); sizeErr == nil && size > 0 {
+			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
 		}
 	}
 	hasArchiveChanges := false
@@ -649,7 +673,7 @@ func updateInstance(root, kind string, opts Options) error {
 				selectedRemote++
 			}
 		}
-		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件，仅需下载 %d 个；%d 个保持原样。\n",
+		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件，需要从启动器接管 %d 个；%d 个保持原样。\n",
 			totalRemote, selectedRemote, totalRemote-selectedRemote)
 	}
 	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
@@ -667,8 +691,19 @@ func updateInstance(root, kind string, opts Options) error {
 			archiveEntries = append(archiveEntries, entry)
 		}
 	}
-	// 多线程下载远程文件，限制并发数以避免源站限流。
-	if len(remoteEntries) > 0 {
+	if kind == "client" {
+		// 第三方文件由启动器下载；更新器只从临时实例复制并校验，不再请求 Mod 下载源。
+		for _, entry := range remoteEntries {
+			stage, stageErr := stagePath(stageRoot, entry.Path)
+			if stageErr != nil {
+				return stageErr
+			}
+			fmt.Printf("[接管] 启动器文件：%s\n", entry.Path)
+			if copyErr := copyVerifiedLauncherEntry(launcherInstanceRoot, entry, stage); copyErr != nil {
+				return copyErr
+			}
+		}
+	} else if len(remoteEntries) > 0 {
 		const maxConcurrentDownloads = 4
 		workers := maxConcurrentDownloads
 		if len(remoteEntries) < workers { workers = len(remoteEntries) }
@@ -787,6 +822,13 @@ func updateInstance(root, kind string, opts Options) error {
 		return fmt.Errorf("更新文件已应用，但游戏根目录 VERSION 为 %s，目标为 %s", actualVersion, target.Version)
 	}
 	fmt.Printf("更新成功：%s -> %s\n", installedVersion, actualVersion)
+	if launcherInstanceRoot != "" {
+		if cleanupErr := removeLauncherInstance(launcherInstanceRoot, root); cleanupErr != nil {
+			fmt.Printf("[清理警告] 更新已成功，但临时启动器实例未能删除：%v\n请手动确认并删除：%s\n", cleanupErr, launcherInstanceRoot)
+		} else {
+			fmt.Println("[清理] 已删除临时启动器实例：", launcherInstanceRoot)
+		}
+	}
 	if deltaUsed {
 		fmt.Printf("更新来源：已校验的 %d 个增量包（%s）\n", len(transferPlan.Incrementals), humanSize(int64(transferPlan.IncrementalSize)))
 	} else if len(archiveEntries) > 0 {
