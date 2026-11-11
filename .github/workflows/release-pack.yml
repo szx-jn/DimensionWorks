@@ -332,7 +332,7 @@ jobs:
             unzip -t "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
           fi
           unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" modrinth.index.json | jq -e . >/dev/null
-          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -Eq '(^|/)dimensionworks-update-manifest.tsv; then
+          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -Eq '(^|/)dimensionworks-update-manifest\.tsv$'; then
             echo "Update manifest must remain a standalone Release asset, not embedded in MRPack" >&2
             exit 1
           fi
