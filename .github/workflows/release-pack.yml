@@ -332,7 +332,129 @@ jobs:
             unzip -t "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
           fi
           unzip -p "dist/DimensionWorks-${PACK_VERSION}.mrpack" modrinth.index.json | jq -e . >/dev/null
-          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -Eq '(^|/)dimensionworks-update-manifest.tsv; then
+          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -Eq '(^|/)dimensionworks-update-manifest\.tsv
+            echo "Update manifest must remain a standalone Release asset, not embedded in MRPack" >&2
+            exit 1
+          fi
+          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -Fxq "dimensionworks-update-manifest.tsv"; then
+            echo "Update manifest must remain a standalone Release asset, not embedded in server ZIP" >&2
+            exit 1
+          fi
+          [[ -s "dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv" ]]
+          [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" ]]
+          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
+            echo "Updater script embedded in client package" >&2
+            exit 1
+          fi
+          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
+            echo "Updater script embedded in server package" >&2
+            exit 1
+          fi
+          (
+            cd dist
+            sha256sum \
+              "DimensionWorks-${PACK_VERSION}.mrpack" \
+              "DimensionWorks-Server-${PACK_VERSION}.zip" \
+              "DimensionWorks-Server-${PACK_VERSION}-delta.zip" \
+              aria2-third-party-source.tar.gz \
+              update-dimensionworks-client-windows-amd64.exe \
+              update-dimensionworks-server-windows-amd64.exe \
+              update-dimensionworks-client-linux-amd64 \
+              update-dimensionworks-server-linux-amd64 \
+              update-dimensionworks-client-macos-arm64 \
+              update-dimensionworks-server-macos-arm64 \
+              > SHA256SUMS
+          )
+          [[ -s "dist/SHA256SUMS" ]] || { echo "Missing SHA256SUMS" >&2; exit 1; }
+          (cd dist && sha256sum --check SHA256SUMS)
+      - name: 上传打包产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: dimensionworks-${{ steps.version.outputs.version }}
+          if-no-files-found: error
+          retention-days: 14
+          path: dist/*
+
+      - name: 发布 GitHub 正式版本
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACK_VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_FEATURES: ${{ inputs.release_features }}
+          RELEASE_FIXES: ${{ inputs.release_fixes }}
+          RELEASE_PERFORMANCE: ${{ inputs.release_performance }}
+          RELEASE_OTHER: ${{ inputs.release_other }}
+          SKIP_TESTS: ${{ inputs.skip_tests }}
+        run: |
+          set -euo pipefail
+          title="DimensionWorks ${PACK_VERSION}"
+          notes="$(python3 - <<'PY'
+          import os
+          sections = (
+              "RELEASE_FEATURES",
+              "RELEASE_FIXES",
+              "RELEASE_PERFORMANCE",
+              "RELEASE_OTHER",
+          )
+          entries = []
+          for key in sections:
+              entries.extend(
+                  line.strip()
+                  for line in os.environ.get(key, "").splitlines()
+                  if line.strip()
+              )
+          print(f"DimensionWorks v{os.environ['PACK_VERSION']} 版本更新：")
+          if entries:
+              print("\n".join(entries))
+          else:
+            print("更新器：Windows/Linux/macOS 六个更新器全部单文件内嵌 aria2c；同版提供 GPL 许可证与源码，下载仅使用 aria2c，并提供错误原因、单连接兼容重试和超一小时切源。")
+          if os.environ.get("SKIP_TESTS", "").lower() == "true":
+              print("本次按维护者要求跳过测试，仅执行构建及静态产物校验；未进行游戏内登录或迁移验收。")
+          PY
+          )"
+          assets=(
+            "dist/DimensionWorks-${PACK_VERSION}.mrpack"
+            "dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv"
+            "dist/DimensionWorks-Server-${PACK_VERSION}.zip"
+            "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"
+            "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
+            "dist/aria2-third-party-source.tar.gz"
+            "dist/SHA256SUMS"
+            "dist/update-dimensionworks-client-windows-amd64.exe"
+            "dist/update-dimensionworks-server-windows-amd64.exe"
+            "dist/update-dimensionworks-client-linux-amd64"
+            "dist/update-dimensionworks-server-linux-amd64"
+            "dist/update-dimensionworks-client-macos-arm64"
+            "dist/update-dimensionworks-server-macos-arm64"
+          )
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refusing to overwrite it." >&2
+            exit 1
+          fi
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --latest \
+            --title "$title" \
+            --notes "$notes" \
+            "${assets[@]}"
+
+      - name: 回写已发布版本号
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "${GITHUB_REF_NAME}"
+          git checkout --force -B "${GITHUB_REF_NAME}" "origin/${GITHUB_REF_NAME}"
+          released_version="${TAG#v}"
+          printf '%s\n' "${released_version}" > VERSION
+          git add VERSION
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): record ${TAG}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+; then
             echo "Update manifest must remain a standalone Release asset, not embedded in MRPack" >&2
             exit 1
           fi
