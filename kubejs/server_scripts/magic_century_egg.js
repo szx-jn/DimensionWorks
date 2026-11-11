@@ -100,8 +100,8 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
     if (effectId == null || effectId.toString() === 'minecraft:levitation') continue
 
     attempted++
-    player.potionEffects.add(effectId.toString(), DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
-    if (player.hasEffect(effect)) applied++
+    player.potionEffects.add(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
+    if (player.potionEffects.isActive(effect)) applied++
   }
 
   console.info('[Magic Century Egg] Beneficial effects applied: ' + applied + '/' + attempted)
