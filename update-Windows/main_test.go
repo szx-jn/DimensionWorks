@@ -1411,8 +1411,12 @@ func TestValidateLauncherInstanceRootResolvesSymlinkedParent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != instance {
-		t.Fatalf("got %q, want canonical path %q", got, instance)
+	expected, err := filepath.EvalSymlinks(instance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != expected {
+		t.Fatalf("got %q, want canonical path %q", got, expected)
 	}
 }
 
@@ -1430,7 +1434,11 @@ func TestValidateLauncherInstanceRootAcceptsSeparateDirectory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != instance {
-		t.Fatalf("got %q, want %q", got, instance)
+	expected, err := filepath.EvalSymlinks(instance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != expected {
+		t.Fatalf("got %q, want canonical path %q", got, expected)
 	}
 }
