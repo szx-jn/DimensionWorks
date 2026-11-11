@@ -101,12 +101,7 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const data = player.persistentData
 
   if (data.getBoolean(DW_MAGIC_EGG_PENDING)) {
-    data.putBoolean(DW_MAGIC_EGG_PENDING, false)
-    data.putLong(DW_MAGIC_EGG_DEADLINE, 0)
-
-    const level = player.level()
-    dwStartMagicEggFireworks(level, player.x, player.y, player.z)
-    player.kill()
+    data.putLong(DW_MAGIC_EGG_DEADLINE, player.age)
     return
   }
 
@@ -131,15 +126,14 @@ PlayerEvents.tick(event => {
   if (!data.getBoolean(DW_MAGIC_EGG_PENDING)) return
   if (player.age < data.getLong(DW_MAGIC_EGG_DEADLINE)) return
 
+  player.kill()
+  if (!player.isDeadOrDying()) return
+
   data.putBoolean(DW_MAGIC_EGG_PENDING, false)
   data.putLong(DW_MAGIC_EGG_DEADLINE, 0)
 
   const level = player.level()
-  const x = player.x
-  const y = player.y
-  const z = player.z
-  dwStartMagicEggFireworks(level, x, y, z)
-  player.kill()
+  dwStartMagicEggFireworks(level, player.x, player.y, player.z)
 })
 
 ServerEvents.tick(event => dwTickMagicEggFireworks(event))
