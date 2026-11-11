@@ -94,8 +94,8 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
     const effect = effects.next()
     if (!effect.isBeneficial()) continue
     const effectId = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect)
-    if (effectId != null && effectId.toString() === 'minecraft:levitation') continue
-    player.potionEffects.add(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
+    if (effectId == null || effectId.toString() === 'minecraft:levitation') continue
+    player.potionEffects.add(effectId.toString(), DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
   }
 
   const data = player.persistentData
