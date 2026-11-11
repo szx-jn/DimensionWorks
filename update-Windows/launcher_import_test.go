@@ -23,8 +23,16 @@ func TestValidateLauncherInstanceRoot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != instance {
-		t.Fatalf("validated path = %q, want %q", got, instance)
+	gotInfo, err := os.Stat(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	instanceInfo, err := os.Stat(instance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !os.SameFile(gotInfo, instanceInfo) {
+		t.Fatalf("validated path %q does not identify selected instance %q", got, instance)
 	}
 }
 
