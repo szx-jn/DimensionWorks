@@ -89,8 +89,9 @@ function dwTickMagicEggFireworks(event) {
 
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
-  let attempted = 0
-  let applied = 0
+  let timedAttempted = 0
+  let timedActive = 0
+  let instantTriggered = 0
 
   const effects = $DWMagicEggMobEffects.MOB_EFFECTS.iterator()
   while (effects.hasNext()) {
@@ -99,12 +100,17 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
     const effectId = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect)
     if (effectId == null || effectId.toString() === 'minecraft:levitation') continue
 
-    attempted++
-    player.potionEffects.add(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
-    if (player.potionEffects.isActive(effect)) applied++
+    if (effect.isInstantenous()) {
+      effect.applyInstantenousEffect(player, player, player, 4, 1.0)
+      instantTriggered++
+    } else {
+      timedAttempted++
+      player.potionEffects.add(effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
+      if (player.potionEffects.isActive(effect)) timedActive++
+    }
   }
 
-  console.info('[Magic Century Egg] Beneficial effects applied: ' + applied + '/' + attempted)
+  console.info('[Magic Century Egg] Timed effects active: ' + timedActive + '/' + timedAttempted + ', instant effects triggered: ' + instantTriggered)
 
   const data = player.persistentData
 
