@@ -27,6 +27,7 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 		`HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall`,
 		`HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths`,
 		`HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths`,
+		`HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths`,
 		`HKCU\Software\Classes\Applications`,
 		`HKLM\Software\Classes\Applications`,
 	}
