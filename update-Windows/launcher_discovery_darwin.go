@@ -15,8 +15,12 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 	if err != nil {
 		return nil, err
 	}
+	return parseLaunchServicesApps(string(output)), nil
+}
+
+func parseLaunchServicesApps(output string) []Launcher {
 	var found []Launcher
-	for _, line := range strings.Split(string(output), "\n") {
+	for _, line := range strings.Split(output, "\n") {
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(strings.ToLower(line), "path:") {
 			continue
@@ -33,7 +37,7 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 			found = append(found, Launcher{Name: name, Path: path})
 		}
 	}
-	return normalizeLaunchers(found), nil
+	return normalizeLaunchers(found)
 }
 
 func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
