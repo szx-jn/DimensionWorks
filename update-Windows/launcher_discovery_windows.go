@@ -62,14 +62,18 @@ func parseWindowsLauncherRegistry(output string) []Launcher {
 		if len(fields) < 3 {
 			continue
 		}
-		current.values[strings.ToLower(fields[0])] = strings.TrimSpace(strings.TrimPrefix(line, fields[0]+" "+fields[1]))
+		valueName := strings.ToLower(fields[0])
+		if valueName == "(default)" {
+			valueName = "(default)"
+		}
+		current.values[valueName] = strings.TrimSpace(strings.TrimPrefix(line, fields[0]+" "+fields[1]))
 	}
 	var found []Launcher
 	for _, item := range records {
 		name := item.values["displayname"]
 		executable := registryExecutable(item.values["displayicon"])
 		if executable == "" {
-			executable = registryExecutable(item.values[""])
+			executable = registryExecutable(item.values["(default)"])
 		}
 		if executable == "" {
 			executable = registryExecutable(item.values["open"])
