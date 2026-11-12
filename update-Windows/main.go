@@ -441,7 +441,6 @@ func updateInstance(root, kind string, opts Options) error {
 	var fullPackage *Archive
 	var fullPackageURL string
 	var localPackagePath string
-	var fullPackagePath string
 	var releaseInfo *ReleaseInfo
 	releaseTag := ""
 
@@ -457,7 +456,6 @@ func updateInstance(root, kind string, opts Options) error {
 		}
 		defer fullPackage.Close()
 		localPackagePath = packagePath
-		fullPackagePath = packagePath
 		target, err = packageManifest(packagePath, kind)
 		if err != nil {
 			return err
@@ -573,7 +571,6 @@ func updateInstance(root, kind string, opts Options) error {
 			fullPackageURL = assetURL(target.Release, fullPackageName(kind, target.Version))
 		}
 		packagePath := filepath.Join(work, "full-package.mrpack")
-		fullPackagePath = packagePath
 		if size, sizeErr := remoteContentLength(fullPackageURL); sizeErr == nil && size > 0 {
 			if spaceErr := ensureDiskSpace(root, saturatingAdd(uint64(size), 256<<20)); spaceErr != nil {
 				return fmt.Errorf("下载完整 MRPack 前磁盘空间不足：%w", spaceErr)
