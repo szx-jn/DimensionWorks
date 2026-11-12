@@ -58,7 +58,7 @@ func createLauncherDeltaMRPack(archive *Archive, entries []Entry, destination st
 	if err := json.Unmarshal(data, &index); err != nil {
 		return fmt.Errorf("解析 MRPack 索引失败：%w", err)
 	}
-	if index.FormatVersion != 1 || index.Game != "minecraft" || index.Dependencies["minecraft"] == "" {
+	if index.FormatVersion != 1 || index.Game != "minecraft" || index.Name == "" || index.VersionID == "" || index.Dependencies["minecraft"] == "" {
 		return errors.New("MRPack 缺少标准 Minecraft 依赖信息，无法生成可导入的差量包")
 	}
 
