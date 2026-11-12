@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-// Keep this as an explicit allowlist: ordinary HTTP failures must not trigger launcher import.\nfunc requiresLauncherDownload(entry Entry) bool {
+// Keep this as an explicit allowlist: ordinary HTTP failures must not trigger launcher import.
+func requiresLauncherDownload(entry Entry) bool {
 	sources := entry.Sources
 	if len(sources) == 0 {
 		sources = []string{entry.Source}
