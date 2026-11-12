@@ -24,7 +24,7 @@ func supportedLauncherName(value string) string {
 		return "Prism Launcher"
 	case strings.Contains(name, "hmcl"), strings.Contains(name, "hello minecraft"):
 		return "HMCL"
-	case runtime.GOOS == "windows" && (name == "pcl" || strings.Contains(name, "pcl2") || strings.Contains(name, "plain craft launcher")):
+	case runtime.GOOS == "windows" && (name == "pcl" || strings.HasPrefix(name, "pcl 2") || strings.Contains(name, "pcl2") || strings.Contains(name, "plain craft launcher")):
 		return "PCL"
 	default:
 		return ""
