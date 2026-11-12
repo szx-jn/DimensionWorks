@@ -85,7 +85,7 @@ func selectAndOpenMRPack(packagePath string) error {
 	if err := openMRPackWithLauncher(selected, packagePath); err != nil {
 		return fmt.Errorf("无法通过 %s 打开 MRPack：%w", selected.Name, err)
 	}
-if selected.Name == "Prism Launcher" {
+	if selected.Name == "Prism Launcher" {
 		fmt.Println("[启动器] 已请求 Prism Launcher 导入 MRPack。请在启动器中完成下载。")
 	} else {
 		fmt.Printf("[启动器] 已启动 %s。请在启动器的导入界面选择文件：%s\n", selected.Name, packagePath)
