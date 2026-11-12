@@ -5,6 +5,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"net/url"
 	"path/filepath"
 	"strings"
 )
@@ -66,5 +67,10 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 
 func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 	// gio launch invokes the registered desktop entry and supplies the file URI.
-	return startLauncher("gio", "launch", launcher.DesktopFile, packagePath)
+	absolute, err := filepath.Abs(packagePath)
+	if err != nil {
+		return err
+	}
+	fileURI := (&url.URL{Scheme: "file", Path: filepath.ToSlash(absolute)}).String()
+	return startLauncher("gio", "launch", launcher.DesktopFile, fileURI)
 }
