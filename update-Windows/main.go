@@ -603,16 +603,31 @@ func updateInstance(root, kind string, opts Options) error {
 		fmt.Println("[保护] 首次建立签名状态时跳过旧文件清理，避免误删无法验证归属的本地文件")
 		deletions = nil
 	}
-	launcherInstanceRoot := ""
-	if kind == "client" {
-		for _, entry := range selected {
-			if entry.Action == "remote" {
-				launcherInstanceRoot, err = promptLauncherInstance(updateRoot, root, fullPackagePath)
-				if err != nil {
-					return err
-				}
-				break
+	launcherEntries := make([]Entry, 0)
+	remoteEntries := make([]Entry, 0)
+	archiveEntries := make([]Entry, 0)
+	for _, entry := range selected {
+		switch entry.Action {
+		case "remote":
+			if kind == "client" && requiresLauncherDownload(entry) {
+				launcherEntries = append(launcherEntries, entry)
+			} else {
+				remoteEntries = append(remoteEntries, entry)
 			}
+		case "archive":
+			archiveEntries = append(archiveEntries, entry)
+		}
+	}
+
+	launcherInstanceRoot := ""
+	if len(launcherEntries) > 0 {
+		deltaPackagePath := filepath.Join(work, "launcher-delta.mrpack")
+		if err := createLauncherDeltaMRPack(fullPackage, launcherEntries, deltaPackagePath); err != nil {
+			return fmt.Errorf("生成启动器差量 MRPack 失败：%w", err)
+		}
+		launcherInstanceRoot, err = promptLauncherInstance(updateRoot, root, deltaPackagePath)
+		if err != nil {
+			return err
 		}
 	}
 	backupBytes, err := estimateExistingBytes(root, selected)
