@@ -156,6 +156,9 @@ func registryExecutable(value string) string {
 		}
 	}
 	value = strings.Trim(value, "\"")
+	if !strings.EqualFold(filepath.Ext(value), ".exe") {
+		return ""
+	}
 	if info, err := os.Stat(value); err == nil && !info.IsDir() {
 		return value
 	}
