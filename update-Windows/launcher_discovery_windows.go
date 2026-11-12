@@ -66,7 +66,8 @@ func parseWindowsLauncherRegistry(output string) []Launcher {
 		if valueName == "(default)" {
 			valueName = "(default)"
 		}
-		current.values[valueName] = strings.TrimSpace(strings.TrimPrefix(line, fields[0]+" "+fields[1]))
+		valueStart := strings.Index(line, fields[1]) + len(fields[1])
+		current.values[valueName] = strings.TrimSpace(line[valueStart:])
 	}
 	var found []Launcher
 	for _, item := range records {
