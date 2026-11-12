@@ -63,7 +63,7 @@ func parseWindowsLauncherRegistry(output string) []Launcher {
 			continue
 		}
 		valueName := strings.ToLower(fields[0])
-		if valueName == "(default)" {
+		if valueName == "(default)" || valueName == "(默认)" {
 			valueName = "(default)"
 		}
 		valueStart := strings.Index(line, fields[1]) + len(fields[1])
