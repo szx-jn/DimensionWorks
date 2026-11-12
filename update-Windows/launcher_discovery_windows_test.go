@@ -4,6 +4,8 @@ package main
 
 import (
 	"os"
+	"encoding/binary"
+	"unicode/utf16"
 	"path/filepath"
 	"testing"
 )
@@ -43,5 +45,17 @@ func TestParseWindowsRegisteredApplicationOpenCommand(t *testing.T) {
 	found := parseWindowsLauncherRegistry(output)
 	if len(found) != 1 || found[0].Name != "HMCL" || found[0].Path != executable {
 		t.Fatalf("unexpected registered application result: %#v", found)
+	}
+}
+
+func TestDecodeWindowsRegistryOutputUTF16(t *testing.T) {
+	text := "HKEY_CURRENT_USER\\Software\\Applications\\HMCL"
+	encoded := utf16.Encode([]rune(text))
+	data := make([]byte, len(encoded)*2)
+	for i, value := range encoded {
+		binary.LittleEndian.PutUint16(data[i*2:], value)
+	}
+	if got := decodeWindowsRegistryOutput(data); got != text {
+		t.Fatalf("decoded registry output = %q, want %q", got, text)
 	}
 }
