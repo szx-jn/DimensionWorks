@@ -3,11 +3,11 @@
 package main
 
 import (
-	"os"
 	"encoding/binary"
-	"unicode/utf16"
+	"os"
 	"path/filepath"
 	"testing"
+	"unicode/utf16"
 )
 
 func TestParseWindowsLauncherRegistry(t *testing.T) {
