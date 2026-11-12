@@ -3,8 +3,8 @@
 package main
 
 import (
-	"os"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 )
