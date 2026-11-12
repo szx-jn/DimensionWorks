@@ -11,8 +11,8 @@ import (
 )
 
 var windowsLauncherNames = map[string][]string{
-	"HMCL":          {"HMCL.exe", "HMCL"},
-	"PCL":           {"Plain Craft Launcher.exe", "PCL.exe", "PCL2.exe"},
+	"HMCL":           {"HMCL.exe", "HMCL"},
+	"PCL":            {"Plain Craft Launcher.exe", "PCL.exe", "PCL2.exe"},
 	"Prism Launcher": {"prismlauncher.exe", "PrismLauncher.exe"},
 }
 
@@ -23,6 +23,8 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 		`HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall`,
 		`HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall`,
 		`HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall`,
+		`HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths`,
+		`HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths`,
 		`HKCU\Software\Classes\Applications`,
 		`HKLM\Software\Classes\Applications`,
 	}
@@ -30,7 +32,6 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 	for _, root := range roots {
 		output, err := exec.Command("reg.exe", "query", root, "/s").Output()
 		if err != nil {
-			// A missing registry branch is normal; other branches are still useful.
 			continue
 		}
 		found = append(found, parseWindowsLauncherRegistry(string(output))...)
@@ -69,41 +70,34 @@ func parseWindowsLauncherRegistry(output string) []Launcher {
 		valueStart := strings.Index(line, fields[1]) + len(fields[1])
 		current.values[valueName] = strings.TrimSpace(line[valueStart:])
 	}
+
 	var found []Launcher
 	for _, item := range records {
 		name := item.values["displayname"]
+		if name == "" {
+			base := filepath.Base(item.key)
+			if strings.EqualFold(base, "command") {
+				parts := strings.Split(item.key, "\\")
+				for i := len(parts) - 1; i >= 0; i-- {
+					if strings.HasSuffix(strings.ToLower(parts[i]), ".exe") {
+						base = parts[i]
+						break
+					}
+				}
+			}
+			name = supportedLauncherName(base)
+		}
+		canonical := supportedLauncherName(name)
+		if canonical == "" {
+			continue
+		}
+
 		executable := registryExecutable(item.values["displayicon"])
 		if executable == "" {
 			executable = registryExecutable(item.values["(default)"])
 		}
 		if executable == "" {
 			executable = registryExecutable(item.values["open"])
-		}
-		if name == "" {
-			base := strings.ToLower(filepath.Base(item.key))
-			if strings.EqualFold(base, "command") {
-				parts := strings.Split(item.key, "\\")
-				for i := len(parts) - 1; i >= 0; i-- {
-					if strings.HasSuffix(strings.ToLower(parts[i]), ".exe") {
-						base = strings.ToLower(parts[i])
-						break
-					}
-				}
-					base = strings.ToLower(parts[len(parts)-3])
-				}
-			}
-			for candidate, names := range windowsLauncherNames {
-				for _, filename := range names {
-					if base == strings.ToLower(filename) {
-						name = candidate
-						break
-					}
-				}
-			}
-		}
-		canonical := supportedLauncherName(name)
-		if canonical == "" {
-			continue
 		}
 		if executable == "" {
 			location := strings.Trim(strings.TrimSpace(item.values["installlocation"]), "\"")
@@ -133,7 +127,6 @@ func registryExecutable(value string) string {
 		if comma := strings.LastIndex(value, ","); comma >= 0 {
 			value = value[:comma]
 		}
-		value = strings.TrimSpace(value)
 		if index := strings.Index(strings.ToLower(value), ".exe"); index >= 0 {
 			value = value[:index+4]
 		}
@@ -149,6 +142,6 @@ func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 	if launcher.Name == "Prism Launcher" {
 		return startLauncher(launcher.Path, "--import", packagePath)
 	}
-	// HMCL and PCL support opening an import file from the application entry point.
-	return startLauncher(launcher.Path, packagePath)
+	// HMCL/PCL have no verified import CLI; start the selected app for manual import.
+	return startLauncher(launcher.Path)
 }
