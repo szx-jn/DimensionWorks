@@ -97,14 +97,3 @@ func startLauncher(executable string, args ...string) error {
 	return nil
 }
 
-func launcherExecutable(path string) string {
-	path = strings.TrimSpace(strings.Trim(path, "\"`"))
-	if path == "" {
-		return ""
-	}
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return ""
-	}
-	return abs
-}
