@@ -77,6 +77,15 @@ func parseWindowsLauncherRegistry(output string) []Launcher {
 		if name == "" {
 			base := filepath.Base(item.key)
 			if strings.EqualFold(base, "command") {
+				parts := strings.Split(item.key, "\\\\")
+				for i := len(parts) - 1; i >= 0; i-- {
+					if strings.HasSuffix(strings.ToLower(parts[i]), ".exe") {
+						base = parts[i]
+						break
+					}
+				}
+			}
+			if strings.EqualFold(base, "command") {
 				parts := strings.Split(item.key, "\\")
 				for i := len(parts) - 1; i >= 0; i-- {
 					if strings.HasSuffix(strings.ToLower(parts[i]), ".exe") {
