@@ -108,8 +108,10 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 	fmt.Println()
 	fmt.Println("第三方文件将由启动器下载，更新器不会再直接请求这些 Mod 的下载源。")
 	if packagePath != "" {
-		fmt.Println("请将下面的 MRPack 导入 HMCL 或其他支持 Modrinth 的启动器，等待启动器显示安装成功：")
-		fmt.Println(packagePath)
+		if err := selectAndOpenMRPack(packagePath); err != nil {
+			return "", err
+		}
+		fmt.Println("请等待启动器完成 MRPack 导入和文件下载。")
 	}
 	fmt.Println("安装成功后退出启动器，再打开这次新建实例的游戏文件夹，复制其完整路径。")
 	fmt.Println("注意：请只选择本次新建的临时实例；更新成功后，更新器会再次要求输入 DELETE 才会删除，否则保留目录。")
