@@ -3,13 +3,13 @@
 package main
 
 import (
+	"encoding/binary"
 	"os"
 	"os/exec"
-	"encoding/binary"
-	"unicode/utf16"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"unicode/utf16"
 )
 
 var windowsLauncherNames = map[string][]string{
