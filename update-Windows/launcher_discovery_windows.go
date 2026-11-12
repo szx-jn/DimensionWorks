@@ -5,6 +5,8 @@ package main
 import (
 	"os"
 	"os/exec"
+	"encoding/binary"
+	"unicode/utf16"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -12,7 +14,7 @@ import (
 
 var windowsLauncherNames = map[string][]string{
 	"HMCL":           {"HMCL.exe", "HMCL"},
-	"PCL":            {"Plain Craft Launcher.exe", "PCL.exe", "PCL2.exe"},
+	"PCL":            {"Plain Craft Launcher.exe", "Plain Craft Launcher 2.exe", "PCL.exe", "PCL2.exe"},
 	"Prism Launcher": {"prismlauncher.exe", "PrismLauncher.exe"},
 }
 
@@ -34,9 +36,31 @@ func discoverRegisteredLaunchers() ([]Launcher, error) {
 		if err != nil {
 			continue
 		}
-		found = append(found, parseWindowsLauncherRegistry(string(output))...)
+		found = append(found, parseWindowsLauncherRegistry(decodeWindowsRegistryOutput(output))...)
 	}
 	return normalizeLaunchers(found), nil
+}
+
+func decodeWindowsRegistryOutput(data []byte) string {
+	if len(data) >= 2 && data[0] == 0xff && data[1] == 0xfe {
+		data = data[2:]
+	}
+	if len(data) >= 2 && len(data)%2 == 0 {
+		zeroBytes := 0
+		for i := 1; i < len(data); i += 2 {
+			if data[i] == 0 {
+				zeroBytes++
+			}
+		}
+		if zeroBytes > len(data)/8 {
+			words := make([]uint16, len(data)/2)
+			for i := range words {
+				words[i] = binary.LittleEndian.Uint16(data[i*2 : i*2+2])
+			}
+			return string(utf16.Decode(words))
+		}
+	}
+	return string(data)
 }
 
 func parseWindowsLauncherRegistry(output string) []Launcher {
