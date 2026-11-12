@@ -13,7 +13,7 @@ import (
 )
 
 var windowsLauncherNames = map[string][]string{
-	"HMCL":           {"HMCL.exe", "HMCL"},
+	"HMCL":           {"HMCL.exe"},
 	"PCL":            {"Plain Craft Launcher.exe", "Plain Craft Launcher 2.exe", "PCL.exe", "PCL2.exe"},
 	"Prism Launcher": {"prismlauncher.exe", "PrismLauncher.exe"},
 }
