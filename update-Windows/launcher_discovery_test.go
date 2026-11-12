@@ -16,7 +16,7 @@ func TestSupportedLauncherName(t *testing.T) {
 		{"Hello Minecraft Launcher", "HMCL"},
 		{"PrismLauncher", "Prism Launcher"},
 		{"Prism Launcher", "Prism Launcher"},
-		{"Plain Craft Launcher 2", ""},
+		{"Plain Craft Launcher 2", map[bool]string{true: "PCL", false: ""}[runtime.GOOS == "windows"]},
 		{"unrelated application", ""},
 	}
 	for _, test := range cases {
