@@ -37,6 +37,9 @@ func normalizeLaunchers(items []Launcher) []Launcher {
 		if item.Name == "" || item.Path == "" {
 			continue
 		}
+		if runtime.GOOS == "windows" && !strings.HasSuffix(strings.ToLower(item.Path), ".exe") {
+			continue
+		}
 		info, err := os.Stat(item.Path)
 		if err != nil || (info.IsDir() && !(runtime.GOOS == "darwin" && strings.HasSuffix(strings.ToLower(item.Path), ".app"))) {
 			continue
