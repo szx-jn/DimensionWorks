@@ -8,14 +8,23 @@ import (
 	"strings"
 )
 
+const launchServicesRegistry = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+
 func discoverRegisteredLaunchers() ([]Launcher, error) {
-	output, err := exec.Command("mdfind", "kMDItemContentType == 'com.apple.application-bundle'").Output()
+	output, err := exec.Command(launchServicesRegistry, "-dump").Output()
 	if err != nil {
 		return nil, err
 	}
 	var found []Launcher
-	for _, path := range strings.Split(string(output), "\n") {
-		path = strings.TrimSpace(path)
+	for _, line := range strings.Split(string(output), "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(strings.ToLower(line), "path:") {
+			continue
+		}
+		path := strings.TrimSpace(line[len("path:"):])
+		if end := strings.Index(strings.ToLower(path), ".app"); end >= 0 {
+			path = path[:end+4]
+		}
 		if path == "" {
 			continue
 		}
@@ -31,6 +40,5 @@ func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 	if launcher.Name == "Prism Launcher" {
 		return startLauncher("open", "-a", launcher.Path, "--args", "--import", packagePath)
 	}
-	// LaunchServices sends the selected document to the chosen application.
 	return startLauncher("open", "-a", launcher.Path, packagePath)
 }
