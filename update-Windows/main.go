@@ -2787,6 +2787,10 @@ func packageManifest(packagePath, kind string) (*Manifest, error) {
 type modrinthIndex struct {
 	FormatVersion int                 `json:"formatVersion"`
 	Game          string              `json:"game"`
+	VersionID     string              `json:"versionId"`
+	Name          string              `json:"name"`
+	Summary       string              `json:"summary,omitempty"`
+	Dependencies  map[string]string   `json:"dependencies"`
 	Files         []modrinthIndexFile `json:"files"`
 }
 
@@ -2795,6 +2799,7 @@ type modrinthIndexFile struct {
 	Hashes    map[string]string `json:"hashes"`
 	Downloads []string          `json:"downloads"`
 	Env       map[string]string `json:"env"`
+	FileSize  int64             `json:"fileSize"`
 }
 
 func validateClientMRPackIndex(archive *Archive, target *Manifest) (int, error) {
