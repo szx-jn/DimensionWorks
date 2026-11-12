@@ -66,25 +66,31 @@ func selectAndOpenMRPack(packagePath string) error {
 		return nil
 	}
 
-	fmt.Println()
-	fmt.Println("检测到以下已注册的 Minecraft 启动器：")
-	for i, launcher := range launchers {
-		fmt.Printf("[%d] %s\n", i+1, launcher.Name)
+	var selected Launcher
+	if len(launchers) == 1 {
+		selected = launchers[0]
+		fmt.Printf("[启动器] 只检测到 %s，直接使用。\n", selected.Name)
+	} else {
+		fmt.Println()
+		fmt.Println("检测到以下已注册的 Minecraft 启动器：")
+		for i, launcher := range launchers {
+			fmt.Printf("[%d] %s\n", i+1, launcher.Name)
+		}
+		fmt.Println("[0] 取消")
+		fmt.Print("请选择用于导入 MRPack 的启动器，输入编号：")
+		line, readErr := readConsoleLine()
+		if readErr != nil && strings.TrimSpace(line) == "" {
+			return fmt.Errorf("读取启动器选择失败：%w", readErr)
+		}
+		choice, err := strconv.Atoi(strings.TrimSpace(line))
+		if err != nil || choice < 0 || choice > len(launchers) {
+			return errors.New("启动器编号无效")
+		}
+		if choice == 0 {
+			return errors.New("用户取消了启动器选择")
+		}
+		selected = launchers[choice-1]
 	}
-	fmt.Println("[0] 取消")
-	fmt.Print("请选择用于导入 MRPack 的启动器，输入编号：")
-	line, readErr := readConsoleLine()
-	if readErr != nil && strings.TrimSpace(line) == "" {
-		return fmt.Errorf("读取启动器选择失败：%w", readErr)
-	}
-	choice, err := strconv.Atoi(strings.TrimSpace(line))
-	if err != nil || choice < 0 || choice > len(launchers) {
-		return errors.New("启动器编号无效")
-	}
-	if choice == 0 {
-		return errors.New("用户取消了启动器选择")
-	}
-	selected := launchers[choice-1]
 	if err := openMRPackWithLauncher(selected, packagePath); err != nil {
 		return fmt.Errorf("无法通过 %s 打开 MRPack：%w", selected.Name, err)
 	}
