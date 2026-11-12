@@ -640,7 +640,7 @@ func updateInstance(root, kind string, opts Options) error {
 		if entry.Action != "remote" {
 			continue
 		}
-		if kind == "client" {
+		if kind == "client" && requiresLauncherDownload(entry) {
 			_, size, sourceErr := launcherEntrySource(launcherInstanceRoot, entry)
 			if sourceErr != nil {
 				return sourceErr
