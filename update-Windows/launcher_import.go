@@ -51,9 +51,16 @@ func validateLauncherInstanceRoot(path, updaterRoot string) (string, error) {
 			return "", errors.New("不能选择包含 DimensionWorks 当前实例的目录")
 		}
 	}
-	modsInfo, err := os.Lstat(filepath.Join(abs, "mods"))
-	if err != nil || modsInfo.Mode()&os.ModeSymlink != 0 || !modsInfo.IsDir() {
-		return "", errors.New("所选目录中没有有效的 mods 文件夹；请选择启动器新安装实例的游戏目录")
+	hasGameFiles := false
+	for _, directory := range []string{"mods", "shaderpacks", "resourcepacks", "datapacks"} {
+		info, statErr := os.Lstat(filepath.Join(abs, directory))
+		if statErr == nil && info.Mode()&os.ModeSymlink == 0 && info.IsDir() {
+			hasGameFiles = true
+			break
+		}
+	}
+	if !hasGameFiles {
+		return "", errors.New("所选目录中没有有效的 mods、shaderpacks、resourcepacks 或 datapacks 文件夹；请选择启动器新安装实例的游戏目录")
 	}
 	return abs, nil
 }
