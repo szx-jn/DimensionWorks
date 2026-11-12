@@ -55,7 +55,7 @@ func TestCreateLauncherDeltaMRPackKeepsDependenciesAndOnlySelectedFiles(t *testi
 }`
 	archive := writeTestMRPack(t, indexJSON)
 	destination := filepath.Join(t.TempDir(), "delta.mrpack")
-	entry := Entry{Action: "remote", Path: "mods/restricted.jar"}
+	entry := Entry{Action: "remote", Path: "mods/restricted.jar", Algorithm: "sha512", Value: strings.Repeat("a", 128), Source: "https://edge.forgecdn.net/files/1/2/restricted.jar"}
 	if err := createLauncherDeltaMRPack(archive, []Entry{entry}, destination); err != nil {
 		t.Fatalf("createLauncherDeltaMRPack() failed: %v", err)
 	}
