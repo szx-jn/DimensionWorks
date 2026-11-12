@@ -38,8 +38,8 @@ func TestParseWindowsRegisteredApplicationOpenCommand(t *testing.T) {
 	if err := os.WriteFile(executable, []byte("test"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	output := "HKEY_CURRENT_USER\\Software\\Classes\\Applications\\HMCL.exe\\shell\\open\\command\\r\\n" +
-		"    (默认)    REG_SZ    \"" + executable + "\" \"%1\"\\r\\n"
+	output := "HKEY_CURRENT_USER\\Software\\Classes\\Applications\\HMCL.exe\\shell\\open\\command\r\n" +
+		"    (默认)    REG_SZ    \"" + executable + "\" \"%1\"\r\n"
 	found := parseWindowsLauncherRegistry(output)
 	if len(found) != 1 || found[0].Name != "HMCL" || found[0].Path != executable {
 		t.Fatalf("unexpected registered application result: %#v", found)
