@@ -4,7 +4,6 @@ package main
 
 import (
 	"os"
-	"os/exec"
 	"net/url"
 	"path/filepath"
 	"strings"
