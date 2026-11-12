@@ -676,20 +676,15 @@ func updateInstance(root, kind string, opts Options) error {
 		fmt.Println("[保护] 已备份被更新覆盖的本地修改：", userBackup)
 	}
 	if kind == "client" {
-		selectedRemote := 0
+		selectedRemote := len(launcherEntries) + len(remoteEntries)
 		totalRemote := 0
 		for _, entry := range target.Entries {
 			if entry.Action == "remote" {
 				totalRemote++
 			}
 		}
-		for _, entry := range selected {
-			if entry.Action == "remote" {
-				selectedRemote++
-			}
-		}
-		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件，需要从启动器接管 %d 个；%d 个保持原样。\n",
-			totalRemote, selectedRemote, totalRemote-selectedRemote)
+		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件：启动器接管 %d 个，更新器直接下载 %d 个，%d 个无需更新。\n",
+			totalRemote, len(launcherEntries), len(remoteEntries), totalRemote-selectedRemote)
 	}
 	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
 	stageRoot := filepath.Join(work, "stage")
@@ -697,18 +692,8 @@ func updateInstance(root, kind string, opts Options) error {
 		return err
 	}
 
-	remoteEntries := make([]Entry, 0)
-	archiveEntries := make([]Entry, 0)
-	for _, entry := range selected {
-		if entry.Action == "remote" {
-			remoteEntries = append(remoteEntries, entry)
-		} else {
-			archiveEntries = append(archiveEntries, entry)
-		}
-	}
 	if kind == "client" {
-		// 第三方文件由启动器下载；更新器只从临时实例复制并校验，不再请求 Mod 下载源。
-		for _, entry := range remoteEntries {
+		for _, entry := range launcherEntries {
 			stage, stageErr := stagePath(stageRoot, entry.Path)
 			if stageErr != nil {
 				return stageErr
@@ -718,7 +703,8 @@ func updateInstance(root, kind string, opts Options) error {
 				return copyErr
 			}
 		}
-	} else if len(remoteEntries) > 0 {
+	}
+	if len(remoteEntries) > 0 {
 		const maxConcurrentDownloads = 4
 		workers := maxConcurrentDownloads
 		if len(remoteEntries) < workers { workers = len(remoteEntries) }
