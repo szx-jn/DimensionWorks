@@ -63,17 +63,25 @@ func createLauncherDeltaMRPack(archive *Archive, entries []Entry, destination st
 		return errors.New("MRPack 缺少标准 Minecraft 依赖信息，无法生成可导入的差量包")
 	}
 
-	wanted := make(map[string]bool, len(entries))
+	wanted := make(map[string]Entry, len(entries))
 	for _, entry := range entries {
-		wanted[strings.ToLower(entry.Path)] = true
+		wanted[strings.ToLower(entry.Path)] = entry
 	}
 	filtered := make([]modrinthIndexFile, 0, len(entries))
 	for _, item := range index.Files {
 		key := strings.ToLower(item.Path)
-		if wanted[key] {
-			filtered = append(filtered, item)
-			delete(wanted, key)
+		entry, ok := wanted[key]
+		if !ok {
+			continue
 		}
+		if err := validateRelative(item.Path); err != nil {
+			return fmt.Errorf("启动器差量包包含无效路径：%w", err)
+		}
+		if strings.ToLower(item.Hashes["sha512"]) != entry.Value || len(item.Downloads) == 0 || item.Downloads[0] != entry.Source {
+			return fmt.Errorf("启动器差量包索引与更新清单不一致：%s", item.Path)
+		}
+		filtered = append(filtered, item)
+		delete(wanted, key)
 	}
 	if len(wanted) != 0 || len(filtered) != len(entries) {
 		return errors.New("启动器差量包文件清单与完整 MRPack 索引不一致")
