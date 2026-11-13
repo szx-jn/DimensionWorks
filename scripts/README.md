@@ -72,10 +72,10 @@ python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
 
 ## 独立增量更新器
 
-更新器是独立发布资产，不会进入 `.mrpack` 或服务端 ZIP。每个 Release 发布六个原生 Go 更新器：
+更新器是独立发布资产，不会进入 `.mrpack` 或服务端 ZIP。每个 Release 发布五个原生 Go 更新器：
 
 - Windows amd64：`update-dimensionworks-client-windows-amd64.exe`、`update-dimensionworks-server-windows-amd64.exe`
-- Linux amd64：`update-dimensionworks-client-linux-amd64`、`update-dimensionworks-server-linux-amd64`
+- Linux amd64：仅服务端 `update-dimensionworks-server-linux-amd64`
 - macOS arm64：`update-dimensionworks-client-macos-arm64`、`update-dimensionworks-server-macos-arm64`
 
 首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。所有平台均使用 `update-Windows/` 中同一套 Go 源码交叉编译，不依赖 Shell、BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取 Release 侧的独立 `*-update-manifest.tsv` 资产；使用本地 `--package` 时读取完整包同目录的配套清单，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
@@ -149,7 +149,7 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 ## GitHub Actions 发行
 
-手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、六个原生 Go 更新器和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
+手动触发 `.github/workflows/release-pack.yml` 后，工作流先查询 GitHub 最新 Release，以本地 `VERSION` 与远端标签较大者为基线推进补丁版本；目标标签已存在时直接失败，绝不覆盖。随后生成客户端 `.mrpack`、服务端 ZIP、两个独立更新清单、服务端差量 ZIP、五个原生 Go 更新器和 `SHA256SUMS`，上传工作流 artifacts 并创建对应的 `v<版本>` GitHub Release。发布成功后把新的 `VERSION` 提交回触发分支。
 
 `skip_tests` 默认关闭。维护者明确要求停止测试时，可在手动发行中设为 `true`：自研 Mod 构建使用 `-x test`，跳过 Go 测试、内嵌 aria2 下载测试和 Linux 更新事务运行验证，仍执行打包静态预检、完整构建和产物格式/摘要检查。该状态会自动写入发行说明。钩子通过 `DIMENSIONWORKS_SKIP_TESTS=true` 接收这一构建选项，未设置时保留原流程。
 

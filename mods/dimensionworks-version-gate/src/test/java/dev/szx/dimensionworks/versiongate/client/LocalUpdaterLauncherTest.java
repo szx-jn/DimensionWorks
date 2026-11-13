@@ -26,10 +26,10 @@ class LocalUpdaterLauncherTest {
     }
 
     @Test
-    void linuxUsesNativeAmd64Asset() throws IOException {
-        assertEquals(
-            "update-dimensionworks-client-linux-amd64",
-            LocalUpdaterLauncher.Platform.detect("Linux").updaterFilename("x86_64"));
+    void linuxClientUpdateIsUnsupported() {
+        IOException error = assertThrows(IOException.class,
+            () -> LocalUpdaterLauncher.Platform.detect("Linux"));
+        assertTrue(error.getMessage().contains("仅支持服务端更新"));
     }
 
     @Test
@@ -43,8 +43,6 @@ class LocalUpdaterLauncherTest {
     @Test
     void unsupportedArchitecturesFailClearly() {
         assertThrows(IOException.class,
-            () -> LocalUpdaterLauncher.Platform.detect("Linux").updaterFilename("aarch64"));
-        assertThrows(IOException.class,
             () -> LocalUpdaterLauncher.Platform.detect("Mac OS X").updaterFilename("x86_64"));
     }
 
@@ -52,6 +50,18 @@ class LocalUpdaterLauncherTest {
     void missingLocalUpdaterIsRejected() {
         assertThrows(IOException.class,
                 () -> LocalUpdaterLauncher.findUpdater(directory, LocalUpdaterLauncher.Platform.MACOS, "arm64"));
+    }
+
+    @Test
+    void macosPlanUsesTerminalAndWritesQuotedHandoff() throws IOException {
+        Path updater = directory.resolve("player's updater");
+        var plan = LocalUpdaterLauncher.prepare(directory, updater,
+            LocalUpdaterLauncher.Platform.MACOS, "0.3.38", 12345);
+        assertEquals("/usr/bin/osascript", plan.command().get(0));
+        assertTrue(plan.command().contains("tell application \"Terminal\""));
+        assertTrue(Files.readString(plan.script()).contains("player'\"'\"'s updater"));
+        plan.cleanup();
+        assertFalse(Files.exists(plan.script()));
     }
 
     @Test

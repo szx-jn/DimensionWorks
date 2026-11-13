@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
@@ -15,18 +14,16 @@ import java.util.UUID;
 /** Opens a local updater in an independent terminal, after this JVM has exited normally. */
 public final class LocalUpdaterLauncher {
     private static final Duration READY_TIMEOUT = Duration.ofSeconds(10);
-    private static final List<String> LINUX_TERMINALS = List.of("x-terminal-emulator", "gnome-terminal",
-        "konsole", "xfce4-terminal", "mate-terminal", "kitty", "alacritty", "xterm");
 
     enum Platform {
-        WINDOWS, MACOS, LINUX;
+        WINDOWS, MACOS;
 
         static Platform detect(String osName) throws IOException {
             String os = osName == null ? "" : osName.toLowerCase(Locale.ROOT);
             // Darwin contains "win", so it must be recognized before Windows.
             if (os.contains("mac") || os.contains("darwin")) return MACOS;
             if (os.contains("windows")) return WINDOWS;
-            if (os.contains("linux")) return LINUX;
+            if (os.contains("linux")) throw new IOException("Linux 仅支持服务端更新，不提供客户端自动更新。");
             throw new IOException("当前操作系统暂不支持自动更新：" + osName);
         }
 
@@ -36,7 +33,6 @@ public final class LocalUpdaterLauncher {
             boolean arm64 = arch.equals("arm64") || arch.equals("aarch64");
             if (this == MACOS && arm64) return "update-dimensionworks-client-macos-arm64";
             if (this == WINDOWS && amd64) return "update-dimensionworks-client-windows-amd64.exe";
-            if (this == LINUX && amd64) return "update-dimensionworks-client-linux-amd64";
             throw new IOException("当前 " + this + " 架构暂不支持自动更新：" + architecture);
         }
     }
@@ -59,9 +55,8 @@ public final class LocalUpdaterLauncher {
                 && !updater.toFile().setExecutable(true, true)) {
             throw new IOException("无法设置更新器执行权限：" + updater.getFileName());
         }
-        Path terminal = platform == Platform.LINUX ? findLinuxTerminal(System.getenv("PATH")) : null;
         LaunchPlan plan = prepare(directory, updater, platform, serverVersion,
-            ProcessHandle.current().pid(), terminal);
+            ProcessHandle.current().pid());
         start(plan, onReady, READY_TIMEOUT);
     }
 
@@ -75,7 +70,7 @@ public final class LocalUpdaterLauncher {
     }
 
     static LaunchPlan prepare(Path directory, Path updater, Platform platform, String version,
-            long gamePid, Path linuxTerminal) throws IOException {
+            long gamePid) throws IOException {
         try {
             PackVersion.parse(version);
         } catch (IllegalArgumentException exception) {
@@ -98,14 +93,9 @@ public final class LocalUpdaterLauncher {
         }
         Path script = handoff.resolve(id + ".sh");
         Files.writeString(script, unixHandoff(directory, updater, "v" + version, gamePid, ready), StandardCharsets.UTF_8);
-        List<String> command;
-        if (platform == Platform.MACOS) {
-            String shell = "exec /bin/sh " + shellQuote(script.toString());
-            command = List.of("/usr/bin/osascript", "-e", "tell application \"Terminal\"",
-                "-e", "do script " + appleScriptQuote(shell), "-e", "activate", "-e", "end tell");
-        } else {
-            command = linuxTerminalCommand(linuxTerminal, script);
-        }
+        String shell = "exec /bin/sh " + shellQuote(script.toString());
+        List<String> command = List.of("/usr/bin/osascript", "-e", "tell application \"Terminal\"",
+            "-e", "do script " + appleScriptQuote(shell), "-e", "activate", "-e", "end tell");
         return new LaunchPlan(command, directory, ready, script, log);
     }
 
@@ -172,35 +162,6 @@ public final class LocalUpdaterLauncher {
             + "Write-Host 'Minecraft 尚未退出，已取消更新。'; exit 1 }; "
             + "Set-Location -LiteralPath " + powershellQuote(directory.toString()) + "; "
             + "& " + powershellQuote(updater.toString()) + " --release " + powershellQuote(tag);
-    }
-
-    static Path findLinuxTerminal(String searchPath) throws IOException {
-        for (String name : LINUX_TERMINALS) {
-            if (searchPath == null) break;
-            for (String entry : searchPath.split(java.util.regex.Pattern.quote(java.io.File.pathSeparator))) {
-                if (entry.isBlank()) continue;
-                Path path = Path.of(entry).resolve(name);
-                if (Files.isRegularFile(path) && Files.isExecutable(path)) return path.toAbsolutePath();
-            }
-        }
-        throw new IOException("未找到可用 Linux 终端，请安装终端或手动运行游戏目录中的更新器。");
-    }
-
-    static List<String> linuxTerminalCommand(Path terminal, Path script) throws IOException {
-        if (terminal == null) throw new IOException("未找到可用 Linux 终端。");
-        var command = new ArrayList<String>();
-        command.add(terminal.toString());
-        switch (terminal.getFileName().toString()) {
-            case "gnome-terminal" -> command.add("--");
-            case "konsole" -> { command.add("--separate"); command.add("-e"); }
-            case "xfce4-terminal" -> { command.add("--disable-server"); command.add("-x"); }
-            case "mate-terminal" -> command.add("-x");
-            case "kitty" -> {}
-            default -> command.add("-e");
-        }
-        command.add("/bin/sh");
-        command.add(script.toString());
-        return List.copyOf(command);
     }
 
     static String shellQuote(String value) { return "'" + value.replace("'", "'\"'\"'") + "'"; }

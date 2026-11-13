@@ -57,7 +57,7 @@ class UpdaterAssetContractTest(unittest.TestCase):
             client.mkdir(parents=True)
             (client / "VersionMismatchScreen.java").write_text("LocalUpdaterLauncher.launch(gameDir);")
             (client / "LocalUpdaterLauncher.java").write_text(
-                "update-dimensionworks-client-windows-amd64.exe\nupdate-dimensionworks-client-linux-amd64"
+                "update-dimensionworks-client-windows-amd64.exe"
             )
             with patch.object(pack_hook, "ROOT", root):
                 result = check_update_assets()
