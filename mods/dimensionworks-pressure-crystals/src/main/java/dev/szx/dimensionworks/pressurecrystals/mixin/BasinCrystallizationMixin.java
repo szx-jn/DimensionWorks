@@ -10,7 +10,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BasinBlockEntity.class, remap = false)
 public abstract class BasinCrystallizationMixin {
-    @Inject(method = "tick", at = @At("TAIL"), remap = false)
+    // BasinBlockEntity returns early when its contents are unchanged. Cover every
+    // return so idle basins still settle crystals on the 200-tick interval.
+    @Inject(method = "tick", at = @At("RETURN"), remap = false)
     private void dimensionworks$precipitateCrystals(CallbackInfo ci) {
         BasinBlockEntity basin = (BasinBlockEntity) (Object) this;
         Level level = basin.getLevel();

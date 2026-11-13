@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_pressure_crystals"
-version="0.1.0"
+version="0.1.1"
 displayName="DimensionWorks Pressure Crystals"
 authors="szx-jn"
 description='''Adds pressure-tier crystallization to Create basins using the Vintage Improvements compressor.'''

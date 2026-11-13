@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.1.0'
+version = '0.1.1'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_pressure_crystals'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -22,6 +22,7 @@ minecraft {
 }
 repositories {
     maven { name = 'Create'; url = 'https://maven.createmod.net' }
+    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
     maven { name = 'CurseMaven'; url = 'https://www.cursemaven.com' }
     mavenCentral()
 }
@@ -29,7 +30,9 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    compileOnly fg.deobf('curse.maven:vintage-improvenents-ssw-edition-1255448:8941689')
+    compileOnly fg.deobf(project.hasProperty('pressureCheck')
+        ? 'dw-test:vintageimprovements:1.20.1-0.3.7.9'
+        : 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941689')
     runtimeOnly fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
     runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
@@ -46,4 +49,42 @@ tasks.named('test') { useJUnitPlatform() }
 jar {
     manifest.attributes(['MixinConfigs': 'dimensionworks_pressure_crystals.mixins.json'])
     finalizedBy 'reobfJar'
+}
+
+// Explicit server regression check with the pack's pinned local runtime jars.
+if (project.hasProperty('pressureCheck')) {
+    if (!project.hasProperty('pressureMods')) {
+        throw new GradleException('Supply -PpressureMods=<DimensionWorks mods directory> for pressureCheck')
+    }
+    repositories { flatDir { dirs project.property('pressureMods') } }
+    dependencies {
+        [
+            'vintageimprovements:1.20.1-0.3.7.9', 'dimensionworks_cave_factory:0.1.6',
+            'dimensionworks_rpm_limit:0.4.21', 'alexscaves:2.0.2',
+            "Dimensions-of-Alex's-Caves:1.20.1-1.0.4", 'citadel:2.6.3-1.20.1',
+            'Mekanism:1.20.1-10.4.16.80', 'appliedenergistics2-forge:15.4.10',
+            'guideme:20.1.15', 'curios-forge:5.14.1+1.20.1',
+            'kubejs-forge:2001.6.5-build.26', 'rhino-forge:2001.2.3-build.10',
+            'architectury:9.2.14-forge'
+        ].each { coordinate -> runtimeOnly fg.deobf("dw-test:${coordinate}") }
+    }
+    sourceSets {
+        pressureCheck {
+            compileClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+        }
+    }
+    minecraft.runs {
+        gameTestServer {
+            workingDirectory project.file('run-gametest-pressure')
+            args '--nogui'
+            property 'forge.enabledGameTestNamespaces', 'dimensionworks_pressure_crystals'
+            mods.dimensionworks_pressure_crystals { sources = [sourceSets.main, sourceSets.pressureCheck] }
+        }
+    }
+    tasks.register('preparePressureCheck', Copy) {
+        from '../../kubejs/startup_scripts/molten_metals.js'
+        into 'run-gametest-pressure/kubejs/startup_scripts'
+    }
+    tasks.matching { it.name == 'runGameTestServer' }.configureEach { dependsOn 'preparePressureCheck' }
 }
