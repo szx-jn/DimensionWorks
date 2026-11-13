@@ -63,7 +63,7 @@
   "item.kubejs.incomplete_magic_century_egg_final": "Magic Century Egg Final Assembly",
   "item.kubejs.incomplete_magic_century_egg_final.tooltip": "Complete eight cycles of final pressing, cutting, filling, and assembly.",
   "item.kubejs.magic_century_egg": "Magic Century Egg",
-  "item.kubejs.magic_century_egg.tooltip.1": "Grants every beneficial effect except Levitation for 3 minutes.",
+  "item.kubejs.magic_century_egg.tooltip.1": "Choose effects at level V; confirmation starts the 3-minute countdown.",
   "item.kubejs.magic_century_egg.tooltip.2": "Eating it starts a death countdown; eating again during it kills immediately.",
   "fluid.dimensionworks.molten_iron": "Molten Iron",
   "fluid.dimensionworks.molten_copper": "Molten Copper",

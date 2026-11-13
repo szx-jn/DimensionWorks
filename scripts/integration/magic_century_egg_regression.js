@@ -21,35 +21,39 @@ ServerEvents.tick(event => {
       player.setHealth(1)
       player.eat(level, Item.of('kubejs:magic_century_egg'))
 
-      var effects = registries.MOB_EFFECTS.iterator()
-      var timed = 0
-      var instant = 0
-      var moddedTimed = 0
-      while (effects.hasNext()) {
-        var effect = effects.next()
-        var id = registries.MOB_EFFECTS.getKey(effect).toString()
-        var active = player.potionEffects.getActive(effect)
-        if (!effect.isBeneficial() || id === 'minecraft:levitation') {
-          check('excluded ' + id, active == null)
-        } else if (effect.isInstantenous()) {
-          instant++
-          check('instant has no lasting status ' + id, active == null)
-        } else {
-          timed++
-          if (!id.startsWith('minecraft:')) moddedTimed++
-          check('duration and level ' + id, active != null && active.getDuration() === 3600 && active.getAmplifier() === 4)
+      check('menu opens without countdown', !player.persistentData.getBoolean('dw_magic_century_egg_pending'))
+      var gui = player.containerMenu.data
+      var click = Java.loadClass('net.minecraft.world.inventory.ClickType').PICKUP
+      var pages = 0
+      var found = 0
+      do {
+        for (var slot = 9; slot < 45; slot++) {
+          var stack = gui.slots[slot].item
+          var id = String(stack.nbt)
+          if (id.indexOf('minecraft:speed') >= 0 || id.indexOf('minecraft:poison') >= 0 || id.indexOf('minecraft:levitation') >= 0) {
+            gui.handleClick(slot, click, 0)
+            found++
+          }
         }
-      }
-
-      check('multiple distinct effects', timed > 1 && player.potionEffects.active.size() === timed)
-      check('third-party effects covered', moddedTimed > 0)
-      check('instant healing triggered', player.getHealth() > 1)
-      check('first eating starts countdown', player.persistentData.getBoolean('dw_magic_century_egg_pending') &&
+        pages++
+        gui.handleClick(47, click, 0)
+      } while (String(gui.slots[46].item.hoverName.string).indexOf('第 1 /') < 0 && pages < 100)
+      check('three effects selected across pages', found === 3)
+      check('no effects before confirmation', player.potionEffects.active.size() === 0)
+      gui.handleClick(53, click, 0)
+      check('confirmation starts countdown', player.persistentData.getBoolean('dw_magic_century_egg_pending') &&
         player.persistentData.getLong('dw_magic_century_egg_deadline') === player.age + 3600)
+      check('only selected effects active', player.potionEffects.active.size() === 3)
+      var chosen = ['minecraft:speed', 'minecraft:poison', 'minecraft:levitation']
+      for (var i = 0; i < chosen.length; i++) {
+        var active = player.potionEffects.getActive(registries.MOB_EFFECTS.getValue(chosen[i]))
+        check('selected duration and level ' + chosen[i], active != null && active.getDuration() === 3600 && active.getAmplifier() === 4)
+      }
+      player.setHealth(player.getMaxHealth())
       player.eat(level, Item.of('kubejs:magic_century_egg'))
-      check('second eating expires countdown', player.persistentData.getLong('dw_magic_century_egg_deadline') === player.age)
-      check('second eating retains distinct effects', player.potionEffects.active.size() === timed)
-      console.info('[DW_EGG_REGRESSION] COVERAGE timed=' + timed + ' moddedTimed=' + moddedTimed + ' instant=' + instant)
+      check('second eating kills immediately', player.isDeadOrDying())
+      check('death clears effects', player.potionEffects.active.size() === 0)
+      check('death clears countdown', !player.persistentData.getBoolean('dw_magic_century_egg_pending'))
     } catch (error) {
       failures++
       console.error('[DW_EGG_REGRESSION] EXCEPTION ' + error)

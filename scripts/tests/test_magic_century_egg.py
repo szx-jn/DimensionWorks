@@ -125,8 +125,8 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertIn(".hunger(20)", startup)
         self.assertNotIn(".effect(", startup)
         self.assertNotIn(".eaten(", startup)
-        self.assertIn("isBeneficial()", server)
-        self.assertIn("minecraft:levitation", server)
+        self.assertIn("effect.getCategory()", server)
+        self.assertIn("dwOpenMagicEggSelection(player)", server)
         self.assertIn("ItemEvents.foodEaten(DW_MAGIC_EGG_ID", server)
         self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", server)
 
@@ -137,8 +137,9 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertNotIn("DW_MAGIC_EGG_PENDING", startup)
         self.assertNotIn("DW_MAGIC_EGG_DEADLINE", startup)
         self.assertIn("if (data.getBoolean(DW_MAGIC_EGG_PENDING))", server)
-        self.assertIn("dwStartMagicEggFireworks(level, player.x, player.y, player.z)", server)
-        self.assertIn("player.kill()", server)
+        self.assertIn("dwStartMagicEggFireworks(player.level(), player.x, player.y, player.z)", server)
+        self.assertIn("player.setHealth(0)", server)
+        self.assertIn("player.die(player.damageSources().genericKill())", server)
         self.assertNotIn("DW_MAGIC_EGG_DAMAGE", server)
 
 
