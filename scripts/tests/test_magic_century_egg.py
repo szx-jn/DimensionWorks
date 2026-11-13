@@ -127,7 +127,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertNotIn(".eaten(", startup)
         self.assertIn("isBeneficial()", server)
         self.assertIn("minecraft:levitation", server)
-        self.assertIn("new $DWMagicEggMobEffectInstance(effect, DW_MAGIC_EGG_DURATION_TICKS, 4", server)
+        self.assertIn("ItemEvents.foodEaten(DW_MAGIC_EGG_ID", server)
         self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", server)
 
     def test_eating_again_triggers_death_immediately(self) -> None:

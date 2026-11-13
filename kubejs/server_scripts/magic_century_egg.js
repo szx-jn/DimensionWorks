@@ -95,9 +95,10 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
 
   const effects = $DWMagicEggMobEffects.MOB_EFFECTS.iterator()
   while (effects.hasNext()) {
-    const effect = effects.next()
+    // Rhino 2001 的循环体 const 会保留首次赋值，必须使用可重新赋值的局部变量。
+    let effect = effects.next()
     if (!effect.isBeneficial()) continue
-    const effectId = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect)
+    let effectId = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect)
     if (effectId == null || effectId.toString() === 'minecraft:levitation') continue
 
     if (effect.isInstantenous()) {
