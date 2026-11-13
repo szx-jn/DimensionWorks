@@ -75,8 +75,16 @@ func TestCustomWindowsShortcutPreservesTargetArgumentsAndDirectory(t *testing.T)
 		t.Fatalf("%v: %s", err, out)
 	}
 	got, err := customLauncherFromInput("\"" + link + "\"")
-	if err != nil || got.Path != target || got.Arguments != "--test 123" || got.Name != "HMCL" {
+	if err != nil || got.Arguments != "--test 123" || got.Name != "HMCL" {
 		t.Fatalf("%#v, %v", got, err)
+	}
+	expectedTarget, err := os.Stat(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actualTarget, err := os.Stat(got.Path)
+	if err != nil || !os.SameFile(expectedTarget, actualTarget) {
+		t.Fatalf("shortcut changed target file: %s, %v", got.Path, err)
 	}
 	expectedDir, err := os.Stat(root)
 	if err != nil {
