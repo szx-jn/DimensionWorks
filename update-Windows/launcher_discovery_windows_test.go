@@ -75,11 +75,19 @@ func TestCustomWindowsShortcutPreservesTargetArgumentsAndDirectory(t *testing.T)
 		t.Fatalf("%v: %s", err, out)
 	}
 	got, err := customLauncherFromInput("\"" + link + "\"")
-	if err != nil || got.Path != target || got.Arguments != "--test 123" || got.WorkingDir != root || got.Name != "HMCL" {
+	if err != nil || got.Path != target || got.Arguments != "--test 123" || got.Name != "HMCL" {
 		t.Fatalf("%#v, %v", got, err)
 	}
+	expectedDir, err := os.Stat(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actualDir, err := os.Stat(got.WorkingDir)
+	if err != nil || !os.SameFile(expectedDir, actualDir) {
+		t.Fatalf("shortcut changed working directory: %s, %v", got.WorkingDir, err)
+	}
 	cmd := launcherCommand(got, "delta.mrpack")
-	if cmd.Dir != root || !strings.HasSuffix(cmd.SysProcAttr.CmdLine, " --test 123") {
+	if cmd.Dir != got.WorkingDir || !strings.HasSuffix(cmd.SysProcAttr.CmdLine, " --test 123") {
 		t.Fatalf("shortcut command lost arguments: %#v", cmd)
 	}
 }
