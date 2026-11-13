@@ -10,9 +10,9 @@ import (
 
 func TestRequiresLauncherDownload(t *testing.T) {
 	cases := []struct {
-		name string
+		name  string
 		entry Entry
-		want bool
+		want  bool
 	}{
 		{"CurseForge CDN", Entry{Source: "https://edge.forgecdn.net/files/1/2/mod.jar"}, true},
 		{"CurseForge fallback candidate", Entry{Source: "https://cdn.modrinth.com/mod.jar", Sources: []string{"https://cdn.modrinth.com/mod.jar", "https://edge.forgecdn.net/files/1/2/mod.jar"}}, true},
@@ -27,7 +27,7 @@ func TestRequiresLauncherDownload(t *testing.T) {
 }
 
 func TestCreateLauncherDeltaMRPackKeepsDependenciesAndOnlySelectedFiles(t *testing.T) {
-	const indexJSON = `{
+	indexJSON := `{
   "formatVersion": 1,
   "game": "minecraft",
   "versionId": "1.2.3",

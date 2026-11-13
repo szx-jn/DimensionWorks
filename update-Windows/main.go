@@ -589,7 +589,7 @@ func updateInstance(root, kind string, opts Options) error {
 		if err != nil {
 			return fmt.Errorf("MRPack 索引校验失败：%w", err)
 		}
-		fmt.Printf("[MRPack] 已核对 %d 个客户端文件；缺失或变化的第三方文件将由启动器下载。\n", indexedFiles)
+		fmt.Printf("[MRPack] 已核对 %d 个客户端文件；仅更新缺失或变化的文件。\n", indexedFiles)
 	} else if kind == "client" {
 		indexedFiles, err := validateClientMRPackIndex(fullPackage, target)
 		if err != nil {

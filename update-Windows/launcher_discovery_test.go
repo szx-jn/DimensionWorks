@@ -17,6 +17,7 @@ func TestSupportedLauncherName(t *testing.T) {
 		{"PrismLauncher", "Prism Launcher"},
 		{"Prism Launcher", "Prism Launcher"},
 		{"Plain Craft Launcher 2", map[bool]string{true: "PCL", false: ""}[runtime.GOOS == "windows"]},
+		{"PCL.exe", map[bool]string{true: "PCL", false: ""}[runtime.GOOS == "windows"]},
 		{"unrelated application", ""},
 	}
 	for _, test := range cases {
@@ -33,7 +34,7 @@ func TestSupportedLauncherName(t *testing.T) {
 
 func TestNormalizeLaunchersDeduplicatesAndChecksPath(t *testing.T) {
 	root := t.TempDir()
-	executable := filepath.Join(root, "hmcl")
+	executable := filepath.Join(root, "HMCL.exe")
 	if err := os.WriteFile(executable, []byte("test"), 0600); err != nil {
 		t.Fatal(err)
 	}

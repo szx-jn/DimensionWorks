@@ -113,7 +113,7 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 	}
 
 	fmt.Println()
-	fmt.Println("第三方文件将由启动器下载，更新器不会再直接请求这些 Mod 的下载源。")
+	fmt.Println("本次需要更新的受限来源文件将由启动器下载，其他远程文件由更新器直接下载。")
 	if packagePath != "" {
 		if err := selectAndOpenMRPack(packagePath); err != nil {
 			return "", err

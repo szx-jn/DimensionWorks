@@ -19,6 +19,9 @@ type Launcher struct {
 
 func supportedLauncherName(value string) string {
 	name := strings.ToLower(strings.TrimSpace(value))
+	if runtime.GOOS == "windows" {
+		name = strings.TrimSuffix(name, ".exe")
+	}
 	switch {
 	case strings.Contains(name, "prism launcher"), strings.Contains(name, "prismlauncher"):
 		return "Prism Launcher"
@@ -109,4 +112,3 @@ func startLauncher(executable string, args ...string) error {
 	}
 	return nil
 }
-
