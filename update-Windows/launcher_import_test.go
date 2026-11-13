@@ -143,3 +143,18 @@ func TestRemoveLauncherInstanceRejectsUpdaterParent(t *testing.T) {
 		t.Fatalf("active updater directory was damaged: %v", err)
 	}
 }
+
+func TestValidateLauncherInstanceRootAcceptsShaderpackOnly(t *testing.T) {
+	base := t.TempDir()
+	instance := filepath.Join(base, "launcher-instance")
+	if err := os.MkdirAll(filepath.Join(instance, "shaderpacks"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	updater := filepath.Join(base, "DimensionWorks")
+	if err := os.MkdirAll(updater, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := validateLauncherInstanceRoot(instance, updater); err != nil {
+		t.Fatalf("shaderpack-only launcher instance should be accepted: %v", err)
+	}
+}

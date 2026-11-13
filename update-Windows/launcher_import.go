@@ -51,9 +51,16 @@ func validateLauncherInstanceRoot(path, updaterRoot string) (string, error) {
 			return "", errors.New("不能选择包含 DimensionWorks 当前实例的目录")
 		}
 	}
-	modsInfo, err := os.Lstat(filepath.Join(abs, "mods"))
-	if err != nil || modsInfo.Mode()&os.ModeSymlink != 0 || !modsInfo.IsDir() {
-		return "", errors.New("所选目录中没有有效的 mods 文件夹；请选择启动器新安装实例的游戏目录")
+	hasGameFiles := false
+	for _, directory := range []string{"mods", "shaderpacks", "resourcepacks", "datapacks"} {
+		info, statErr := os.Lstat(filepath.Join(abs, directory))
+		if statErr == nil && info.Mode()&os.ModeSymlink == 0 && info.IsDir() {
+			hasGameFiles = true
+			break
+		}
+	}
+	if !hasGameFiles {
+		return "", errors.New("所选目录中没有有效的 mods、shaderpacks、resourcepacks 或 datapacks 文件夹；请选择启动器新安装实例的游戏目录")
 	}
 	return abs, nil
 }
@@ -106,10 +113,12 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 	}
 
 	fmt.Println()
-	fmt.Println("第三方文件将由启动器下载，更新器不会再直接请求这些 Mod 的下载源。")
+	fmt.Println("本次需要更新的受限来源文件将由启动器下载，其他远程文件由更新器直接下载。")
 	if packagePath != "" {
-		fmt.Println("请将下面的 MRPack 导入 HMCL 或其他支持 Modrinth 的启动器，等待启动器显示安装成功：")
-		fmt.Println(packagePath)
+		if err := selectAndOpenMRPack(packagePath); err != nil {
+			return "", err
+		}
+		fmt.Println("请等待启动器完成 MRPack 导入和文件下载。")
 	}
 	fmt.Println("安装成功后退出启动器，再打开这次新建实例的游戏文件夹，复制其完整路径。")
 	fmt.Println("注意：请只选择本次新建的临时实例；更新成功后，更新器会再次要求输入 DELETE 才会删除，否则保留目录。")
