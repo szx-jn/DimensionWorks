@@ -12,6 +12,10 @@ func validateLauncherInstanceRoot(path, updaterRoot string) (string, error) {
 	if strings.TrimSpace(path) == "" {
 		return "", errors.New("启动器实例目录不能为空")
 	}
+	path, err := draggedPath(path)
+	if err != nil {
+		return "", fmt.Errorf("启动器实例路径无效：%w", err)
+	}
 	abs, err := filepath.Abs(path)
 	if err != nil {
 		return "", fmt.Errorf("启动器实例路径无效：%w", err)
@@ -130,7 +134,7 @@ func promptLauncherInstance(updateRoot, updaterRoot, packagePath string) (string
 	if readErr != nil && strings.TrimSpace(line) == "" {
 		return "", fmt.Errorf("无法读取启动器实例路径：%w", readErr)
 	}
-	path := strings.Trim(strings.TrimSpace(line), "\"")
+	path := strings.TrimSpace(line)
 	if path == "" {
 		path = savedPath
 	}

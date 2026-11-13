@@ -75,6 +75,11 @@ func selectAndOpenMRPack(packagePath string) error {
 	if err := openMRPackWithLauncher(selected, packagePath); err != nil {
 		return fmt.Errorf("无法通过 %s 打开 MRPack：%w", selected.Name, err)
 	}
+	if err := revealMRPack(packagePath); err != nil {
+		fmt.Printf("[文件管理器] 无法展示差量包：%v\n请手动打开文件所在目录：%s\n", err, filepath.Dir(packagePath))
+	} else {
+		fmt.Println("[文件管理器] 已请求打开所在文件夹并选中差量 MRPack，可将该文件拖入启动器导入界面。")
+	}
 	if selected.Name == "Prism Launcher" {
 		fmt.Println("[启动器] 已请求 Prism Launcher 导入 MRPack。请在启动器中完成下载。")
 	} else {
@@ -125,7 +130,7 @@ func chooseLauncher(launchers []Launcher, readLine func() (string, error)) (Laun
 }
 
 func customLauncherFromInput(input string) (Launcher, error) {
-	path, err := draggedLauncherPath(input)
+	path, err := draggedPath(input)
 	if err != nil {
 		return Launcher{}, err
 	}

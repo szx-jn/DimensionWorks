@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestDraggedLauncherPath(t *testing.T) {
+func TestDraggedPath(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "启动器 with space.jar")
 	if err := os.WriteFile(path, []byte("fixture"), 0600); err != nil {
 		t.Fatal(err)
@@ -19,7 +19,7 @@ func TestDraggedLauncherPath(t *testing.T) {
 		inputs = append(inputs, "'"+path+"'", strings.ReplaceAll(path, " ", `\ `))
 	}
 	for _, input := range inputs {
-		got, err := draggedLauncherPath(input)
+		got, err := draggedPath(input)
 		if err != nil || got != path {
 			t.Fatalf("%q => %q, %v", input, got, err)
 		}

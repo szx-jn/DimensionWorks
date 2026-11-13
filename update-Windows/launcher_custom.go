@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-func draggedLauncherPath(input string) (string, error) {
+func draggedPath(input string) (string, error) {
 	input = strings.TrimSpace(input)
 	if input == "" {
-		return "", errors.New("启动器文件路径不能为空")
+		return "", errors.New("路径不能为空")
 	}
 	// Also accept a pasted, unescaped path containing spaces.
 	if _, err := os.Stat(input); err == nil {
@@ -29,7 +29,7 @@ func draggedLauncherPath(input string) (string, error) {
 			c := input[i]
 			if c == '\\' && quote != '\'' {
 				if i+1 == len(input) {
-					return "", errors.New("启动器路径末尾的转义不完整")
+					return "", errors.New("路径末尾的转义不完整")
 				}
 				i++
 				result.WriteByte(input[i])
@@ -42,25 +42,25 @@ func draggedLauncherPath(input string) (string, error) {
 			} else if c == '\'' || c == '"' {
 				quote = c
 			} else if c == ' ' || c == '\t' {
-				return "", errors.New("请只拖入一个启动器文件；含空格的路径请保留终端添加的引号或转义")
+				return "", errors.New("请只拖入一个文件或目录；含空格的路径请保留终端添加的引号或转义")
 			} else {
 				result.WriteByte(c)
 			}
 		}
 		if quote != 0 {
-			return "", errors.New("启动器路径的引号未闭合")
+			return "", errors.New("路径的引号未闭合")
 		}
 		path = result.String()
 	}
 	if strings.HasPrefix(path, "file:") {
 		uri, err := url.Parse(path)
 		if err != nil || uri.Scheme != "file" || (uri.Host != "" && uri.Host != "localhost") {
-			return "", errors.New("启动器文件 URI 必须指向本机文件")
+			return "", errors.New("文件 URI 必须指向本机文件或目录")
 		}
 		path = uri.Path
 	}
 	if path == "" {
-		return "", errors.New("启动器文件路径不能为空")
+		return "", errors.New("路径不能为空")
 	}
 	return path, nil
 }

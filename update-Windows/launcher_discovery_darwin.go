@@ -50,6 +50,10 @@ func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 
 func resolveCustomLauncher(path string) (Launcher, error) { return customLauncherFile(path) }
 
+func revealMRPack(packagePath string) error {
+	return runLauncherDelegate(exec.Command("open", "-R", packagePath))
+}
+
 func launcherCommand(launcher Launcher, packagePath string) *exec.Cmd {
 	var cmd *exec.Cmd
 	switch strings.ToLower(filepath.Ext(launcher.Path)) {

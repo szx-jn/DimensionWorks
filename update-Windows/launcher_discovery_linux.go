@@ -13,3 +13,7 @@ func resolveCustomLauncher(path string) (Launcher, error) {
 func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 	return errors.New("Linux 仅支持服务端更新，不提供 MRPack 启动器导入")
 }
+
+func revealMRPack(packagePath string) error {
+	return errors.New("Linux 仅支持服务端更新，不提供客户端差量包展示")
+}

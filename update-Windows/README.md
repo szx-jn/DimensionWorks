@@ -68,7 +68,7 @@ Linux/macOS 下载后如更新器没有可执行权限，先赋予更新器执�
 
 客户端更新先获取完整 `.mrpack`，解析 `modrinth.index.json`，逐项核对客户端文件路径、SHA-512 与独立更新清单中的首选下载地址，并保留索引中的下载候选。仅处理现有实例缺少或需要更新的文件：下载候选命中 `curseforge.com`、`forgecdn.net` 或其子域名的文件交给启动器，其他远程文件由更新器直接下载；普通 HTTP 下载失败不会触发启动器导入。
 
-需要启动器时，更新器仅把本次需更新的受限来源文件写入差量 MRPack，保留目标包的 Minecraft/加载器依赖，不包含配置 overrides。Windows 从注册表、macOS 从 LaunchServices 发现 HMCL、Prism Launcher，以及仅 Windows 支持的 PCL。菜单始终在已发现启动器后追加“自定义启动器”（序号为结果数量 + 1），没有结果时自定义为 1，0 取消。自定义时拖入一个启动器文件并按回车；Windows 支持 `.lnk`、`.exe`、`.jar`，解析快捷方式的目标、参数及工作目录；macOS 支持 `.app`、`.jar` 和可执行文件，兼容拖入路径的引号、空格转义及本机 file URI。`.jar` 使用系统 Java 启动，需安装 Java。Prism 通过 `--import` 请求导入；HMCL/PCL 启动后提示从界面选择差量包。启动器导入完成后，用户输入本次新建临时实例的游戏目录，更新器仅复制所需文件并核对 SHA-512，再交给原有事务流程应用。临时实例可以仅包含 shaderpacks、resourcepacks 或 datapacks。
+需要启动器时，更新器仅把本次需更新的受限来源文件写入差量 MRPack，保留目标包的 Minecraft/加载器依赖，不包含配置 overrides。Windows 从注册表、macOS 从 LaunchServices 发现 HMCL、Prism Launcher，以及仅 Windows 支持的 PCL。菜单始终在已发现启动器后追加“自定义启动器”（序号为结果数量 + 1），没有结果时自定义为 1，0 取消。自定义时拖入一个启动器文件并按回车；Windows 支持 `.lnk`、`.exe`、`.jar`，解析快捷方式的目标、参数及工作目录；macOS 支持 `.app`、`.jar` 和可执行文件，兼容拖入路径的引号、空格转义及本机 file URI。`.jar` 使用系统 Java 启动，需安装 Java。Prism 通过 `--import` 请求导入；HMCL/PCL 启动后提示从界面选择差量包。启动器打开后，Windows 同时打开资源管理器、macOS 打开 Finder，并选中本次差量 MRPack，方便拖入启动器导入界面；文件管理器启动失败会显示包所在目录，用户仍可手动导入。启动器导入完成后，用户输入或拖入本次新建临时实例的游戏目录，支持终端添加的单/双引号及空格转义，更新器仅复制所需文件并核对 SHA-512，再交给原有事务流程应用。临时实例可以仅包含 shaderpacks、resourcepacks 或 datapacks。
 
 更新成功后会再次显示临时实例的完整路径，只有用户明确输入 DELETE 才会删除；取消或无法读取确认时保留目录。任一步更新失败也会保留临时实例，便于重新运行。配置和其他 overrides 仍由更新器暂存、校验并应用。差量 MRPack 是标准整合包格式，启动器是否复用已缓存的 Minecraft/Forge 组件取决于启动器；Linux 不提供客户端启动器发现或导入，客户端更新请求会在访问实例前被拒绝。服务端仍使用原有 ZIP/增量包更新流程。
 

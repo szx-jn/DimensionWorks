@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -36,6 +37,36 @@ func TestValidateLauncherInstanceRoot(t *testing.T) {
 	}
 }
 
+func TestValidateLauncherInstanceRootAcceptsDraggedDirectory(t *testing.T) {
+	base := t.TempDir()
+	instance := filepath.Join(base, "player's 启动器 instance")
+	updater := filepath.Join(base, "DimensionWorks")
+	for _, path := range []string{filepath.Join(instance, "mods"), updater} {
+		if err := os.MkdirAll(path, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	inputs := []string{instance, `"` + instance + `"`}
+	if runtime.GOOS != "windows" {
+		inputs = append(inputs, "'"+strings.ReplaceAll(instance, "'", `'\''`)+"'",
+			strings.NewReplacer("'", `\'`, " ", `\ `).Replace(instance))
+	}
+	for _, input := range inputs {
+		got, err := validateLauncherInstanceRoot(input, updater)
+		if err != nil {
+			t.Fatalf("%q: %v", input, err)
+		}
+		gotInfo, err := os.Stat(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		instanceInfo, err := os.Stat(instance)
+		if err != nil || !os.SameFile(gotInfo, instanceInfo) {
+			t.Fatalf("%q resolved to the wrong instance %q: %v", input, got, err)
+		}
+	}
+}
+
 func TestValidateLauncherInstanceRootRejectsUpdaterParent(t *testing.T) {
 	base := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(base, "mods"), 0755); err != nil {
@@ -62,10 +93,10 @@ func TestCopyVerifiedLauncherEntry(t *testing.T) {
 	}
 	sum := sha512.Sum512(data)
 	entry := Entry{
-		Action: "remote",
-		Path: "mods/example.jar",
+		Action:    "remote",
+		Path:      "mods/example.jar",
 		Algorithm: "sha512",
-		Value: hex.EncodeToString(sum[:]),
+		Value:     hex.EncodeToString(sum[:]),
 	}
 	destination := filepath.Join(t.TempDir(), "stage", "mods", "example.jar")
 	if err := copyVerifiedLauncherEntry(root, entry, destination); err != nil {

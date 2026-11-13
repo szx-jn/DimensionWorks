@@ -173,6 +173,10 @@ func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 	return startLauncherCommand(launcherCommand(launcher, packagePath))
 }
 
+func revealMRPack(packagePath string) error {
+	return startLauncherCommand(exec.Command("explorer.exe", "/select,", packagePath))
+}
+
 func resolveCustomLauncher(path string) (Launcher, error) {
 	if !strings.EqualFold(filepath.Ext(path), ".lnk") {
 		return customLauncherFile(path)
