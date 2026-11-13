@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strconv"
@@ -12,9 +13,10 @@ import (
 )
 
 type Launcher struct {
-	Name        string
-	Path        string
-	DesktopFile string
+	Name       string
+	Path       string
+	Arguments  string
+	WorkingDir string
 }
 
 func supportedLauncherName(value string) string {
@@ -64,36 +66,12 @@ func selectAndOpenMRPack(packagePath string) error {
 	if err != nil {
 		return fmt.Errorf("扫描已注册启动器失败：%w", err)
 	}
-	if len(launchers) == 0 {
-		fmt.Println("[启动器] 没有检测到已注册的受支持启动器，请手动打开 MRPack：", packagePath)
-		return nil
+	selected, err := chooseLauncher(launchers, readConsoleLine)
+	if err != nil {
+		return err
 	}
-
-	var selected Launcher
-	if len(launchers) == 1 {
-		selected = launchers[0]
-		fmt.Printf("[启动器] 只检测到 %s，直接使用。\n", selected.Name)
-	} else {
-		fmt.Println()
-		fmt.Println("检测到以下已注册的 Minecraft 启动器：")
-		for i, launcher := range launchers {
-			fmt.Printf("[%d] %s\n", i+1, launcher.Name)
-		}
-		fmt.Println("[0] 取消")
-		fmt.Print("请选择用于导入 MRPack 的启动器，输入编号：")
-		line, readErr := readConsoleLine()
-		if readErr != nil && strings.TrimSpace(line) == "" {
-			return fmt.Errorf("读取启动器选择失败：%w", readErr)
-		}
-		choice, err := strconv.Atoi(strings.TrimSpace(line))
-		if err != nil || choice < 0 || choice > len(launchers) {
-			return errors.New("启动器编号无效")
-		}
-		if choice == 0 {
-			return errors.New("用户取消了启动器选择")
-		}
-		selected = launchers[choice-1]
-	}
+	fmt.Printf("[启动器] 使用 %s：%s\n", selected.Name, selected.Path)
+	fmt.Println("[MRPack] 本次差量包：", packagePath)
 	if err := openMRPackWithLauncher(selected, packagePath); err != nil {
 		return fmt.Errorf("无法通过 %s 打开 MRPack：%w", selected.Name, err)
 	}
@@ -105,10 +83,82 @@ func selectAndOpenMRPack(packagePath string) error {
 	return nil
 }
 
-func startLauncher(executable string, args ...string) error {
-	cmd := exec.Command(executable, args...)
+func chooseLauncher(launchers []Launcher, readLine func() (string, error)) (Launcher, error) {
+	fmt.Println()
+	if len(launchers) == 0 {
+		fmt.Println("没有检测到已注册的受支持启动器，请选择自定义并提供启动器文件。")
+	} else {
+		fmt.Println("检测到以下已注册的 Minecraft 启动器：")
+	}
+	for i, launcher := range launchers {
+		fmt.Printf("[%d] %s\n", i+1, launcher.Name)
+	}
+	fmt.Printf("[%d] 自定义启动器\n", len(launchers)+1)
+	fmt.Println("[0] 取消")
+	fmt.Print("请选择用于导入 MRPack 的启动器，输入编号：")
+	line, readErr := readLine()
+	if readErr != nil && strings.TrimSpace(line) == "" {
+		return Launcher{}, fmt.Errorf("读取启动器选择失败：%w", readErr)
+	}
+	choice, err := strconv.Atoi(strings.TrimSpace(line))
+	if err != nil || choice < 0 || choice > len(launchers)+1 {
+		return Launcher{}, errors.New("启动器编号无效")
+	}
+	if choice == 0 {
+		return Launcher{}, errors.New("用户取消了启动器选择")
+	}
+	if choice <= len(launchers) {
+		return launchers[choice-1], nil
+	}
+	switch runtime.GOOS {
+	case "windows":
+		fmt.Println("请将启动器快捷方式（.lnk）、.exe 或 .jar 文件拖入终端，然后按回车。")
+	case "darwin":
+		fmt.Println("请将启动器 .app、.jar 或可执行文件拖入终端，然后按回车。")
+	}
+	fmt.Print("启动器文件路径：")
+	line, readErr = readLine()
+	if readErr != nil && strings.TrimSpace(line) == "" {
+		return Launcher{}, fmt.Errorf("读取自定义启动器路径失败：%w", readErr)
+	}
+	return customLauncherFromInput(line)
+}
+
+func customLauncherFromInput(input string) (Launcher, error) {
+	path, err := draggedLauncherPath(input)
+	if err != nil {
+		return Launcher{}, err
+	}
+	path, err = filepath.Abs(path)
+	if err != nil {
+		return Launcher{}, err
+	}
+	launcher, err := resolveCustomLauncher(path)
+	if err != nil {
+		return Launcher{}, err
+	}
+	if name := supportedLauncherName(filepath.Base(launcher.Path) + " " + launcher.Arguments); name != "" && launcher.Name == "" {
+		launcher.Name = name
+	}
+	if launcher.Name == "" {
+		launcher.Name = filepath.Base(launcher.Path)
+	}
+	return launcher, nil
+}
+
+func startLauncherCommand(cmd *exec.Cmd) error {
 	if err := cmd.Start(); err != nil {
 		return err
+	}
+	go func() { _ = cmd.Wait() }()
+	return nil
+}
+
+// open/gio exit after dispatching to the app, so report dispatch errors synchronously.
+func runLauncherDelegate(cmd *exec.Cmd) error {
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%w：%s", err, strings.TrimSpace(string(output)))
 	}
 	return nil
 }

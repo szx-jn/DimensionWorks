@@ -41,8 +41,33 @@ func parseLaunchServicesApps(output string) []Launcher {
 }
 
 func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
-	if launcher.Name == "Prism Launcher" {
-		return startLauncher("open", "-a", launcher.Path, "--args", "--import", packagePath)
+	cmd := launcherCommand(launcher, packagePath)
+	if strings.EqualFold(filepath.Ext(launcher.Path), ".app") {
+		return runLauncherDelegate(cmd)
 	}
-	return startLauncher("open", "-a", launcher.Path, packagePath)
+	return startLauncherCommand(cmd)
+}
+
+func resolveCustomLauncher(path string) (Launcher, error) { return customLauncherFile(path) }
+
+func launcherCommand(launcher Launcher, packagePath string) *exec.Cmd {
+	var cmd *exec.Cmd
+	switch strings.ToLower(filepath.Ext(launcher.Path)) {
+	case ".app":
+		args := []string{"-a", launcher.Path}
+		if launcher.Name == "Prism Launcher" {
+			args = append(args, "--args", "--import", packagePath)
+		}
+		cmd = exec.Command("open", args...)
+	case ".jar":
+		cmd = exec.Command("java", "-jar", launcher.Path)
+	default:
+		args := []string{}
+		if launcher.Name == "Prism Launcher" {
+			args = append(args, "--import", packagePath)
+		}
+		cmd = exec.Command(launcher.Path, args...)
+	}
+	cmd.Dir = launcher.WorkingDir
+	return cmd
 }

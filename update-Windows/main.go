@@ -358,6 +358,9 @@ func run(kind string, args []string) error {
 	if kind != "client" && kind != "server" {
 		return errors.New("该程序未指定 client/server 构建类型")
 	}
+	if runtime.GOOS == "linux" && kind == "client" {
+		return errors.New("Linux 仅支持服务端更新，请使用服务端更新器")
+	}
 	if runtime.GOOS != "windows" {
 		fmt.Println("运行平台：", runtime.GOOS)
 	}

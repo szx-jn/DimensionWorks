@@ -57,7 +57,9 @@ jobs:
               darwin) platform=macos; extension=; expected='Mach-O 64-bit' ;;
               *) exit 1 ;;
             esac
-            for kind in client server; do
+            kinds="client server"
+            [[ "$goos" == "linux" ]] && kinds="server"
+            for kind in $kinds; do
               output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
               GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -tags bundled_aria2 \
                 -trimpath -ldflags="-s -w -X main.defaultKind=${kind}" -o "$output" .

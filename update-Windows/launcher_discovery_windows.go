@@ -4,11 +4,14 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 	"unicode/utf16"
 )
 
@@ -167,9 +170,52 @@ func registryExecutable(value string) string {
 }
 
 func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
-	if launcher.Name == "Prism Launcher" {
-		return startLauncher(launcher.Path, "--import", packagePath)
+	return startLauncherCommand(launcherCommand(launcher, packagePath))
+}
+
+func resolveCustomLauncher(path string) (Launcher, error) {
+	if !strings.EqualFold(filepath.Ext(path), ".lnk") {
+		return customLauncherFile(path)
 	}
-	// HMCL/PCL have no verified import CLI; start the selected app for manual import.
-	return startLauncher(launcher.Path)
+	if _, err := os.Stat(path); err != nil {
+		return Launcher{}, err
+	}
+	script := `[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); $ErrorActionPreference='Stop'; $s=(New-Object -ComObject WScript.Shell).CreateShortcut('` + strings.ReplaceAll(path, "'", "''") + `'); @{Path=$s.TargetPath; Arguments=$s.Arguments; WorkingDir=$s.WorkingDirectory} | ConvertTo-Json -Compress`
+	data, err := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script).CombinedOutput()
+	if err != nil {
+		return Launcher{}, fmt.Errorf("解析启动器快捷方式失败：%w：%s", err, strings.TrimSpace(string(data)))
+	}
+	var shortcut Launcher
+	if err := json.Unmarshal(data, &shortcut); err != nil {
+		return Launcher{}, fmt.Errorf("解析快捷方式目标失败：%w", err)
+	}
+	launcher, err := customLauncherFile(shortcut.Path)
+	if err != nil {
+		return Launcher{}, fmt.Errorf("快捷方式目标无效：%w", err)
+	}
+	launcher.Arguments = shortcut.Arguments
+	if shortcut.WorkingDir != "" {
+		launcher.WorkingDir = shortcut.WorkingDir
+	}
+	return launcher, nil
+}
+
+func launcherCommand(launcher Launcher, packagePath string) *exec.Cmd {
+	cmd := exec.Command(launcher.Path)
+	if strings.EqualFold(filepath.Ext(launcher.Path), ".jar") {
+		cmd = exec.Command("java", "-jar", launcher.Path)
+	}
+	if launcher.Name == "Prism Launcher" {
+		cmd.Args = append(cmd.Args, "--import", packagePath)
+	}
+	if launcher.Arguments != "" {
+		// Preserve the shortcut's arguments without interpreting them in a shell.
+		prefix := syscall.EscapeArg(cmd.Args[0])
+		for _, arg := range cmd.Args[1:] {
+			prefix += " " + syscall.EscapeArg(arg)
+		}
+		cmd.SysProcAttr = &syscall.SysProcAttr{CmdLine: prefix + " " + launcher.Arguments}
+	}
+	cmd.Dir = launcher.WorkingDir
+	return cmd
 }

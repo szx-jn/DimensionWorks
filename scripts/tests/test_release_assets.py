@@ -19,12 +19,10 @@ class ReleaseWorkflowTest(unittest.TestCase):
             "refusing to overwrite it",
             "build_server_delta.py",
             "DimensionWorks-${PACK_VERSION}-update-manifest.tsv",
-            "DimensionWorks-${PACK_VERSION}-delta.zip",
             "DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv",
             "DimensionWorks-Server-${PACK_VERSION}-delta.zip",
             "update-dimensionworks-client-windows-amd64.exe",
             "update-dimensionworks-server-windows-amd64.exe",
-            "update-dimensionworks-client-linux-amd64",
             "update-dimensionworks-server-linux-amd64",
             "update-dimensionworks-client-macos-arm64",
             "update-dimensionworks-server-macos-arm64",
@@ -39,12 +37,13 @@ class ReleaseWorkflowTest(unittest.TestCase):
             with self.subTest(fragment=fragment):
                 self.assertIn(fragment, text)
 
-    def test_release_has_exactly_six_bundled_updaters_and_no_loose_engines(self) -> None:
+    def test_release_has_exactly_five_bundled_updaters_and_no_loose_engines(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")
         assets = text.split("assets=(", 1)[1].split(")", 1)[0]
         updaters = re.findall(r'"dist/(update-dimensionworks-[^"\n]+)"', assets)
-        self.assertEqual(len(updaters), 6)
-        self.assertEqual(len(set(updaters)), 6)
+        self.assertEqual(len(updaters), 5)
+        self.assertEqual(len(set(updaters)), 5)
+        self.assertNotIn('update-dimensionworks-client-linux-amd64', assets)
         self.assertNotIn('"dist/aria2c-', assets)
         self.assertIn('"dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv"', assets)
         self.assertIn('"dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"', assets)
@@ -72,8 +71,6 @@ class ReleaseWorkflowTest(unittest.TestCase):
         self.assertIn("Updater script embedded in server package", text)
         self.assertIn('--manifest "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv"', text)
         self.assertIn("must remain a standalone Release asset", text)
-        self.assertNotIn("unzip -p \"dist/DimensionWorks-${PACK_VERSION}.mrpack\"", text)
-        self.assertNotIn("unzip -p \"dist/DimensionWorks-Server-${PACK_VERSION}.zip\"", text)
         client_packager = (ROOT / "scripts" / "package_mrpack.py").read_text(encoding="utf-8")
         server_packager = (ROOT / "scripts" / "package_server.py").read_text(encoding="utf-8")
         self.assertNotIn("archive.write(staging / pack_manifest.MANIFEST_NAME", client_packager)

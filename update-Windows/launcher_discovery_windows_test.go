@@ -5,7 +5,9 @@ package main
 import (
 	"encoding/binary"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"unicode/utf16"
 )
@@ -57,5 +59,27 @@ func TestDecodeWindowsRegistryOutputUTF16(t *testing.T) {
 	}
 	if got := decodeWindowsRegistryOutput(data); got != text {
 		t.Fatalf("decoded registry output = %q, want %q", got, text)
+	}
+}
+
+func TestCustomWindowsShortcutPreservesTargetArgumentsAndDirectory(t *testing.T) {
+	root := t.TempDir()
+	target := filepath.Join(root, "HMCL.exe")
+	link := filepath.Join(root, "launcher.lnk")
+	if err := os.WriteFile(target, []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	quote := func(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
+	script := "$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + quote(link) + "); $s.TargetPath=" + quote(target) + "; $s.Arguments='--test 123'; $s.WorkingDirectory=" + quote(root) + "; $s.Save()"
+	if out, err := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script).CombinedOutput(); err != nil {
+		t.Fatalf("%v: %s", err, out)
+	}
+	got, err := customLauncherFromInput("\"" + link + "\"")
+	if err != nil || got.Path != target || got.Arguments != "--test 123" || got.WorkingDir != root || got.Name != "HMCL" {
+		t.Fatalf("%#v, %v", got, err)
+	}
+	cmd := launcherCommand(got, "delta.mrpack")
+	if cmd.Dir != root || !strings.HasSuffix(cmd.SysProcAttr.CmdLine, " --test 123") {
+		t.Fatalf("shortcut command lost arguments: %#v", cmd)
 	}
 }

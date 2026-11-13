@@ -18,7 +18,7 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(create): 新增机器或配方"
+        description: "新增功能；每行一条，如 feat(updater): 新增自定义启动器导入"
         required: false
         type: string
       release_fixes:
@@ -30,7 +30,7 @@ on:
         required: false
         type: string
       release_other:
-        description: "其他变更；每行一条，如 docs: 更新使用说明"
+        description: "其他变更；每行一条，如 chore(updater): Linux 仅发布服务端更新器"
         required: false
         type: string
 permissions:
@@ -263,7 +263,9 @@ jobs:
               darwin) platform="macos"; extension="" ;;
               *) echo "Unsupported target: $goos" >&2; exit 1 ;;
             esac
-            for kind in client server; do
+            kinds="client server"
+            [[ "$goos" == "linux" ]] && kinds="server"
+            for kind in $kinds; do
               output="../dist/update-dimensionworks-${kind}-${platform}-${goarch}${extension}"
               echo "Building ${output}"
               GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -tags bundled_aria2 \
@@ -300,7 +302,7 @@ jobs:
           [[ "$client_version" == "$PACK_VERSION" ]] || { echo "Client VERSION mismatch: $client_version != $PACK_VERSION" >&2; exit 1; }
           [[ "$server_version" == "$PACK_VERSION" ]] || { echo "Server VERSION mismatch: $server_version != $PACK_VERSION" >&2; exit 1; }
           echo "Client and server VERSION verified: $PACK_VERSION"
-          [[ "$(find dist -maxdepth 1 -type f -name 'update-dimensionworks-*' | wc -l)" -eq 6 ]] || { echo "Expected exactly six updater binaries" >&2; exit 1; }
+          [[ "$(find dist -maxdepth 1 -type f -name 'update-dimensionworks-*' | wc -l)" -eq 5 ]] || { echo "Expected exactly five updater binaries" >&2; exit 1; }
           [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip" ]] || { echo "Missing server delta package" >&2; exit 1; }
           [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}.zip" ]] || { echo "Missing server full package" >&2; exit 1; }
           [[ -s "dist/DimensionWorks-${PACK_VERSION}.mrpack" ]] || { echo "Missing client MRPack" >&2; exit 1; }
@@ -315,7 +317,9 @@ jobs:
               linux-*) expected='ELF 64-bit' ;;
               macos-*) expected='Mach-O 64-bit' ;;
             esac
-            for kind in client server; do
+            kinds="client server"
+            [[ "$target" == linux-* ]] && kinds="server"
+            for kind in $kinds; do
               binary="dist/update-dimensionworks-${kind}-${target}"
               [[ -s "$binary" ]] || { echo "Missing updater: $binary" >&2; exit 1; }
               file "$binary" | grep -q "$expected" || { echo "Wrong binary format: $binary" >&2; exit 1; }
@@ -359,7 +363,6 @@ jobs:
               aria2-third-party-source.tar.gz \
               update-dimensionworks-client-windows-amd64.exe \
               update-dimensionworks-server-windows-amd64.exe \
-              update-dimensionworks-client-linux-amd64 \
               update-dimensionworks-server-linux-amd64 \
               update-dimensionworks-client-macos-arm64 \
               update-dimensionworks-server-macos-arm64 \
@@ -407,7 +410,7 @@ jobs:
           if entries:
               print("\n".join(entries))
           else:
-            print("更新器：Windows/Linux/macOS 六个更新器全部单文件内嵌 aria2c；同版提供 GPL 许可证与源码，下载仅使用 aria2c，并提供错误原因、单连接兼容重试和超一小时切源。")
+            print("更新器：Windows/macOS 客户端及 Windows/Linux/macOS 服务端五个更新器全部单文件内嵌 aria2c；同版提供 GPL 许可证与源码，下载仅使用 aria2c，并提供错误原因、单连接兼容重试和超一小时切源。")
           if os.environ.get("SKIP_TESTS", "").lower() == "true":
               print("本次按维护者要求跳过测试，仅执行构建及静态产物校验；未进行游戏内登录或迁移验收。")
           PY
@@ -422,7 +425,6 @@ jobs:
             "dist/SHA256SUMS"
             "dist/update-dimensionworks-client-windows-amd64.exe"
             "dist/update-dimensionworks-server-windows-amd64.exe"
-            "dist/update-dimensionworks-client-linux-amd64"
             "dist/update-dimensionworks-server-linux-amd64"
             "dist/update-dimensionworks-client-macos-arm64"
             "dist/update-dimensionworks-server-macos-arm64"

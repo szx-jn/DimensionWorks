@@ -1,6 +1,6 @@
 # Go 跨平台更新器
 
-本目录包含 DimensionWorks 客户端与服务端的统一 Go 更新器。目录名沿用历史命名；同一份源码可构建为 Windows、Linux 与 macOS 原生程序。正式发布的 Windows amd64、Linux amd64、macOS arm64 客户端与服务端共六个更新器，全部为内嵌 aria2c 的单文件程序。文件下载仅使用 aria2c，不自动切换 Go 下载器；发行信息查询仍使用 Go HTTP 客户端。玩家不需要额外安装 aria2、curl、wget、Python 或 Java。
+本目录包含 DimensionWorks 客户端与服务端的统一 Go 更新器。目录名沿用历史命名；同一份源码可构建为 Windows、Linux 与 macOS 原生程序。正式发布的 Windows amd64/macOS arm64 客户端，以及 Windows amd64/Linux amd64/macOS arm64 服务端共五个更新器，全部为内嵌 aria2c 的单文件程序。文件下载仅使用 aria2c，不自动切换 Go 下载器；发行信息查询仍使用 Go HTTP 客户端。下载不需要额外安装 aria2、curl、wget 或 Python；自定义 `.jar` 启动器需要 Java。
 
 ## 本地测试
 
@@ -29,7 +29,9 @@ EOF
     linux) platform=linux; extension= ;;
     darwin) platform=macos; extension= ;;
   esac
-  for kind in client server; do
+  kinds="client server"
+  [ "$goos" = linux ] && kinds="server"
+  for kind in $kinds; do
     GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -tags bundled_aria2 \
       -trimpath -ldflags="-s -w -X main.defaultKind=$kind" \
       -o "../dist/update-dimensionworks-$kind-$platform-$goarch$extension" .
@@ -42,10 +44,10 @@ done
 ## 发布资产与使用
 
 - Windows amd64：update-dimensionworks-{client,server}-windows-amd64.exe
-- Linux amd64：update-dimensionworks-{client,server}-linux-amd64
+- Linux amd64：update-dimensionworks-server-linux-amd64（仅服务端）
 - macOS Apple Silicon（arm64）：update-dimensionworks-{client,server}-macos-arm64
 
-每个平台只需下载对应的一个更新器放到实例根目录，无需再下载或摆放 `aria2c`。正式发行只提供上述六个更新器，不再提供额外引擎文件或重复命名的更新器。运行时先校验内嵌引擎 SHA-256，再释放到更新器目录内的进程私有目录，授予 0700 权限，并执行限时版本检查。目录不可写或禁止执行时依次尝试当前目录、用户缓存目录和系统临时目录；失败的释放立即清理，成功的引擎在正常退出时清理。内嵌版本优先，未经固定摘要校验的外置文件不会执行。Windows/macOS 同样内嵌各自平台引擎，不需要额外组件。不带 `bundled_aria2` 的开发构建缺少引擎时会解释原因并停止文件下载。
+每个平台只需下载对应的一个更新器放到实例根目录，无需再下载或摆放 `aria2c`。正式发行只提供上述五个更新器，不再提供额外引擎文件或重复命名的更新器。运行时先校验内嵌引擎 SHA-256，再释放到更新器目录内的进程私有目录，授予 0700 权限，并执行限时版本检查。目录不可写或禁止执行时依次尝试当前目录、用户缓存目录和系统临时目录；失败的释放立即清理，成功的引擎在正常退出时清理。内嵌版本优先，未经固定摘要校验的外置文件不会执行。Windows/macOS 同样内嵌各自平台引擎，不需要额外组件。不带 `bundled_aria2` 的开发构建缺少引擎时会解释原因并停止文件下载。
 
 Linux 示例：
 
@@ -66,9 +68,9 @@ Linux/macOS 下载后如更新器没有可执行权限，先赋予更新器执�
 
 客户端更新先获取完整 `.mrpack`，解析 `modrinth.index.json`，逐项核对客户端文件路径、SHA-512 与独立更新清单中的首选下载地址，并保留索引中的下载候选。仅处理现有实例缺少或需要更新的文件：下载候选命中 `curseforge.com`、`forgecdn.net` 或其子域名的文件交给启动器，其他远程文件由更新器直接下载；普通 HTTP 下载失败不会触发启动器导入。
 
-需要启动器时，更新器仅把本次需更新的受限来源文件写入差量 MRPack，保留目标包的 Minecraft/加载器依赖，不包含配置 overrides。Windows 从注册表、macOS 从 LaunchServices、Linux 从 XDG `.desktop` 注册项发现 HMCL、Prism Launcher，以及仅 Windows 支持的 PCL；只有一个结果时直接使用，多个结果时要求选择，没有结果时提示手动导入。Prism 通过 `--import` 或 Linux 桌面注册项传入文件 URI 请求导入；HMCL/PCL 启动后提示从界面选择差量包。启动器导入完成后，用户输入本次新建临时实例的游戏目录，更新器仅复制所需文件并核对 SHA-512，再交给原有事务流程应用。临时实例可以仅包含 shaderpacks、resourcepacks 或 datapacks。
+需要启动器时，更新器仅把本次需更新的受限来源文件写入差量 MRPack，保留目标包的 Minecraft/加载器依赖，不包含配置 overrides。Windows 从注册表、macOS 从 LaunchServices 发现 HMCL、Prism Launcher，以及仅 Windows 支持的 PCL。菜单始终在已发现启动器后追加“自定义启动器”（序号为结果数量 + 1），没有结果时自定义为 1，0 取消。自定义时拖入一个启动器文件并按回车；Windows 支持 `.lnk`、`.exe`、`.jar`，解析快捷方式的目标、参数及工作目录；macOS 支持 `.app`、`.jar` 和可执行文件，兼容拖入路径的引号、空格转义及本机 file URI。`.jar` 使用系统 Java 启动，需安装 Java。Prism 通过 `--import` 请求导入；HMCL/PCL 启动后提示从界面选择差量包。启动器导入完成后，用户输入本次新建临时实例的游戏目录，更新器仅复制所需文件并核对 SHA-512，再交给原有事务流程应用。临时实例可以仅包含 shaderpacks、resourcepacks 或 datapacks。
 
-更新成功后会再次显示临时实例的完整路径，只有用户明确输入 DELETE 才会删除；取消或无法读取确认时保留目录。任一步更新失败也会保留临时实例，便于重新运行。配置和其他 overrides 仍由更新器暂存、校验并应用。差量 MRPack 是标准整合包格式，启动器是否复用已缓存的 Minecraft/Forge 组件取决于启动器；尚未完成 HMCL/PCL/Prism 的实机导入验证。服务端仍使用原有 ZIP/增量包更新流程。
+更新成功后会再次显示临时实例的完整路径，只有用户明确输入 DELETE 才会删除；取消或无法读取确认时保留目录。任一步更新失败也会保留临时实例，便于重新运行。配置和其他 overrides 仍由更新器暂存、校验并应用。差量 MRPack 是标准整合包格式，启动器是否复用已缓存的 Minecraft/Forge 组件取决于启动器；Linux 不提供客户端启动器发现或导入，客户端更新请求会在访问实例前被拒绝。服务端仍使用原有 ZIP/增量包更新流程。
 
 aria2 下载直接发起 GET，不再强制先执行 5 秒超时的 HEAD 预检；不支持 HEAD 或 HEAD 很慢的来源仍可正常下载。RPC 模式根据终态确认完成，再回收引擎进程，避免下载完成后一直等待进程退出。远程大小限制在下载进度和落盘文件中核对，最终仍校验发布清单摘要。
 
