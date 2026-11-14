@@ -43,6 +43,7 @@ public final class ElasticClientSmokeCheck {
 
     @SubscribeEvent
     public static void tick(TickEvent.ClientTickEvent event) {
+        if (Boolean.getBoolean("dimensionworks.elasticVerticalBeltClientCheck")) return;
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         if (started == 0) started = System.currentTimeMillis();

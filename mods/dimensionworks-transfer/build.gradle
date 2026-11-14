@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.3.11'
+version = '0.3.12'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_transfer'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -111,6 +111,8 @@ if (project.hasProperty('elasticClientCheck')) {
         workingDirectory project.file('run-elastic-client')
         args '--quickPlaySingleplayer', 'ElasticCheck', '--width', '1100', '--height', '750'
         mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.elasticClientTest]
+        if (project.hasProperty('elasticVerticalBeltClientCheck'))
+            property 'dimensionworks.elasticVerticalBeltClientCheck', 'true'
     }
 }
 

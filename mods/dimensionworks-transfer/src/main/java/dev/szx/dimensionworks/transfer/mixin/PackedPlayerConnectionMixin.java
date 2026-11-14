@@ -1,6 +1,7 @@
 package dev.szx.dimensionworks.transfer.mixin;
 
 import dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport;
+import dev.szx.dimensionworks.transfer.elastic.ElasticVerticalBelt;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -27,6 +28,10 @@ public abstract class PackedPlayerConnectionMixin {
     @Inject(method = "handleMovePlayer", at = @At("RETURN"))
     private void dimensionworks$chainSuspendsParcel(ServerboundMovePlayerPacket packet, CallbackInfo ci) {
         if (PackedPlayerTransport.ignoresBlocks(player)) {
+            clientIsFloating = false;
+            player.fallDistance = 0;
+        } else if (ElasticVerticalBelt.findContact(player) != null) {
+            // 只豁免真实贴住运行中竖直带的弹力包裹，不扩大无碰撞权限。
             clientIsFloating = false;
             player.fallDistance = 0;
         }

@@ -7,13 +7,14 @@
 - `dimensionworks_transfer:elastic_packager` 沿用 CMP 打包工具模型与功能，名称显示绿色；`kubejs:bounce_tape` 与旧工具无序合成升级，保留旧工具完整保存数据。
 - 只有被该工具打包的玩家成为史莱姆色系弹力包裹，不透明度约 88%；普通包裹及生物/方块封装仍使用原处理。
 - 落地调用原版史莱姆块反弹，Shift 潜行抑制反弹。站在地面长按 Shift 蓄力，60 tick 满；松开后按蓄力力度向当前视角方向发射，满蓄力速度为 3.7125 格/tick（原先 1.65 的 2.25 倍），部分蓄力采用线性力度 `0.35 + 3.3625 × 蓄力tick / 60`。三段绿、橙、红蓄力条居中显示在物品栏上方 20 个 HUD 像素，满蓄力全金色。
+- 弹力玩家包裹贴住运行中的 Create 竖直传送带侧面时可随带面上行或下行，同一条带两面方向相反，反转立即改变方向；速度使用 Create 的带速 `RPM / 480`。自行横向走离或按 Shift 可以脱离。普通玩家、普通 CMP 包裹、生物和物品不能进入这条新运输路径。停机、越过上下末端、解包或离开接触面后恢复普通运动；飞行、骑乘、锁链悬挂与引导锁定优先。运输保留方块碰撞，不新增实体或贴图。
 - 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
 - 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
 - 工具继承整合包已必需的 CMP 固定 fork Release `0.6.1-dimensionworks.15`，构建直接依赖该公开资产，不内嵌第三方类。
 - 直接交互 Mixin 同时匹配开发环境与正式 JAR 的 `interactLivingEntity` / `m_6880_`，避免正式客户端与专用服务器在模组初始化时崩溃。
 
-详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
+详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)、[竖直带运输验证](../../docs/validation/2026-11-14-elastic-vertical-belt.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
 
 ## 进入与物品
 

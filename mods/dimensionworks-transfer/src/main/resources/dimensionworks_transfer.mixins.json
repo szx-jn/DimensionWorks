@@ -9,6 +9,7 @@
     "ElasticToolInteractionMixin",
     "ElasticPackagerRecognitionMixin",
     "ElasticLandingMixin",
+    "ElasticVerticalBeltMovementMixin",
     "TutorialConnectionMixin",
     "TutorialPackedEscapeMixin",
     "PackedPlayerStateMixin",
