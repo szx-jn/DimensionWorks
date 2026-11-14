@@ -125,10 +125,11 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertIn(".hunger(20)", startup)
         self.assertNotIn(".effect(", startup)
         self.assertNotIn(".eaten(", startup)
-        self.assertIn("effect.getCategory()", server)
-        self.assertIn("dwOpenMagicEggSelection(player)", server)
+        gui = (ROOT / "mods/dimensionworks-magic-egg/src/main/java/dev/szx/dimensionworks/magicegg/MagicEggSelection.java").read_text(encoding="utf-8")
+        self.assertIn("effect.getCategory()", gui)
+        self.assertIn("$DWMagicEggSelection.open(player, data)", server)
         self.assertIn("ItemEvents.foodEaten(DW_MAGIC_EGG_ID", server)
-        self.assertIn("const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3", server)
+        self.assertIn("DURATION_TICKS = 20 * 60 * 10", gui)
 
     def test_eating_again_triggers_death_immediately(self) -> None:
         startup = (ROOT / "kubejs" / "startup_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")

@@ -1,8 +1,7 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
-const $DWMagicEggMobEffects = Java.loadClass('net.minecraftforge.registries.ForgeRegistries')
+const $DWMagicEggSelection = Java.loadClass('dev.szx.dimensionworks.magicegg.MagicEggSelection')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
-const DW_MAGIC_EGG_DURATION_TICKS = 20 * 60 * 3
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
 const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
@@ -87,21 +86,6 @@ function dwTickMagicEggFireworks(event) {
   }
 }
 
-// 每页每栏 12 个效果；选择只属于当前菜单，不与其他玩家共享。
-function dwMagicEggEffectButton(gui, entry, x, y, selected) {
-  const slot = gui.getSlot(x, y)
-  function refresh() {
-    slot.item = Item.of(selected[entry.id] ? 'minecraft:lime_dye' : 'minecraft:gray_dye')
-      .withName(Text.of(selected[entry.id] ? '已选择：' : '未选择：').append(Text.translate(entry.effect.getDescriptionId())).append(' V'))
-      .withLore([Text.of(entry.id), Text.of('点击切换；持续效果 3 分钟，瞬时效果立即触发')])
-  }
-  refresh()
-  slot.leftClicked = () => {
-    selected[entry.id] = !selected[entry.id]
-    refresh()
-  }
-}
-
 function dwFinishMagicEggDeath(player) {
   // 先移除增益，防止免伤、复活和持续治疗效果阻止死亡。
   player.potionEffects.clear()
@@ -114,65 +98,6 @@ function dwFinishMagicEggDeath(player) {
   dwStartMagicEggFireworks(player.level(), player.x, player.y, player.z)
 }
 
-function dwOpenMagicEggSelection(player) {
-  const groups = [[], [], []]
-  const selected = {}
-  const effects = $DWMagicEggMobEffects.MOB_EFFECTS.iterator()
-  while (effects.hasNext()) {
-    let effect = effects.next()
-    let id = $DWMagicEggMobEffects.MOB_EFFECTS.getKey(effect).toString()
-    let category = effect.getCategory().toString()
-    groups[category === 'BENEFICIAL' ? 0 : category === 'NEUTRAL' ? 1 : 2].push({ id: id, effect: effect })
-  }
-  const pages = Math.max(1, Math.ceil(Math.max(groups[0].length, groups[1].length, groups[2].length) / 12))
-  let page = 0
-  let confirmed = false
-  function render(gui) {
-    gui.playerSlots = false
-    for (let index = 0; index < 54; index++) {
-      gui.slots[index].item = Item.empty
-      gui.slots[index].resetClickHandlers()
-    }
-    const names = ['增益状态', '中立状态', '减益状态']
-    const colors = ['minecraft:green_stained_glass_pane', 'minecraft:yellow_stained_glass_pane', 'minecraft:red_stained_glass_pane']
-    for (let group = 0; group < 3; group++) {
-      gui.button(group * 3 + 1, 0, Item.of(colors[group]), Text.of(names[group] + ' · 默认 V'), () => {})
-      for (let offset = 0; offset < 12; offset++) {
-        let entry = groups[group][page * 12 + offset]
-        if (entry) dwMagicEggEffectButton(gui, entry, group * 3 + offset % 3, 1 + Math.floor(offset / 3), selected)
-      }
-    }
-    gui.button(0, 5, Item.of('minecraft:arrow'), Text.of('上一页'), () => { page = (page + pages - 1) % pages; render(gui) })
-    gui.button(1, 5, Item.of('minecraft:paper'), Text.of('第 ' + (page + 1) + ' / ' + pages + ' 页'), () => {})
-    gui.button(2, 5, Item.of('minecraft:arrow'), Text.of('下一页'), () => { page = (page + 1) % pages; render(gui) })
-    gui.button(4, 5, Item.of('minecraft:barrier').withLore([
-      Text.of('有些效果可能造成画面被影响，'),
-      Text.of('整合包概不负责这些效果，请谨慎选择')
-    ]), Text.of('免责声明 · 请谨慎选择'), () => {})
-    gui.button(8, 5, Item.of('minecraft:emerald'), Text.of('确认选择并开始倒计时'), () => {
-      if (confirmed || !player.isAlive()) return
-      confirmed = true
-      player.closeMenu()
-      const data = player.persistentData
-      data.putBoolean(DW_MAGIC_EGG_PENDING, true)
-      data.putLong(DW_MAGIC_EGG_DEADLINE, player.age + DW_MAGIC_EGG_DURATION_TICKS)
-      for (let group = 0; group < 3; group++) {
-        for (let index = 0; index < groups[group].length; index++) {
-          let entry = groups[group][index]
-          if (!selected[entry.id]) continue
-          if (entry.effect.isInstantenous()) {
-            entry.effect.applyInstantenousEffect(player, player, player, 4, 1.0)
-          } else {
-            player.potionEffects.add(entry.effect, DW_MAGIC_EGG_DURATION_TICKS, 4, false, true)
-          }
-          if (!player.isAlive()) return
-        }
-      }
-    })
-  }
-  player.openChestGUI(Text.of('魔法皮蛋：选择本次效果'), 6, gui => render(gui))
-}
-
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
   const data = player.persistentData
@@ -181,7 +106,8 @@ ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
     dwFinishMagicEggDeath(player)
     return
   }
-  dwOpenMagicEggSelection(player)
+  // KubeJS persistentData 与 Forge persistentData 不同；明确传递原倒计时数据。
+  $DWMagicEggSelection.open(player, data)
 })
 
 PlayerEvents.inventoryChanged(event => {

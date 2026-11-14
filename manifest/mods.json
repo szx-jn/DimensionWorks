@@ -6,6 +6,16 @@
   },
   "mods": [
     {
+      "id": "dimensionworks_magic_egg",
+      "name": "DimensionWorks Magic Egg",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-magic-egg",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "both",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-magic-egg"
+    },
+    {
       "id": "ae2",
       "name": "Applied Energistics 2",
       "source": "modrinth",
