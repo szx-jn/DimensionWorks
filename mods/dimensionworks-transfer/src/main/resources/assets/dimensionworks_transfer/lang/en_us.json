@@ -19,5 +19,6 @@
   "dimensionworks_transfer.destination.alexscaves": "Alex Caves",
   "dimensionworks_transfer.destination.aether": "The Aether",
   "message.dimensionworks_transfer.tutorial_action": "Controls unlock when you arrive",
-  "message.dimensionworks_transfer.no_safe_landing": "No safe landing in your plot: a safe floor and two clear vertical blocks are required."
+  "message.dimensionworks_transfer.no_safe_landing": "No safe landing in your plot: a safe floor and two clear vertical blocks are required.",
+  "item.dimensionworks_transfer.elastic_packager": "Elastic Packager"
 }

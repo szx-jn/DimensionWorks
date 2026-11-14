@@ -2,6 +2,18 @@
 
 为维度工坊提供 `dw:transfer` 个人中转领地、维度钥匙引导和玩家包裹发运。
 
+## 弹力打包工具
+
+- `dimensionworks_transfer:elastic_packager` 沿用 CMP 打包工具模型与功能，名称显示绿色；`kubejs:bounce_tape` 与旧工具无序合成升级，保留旧工具完整保存数据。
+- 只有被该工具打包的玩家成为史莱姆色系弹力包裹，不透明度约 88%；普通包裹及生物/方块封装仍使用原处理。
+- 落地调用原版史莱姆块反弹，Shift 潜行抑制反弹。站在地面长按 Shift 蓄力，60 tick 满；松开后按蓄力力度向当前视角方向发射。三段绿、橙、红蓄力条居中显示在物品栏上方 20 个 HUD 像素，满蓄力全金色。
+- 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
+- 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
+- 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
+- 工具继承整合包已必需的 CMP 固定 fork Release `0.6.1-dimensionworks.15`，构建直接依赖该公开资产，不内嵌第三方类。
+
+详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md) 和 [本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
+
 ## 进入与物品
 
 - 齿轮之心第二阶段完成后授予一次性维度钥匙。引导记录完整主手 NBT 与快捷栏槽位，冻结操作；主手右键成功进入领地后，在下一服务端 tick 恢复物品并完整同步背包。消费逻辑只操作使用开始时捕获的钥匙，不消费恢复后的物品。

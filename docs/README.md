@@ -6,7 +6,8 @@
 
 - [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：暮色方块的职责与可替代性审查；旧六个提案已撤回，新机械先审阅职责再设计产线；下一维度待定。
 - [`design/twilight-machine-products.md`](design/twilight-machine-products.md)：四项机械成果候选：现场爆炸驱动、活体装备拆装、生物行为控制和状态读取；温度探头与流量计已撤回，列明组合用途、替代边界与未验证项。
-- [`design/twilight-easter-egg-toys.md`](design/twilight-easter-egg-toys.md)：彩蛋仅保留弹跳封带，与打包工具合成弹力打包工具；限定玩家弹力包裹、史莱姆落地弹跳、Shift 蓄力和发射，材料与配方待定。
+- [`design/twilight-easter-egg-toys.md`](design/twilight-easter-egg-toys.md)：已实现弹跳封带与弹力打包工具，记录暮色供料、十步装配、玩家弹力包裹、史莱姆落地弹跳、Shift 蓄力和发射。
+- [`validation/2026-11-14-elastic-packager.md`](validation/2026-11-14-elastic-packager.md)：弹力打包工具的编译、单元测试、真实配方与包裹回归检查，以及独立客户端的模型、蓄力界面和运动验证。
 - [`design/twilight-item-registry-inventory.md`](design/twilight-item-registry-inventory.md)：固定版暮色森林 4.3.2508 的全部 562 项注册物品，含方块物品、刷怪蛋及中英文名称，附完整 CSV；用于先盘点再选择弹力材料。
 
 - [`design/root-version-authority.md`](design/root-version-authority.md)：更新器与登录检测仅以实际游戏根目录 VERSION 判断当前版本、失败处理与文件事务规则。

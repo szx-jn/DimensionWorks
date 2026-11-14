@@ -23,6 +23,8 @@ public final class WDTransfer {
         modEventBus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
             event.enqueueWork(dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy::initialize));
         TransferNetwork.register();
+        dev.szx.dimensionworks.transfer.elastic.ElasticNetwork.register();
+        dev.szx.dimensionworks.transfer.elastic.ElasticItems.ITEMS.register(modEventBus);
         DispatchBlocks.BLOCKS.register(modEventBus);
         ModChunkGenerators.CHUNK_GENERATORS.register(modEventBus);
         LOGGER.info("DimensionWorks Transfer loaded");

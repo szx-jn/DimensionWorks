@@ -98,5 +98,9 @@
   "item.kubejs.incomplete_netherite_scrap": "Netherite-Trait Mixed Metal",
   "item.kubejs.incomplete_netherite_scrap.tooltip": "The netherite trait has been assigned by a high-pressure netherite crystal. Await final mechanical pressing.",
   "item.kubejs.mixed_metal": "Mixed Metal Ingot",
-  "item.kubejs.mixed_metal.tooltip": "Chemically mixed from sulfuric acid, sulfur dioxide, and several metal feedstocks. No metal trait has been assigned yet."
+  "item.kubejs.mixed_metal.tooltip": "Chemically mixed from sulfuric acid, sulfur dioxide, and several metal feedstocks. No metal trait has been assigned yet.",
+  "item.kubejs.bounce_tape": "Bounce Tape",
+  "item.kubejs.incomplete_bounce_tape": "Incomplete Bounce Tape",
+  "item.kubejs.elastic_compound": "Elastic Compound",
+  "item.kubejs.steeleaf_seal_strip": "Steeleaf Tape Blank"
 }

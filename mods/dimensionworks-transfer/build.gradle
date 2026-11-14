@@ -4,7 +4,7 @@ plugins {
     id 'eclipse'
     id 'idea'
 }
-version = '0.3.8'
+version = '0.3.9'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_transfer'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -29,6 +29,14 @@ minecraft {
 }
 
 repositories {
+    // The pack already requires this fixed CMP fork release. Use its public API,
+    // without embedding or copying third-party code into this module.
+    ivy {
+        url = 'https://github.com/szx-jn/Create-Mobile-Packages/releases/download'
+        patternLayout { artifact '[revision]/[artifact]-[revision].[ext]' }
+        metadataSources { artifact() }
+        content { includeModule 'dw-cmp', 'create_mobile_packages' }
+    }
     maven { url = 'https://maven.createmod.net' }
     maven { url = 'https://maven.tterrag.com' }
     maven { url = 'https://maven.theillusivec4.top' }
@@ -41,7 +49,6 @@ if (project.hasProperty('transferTestModsDir')) {
     repositories { flatDir { dirs project.property('transferTestModsDir') } }
     dependencies {
         runtimeOnly fg.deobf('dw-test:twilightforest:1.20.1-4.3.2508-universal')
-        runtimeOnly fg.deobf('dw-test:create_mobile_packages:1.20.1-0.6.1-dimensionworks.15')
         runtimeOnly fg.deobf('dw-test:appliedenergistics2-forge:15.4.10')
         runtimeOnly fg.deobf('dw-test:guideme:20.1.15')
         runtimeOnly fg.deobf('dw-test:Mekanism:1.20.1-10.4.16.80')
@@ -49,11 +56,19 @@ if (project.hasProperty('transferTestModsDir')) {
         runtimeOnly fg.deobf('dw-test:megacells-forge:2.4.6-1.20.1')
         runtimeOnly fg.deobf('dw-test:Applied-Mekanistics:1.4.3')
         runtimeOnly fg.deobf('dw-test:cloth-config:11.1.136-forge')
+        if (project.hasProperty('elasticRecipeCheck')) {
+            runtimeOnly fg.deobf('dw-test:kubejs-forge:2001.6.5-build.26')
+            runtimeOnly fg.deobf('dw-test:kubejs-create-forge:2001.3.0-build.8')
+            runtimeOnly fg.deobf('dw-test:rhino-forge:2001.2.3-build.10')
+            runtimeOnly fg.deobf('dw-test:architectury:9.2.14-forge')
+            runtimeOnly fg.deobf('dw-test:vintageimprovements:1.20.1-0.3.7.9')
+        }
     }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
+    implementation fg.deobf('dw-cmp:create_mobile_packages:1.20.1-0.6.1-dimensionworks.15')
     implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
     implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
     implementation fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
@@ -81,6 +96,21 @@ minecraft.runs {
         workingDirectory project.file('run-gametest-recovery')
         property 'forge.enabledGameTestNamespaces', project.findProperty('transferGameTestNamespaces') ?: 'dimensionworks_transfer'
         mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.gameTest]
+    }
+}
+
+// Local visual/physics smoke check only; never included in the production JAR or CI.
+if (project.hasProperty('elasticClientCheck')) {
+    sourceSets {
+        elasticClientTest {
+            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+        }
+    }
+    minecraft.runs.client {
+        workingDirectory project.file('run-elastic-client')
+        args '--quickPlaySingleplayer', 'ElasticCheck', '--width', '1100', '--height', '750'
+        mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.elasticClientTest]
     }
 }
 

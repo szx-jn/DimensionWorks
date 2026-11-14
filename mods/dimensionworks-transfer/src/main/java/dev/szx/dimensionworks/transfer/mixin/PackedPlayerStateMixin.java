@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class PackedPlayerStateMixin {
     @Inject(method = "setPacked", at = @At("TAIL"), remap = false)
     private static void dimensionworks$updatePackedTag(ServerPlayer player, boolean value, boolean byOther, CallbackInfo ci) {
+        dev.szx.dimensionworks.transfer.elastic.ElasticParcelState.synchronize(player);
         dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport.synchronize(player);
         if (!value) com.simibubi.create.content.kinetics.chainConveyor.ServerChainConveyorHandler.handleStopRidingPacket(player);
     }
@@ -25,6 +26,7 @@ abstract class PackedPlayerStateMixin {
         boolean byOther,
         CallbackInfo callback
     ) {
+        if (!value) dev.szx.dimensionworks.transfer.elastic.ElasticParcelState.clear(player);
         if (!value && player.getPersistentData().getBoolean("cmp_packed_player")) {
             UnpackFireworks.start(player);
         }

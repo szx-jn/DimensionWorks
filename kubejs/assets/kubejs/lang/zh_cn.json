@@ -100,5 +100,9 @@
   "item.kubejs.incomplete_netherite_scrap": "下界合金特质混合金属",
   "item.kubejs.incomplete_netherite_scrap.tooltip": "已由下界合金高压结晶赋予 netherite 特质，等待最终机械冲压。",
   "item.kubejs.mixed_metal": "混合金属锭",
-  "item.kubejs.mixed_metal.tooltip": "由硫酸、二氧化硫与多种金属原料经化学冶金混合制成，尚未赋予金属特质。"
+  "item.kubejs.mixed_metal.tooltip": "由硫酸、二氧化硫与多种金属原料经化学冶金混合制成，尚未赋予金属特质。",
+  "item.kubejs.bounce_tape": "弹跳封带",
+  "item.kubejs.incomplete_bounce_tape": "未完成的弹跳封带",
+  "item.kubejs.elastic_compound": "弹性胶料",
+  "item.kubejs.steeleaf_seal_strip": "钢叶封带坯"
 }

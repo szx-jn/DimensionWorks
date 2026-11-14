@@ -15,6 +15,7 @@ public final class TutorialOverlay {
     private static int frame;
     private TutorialOverlay() {}
     public static void setLocked(boolean value) { locked = value; }
+    public static boolean isLocked() { return locked; }
 
     @SubscribeEvent
     public static void render(RenderGuiOverlayEvent.Post event) {

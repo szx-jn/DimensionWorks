@@ -19,5 +19,6 @@
   "dimensionworks_transfer.destination.alexscaves": "Alex 洞穴",
   "dimensionworks_transfer.destination.aether": "天境",
   "message.dimensionworks_transfer.tutorial_action": "完成引导后操作将恢复",
-  "message.dimensionworks_transfer.no_safe_landing": "领地内找不到安全落点：需要安全地面和连续两格空余空间。"
+  "message.dimensionworks_transfer.no_safe_landing": "领地内找不到安全落点：需要安全地面和连续两格空余空间。",
+  "item.dimensionworks_transfer.elastic_packager": "弹力打包工具"
 }
