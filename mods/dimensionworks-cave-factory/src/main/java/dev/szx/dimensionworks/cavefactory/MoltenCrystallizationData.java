@@ -52,12 +52,6 @@ public final class MoltenCrystallizationData extends SavedData {
         return exposureStarted;
     }
 
-    public void track(BlockPos pos) {
-        if (exposureStarted.putIfAbsent(pos.asLong(), -1L) == null) {
-            setDirty();
-        }
-    }
-
     public void reset(BlockPos pos) {
         exposureStarted.put(pos.asLong(), -1L);
         setDirty();

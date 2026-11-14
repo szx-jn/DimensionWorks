@@ -5,7 +5,7 @@ import shutil
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT.parent / 'mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures'
 DESTINATION = ROOT / 'public/memory'
-TYPES = ('economy', 'balanced', 'high_speed', 'high_storage', 'defective', 'final')
+TYPES = ('economy', 'balanced', 'high_speed', 'low_loss', 'defective', 'final')
 
 
 def generate():

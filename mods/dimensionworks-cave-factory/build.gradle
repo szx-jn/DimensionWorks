@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-version = '0.1.6'
+version = '0.1.7'
 group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_cave_factory'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -94,81 +94,46 @@ jar {
     finalizedBy 'reobfJar'
 }
 
-// Opt-in client verification with the pack's fluid registration script and required runtime mods.
+// Opt-in verification uses the pack's pinned local runtime releases.
 if (project.hasProperty('crystalCheck')) {
+    if (!project.hasProperty('crystalMods')) {
+        throw new GradleException('Supply -PcrystalMods=<DimensionWorks mods directory> for crystalCheck')
+    }
+    repositories {
+        flatDir { dirs '../dimensionworks-rpm-limit/build/libs' }
+        flatDir { dirs project.property('crystalMods') }
+    }
     dependencies {
-        runtimeOnly fg.deobf(files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}-dev.jar"))
-        runtimeOnly fg.deobf('mekanism:Mekanism:1.20.1-10.4.16.80')
-        runtimeOnly fg.deobf('appeng:appliedenergistics2-forge:15.4.10')
-        runtimeOnly fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
-        runtimeOnly fg.deobf('maven.modrinth:U6GY0xp0:lC8HHXOF')
-        runtimeOnly fg.deobf('maven.modrinth:vLhkn5ux:j1560XGp')
-        runtimeOnly fg.deobf('maven.modrinth:jJfV67b1:lTAAe4sZ')
-        runtimeOnly fg.deobf('maven.modrinth:umyGl7zF:hVR2xUSr')
-        runtimeOnly fg.deobf('maven.modrinth:lhGA9TYQ:1MKTLiiG')
-        runtimeOnly fg.deobf('maven.modrinth:sk9knFPE:uNALdylI')
-        runtimeOnly fg.deobf('maven.modrinth:guideme:20.1.15')
+        runtimeOnly fg.deobf("dw-test:dimensionworks_rpm_limit:${rpmLimitVersion}")
+        [
+            'Mekanism:1.20.1-10.4.16.80', 'appliedenergistics2-forge:15.4.10',
+            'curios-forge:5.14.1+1.20.1', 'kubejs-forge:2001.6.5-build.26',
+            'rhino-forge:2001.2.3-build.10', 'architectury:9.2.14-forge',
+            'alexscaves:2.0.2', "Dimensions-of-Alex's-Caves:1.20.1-1.0.4",
+            'citadel:2.6.3-1.20.1', 'guideme:20.1.15'
+        ].each { coordinate -> runtimeOnly fg.deobf("dw-test:${coordinate}") }
     }
     sourceSets {
         crystalCheck {
-            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+            compileClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
             runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
         }
     }
-    minecraft.runs.client {
-        workingDirectory project.file('run-crystal-check')
-        property 'dimensionworks.verifyCrystallizedFluids', 'true'
-        mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.crystalCheck] }
-    }
-}
-if (project.hasProperty('crystalCheck')) {
     minecraft.runs {
+        client {
+            workingDirectory project.file('run-crystal-check')
+            property 'dimensionworks.verifyCrystallizedFluids', 'true'
+            mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.crystalCheck] }
+        }
         gameTestServer {
             workingDirectory project.file('run-crystal-check')
             property 'forge.enabledGameTestNamespaces', 'dimensionworks_cave_factory'
             mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.crystalCheck] }
         }
     }
-}
-
-// Explicit, disposable server verification using the pack's pinned local runtime jars.
-if (project.hasProperty('twilightCheck')) {
-    if (!project.hasProperty('twilightMods')) {
-        throw new GradleException('Supply -PtwilightMods=<DimensionWorks mods directory> for twilightCheck')
+    tasks.register('prepareCrystalCheck', Copy) {
+        from '../../kubejs/startup_scripts/molten_metals.js'
+        into 'run-crystal-check/kubejs/startup_scripts'
     }
-    repositories { flatDir { dirs project.property('twilightMods') } }
-    dependencies {
-        runtimeOnly files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}-dev.jar")
-        [
-            'twilightforest:1.20.1-4.3.2508-universal', 'alexscaves:2.0.2',
-            "Dimensions-of-Alex's-Caves:1.20.1-1.0.4", 'citadel:2.6.3-1.20.1',
-            'Mekanism:1.20.1-10.4.16.80', 'appliedenergistics2-forge:15.4.10',
-            'guideme:20.1.15',
-            'curios-forge:5.14.1+1.20.1', 'kubejs-forge:2001.6.5-build.26',
-            'rhino-forge:2001.2.3-build.10', 'architectury:9.2.14-forge'
-        ].each { coordinate -> runtimeOnly fg.deobf("dw-test:${coordinate}") }
-    }
-    sourceSets {
-        twilightCheck {
-            compileClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-        }
-    }
-    minecraft.runs.gameTestServer {
-        workingDirectory project.file('run-twilight-check')
-        property 'forge.enabledGameTestNamespaces', 'dimensionworks_cave_factory'
-        mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.twilightCheck] }
-    }
-    tasks.register('prepareTwilightCheck', Copy) {
-        dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':devJar')
-        from('../../kubejs') {
-            include 'startup_scripts/twilight_industry.js'
-            include 'data/dimensionworks_cave_factory/recipes/twilight/**'
-            include 'data/dimensionworks_cave_factory/tags/items/twilight_leaves.json'
-            include 'data/dimensionworks_cave_factory/tags/items/boar_feed.json'
-            include 'data/dimensionworks_cave_factory/tags/blocks/root_bed.json'
-        }
-        into 'run-twilight-check/kubejs'
-    }
-    tasks.matching { it.name == 'runGameTestServer' }.configureEach { dependsOn 'prepareTwilightCheck' }
+    tasks.matching { it.name in ['runGameTestServer', 'runClient'] }.configureEach { dependsOn 'prepareCrystalCheck' }
 }

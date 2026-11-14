@@ -77,10 +77,6 @@ public final class GearHeartState {
         return isItem(stack, NORMAL_ID);
     }
 
-    public static boolean isLegacyCursed(ItemStack stack) {
-        return isEnchantedGearHeart(stack) && getCustomModelData(stack) == 2;
-    }
-
     public static ItemStack createUnrepairedCursedHeart() {
         Item item = ForgeRegistries.ITEMS.getValue(NORMAL_ID);
         return item == null ? ItemStack.EMPTY : createUnrepairedCursedHeart(item);
@@ -126,7 +122,7 @@ public final class GearHeartState {
     }
 
     public static int nextRepairIndex(int repairedMask) {
-        int normalized = normalizeLegacyMask(repairedMask);
+        int normalized = normalizeMask(repairedMask);
         for (int index = 1; index <= REPAIR_FRAGMENT_BITS.length; index++) {
             if ((normalized & REPAIR_FRAGMENT_BITS[index - 1]) == 0) {
                 return index;
@@ -161,19 +157,19 @@ public final class GearHeartState {
     }
 
     public static boolean isFullyReleasedMask(int repairedMask) {
-        return normalizeLegacyMask(repairedMask) == ALL_CURSES;
+        return normalizeMask(repairedMask) == ALL_CURSES;
     }
 
     public static boolean isFullyReleased(ItemStack stack) {
-        return isBlessed(stack) && !isLegacyCursed(stack)
+        return isBlessed(stack)
             || isFullyReleasedMask(getRepairedMask(stack));
     }
 
     public static boolean isRepairApplied(int repairedMask, int repairBit) {
-        return (normalizeLegacyMask(repairedMask) & repairBit) != 0;
+        return (normalizeMask(repairedMask) & repairBit) != 0;
     }
 
-    public static int normalizeLegacyMask(int repairedMask) {
+    public static int normalizeMask(int repairedMask) {
         return repairedMask & ALL_CURSES;
     }
 
@@ -215,23 +211,6 @@ public final class GearHeartState {
         return finalStack;
     }
 
-    public static ItemStack migrateLegacyCursed(ItemStack legacy) {
-        Item item = ForgeRegistries.ITEMS.getValue(NORMAL_ID);
-        if (item == null) {
-            return legacy.copy();
-        }
-
-        ItemStack migrated = new ItemStack(item);
-        CompoundTag tag = legacy.getTag();
-        if (tag != null) {
-            migrated.setTag(tag.copy());
-        }
-        migrated.getOrCreateTag().putInt(
-            REPAIRED_MASK_KEY, normalizeLegacyMask(legacy.getOrCreateTag().getInt(REPAIRED_MASK_KEY)));
-        migrated.getOrCreateTag().putInt("CustomModelData", 1);
-        return migrated;
-    }
-
     public static boolean isCurseActive(ItemStack stack, int curseMask) {
         return isCursed(stack) && (getRepairedMask(stack) & curseMask) == 0;
     }
@@ -241,16 +220,11 @@ public final class GearHeartState {
         if (tag == null || !tag.contains(REPAIRED_MASK_KEY)) {
             return 0;
         }
-        return normalizeLegacyMask(tag.getInt(REPAIRED_MASK_KEY));
+        return normalizeMask(tag.getInt(REPAIRED_MASK_KEY));
     }
 
     public static void setRepairedMask(ItemStack stack, int mask) {
-        stack.getOrCreateTag().putInt(REPAIRED_MASK_KEY, normalizeLegacyMask(mask));
-    }
-
-    public static int getCustomModelData(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? 0 : tag.getInt("CustomModelData");
+        stack.getOrCreateTag().putInt(REPAIRED_MASK_KEY, normalizeMask(mask));
     }
 
     private static boolean isItem(ItemStack stack, ResourceLocation expected) {

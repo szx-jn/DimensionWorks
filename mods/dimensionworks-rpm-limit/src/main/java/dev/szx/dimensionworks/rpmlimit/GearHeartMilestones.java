@@ -15,7 +15,7 @@ public final class GearHeartMilestones {
 
     public static void record(CompoundTag data, ItemStack heart) {
         if (reachedStageTwo(data) || !GearHeartState.isGearHeart(heart)) return;
-        boolean finished = GearHeartState.isBlessed(heart) && !GearHeartState.isLegacyCursed(heart);
+        boolean finished = GearHeartState.isBlessed(heart);
         int mask = GearHeartState.getRepairedMask(heart);
         if (finished || (mask & (GearHeartState.ROTATION_SPEED | GearHeartState.CREATE_CAPACITY))
                 == (GearHeartState.ROTATION_SPEED | GearHeartState.CREATE_CAPACITY)) {

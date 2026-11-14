@@ -80,7 +80,7 @@ ServerEvents.recipes(event => {
       C: 'ae2:speed_card'
     }).id(`dimensionworks_mek_stress:memory_card_ddr${tier}_high_speed`)
 
-    event.shaped(`4x dimensionworks_mek_stress:memory_card_ddr${tier}_high_storage`, [
+    event.shaped(`4x dimensionworks_mek_stress:memory_card_ddr${tier}_low_loss`, [
       'PAP',
       'ACA',
       'PAP'
@@ -88,10 +88,10 @@ ServerEvents.recipes(event => {
       P: definition.plate,
       A: definition.alloy,
       C: definition.storage
-    }).id(`dimensionworks_mek_stress:memory_card_ddr${tier}_high_storage`)
+    }).id(`dimensionworks_mek_stress:memory_card_ddr${tier}_low_loss`)
 
     if (tier > 1) {
-      ['economy', 'balanced', 'high_speed', 'high_storage'].forEach(kind => {
+      ['economy', 'balanced', 'high_speed', 'low_loss'].forEach(kind => {
         const oldCard = `dimensionworks_mek_stress:memory_card_ddr${tier - 1}_${kind}`
         event.shapeless(`4x dimensionworks_mek_stress:memory_card_ddr${tier}_${kind}`, [
           oldCard, oldCard, oldCard, oldCard, definition.plate, definition.alloy, definition.circuit
@@ -99,10 +99,6 @@ ServerEvents.recipes(event => {
       })
     }
   })
-
-  for (let tier = 1; tier <= 5; tier++) {
-    event.remove({ output: `dimensionworks_mek_stress:memory_card_ddr${tier}` })
-  }
 
   event.shaped('dimensionworks_mek_stress:memory_drive_ddr1', [
     'SAS',
@@ -129,9 +125,7 @@ ServerEvents.recipes(event => {
       const previous = grid.find(`dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`)
       const saved = previous.getTagElement('BlockEntityTag')
       if (saved != null) {
-        const copied = saved.copy()
-        copied.remove('StoredSu')
-        result.addTagElement('BlockEntityTag', copied)
+        result.addTagElement('BlockEntityTag', saved.copy())
       }
       return result
     }).id(`dimensionworks_mek_stress:upgrade_memory_drive_ddr${tier}`)

@@ -260,15 +260,6 @@ func planTransfer(kind, installedVersion string, target *Manifest, targetInfo *R
 }
 
 func stageIncrementalPackages(root, work, stageRoot string, packages []IncrementalPackage, entries []Entry, backupBytes uint64) error {
-	cacheRoot := filepath.Join(work, "incremental-downloads")
-	if err := os.Mkdir(cacheRoot, 0700); err != nil {
-		return fmt.Errorf("无法创建增量包临时下载目录：%w", err)
-	}
-	defer os.RemoveAll(cacheRoot)
-	previousCacheRoot := downloadCacheRoot
-	downloadCacheRoot = cacheRoot
-	defer func() { downloadCacheRoot = previousCacheRoot }()
-
 	staged := make(map[string]bool, len(entries))
 	for index, pkg := range packages {
 		packagePath := filepath.Join(work, fmt.Sprintf("incremental-%03d.zip", index+1))
@@ -331,9 +322,6 @@ func stageIncrementalPackages(root, work, stageRoot string, packages []Increment
 			return fmt.Errorf("增量链中的最终文件 %s 校验失败：%w", entry.Path, err)
 		}
 	}
-	if err := os.RemoveAll(cacheRoot); err != nil {
-		return fmt.Errorf("无法清理增量包分段缓存：%w", err)
-	}
-	fmt.Printf("[清理] 已删除 %d 个使用过的增量包及其下载分段缓存\n", len(packages))
+	fmt.Printf("[清理] 已删除 %d 个使用过的增量包\n", len(packages))
 	return nil
 }

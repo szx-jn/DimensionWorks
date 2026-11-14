@@ -13,13 +13,12 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class RpmPersistenceGameTests {
     private static CompoundTag repairedOfflinePlayer() {
-        return offlinePlayerWithHeart("kubejs:gear_heart_enchanted", GearHeartState.ALL_CURSES, 0);
+        return offlinePlayerWithHeart("kubejs:gear_heart_enchanted", GearHeartState.ALL_CURSES);
     }
-    private static CompoundTag offlinePlayerWithHeart(String itemId, int repairedMask, int modelData) {
+    private static CompoundTag offlinePlayerWithHeart(String itemId, int repairedMask) {
         CompoundTag heart = new CompoundTag(); heart.putString("id", itemId);
         heart.putByte("Count", (byte) 1);
         CompoundTag tag = new CompoundTag(); tag.putInt(GearHeartState.REPAIRED_MASK_KEY, repairedMask);
-        if (modelData != 0) tag.putInt("CustomModelData", modelData);
         heart.put("tag", tag);
         ListTag items = new ListTag(); items.add(heart);
         CompoundTag stacks = new CompoundTag(); stacks.put("Items", items);
@@ -28,7 +27,11 @@ public final class RpmPersistenceGameTests {
         ListTag slots = new ListTag(); slots.add(slot);
         CompoundTag inventory = new CompoundTag(); inventory.put("Curios", slots);
         CompoundTag caps = new CompoundTag(); caps.put("curios:inventory", inventory);
-        CompoundTag player = new CompoundTag(); player.put("ForgeCaps", caps); return player;
+        CompoundTag player = new CompoundTag(); player.put("ForgeCaps", caps);
+        CompoundTag data = new CompoundTag();
+        data.putInt(RpmPlayerState.LIMIT, RpmLimitConfig.gearHeartRotationLimit(repairedMask));
+        data.putBoolean(RpmPlayerState.INITIALIZED, true);
+        RpmPlayerState.persist(data); player.put("ForgeData", data); return player;
     }
     @GameTest(template = "empty")
     public static void repairedOfflineOwnerRecoversFull10240Limit(GameTestHelper helper) {
@@ -38,38 +41,28 @@ public final class RpmPersistenceGameTests {
         helper.succeed();
     }
     @GameTest(template = "empty")
-    public static void oldOfflineSavesRecoverFixedStagesAndLegacyPlaceholders(GameTestHelper helper) {
+    public static void offlineProfilesUseCurrentRepairStages(GameTestHelper helper) {
         int[] expected = {32, 512, 1024, 2048, 4096, 5120, 8192, 10240};
-        int[] previousLimits = {32, 1490, 2949, 4407, 5865, 7323, 8782, 10240};
         for (int stage = 0; stage < expected.length; stage++) {
             String item = stage == 7 ? "kubejs:gear_heart_enchanted" : "kubejs:gear_heart";
-            for (int oldLimit : new int[] {512, previousLimits[stage]}) {
-                CompoundTag player = offlinePlayerWithHeart(item, (1 << stage) - 1, 0);
-                CompoundTag oldData = new CompoundTag();
-                oldData.putInt(RpmPlayerState.LIMIT, oldLimit);
-                oldData.putBoolean(RpmPlayerState.INITIALIZED, true);
-                player.put("ForgeData", oldData);
-                RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(player);
-                helper.assertTrue(profile.base() == expected[stage] && profile.effective() == expected[stage],
-                    "Offline save must replace historical RPM values with the fixed repair-stage limit");
-            }
+            CompoundTag player = offlinePlayerWithHeart(item, (1 << stage) - 1);
+            RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(player);
+            helper.assertTrue(profile.base() == expected[stage] && profile.effective() == expected[stage],
+                "Offline profile must retain its current repair-stage limit");
         }
-        var legacy = RpmPlayerState.fromPlayerNbt(offlinePlayerWithHeart("kubejs:gear_heart_enchanted", 3, 2));
-        helper.assertTrue(legacy.base() == 1024 && legacy.effective() == 1024,
-            "Legacy placeholder must recover only the first two repair stages");
-        var reopened = RpmPlayerState.fromPlayerNbt(offlinePlayerWithHeart("kubejs:gear_heart", 0b1111011, 1));
+        var reopened = RpmPlayerState.fromPlayerNbt(offlinePlayerWithHeart("kubejs:gear_heart", 0b1111011));
         helper.assertTrue(reopened.base() == 1024 && reopened.effective() == 1024,
             "Offline reopened curse must not unlock later RPM stages");
         helper.succeed();
     }
     @GameTest(template = "empty")
-    public static void repairMigrationPreservesExplicitCommandLimit(GameTestHelper helper) {
+    public static void repairedHeartPreservesExplicitCommandLimit(GameTestHelper helper) {
         CompoundTag player = repairedOfflinePlayer(), data = new CompoundTag();
         data.putInt(RpmPlayerState.LIMIT, 64); data.putBoolean(RpmPlayerState.OVERRIDE, true);
-        player.put("ForgeData", data);
+        RpmPlayerState.persist(data); player.put("ForgeData", data);
         RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(player);
         helper.assertTrue(profile.base() == 64 && profile.effective() == 64 && profile.commandOverride(),
-            "Repair migration overwrote an explicit command limit");
+            "Repaired heart overwrote an explicit command limit");
         helper.succeed();
     }
     @GameTest(template = "empty")

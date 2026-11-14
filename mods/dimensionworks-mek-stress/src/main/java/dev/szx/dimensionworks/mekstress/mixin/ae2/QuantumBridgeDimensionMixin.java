@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-/** Applies the legacy transport policy only to fixed QNB grid connections. */
+/** Applies the current transport policy to fixed QNB grid connections. */
 @Mixin(value = QuantumCluster.class, remap = false)
 public abstract class QuantumBridgeDimensionMixin {
     @Redirect(method = "updateStatus", at = @At(value = "INVOKE",
@@ -19,7 +19,7 @@ public abstract class QuantumBridgeDimensionMixin {
         if (!(first.getOwner() instanceof QuantumBridgeBlockEntity a)
             || !(second.getOwner() instanceof QuantumBridgeBlockEntity b)
             || a.getLevel() == null || b.getLevel() == null) return null;
-        if (!DimensionTransportPolicy.legacyTransportAllowed(
+        if (!DimensionTransportPolicy.standardTransportAllowed(
             a.getLevel().dimension().location().toString(), b.getLevel().dimension().location().toString())) return null;
         return GridHelper.createConnection(first, second);
     }

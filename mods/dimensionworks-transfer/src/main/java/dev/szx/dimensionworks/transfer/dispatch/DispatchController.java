@@ -8,6 +8,7 @@ import dev.szx.dimensionworks.transfer.returnpoint.ReturnPoint;
 import dev.szx.dimensionworks.transfer.returnpoint.ReturnPointSavedData;
 import dev.szx.dimensionworks.transfer.territory.Territory;
 import dev.szx.dimensionworks.transfer.territory.TerritoryManager;
+import dev.szx.dimensionworks.transfer.territory.TerritorySavedData;
 import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
 import dev.szx.dimensionworks.transfer.territory.SafeLanding;
 import java.io.IOException;
@@ -50,6 +51,10 @@ public final class DispatchController {
 
     public static boolean authorized(ServerPlayer player) {
         return AUTHORIZED_TWILIGHT_TRAVEL.contains(player.getUUID());
+    }
+
+    public static boolean alexCavesUnlocked(ServerPlayer player) {
+        return TerritorySavedData.get(player.server.overworld()).alexCavesUnlocked(player.getUUID());
     }
 
     public static boolean eligible(ServerPlayer player, BlockPos pos) {
@@ -141,7 +146,7 @@ public final class DispatchController {
         }
 
         forceClose(player);
-        if (route.equals("alexscaves") || route.equals("aether")) {
+        if (!DispatchPolicy.routeAllowed(route, alexCavesUnlocked(player))) {
             player.displayClientMessage(
                 Component.translatable("message.dimensionworks_transfer.destination_locked"), true);
             return false;
@@ -157,7 +162,7 @@ public final class DispatchController {
                 case "nether" -> toNether(player, source);
                 case "end" -> toEnd(player);
                 case "twilight" -> toTwilight(player, source);
-                default -> false;
+                default -> AlexCavesDestination.fromRoute(route).travel(player, source);
             };
         } catch (ReflectiveOperationException | IOException | RuntimeException exception) {
             WDTransfer.LOGGER.error("Could not dispatch player to route {}", route, exception);

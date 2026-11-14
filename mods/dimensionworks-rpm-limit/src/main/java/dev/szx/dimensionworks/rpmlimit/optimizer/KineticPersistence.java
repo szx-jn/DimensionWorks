@@ -31,8 +31,8 @@ public final class KineticPersistence {
     private static boolean valid(float value) { return Float.isFinite(value) && value >= 0; }
     public static void initialize(KineticBlockEntity member, KineticNetwork network) {
         Saved saved = SAVED.get(member);
-        // Legacy aggregates cannot distinguish phantom/virtual/physical unloaded load. Rebuild
-        // from members as their chunks load, preserving the existing rotation/source graph.
+        // Only this physical-member snapshot participates in accounting. A newly loaded
+        // network with no snapshot starts empty and adds physical members as chunks load.
         network.initFromTE(saved == null ? 0 : saved.capacity, saved == null ? 0 : saved.stress, saved == null ? 0 : saved.count);
     }
     public static void restore(KineticNetwork network, KineticBlockEntity member) {

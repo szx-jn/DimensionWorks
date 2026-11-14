@@ -10,7 +10,7 @@ public final class DimensionTransportPolicy {
 
     private DimensionTransportPolicy() {}
 
-    public static boolean legacyTransportAllowed(String from, String to) {
+    public static boolean standardTransportAllowed(String from, String to) {
         requireDimension(from);
         requireDimension(to);
         return from.equals(to) || (VANILLA_DIMENSIONS.contains(from) && VANILLA_DIMENSIONS.contains(to));

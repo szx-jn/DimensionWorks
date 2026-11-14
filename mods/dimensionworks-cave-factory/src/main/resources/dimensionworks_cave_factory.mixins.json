@@ -6,6 +6,7 @@
   "refmap": "dimensionworks_cave_factory.refmap.json",
   "mixins": [
     "BasinOperatingBlockEntityMixin",
+    "LiquidBlockPlacementMixin",
     "ContraptionMixin"
   ],
   "client": [],

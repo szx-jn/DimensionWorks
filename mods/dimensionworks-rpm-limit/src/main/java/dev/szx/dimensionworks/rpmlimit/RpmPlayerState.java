@@ -5,7 +5,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 
-/** Durable player state and migration of offline profiles whose transient ForgeData was lost. */
+/** Current RPM state, persisted across logout, restart and player replacement. */
 public final class RpmPlayerState {
     static final String LIMIT = "dimensionworks_rpm_limit";
     static final String INITIALIZED = "dimensionworks_rpm_initialized";
@@ -22,6 +22,9 @@ public final class RpmPlayerState {
     }
     public static void restore(CompoundTag data) {
         CompoundTag stable = data.getCompound(Player.PERSISTED_NBT_TAG);
+        for (String key : new String[]{LIMIT, INITIALIZED, OVERRIDE}) {
+            data.remove(key);
+        }
         if (stable.contains(LIMIT, Tag.TAG_ANY_NUMERIC)) {
             for (String key : new String[]{LIMIT, INITIALIZED, OVERRIDE}) {
                 if (stable.contains(key)) data.put(key, stable.get(key).copy());
@@ -37,16 +40,14 @@ public final class RpmPlayerState {
         persist(replacement);
     }
     public static Profile fromPlayerNbt(CompoundTag player) {
-        CompoundTag data = player.getCompound("ForgeData").copy();
-        restore(data);
+        CompoundTag data = player.getCompound("ForgeData").getCompound(Player.PERSISTED_NBT_TAG);
         boolean override = data.getBoolean(OVERRIDE);
         int base = data.contains(LIMIT, Tag.TAG_ANY_NUMERIC) ? cap(data.getInt(LIMIT)) : RpmLimitConfig.DEFAULT_RPM.get();
         CompoundTag heart = equippedHeart(player);
         CompoundTag heartTag = heart.getCompound("tag");
         boolean enchanted = "kubejs:gear_heart_enchanted".equals(heart.getString("id"));
-        boolean legacyCurse = enchanted && heartTag.getInt("CustomModelData") == 2;
         int repairedMask = heartTag.getInt(GearHeartState.REPAIRED_MASK_KEY);
-        boolean fullyRepaired = enchanted && !legacyCurse || GearHeartState.isFullyReleasedMask(repairedMask);
+        boolean fullyRepaired = enchanted || GearHeartState.isFullyReleasedMask(repairedMask);
         int stageRpm = RpmLimitConfig.gearHeartRotationLimit(
             fullyRepaired ? GearHeartState.ALL_CURSES : repairedMask);
         if (!heart.isEmpty() && !override) base = stageRpm;

@@ -5,7 +5,7 @@ public enum MemoryCardType {
     ECONOMY("economy", -1, 200, true),
     BALANCED("balanced", 0, 150, true),
     HIGH_SPEED("high_speed", 1, 175, true),
-    HIGH_STORAGE("high_storage", -1, 75, true),
+    LOW_LOSS("low_loss", -1, 75, true),
     DEFECTIVE("defective", -2, 2000, false),
     FINAL("final", 2, 0, false);
     private final String id;

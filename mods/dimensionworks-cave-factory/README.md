@@ -1,7 +1,7 @@
 # DimensionWorks Cave Factory
 
 `dimensionworks_cave_factory` 为 Alex's Caves 六个洞穴维度提供统一的后期工厂骨架。
-当前版本为 `0.1.1`，首个里程碑只让渊海陷窟具备完整生存行为和实际配方。
+当前版本为 `0.1.7`，首个里程碑只让渊海陷窟具备完整生存行为和实际配方。
 
 ## 已实现
 
@@ -76,40 +76,19 @@ gradle build --no-daemon
 
 贴图加载器读取当前资源包中 KubeJS 原始 thick_fluid 静止/流动动画，使用原金属色并叠加现有结晶纹理（35% 不透明度）。不使用旧的非法角度立体晶簇模型。每种金属分别提供静止和流动精灵，保留原动画帧和帧时长。像素只在资源重载时合成，不添加逐 tick 绘图或世界扫描。素材沿用现有资源，不复制第三方原始素材到仓库。
 
-本地专项检查：`gradle -PcrystalCheck runClient`，将随包 `molten_metals.js` 放入 `run-crystal-check/kubejs/startup_scripts/`。检查所有源流体、流体桶、储罐填充/排出、旧固体物品缺席与 42 张动画精灵；该检查源码不进入正式 JAR。
-
-旧世界中的同名方块 ID 对应新的液体方块；Forge 缺失物品映射将旧结晶固体物品 ID 转向对应流体桶，避免直接丢失旧库存。
+本地专项检查：`gradle -PcrystalCheck -PcrystalMods="<整合包 mods 目录>" runClient`，准备任务自动复制当前 `molten_metals.js`。检查所有源流体、流体桶、储罐填充/排出、旧固体物品缺席与 42 张动画精灵；该检查源码不进入正式 JAR。
 
 本次验证：带实际 KubeJS 流体注册的服务端通过 6 项 GameTest（含真实 30 秒外露后的液体源转换）；开发客户端检查 21 种源流体、42 张动画精灵、对应桶、储罐进出以及旧固体物品缺席。
 
-## 暮色传送兼容
+## 暮色与 Alex 传送权限
 
 暮色入口限制允许已持有 `dimensionworks_transfer.unlocked` 永久标记的玩家使用 TP，以及中转终端当次临时授权。未解锁玩家仍被拦截；传统暮色门由 Transfer 按传送器单独禁用。
 
 
-## 0.1.6：暮色林地生产
+## 0.1.7：当前发运权限与真实露天结晶
 
-新增林地浸出槽、生物调理槽、林地树脂、根系纤维、熟化腐殖料、铁木框架和林地滤芯；KubeJS 注册 `dimensionworks:forest_extract` 林地原液。全部收录到已有「维度工坊」页签。主世界机器与材料可支援建设，新品只供暮色工艺。
+暮色林地原型的 Java 实现、注册、配方、标签、语言、贴图、生成脚本和专项测试全部删除。暮色只提供弹力打包工具与终端升级，见[现行规格](../../docs/design/twilight-dispatch-upgrade.md)。移除结晶固体到桶的缺失映射。Alex 洞穴只接受已升级中转终端的当次授权，普通洞穴钥匙与天境权限按当前规则检查。
 
-- 浸出槽：只在暮色工作，下方同一层完整 3×3 接触床（缠根泥土、根、活根方块可混用）。每批消耗 8 暮色树叶、1 腐殖料和 1,000 mB 水，产 1,000 mB 原液。
-- 生物槽：只在暮色工作，附近需要 2 只成年野猪，每批消耗 8 树叶、1 胡萝卜/土豆/甜菜根、250 mB 水，产 4 腐殖料。每只野猪独占一个工位，完工休息 200 个加载刻。打包不工作，休息与工位记录保存在实体 ForgeData。
-- 动力：接水平轴，最低 32 RPM，128 RPM 时每批 10 秒；更高 RPM 不加快工作。每台消耗 4 SU/RPM，沿用现有 RPM/应力网络和成品生产额度。
-- 接口：上方输入两类物品，下方输出产物，侧面接水；水罐与原液罐各 10 B。水桶灌水、空桶取原液，空手右键打开界面。缺料、满仓、断动力、红石暂停等有可见原因且不扣输入。
-- 原液在加热工作盆分出 2 树脂和 2 纤维；消耗一个滤芯的精制路线分出 4 树脂和 2 纤维。框架、滤芯用现有压块工艺；启动腐殖料有手工与植物混合路线。
-- 库存与液体随实际掉落的设施物品保存；便携物品不携带未完成进度。环境每秒查 9 个局部方块，动物每秒局部查询；不强制加载、不结算离线产量、不产生周期掉落实体。
+露天计时从液体方块实际放置完成后登记，覆盖桶、流体自然流动和世界放置；替换流体重新计时，同种液体流量变化保持当前暴露计时。每 20 tick 仅检查已登记且已加载的位置，连续见天空 600 tick 后转换；遮挡重计时，不强制加载或扫描全世界。源流体保持源状态，流动液体保持流量。
 
-配方与标签位于 `kubejs/data/dimensionworks_cave_factory/recipes/twilight/` 和相应 tags。`twilight_work` JSON 的 `station` 为 `leaching` 或 `conditioning`；`first`、`second` 各含 `ingredient` 与 `count`，`water` 为 mB，`duration` 为 128 RPM 下的工作刻。前者使用 `fluid_result`，后者使用 `result`。输入槽种类分别由树叶、饲料标签与腐殖料物品限定。JEI 显示现场配方与环境条件。
-
-本地验证入口：
-
-```sh
-python3 scripts/check_twilight_industry.py
-node --check kubejs/startup_scripts/twilight_industry.js
-cd mods/dimensionworks-cave-factory
-gradle test build --offline --no-daemon
-gradle -PtwilightCheck -PtwilightMods='<整合包 mods 目录>' runGameTestServer --offline --no-daemon
-```
-
-专项 GameTest 使用真实暮色、KubeJS 与 Create，在忽略的 `run-twilight-check/` 临时世界中验证。测试夹具会加载测试区块，生产实现不会。测试源码不进入正式 JAR。图像由 `scripts/draw_twilight_assets.py` 的标准库像素绘图生成，无生图调用。
-
-本次构建、31 项 JUnit、16 项服务器 GameTest 与静态预检通过。客户端显示、实际 CMP 打包操作、完整自动林场和长期平衡尚未验证，详见 [验证记录](../../docs/validation/2026-11-07-twilight-first-production.md)。
+工作盆的敞口结晶与压力产出由 [Pressure Crystals](../dimensionworks-pressure-crystals/README.md) 处理。当前验证使用真实放置路径，不再手动写入计时数据；服务端 9 项 GameTest 覆盖 21 种熔液、倒桶、遮挡、重新倒液和流动液体，客户端核对 21 种源流体、42 张动画精灵、流体桶及储罐进出。详细结果见[本次验证记录](../../docs/validation/2026-11-14-compat-cleanup-and-dispatch.md)。

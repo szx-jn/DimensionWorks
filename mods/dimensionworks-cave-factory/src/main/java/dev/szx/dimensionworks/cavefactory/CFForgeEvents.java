@@ -40,7 +40,6 @@ public final class CFForgeEvents {
     public static void register() {
         MinecraftForge.EVENT_BUS.register(CFForgeEvents.class);
         MinecraftForge.EVENT_BUS.register(MoltenCrystallizationEvents.class);
-        MinecraftForge.EVENT_BUS.register(dev.szx.dimensionworks.cavefactory.twilight.TwilightBoarWork.class);
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -75,6 +74,9 @@ public final class CFForgeEvents {
             return;
         }
         ResourceLocation destination = event.getDimension().location();
+        if (destination.getNamespace().equals("alex_caves_dimensions") && BLOCKED_DIMENSIONS.contains(destination)
+            && player.level().dimension().location().equals(new ResourceLocation("dw", "transfer"))
+            && player.getPersistentData().getBoolean("dw_dispatch_alex_caves_authorized")) return;
         // Unlocked players may use command travel; the transfer mod separately blocks TF portals.
         if (TWILIGHT_FOREST.equals(destination)
             && (player.getTags().contains("dimensionworks_transfer.unlocked")

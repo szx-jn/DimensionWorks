@@ -176,8 +176,6 @@
     }
   }
 
-  // The Grinding name is the generic API. Keep Crushing as an alias for existing scripts.
   global.DimensionWorksGrinding = api
-  global.DimensionWorksCrushing = api
   console.info('[DimensionWorks] Grinding API ready adapters=' + Object.keys(adapters).sort().join(','))
 })()

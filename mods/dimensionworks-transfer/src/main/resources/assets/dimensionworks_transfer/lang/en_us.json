@@ -20,5 +20,19 @@
   "dimensionworks_transfer.destination.aether": "The Aether",
   "message.dimensionworks_transfer.tutorial_action": "Controls unlock when you arrive",
   "message.dimensionworks_transfer.no_safe_landing": "No safe landing in your plot: a safe floor and two clear vertical blocks are required.",
-  "item.dimensionworks_transfer.elastic_packager": "Elastic Packager"
+  "item.dimensionworks_transfer.elastic_packager": "Elastic Packager",
+  "item.dimensionworks_transfer.twilight_dispatch_upgrade": "Twilight Terminal Upgrade",
+  "tooltip.dimensionworks_transfer.twilight_dispatch_upgrade": "Use on your dispatch terminal to unlock all six Alex cave routes.",
+  "screen.dimensionworks_transfer.alex_caves": "Alex Caves · Choose a Destination",
+  "dimensionworks_transfer.destination.magnetic_caves": "Magnetic Caves",
+  "dimensionworks_transfer.destination.primordial_caves": "Primordial Caves",
+  "dimensionworks_transfer.destination.toxic_caves": "Toxic Caves",
+  "dimensionworks_transfer.destination.abyssal_chasm": "Abyssal Chasm",
+  "dimensionworks_transfer.destination.forlorn_hollows": "Forlorn Hollows",
+  "dimensionworks_transfer.destination.candy_cavity": "Candy Cavity",
+  "message.dimensionworks_transfer.upgrade_not_owner": "Install this upgrade on your own transfer plot's dispatch terminal.",
+  "message.dimensionworks_transfer.upgrade_already_installed": "This terminal already has access to the Alex cave routes.",
+  "message.dimensionworks_transfer.upgrade_installed": "Terminal upgraded. All six Alex cave routes are now open!",
+  "message.dimensionworks_transfer.alex_caves_unlocked": "Alex cave routes unlocked",
+  "message.dimensionworks_transfer.alex_caves_upgrade_hint": "1 Twilight log + any 3 Boss trophies → Terminal upgrade"
 }

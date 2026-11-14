@@ -4,7 +4,7 @@
 The source image is a user-provided high-resolution pixel-art template. The
 script removes its connected black background, crops and centers the subject,
 downsamples it to Minecraft's 32x32 item resolution, and derives normal,
-damaged, cursed, and blessed variants from the same template.
+damaged and blessed variants from the same template.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections import deque
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
+from PIL import Image, ImageDraw, ImageEnhance
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -122,11 +122,6 @@ def transformed_colors(image: Image.Image, state: str) -> Image.Image:
                 green = green * 0.58 + gray * 0.42
                 blue = blue * 0.58 + gray * 0.42
                 red, green, blue = red * 0.82, green * 0.78, blue * 0.76
-            elif state == "cursed":
-                gray = red * 0.299 + green * 0.587 + blue * 0.114
-                red = (red * 0.52 + gray * 0.18) * 0.82 + 118 * 0.30
-                green = (green * 0.45 + gray * 0.20) * 0.70 + 34 * 0.30
-                blue = (blue * 0.62 + gray * 0.08) * 1.05 + 139 * 0.30
             else:
                 red = red * 1.07 + 7
                 green = green * 1.05 + 5
@@ -135,22 +130,6 @@ def transformed_colors(image: Image.Image, state: str) -> Image.Image:
             pixels[x, y] = (clamp(red), clamp(green), clamp(blue), alpha)
 
     return result
-
-
-def add_cursed_aura(image: Image.Image) -> Image.Image:
-    original_alpha = image.getchannel("A")
-    expanded_alpha = original_alpha.filter(ImageFilter.MaxFilter(3))
-    aura = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    aura_pixels = aura.load()
-    original_pixels = original_alpha.load()
-    expanded_pixels = expanded_alpha.load()
-
-    for y in range(SIZE):
-        for x in range(SIZE):
-            if original_pixels[x, y] == 0 and expanded_pixels[x, y] > 0:
-                aura_pixels[x, y] = (126, 48, 166, 128)
-
-    return Image.alpha_composite(aura, image)
 
 
 def apply_damage(image: Image.Image) -> Image.Image:
@@ -185,11 +164,6 @@ def make_state(base: Image.Image, state: str) -> Image.Image:
         result = ImageEnhance.Contrast(transformed_colors(base, state)).enhance(1.08)
         result = ImageEnhance.Color(result).enhance(1.10)
         return quantize_rgba(result)
-
-    if state == "cursed":
-        result = transformed_colors(base, state)
-        result = ImageEnhance.Contrast(result).enhance(1.05)
-        return add_cursed_aura(quantize_rgba(result))
 
     result = apply_damage(transformed_colors(base, state))
     return quantize_rgba(result)
@@ -274,12 +248,12 @@ def make_preview(images: dict[str, Image.Image]) -> None:
     gap = 8
     preview = Image.new(
         "RGBA",
-        (SIZE * 4 * PREVIEW_SCALE + gap * 3, SIZE * PREVIEW_SCALE),
+        (SIZE * 3 * PREVIEW_SCALE + gap * 2, SIZE * PREVIEW_SCALE),
         (28, 28, 31, 255),
     )
     preview_draw = ImageDraw.Draw(preview)
 
-    for index, state in enumerate(("normal", "damaged", "cursed", "blessed")):
+    for index, state in enumerate(("normal", "damaged", "blessed")):
         scaled = images[state].resize(
             (SIZE * PREVIEW_SCALE, SIZE * PREVIEW_SCALE),
             Image.Resampling.NEAREST,
@@ -304,7 +278,7 @@ def main() -> None:
         base = make_pixel_art(source)
 
     images = {}
-    for state in ("normal", "damaged", "cursed", "blessed"):
+    for state in ("normal", "damaged", "blessed"):
         image = make_state(base, state)
         output = TEXTURE_DIR / f"gear_heart_{state}.png"
         image.save(output)
@@ -320,10 +294,7 @@ def main() -> None:
         fragments[index] = fragment
         print(f"wrote {output.relative_to(ROOT)}")
 
-    legacy_output = TEXTURE_DIR / "gear_heart_repair_fragment.png"
-    fragments[1].save(legacy_output)
     make_fragment_preview(fragments)
-    print(f"wrote {legacy_output.relative_to(ROOT)}")
     print(f"wrote {PREVIEW.relative_to(ROOT)}")
     print(f"wrote {FRAGMENT_PREVIEW.relative_to(ROOT)}")
 

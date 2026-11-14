@@ -18,8 +18,8 @@ class VersionCheckTest {
         for (String[] versions : new String[][]{
                 {"0.3.14", "0.3.15", "TOO_OLD"},
                 {"0.3.15", "0.3.15", "CURRENT"},
-                {"0.3.16", "0.3.15", "CURRENT"},
-                {"0.3.10", "0.3.9", "CURRENT"},
+                {"0.3.16", "0.3.15", "TOO_NEW"},
+                {"0.3.10", "0.3.9", "TOO_NEW"},
                 {"0.0.0", "0.0.1", "TOO_OLD"}}) {
             Files.writeString(directory.resolve("VERSION"), versions[0] + "\n");
             VersionCheck check = VersionCheck.evaluate(directory, versions[1]);

@@ -40,6 +40,6 @@ public final class ZeroEnergyContainer implements IEnergyContainer {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        // Ignore legacy charge NBT so old tablets cannot retain stored energy.
+        // This disabled energy container never restores stored charge.
     }
 }

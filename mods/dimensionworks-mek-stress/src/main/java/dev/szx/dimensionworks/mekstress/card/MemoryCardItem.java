@@ -53,7 +53,7 @@ public final class MemoryCardItem extends Item {
             case ECONOMY -> ChatFormatting.GREEN;
             case BALANCED -> ChatFormatting.AQUA;
             case HIGH_SPEED -> ChatFormatting.RED;
-            case HIGH_STORAGE -> ChatFormatting.LIGHT_PURPLE;
+            case LOW_LOSS -> ChatFormatting.LIGHT_PURPLE;
             case DEFECTIVE -> ChatFormatting.DARK_GRAY;
             case FINAL -> ChatFormatting.GOLD;
         };

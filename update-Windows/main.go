@@ -47,8 +47,6 @@ var aria2PathError error
 var aria2RuntimeCleanup func()
 var progressMu sync.Mutex
 var downloadProgressUI = newProgressTracker()
-var downloadCacheRoot string
-var parallelDownloadLimit atomic.Int64
 var errHTTPSDowngrade = errors.New("拒绝 HTTPS 下载重定向到不安全的 HTTP")
 
 const (
@@ -401,9 +399,7 @@ func updateInstance(root, kind string, opts Options) error {
 	if info, err := os.Lstat(updateRoot); err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 		return errors.New(".dimensionworks-update 必须是普通目录，不能是符号链接")
 	}
-	previousCacheRoot := downloadCacheRoot
-	downloadCacheRoot = filepath.Join(updateRoot, "downloads")
-	defer func() { downloadCacheRoot = previousCacheRoot }()
+	downloadCacheRoot := filepath.Join(updateRoot, "downloads")
 	if err := os.MkdirAll(downloadCacheRoot, 0700); err != nil {
 		return fmt.Errorf("无法创建断点续传目录：%w", err)
 	}
@@ -552,7 +548,7 @@ func updateInstance(root, kind string, opts Options) error {
 	if err != nil {
 		return fmt.Errorf("现有更新状态无效：%w。请备份并检查 %s", err, statePath)
 	}
-	legacyState := current == nil
+	initialState := current == nil
 	if current == nil {
 		current, err = scanInstalledFiles(root, kind)
 		if err != nil {
@@ -605,7 +601,7 @@ func updateInstance(root, kind string, opts Options) error {
 	if err != nil {
 		return err
 	}
-	if legacyState && len(deletions) > 0 {
+	if initialState && len(deletions) > 0 {
 		fmt.Println("[保护] 首次建立签名状态时跳过旧文件清理，避免误删无法验证归属的本地文件")
 		deletions = nil
 	}
@@ -674,7 +670,7 @@ func updateInstance(root, kind string, opts Options) error {
 	if err := ensureDiskSpace(root, saturatingAdd(saturatingAdd(saturatingAdd(backupBytes, backupBytes), remoteBytes), 256<<20)); err != nil {
 		return fmt.Errorf("磁盘空间预检失败：%w", err)
 	}
-	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected, legacyState)
+	userBackup, err := backupModifiedFiles(root, updateRoot, current, selected, initialState)
 	if err != nil {
 		return fmt.Errorf("无法备份用户修改文件，已中止更新：%w", err)
 	}
@@ -714,7 +710,6 @@ func updateInstance(root, kind string, opts Options) error {
 		const maxConcurrentDownloads = 4
 		workers := maxConcurrentDownloads
 		if len(remoteEntries) < workers { workers = len(remoteEntries) }
-		parallelDownloadLimit.Store(int64(parallelDownloadWorkers / workers))
 		jobs := make(chan Entry)
 		errs := make(chan error, len(remoteEntries))
 		var wg sync.WaitGroup
@@ -737,7 +732,6 @@ func updateInstance(root, kind string, opts Options) error {
 		for _, entry := range remoteEntries { jobs <- entry }
 		close(jobs)
 		wg.Wait()
-		parallelDownloadLimit.Store(parallelDownloadWorkers)
 		close(errs)
 		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
 	}
@@ -1880,42 +1874,6 @@ func callAria2RPC(ctx context.Context, client *http.Client, endpoint, secret, me
 func progressAdd(key string, count int64) { downloadProgressUI.add(key, count) }
 func progressRewind(key string, count int64) { downloadProgressUI.rewind(key, count) }
 
-type activityReader struct {
-	reader io.Reader
-	touch func()
-}
-
-func (r activityReader) Read(buffer []byte) (int, error) {
-	n, err := r.reader.Read(buffer)
-	if n > 0 { r.touch() }
-	return n, err
-}
-
-func newIdleTimeoutContext(parent context.Context, idle time.Duration) (context.Context, func(), func()) {
-	ctx, cancel := context.WithCancel(parent)
-	timer := time.AfterFunc(idle, cancel)
-	touch := func() { timer.Reset(idle) }
-	stop := func() { timer.Stop(); cancel() }
-	return ctx, stop, touch
-}
-
-func downloadIdleTimeout(expectedBytes int64) time.Duration {
-	const minimum = 2 * time.Minute
-	const maximum = 10 * time.Minute
-	if expectedBytes <= 0 { return 3 * time.Minute }
-	extra := time.Duration(expectedBytes/(512*1024)) * time.Second
-	idle := minimum + extra
-	if idle > maximum { return maximum }
-	return idle
-}
-
-type resumeMetadata struct {
-	Source string `json:"source"`
-	ETag string `json:"etag"`
-	LastModified string `json:"last_modified"`
-	Total int64 `json:"total"`
-}
-
 func cleanupDownloadCache(cacheRoot string, maxAge time.Duration) error {
 	info, err := os.Lstat(cacheRoot)
 	if err != nil { return err }
@@ -1934,421 +1892,6 @@ func cleanupDownloadCache(cacheRoot string, maxAge time.Duration) error {
 		}
 	}
 	return nil
-}
-
-func downloadResumePaths(source, destination string) (string, string, error) {
-	if downloadCacheRoot == "" {
-		part := destination + ".part"
-		return part, part + ".json", nil
-	}
-	info, err := os.Lstat(downloadCacheRoot)
-	if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
-		return "", "", errors.New("断点续传缓存目录不安全")
-	}
-	sum := sha256.Sum256([]byte(source))
-	base := filepath.Join(downloadCacheRoot, hex.EncodeToString(sum[:]))
-	return base + ".part", base + ".json", nil
-}
-
-func loadResumeMetadata(path, source string) (*resumeMetadata, error) {
-	info, err := os.Lstat(path)
-	if os.IsNotExist(err) { return nil, nil }
-	if err != nil { return nil, err }
-	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() > 4096 {
-		return nil, errors.New("断点续传元数据不安全或超过大小限制")
-	}
-	data, err := readRegularFile(path, 4096)
-	if err != nil { return nil, err }
-	var meta resumeMetadata
-	if err := json.Unmarshal(data, &meta); err != nil { return nil, err }
-	if meta.Source != source || meta.Total < 0 || (meta.ETag == "" && meta.LastModified == "") {
-		return nil, nil
-	}
-	return &meta, nil
-}
-
-func saveResumeMetadata(path string, meta resumeMetadata) error {
-	data, err := json.Marshal(meta)
-	if err != nil { return err }
-	temp, err := os.CreateTemp(filepath.Dir(path), ".resume-meta-*")
-	if err != nil { return err }
-	tempPath := temp.Name()
-	defer os.Remove(tempPath)
-	if _, err := temp.Write(data); err != nil { _ = temp.Close(); return err }
-	if err := temp.Sync(); err != nil { _ = temp.Close(); return err }
-	if err := temp.Close(); err != nil { return err }
-	return replaceExistingFile(tempPath, path)
-}
-
-func downloadSequential(ctx context.Context, source, destination string, maxBytes int64) error {
-	part, metaPath, err := downloadResumePaths(source, destination)
-	if err != nil { return err }
-	meta, err := loadResumeMetadata(metaPath, source)
-	if err != nil { _ = os.Remove(metaPath); meta = nil }
-	if meta != nil && meta.Total > maxBytes {
-		_ = os.Remove(part)
-		_ = os.Remove(metaPath)
-		meta = nil
-	}
-	if partInfo, partErr := os.Lstat(part); partErr == nil {
-		if partInfo.Mode()&os.ModeSymlink != 0 || !partInfo.Mode().IsRegular() {
-			return errors.New("断点续传临时文件不是普通文件")
-		}
-	} else if !os.IsNotExist(partErr) {
-		return partErr
-	}
-	offset := int64(0)
-	if meta != nil {
-		if info, statErr := os.Lstat(part); statErr == nil && info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0 && info.Size() <= meta.Total {
-			offset = info.Size()
-		} else {
-			_ = os.Remove(part)
-			_ = os.Remove(metaPath)
-			meta = nil
-		}
-	}
-	if meta != nil && offset == meta.Total && offset > 0 {
-		if err := replaceExistingFile(part, destination); err != nil { return err }
-		_ = os.Remove(metaPath)
-		return nil
-	}
-	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(maxBytes))
-	defer stopIdle()
-	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
-	if err != nil { return err }
-	req.Header.Set("User-Agent", updaterUserAgent)
-	if offset > 0 && meta != nil {
-		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", offset))
-		if meta.ETag != "" { req.Header.Set("If-Range", meta.ETag) } else { req.Header.Set("If-Range", meta.LastModified) }
-	}
-	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
-	if err != nil { return err }
-	defer resp.Body.Close()
-	restartFresh := func(reason string) error {
-		_ = resp.Body.Close()
-		_ = os.Remove(part)
-		_ = os.Remove(metaPath)
-		if reason != "" { fmt.Println("[续传] ", reason, "，将从头下载") }
-		return downloadSequential(ctx, source, destination, maxBytes)
-	}
-
-	appendMode := false
-	total := resp.ContentLength
-	if offset > 0 && meta != nil && resp.StatusCode == http.StatusPartialContent {
-		matches := regexp.MustCompile("^bytes ([0-9]+)-([0-9]+)/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
-		if len(matches) != 4 { return restartFresh("续传响应范围无效") }
-		begin, e1 := strconv.ParseInt(matches[1], 10, 64)
-		end, e2 := strconv.ParseInt(matches[2], 10, 64)
-		declaredTotal, e3 := strconv.ParseInt(matches[3], 10, 64)
-		if e1 != nil || e2 != nil || e3 != nil || begin != offset || declaredTotal != meta.Total || end < begin || end >= declaredTotal {
-			return restartFresh("续传响应与已保存的文件长度不匹配")
-		}
-		if meta.ETag != "" && resp.Header.Get("ETag") != meta.ETag { return restartFresh("续传资源 ETag 已变化") }
-		if meta.ETag == "" && resp.Header.Get("Last-Modified") != meta.LastModified { return restartFresh("续传资源 Last-Modified 已变化") }
-		if encoding := strings.TrimSpace(resp.Header.Get("Content-Encoding")); encoding != "" && !strings.EqualFold(encoding, "identity") { return restartFresh("续传响应使用了压缩编码") }
-		total = declaredTotal
-		appendMode = true
-	} else if resp.StatusCode == http.StatusOK {
-		offset = 0
-		if total < 0 {
-			meta = nil
-			_ = os.Remove(metaPath)
-		} else {
-			meta = &resumeMetadata{Source: source, ETag: resp.Header.Get("ETag"), LastModified: resp.Header.Get("Last-Modified"), Total: total}
-			if meta.ETag == "" && meta.LastModified == "" {
-				_ = os.Remove(metaPath)
-				meta = nil
-			} else if err := saveResumeMetadata(metaPath, *meta); err != nil {
-				return fmt.Errorf("保存断点续传元数据失败：%w", err)
-			}
-		}
-	} else if resp.StatusCode == http.StatusRequestedRangeNotSatisfiable && offset > 0 {
-		_ = resp.Body.Close()
-		_ = os.Remove(part)
-		_ = os.Remove(metaPath)
-		return downloadSequential(ctx, source, destination, maxBytes)
-	} else {
-		return fmt.Errorf("HTTP %d，续传请求未获得可用响应", resp.StatusCode)
-	}
-	if total > maxBytes { _ = os.Remove(part); _ = os.Remove(metaPath); return fmt.Errorf("下载文件超过大小限制：%s", humanSize(total)) }
-	if resp.ContentLength >= 0 && appendMode && resp.ContentLength != total-offset {
-		return restartFresh("续传响应长度不匹配")
-	}
-	if offset > 0 { downloadProgressUI.add(destination, offset) }
-	progressSetTotal(destination, total)
-	flags := os.O_CREATE|os.O_WRONLY
-	if appendMode { flags |= os.O_APPEND } else { flags |= os.O_TRUNC }
-	file, err := os.OpenFile(part, flags, 0644)
-	if err != nil { return err }
-	writer := &downloadProgress{writer: file, key: destination}
-	written, copyErr := io.Copy(writer, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, maxBytes-offset+1))
-	syncErr := file.Sync()
-	closeErr := file.Close()
-	if copyErr != nil { return copyErr }
-	if syncErr != nil { return syncErr }
-	if closeErr != nil { return closeErr }
-	if written > maxBytes-offset { return fmt.Errorf("下载文件超过大小限制：%s", humanSize(offset+written)) }
-	if total >= 0 && offset+written != total { return fmt.Errorf("下载未完成，已保存 %d/%d 字节；再次运行可继续下载", offset+written, total) }
-	if err := replaceExistingFile(part, destination); err != nil { return err }
-	_ = os.Remove(metaPath)
-	return nil
-}
-
-// downloadRanged only enables parallel mode after a real 206 + Content-Range probe.
-// Every segment is written to a separate temporary file and validated before assembly.
-func rangePartPath(source, destination, validator string, total, index int64) (string, error) {
-	base := destination
-	if downloadCacheRoot != "" && validator != "" {
-		info, err := os.Lstat(downloadCacheRoot)
-		if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
-			return "", errors.New("分段下载缓存目录不安全")
-		}
-		sum := sha256.Sum256([]byte(source+"\n"+validator))
-		base = filepath.Join(downloadCacheRoot, hex.EncodeToString(sum[:]))
-	}
-	return fmt.Sprintf("%s.range-%d-%02d.part", base, total, index), nil
-}
-
-func downloadRanged(ctx context.Context, source, destination string, maxBytes int64) error {
-	probeParent, cancelProbe := context.WithTimeout(ctx, 20*time.Second)
-	defer cancelProbe()
-	probeCtx, stopIdle, touchProbe := newIdleTimeoutContext(probeParent, 2*time.Minute)
-	defer stopIdle()
-	req, err := http.NewRequestWithContext(probeCtx, http.MethodGet, source, nil)
-	if err != nil { return err }
-	req.Header.Set("User-Agent", updaterUserAgent)
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Range", "bytes=0-0")
-	resp, err := newHTTPClient(0, 20*time.Second).Do(req)
-	if err != nil { return err }
-	probeBody, bodyErr := io.ReadAll(io.LimitReader(activityReader{reader: resp.Body, touch: touchProbe}, 2))
-	resp.Body.Close()
-	if bodyErr != nil { return fmt.Errorf("读取 Range 探测响应失败：%w", bodyErr) }
-	if resp.StatusCode == http.StatusOK { return fmt.Errorf("%w：当前来源返回 HTTP 200，没有接受 Range 分段请求；将使用单连接下载。下载器只能根据当前来源的 HTTP 响应判断，其他下载器可能使用了不同的来源或请求方式", errSingleConnection) }
-	if resp.StatusCode != http.StatusPartialContent { return fmt.Errorf("Range 探测失败（HTTP %d）", resp.StatusCode) }
-	matches := regexp.MustCompile("^bytes 0-0/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
-	if len(matches) != 2 || len(probeBody) != 1 || (resp.ContentLength >= 0 && resp.ContentLength != 1) {
-		return errors.New("服务器返回无效的 Range 探测响应")
-	}
-	if encoding := strings.TrimSpace(resp.Header.Get("Content-Encoding")); encoding != "" && !strings.EqualFold(encoding, "identity") {
-		return fmt.Errorf("Range 探测响应使用了不支持的内容编码：%s", encoding)
-	}
-	total, err := strconv.ParseInt(matches[1], 10, 64)
-	if err != nil || total <= 0 || total > maxBytes { return errors.New("服务器返回无效或超限的 Content-Range") }
-	validator := rangeValidator(resp.Header)
-	// Reuse the probed endpoint: release redirects can be expensive, rate-limited,
-	// or yield different mirror origins/validators for each concurrent request.
-	segmentSource := resp.Request.URL.String()
-	progressSetTotal(destination, total)
-	if total <= parallelDownloadThreshold { return fmt.Errorf("%w：当前文件为 %s，未超过启用分段下载的 %s 阈值", errSingleConnection, humanSize(total), humanSize(parallelDownloadThreshold)) }
-
-	segmentBudget := int64(parallelDownloadWorkers)
-	if configured := parallelDownloadLimit.Load(); configured > 0 && configured < segmentBudget {
-		segmentBudget = configured
-	}
-	// Small assets use fewer connections; large assets can use the full budget.
-	segments := (total + (16<<20) - 1) / (16 << 20)
-	if segments < 2 { segments = 2 }
-	if segments > segmentBudget { segments = segmentBudget }
-	if total < segments { segments = total }
-	chunkSize := (total + segments - 1) / segments
-	partPaths := make([]string, 0, segments)
-	for i := int64(0); i < segments; i++ {
-		path, err := rangePartPath(source, destination, validator, total, i)
-		if err != nil { return err }
-		partPaths = append(partPaths, path)
-	}
-	jobs := make(chan int64)
-	errs := make(chan error, segments)
-	rangeCtx, cancelRange := context.WithCancel(ctx)
-	defer cancelRange()
-	var wg sync.WaitGroup
-	var completed atomic.Int64
-	var finished atomic.Int64
-	var printMu sync.Mutex
-	workers := int(segments)
-	fmt.Printf("[下载] 启用 %d 路分段并发，总大小 %s\n", workers, humanSize(total))
-	for i := 0; i < workers; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for {
-				var index int64
-				var ok bool
-				select {
-				case <-rangeCtx.Done(): return
-				case index, ok = <-jobs: if !ok { return }
-				}
-				begin := index * chunkSize
-				end := begin + chunkSize - 1
-				if end >= total { end = total - 1 }
-				expected := end-begin+1
-				cachedInfo, cacheErr := os.Lstat(partPaths[index])
-				if cacheErr == nil {
-					if cachedInfo.Mode()&os.ModeSymlink != 0 || !cachedInfo.Mode().IsRegular() {
-						select { case errs <- fmt.Errorf("缓存分段不是普通文件：%s", partPaths[index]): default: }
-						cancelRange(); return
-					}
-					checksumPath := partPaths[index] + ".sha256"
-					checksumInfo, checksumErr := os.Lstat(checksumPath)
-					checksumOK := false
-					if checksumErr == nil && checksumInfo.Mode().IsRegular() && checksumInfo.Mode()&os.ModeSymlink == 0 && checksumInfo.Size() == 64 {
-						checksumBytes, readErr := os.ReadFile(checksumPath)
-						checksumOK = readErr == nil && verifyDigest(partPaths[index], "sha256", string(checksumBytes)) == nil
-					}
-					if cachedInfo.Size() == expected && checksumOK {
-						completed.Add(expected); finished.Add(1); downloadProgressUI.add(destination, expected)
-						continue
-					}
-					_ = os.Remove(partPaths[index])
-					_ = os.Remove(checksumPath)
-				} else if !os.IsNotExist(cacheErr) {
-					select { case errs <- cacheErr: default: }; cancelRange(); return
-				}
-				if err := downloadRangeSegmentWithRetry(rangeCtx, segmentSource, partPaths[index], destination, begin, end, total, validator); err != nil {
-					select { case errs <- fmt.Errorf("分段 %d：%w", index+1, err): default: }
-					cancelRange(); return
-				}
-				completed.Add(expected); finished.Add(1)
-				printMu.Lock()
-				fmt.Printf("[下载进度] 分段完成 %d/%d（%s/%s）\n", finished.Load(), segments, humanSize(completed.Load()), humanSize(total))
-				printMu.Unlock()
-			}
-		}()
-	}
-sendJobs:
-	for i := int64(0); i < segments; i++ {
-		select { case jobs <- i: case <-rangeCtx.Done(): break sendJobs }
-	}
-	close(jobs)
-	wg.Wait()
-	close(errs)
-	for segmentErr := range errs { if segmentErr != nil { return segmentErr } }
-	if completed.Load() != total { return fmt.Errorf("分段总长度不符：%d/%d", completed.Load(), total) }
-
-	assembled := destination + ".assembled"
-	_ = os.Remove(assembled)
-	out, err := os.OpenFile(assembled, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil { return err }
-	var copied int64
-	for _, path := range partPaths {
-		in, openErr := os.Open(path)
-		if openErr != nil { _ = out.Close(); _ = os.Remove(assembled); return openErr }
-		n, copyErr := io.Copy(out, in)
-		closeErr := in.Close()
-		copied += n
-		if copyErr != nil || closeErr != nil {
-			_ = out.Close(); _ = os.Remove(assembled)
-			if copyErr != nil { return copyErr }; return closeErr
-		}
-	}
-	if err := out.Sync(); err != nil { _ = out.Close(); _ = os.Remove(assembled); return err }
-	if err := out.Close(); err != nil { _ = os.Remove(assembled); return err }
-	if copied != total { _ = os.Remove(assembled); return fmt.Errorf("合并后长度不符：%d/%d", copied, total) }
-	if err := replaceExistingFile(assembled, destination); err != nil { _ = os.Remove(assembled); return err }
-	for _, path := range partPaths { _ = os.Remove(path); _ = os.Remove(path + ".sha256") }
-	return nil
-}
-
-func writeSmallFileAtomic(path string, data []byte, mode os.FileMode) error {
-	temp, err := os.CreateTemp(filepath.Dir(path), ".dw-meta-*")
-	if err != nil { return err }
-	tempPath := temp.Name()
-	defer os.Remove(tempPath)
-	if _, err := temp.Write(data); err != nil { _ = temp.Close(); return err }
-	if err := temp.Sync(); err != nil { _ = temp.Close(); return err }
-	if err := temp.Chmod(mode); err != nil { _ = temp.Close(); return err }
-	if err := temp.Close(); err != nil { return err }
-	return replaceExistingFile(tempPath, path)
-}
-
-// RFC 9110 forbids weak entity tags in If-Range. Prefer a strong ETag,
-// otherwise use Last-Modified; final file digests remain mandatory.
-func rangeValidator(header http.Header) string {
-	etag := strings.TrimSpace(header.Get("ETag"))
-	if strings.HasPrefix(etag, "\"") && strings.HasSuffix(etag, "\"") {
-		return etag
-	}
-	return header.Get("Last-Modified")
-}
-
-func downloadRangeSegmentWithRetry(ctx context.Context, source, destination, progressKey string, begin, end, total int64, validator string) error {
-	var lastErr error
-	for attempt := 0; attempt < 3; attempt++ {
-		if attempt > 0 {
-			timer := time.NewTimer(time.Duration(attempt) * time.Second)
-			select {
-			case <-ctx.Done(): timer.Stop(); return ctx.Err()
-			case <-timer.C:
-			}
-		}
-		lastErr = downloadRangeSegment(ctx, source, destination, progressKey, begin, end, total, validator)
-		if lastErr == nil { return nil }
-		if ctx.Err() != nil { return ctx.Err() }
-	}
-	return lastErr
-}
-
-func downloadRangeSegment(ctx context.Context, source, destination, progressKey string, begin, end, total int64, validator string) error {
-	idleCtx, stopIdle, touch := newIdleTimeoutContext(ctx, downloadIdleTimeout(end-begin+1))
-	defer stopIdle()
-	req, err := http.NewRequestWithContext(idleCtx, http.MethodGet, source, nil)
-	if err != nil { return err }
-	req.Header.Set("User-Agent", updaterUserAgent)
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", begin, end))
-	if validator != "" { req.Header.Set("If-Range", validator) }
-	resp, err := newHTTPClient(0, 30*time.Second).Do(req)
-	if err != nil { return err }
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusPartialContent {
-		return fmt.Errorf("HTTP %d，预期 206 Partial Content", resp.StatusCode)
-	}
-	if validator != "" && resp.Header.Get("ETag") != validator && resp.Header.Get("Last-Modified") != validator {
-		return errors.New("分段资源校验标识变化，拒绝混合不同版本文件")
-	}
-	contentRange := regexp.MustCompile("^bytes ([0-9]+)-([0-9]+)/([0-9]+)$").FindStringSubmatch(resp.Header.Get("Content-Range"))
-	if len(contentRange) != 4 {
-		return fmt.Errorf("Content-Range 格式无效：%q", resp.Header.Get("Content-Range"))
-	}
-	gotBegin, err1 := strconv.ParseInt(contentRange[1], 10, 64)
-	gotEnd, err2 := strconv.ParseInt(contentRange[2], 10, 64)
-	gotTotal, err3 := strconv.ParseInt(contentRange[3], 10, 64)
-	if err1 != nil || err2 != nil || err3 != nil || gotBegin != begin || gotEnd != end || gotTotal != total {
-		return fmt.Errorf("Content-Range 不匹配：%q", resp.Header.Get("Content-Range"))
-	}
-	if encoding := strings.TrimSpace(resp.Header.Get("Content-Encoding")); encoding != "" && !strings.EqualFold(encoding, "identity") {
-		return fmt.Errorf("Range 响应使用了不支持的内容编码：%s", encoding)
-	}
-	expected := end-begin+1
-	if resp.ContentLength >= 0 && resp.ContentLength != expected {
-		return fmt.Errorf("分段长度声明不匹配：%d/%d", resp.ContentLength, expected)
-	}
-	file, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil { return err }
-	progressWriter := &downloadProgress{writer: file, key: progressKey}
-	succeeded := false
-	defer func() {
-		if !succeeded { downloadProgressUI.rewind(progressKey, progressWriter.written) }
-	}()
-	n, copyErr := io.Copy(progressWriter, io.LimitReader(activityReader{reader: resp.Body, touch: touch}, expected+1))
-	syncErr := file.Sync()
-	closeErr := file.Close()
-	if copyErr != nil { _ = os.Remove(destination); return copyErr }
-	if syncErr != nil { _ = os.Remove(destination); return syncErr }
-	if closeErr != nil { _ = os.Remove(destination); return closeErr }
-	if n != expected { _ = os.Remove(destination); return fmt.Errorf("分段实际长度不匹配：%d/%d", n, expected) }
-	digest, err := hashFile(destination, "sha256")
-	if err != nil { _ = os.Remove(destination); return err }
-	if err := writeSmallFileAtomic(destination+".sha256", []byte(digest), 0600); err != nil { _ = os.Remove(destination); return err }
-	succeeded = true
-	return nil
-}
-
-type downloadProgress struct {
-	writer  io.Writer
-	key     string
-	written int64
 }
 
 type progressFile struct {
@@ -2489,13 +2032,6 @@ func progressBegin(key, name string) { downloadProgressUI.begin(key, name) }
 func progressReset(key string) { downloadProgressUI.reset(key) }
 func progressSetTotal(key string, total int64) { downloadProgressUI.setTotal(key, total) }
 func progressFinish(key string, success bool) { downloadProgressUI.finish(key, success) }
-
-func (w *downloadProgress) Write(data []byte) (int, error) {
-	n, err := w.writer.Write(data)
-	w.written += int64(n)
-	downloadProgressUI.add(w.key, int64(n))
-	return n, err
-}
 
 func humanSize(size int64) string {
 	const unit = 1024.0
@@ -3117,8 +2653,7 @@ func readState(root, path, kind string) (*Manifest, error) {
 	signaturePath := filepath.Join(root, filepath.FromSlash(stateSignatureName))
 	signatureInfo, err := os.Lstat(signaturePath)
 	if os.IsNotExist(err) {
-		fmt.Println("[保护] 检测到旧版未签名状态文件，将重新扫描本地文件，不信任旧删除记录")
-		return nil, nil
+		return nil, errors.New("state.tsv 缺少签名文件，不支持未签名状态")
 	}
 	if err != nil { return nil, err }
 	if signatureInfo.Mode()&os.ModeSymlink != 0 || !signatureInfo.Mode().IsRegular() || signatureInfo.Size() > 128 {
@@ -3270,8 +2805,7 @@ func renderManifest(manifest *Manifest) []byte {
 	return []byte(strings.Join(lines, "\n") + "\n")
 }
 
-func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []Entry, forceBackup ...bool) (string, error) {
-	force := len(forceBackup) > 0 && forceBackup[0]
+func backupModifiedFiles(root, updateRoot string, current *Manifest, selected []Entry, force bool) (string, error) {
 	if current == nil || len(selected) == 0 {
 		return "", nil
 	}

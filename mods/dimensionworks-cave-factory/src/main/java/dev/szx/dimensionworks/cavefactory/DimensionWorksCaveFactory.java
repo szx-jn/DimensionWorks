@@ -75,7 +75,6 @@ public final class DimensionWorksCaveFactory {
             CFItems.register();
             CFMenus.register();
             CFRecipes.register();
-            dev.szx.dimensionworks.cavefactory.twilight.TwilightIndustry.register();
 
             BLOCKS.register(bus);
             ITEMS.register(bus);

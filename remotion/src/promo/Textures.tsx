@@ -9,8 +9,8 @@ export const itemTexturesFor=(label:string):string[]=>{
  ['粗铁','raw_iron'],['铁粉','dust_iron'],['铜板','copper_sheet'],['铜锭','copper_ingot'],
  ['铜粉','dust_copper'],['红石','redstone'],['灌注合金','alloy_infused'],
  ['复杂链路处理器','engineering_processor'],['余烬面粉','cinder_flour'],['下界岩','netherrack'],
- ['硫粉','dust_sulfur'],['树脂','forest_resin'],['纤维','root_fiber'],['滤芯','forest_filter'],
- ['框架','ironwood_frame'],['腐殖料','mature_humus'],['树叶','oak_leaves'],['圆石','cobblestone'],
+ ['硫粉','dust_sulfur'],['树叶','oak_leaves'],['圆石','cobblestone'],
+ ['暮色木头','twilight_oak_log'],['Boss奖杯','naga_trophy'],['终端升级卡','twilight_dispatch_upgrade'],
  ['胶料','elastic_compound'],['钢叶带坯','steeleaf_seal_strip'],['弹跳封带','bounce_tape'],
  ['物质球','matter_ball'],['蜂蜜','honey_bottle'],['金属锭','iron_ingot'],
  ];

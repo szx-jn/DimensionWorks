@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -37,7 +38,9 @@ public final class PressureCrystallization {
             FluidStack crystallized = tank.getFluid().copy();
             if (crystallized.getAmount() < PRECIPITATION_AMOUNT) continue;
 
-            ResourceLocation id = ForgeRegistries.FLUIDS.getKey(crystallized.getFluid());
+            Fluid source = crystallized.getFluid();
+            if (source instanceof FlowingFluid flowing) source = flowing.getSource();
+            ResourceLocation id = ForgeRegistries.FLUIDS.getKey(source);
             if (id == null || !id.getNamespace().equals("dimensionworks_cave_factory")
                 || !id.getPath().startsWith(CRYSTALLIZED_PREFIX)) continue;
 
@@ -51,7 +54,7 @@ public final class PressureCrystallization {
                 crystalStack.getOrCreateTagElement("DimensionWorks").putString("Metal", metal);
             }
             List<ItemStack> output = List.of(crystalStack);
-            if (!basin.acceptOutputs(output, List.of(), true)) return;
+            if (!basin.acceptOutputs(output, List.of(), true)) continue;
             if (!basin.acceptOutputs(output, List.of(), false)) return;
 
             int remaining = crystallized.getAmount() - PRECIPITATION_AMOUNT;

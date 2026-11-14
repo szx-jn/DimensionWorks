@@ -55,7 +55,7 @@ public final class MemoryDriveLedRenderer implements BlockEntityRenderer<MemoryD
             case ECONOMY -> 0x35D0A4;
             case BALANCED -> 0x31DAEF;
             case HIGH_SPEED -> 0xF640C6;
-            case HIGH_STORAGE -> 0xB169F9;
+            case LOW_LOSS -> 0xB169F9;
             case FINAL -> 0xFFDE64;
         };
     }

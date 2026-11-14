@@ -53,6 +53,7 @@ update-Windows/aria2-runtime/
 # Optional local fluid rendering verification
 run-crystal-check/
 run-twilight-check/
+run-alex-dispatch*/
 
 # Generated promotional-film narration and original score
 /remotion/public/promo/audio/

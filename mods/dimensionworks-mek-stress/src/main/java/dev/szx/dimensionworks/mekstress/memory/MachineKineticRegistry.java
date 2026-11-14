@@ -23,10 +23,6 @@ public final class MachineKineticRegistry {
     private MachineKineticRegistry() {
     }
 
-    public static void sync(TileEntityMekanism machine, KineticNetwork network, float memberRpm) {
-        sync(machine, network, memberRpm, machine.getBlockPos());
-    }
-
     public static void sync(TileEntityMekanism machine, KineticNetwork network, float memberRpm, net.minecraft.core.BlockPos attachment) {
         if (network == null) {
             detach(machine);

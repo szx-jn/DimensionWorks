@@ -20,7 +20,7 @@ speedExponent = -1
 speedExponent = 0
 [memory_card_types.high_speed]
 speedExponent = 1
-[memory_card_types.high_storage]
+[memory_card_types.low_loss]
 speedExponent = -1
 [memory_card_types.defective]
 speedExponent = -2

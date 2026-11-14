@@ -544,7 +544,7 @@
       "name": "DimensionWorks Cave Factory",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-cave-factory",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-cave-factory"
@@ -604,7 +604,7 @@
       "name": "DimensionWorks ME Mechanical Power",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-mek-stress",
-      "version": "0.3.29",
+      "version": "0.3.30",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-mek-stress"
@@ -614,7 +614,7 @@
       "name": "DimensionWorks RPM Limit",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-rpm-limit",
-      "version": "0.4.21",
+      "version": "0.4.22",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-rpm-limit"
@@ -634,7 +634,7 @@
       "name": "DimensionWorks Transfer",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-transfer",
-      "version": "0.3.13",
+      "version": "0.3.14",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-transfer"
@@ -644,7 +644,7 @@
       "name": "DimensionWorks Version Gate",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-version-gate",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks"
@@ -2015,7 +2015,7 @@
       "name": "DimensionWorks Pressure Crystals",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-pressure-crystals",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-pressure-crystals"

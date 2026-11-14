@@ -1,5 +1,7 @@
 # ME 内存卡六形态规格
 
+> 本文记录最初的储存模型。当前内存卡仅提供 RPM 带宽与输入扣除；低损耗型 ID 为 `low_loss`。旧容量公式与 `high_storage` 不再作为实现接口，当前规则见 [ME 动力说明](../../../mods/dimensionworks-mek-stress/README.md)。
+
 日期：2026-09-30  
 状态：已实现，最终型毕业配方待定。
 

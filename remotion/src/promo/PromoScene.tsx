@@ -17,9 +17,8 @@ const Graph:React.FC<{s:typeof shots[number];t:number}>=({s,t})=>{
  {s.kind==='power'&&<Text x={960} y={760} size={50} color={C.copper}>1 FE/t = 2 SU</Text>}
  {s.kind==='ae'&&<Text x={960} y={825} size={27}>机械应力与 AE 供能分别计量 · 需要正常频道</Text>}
  {s.kind==='live'&&<Text x={960} y={780} size={50} color={active?C.teal:C.red}>{active?'输入足额 → 正常输出':'输入归零 → 输出停机'}</Text>}
- {s.kind==='forest'&&<Text x={960} y={820} size={27}>只在暮色采集 · 不强加载 · 不结算离线产量</Text>}
+ {s.id===47&&<Text x={960} y={820} size={27}>任意三个击杀 Boss 奖杯 · 允许同种重复</Text>}
  {s.kind==='life'&&<Text x={960} y={835} size={25}>整合生态：农业 / 烹饪 / 冒险 · 具体魔改：女仆参与AE手摇曲柄</Text>}
- {s.kind==='boars'&&<Text x={960} y={825} size={27}>128 RPM 达到最高处理速度 · 每只野猪独占工位并休息</Text>}
  </>;
 };
 const Network:React.FC<{s:typeof shots[number];t:number}>=({s,t})=>{
@@ -34,7 +33,7 @@ const Tiles:React.FC<{s:typeof shots[number];t:number}>=({s,t})=>{
  const cols=s.nodes.length>6?4:3;const rows=Math.ceil(s.nodes.length/cols);const gap=22;const w=1440/cols;const h=rows>2?153:235;const startY=rows>2?295:335;
  return <>{s.nodes.map((label,i)=><g key={i} transform={`translate(${240+(i%cols)*(w+gap)} ${startY+Math.floor(i/cols)*(h+gap)})`} opacity={s.kind==='qol'?1:.35+.65*fade(t,i*.28,i*.28+.3)}>
  <rect width={w} height={h} rx="12" fill={i===Math.floor(t)%s.nodes.length?'#3a4d51':'#213842'} stroke={i===Math.floor(t)%s.nodes.length?C.copper:'#526e74'} strokeWidth="2"/>
- {s.kind==='ddr'?<DriveBlock x={w/2} y={65} tier={i+1} size={86}/>:s.kind==='cards'?<image href={staticFile(`memory/card_ddr3_${['economy','balanced','high_speed','high_storage','defective','final'][i]}.png`)} x={w/2-48} y="15" width="96" height="96"/>:<Gear x={w/2} y={rows>2?40:65} radius={rows>2?19:33} angle={t*35} color={s.kind==='chemicals'?C.teal:C.copper}/>}
+ {s.kind==='ddr'?<DriveBlock x={w/2} y={65} tier={i+1} size={86}/>:s.kind==='cards'?<image href={staticFile(`memory/card_ddr3_${['economy','balanced','high_speed','low_loss','defective','final'][i]}.png`)} x={w/2-48} y="15" width="96" height="96"/>:<Gear x={w/2} y={rows>2?40:65} radius={rows>2?19:33} angle={t*35} color={s.kind==='chemicals'?C.teal:C.copper}/>}
  <Text x={w/2} y={rows>2?105:155} size={s.kind==='quotas'?28:s.kind==='qol'?30:33}>{label}</Text>
  {s.kind==='qol'&&['扳手联动 · 永久超级胶水\n鼓风染色兼容','F4进入旁观\n再按返回原位置','保留领地保护 · 禁用FTB强加载\n掉落物按领地与稀有度计时','背包 / 箱体 / 抽屉保留\n精妙存储网络组件配方退役','拾取竞争防重复\n封装搬运保留数据','中文信息与版本检查\n跨平台更新器'][i].split('\n').map((line,j)=><Text key={line} x={w/2} y={185+j*31} size={20} color={C.muted}>{line}</Text>)}
  {s.kind==='ddr'&&<Text x={w/2} y={198} size={24} color={C.teal}>{[4,8,16,32,64][i]}槽 · {[256,512,1024,2048,4096][i]} RPM</Text>}
@@ -63,7 +62,7 @@ const Comparison:React.FC<{s:typeof shots[number];t:number}>=({s,t})=>{
  <rect x={x-305} y="300" width="610" height="510" rx="18" fill="#1e3540" stroke="#56777c" strokeWidth="2"/>
  <Text x={x} y={350} size={36}>{crystal?(i?'上方遮挡':'能直见天空'):gas?(i?'专用盆盖关闭':'无盖 / 开盖'):(i?'超级加热':'普通加热')}</Text>
  {crystal?<><path d={`M${x-190} 590 l90 -85 h250 l-90 85Z`} fill={changed?'#b194da':'#d99469'} stroke="#edcfaa" strokeWidth="3"/>{i===1&&<path d={`M${x-220} 438 l80 -48 h380 l-80 48Z`} fill="#819695" stroke="#bec9b5" strokeWidth="3"/>}<path d={`M${x-70} 420 V475`} stroke={i?C.red:C.teal} strokeWidth="5" strokeDasharray="8 9"/><Text x={x} y={690} size={55} color={changed?C.violet:C.teal}>{i?'计时重置':`${Math.min(30,Math.floor(t/3.65*30))} 秒`}</Text>{changed&&Array.from({length:8},(_,j)=><path key={j} d={`M${x-145+j*36} ${550+Math.sin(t+j)*9} l12 -15 l10 16 l-10 15Z`} fill="#e4c3f2"/>)}<Text x={x} y={755} size={29}>{changed?'已结晶 · 保留流动状态':'世界中的熔融流体方块'}</Text></>:<><Art kind="basin" x={x} y={500} t={t} scale={1.4}/>{gas&&i===1&&<path d={`M${x-110} 382 h220 v21 h-220Z`} fill="#899b8c" stroke="#decda3" strokeWidth="3"/>}{gas&&i===0&&Array.from({length:9},(_,j)=><circle key={j} cx={x-90+j*23} cy={425-((t*65+j*17)%120)} r="7" fill={C.teal} opacity=".45"/>)}<Text x={x} y={740} size={35} color={C.teal}>{gas?(i?'保留气体':'200 mB / 秒'):(i?'250 mB CO₂':'125 mB CO')}</Text></>}
- </g>})}<Text x={960} y={850} size={26} color={C.muted}>{crystal?'30秒时间压缩示意 · 不代表敞口工作盆或任意储罐判定':gas?'只有专用盆盖有效 · 屋顶和普通方块不算密封盖':'热态决定配方 · 切换气体前抽空出气缓冲'}</Text></>;
+ </g>})}<Text x={960} y={850} size={26} color={C.muted}>{crystal?'连续30秒时间压缩示意 · 敞口工作盆同样结晶 · 普通储罐不触发':gas?'只有专用盆盖有效 · 屋顶和普通方块不算密封盖':'热态决定配方 · 切换气体前抽空出气缓冲'}</Text></>;
 };
 const Transport:React.FC<{s:typeof shots[number];t:number}>=({s,t})=>{
  const vertical=s.kind==='vertical';const elastic=s.kind==='elastic';
@@ -80,7 +79,7 @@ const Territory:React.FC<{t:number}>=({t})=><>{Array.from({length:9},(_,i)=><g k
 export const PromoScene:React.FC<{shotId:number}>=({shotId})=>{
  const s=shots[shotId];const {fps}=useVideoConfig();const frame=useCurrentFrame();const t=frame/fps;
  const story=['story','heart','fall','time','awake','end'].includes(s.kind);
- const graph=['graph','power','generators','reactor','network','ae','live','upgrade','loop','netherrack','split','molten','forest','boars','tape','life','endpoints','cloud','phase','assessment'].includes(s.kind);
+ const graph=['graph','power','generators','reactor','network','ae','live','upgrade','loop','netherrack','split','molten','tape','life','endpoints','cloud','phase','assessment'].includes(s.kind);
  let visual:React.ReactNode;
  if(story)visual=<Story s={s} t={t}/>;
  else if(['network','ae','live'].includes(s.kind))visual=<svg width="1920" height="1080">{FLOOR}<Network s={s} t={t}/></svg>;
@@ -91,7 +90,7 @@ export const PromoScene:React.FC<{shotId:number}>=({shotId})=>{
  ['packing','parcel','dispatch','elastic','vertical'].includes(s.kind)?<Transport s={s} t={t}/>:
  ['egg','death'].includes(s.kind)?<Egg s={s} t={t}/>:
  s.kind==='territory'?<Territory t={t}/>:
- s.kind==='cards'?<>{s.nodes.map((n,i)=><Text key={n} x={425+i*245} y={295} size={30} color={C.teal}>{n}</Text>)}{Array.from({length:5},(_,r)=><g key={r}><Text x={205} y={372+r*99} size={30}>DDR{r+1}</Text>{['economy','balanced','high_speed','high_storage','defective','final'].map((type,c)=><g key={type} opacity={c===Math.floor(t)?1:.5}><rect x={375+c*245} y={320+r*99} width="100" height="90" rx="8" fill="#29404a" stroke={c===Math.floor(t)?C.copper:'#45626b'}/><image href={staticFile(`memory/card_ddr${r+1}_${type}.png`)} x={391+c*245} y={330+r*99} width="68" height="68"/></g>)}</g>)}<Text x={960} y={875} size={28}>最终卡：暂无生存配方 · 同代卡生效 · 损耗按全网累计</Text></>:
+ s.kind==='cards'?<>{s.nodes.map((n,i)=><Text key={n} x={425+i*245} y={295} size={30} color={C.teal}>{n}</Text>)}{Array.from({length:5},(_,r)=><g key={r}><Text x={205} y={372+r*99} size={30}>DDR{r+1}</Text>{['economy','balanced','high_speed','low_loss','defective','final'].map((type,c)=><g key={type} opacity={c===Math.floor(t)?1:.5}><rect x={375+c*245} y={320+r*99} width="100" height="90" rx="8" fill="#29404a" stroke={c===Math.floor(t)?C.copper:'#45626b'}/><image href={staticFile(`memory/card_ddr${r+1}_${type}.png`)} x={391+c*245} y={330+r*99} width="68" height="68"/></g>)}</g>)}<Text x={960} y={875} size={28}>最终卡：暂无生存配方 · 同代卡生效 · 损耗按全网累计</Text></>:
  s.kind==='repair'?<>{s.nodes.map((n,i)=><g key={i} opacity={.2+.8*fade(t,i,i+.25)}><image href={staticFile('gear_heart_damaged.png')} x={290+i*250} y={650-i*55} width="90" height="90"/><Text x={335+i*250} y={780-i*55} size={42} color={C.teal}>{n}</Text></g>)}<Text x={960} y={330} size={45}>顺序修复 · RPM逐级提升</Text></>:
  s.kind==='effects'||s.kind==='blessing'?<><image href={staticFile(s.kind==='effects'?'gear_heart_damaged.png':'gear_heart_normal.png')} x="320" y="370" width="320" height="320"/><Person x={680} y={480} t={t} scale={.5}/>{s.nodes.map((n,i)=><g key={i} opacity={.25+.75*fade(t,i*.55,i*.55+.3)}><rect x="970" y={325+i*81} width="690" height="65" rx="10" fill="#29434c" stroke={s.kind==='effects'&&i===4?C.red:C.teal}/><Text x={1315} y={369+i*81} size={34}>{n}</Text></g>)}</>:
  s.kind==='overspeed'?<><Art kind="press" x={500} y={480} t={t} scale={2}/><Art kind="material" x={820} y={580} t={t}/><Art kind="output" x={1250} y={580} t={t}/><Text x={1110} y={380} size={86} color={C.copper}>× {t<2?'1':t<4?'5':'15'}</Text><Text x={1100} y={750} size={38}>原料 ×N · 产出 ×N · 应力 ×N</Text><Text x={960} y={840} size={27}>只对适用机器生效 · 不通过超速反复推动实体</Text></>:

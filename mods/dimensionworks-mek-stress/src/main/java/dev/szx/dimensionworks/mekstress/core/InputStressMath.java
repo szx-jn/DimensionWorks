@@ -9,7 +9,7 @@ public final class InputStressMath {
     private InputStressMath() {
     }
 
-    /** Network-wide loss is bounded at 99%, including legacy or oversized inputs. */
+    /** Network-wide loss is bounded at 99%, including oversized inputs. */
     public static int cappedReductionBasisPoints(long totalBasisPoints) {
         return (int) Math.max(0L, Math.min(MAXIMUM_INPUT_LOSS_BASIS_POINTS, totalBasisPoints));
     }

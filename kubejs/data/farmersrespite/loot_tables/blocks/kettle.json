@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "farmersrespite:kettle",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "FluidTank",
+                  "target": "BlockEntityTag.FluidTank",
+                  "op": "replace"
+                },
+                {
+                  "source": "Container",
+                  "target": "BlockEntityTag.Container",
+                  "op": "replace"
+                }
+              ]
+            },
+            {
+              "function": "minecraft:copy_name",
+              "source": "block_entity"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

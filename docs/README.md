@@ -5,8 +5,10 @@
 已建立：
 
 - [`design/six-minute-promo-content-plan.md`](design/six-minute-promo-content-plan.md)：已确认的 6 分钟宣传片内容规划，含 60 组逐秒分镜、旁白工作稿、机制与预告边界；已据此制作 Remotion 宣传片。
-- [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：暮色方块的职责与可替代性审查；旧六个提案已撤回，新机械先审阅职责再设计产线；下一维度待定。
-- [`design/twilight-machine-products.md`](design/twilight-machine-products.md)：四项机械成果候选：现场爆炸驱动、活体装备拆装、生物行为控制和状态读取；温度探头与流量计已撤回，列明组合用途、替代边界与未验证项。
+- [`design/twilight-dispatch-upgrade.md`](design/twilight-dispatch-upgrade.md)：现行暮色收尾：仅提供弹力打包工具与终端升级；1 块暮色木头和任意 3 个可重复 Boss 奖杯解锁六洞穴发运 GUI。
+- [`validation/2026-11-14-compat-cleanup-and-dispatch.md`](validation/2026-11-14-compat-cleanup-and-dispatch.md)：终端升级、六洞穴 GUI、世界/工作盆结晶、历史兼容清理与完整整包的本地验证。
+- [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：已归档的全章产线、机械与阶段规划，不再作为实现目标。
+- [`design/twilight-machine-products.md`](design/twilight-machine-products.md)：已归档的机械职责候选，不再扩展暮色机械目录。
 - [`design/twilight-easter-egg-toys.md`](design/twilight-easter-egg-toys.md)：已实现弹跳封带与弹力打包工具，记录暮色供料、十步装配、玩家弹力包裹、史莱姆落地弹跳、Shift 蓄力和发射。
 - [`validation/2026-11-14-elastic-packager.md`](validation/2026-11-14-elastic-packager.md)：弹力打包工具的编译、单元测试、真实配方与包裹回归检查，以及独立客户端的模型、蓄力界面和运动验证。
 - [`design/twilight-item-registry-inventory.md`](design/twilight-item-registry-inventory.md)：固定版暮色森林 4.3.2508 的全部 562 项注册物品，含方块物品、刷怪蛋及中英文名称，附完整 CSV；用于先盘点再选择弹力材料。
@@ -21,15 +23,15 @@
 
 - [`design/transfer-safety-cloud-disk.md`](design/transfer-safety-cloud-disk.md)：中转物品保护、安全落点、九区块可见范围与 F12 持久云盘回收。
 
-- [`design/twilight-industrial-branch.md`](design/twilight-industrial-branch.md)：暮色森林物品调查、工业支线与第三修复碎片关联提案。
+- [`design/twilight-industrial-branch.md`](design/twilight-industrial-branch.md)：已归档的暮色物品调查、工业支线与第三修复碎片关联提案。
 
-- [`design/twilight-resonance-industry.md`](design/twilight-resonance-industry.md)：暮色共振工艺、冒险与工业替代路线、一次性首领压制及增益设备。
+- [`design/twilight-resonance-industry.md`](design/twilight-resonance-industry.md)：已归档的暮色共振工艺、冒险与工业替代路线及增益设备。
 
-- [`design/twilight-ecological-production.md`](design/twilight-ecological-production.md)：暮色环境与生物供料、二次加工、回用优化及 20～30 小时主动工业游玩提案。
+- [`design/twilight-ecological-production.md`](design/twilight-ecological-production.md)：已归档的暮色环境与生物供料、二次加工、回用优化提案。
 
 - [`design/twilight-progression-survey.md`](design/twilight-progression-survey.md)：暮色 4.3.2508 入门至毕业、三分支进度、区域保护、原生再生资源与全部非配方进度调查；后续产线分期依据。
 
-- [`design/twilight-first-arrival.md`](design/twilight-first-arrival.md)：单向承接主世界工业基础的暮色开场、林地浸出与野猪调理首版规则。
+- [`design/twilight-first-arrival.md`](design/twilight-first-arrival.md)：已归档的林地起步原型；实现、注册、配方、贴图与专项测试均已删除。
 - [`validation/2026-11-07-twilight-first-production.md`](validation/2026-11-07-twilight-first-production.md)：暮色首版产线的服务器 GameTest、构建、静态检查与未验证范围。
 
 - [`design/energy-mechanical-unification.md`](design/energy-mechanical-unification.md)：FE/t 与 SU 统一计量、跨模组供能范围与生命周期约束。

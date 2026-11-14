@@ -4,11 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -22,38 +19,11 @@ public final class MoltenCrystallizationEvents {
 
     private MoltenCrystallizationEvents() {}
 
-    @SubscribeEvent
-    public static void migrateRetiredSolidItems(net.minecraftforge.registries.MissingMappingsEvent event) {
-        for (var mapping : event.getMappings(ForgeRegistries.Keys.ITEMS, DimensionWorksCaveFactory.MOD_ID)) {
-            if (!mapping.getKey().getPath().startsWith("crystallized_molten_")) continue;
-            var bucket = ForgeRegistries.ITEMS.getValue(new ResourceLocation(DimensionWorksCaveFactory.MOD_ID,
-                mapping.getKey().getPath() + "_bucket"));
-            if (bucket instanceof net.minecraft.world.item.BucketItem) mapping.remap(bucket);
+    /** Called after the liquid block is installed, including buckets, pipes and flowing fluid. */
+    public static void onPlaced(LevelAccessor level, BlockPos pos, BlockState state) {
+        if (level instanceof ServerLevel serverLevel && isMoltenMetal(state)) {
+            MoltenCrystallizationData.get(serverLevel).reset(pos);
         }
-    }
-
-    @SubscribeEvent
-    public static void onFluidFlow(BlockEvent.FluidPlaceBlockEvent event) {
-        track(event.getLevel(), event.getPos(), event.getNewState());
-    }
-
-    @SubscribeEvent
-    public static void onBlockPlaced(BlockEvent.EntityPlaceEvent event) {
-        if (event.getLevel() instanceof ServerLevel level && isMoltenMetal(event.getPlacedBlock())) {
-            MoltenCrystallizationData.get(level).reset(event.getPos());
-        }
-    }
-
-    @SubscribeEvent
-    public static void onBucketUse(PlayerInteractEvent.RightClickBlock event) {
-        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(event.getItemStack().getItem());
-        if (itemId == null || !itemId.getNamespace().equals("dimensionworks")
-            || !itemId.getPath().startsWith("molten_") || !itemId.getPath().endsWith("_bucket")
-            || !(event.getLevel() instanceof ServerLevel level)) {
-            return;
-        }
-        BlockPos target = event.getPos().relative(event.getFace());
-        MoltenCrystallizationData.get(level).reset(target);
     }
 
     @SubscribeEvent
@@ -113,15 +83,8 @@ public final class MoltenCrystallizationEvents {
         }
     }
 
-    private static void track(LevelAccessor level, BlockPos pos, BlockState state) {
-        if (level instanceof ServerLevel serverLevel && isMoltenMetal(state)) {
-            MoltenCrystallizationData.get(serverLevel).track(pos);
-        }
-    }
-
     private static boolean isMoltenMetal(BlockState state) {
-        Block block = state.getBlock();
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(block);
+        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
         return id != null && id.getNamespace().equals("dimensionworks")
             && id.getPath().startsWith("molten_");
     }

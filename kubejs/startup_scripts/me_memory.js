@@ -44,7 +44,7 @@ const dwMemoryCardTypes = [
   'economy',
   'balanced',
   'high_speed',
-  'high_storage',
+  'low_loss',
   'defective',
   'final'
 ]

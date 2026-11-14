@@ -162,21 +162,6 @@ public final class KineticAccountingGameTests {
         helper.succeed();
     }
     @GameTest(template = "empty", timeoutTicks = 100)
-    public static void legacyPhantomTotalsAreNotImported(GameTestHelper helper) {
-        KineticBlockEntity shaft = block(helper, "shaft", new BlockPos(2, 1, 2));
-        CompoundTag legacy = new CompoundTag();
-        CompoundTag networkTag = new CompoundTag();
-        networkTag.putFloat("Stress", 999999); networkTag.putFloat("Capacity", 999999);
-        legacy.put("Network", networkTag);
-        KineticPersistence.read(shaft, legacy, false);
-        KineticNetwork restored = new KineticNetwork();
-        KineticPersistence.initialize(shaft, restored);
-        restored.addSilently(shaft, 0, 0);
-        helper.assertTrue(restored.calculateStress() == 0, "Legacy phantom stress was imported");
-        helper.assertTrue(restored.calculateCapacity() == 0, "Legacy phantom capacity was imported");
-        helper.succeed();
-    }
-    @GameTest(template = "empty", timeoutTicks = 100)
     public static void topologyFocusAndIconsSurvivePaginationAndPacket(GameTestHelper helper) {
         block(helper, "creative_motor", new BlockPos(2, 1, 2));
         helper.runAfterDelay(20, () -> {

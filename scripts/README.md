@@ -14,7 +14,7 @@ python3 scripts/generate_dimension_key_texture.py
 
 ## 生成齿轮之心与修复碎片贴图
 
-以 `docs/assets/gear_heart_reference.png` 为用户提供的模板，使用 Pillow 去除黑底并像素化为 32x32，再生成常态、破损、诅咒和祝福四态；脚本同时绘制七个修复碎片共用的 32x32 占位贴图：
+以 `docs/assets/gear_heart_reference.png` 为用户提供的模板，使用 Pillow 去除黑底并像素化为 32x32，再生成常态、破损和祝福三态；脚本同时绘制七个修复碎片各自的 32x32 贴图：
 
 ```sh
 python3 scripts/pixelate_gear_heart_textures.py
@@ -78,7 +78,7 @@ python3 scripts/package_server.py --output ~/Desktop/DimensionWorks-Server.zip
 - Linux amd64：仅服务端 `update-dimensionworks-server-linux-amd64`
 - macOS arm64：`update-dimensionworks-client-macos-arm64`、`update-dimensionworks-server-macos-arm64`
 
-首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。所有平台均使用 `update-Windows/` 中同一套 Go 源码交叉编译，不依赖 Shell、BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取 Release 侧的独立 `*-update-manifest.tsv` 资产；使用本地 `--package` 时读取完整包同目录的配套清单，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在旧状态缺失时从受管目录建立基线，删除旧包遗留文件。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
+首次使用时把对应更新器复制到客户端实例根目录或服务端根目录执行。所有平台均使用 `update-Windows/` 中同一套 Go 源码交叉编译，不依赖 Shell、BAT、PowerShell 或 Python。更新器默认查询 GitHub Latest Release，也支持 `--release vX.Y.Z`、`--package <本地完整包>`、`--url <完整包 URL>` 和 `--help`。更新器读取 Release 侧的独立 `*-update-manifest.tsv` 资产；使用本地 `--package` 时读取完整包同目录的配套清单，优先使用客户端或服务端差量 ZIP，只复制或下载摘要变化的受管文件，并在首次运行没有状态文件时从受管目录建立摘要基线，保护无可信基线的自定义文件。已有未签名状态直接报错。终端会实时显示下载、检查、暂存、应用和删除进度。`.dimensionworks-update/state.tsv` 记录版本和受管文件状态，事务目录保存回滚备份。
 
 客户端保留存档、日志、截图和启动器私有数据；服务端保留世界（含 `server.properties` 指定的自定义世界名）、`config/`、`defaultconfigs/`、LuckPerms 配置与数据库、日志、`eula.txt`、`server.properties`、`user_jvm_args.txt`、白名单、封禁和运行数据。已有配置只在缺失时从新包补齐，不覆盖现存配置。更新器等待服务端正常退出，最多 180 秒；超时即中止，不强制杀进程，以免世界规则或权限数据未落盘。运行客户端前退出游戏，更新前建议先手动停止服务端。服务端优先使用 `DimensionWorks-Server-<版本>-delta.zip`，差量缺失、跨版本或本地文件漂移时自动回退完整 ZIP。
 
@@ -186,4 +186,4 @@ python3 -m unittest discover -s scripts/tests -p 'test_sync_bbsmc_release.py' -v
 
 该步骤不编译或修改第三方 Java 类，保留所需编译依赖，不改变整合包分发的 Create 原包，不关闭 HTTPS 验证。升级清单中的 Create 版本时必须同步审查此脚本的版本与哈希。普通模组构建、独立客户端验证、正式发布共同使用该准备步骤。
 
-`python3 scripts/draw_dispatch_terminal_assets.py` 生成中转发运终端的完整六面模型及不透明 16×16 PNG 材质，无第三方依赖。
+`python3 scripts/draw_dispatch_terminal_assets.py` 生成中转发运终端的完整六面模型、不透明 16×16 PNG 材质、暮色升级卡图标，以及六个 Alex 洞穴的 108×82 像素插画和总览图。只使用 Python 标准库；GUI 按实际卡片尺寸缩放整张图像。

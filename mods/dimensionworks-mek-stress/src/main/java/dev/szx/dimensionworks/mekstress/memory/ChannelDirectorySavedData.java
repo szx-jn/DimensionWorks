@@ -85,11 +85,12 @@ public final class ChannelDirectorySavedData extends SavedData {
             ListTag list = entry.getList("Endpoints", Tag.TAG_COMPOUND);
             for (int j = 0; j < list.size(); j++) {
                 CompoundTag node = list.getCompound(j);
-                if (!node.contains("Dimension", Tag.TAG_STRING) || !node.contains("Position", Tag.TAG_LONG))
+                if (!node.contains("Dimension", Tag.TAG_STRING) || !node.contains("Position", Tag.TAG_LONG)
+                    || !node.contains("Tier", Tag.TAG_INT))
                     throw new IllegalArgumentException("Invalid saved endpoint");
                 var endpoint = new ChannelDirectory.Endpoint(node.getString("Dimension"), node.getLong("Position"));
                 if (!endpoints.add(endpoint)) throw new IllegalArgumentException("Duplicate endpoint");
-                int tier = node.contains("Tier", Tag.TAG_INT) ? node.getInt("Tier") : 1;
+                int tier = node.getInt("Tier");
                 if (tier < 1 || tier > 3) throw new IllegalArgumentException("Invalid saved endpoint tier");
                 result.tiers.put(endpoint, tier);
             }

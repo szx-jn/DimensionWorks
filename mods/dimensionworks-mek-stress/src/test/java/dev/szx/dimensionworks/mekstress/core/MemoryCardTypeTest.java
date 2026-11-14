@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 class MemoryCardTypeTest {
 
     @Test
-    void definesTheSymmetricArchetypeExponents() {
-        assertExponents(MemoryCardType.DEFECTIVE, -2, -2);
-        assertExponents(MemoryCardType.ECONOMY, -1, -1);
-        assertExponents(MemoryCardType.BALANCED, 0, 0);
-        assertExponents(MemoryCardType.HIGH_SPEED, -1, 1);
-        assertExponents(MemoryCardType.HIGH_STORAGE, 1, -1);
-        assertExponents(MemoryCardType.FINAL, 2, 2);
+    void definesTheSixRpmBandwidthExponents() {
+        assertExponent(MemoryCardType.DEFECTIVE, -2);
+        assertExponent(MemoryCardType.ECONOMY, -1);
+        assertExponent(MemoryCardType.BALANCED, 0);
+        assertExponent(MemoryCardType.HIGH_SPEED, 1);
+        assertExponent(MemoryCardType.LOW_LOSS, -1);
+        assertExponent(MemoryCardType.FINAL, 2);
     }
 
     @Test
@@ -24,7 +24,7 @@ class MemoryCardTypeTest {
         assertEquals(200, MemoryCardType.ECONOMY.inputReductionBasisPoints());
         assertEquals(150, MemoryCardType.BALANCED.inputReductionBasisPoints());
         assertEquals(175, MemoryCardType.HIGH_SPEED.inputReductionBasisPoints());
-        assertEquals(75, MemoryCardType.HIGH_STORAGE.inputReductionBasisPoints());
+        assertEquals(75, MemoryCardType.LOW_LOSS.inputReductionBasisPoints());
         assertEquals(0, MemoryCardType.FINAL.inputReductionBasisPoints());
     }
 
@@ -33,12 +33,12 @@ class MemoryCardTypeTest {
         assertTrue(MemoryCardType.ECONOMY.craftable());
         assertTrue(MemoryCardType.BALANCED.craftable());
         assertTrue(MemoryCardType.HIGH_SPEED.craftable());
-        assertTrue(MemoryCardType.HIGH_STORAGE.craftable());
+        assertTrue(MemoryCardType.LOW_LOSS.craftable());
         assertFalse(MemoryCardType.DEFECTIVE.craftable());
         assertFalse(MemoryCardType.FINAL.craftable());
     }
 
-    private static void assertExponents(MemoryCardType type, int storageExponent, int speedExponent) {
+    private static void assertExponent(MemoryCardType type, int speedExponent) {
         assertEquals(speedExponent, type.defaultSpeedExponent());
     }
 }

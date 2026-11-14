@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "dimensionworks_transfer:item/twilight_dispatch_upgrade" }
+}

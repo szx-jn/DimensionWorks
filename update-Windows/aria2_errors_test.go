@@ -90,15 +90,6 @@ func TestAria2StopsWhenTerminalRPCFailsContinuously(t *testing.T) {
 	}
 }
 
-// Legacy transport helpers are tested directly; production uses only aria2c.
-func downloadGoForTest(source, destination string) error {
-	err := downloadRanged(context.Background(), source, destination, maxDownloadBytes)
-	if err == nil {
-		return nil
-	}
-	return downloadSequential(context.Background(), source, destination, maxDownloadBytes)
-}
-
 func TestAria2ErrorExplainsCausesAndRecovery(t *testing.T) {
 	for _, test := range []struct {
 		code, detail, want string

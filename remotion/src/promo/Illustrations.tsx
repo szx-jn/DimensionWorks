@@ -10,14 +10,14 @@ export const Box:React.FC<{color?:string;children?:React.ReactNode}>=({color='#4
 export const Person:React.FC<{x:number;y:number;t:number;scale?:number;packed?:boolean;elastic?:boolean}> =({x,y,t,scale=.52,packed=false,elastic=false})=><g transform={`translate(${x} ${y}) scale(${scale})`}>{packed?<><path d="M-85 0 l35 -30 h170 l-35 30Z" fill={elastic?'#8dce73':'#cda77b'}/><path d="M85 0 l35 -30 v150 l-35 30Z" fill={elastic?'#538b64':'#9d754f'}/><rect x="-85" y="0" width="170" height="150" fill={elastic?'#76b978':'#bd9368'} stroke="#f1dfba" strokeWidth="4"/><path d="M-85 74 H85 M0 0 V150" stroke="#edd6a1" strokeWidth="12"/><rect x="-56" y="25" width="18" height="18" fill="#244940"/><rect x="32" y="25" width="18" height="18" fill="#244940"/></>:<Steve x={0} y={0} time={t}/>}</g>;
 export const Art:React.FC<{kind:string;x:number;y:number;t:number;active?:boolean;scale?:number;label?:string;sprite?:string}> =({kind,x,y,t,active=true,scale=1,label='',sprite})=>{
  const tick=active?t:0;
- const machine=kind==='factory'||kind==='machine'||kind==='leach'||kind==='condition';
+ const machine=kind==='factory'||kind==='machine';
  const materials=sprite?[sprite]:itemTexturesFor(label);
  const item=(['material','output','orb','crystal','cooking'].includes(kind)&&materials.length>0);
  const front=label.includes('结合器')?'combiner_front':label.includes('提纯')?'purifier_front':'factory_front';
  return <g transform={`translate(${x} ${y}) scale(${scale})`}>
  <ellipse cx="10" cy="150" rx="100" ry="20" fill="#050e16" opacity=".35"/>
  {item?<>{materials.map((name,i)=><Sprite key={name} name={name} x={materials.length>1?-100+i*105:-65} y={-50+Math.sin(t*2)*5} size={materials.length>1?100:130}/>)}</>:
- machine?<TexturedCase front={kind==='leach'||kind==='condition'?'twilight_casing':front} top={kind==='leach'?'forest_leacher_top':kind==='condition'?'boar_conditioner_top':front==='combiner_front'?'combiner_top':'factory_top'} t={tick} active={active}/>:
+ machine?<TexturedCase front={front} top={front==='combiner_front'?'combiner_top':'factory_top'} t={tick} active={active}/>:
  kind==='press'?<g transform="translate(0 -62) scale(.65)"><MechanicalPress x={0} y={0} time={tick} active={active}/><Sprite name="press_front" x={-55} y={-49} size={110}/></g>:
  kind==='motor'?<Motor x={0} y={0} time={tick}/>:
  kind==='me'?<TexturedCase front="me_controller" t={tick} active={active} width={122} height={122}/>:
@@ -26,7 +26,7 @@ export const Art:React.FC<{kind:string;x:number;y:number;t:number;active?:boolea
  kind==='vibration'?<TexturedCase front="vibration_front" t={tick} active={active} width={117} height={117}/>:
  kind==='receiver'?<g transform="scale(1.5)"><EnergyBlock x={0} y={0} kind="kinetic" time={tick}/></g>:
  kind==='pig'||kind==='frog'?<><rect x="-65" y="-18" width="130" height="80" fill={kind==='pig'?'#b68380':'#7cb681'} stroke="#dfcc9a" strokeWidth="3"/><rect x="-46" y="62" width="25" height="38" fill="#745f61"/><rect x="28" y="62" width="25" height="38" fill="#745f61"/><rect x="-30" y="-42" width="70" height="57" fill={kind==='pig'?'#d6a49c':'#9fd0a0'}/><rect x="-18" y="-28" width="10" height="10" fill="#263d40"/><rect x="17" y="-28" width="10" height="10" fill="#263d40"/><rect x="-10" y="-8" width="35" height="18" fill="#ebbaaa"/></>:
- kind==='roots'||kind==='farm'?<>{Array.from({length:9},(_,i)=><g key={i} transform={`translate(${(i%3-1)*43+(Math.floor(i/3)-1)*20} ${(Math.floor(i/3)-1)*35})`}><path d="M-20 0 l20 -12 l40 0 l-20 12Z" fill="#799671"/><path d="M-20 0 h40 v25 h-40Z" fill="#79604b"/><path d="M-12 9 l16 8 l10 -6" fill="none" stroke="#d4b982" strokeWidth="3"/></g>)}</>:
+ kind==='farm'?<>{Array.from({length:9},(_,i)=><g key={i} transform={`translate(${(i%3-1)*43+(Math.floor(i/3)-1)*20} ${(Math.floor(i/3)-1)*35})`}><path d="M-20 0 l20 -12 l40 0 l-20 12Z" fill="#799671"/><path d="M-20 0 h40 v25 h-40Z" fill="#79604b"/><path d="M-12 9 l16 8 l10 -6" fill="none" stroke="#d4b982" strokeWidth="3"/></g>)}</>:
  kind==='wind'?<><rect x="-12" y="-10" width="24" height="150" fill="#b4aa8c"/><g transform={`rotate(${tick*55})`}><circle r="18" fill={C.copper}/>{[0,120,240].map(a=><path key={a} d="M0 -10 L-18 -130 L18 -110 L10 0Z" fill="#d8d5b4" transform={`rotate(${a})`}/>)}</g></>:
  kind==='solar'?<><path d="M-88 -35 L52 -78 L92 5 L-48 47Z" fill="#395984" stroke="#a1bccb" strokeWidth="5"/>{[0,1,2].map(i=><path key={i} d={`M${-55+i*40} ${-45-i*12} l35 75`} stroke="#8cacbe" strokeWidth="3"/>)}<rect x="-7" y="35" width="14" height="75" fill="#a4a38d"/><circle cx="75" cy="-115" r="24" fill="#e9cb88"/></>:
  kind==='tank'||kind==='basin'?<><Box color="#355865"><rect x="-49" y="-38" width="99" height="95" fill="#172e40" stroke="#bac6b1" strokeWidth="4"/><rect x="-43" y={-20+Math.sin(t)*3} width="87" height="71" fill={kind==='basin'?C.copper:C.teal} opacity=".72"/>{[0,1,2,3].map(i=><circle key={i} cx={-30+i*19} cy={28-((t*15+i*14)%50)} r="3" fill="#fff0b7" opacity=".6"/>)}{kind==='basin'&&<Gear x={0} y={-70} radius={27} angle={tick*90}/>}</Box></>:

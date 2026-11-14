@@ -50,9 +50,9 @@ export const Promo:React.FC=()=>{const {fps}=useVideoConfig();return <AbsoluteFi
 <Sequence name="04:18 跨维方式有自己的边界" from={258 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={43}/></Sequence>
 <Sequence name="04:24 两秒蓄力，沿视线发射" from={264 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={44}/></Sequence>
 <Sequence name="04:30 竖直带也能运送你" from={270 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={45}/></Sequence>
-<Sequence name="04:36 暮色：从环境中取得原料" from={276 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={46}/></Sequence>
-<Sequence name="04:42 活体工位，持续供料" from={282 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={47}/></Sequence>
-<Sequence name="04:48 加工、回用与效率" from={288 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={48}/></Sequence>
+<Sequence name="04:36 暮色：两项升级" from={276 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={46}/></Sequence>
+<Sequence name="04:42 一块木头，三个奖杯" from={282 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={47}/></Sequence>
+<Sequence name="04:48 升级后发运至六洞穴" from={288 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={48}/></Sequence>
 <Sequence name="04:54 暮色材料汇入十步装配" from={294 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={49}/></Sequence>
 <Sequence name="05:00 工厂之外，同样丰富" from={300 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={50}/></Sequence>
 <Sequence name="05:06 魔法皮蛋：选择效果" from={306 * fps} durationInFrames={6 * fps} premountFor={fps}><PromoScene shotId={51}/></Sequence>

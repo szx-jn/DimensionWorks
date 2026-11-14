@@ -53,9 +53,11 @@ public final class VersionMismatchScreen extends Screen {
         graphics.drawCenteredString(font, Component.literal("服务器版本： " + check.serverText()), width / 2, top + 42, 0xFFFFFFFF);
         graphics.drawCenteredString(font, Component.literal("你的版本： " + check.localText()), width / 2, top + 60, 0xFFFFFFFF);
         if (check.status() != VersionCheck.Status.TOO_OLD) {
-            String help = check.status() == VersionCheck.Status.LOCAL_VERSION_ERROR
-                    ? "请检查游戏根目录 VERSION 文件；详情见日志"
-                    : "请联系管理员检查服务器根目录 VERSION 文件";
+            String help = switch (check.status()) {
+                case TOO_NEW -> "请使用与服务器相同版本的整合包";
+                case LOCAL_VERSION_ERROR -> "请检查游戏根目录 VERSION 文件；详情见日志";
+                default -> "请联系管理员检查服务器根目录 VERSION 文件";
+            };
             graphics.drawCenteredString(font, Component.literal(help), width / 2, top + 84, 0xFFFFAA00);
         }
         if (!status.isEmpty()) {

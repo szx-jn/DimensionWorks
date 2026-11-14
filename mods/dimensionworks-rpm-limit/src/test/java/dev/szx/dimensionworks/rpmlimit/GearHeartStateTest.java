@@ -28,7 +28,7 @@ class GearHeartStateTest {
     void seventhRepairCompletesTheMask() {
         assertTrue(GearHeartState.isFullyReleasedMask(0b1111111));
         assertFalse(GearHeartState.isFullyReleasedMask(0b0111111));
-        assertEquals(0b0101010, GearHeartState.normalizeLegacyMask(0b10101010));
+        assertEquals(0b0101010, GearHeartState.normalizeMask(0b10101010));
     }
 
     @Test

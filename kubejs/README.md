@@ -1,5 +1,9 @@
 # KubeJS
 
+## 当前固定模组的数据修正
+
+`server_scripts/pack_resource_corrections.js` 移除导致现有食物标签加载失败的未注册项。`data/culturaldelights/loot_tables` 用当前 `minecraft:any_of` 条件恢复两种牛油果叶的剪刀、精准采集和自然掉落。`data/farmersrespite` 恢复茶壶掉落及流体 NBT，并用原版动作条件实现修剪进度；女仆存储和下界万象进度使用当前注册的物品、效果名称。对应整包运行结果见[本次验证记录](../docs/validation/2026-11-14-compat-cleanup-and-dispatch.md)。
+
 存放 DimensionWorks 的 KubeJS 脚本、配方、标签和数据。
 
 建议结构：
@@ -12,7 +16,7 @@
 
 ## ME 动力路线配方
 
-`server_scripts/me_memory.js` 提供 20 种正常卡配方、16 种四卡逐级升级配方和五代驱动器配方。DDR1 使用工程处理器与强化合金；后续驱动器用一台前代驱动器、四个对应电路和四个合金升级。升级回调保留原驱动器的内存卡 NBT 并删除旧 `StoredSu`；保留的旧代卡须另行升级至同代才生效。普通 DDR5 卡不再使用反物质。
+`server_scripts/me_memory.js` 提供 20 种正常卡配方、16 种四卡逐级升级配方和五代驱动器配方。DDR1 使用工程处理器与强化合金；后续驱动器用一台前代驱动器、四个对应电路和四个合金升级。升级回调保留原驱动器的内存卡 NBT；保留的前代卡须另行升级至同代才生效。普通 DDR5 卡不再使用反物质。
 
 `data/dimensionworks/recipes/advanced_speed_controller.json` 保留 5×5 动力合成图案，将原四个粉碎轮和四个电子管分别换为四个工程处理器、四个强化合金，使两条路线共用中后期工业材料。实时 SU/RPM 规则见 [`../docs/design/me-live-stress-network.md`](../docs/design/me-live-stress-network.md)。
 
@@ -49,14 +53,13 @@
 | `kubejs:gear_heart_enchanted` | `0` | 全链释限，不显示工业瓶颈 |
 
 `kubejs:gear_heart` 本身就是带工业瓶颈的物品，不需要手动设置 `CustomModelData`；物品说明会直接列出当前七条工业瓶颈，已破除项在原位置改为绿色效果。
-`kubejs:gear_heart_enchanted` 的旧 `CustomModelData=2` 受损物品会在装备后自动迁移为
-破损态 `kubejs:gear_heart`。`kubejs:gear_heart_repair_fragment_1` 至 `_7` 对应七个固定配方，
+`kubejs:gear_heart_enchanted` 为全链齿轮之心。`kubejs:gear_heart_repair_fragment_1` 至 `_7` 对应七个固定配方，
 右键已装备的破损齿轮之心必须按 1 到 7 的顺序破除七条工业瓶颈。
 
 `data/curios/` 新增专属 `gear_heart` 槽，只接受齿轮之心；装备后由 RPM Limit 模组拦截
 手动取下并设为死亡保留。未完全修复时提供方块与实体交互距离 +2、急迫 II、夜视 I，造成伤害降低 10%；全链状态改为交互距离 +4、急迫 III、夜视 I，造成伤害提高 50%，不叠加原惩罚。伤害按小数倍率结算，不取整。
 
-初始上限为 32 RPM，七次修复依次使用固定档位 512、1,024、2,048、4,096、5,120、8,192、10,240 RPM。第三项立即移除矿物处理次数额度，第四项立即移除 AE2 自动合成并发额度；其他未修复项继续独立生效。物品说明显示当前连续修复阶段及其转速上限，已有存档由 RPM Limit 自动按进度恢复。
+初始上限为 32 RPM，七次修复依次使用固定档位 512、1,024、2,048、4,096、5,120、8,192、10,240 RPM。第三项立即移除矿物处理次数额度，第四项立即移除 AE2 自动合成并发额度；其他未修复项继续独立生效。物品说明显示当前连续修复阶段及其转速上限，当前玩家上限由 RPM Limit 按连续修复进度计算。
 工业额度运行效果与破除位写入同一模组，详见 `mods/dimensionworks-rpm-limit/README.md`。
 
 贴图生成流程见 `scripts/README.md`。

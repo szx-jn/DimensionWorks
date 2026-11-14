@@ -9,7 +9,7 @@
     "dimensionworks_cave_factory:pressure_matrix",
     "dimensionworks_mek_stress:memory_card_ddr5_balanced",
     "dimensionworks_mek_stress:memory_card_ddr5_high_speed",
-    "dimensionworks_mek_stress:memory_card_ddr5_high_storage",
+    "dimensionworks_mek_stress:memory_card_ddr5_low_loss",
     "dimensionworks_mek_stress:memory_drive_ddr5"
   ]
 }

@@ -5,7 +5,15 @@
     {"route":"nether","name":"dimensionworks_transfer.destination.nether","image":"dimensionworks_transfer:textures/gui/destinations/nether.png"},
     {"route":"end","name":"dimensionworks_transfer.destination.end","image":"dimensionworks_transfer:textures/gui/destinations/end.png"},
     {"route":"twilight","name":"dimensionworks_transfer.destination.twilight","image":"dimensionworks_transfer:textures/gui/destinations/twilight.png"},
-    {"route":"alexscaves","name":"dimensionworks_transfer.destination.alexscaves","image":"dimensionworks_transfer:textures/gui/destinations/alexscaves.png","locked":true},
+    {"route":"alexscaves","name":"dimensionworks_transfer.destination.alexscaves","image":"dimensionworks_transfer:textures/gui/destinations/alexscaves.png"},
     {"route":"aether","name":"dimensionworks_transfer.destination.aether","image":"dimensionworks_transfer:textures/gui/destinations/aether.png","locked":true}
+  ],
+  "alex_caves": [
+    {"route":"alex_magnetic_caves","name":"dimensionworks_transfer.destination.magnetic_caves","image":"dimensionworks_transfer:textures/gui/destinations/magnetic_caves.png"},
+    {"route":"alex_primordial_caves","name":"dimensionworks_transfer.destination.primordial_caves","image":"dimensionworks_transfer:textures/gui/destinations/primordial_caves.png"},
+    {"route":"alex_toxic_caves","name":"dimensionworks_transfer.destination.toxic_caves","image":"dimensionworks_transfer:textures/gui/destinations/toxic_caves.png"},
+    {"route":"alex_abyssal_chasm","name":"dimensionworks_transfer.destination.abyssal_chasm","image":"dimensionworks_transfer:textures/gui/destinations/abyssal_chasm.png"},
+    {"route":"alex_forlorn_hollows","name":"dimensionworks_transfer.destination.forlorn_hollows","image":"dimensionworks_transfer:textures/gui/destinations/forlorn_hollows.png"},
+    {"route":"alex_candy_cavity","name":"dimensionworks_transfer.destination.candy_cavity","image":"dimensionworks_transfer:textures/gui/destinations/candy_cavity.png"}
   ]
 }

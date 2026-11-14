@@ -132,31 +132,5 @@ public class LiveStressGameTests {
         });
     }
 
-    @GameTest(template = "empty", timeoutTicks = 200)
-    public static void legacyStoredStressCannotPowerGrid(GameTestHelper helper) {
-        dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.DEFAULT_RPM.set(10240);
-        BlockPos pos = new BlockPos(3, 2, 3);
-        helper.setBlock(pos, block("dimensionworks_mek_stress:memory_drive_ddr1"));
-        helper.setBlock(pos.south(), block("ae2:creative_energy_cell"));
-        helper.setBlock(pos.east(), block("appliedcreate:me_gearbox"));
-        MemoryDriveBlockEntity drive = (MemoryDriveBlockEntity) helper.getBlockEntity(pos);
-        var legacy = drive.saveWithoutMetadata();
-        legacy.putLong("StoredSu", Long.MAX_VALUE);
-        drive.loadTag(legacy);
-        MEGearboxBlockEntity output = (MEGearboxBlockEntity) helper.getBlockEntity(pos.east());
-        output.setMode(MEGearboxBlockEntity.Mode.EXPORT);
-        output.setConfiguredSpeed(16);
-        output.setConfiguredStress(4);
-        helper.runAfterDelay(60, () -> {
-            helper.assertTrue(drive.getMainNode().isActive(), "Legacy drive must be online");
-            var snapshot = drive.getMainNode().getGrid().getService(IMemoryGridService.class).snapshot(0);
-            helper.assertTrue(snapshot.capacitySu() == 0 && snapshot.effectiveCapacitySu() == 0,
-                "Legacy StoredSu must not restore capacity");
-            helper.assertTrue(snapshot.status() == MemoryNetworkStatus.OUTPUT_OVERLOAD,
-                "Zero capacity must report output overload");
-            helper.assertTrue(output.getGeneratedSpeed() == 0, "Legacy stock must never power output");
-            helper.assertTrue(!drive.saveWithoutMetadata().contains("StoredSu"), "Save must retire legacy stock");
-            helper.succeed();
-        });
-    }
+
 }

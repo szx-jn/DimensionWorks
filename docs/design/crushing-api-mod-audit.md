@@ -15,7 +15,7 @@
 | mekanism:crushing | Mekanism 粉碎机 | 单个确定物品结果；其他形式显式报错 |
 | create_enchantment_industry:grinding | Create: Enchantment Industry 机械磨石 | 最多 4 个物品结果；可选一个流体输入或一个流体结果 |
 
-统一入口为 global.DimensionWorksGrinding.register(event, recipe)。global.DimensionWorksCrushing 保留为兼容别名。未来接入其他 mod 机器时，只需注册适配器，不改变调用方的数据模型。
+统一入口为 `global.DimensionWorksGrinding.register(event, recipe)`。各已接入加工设备使用当前配方数据模型，不提供旧名称别名。
 
 Create 的粉碎轮/磨石通过 KubeJS Create 注册；Mekanism 粉碎机通过 KubeJS Mekanism 注册；CEI Grinding 使用它自己的 1.20.1 配方类型 JSON（不是 Create:crushing，也不是 CEI disenchanting）。CEI 1.20.1 GrindingRecipe 的源代码约束是一个物品输入、最多四个物品输出，以及一个流体输入或一个流体输出；两种流体方向不可同时存在。
 

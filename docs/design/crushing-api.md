@@ -2,7 +2,7 @@
 
 ## 调用入口
 
-统一入口为 global.DimensionWorksGrinding.register(event, recipe)，旧名 global.DimensionWorksCrushing 仍指向同一个 API，以兼容既有脚本。
+统一入口为 `global.DimensionWorksGrinding.register(event, recipe)`；只提供当前接口。
 
 一个调用需指定 id、machine、单个物品 ID 或 #tag 输入，以及输出列表。每个输出可指定物品、数量和概率。概率是每个输出项独立判定的概率；例如固定产出 2 个粉末，另有 70% 概率额外产出 1 个粉末，即总量 2 个的概率 30%、3 个的概率 70%。
 

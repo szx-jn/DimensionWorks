@@ -32,7 +32,7 @@ public abstract class CardboardPlaneManagerMixin {
             if (!(value instanceof ResourceKey<?> destination)) return null;
             String sourceId = source.dimension().location().toString();
             String destinationId = destination.location().toString();
-            return DimensionTransportPolicy.legacyTransportAllowed(sourceId, destinationId) ? target : null;
+            return DimensionTransportPolicy.standardTransportAllowed(sourceId, destinationId) ? target : null;
         } catch (ReflectiveOperationException | LinkageError exception) {
             return null;
         }

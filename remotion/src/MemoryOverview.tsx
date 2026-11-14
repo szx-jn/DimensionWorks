@@ -12,7 +12,7 @@ export const CARD_TYPES = [
   {id: "economy", name: "经济型", multiplier: "0.5×", loss: "2%", color: "#96bcab"},
   {id: "balanced", name: "均衡型", multiplier: "1×", loss: "1.5%", color: "#83bed6"},
   {id: "high_speed", name: "高速型", multiplier: "2×", loss: "1.75%", color: "#d8b67b"},
-  {id: "high_storage", name: "低损耗型", multiplier: "0.5×", loss: "0.75%", color: "#b6a2d7"},
+  {id: "low_loss", name: "低损耗型", multiplier: "0.5×", loss: "0.75%", color: "#b6a2d7"},
   {id: "defective", name: "劣质型", multiplier: "0.25×", loss: "20%", color: "#d59688"},
   {id: "final", name: "最终型", multiplier: "4×", loss: "0%", color: "#e0d9b3"},
 ];

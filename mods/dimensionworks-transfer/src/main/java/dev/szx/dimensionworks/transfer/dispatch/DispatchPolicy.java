@@ -18,4 +18,11 @@ public final class DispatchPolicy {
         if (!available) return Decision.UNAVAILABLE;
         return Decision.ALLOWED;
     }
+
+    public static boolean routeAllowed(String route, boolean alexCavesUnlocked) {
+        return switch (route) {
+            case "overworld", "nether", "end", "twilight" -> true;
+            default -> alexCavesUnlocked && AlexCavesDestination.fromRoute(route) != null;
+        };
+    }
 }

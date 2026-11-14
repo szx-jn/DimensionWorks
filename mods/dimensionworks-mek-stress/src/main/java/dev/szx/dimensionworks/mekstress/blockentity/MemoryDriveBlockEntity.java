@@ -100,13 +100,6 @@ public final class MemoryDriveBlockEntity extends AENetworkInvBlockEntity {
     public void loadTag(CompoundTag tag) {
         super.loadTag(tag);
         refreshCards();
-        // Old StoredSu represented energy. Live mechanical capacity is never restored from NBT.
-    }
-
-    @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.remove("StoredSu");
     }
 
     public MemoryTier tier() {

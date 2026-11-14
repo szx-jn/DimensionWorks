@@ -27,10 +27,6 @@ class Canvas:
 
 NAVY=(18,31,50); EDGE=(37,57,79); SHADOW=(48,64,86); METAL=(91,105,128); LIGHT=(135,148,169); HI=(172,183,197); CYAN=(40,210,235); GLOW=(113,244,250)
 DDR_ACCENTS=[(53,130,238),(45,177,207),(54,205,190),(58,220,219),(97,232,230)]
-TYPES={
- "defective":((102,111,125),(151,159,169)), "economy":((16,143,121),(52,210,177)),
- "balanced":((21,153,204),(49,218,239)), "high_speed":((191,34,156),(246,64,198)),
- "high_storage":((113,54,201),(177,105,249)), "final":((226,162,40),(255,222,100))}
 
 def drive(level):
     c=Canvas(color=(*NAVY,255)); a=DDR_ACCENTS[level-1]
@@ -129,33 +125,6 @@ def extract_card(concept, x):
     result.alpha_composite(crop,((64-crop.width)//2,(64-crop.height)//2))
     return result
 
-def card(ddr, kind):
-    c=Canvas(); accent,chip=TYPES[kind]; da=DDR_ACCENTS[ddr-1]
-    # Card silhouette and silver bevel; proportions follow the selected image.
-    c.rect(3,0,12,0,NAVY); c.rect(2,1,13,1,NAVY); c.rect(1,2,14,12,NAVY)
-    c.rect(2,2,13,11,SHADOW); c.rect(3,2,12,2,METAL); c.rect(2,3,2,10,METAL); c.rect(13,3,13,10,EDGE)
-    c.rect(3,3,12,10,(24,43,61)); c.rect(4,3,11,3,EDGE)
-    # card family is carried by corner circuitry / rails, DDR generation by a tiny top edge marker.
-    c.rect(4,4,4,5,accent); c.rect(11,4,11,5,accent); c.rect(4,8,4,9,accent); c.rect(11,8,11,9,accent)
-    c.rect(7,2,8,2,da)
-    # colored traces, intentionally sparse at 16px resolution
-    c.px(5,5,accent); c.px(5,6,accent); c.px(6,6,accent); c.px(10,5,accent); c.px(10,6,accent); c.px(9,6,accent)
-    # central chip and metallic socket
-    c.rect(5,6,10,9,EDGE); c.rect(6,6,9,9,METAL); c.rect(6,7,9,8,chip); c.px(6,7,GLOW)
-    # five gold contacts along the short edge
-    c.rect(3,12,12,12,NAVY)
-    for x in (3,5,7,9,11):
-        c.rect(x,13,x+1,14,(224,164,61)); c.px(x,13,(255,213,105))
-    c.rect(4,15,11,15,NAVY)
-    if kind == "defective":
-        c.px(9,7,(72,76,82)); c.px(10,8,(72,76,82)); c.px(5,4,(84,89,97))
-    if kind == "economy": c.px(8,5,accent)
-    if kind == "high_speed": c.rect(5,3,5,4,accent); c.rect(10,3,10,4,accent)
-    if kind == "high_storage": c.rect(6,5,9,5,accent)
-    if kind == "final":
-        for x in (4,11): c.px(x,3,(255,211,91))
-    return c
-
 def main():
     block=ASSET/"textures/block"; item=ASSET/"textures/item"; models=ASSET/"models"
     # The accepted concept image is RGB with a checkerboard baked into the background.
@@ -163,7 +132,7 @@ def main():
     concept=ROOT/"scripts/assets/memory_cards_reference.png"
     if not concept.exists(): raise SystemExit(f"Missing approved concept image: {concept}")
     reference=Image.open(concept)
-    card_x={"defective":80,"economy":360,"balanced":640,"high_speed":920,"high_storage":1200,"final":1480}
+    card_x={"defective":80,"economy":360,"balanced":640,"high_speed":920,"low_loss":1200,"final":1480}
     cards={kind:extract_card(reference,x) for kind,x in card_x.items()}
     for d in range(1,6):
         drive(d).save(block/f"memory_drive_ddr{d}_front.png")

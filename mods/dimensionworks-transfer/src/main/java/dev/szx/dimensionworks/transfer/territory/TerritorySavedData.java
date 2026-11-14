@@ -18,6 +18,7 @@ public class TerritorySavedData extends SavedData {
     private int nextSpiralIndex;
     private final Map<UUID, Territory> territories = new HashMap<>();
     private final Set<UUID> completed = new HashSet<>();
+    private final Set<UUID> alexCavesUnlocked = new HashSet<>();
 
     public static TerritorySavedData get(ServerLevel level) {
         return level.getDataStorage()
@@ -41,6 +42,9 @@ public class TerritorySavedData extends SavedData {
             if (entry.getBoolean("Completed")) {
                 data.completed.add(id);
             }
+            if (entry.getBoolean("AlexCavesUnlocked")) {
+                data.alexCavesUnlocked.add(id);
+            }
         }
         return data;
     }
@@ -57,6 +61,7 @@ public class TerritorySavedData extends SavedData {
             entry.putInt("GridX", territory.gridX());
             entry.putInt("GridZ", territory.gridZ());
             entry.putBoolean("Completed", completed.contains(id));
+            entry.putBoolean("AlexCavesUnlocked", alexCavesUnlocked.contains(id));
             list.add(entry);
         });
         tag.put("Territories", list);
@@ -90,6 +95,14 @@ public class TerritorySavedData extends SavedData {
         if (completed.add(player)) {
             setDirty();
         }
+    }
+
+    public boolean alexCavesUnlocked(UUID player) {
+        return alexCavesUnlocked.contains(player);
+    }
+
+    public void unlockAlexCaves(UUID player) {
+        if (alexCavesUnlocked.add(player)) setDirty();
     }
 
     private static UUID parseUuid(String raw) {

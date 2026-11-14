@@ -26,7 +26,6 @@ class CrushingApiTest(unittest.TestCase):
         self.assertIn("adapters['create:milling']", self.api)
         self.assertIn("adapters['mekanism:crushing']", self.api)
         self.assertIn("global.DimensionWorksGrinding = api", self.api)
-        self.assertIn("global.DimensionWorksCrushing = api", self.api)
         self.assertIn("registerAdapter: registerAdapter", self.api)
 
     def test_create_supports_independent_chance_outputs(self) -> None:

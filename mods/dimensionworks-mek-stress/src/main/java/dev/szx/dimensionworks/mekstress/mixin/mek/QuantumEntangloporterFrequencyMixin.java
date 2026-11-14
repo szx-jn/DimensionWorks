@@ -34,7 +34,7 @@ public abstract class QuantumEntangloporterFrequencyMixin implements QuantumEnta
         for (TileEntityQuantumEntangloporter other : activeQEs.values()) {
             if (other == candidate || other.getLevel() == null) continue;
             String otherDimension = other.getLevel().dimension().location().toString();
-            if (!DimensionTransportPolicy.legacyTransportAllowed(dimension, otherDimension)) {
+            if (!DimensionTransportPolicy.standardTransportAllowed(dimension, otherDimension)) {
                 cir.setReturnValue(false);
                 return;
             }

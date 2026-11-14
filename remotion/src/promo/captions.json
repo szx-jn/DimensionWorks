@@ -252,9 +252,9 @@
     "confidence": null
   },
   {
-    "text": "直见天空的熔融金属，三十秒后结晶，仍能流动。",
+    "text": "露天金属和敞口工作盆，连续三十秒后结晶，仍保持液态。",
     "startMs": 210180,
-    "endMs": 214334,
+    "endMs": 215381,
     "timestampMs": null,
     "confidence": null
   },
@@ -329,23 +329,30 @@
     "confidence": null
   },
   {
-    "text": "根系接触床、树叶、水与腐殖料，共同支撑林地浸出。",
+    "text": "暮色提供弹力打包工具，以及开放六洞穴的终端升级卡。",
     "startMs": 276180,
-    "endMs": 280826,
+    "endMs": 280502,
     "timestampMs": null,
     "confidence": null
   },
   {
-    "text": "两只野猪参与调理，供料、工位与休息都要协调。",
+    "text": "一块暮色木头，加任意三个Boss奖杯，无序合成；",
     "startMs": 282180,
-    "endMs": 286235,
+    "endMs": 286059,
     "timestampMs": null,
     "confidence": null
   },
   {
-    "text": "原液再加工为框架和滤芯，通过增加工序，改善后续材料回收。",
+    "text": "奖杯允许重复。",
+    "startMs": 286059,
+    "endMs": 287229,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "安装升级卡后，在六洞穴页面选择目的地，抵达后解包。",
     "startMs": 288180,
-    "endMs": 293533,
+    "endMs": 292794,
     "timestampMs": null,
     "confidence": null
   },
@@ -406,9 +413,16 @@
     "confidence": null
   },
   {
-    "text": "天境和六洞穴仍受限制，长期生产体系继续建设。",
+    "text": "终端升级开放六洞穴，天境仍受限；",
     "startMs": 336180,
-    "endMs": 340385,
+    "endMs": 339207,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "工业体系继续建设。",
+    "startMs": 339207,
+    "endMs": 340684,
     "timestampMs": null,
     "confidence": null
   },

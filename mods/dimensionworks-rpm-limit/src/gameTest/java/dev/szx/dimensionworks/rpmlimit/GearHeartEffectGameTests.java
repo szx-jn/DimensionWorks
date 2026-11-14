@@ -237,23 +237,4 @@ public class GearHeartEffectGameTests {
             h.succeed();
         } finally { close(p); }
     }
-
-    @GameTest(template="empty")
-    public static void legacyEnchantedPlaceholderMigratesWithoutFullReleaseBonuses(GameTestHelper h) {
-        var p = equipped(h, new RecordingConnection());
-        try {
-            var legacy = GearHeartState.finalizeRepair(heart(p));
-            legacy.getOrCreateTag().putInt("CustomModelData", 2);
-            GearHeartState.setRepairedMask(legacy, 0b0000011);
-            equip(p, legacy);
-            h.assertTrue(GearHeartState.isNormalGearHeart(heart(p)) && !GearHeartState.isFullyReleased(heart(p)),
-                "Legacy enchanted placeholder must migrate to the damaged item");
-            h.assertTrue(RpmLimitManager.getEffectiveLimit(p.getUUID()) == 1024
-                && p.getEffect(MobEffects.DIG_SPEED).getAmplifier() == 1,
-                "Legacy placeholder must receive only its actual repaired-stage RPM and base haste");
-            near(h, GearHeartEffects.outgoingDamageMultiplier(p), 0.9D,
-                "Legacy placeholder must not receive the full-release damage bonus");
-            h.succeed();
-        } finally { close(p); }
-    }
 }

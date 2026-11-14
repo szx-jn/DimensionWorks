@@ -1,5 +1,5 @@
 // DimensionWorks：高中化学核心气体的 Mekanism 获取链
-// 所有配方使用 Mekanism 10.4.16.80（1.20.1）的旧版 camelCase JSON 字段。
+// 所有配方使用当前固定版本 Mekanism 10.4.16.80（1.20.1）的 camelCase JSON 字段。
 // 新气体由 startup_scripts/chemistry_gases.js 注册。
 
 ServerEvents.recipes(event => {

@@ -13,22 +13,22 @@ import org.junit.jupiter.api.Test;
 
 class MemoryCardPackContractTest {
     private static final String[] TYPES = {
-        "economy", "balanced", "high_speed", "high_storage", "defective", "final"
+        "economy", "balanced", "high_speed", "low_loss", "defective", "final"
     };
 
     @Test
-    void registersThirtyModelsLangEntriesAndSixOverlays() throws IOException {
+    void registersThirtyModelsLangEntriesAndCardTextures() throws IOException {
         Path models = Path.of("src/main/resources/assets/dimensionworks_mek_stress/models/item");
         try (var files = Files.list(models)) {
             assertEquals(30, files
-                .filter(path -> path.getFileName().toString().matches("memory_card_ddr[1-5]_(economy|balanced|high_speed|high_storage|defective|final)\\.json"))
+                .filter(path -> path.getFileName().toString().matches("memory_card_ddr[1-5]_(economy|balanced|high_speed|low_loss|defective|final)\\.json"))
                 .count());
         }
 
         Path textures = Path.of("src/main/resources/assets/dimensionworks_mek_stress/textures/item");
         try (var files = Files.list(textures)) {
-            assertEquals(6, files
-                .filter(path -> path.getFileName().toString().matches("memory_card_(economy|balanced|high_speed|high_storage|defective|final)_overlay\\.png"))
+            assertEquals(30, files
+                .filter(path -> path.getFileName().toString().matches("memory_card_ddr[1-5]_(economy|balanced|high_speed|low_loss|defective|final)\\.png"))
                 .count());
         }
 
@@ -59,13 +59,9 @@ class MemoryCardPackContractTest {
     }
 
     @Test
-    void registersNewIdsAndKeepsLegacyMigrationAndFakePlayerGuard() throws IOException {
+    void registersCurrentIdsAndKeepsFakePlayerGuard() throws IOException {
         String registry = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/DimensionWorksMekStress.java"));
-        String migration = Files.readString(Path.of(
-            "src/main/java/dev/szx/dimensionworks/mekstress/memory/MemoryLegacyMigration.java"));
-        String migrationLogic = Files.readString(Path.of(
-            "src/main/java/dev/szx/dimensionworks/mekstress/core/MemoryCardMigration.java"));
         String crafting = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/card/MemoryCardCraftingHandler.java"));
         String craftingMenuMixin = Files.readString(Path.of(
@@ -75,12 +71,6 @@ class MemoryCardPackContractTest {
 
         assertTrue(registry.contains("for (MemoryCardType cardType : MemoryCardType.values())"));
         assertFalse(registry.contains("String cardName = \"memory_card_ddr\" + tier.index();"));
-        assertTrue(migration.contains("onMissingMappings"));
-        assertTrue(migration.contains("MemoryCardMigration.legacyMapping"));
-        assertTrue(migration.contains("Defer capability discovery until a later server tick"));
-        assertTrue(migration.contains("blockEntity.getLevel() == level"));
-        assertFalse(migration.contains("hasItemStorage(blockEntity)"));
-        assertTrue(migrationLogic.contains("MemoryCardType.BALANCED"));
         assertTrue(crafting.contains("player instanceof FakePlayer"));
         assertTrue(crafting.contains("player.drop(stack, false)"));
         assertTrue(crafting.contains("int converted = removeNormalCards(player, pending.card, remainingDefects)"));

@@ -24,7 +24,7 @@ public abstract class QuantumEntangloporterTileMixin {
         Map<Coord4D, TileEntityQuantumEntangloporter> active = access.dimensionworks$activeEntangloporters();
         for (TileEntityQuantumEntangloporter other : active.values()) {
             if (other == self || other.getLevel() == null) continue;
-            if (!DimensionTransportPolicy.legacyTransportAllowed(
+            if (!DimensionTransportPolicy.standardTransportAllowed(
                 dimension, other.getLevel().dimension().location().toString())) {
                 cir.setReturnValue(null);
                 return;

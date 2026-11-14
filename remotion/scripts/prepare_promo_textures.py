@@ -78,6 +78,10 @@ def main():
         'vibration_front': 'block/vibration_chamber_front',
         'engineering_processor': 'item/engineering_processor',
     })
+    archive('twilightforest-1.20.1-4.3.2508*.jar', 'twilightforest', {
+        'twilight_oak_log': 'block/twilight_oak_log',
+        'naga_trophy': 'item/naga_trophy',
+    })
     vanilla_files = sorted((args.minecraft / 'libraries/net/minecraft/client').glob(
         '1.20.1-*/*-extra.jar'))
     if len(vanilla_files) != 1:
@@ -100,8 +104,7 @@ def main():
     }
     for mod, namespace, names, category in [
         ('pressure-crystals', 'pressure_crystals', ['low_pressure_crystal', 'medium_pressure_crystal', 'high_pressure_crystal'], 'item'),
-        ('cave-factory', 'cave_factory', ['forest_resin', 'root_fiber', 'forest_filter', 'ironwood_frame', 'mature_humus'], 'item'),
-        ('cave-factory', 'cave_factory', ['forest_leacher_top', 'boar_conditioner_top', 'twilight_casing'], 'block'),
+        ('transfer', 'transfer', ['twilight_dispatch_upgrade'], 'item'),
         ('mek-stress', 'mek_stress', ['matter_ball'], 'item'),
     ]:
         for name in names:

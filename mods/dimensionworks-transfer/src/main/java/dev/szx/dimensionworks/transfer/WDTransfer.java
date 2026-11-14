@@ -25,6 +25,7 @@ public final class WDTransfer {
         TransferNetwork.register();
         dev.szx.dimensionworks.transfer.elastic.ElasticNetwork.register();
         dev.szx.dimensionworks.transfer.elastic.ElasticItems.ITEMS.register(modEventBus);
+        dev.szx.dimensionworks.transfer.dispatch.DispatchItems.ITEMS.register(modEventBus);
         DispatchBlocks.BLOCKS.register(modEventBus);
         ModChunkGenerators.CHUNK_GENERATORS.register(modEventBus);
         LOGGER.info("DimensionWorks Transfer loaded");

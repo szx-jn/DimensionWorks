@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -323,108 +322,6 @@ func TestDownloadLimitStopsOversizedBody(t *testing.T) {
 	}
 }
 
-func TestSequentialDownloadResumesFromSavedRange(t *testing.T) {
-	var first atomic.Bool
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("ETag", "\"stable-v1\"")
-		if r.Header.Get("Range") == "bytes=4-" {
-			w.Header().Set("Content-Range", "bytes 4-9/10")
-			w.Header().Set("Content-Length", "6")
-			w.WriteHeader(http.StatusPartialContent)
-			_, _ = w.Write([]byte("ghijkl"))
-			return
-		}
-		first.Store(true)
-		w.Header().Set("Content-Length", "10")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("abcd"))
-		if flusher, ok := w.(http.Flusher); ok { flusher.Flush() }
-		<-r.Context().Done()
-	}))
-	defer server.Close()
-	cache := t.TempDir()
-	oldCache := downloadCacheRoot
-	downloadCacheRoot = cache
-	defer func(){ downloadCacheRoot = oldCache }()
-	destination := filepath.Join(t.TempDir(), "payload.bin")
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
-	if err := downloadSequential(ctx, server.URL, destination, 1024); err == nil {
-		t.Fatal("first transfer should stop after its context expires")
-	}
-	if !first.Load() { t.Fatal("initial full download request was not made") }
-	part, metaPath, err := downloadResumePaths(server.URL, destination)
-	if err != nil { t.Fatal(err) }
-	info, err := os.Stat(part)
-	if err != nil { t.Fatalf("partial data was not retained: %v", err) }
-	if info.Size() != 4 { t.Fatalf("expected 4 retained bytes, got %d", info.Size()) }
-	if _, err := os.Stat(metaPath); err != nil { t.Fatalf("resume metadata was not retained: %v", err) }
-	if err := downloadSequential(context.Background(), server.URL, destination, 1024); err != nil {
-		t.Fatalf("resume failed: %v", err)
-	}
-	data, err := os.ReadFile(destination)
-	if err != nil { t.Fatal(err) }
-	if string(data) != "abcdghijkl" { t.Fatalf("resumed content mismatch: %q", data) }
-	if _, err := os.Stat(metaPath); !os.IsNotExist(err) { t.Fatalf("resume metadata should be removed after success: %v", err) }
-}
-
-func TestRangedDownloadResumesCompletedSegmentsAfterRestart(t *testing.T) {
-	data := bytes.Repeat([]byte("dimensionworks"), int((parallelDownloadThreshold+4096)/14+1))
-	var failed atomic.Bool
-	failed.Store(true)
-	var segmentRequests atomic.Int64
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("ETag", "\"range-v1\"")
-		rangeValue := r.Header.Get("Range")
-		if rangeValue == "bytes=0-0" {
-			w.Header().Set("Content-Range", fmt.Sprintf("bytes 0-0/%d", len(data)))
-			w.Header().Set("Content-Length", "1")
-			w.WriteHeader(http.StatusPartialContent)
-			_, _ = w.Write(data[:1])
-			return
-		}
-		segmentRequests.Add(1)
-		if failed.Load() && strings.HasPrefix(rangeValue, "bytes=0-") {
-			time.Sleep(100 * time.Millisecond)
-			w.WriteHeader(http.StatusBadGateway)
-			return
-		}
-		var begin, end int
-		if _, err := fmt.Sscanf(rangeValue, "bytes=%d-%d", &begin, &end); err != nil || begin < 0 || end >= len(data) || begin > end {
-			http.Error(w, "bad range", http.StatusBadRequest)
-			return
-		}
-		body := data[begin:end+1]
-		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin, end, len(data)))
-		w.Header().Set("Content-Length", fmt.Sprint(len(body)))
-		w.WriteHeader(http.StatusPartialContent)
-		_, _ = w.Write(body)
-	}))
-	defer server.Close()
-	cache := t.TempDir()
-	oldCache := downloadCacheRoot
-	downloadCacheRoot = cache
-	defer func(){ downloadCacheRoot = oldCache }()
-	destination := filepath.Join(t.TempDir(), "package.zip")
-	if err := downloadRanged(context.Background(), server.URL, destination, int64(len(data))); err == nil {
-		t.Fatal("first ranged attempt should exhaust retries")
-	}
-	cached, err := filepath.Glob(filepath.Join(cache, "*.part"))
-	if err != nil { t.Fatal(err) }
-	if len(cached) == 0 { t.Fatal("completed segments were not persisted") }
-	before := segmentRequests.Load()
-	failed.Store(false)
-	if err := downloadRanged(context.Background(), server.URL, destination, int64(len(data))); err != nil {
-		t.Fatalf("second ranged attempt should resume: %v", err)
-	}
-	if segmentRequests.Load()-before != 1 {
-		t.Fatal("resume redownloaded every segment instead of reusing completed ones")
-	}
-	got, err := os.ReadFile(destination)
-	if err != nil { t.Fatal(err) }
-	if !bytes.Equal(got, data) { t.Fatal("resumed archive content does not match source") }
-}
-
 func TestCopyFileAtomicPreservesDestinationOnLimitFailure(t *testing.T) {
 	root := t.TempDir()
 	source := filepath.Join(root, "source.bin")
@@ -470,15 +367,15 @@ func TestReadStateRejectsTampering(t *testing.T) {
 	}
 }
 
-func TestReadStateLegacyManifestFallsBackToRescan(t *testing.T) {
+func TestReadStateRejectsUnsignedManifest(t *testing.T) {
 	root := t.TempDir()
 	updateRoot := filepath.Join(root, ".dimensionworks-update")
 	if err := os.MkdirAll(updateRoot, 0700); err != nil { t.Fatal(err) }
 	statePath := filepath.Join(updateRoot, "state.tsv")
 	if err := os.WriteFile(statePath, manifestBytes("client", "0.2.1", "v0.2.0", nil), 0600); err != nil { t.Fatal(err) }
-	state, err := readState(root, statePath, "client")
-	if err != nil { t.Fatal(err) }
-	if state != nil { t.Fatal("unsigned legacy state must be ignored and rebuilt from local files") }
+	if _, err := readState(root, statePath, "client"); err == nil || !strings.Contains(err.Error(), "缺少签名") {
+		t.Fatalf("unsigned state must be rejected: %v", err)
+	}
 }
 
 func TestLoadOrCreateStateKeyPersistsStableKey(t *testing.T) {
@@ -490,7 +387,7 @@ func TestLoadOrCreateStateKeyPersistsStableKey(t *testing.T) {
 	if len(first) != 32 || !bytes.Equal(first, second) { t.Fatal("state key was not stable across reads") }
 }
 
-func TestLegacyStateMigrationBacksUpPreviouslyUntrackedTargets(t *testing.T) {
+func TestFirstUpdateBacksUpPreviouslyUntrackedTargets(t *testing.T) {
 	root := t.TempDir()
 	updateRoot := filepath.Join(root, ".dimensionworks-update")
 	if err := os.MkdirAll(updateRoot, 0700); err != nil { t.Fatal(err) }
@@ -503,10 +400,10 @@ func TestLegacyStateMigrationBacksUpPreviouslyUntrackedTargets(t *testing.T) {
 	selected := []Entry{{Action: "archive", Path: rel, Algorithm: "sha256", Value: sha256Text("new-pack-default"), Source: rel}}
 	backupDir, err := backupModifiedFiles(root, updateRoot, current, selected, true)
 	if err != nil { t.Fatal(err) }
-	if backupDir == "" { t.Fatal("legacy migration should back up an existing target not present in old state") }
+	if backupDir == "" { t.Fatal("first update must back up an untracked existing target") }
 	backup, err := os.ReadFile(filepath.Join(backupDir, filepath.FromSlash(rel)))
 	if err != nil { t.Fatal(err) }
-	if string(backup) != "user-owned-settings" { t.Fatalf("legacy backup content mismatch: %q", backup) }
+	if string(backup) != "user-owned-settings" { t.Fatalf("initial backup content mismatch: %q", backup) }
 }
 
 func TestRecoverInterruptedTransactionsCleansUncommittedWorkDirectories(t *testing.T) {
@@ -736,89 +633,6 @@ func TestHTTPClientRejectsHTTPSDowngradeRedirect(t *testing.T) {
 	if err == nil { t.Fatal("expected HTTPS-to-HTTP redirect to be rejected") }
 }
 
-func TestDownloadRangedUsesConcurrentValidatedSegments(t *testing.T) {
-	data := bytes.Repeat([]byte("DimensionWorks-parallel-download-check\x00"), (9<<20)/39+1)
-	data = data[:9<<20]
-	var active, peak atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rangeHeader := r.Header.Get("Range")
-		if rangeHeader == "" {
-			w.Header().Set("Content-Length", fmt.Sprint(len(data)))
-			_, _ = w.Write(data)
-			return
-		}
-		var begin, end int
-		if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-%d", &begin, &end); err != nil || begin < 0 || end < begin || end >= len(data) {
-			http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
-			return
-		}
-		current := active.Add(1)
-		for {
-			old := peak.Load()
-			if current <= old || peak.CompareAndSwap(old, current) { break }
-		}
-		defer active.Add(-1)
-		time.Sleep(15 * time.Millisecond)
-		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin, end, len(data)))
-		w.Header().Set("Content-Length", fmt.Sprint(end-begin+1))
-		w.WriteHeader(http.StatusPartialContent)
-		_, _ = w.Write(data[begin : end+1])
-	}))
-	defer server.Close()
-
-	destination := filepath.Join(t.TempDir(), "download.bin")
-	if err := downloadGoForTest(server.URL, destination); err != nil {
-		t.Fatalf("ranged download failed: %v", err)
-	}
-	got, err := os.ReadFile(destination)
-	if err != nil { t.Fatal(err) }
-	if !bytes.Equal(got, data) { t.Fatal("downloaded content differs from source") }
-	if peak.Load() < 2 { t.Fatalf("expected concurrent range requests, peak concurrency=%d", peak.Load()) }
-	matches, err := filepath.Glob(destination + ".segment-*")
-	if err != nil { t.Fatal(err) }
-	if len(matches) != 0 { t.Fatalf("temporary segment files were not cleaned: %v", matches) }
-}
-
-
-func TestDownloadRangedFallsBackOnInvalidContentRange(t *testing.T) {
-	data := bytes.Repeat([]byte("invalid-range-fallback"), (9<<20)/22+1)
-	data = data[:9<<20]
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rangeHeader := r.Header.Get("Range")
-		if rangeHeader == "" {
-			w.Header().Set("Content-Length", fmt.Sprint(len(data)))
-			_, _ = w.Write(data)
-			return
-		}
-		var begin, end int
-		if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-%d", &begin, &end); err != nil || end >= len(data) {
-			http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
-			return
-		}
-		w.Header().Set("Content-Length", fmt.Sprint(end-begin+1))
-		if begin == 0 && end == 0 {
-			w.Header().Set("Content-Range", fmt.Sprintf("bytes 0-0/%d", len(data)))
-		} else {
-			// The probe succeeds, but segment headers lie about the requested byte offsets.
-			w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", begin+1, end+1, len(data)))
-		}
-		w.WriteHeader(http.StatusPartialContent)
-		_, _ = w.Write(data[begin : end+1])
-	}))
-	defer server.Close()
-
-	destination := filepath.Join(t.TempDir(), "invalid-range.bin")
-	if err := downloadGoForTest(server.URL, destination); err != nil {
-		t.Fatalf("download should fall back after invalid Content-Range: %v", err)
-	}
-	got, err := os.ReadFile(destination)
-	if err != nil { t.Fatal(err) }
-	if !bytes.Equal(got, data) { t.Fatal("fallback content differs from source") }
-	matches, err := filepath.Glob(destination + ".segment-*")
-	if err != nil { t.Fatal(err) }
-	if len(matches) != 0 { t.Fatalf("invalid segments were not cleaned: %v", matches) }
-}
-
 func TestDownloadVerifiedRejectsDigestMismatchAfterDownload(t *testing.T) {
 	requireBundledAria2(t)
 	data := bytes.Repeat([]byte("integrity-check"), (9<<20)/15+1)
@@ -848,55 +662,6 @@ func TestDownloadVerifiedRejectsDigestMismatchAfterDownload(t *testing.T) {
 	}
 	if _, err := os.Stat(destination); !os.IsNotExist(err) {
 		t.Fatalf("rejected download must be removed, stat error=%v", err)
-	}
-}
-
-func TestDownloadRangedFallsBackWhenServerIgnoresRange(t *testing.T) {
-	data := bytes.Repeat([]byte("fallback"), (9<<20)/8)
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Simulate a server or mirror that ignores Range and always returns 200.
-		w.Header().Set("Content-Length", fmt.Sprint(len(data)))
-		_, _ = w.Write(data)
-	}))
-	defer server.Close()
-
-	destination := filepath.Join(t.TempDir(), "fallback.bin")
-	if err := downloadGoForTest(server.URL, destination); err != nil {
-		t.Fatalf("download should fall back to a single connection: %v", err)
-	}
-	got, err := os.ReadFile(destination)
-	if err != nil { t.Fatal(err) }
-	if !bytes.Equal(got, data) { t.Fatal("fallback content differs from source") }
-	matches, err := filepath.Glob(destination + ".segment-*")
-	if err != nil { t.Fatal(err) }
-	if len(matches) != 0 { t.Fatalf("fallback left temporary segments: %v", matches) }
-}
-
-
-func TestDownloadRangeSegmentReportsProgressAgainstParentFile(t *testing.T) {
-	data := []byte("segment-progress")
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Range", fmt.Sprintf("bytes 0-%d/%d", len(data)-1, len(data)))
-		w.Header().Set("Content-Length", fmt.Sprint(len(data)))
-		w.WriteHeader(http.StatusPartialContent)
-		_, _ = w.Write(data)
-	}))
-	defer server.Close()
-
-	key := filepath.Join(t.TempDir(), "archive.zip")
-	segment := key + ".segment-00"
-	progressBegin(key, "archive.zip")
-	progressSetTotal(key, int64(len(data)))
-	defer progressFinish(key, false)
-
-	if err := downloadRangeSegment(context.Background(), server.URL, segment, key, 0, int64(len(data)-1), int64(len(data)), ""); err != nil {
-		t.Fatalf("downloadRangeSegment failed: %v", err)
-	}
-	downloadProgressUI.mu.Lock()
-	got := downloadProgressUI.files[key].written
-	downloadProgressUI.mu.Unlock()
-	if got != int64(len(data)) {
-		t.Fatalf("parent progress should count segment bytes: got %d, want %d", got, len(data))
 	}
 }
 
@@ -1049,7 +814,7 @@ func TestBackupModifiedFilesBeforeOverwrite(t *testing.T) {
 	current, err := parseManifest(manifestBytes("client", "0.2.3", "v0.2.2", []Entry{previous}), "client")
 	if err != nil { t.Fatal(err) }
 	selected := []Entry{{Action: "archive", Path: rel, Algorithm: "sha256", Value: sha256Text("new-release-content"), Source: rel}}
-	backupDir, err := backupModifiedFiles(root, updateRoot, current, selected)
+	backupDir, err := backupModifiedFiles(root, updateRoot, current, selected, false)
 	if err != nil { t.Fatal(err) }
 	if backupDir == "" { t.Fatal("expected a persistent backup directory") }
 	backup, err := os.ReadFile(filepath.Join(backupDir, filepath.FromSlash(rel)))

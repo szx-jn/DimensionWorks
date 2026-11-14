@@ -32,10 +32,7 @@ public final class GearHeartEffects {
 
     private static final String RPM_SOURCE = "gear_heart:rpm";
     private static final String BONUS_STATE_KEY = "dimensionworks_gear_heart_bonuses";
-    private static final String BONUS_VERSION_KEY = "dimensionworks_gear_heart_bonus_version";
     private static final String BONUS_RELEASED_KEY = "dimensionworks_gear_heart_bonus_released";
-    private static final int BONUS_VERSION = 4;
-    private static final int LEGACY_EFFECT_VERSION = 3;
     private static final FixedIntervalTokenBucket TOKEN_BUCKET = new FixedIntervalTokenBucket();
     private static final Map<UUID, Integer> ACTIVE_QUOTA_MASKS = new ConcurrentHashMap<>();
 
@@ -210,15 +207,6 @@ public final class GearHeartEffects {
             if (!GearHeartState.isGearHeart(stack)) {
                 continue;
             }
-            if (GearHeartState.isLegacyCursed(stack)) {
-                ItemStack migrated = GearHeartState.migrateLegacyCursed(stack);
-                inventory.setEquippedCurio(
-                    result.slotContext().identifier(),
-                    result.slotContext().index(),
-                    migrated
-                );
-                return Optional.of(migrated);
-            }
             return Optional.of(stack);
         }
         return Optional.empty();
@@ -241,8 +229,8 @@ public final class GearHeartEffects {
         int repairedMask = fullyReleased ? GearHeartState.ALL_CURSES : GearHeartState.getRepairedMask(heart);
         int rpm = RpmLimitConfig.gearHeartRotationLimit(repairedMask);
 
-        // Reconcile old saves and every repair stage, including a reopened curse. Explicit
-        // /dw rpm (or API setLimit) values keep their existing priority.
+        // Every repair stage, including a reopened curse, follows its current RPM limit.
+        // Explicit /dw rpm (or API setLimit) values keep their priority.
         if (!RpmLimitManager.hasCommandOverride(player) && RpmLimitApi.getLimit(player) != rpm) {
             RpmLimitManager.setGearHeartDefaultLimit(player, rpm);
         }
@@ -263,19 +251,11 @@ public final class GearHeartEffects {
     }
 
     private static void applyBaseBonuses(ServerPlayer player, boolean fullyReleased) {
-        // Previous releases supplied infinite Luck I. Migrate once, without clearing
-        // finite potion effects or stronger effects supplied by another source.
-        if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)
-            && player.getPersistentData().getInt(BONUS_VERSION_KEY) < LEGACY_EFFECT_VERSION) {
-            removeHeartEffect(player, MobEffects.LUCK, 0);
-            removeHeartEffect(player, MobEffects.WEAKNESS, 0);
-        }
         boolean previouslyReleased = player.getPersistentData().getBoolean(BONUS_RELEASED_KEY);
         if (previouslyReleased != fullyReleased) {
             removeHeartEffect(player, MobEffects.DIG_SPEED, previouslyReleased ? 2 : 1);
         }
         player.getPersistentData().putBoolean(BONUS_STATE_KEY, true);
-        player.getPersistentData().putInt(BONUS_VERSION_KEY, BONUS_VERSION);
         player.getPersistentData().putBoolean(BONUS_RELEASED_KEY, fullyReleased);
         double reach = fullyReleased ? 4.0D : 2.0D;
         addModifier(player, ForgeMod.BLOCK_REACH.get(), BLOCK_REACH_ID, "Gear Heart Block Reach", reach);
@@ -326,13 +306,8 @@ public final class GearHeartEffects {
         if (player.getPersistentData().getBoolean(BONUS_STATE_KEY)) {
             removeHeartEffect(player, MobEffects.DIG_SPEED,
                 player.getPersistentData().getBoolean(BONUS_RELEASED_KEY) ? 2 : 1);
-            removeHeartEffect(player, MobEffects.WEAKNESS, 0);
             removeHeartEffect(player, MobEffects.NIGHT_VISION, 0);
-            if (player.getPersistentData().getInt(BONUS_VERSION_KEY) < LEGACY_EFFECT_VERSION) {
-                removeHeartEffect(player, MobEffects.LUCK, 0);
-            }
             player.getPersistentData().remove(BONUS_STATE_KEY);
-            player.getPersistentData().remove(BONUS_VERSION_KEY);
             player.getPersistentData().remove(BONUS_RELEASED_KEY);
         }
     }
