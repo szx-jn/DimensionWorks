@@ -30,7 +30,7 @@ on:
         required: false
         type: string
       release_other:
-        description: "其他变更；每行一条，如 chore(updater): Linux 仅发布服务端更新器"
+        description: "其他变更；每行一条，如 chore(release): 最新正式版自动同步 BBSMC"
         required: false
         type: string
 permissions:
@@ -39,12 +39,28 @@ permissions:
 jobs:
   release:
     name: 打包客户端与服务端
+    outputs:
+      published_tag: ${{ steps.publish.outputs.tag }}
     concurrency:
       group: dimensionworks-release-${{ github.ref }}
       cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      - name: 检查本次发行说明
+        env:
+          RELEASE_FEATURES: ${{ inputs.release_features }}
+          RELEASE_FIXES: ${{ inputs.release_fixes }}
+          RELEASE_PERFORMANCE: ${{ inputs.release_performance }}
+          RELEASE_OTHER: ${{ inputs.release_other }}
+        run: |
+          python3 - <<'PY'
+          import os
+          keys = ("RELEASE_FEATURES", "RELEASE_FIXES", "RELEASE_PERFORMANCE", "RELEASE_OTHER")
+          if not any(os.environ.get(key, "").strip() for key in keys):
+              raise SystemExit("至少填写一条本次发行说明，GitHub 与 BBSMC 将共用这份更新日志。")
+          PY
+
       - name: 检出仓库代码
         uses: actions/checkout@v4
         with:
@@ -379,6 +395,7 @@ jobs:
           path: dist/*
 
       - name: 发布 GitHub 正式版本
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
           PACK_VERSION: ${{ steps.version.outputs.version }}
@@ -407,10 +424,7 @@ jobs:
                   if line.strip()
               )
           print(f"DimensionWorks v{os.environ['PACK_VERSION']} 版本更新：")
-          if entries:
-              print("\n".join(entries))
-          else:
-            print("更新器：Windows/macOS 客户端及 Windows/Linux/macOS 服务端五个更新器全部单文件内嵌 aria2c；同版提供 GPL 许可证与源码，下载仅使用 aria2c，并提供错误原因、单连接兼容重试和超一小时切源。")
+          print("\n".join(entries))
           if os.environ.get("SKIP_TESTS", "").lower() == "true":
               print("本次按维护者要求跳过测试，仅执行构建及静态产物校验；未进行游戏内登录或迁移验收。")
           PY
@@ -439,6 +453,7 @@ jobs:
             --title "$title" \
             --notes "$notes" \
             "${assets[@]}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: 回写已发布版本号
         env:
@@ -456,3 +471,26 @@ jobs:
             git commit -m "chore(release): record ${TAG}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
+
+  sync-bbsmc:
+    name: 同步最新正式版到 BBSMC
+    needs: release
+    if: ${{ needs.release.result == 'success' && needs.release.outputs.published_tag != '' }}
+    permissions:
+      contents: read
+    concurrency:
+      group: dimensionworks-bbsmc-sync
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 检出同步脚本
+        uses: actions/checkout@v4
+
+      - name: 上传 MRPack 与本次发行日志
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.release.outputs.published_tag }}
+          BBSMC_TOKEN: ${{ secrets.BBSMC_TOKEN }}
+          BBSMC_PROJECT_ID: doVGSZq0
+        run: python3 scripts/sync_bbsmc_release.py --tag "$RELEASE_TAG"

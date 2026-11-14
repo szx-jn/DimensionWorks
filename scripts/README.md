@@ -153,6 +153,29 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 `skip_tests` 默认关闭。维护者明确要求停止测试时，可在手动发行中设为 `true`：自研 Mod 构建使用 `-x test`，跳过 Go 测试、内嵌 aria2 下载测试和 Linux 更新事务运行验证，仍执行打包静态预检、完整构建和产物格式/摘要检查。该状态会自动写入发行说明。钩子通过 `DIMENSIONWORKS_SKIP_TESTS=true` 接收这一构建选项，未设置时保留原流程。
 
+### BBSMC 最新正式版同步
+
+正式发布工作流中的 `sync-bbsmc` 任务只在 GitHub 发布任务成功、且成功创建了本次发行标签后运行。脚本再次查询 GitHub Latest Release，确认本次发行仍是最新的非草稿、非预发布版本；上传前再检查一次，避免下载期间已有更新版本发布。普通提交、推送、PR、独立构建和旧发行版不会触发同步。
+
+发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。仅下载并上传该发行版中唯一的 `DimensionWorks-<版本>.mrpack`，逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge 类型从该 MRPack 索引确定。同步不上传服务端包、增量包、更新清单、更新器或其他发行资产，也不修改 BBSMC 项目简介、图标和其他项目设置。
+
+目标为已有的 [维度工序 BBSMC 项目](https://bbsmc.net/modpack/dimensionworks)，项目 ID `doVGSZq0`。首次启用前，登录后直接打开 [BBSMC 个人访问令牌页面](https://bbsmc.net/settings/pats)（当前设置侧栏隐藏了此入口），创建拥有「创建版本、读取版本」权限的令牌，其所属账号还须具备项目上传权限；将令牌保存在 GitHub 仓库 Actions Secret `BBSMC_TOKEN` 中，不写入代码、日志或聊天。缺少令牌时同步任务明确失败，已成功发布的 GitHub Release 与版本号回写保留。
+
+同步失败后，在该正式发布运行中选择 **Re-run failed jobs**，只补跑失败的同步任务，不重建或重发 GitHub Release。若 BBSMC 已存在相同版本，文件名、SHA-512 与更新日志相同且版本已列出，则直接成功，不重复上传；已有同版本内容不同或尚未列出时停止并报告冲突，不覆盖。若 GitHub 已发布更晚版本，则跳过旧版本补同步。上传请求不会自动重试，避免服务端已完成上传但客户端超时导致重复版本。BBSMC 的审核和账户限额仍由平台控制。
+
+无需令牌即可执行只读验证，命令只读取最新发行、下载 MRPack 并核对版本及更新日志，不创建 BBSMC 版本：
+
+```sh
+GITHUB_REPOSITORY=szx-jn/DimensionWorks BBSMC_PROJECT_ID=doVGSZq0 \
+  python3 scripts/sync_bbsmc_release.py --tag vX.Y.Z --dry-run
+```
+
+定向回归检查：
+
+```sh
+python3 -m unittest discover -s scripts/tests -p 'test_sync_bbsmc_release.py' -v
+```
+
 ## CI 固定 Create 编译依赖
 
 `prepare_create_build_repository.py` 仅允许在 GitHub Actions 中执行。Create Maven 站点证书过期时，从清单固定的 Modrinth Create 6.0.8 原包读取编译依赖；校验固定 SHA-512 和内嵌库版本，将 Flywheel、Ponder、Registrate、MixinExtras 原始 jar 及去掉内嵌依赖的 Create 编译 jar 放入运行器临时 Maven 仓库，并以 Gradle init 脚本限定这些固定坐标的来源。

@@ -9,6 +9,28 @@ WORKFLOW = ROOT / ".github" / "workflows" / "release-pack.yml"
 
 
 class ReleaseWorkflowTest(unittest.TestCase):
+    def test_bbsmc_sync_requires_successful_publish_and_has_no_separate_trigger(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        triggers = text.split("permissions:", 1)[0]
+        self.assertIn("workflow_dispatch:", triggers)
+        for event in ("release:", "push:", "pull_request:", "workflow_run:"):
+            self.assertNotIn(event, triggers)
+        publish = text.split("      - name: 发布 GitHub 正式版本", 1)[1].split(
+            "      - name: 回写已发布版本号", 1,
+        )[0]
+        self.assertIn("id: publish", publish)
+        self.assertLess(publish.index("gh release create"), publish.index('echo "tag=$TAG"'))
+        self.assertIn("published_tag: ${{ steps.publish.outputs.tag }}", text)
+        job = text.split("  sync-bbsmc:", 1)[1]
+        self.assertIn("needs: release", job)
+        self.assertIn("needs.release.result == 'success'", job)
+        self.assertIn("needs.release.outputs.published_tag != ''", job)
+        self.assertIn("contents: read", job)
+        self.assertIn("secrets.BBSMC_TOKEN", job)
+        self.assertIn("RELEASE_TAG: ${{ needs.release.outputs.published_tag }}", job)
+        self.assertIn('sync_bbsmc_release.py --tag "$RELEASE_TAG"', job)
+        self.assertNotIn("package_mrpack.py", job)
+
     def test_workflow_publishes_all_standalone_assets_and_refuses_overwrite(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")
         required = (
