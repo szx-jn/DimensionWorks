@@ -4,13 +4,15 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ElasticChargeTest {
-    @Test void continuousHoldCapsAtThreeSecondsAndReleasesOnce() {
+    @Test void continuousHoldCapsAtTwoSecondsAndReleasesOnce() {
         var charge = new ElasticCharge();
         charge.input(true);
-        for (int i = 0; i < 60; i++) charge.tick(true);
-        assertEquals(60, charge.ticks());
+        for (int i = 0; i < 39; i++) charge.tick(true);
+        assertEquals(39, charge.ticks());
+        charge.tick(true);
+        assertEquals(40, charge.ticks());
         for (int i = 0; i < 200; i++) charge.tick(true);
-        assertEquals(60, charge.input(false));
+        assertEquals(40, charge.input(false));
         assertEquals(0, charge.input(false));
         assertEquals(0, charge.ticks());
     }
@@ -40,11 +42,17 @@ class ElasticChargeTest {
         assertEquals(0, charge.ticks());
     }
 
-    @Test void greaterChargeIncreasesStrengthWithinFixedMaximum() {
+    @Test void partialChargeRetainsOriginalStrengthAtEveryTick() {
         assertEquals(0, ElasticCharge.speed(0));
-        assertTrue(ElasticCharge.speed(20) < ElasticCharge.speed(40));
-        assertTrue(ElasticCharge.speed(40) < ElasticCharge.speed(60));
-        assertEquals(3.7125, ElasticCharge.speed(60), 1e-9);
-        assertEquals(ElasticCharge.speed(60), ElasticCharge.speed(200));
+        for (int ticks = 1; ticks < 40; ticks++) {
+            assertEquals(0.35 + 3.3625 * ticks / 60, ElasticCharge.speed(ticks),
+                "Partial charge strength changed at tick " + ticks);
+        }
+    }
+
+    @Test void onlyFullChargeReceivesFiveTimesPreviousFullStrength() {
+        assertEquals(18.5625, ElasticCharge.speed(40), 1e-9);
+        assertEquals(ElasticCharge.speed(40), ElasticCharge.speed(60));
+        assertEquals(ElasticCharge.speed(40), ElasticCharge.speed(200));
     }
 }

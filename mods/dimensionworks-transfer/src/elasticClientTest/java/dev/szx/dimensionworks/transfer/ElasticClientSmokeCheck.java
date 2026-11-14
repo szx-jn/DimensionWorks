@@ -33,12 +33,19 @@ public final class ElasticClientSmokeCheck {
     private static int ticks;
     private static int renders;
     private static Vec3 releasePosition;
+    private static double peakLaunchSpeed;
     private static long started;
     private static boolean startupCaptured;
 
     @SubscribeEvent(receiveCanceled = true, priority = EventPriority.LOWEST)
     public static void rendered(RenderPlayerEvent.Pre event) {
         if (ElasticParcelState.isElastic(event.getEntity())) renders++;
+    }
+
+    @SubscribeEvent
+    public static void beforeMovement(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && stage == 3 && event.player == Minecraft.getInstance().player)
+            peakLaunchSpeed = Math.max(peakLaunchSpeed, event.player.getDeltaMovement().length());
     }
 
     @SubscribeEvent
@@ -90,6 +97,7 @@ public final class ElasticClientSmokeCheck {
         } else if (stage == 2) {
             ticks++;
             if (ticks == 25) screenshot(mc,"partial-charge.png");
+            // Hold past the cap so client prediction cannot release one server tick early.
             if (ticks >= 60 && goldHud(mc)) {
                 screenshot(mc,"full-charge.png");
                 if(renders==0)throw new AssertionError("Packed-player rendering never ran");
@@ -101,6 +109,8 @@ public final class ElasticClientSmokeCheck {
             if(ticks>120)throw new AssertionError("Full charge never became gold in the rendered HUD");
         } else if (stage == 3) {
             if (++ticks==8) {
+                if (Math.abs(peakLaunchSpeed - 18.5625) > 1e-5)
+                    throw new AssertionError("Client did not receive the full launch velocity before movement: " + peakLaunchSpeed);
                 if(mc.player.position().distanceTo(releasePosition)<2 || mc.player.getY()<=releasePosition.y+.2)
                     throw new AssertionError("Charged look-direction launch did not move the real client: " + mc.player.position() + " from " + releasePosition);
                 screenshot(mc,"launch.png");
@@ -112,8 +122,8 @@ public final class ElasticClientSmokeCheck {
             }
         } else if (stage==4 && ++ticks>=15) {
             if(ElasticParcelState.isElastic(mc.player) || PlayerParcel.isPacked(mc.player))throw new AssertionError("Unpack did not synchronize to client");
-            WDTransfer.LOGGER.info("ELASTIC_CLIENT_CHECK_PASS: identical tool model, parcel render, charge HUD, actual launch and unpack; GUI={}x{}, scale={}",
-                mc.getWindow().getGuiScaledWidth(),mc.getWindow().getGuiScaledHeight(),mc.getWindow().getGuiScale());
+            WDTransfer.LOGGER.info("ELASTIC_CLIENT_CHECK_PASS: identical tool model, parcel render, two-second charge HUD, full launch and unpack; GUI={}x{}, scale={}, peakLaunchSpeed={}",
+                mc.getWindow().getGuiScaledWidth(),mc.getWindow().getGuiScaledHeight(),mc.getWindow().getGuiScale(),peakLaunchSpeed);
             stage=5;mc.stop();
         }
     }

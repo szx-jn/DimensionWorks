@@ -2,7 +2,7 @@ package dev.szx.dimensionworks.transfer.elastic;
 
 /** A charge belongs to one continuous grounded key hold; airborne ticks never accumulate. */
 public final class ElasticCharge {
-    public static final int FULL_TICKS = 60;
+    public static final int FULL_TICKS = 40;
     private boolean pressed;
     private int ticks;
 
@@ -23,6 +23,8 @@ public final class ElasticCharge {
 
     public static double speed(int ticks) {
         if (ticks <= 0) return 0;
-        return 0.35 + 3.3625 * Math.min(ticks, FULL_TICKS) / FULL_TICKS;
+        if (ticks >= FULL_TICKS) return 3.7125 * 5;
+        // Preserve the original per-tick strength until the charge is full.
+        return 0.35 + 3.3625 * ticks / 60;
     }
 }

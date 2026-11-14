@@ -60,7 +60,8 @@ public final class ElasticParcelState {
             Vec3 direction = Vec3.directionFromRotation(net.minecraft.util.Mth.clamp(pitch, -90, 90), yaw);
             player.setDeltaMovement(direction.scale(ElasticCharge.speed(released)));
             player.setOnGround(false);
-            player.connection.send(new ClientboundSetEntityMotionPacket(player));
+            if (released == ElasticCharge.FULL_TICKS) ElasticNetwork.launch(player);
+            else player.connection.send(new ClientboundSetEntityMotionPacket(player));
         }
     }
 

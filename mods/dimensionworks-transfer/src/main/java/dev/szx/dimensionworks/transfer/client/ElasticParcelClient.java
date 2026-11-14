@@ -11,6 +11,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -32,6 +33,12 @@ public final class ElasticParcelClient {
         if (mc.level == null || !(mc.level.getEntity(id) instanceof Player player) || !player.getUUID().equals(uuid)) return;
         ElasticParcelState.setElastic(player, elastic);
         if (!elastic && player == mc.player) reset();
+    }
+
+    public static void launch(UUID uuid, Vec3 velocity) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || !mc.player.getUUID().equals(uuid)) return;
+        mc.player.setDeltaMovement(velocity);
     }
 
     private static void reset() { charge = new ElasticCharge(); pressed = false; }
@@ -74,8 +81,8 @@ public final class ElasticParcelClient {
             int x = left + segment * 42;
             g.fill(x - 1, bottom - 8, x + 41, bottom, 0xC0162414);
             g.fill(x, bottom - 7, x + 40, bottom - 1, 0xB03A4235);
-            int amount = Math.max(0, Math.min(20, charge.ticks() - segment * 20));
-            g.fill(x, bottom - 7, x + amount * 2, bottom - 1, full ? 0xFFFFD45B : colors[segment]);
+            int amount = Math.max(0, Math.min(40, charge.ticks() * 120 / ElasticCharge.FULL_TICKS - segment * 40));
+            g.fill(x, bottom - 7, x + amount, bottom - 1, full ? 0xFFFFD45B : colors[segment]);
         }
     }
 

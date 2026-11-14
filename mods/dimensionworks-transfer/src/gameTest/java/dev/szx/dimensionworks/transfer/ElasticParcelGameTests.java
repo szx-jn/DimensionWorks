@@ -122,16 +122,16 @@ public final class ElasticParcelGameTests {
         try {
             pack(p); p.setOnGround(true);
             ElasticParcelState.input(p,true,-30,90);
-            for(int i=0;i<90;i++) ElasticParcelState.tick(p);
+            for(int i=0;i<40;i++) ElasticParcelState.tick(p);
             ElasticParcelState.input(p,false,-30,90);
-            checkVec(h,p.getDeltaMovement(),Vec3.directionFromRotation(-30,90).scale(3.7125),"Full launch must use look pitch and yaw with fixed cap");
+            checkVec(h,p.getDeltaMovement(),Vec3.directionFromRotation(-30,90).scale(18.5625),"Two-second full launch must use look pitch and yaw with five times the previous full strength");
             p.setDeltaMovement(Vec3.ZERO); p.setOnGround(true);
             ElasticParcelState.input(p,false,-30,90);
             checkVec(h,p.getDeltaMovement(),Vec3.ZERO,"Repeated release must not launch again");
             ElasticParcelState.input(p,true,0,0);
             for(int i=0;i<20;i++) ElasticParcelState.tick(p);
             ElasticParcelState.input(p,false,0,0);
-            checkVec(h,p.getDeltaMovement(),Vec3.directionFromRotation(0,0).scale(ElasticCharge.speed(20)),"Partial charge must be weaker");
+            checkVec(h,p.getDeltaMovement(),Vec3.directionFromRotation(0,0).scale(1.4708333333333334),"Partial charge must retain its previous strength");
             h.succeed();
         } finally { close(p); }
     }
