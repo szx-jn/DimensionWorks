@@ -49,6 +49,14 @@ gradle -p mods/dimensionworks-mek-stress test build runGameTestServer --no-daemo
 
 完整整包使用真实已重混淆 JAR 和流体能力接口完成原生功能验证：升级配方实际加载，五档低损耗卡存在且旧名称未注册，退役暮色方块未注册；两种牛油果叶剪刀掉落正确；茶壶掉落携带 500 mB 流体并能重新载入，不复制另行掉落的输入物品；全部 21 种世界熔液实际转换；敞口工作盆从 1,000 mB 普通熔液完成结晶与无压力析出，产出三颗无用结晶并剩余 400 mB 普通熔液；覆盖工作盆的 1,000 mB 铜熔液保持不变。14 个启动脚本和 25 个生产服务端脚本加一个本地测试脚本均加载无脚本错误，保存及退出成功，进程返回 0。日志为 `build/local-validation/full-pack/server-native-functional-pass.log`，检查结果为对应测试目录的 `kubejs/native-functional-results.json`。
 
+## 正式发布结果与剩余阻碍
+
+源码提交 `1ce10ad6` 已推送。正式发布工作流自动采用 `0.3.50`，客户端、服务端、增量包、更新器测试、Linux 原生更新事务、产物校验及 GitHub 发行步骤全部通过；工作流回写的版本提交 `8f68c1a7` 已同步到本地。正式产物由 Actions 生成：[GitHub v0.3.50](https://github.com/szx-jn/DimensionWorks/releases/tag/v0.3.50)。下载正式客户端 MRPack 后另行核对 SHA-256 与 GitHub 资产摘要一致、ZIP 完整、升级配方与数据修正包含其中，且没有本地测试脚本、运行产物或已移除的旧资源。
+
+[发布运行 43617868958](https://github.com/szx-jn/DimensionWorks/actions/runs/43617868958) 的 BBSMC 同步未完成。初次运行及仅补跑失败同步任务的第二次运行，都在上传约 9.6 MiB 客户端、创建版本的 `POST /v2/version` 请求等待 600 秒后报 `The read operation timed out`，尚未进入服务端附件上传。两个运行节点均返回相同错误；之后的无缓存只读查询仍没有 BBSMC `0.3.50`。因此 GitHub 产物可下载，但整个工作流最终结论为失败，不能称整个发布流程成功。没有修改上传协议、删除远端版本或把超时当作成功。
+
+同步错误日志保留在本机 `build/local-validation/bbsmc-sync-failure.log` 与 `build/local-validation/bbsmc-evidence/retry-failure.log`。BBSMC 创建版本接口恢复后，可仅补跑同步任务；没有重新构建或重复发布 GitHub 产物。
+
 ## 证据与边界
 
 本机日志保留在 `build/local-validation/` 与各模块的 `build/`。完整组合仍会记录固定第三方 JAR 中未安装扩展的资源引用、Mixin 元数据和 Rhino 客户端类型反射诊断；原生注册表确认相应可选物品/方块不存在，这些信息没有当作本次模组测试成功的证据，也没有通过修改第三方 JAR 或新增旧名称掩盖。
