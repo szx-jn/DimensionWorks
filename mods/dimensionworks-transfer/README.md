@@ -11,8 +11,9 @@
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
 - 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
 - 工具继承整合包已必需的 CMP 固定 fork Release `0.6.1-dimensionworks.15`，构建直接依赖该公开资产，不内嵌第三方类。
+- 直接交互 Mixin 同时匹配开发环境与正式 JAR 的 `interactLivingEntity` / `m_6880_`，避免正式客户端与专用服务器在模组初始化时崩溃。
 
-详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md) 和 [本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
+详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
 
 ## 进入与物品
 

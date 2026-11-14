@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(targets = "de.theidler.create_mobile_packages.items.mobile_packager.MobilePackager", remap = false)
 public abstract class ElasticToolInteractionMixin {
-    @Redirect(method = "interactLivingEntity", at = @At(value = "INVOKE", target =
+    // This Item override is SRG-named in the fixed CMP release JAR.
+    @Redirect(method = {"interactLivingEntity", "m_6880_"}, at = @At(value = "INVOKE", target =
         "Lde/theidler/create_mobile_packages/items/mobile_packager/PackPlayerPacket;pack(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/entity/player/Player;Z)V"), remap = false)
     private void dimensionworks$useActualInteractionTool(ServerPlayer source, Player target, boolean self) {
         boolean wasPacked = PlayerParcel.isPacked(target);
