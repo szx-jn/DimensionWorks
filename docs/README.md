@@ -4,6 +4,8 @@
 
 已建立：
 
+- [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：暮色全套产线规划、三分支工业、高级材料新增制造路线与中转发运终端升级卡；下一维度待定。
+
 - [`design/root-version-authority.md`](design/root-version-authority.md)：更新器与登录检测仅以实际游戏根目录 VERSION 判断当前版本、失败处理与文件事务规则。
 - [`validation/2026-11-14-trueuuid-client-session-failure.md`](validation/2026-11-14-trueuuid-client-session-failure.md)：TrueUUID 1.0.10 客户端会话提交失败的日志证据、脱敏诊断修改与验证边界。
 - [`validation/2026-11-07-trueuuid-automatic-fork.md`](validation/2026-11-07-trueuuid-automatic-fork.md)：基于 TrueUUID 1.0.9 的自动迁移 fork、玩家数据保全和正式发布范围。
