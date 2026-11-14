@@ -4,7 +4,8 @@
 
 已建立：
 
-- [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：暮色方块的职责与可替代性审查；六个重复/职责不明的机械提案已撤回，先确认独特组合能力再设计产线；下一维度待定。
+- [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：暮色方块的职责与可替代性审查；旧六个提案已撤回，新机械先审阅职责再设计产线；下一维度待定。
+- [`design/twilight-machine-products.md`](design/twilight-machine-products.md)：机械成果重设计候选：现场爆炸驱动、活体装备拆装、生物行为控制和工况测量；列明组合用途、替代边界与未验证项。
 
 - [`design/root-version-authority.md`](design/root-version-authority.md)：更新器与登录检测仅以实际游戏根目录 VERSION 判断当前版本、失败处理与文件事务规则。
 - [`validation/2026-11-14-trueuuid-client-session-failure.md`](validation/2026-11-14-trueuuid-client-session-failure.md)：TrueUUID 1.0.10 客户端会话提交失败的日志证据、脱敏诊断修改与验证边界。
