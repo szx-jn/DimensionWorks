@@ -4,6 +4,7 @@
 
 已建立：
 
+- [`design/six-minute-promo-content-plan.md`](design/six-minute-promo-content-plan.md)：已确认的 6 分钟宣传片内容规划，含 60 组逐秒分镜、旁白工作稿、机制与预告边界；仅保存策划，尚未开始视频制作。
 - [`design/twilight-full-production-plan.md`](design/twilight-full-production-plan.md)：暮色方块的职责与可替代性审查；旧六个提案已撤回，新机械先审阅职责再设计产线；下一维度待定。
 - [`design/twilight-machine-products.md`](design/twilight-machine-products.md)：四项机械成果候选：现场爆炸驱动、活体装备拆装、生物行为控制和状态读取；温度探头与流量计已撤回，列明组合用途、替代边界与未验证项。
 - [`design/twilight-easter-egg-toys.md`](design/twilight-easter-egg-toys.md)：已实现弹跳封带与弹力打包工具，记录暮色供料、十步装配、玩家弹力包裹、史莱姆落地弹跳、Shift 蓄力和发射。
