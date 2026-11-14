@@ -85,19 +85,31 @@ class BbsmcSyncTest(unittest.TestCase):
             bbsmc.assert_not_called()
 
     def test_uploads_three_named_assets_and_exact_release_body_with_client_primary(self) -> None:
+        initial = dict(self.uploaded, files=self.uploaded["files"][:1])
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
             self.downloads() as download,
-            mock.patch.object(sync, "bbsmc_json", return_value=[]) as bbsmc,
-            mock.patch.object(sync, "upload_files", return_value=self.uploaded) as upload,
+            mock.patch.object(sync, "bbsmc_json", side_effect=[[], self.uploaded]) as bbsmc,
+            mock.patch.object(sync, "upload_files", side_effect=[initial, None, None]) as upload,
         ):
             self.assertIn("BBSMC OK", self.run_sync())
         self.assertEqual(download.call_args_list, [
             mock.call("szx-jn/DimensionWorks", "v0.3.41", asset)
             for asset in self.release["assets"][:3]
         ])
-        bbsmc.assert_called_once_with("project/doVGSZq0/version", "token")
-        upload.assert_called_once_with(self.metadata, self.files, "token")
+        self.assertEqual(bbsmc.call_args_list, [
+            mock.call("project/doVGSZq0/version", "token"),
+            mock.call("version/new-version", "token"),
+        ])
+        full_name, delta_name = list(self.files)[1:]
+        self.assertEqual(upload.call_args_list, [
+            mock.call(dict(self.metadata, file_parts=[self.filename]),
+                      {self.filename: self.files[self.filename]}, "token"),
+            mock.call(self.metadata, {delta_name: self.files[delta_name]},
+                      "token", version_id="new-version"),
+            mock.call(self.metadata, {full_name: self.files[full_name]},
+                      "token", version_id="new-version"),
+        ])
         self.assertEqual(self.metadata["file_parts"], list(self.files))
         self.assertEqual(self.metadata["primary_file"], self.filename)
         self.assertEqual(self.metadata["changelog"], self.release["body"])
@@ -150,11 +162,70 @@ class BbsmcSyncTest(unittest.TestCase):
             mock.patch.object(sync, "upload_files", return_value=None) as upload,
         ):
             self.assertIn("BBSMC OK", self.run_sync())
-        upload.assert_called_once_with(
-            self.metadata, {name: data for name, data in self.files.items() if name != self.filename},
-            "token", version_id="new-version",
-        )
+        full_name, delta_name = list(self.files)[1:]
+        self.assertEqual(upload.call_args_list, [
+            mock.call(self.metadata, {delta_name: self.files[delta_name]},
+                      "token", version_id="new-version"),
+            mock.call(self.metadata, {full_name: self.files[full_name]},
+                      "token", version_id="new-version"),
+        ])
         self.assertEqual(bbsmc.call_args_list[-1], mock.call("version/new-version", "token"))
+
+    def test_attachment_timeout_is_not_retried_and_next_run_resumes_remaining_file(self) -> None:
+        initial = dict(self.uploaded, files=self.uploaded["files"][:1])
+        full_name, delta_name = list(self.files)[1:]
+        with (
+            mock.patch.object(sync, "github_json", return_value=self.release),
+            self.downloads(),
+            mock.patch.object(sync, "bbsmc_json", return_value=[initial]),
+            mock.patch.object(sync, "upload_files", side_effect=[
+                None, RuntimeError("BBSMC POST version/new-version/file: The read operation timed out"),
+            ]) as upload,
+            self.assertRaisesRegex(RuntimeError, "read operation timed out"),
+        ):
+            self.run_sync()
+        self.assertEqual(upload.call_count, 2)
+        partial = dict(self.uploaded, files=[
+            file for file in self.uploaded["files"] if file["filename"] != full_name
+        ])
+        self.assertEqual({file["filename"] for file in partial["files"]}, {self.filename, delta_name})
+        with (
+            mock.patch.object(sync, "github_json", return_value=self.release),
+            self.downloads(),
+            mock.patch.object(sync, "bbsmc_json", side_effect=[[partial], self.uploaded]),
+            mock.patch.object(sync, "upload_files", return_value=None) as upload,
+        ):
+            self.assertIn("BBSMC OK", self.run_sync())
+        upload.assert_called_once_with(
+            self.metadata, {full_name: self.files[full_name]}, "token", version_id="new-version",
+        )
+
+    def test_latest_changed_between_attachments_stops_remaining_upload(self) -> None:
+        initial = dict(self.uploaded, files=self.uploaded["files"][:1])
+        with (
+            mock.patch.object(sync, "github_json", side_effect=[
+                self.release, self.release, self.release, self.release,
+                dict(self.release, id=42, tag_name="v0.3.42"),
+            ]),
+            self.downloads(),
+            mock.patch.object(sync, "bbsmc_json", return_value=[]),
+            mock.patch.object(sync, "upload_files", side_effect=[initial, None]) as upload,
+        ):
+            self.assertIn("SKIP", self.run_sync())
+        self.assertEqual(upload.call_count, 2)
+        self.assertEqual(list(upload.call_args.args[1]), [list(self.files)[-1]])
+
+    def test_network_timeout_reports_request_method_and_endpoint(self) -> None:
+        for endpoint, data, method in (
+            ("project/doVGSZq0/version", None, "GET"),
+            ("version/new-version/file", b"payload", "POST"),
+        ):
+            with (
+                self.subTest(method=method),
+                mock.patch.object(sync.urllib.request, "urlopen", side_effect=TimeoutError("The read operation timed out")),
+                self.assertRaisesRegex(RuntimeError, f"BBSMC {method} {endpoint}: The read operation timed out"),
+            ):
+                sync.bbsmc_json(endpoint, "token", data=data)
 
     def test_partial_completion_only_adds_remaining_file_and_dry_run_cannot_write(self) -> None:
         existing = dict(self.uploaded, files=self.uploaded["files"][:2])

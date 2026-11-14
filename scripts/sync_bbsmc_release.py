@@ -102,7 +102,9 @@ def bbsmc_json(endpoint: str, token: str, *, data: bytes | None = None,
             return json.load(response)
     except urllib.error.HTTPError as error:
         detail = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"BBSMC HTTP {error.code}: {detail}") from None
+        raise RuntimeError(f"BBSMC {request.get_method()} {endpoint} HTTP {error.code}: {detail}") from None
+    except OSError as error:
+        raise RuntimeError(f"BBSMC {request.get_method()} {endpoint}: {error}") from None
 
 
 def matching_version(versions: list, metadata: dict, files: dict[str, bytes]) -> dict | None:
@@ -149,9 +151,12 @@ def upload_files(metadata: dict, files: dict[str, bytes], token: str,
             data,
         ])
     parts.append(f"\r\n--{boundary}--\r\n".encode())
+    endpoint = "version" if version_id is None else f"version/{version_id}/file"
+    size_mib = sum(len(data) for data in files.values()) / (1024 * 1024)
+    print(f"BBSMC upload: {', '.join(files)} ({size_mib:.1f} MiB) -> {endpoint}", flush=True)
     # 创建/补附件均只提交一次；重跑前先核对已有文件，避免重复上传。
     return bbsmc_json(
-        "version" if version_id is None else f"version/{version_id}/file",
+        endpoint,
         token, data=b"".join(parts),
         content_type=f"multipart/form-data; boundary={boundary}",
     )
@@ -178,6 +183,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
         assets = [asset for asset in release["assets"] if asset["name"] == filename]
         if len(assets) != 1 or assets[0]["state"] != "uploaded":
             raise ValueError(f"GitHub 发行版缺少唯一且已上传的 {filename}")
+        print(f"BBSMC download: {filename}", flush=True)
         files[filename] = download_asset(repository, tag, assets[0])
     metadata = version_metadata(release, project_id, files)
     versions = bbsmc_json(f"project/{project_id}/version", token)
@@ -190,12 +196,20 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     if not is_latest_release(repository, release):
         return f"BBSMC SKIP: {tag} 已被更新的 GitHub 正式版替代"
     if existing is None:
-        uploaded = upload_files(metadata, files, token)
-    else:
-        names = {file["filename"] for file in existing["files"]}
-        missing = {filename: data for filename, data in files.items() if filename not in names}
-        upload_files(metadata, missing, token, version_id=existing["id"])
-        uploaded = bbsmc_json(f"version/{existing['id']}", token)
+        primary = metadata["primary_file"]
+        initial_metadata = dict(metadata, file_parts=[primary])
+        uploaded = upload_files(initial_metadata, {primary: files[primary]}, token)
+        existing = matching_version([uploaded], metadata, files)
+        if existing is None:
+            raise ValueError("BBSMC 返回的版本或客户端文件与本次上传不一致")
+    names = {file["filename"] for file in existing["files"]}
+    missing = {filename: data for filename, data in files.items() if filename not in names}
+    # 建版请求只含客户端；附件逐个提交，小文件优先，避免三个文件共用一次大请求。
+    for filename in sorted(missing, key=lambda name: len(missing[name])):
+        if not is_latest_release(repository, release):
+            return f"BBSMC SKIP: {tag} 已被更新的 GitHub 正式版替代"
+        upload_files(metadata, {filename: missing[filename]}, token, version_id=existing["id"])
+    uploaded = bbsmc_json(f"version/{existing['id']}", token)
     if not already_synced([uploaded], metadata, files):
         raise ValueError("BBSMC 返回的版本、文件或更新日志与本次上传不一致")
     return f"BBSMC OK: {tag} 客户端、服务端完整/增量包与发行日志已同步（{uploaded['id']}）"
