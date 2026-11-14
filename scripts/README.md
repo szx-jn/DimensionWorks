@@ -157,13 +157,15 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 正式发布工作流中的 `sync-bbsmc` 任务只在 GitHub 发布任务成功、且成功创建了本次发行标签后运行。脚本再次查询 GitHub Latest Release，确认本次发行仍是最新的非草稿、非预发布版本；上传前再检查一次，避免下载期间已有更新版本发布。普通提交、推送、PR、独立构建和旧发行版不会触发同步。
 
-发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。仅下载并上传该发行版中唯一的 `DimensionWorks-<版本>.mrpack`，逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge 类型从该 MRPack 索引确定。同步不上传服务端包、增量包、更新清单、更新器或其他发行资产，也不修改 BBSMC 项目简介、图标和其他项目设置。
+发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。同步同一正式发行中的三个固定资产：`DimensionWorks-<版本>.mrpack`、`DimensionWorks-Server-<版本>.zip` 和 `DimensionWorks-Server-<版本>-delta.zip`。逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge 类型从 MRPack 索引确定，MRPack 始终为主文件，两个服务端 ZIP 为附加下载。每个下载核对资产大小及 GitHub 提供的 SHA-256，上传后核对三个文件的 SHA-512、主文件和更新日志。同步不上传更新清单、更新器或其他发行资产，也不修改 BBSMC 项目设置。
 
-目标为已有的 [维度工序 BBSMC 项目](https://bbsmc.net/modpack/dimensionworks)，项目 ID `doVGSZq0`。首次启用前，登录后直接打开 [BBSMC 个人访问令牌页面](https://bbsmc.net/settings/pats)（当前设置侧栏隐藏了此入口），创建拥有「创建版本、读取版本」权限的令牌，其所属账号还须具备项目上传权限；将令牌保存在 GitHub 仓库 Actions Secret `BBSMC_TOKEN` 中，不写入代码、日志或聊天。缺少令牌时同步任务明确失败，已成功发布的 GitHub Release 与版本号回写保留。
+目标为已有的 [维度工序 BBSMC 项目](https://bbsmc.net/modpack/dimensionworks)，项目 ID `doVGSZq0`。首次启用前，登录后直接打开 [BBSMC 个人访问令牌页面](https://bbsmc.net/settings/pats)（当前设置侧栏隐藏了此入口），创建拥有「创建版本、读取版本、修改版本」权限的令牌，其所属账号还须具备项目上传权限；补齐已有版本附件需要 `VERSION_WRITE`。将令牌保存在 GitHub 仓库 Actions Secret `BBSMC_TOKEN` 中，不写入代码、日志或聊天。缺少令牌时同步任务明确失败，已成功发布的 GitHub Release 与版本号回写保留。
 
-同步失败后，在该正式发布运行中选择 **Re-run failed jobs**，只补跑失败的同步任务，不重建或重发 GitHub Release。若 BBSMC 已存在相同版本，文件名、SHA-512 与更新日志相同且版本已列出，则直接成功，不重复上传；已有同版本内容不同或尚未列出时停止并报告冲突，不覆盖。若 GitHub 已发布更晚版本，则跳过旧版本补同步。上传请求不会自动重试，避免服务端已完成上传但客户端超时导致重复版本。BBSMC 的审核和账户限额仍由平台控制。
+同步失败后，在该正式发布运行中选择 **Re-run failed jobs**，只补跑失败的同步任务。也可手动运行 `.github/workflows/sync-bbsmc.yml`，使用最新脚本补齐当前正式版，不重建或重发 GitHub Release。若 BBSMC 已存在相同版本，先验证已列出、更新日志、现有文件名/摘要与 MRPack 主文件；三个文件齐全则直接成功，只缺服务端附件时通过追加文件接口补齐。已有内容不同或尚未列出时停止报告冲突，不覆盖。若 GitHub 已发布更晚版本，则跳过旧版本补同步。上传请求不会自动重试，重跑会先核对已有文件。BBSMC 的审核和账户限额仍由平台控制。
 
-无需令牌即可执行只读验证，命令只读取最新发行、下载 MRPack 并核对版本及更新日志，不创建 BBSMC 版本：
+API 依据：[Modrinth 创建版本](https://docs.modrinth.com/api/operations/createversion/)使用 `file_parts` 与 `primary_file` 的多文件 multipart 请求；[追加版本文件](https://docs.modrinth.com/api/operations/addfilestoversion/)使用 `POST /version/{id}/file`、`VERSION_WRITE` 权限并返回 HTTP 204。另核对 [BBSMC 文件校验实现](https://github.com/bbsmc/app/blob/main/apps/labrinth/src/validate/mod.rs)与[上传实现](https://github.com/bbsmc/app/blob/main/apps/labrinth/src/routes/v3/version_creation.rs)：BBSMC 允许 ZIP，每文件上限 1 GiB，本次完整包小于该限制。2026-11-14 的 0.3.46 原同步任务已实际成功使用 `BBSMC_TOKEN` 创建 MRPack 版本，不能仅凭令牌页面此前的「从未使用」判断鉴权失败。
+
+无需令牌即可执行只读验证，命令下载并核对最新发行的三个文件及更新日志，不创建或修改 BBSMC 版本：
 
 ```sh
 GITHUB_REPOSITORY=szx-jn/DimensionWorks BBSMC_PROJECT_ID=doVGSZq0 \

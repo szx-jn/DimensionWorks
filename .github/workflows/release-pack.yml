@@ -18,7 +18,7 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(updater): 新增自定义启动器导入"
+        description: "新增功能；每行一条，如 feat(release): 同步客户端与服务端产物到 BBSMC"
         required: false
         type: string
       release_fixes:
@@ -482,12 +482,12 @@ jobs:
       group: dimensionworks-bbsmc-sync
       cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: 检出同步脚本
         uses: actions/checkout@v4
 
-      - name: 上传 MRPack 与本次发行日志
+      - name: 同步客户端、服务端完整包与增量包及发行日志
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.release.outputs.published_tag }}

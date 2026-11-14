@@ -1,0 +1,37 @@
+name: 补同步 BBSMC 最新正式版
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub 正式发行标签；留空使用最新正式版，仅补同步、不构建或发布"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dimensionworks-bbsmc-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: 补齐 BBSMC 最新正式版产物
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: 同步客户端、服务端完整包与增量包及发行日志
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          BBSMC_TOKEN: ${{ secrets.BBSMC_TOKEN }}
+          BBSMC_PROJECT_ID: doVGSZq0
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_TAG"
+          if [[ -z "$tag" ]]; then
+            tag="$(gh release view --json tagName -q .tagName)"
+          fi
+          python3 scripts/sync_bbsmc_release.py --tag "$tag"

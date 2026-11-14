@@ -31,44 +31,50 @@ def mrpack(version: str = "0.3.41") -> bytes:
 class BbsmcSyncTest(unittest.TestCase):
     def setUp(self) -> None:
         self.filename = "DimensionWorks-0.3.41.mrpack"
-        self.data = mrpack()
+        self.files = {
+            self.filename: mrpack(),
+            "DimensionWorks-Server-0.3.41.zip": b"complete-server",
+            "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
+        }
         self.release = {
             "id": 41, "tag_name": "v0.3.41", "draft": False, "prerelease": False,
             "name": "DimensionWorks 0.3.41",
             "body": "第一行更新日志\n\nfix(release): 保留换行与中文\n",
             "assets": [
-                {"name": self.filename, "state": "uploaded", "size": len(self.data)},
-                {"name": "DimensionWorks-Server-0.3.41.zip", "state": "uploaded"},
-                {"name": "SHA256SUMS", "state": "uploaded"},
-            ],
+                {"name": filename, "state": "uploaded", "size": len(data)}
+                for filename, data in self.files.items()
+            ] + [{"name": "SHA256SUMS", "state": "uploaded"}],
         }
-        self.metadata = sync.version_metadata(
-            self.release, "doVGSZq0", self.filename, self.data,
-        )
+        self.metadata = sync.version_metadata(self.release, "doVGSZq0", self.files)
         self.uploaded = {
             "id": "new-version", "project_id": "doVGSZq0", "status": "listed",
             "version_number": "0.3.41", "changelog": self.release["body"],
             "files": [{
-                "filename": self.filename,
-                "hashes": {"sha512": hashlib.sha512(self.data).hexdigest()},
-            }],
+                "filename": filename, "primary": filename == self.filename,
+                "hashes": {"sha512": hashlib.sha512(data).hexdigest()},
+            } for filename, data in self.files.items()],
         }
 
     def run_sync(self, **kwargs: object) -> str:
         return sync.sync_release("szx-jn/DimensionWorks", "v0.3.41", "doVGSZq0", "token", **kwargs)
 
+    def downloads(self):
+        return mock.patch.object(
+            sync, "download_asset",
+            side_effect=lambda repo, tag, asset: self.files[asset["name"]],
+        )
+
     def test_only_latest_non_draft_non_prerelease_can_reach_bbsmc(self) -> None:
         for changes in ({"draft": True}, {"prerelease": True}, {"id": 42}):
-            with self.subTest(changes=changes):
-                latest = dict(self.release, **changes)
-                with (
-                    mock.patch.object(sync, "github_json", side_effect=[self.release, latest]),
-                    mock.patch.object(sync, "download_mrpack") as download,
-                    mock.patch.object(sync, "bbsmc_json") as bbsmc,
-                ):
-                    self.assertIn("SKIP", self.run_sync())
-                download.assert_not_called()
-                bbsmc.assert_not_called()
+            with (
+                self.subTest(changes=changes),
+                mock.patch.object(sync, "github_json", side_effect=[self.release, dict(self.release, **changes)]),
+                mock.patch.object(sync, "download_asset") as download,
+                mock.patch.object(sync, "bbsmc_json") as bbsmc,
+            ):
+                self.assertIn("SKIP", self.run_sync())
+            download.assert_not_called()
+            bbsmc.assert_not_called()
         for flag in ("draft", "prerelease"):
             with (
                 self.subTest(flag=flag),
@@ -76,19 +82,24 @@ class BbsmcSyncTest(unittest.TestCase):
                 mock.patch.object(sync, "bbsmc_json") as bbsmc,
             ):
                 self.assertIn("SKIP", self.run_sync())
-                bbsmc.assert_not_called()
+            bbsmc.assert_not_called()
 
-    def test_upload_uses_only_named_mrpack_and_exact_release_body(self) -> None:
+    def test_uploads_three_named_assets_and_exact_release_body_with_client_primary(self) -> None:
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
-            mock.patch.object(sync, "download_mrpack", return_value=self.data) as download,
+            self.downloads() as download,
             mock.patch.object(sync, "bbsmc_json", return_value=[]) as bbsmc,
-            mock.patch.object(sync, "upload_version", return_value=self.uploaded) as upload,
+            mock.patch.object(sync, "upload_files", return_value=self.uploaded) as upload,
         ):
             self.assertIn("BBSMC OK", self.run_sync())
-        download.assert_called_once_with("szx-jn/DimensionWorks", "v0.3.41", self.release["assets"][0])
+        self.assertEqual(download.call_args_list, [
+            mock.call("szx-jn/DimensionWorks", "v0.3.41", asset)
+            for asset in self.release["assets"][:3]
+        ])
         bbsmc.assert_called_once_with("project/doVGSZq0/version", "token")
-        upload.assert_called_once_with(self.metadata, self.filename, self.data, "token")
+        upload.assert_called_once_with(self.metadata, self.files, "token")
+        self.assertEqual(self.metadata["file_parts"], list(self.files))
+        self.assertEqual(self.metadata["primary_file"], self.filename)
         self.assertEqual(self.metadata["changelog"], self.release["body"])
 
     def test_latest_changed_during_download_does_not_upload(self) -> None:
@@ -96,91 +107,129 @@ class BbsmcSyncTest(unittest.TestCase):
             mock.patch.object(sync, "github_json", side_effect=[
                 self.release, self.release, dict(self.release, id=42, tag_name="v0.3.42"),
             ]),
-            mock.patch.object(sync, "download_mrpack", return_value=self.data),
+            self.downloads(),
             mock.patch.object(sync, "bbsmc_json", return_value=[]),
-            mock.patch.object(sync, "upload_version") as upload,
+            mock.patch.object(sync, "upload_files") as upload,
         ):
             self.assertIn("SKIP", self.run_sync())
         upload.assert_not_called()
 
-    def test_repeated_job_skips_matching_version_and_refuses_conflict(self) -> None:
-        self.assertTrue(sync.already_synced([self.uploaded], self.metadata, self.filename, self.data))
-        for change in ("changelog", "files", "status"):
+    def test_repeated_job_skips_matching_three_files_and_refuses_conflict(self) -> None:
+        self.assertTrue(sync.already_synced([self.uploaded], self.metadata, self.files))
+        for change in ("changelog", "hash", "status", "primary", "extra", "duplicate"):
             version = copy.deepcopy(self.uploaded)
             if change == "changelog":
-                version[change] = "其他日志"
+                version["changelog"] = "其他日志"
             elif change == "status":
-                version[change] = "draft"
+                version["status"] = "draft"
+            elif change == "hash":
+                version["files"][1]["hashes"]["sha512"] = "other-file-hash"
+            elif change == "primary":
+                version["files"][1]["primary"] = True
+            elif change == "extra":
+                version["files"].append(dict(version["files"][1], filename="unexpected.zip"))
             else:
-                version["files"][0]["hashes"]["sha512"] = "other-file-hash"
+                version["files"].append(version["files"][0])
             with self.subTest(change=change), self.assertRaisesRegex(ValueError, "不覆盖"):
-                sync.already_synced([version], self.metadata, self.filename, self.data)
+                sync.already_synced([version], self.metadata, self.files)
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
-            mock.patch.object(sync, "download_mrpack", return_value=self.data),
+            self.downloads(),
             mock.patch.object(sync, "bbsmc_json", return_value=[self.uploaded]),
-            mock.patch.object(sync, "upload_version") as upload,
+            mock.patch.object(sync, "upload_files") as upload,
         ):
             self.assertIn("无需重复上传", self.run_sync())
         upload.assert_not_called()
 
-    def test_missing_mrpack_or_empty_log_or_wrong_pack_version_refuses_upload(self) -> None:
-        for case in ("asset", "body", "version"):
+    def test_existing_mrpack_gets_only_missing_server_files_and_is_read_back(self) -> None:
+        existing = dict(self.uploaded, files=self.uploaded["files"][:1])
+        with (
+            mock.patch.object(sync, "github_json", return_value=self.release),
+            self.downloads(),
+            mock.patch.object(sync, "bbsmc_json", side_effect=[[existing], self.uploaded]) as bbsmc,
+            mock.patch.object(sync, "upload_files", return_value=None) as upload,
+        ):
+            self.assertIn("BBSMC OK", self.run_sync())
+        upload.assert_called_once_with(
+            self.metadata, {name: data for name, data in self.files.items() if name != self.filename},
+            "token", version_id="new-version",
+        )
+        self.assertEqual(bbsmc.call_args_list[-1], mock.call("version/new-version", "token"))
+
+    def test_partial_completion_only_adds_remaining_file_and_dry_run_cannot_write(self) -> None:
+        existing = dict(self.uploaded, files=self.uploaded["files"][:2])
+        with (
+            mock.patch.object(sync, "github_json", return_value=self.release),
+            self.downloads(),
+            mock.patch.object(sync, "bbsmc_json", side_effect=[[existing], self.uploaded]),
+            mock.patch.object(sync, "upload_files", return_value=None) as upload,
+        ):
+            self.assertIn("BBSMC OK", self.run_sync())
+        last_name = list(self.files)[-1]
+        upload.assert_called_once_with(
+            self.metadata, {last_name: self.files[last_name]}, "token", version_id="new-version",
+        )
+        with (
+            mock.patch.object(sync, "github_json", return_value=self.release),
+            self.downloads(),
+            mock.patch.object(sync, "bbsmc_json", return_value=[existing]),
+            mock.patch.object(sync, "upload_files") as upload,
+        ):
+            self.assertIn("DRY-RUN OK", self.run_sync(dry_run=True))
+        upload.assert_not_called()
+
+    def test_missing_asset_empty_log_wrong_pack_version_or_missing_token_refuses_upload(self) -> None:
+        for case in ("client", "full", "delta", "body", "version", "token"):
             release = copy.deepcopy(self.release)
-            data = self.data
-            if case == "asset":
-                release["assets"] = release["assets"][1:]
+            if case in ("client", "full", "delta"):
+                release["assets"].pop(("client", "full", "delta").index(case))
             elif case == "body":
-                release["body"] = "  \n"
-            else:
-                data = mrpack("0.3.40")
+                release["body"] = " \n"
+            elif case == "version":
+                self.files[self.filename] = mrpack("0.3.40")
             with (
                 self.subTest(case=case),
                 mock.patch.object(sync, "github_json", return_value=release),
-                mock.patch.object(sync, "download_mrpack", return_value=data),
-                mock.patch.object(sync, "upload_version") as upload,
+                self.downloads(),
+                mock.patch.object(sync, "upload_files") as upload,
                 self.assertRaises(ValueError),
             ):
-                self.run_sync()
+                sync.sync_release("repo", "v0.3.41", "doVGSZq0", "" if case == "token" else "token")
             upload.assert_not_called()
+        self.files[self.filename] = mrpack()
 
-    def test_missing_token_fails_and_dry_run_cannot_write(self) -> None:
-        with (
-            mock.patch.object(sync, "github_json", return_value=self.release),
-            mock.patch.object(sync, "download_mrpack", return_value=self.data),
-            mock.patch.object(sync, "bbsmc_json", return_value=[]),
-            mock.patch.object(sync, "upload_version") as upload,
-        ):
-            with self.assertRaisesRegex(ValueError, "BBSMC_TOKEN"):
-                sync.sync_release("repo", "v0.3.41", "project", "")
-            self.assertIn("DRY-RUN OK", sync.sync_release("repo", "v0.3.41", "project", "", dry_run=True))
-        upload.assert_not_called()
+    def test_multipart_creation_and_append_preserve_all_bytes_and_handle_204(self) -> None:
+        for append in (False, True):
+            captured = []
 
-    def test_multipart_contains_json_first_and_one_binary_file_only(self) -> None:
-        captured = []
+            def open_url(request: object, timeout: int) -> io.BytesIO:
+                captured.append(request)
+                self.assertEqual(timeout, 600)
+                response = io.BytesIO(b"" if append else json.dumps(self.uploaded).encode())
+                response.status = 204 if append else 200
+                return response
 
-        def open_url(request: object, timeout: int) -> io.BytesIO:
-            captured.append(request)
-            return io.BytesIO(json.dumps(self.uploaded).encode())
-
-        with mock.patch.object(sync.urllib.request, "urlopen", side_effect=open_url):
-            self.assertEqual(
-                sync.upload_version(self.metadata, self.filename, self.data, "test-token"), self.uploaded,
+            with self.subTest(append=append), mock.patch.object(sync.urllib.request, "urlopen", side_effect=open_url):
+                result = sync.upload_files(
+                    self.metadata, self.files, "test-token", version_id="new-version" if append else None,
+                )
+                self.assertEqual(result, None if append else self.uploaded)
+            request = captured[0]
+            suffix = "version/new-version/file" if append else "version"
+            self.assertEqual(request.full_url, f"https://api.bbsmc.net/v2/{suffix}")
+            self.assertEqual(request.get_method(), "POST")
+            self.assertEqual(request.get_header("Authorization"), "Bearer test-token")
+            message = BytesParser(policy=default).parsebytes(
+                f"Content-Type: {request.get_header('Content-type')}\r\nMIME-Version: 1.0\r\n\r\n".encode()
+                + request.data,
             )
-        request = captured[0]
-        self.assertEqual(request.full_url, "https://api.bbsmc.net/v2/version")
-        self.assertEqual(request.get_method(), "POST")
-        self.assertEqual(request.get_header("Authorization"), "Bearer test-token")
-        message = BytesParser(policy=default).parsebytes(
-            f"Content-Type: {request.get_header('Content-type')}\r\nMIME-Version: 1.0\r\n\r\n".encode()
-            + request.data,
-        )
-        parts = list(message.iter_parts())
-        self.assertEqual(len(parts), 2)
-        self.assertEqual(parts[0].get_param("name", header="content-disposition"), "data")
-        self.assertEqual(json.loads(parts[0].get_payload(decode=True)), self.metadata)
-        self.assertEqual(parts[1].get_filename(), self.filename)
-        self.assertEqual(parts[1].get_payload(decode=True), self.data)
+            parts = list(message.iter_parts())
+            self.assertEqual(len(parts), 4)
+            self.assertEqual(parts[0].get_param("name", header="content-disposition"), "data")
+            self.assertEqual(json.loads(parts[0].get_payload(decode=True)), {} if append else self.metadata)
+            self.assertEqual(
+                {part.get_filename(): part.get_payload(decode=True) for part in parts[1:]}, self.files,
+            )
 
 
 if __name__ == "__main__":
