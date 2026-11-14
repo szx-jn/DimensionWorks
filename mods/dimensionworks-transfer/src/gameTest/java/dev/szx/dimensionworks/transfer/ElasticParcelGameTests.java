@@ -124,7 +124,7 @@ public final class ElasticParcelGameTests {
             ElasticParcelState.input(p,true,-30,90);
             for(int i=0;i<90;i++) ElasticParcelState.tick(p);
             ElasticParcelState.input(p,false,-30,90);
-            checkVec(h,p.getDeltaMovement(),Vec3.directionFromRotation(-30,90).scale(1.65),"Full launch must use look pitch and yaw with fixed cap");
+            checkVec(h,p.getDeltaMovement(),Vec3.directionFromRotation(-30,90).scale(3.7125),"Full launch must use look pitch and yaw with fixed cap");
             p.setDeltaMovement(Vec3.ZERO); p.setOnGround(true);
             ElasticParcelState.input(p,false,-30,90);
             checkVec(h,p.getDeltaMovement(),Vec3.ZERO,"Repeated release must not launch again");

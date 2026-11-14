@@ -44,7 +44,7 @@ class ElasticChargeTest {
         assertEquals(0, ElasticCharge.speed(0));
         assertTrue(ElasticCharge.speed(20) < ElasticCharge.speed(40));
         assertTrue(ElasticCharge.speed(40) < ElasticCharge.speed(60));
-        assertEquals(1.65, ElasticCharge.speed(60), 1e-9);
+        assertEquals(3.7125, ElasticCharge.speed(60), 1e-9);
         assertEquals(ElasticCharge.speed(60), ElasticCharge.speed(200));
     }
 }

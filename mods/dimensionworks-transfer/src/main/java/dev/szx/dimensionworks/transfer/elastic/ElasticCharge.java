@@ -23,6 +23,6 @@ public final class ElasticCharge {
 
     public static double speed(int ticks) {
         if (ticks <= 0) return 0;
-        return 0.35 + 1.30 * Math.min(ticks, FULL_TICKS) / FULL_TICKS;
+        return 0.35 + 3.3625 * Math.min(ticks, FULL_TICKS) / FULL_TICKS;
     }
 }
