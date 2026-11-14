@@ -6,7 +6,10 @@
     "assets": "python3 scripts/generate_assets.py && python3 scripts/generate_memory_assets.py && python3 scripts/generate_soundscape.py",
     "voiceover": "python3 scripts/generate_voiceover.py",
     "studio": "npm run assets && remotion studio src/index.ts",
-    "render": "npm run assets && remotion render src/index.ts DimensionWorksIntro out/dimensionworks-intro.mp4"
+    "render": "npm run assets && remotion render src/index.ts DimensionWorksIntro out/dimensionworks-intro.mp4",
+    "promo:audio": "python3 scripts/generate_promo_audio.py",
+    "promo:render": "remotion render src/index.ts DimensionWorksPromo out/dimensionworks-promo.mp4 --codec=h264 --crf=18",
+    "promo:textures": "python3 scripts/prepare_promo_textures.py"
   },
   "dependencies": {
     "@remotion/cli": "4.0.287",

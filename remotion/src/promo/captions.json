@@ -1,0 +1,443 @@
+[
+  {
+    "text": "故事开始于一次天地异变。",
+    "startMs": 180,
+    "endMs": 2133,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "有些变化，发生在目光之外。",
+    "startMs": 6180,
+    "endMs": 8550,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "三万年过去，草木已看不出那一天的痕迹。",
+    "startMs": 18180,
+    "endMs": 21413,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "这是维度工序。",
+    "startMs": 24180,
+    "endMs": 25234,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "带你看看，我们改变了什么。",
+    "startMs": 25234,
+    "endMs": 27236,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "破损的齿轮之心带来便利，也让你的伤害降低百分之十。",
+    "startMs": 30180,
+    "endMs": 34293,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "它也约束工业：开局转速，以及你能调动的应力容量。",
+    "startMs": 36180,
+    "endMs": 40368,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "处理次数、合成并发、活跃设备和指定产出，也有额度。",
+    "startMs": 42180,
+    "endMs": 46756,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "七次修复按顺序推进，逐步改变对应额度，并提高转速上限。",
+    "startMs": 48180,
+    "endMs": 53213,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "完全修复后，心脏解除自身的工业限制，个人能力也进一步增强。",
+    "startMs": 54180,
+    "endMs": 59395,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "我们希望进步来自工程设计，让玩家自由组织产线。",
+    "startMs": 60180,
+    "endMs": 64096,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "合格的Mek设备，现在可以直接连接机械动力。",
+    "startMs": 66180,
+    "endMs": 69538,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "发电机保留运行条件，把实际产能转换为应力。",
+    "startMs": 72180,
+    "endMs": 76027,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "大型能源同样接轴，龙堆的启动与护盾仍需认真处理。",
+    "startMs": 78180,
+    "endMs": 82259,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "部分机器超速后可以并行加工，应力成本同步提高。",
+    "startMs": 84180,
+    "endMs": 88360,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "工厂的等级、并行和转速，需要一起考虑。",
+    "startMs": 90180,
+    "endMs": 93642,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "能量板改为装配件，连接金属、处理器与合金生产。",
+    "startMs": 96180,
+    "endMs": 100619,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "数字调速和拓扑图，帮助你检查连接与限速。",
+    "startMs": 102180,
+    "endMs": 105926,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "接下来，应力可以通过ME网络分配到另一端。",
+    "startMs": 108180,
+    "endMs": 111684,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "这需要真实的机械输入，也需要ME网络自身正常供电和连接。",
+    "startMs": 114180,
+    "endMs": 118717,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "ME应力采用实时额度，输入停止，网络就失去相应的输出能力。",
+    "startMs": 120180,
+    "endMs": 125081,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "五代驱动器拓展卡槽与转速，每网最多两台有效。",
+    "startMs": 126180,
+    "endMs": 130246,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "三十种卡，带来不同的转速和输入损耗取舍。",
+    "startMs": 132180,
+    "endMs": 135797,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "自动合成避免劣质概率，旧卡还能逐级升级。",
+    "startMs": 138180,
+    "endMs": 141641,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "应力或总转速任意超限，全部机械输出停机。",
+    "startMs": 144180,
+    "endMs": 147873,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "铁的循环，需要有限样本、研磨、压制和结合。",
+    "startMs": 150180,
+    "endMs": 154246,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "其他基础矿物也有对应路线，当前部分配方仍在持续调整。",
+    "startMs": 156180,
+    "endMs": 161028,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "铜的循环连接化学还原与提纯，气体也是必要供料。",
+    "startMs": 162180,
+    "endMs": 166484,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "下界岩先保住回流，再分配平均余量；",
+    "startMs": 168180,
+    "endMs": 171482,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "每轮仍有波动。",
+    "startMs": 171482,
+    "endMs": 172577,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "同一份余烬面粉，可以接入原油制红石，也可以热处理后制硫。",
+    "startMs": 174180,
+    "endMs": 179157,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "蛋糕底料需要红石，四种液体燃料也接入加热。",
+    "startMs": 180180,
+    "endMs": 183923,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "二十一种熔融材料，连接熔炼、合金与冷冻回收。",
+    "startMs": 186180,
+    "endMs": 190144,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "十二种新增化学品，与Mek原有体系共同加工。",
+    "startMs": 192180,
+    "endMs": 195973,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "同样是木炭，普通加热与超级加热会得到不同气体。",
+    "startMs": 198180,
+    "endMs": 202287,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Create管道能运气体，专用盆盖控制盆内气体流失。",
+    "startMs": 204180,
+    "endMs": 208294,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "直见天空的熔融金属，三十秒后结晶，仍能流动。",
+    "startMs": 210180,
+    "endMs": 214334,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "不同转速的加压处理，产出三档带来源的结晶。",
+    "startMs": 216180,
+    "endMs": 219768,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "下界合金碎片，连接了化学、结晶与序列装配。",
+    "startMs": 222180,
+    "endMs": 226121,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "配方刻数、燃料条件与设备读数，帮助你检查产线。",
+    "startMs": 228180,
+    "endMs": 232580,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "物流的对象也扩大了：物品、方块、生物，甚至玩家自己。",
+    "startMs": 234180,
+    "endMs": 239163,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "玩家包裹可以走传送带，再经青蛙交给锁链运输。",
+    "startMs": 240180,
+    "endMs": 244385,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "第二项修复后，你会获得自己的中转领地，并能通过快捷键往返。",
+    "startMs": 246180,
+    "endMs": 251375,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "把自己打包后，还能通过发运终端前往已经允许的目的地。",
+    "startMs": 252180,
+    "endMs": 256570,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "原生跨维物流，目前只在三大原版维度之间互通。",
+    "startMs": 258180,
+    "endMs": 262279,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "弹力包裹能蓄力发射，落地后还会弹跳。",
+    "startMs": 264180,
+    "endMs": 267428,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "贴住竖直带面，玩家也能加入立体运输。",
+    "startMs": 270180,
+    "endMs": 273502,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "根系接触床、树叶、水与腐殖料，共同支撑林地浸出。",
+    "startMs": 276180,
+    "endMs": 280826,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "两只野猪参与调理，供料、工位与休息都要协调。",
+    "startMs": 282180,
+    "endMs": 286235,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "原液再加工为框架和滤芯，通过增加工序，改善后续材料回收。",
+    "startMs": 288180,
+    "endMs": 293533,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "暮色材料汇入十步装配，封带升级为弹力工具。",
+    "startMs": 294180,
+    "endMs": 297979,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "农业、烹饪和冒险之外，女仆也能参与手摇加工。",
+    "startMs": 300180,
+    "endMs": 304201,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "魔法皮蛋允许你选择五级效果，并记住上一次选择。",
+    "startMs": 306180,
+    "endMs": 310351,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "倒计时到期会死亡，期间再吃一颗会立即死亡。",
+    "startMs": 312180,
+    "endMs": 316051,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "建筑、观察、领地、存储与更新，也有配套调整。",
+    "startMs": 318180,
+    "endMs": 322532,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "以下是开发预览。",
+    "startMs": 324180,
+    "endMs": 325470,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "专用端点已实现，尚无生存配方。",
+    "startMs": 325470,
+    "endMs": 328335,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "频道库存通过云盘和物质球回收，再接回物流。",
+    "startMs": 330180,
+    "endMs": 334176,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "天境和六洞穴仍受限制，长期生产体系继续建设。",
+    "startMs": 336180,
+    "endMs": 340385,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "相位、模块、限时封装与稳定化，构成洞穴工艺。",
+    "startMs": 342180,
+    "endMs": 346446,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "工业考核仍在设计，希望观察真实的工程能力。",
+    "startMs": 348180,
+    "endMs": 351851,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "这里是维度工序。",
+    "startMs": 354180,
+    "endMs": 355362,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "接下来，这个世界怎样运转，由你来设计。",
+    "startMs": 355362,
+    "endMs": 358680,
+    "timestampMs": null,
+    "confidence": null
+  }
+]

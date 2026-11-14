@@ -1,4 +1,45 @@
-# 维度工序 · 90 秒开场
+# 维度工序视频工程
+
+## 6 分钟宣传片
+
+新增 `DimensionWorksPromo`：1920×1080、30 fps、10,800 帧（6:00），按[已确认企划](../docs/design/six-minute-promo-content-plan.md)组织 11 章、60 组六秒镜头。原有 `DimensionWorksIntro` 保留为独立 90 秒合成。
+
+故事沿用天地异变与三万年后苏醒；主体为原创方块人物、结合实际游戏贴图的机械插画、动态管线和剖面演示，采用开发者导览。ME机械输入与AE供电分支分开画，五代六类卡共30张同时展示，气体盆盖密封与世界流体露天结晶使用不同场景。专用跨维端点、云盘、洞穴工厂和工业考核段持续标为开发预览；动画不代表新增玩法或游戏实测。
+
+### 预览与导出
+
+```sh
+npm run promo:textures
+npm run promo:audio
+npx remotion studio src/index.ts --no-open
+npx tsc --noEmit
+npm run promo:render
+```
+
+Studio 选择 `/DimensionWorksPromo`；`PromoScenes` 文件夹提供60个单镜头合成。主时间轴将每个镜头写为独立 JSX Sequence，可分别编辑起止时间，默认每镜头180帧。动画均由帧驱动，无CSS动画或随机帧状态。
+
+`promo:audio` 在macOS调用本机中文语音 `Tingting`，通过 FFmpeg 生成59组旁白（齿轮坠落镜头留白），按每句实际音频时长生成字幕；旁白对照企划缩短重复表达，保持六秒镜头内自然可听。中文字体使用本机 PingFang SC。脚本需要macOS `say` 与 FFmpeg，Python只用标准库；没有调用外部配音服务。
+
+原创配乐由固定种子的风声、和弦、低频脉冲、钟表节奏与心跳合成。两个音轨均为360秒、24 kHz PCM16单声道；MP4导出为H.264/AAC。生成音轨位于忽略的 `public/promo/audio/`，首次预览前需运行生成脚本。字幕 JSON 和完整镜头数据保留为可维护源文件，主画面不显示拍摄指令。
+
+`promo:textures` 从本机 Minecraft 实例的已安装 JAR 与仓库自研资源中提取选定的57张贴图。默认实例为 `DimensionWorks`；可用 `python3 scripts/prepare_promo_textures.py --minecraft 路径 --instance 实例名` 指定安装位置。提取目录 `public/promo/textures/` 不提交，`sources.json` 记录每张贴图的来源及档案内路径。第三方贴图保持原来源，不作为本项目原创资源发布；只在宣传片中用于对应设备与物料的识别。没有修改游戏文件或新增整合包依赖。
+
+桌面交付另附烧录字幕对应的SRT、11章章节表和包含必要素材的可编辑工程ZIP。成片音轨统一至约-16 LUFS并输出48 kHz AAC。2026-11-14已完成TypeScript/Python语法、时间轴/字幕/锁文件检查、60组关键帧检查及MP4全片解码；最终媒体为360.000秒、10,800帧，更新的弹力镜头另做成片对照。
+
+### 内容与维护入口
+
+- `src/promo/shots.json`：完整60镜头、原企划360个逐秒动作、旁白工作稿及画面类别；参数变化时对照模组与KubeJS真相源修改。
+- `src/promo/captions.json`：按实际旁白时长排布的字幕，字段为text/startMs/endMs/timestampMs/confidence。
+- `scripts/prepare_promo_textures.py`：按明确资源路径提取游戏与自研贴图，生成来源记录。
+- `scripts/generate_promo_audio.py`：离线配音、简化旁白和原创配乐生成；修改旁白后重新生成字幕与音轨。
+
+制作期间同步了提交 `6116ae5c` 的弹力包裹更新：正常20 TPS下两秒满蓄力，满蓄力力度为此前五倍；动画按真实两秒演示，旁白时间不变。
+
+低层兼容修复归入日常体验，未开放内容在开发预览中标明。当前图解包括矿物循环、热态与气体、30秒天空可见性结晶、压力分档、玩家包裹、中转领地、竖直带运动和暮色供料关系；具体游戏实现与验证状态以所属模块文档为准。
+
+## 既有 90 秒开场
+
+以下保留90秒开场的历史说明；其制作阶段的限制不适用于上述已获授权并导出的六分钟宣传片。
 
 Remotion 合成 `DimensionWorksIntro` 固定为 **1920×1080、30 fps、2700 帧（90 秒）**。
 主题是「异变留在了世界的运作之中」，整体保持宁静、陌生与好奇，不为玩家规定使命或唯一工业路线。

@@ -53,3 +53,9 @@ update-Windows/aria2-runtime/
 # Optional local fluid rendering verification
 run-crystal-check/
 run-twilight-check/
+
+# Generated promotional-film narration and original score
+/remotion/public/promo/audio/
+
+# Staged Minecraft/third-party skins; reconstruct from local archives
+/remotion/public/promo/textures/
