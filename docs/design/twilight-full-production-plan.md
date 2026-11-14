@@ -53,7 +53,7 @@ Create [官方项目说明](https://github.com/Creators-of-Create/Create/blob/mc
 
 ### 可选彩蛋小玩具
 
-用户补充要求：增加类似打包工具魔改的趣味体验成果，制作尽量复杂，并贴近三个地区的最终产物。新增 [暮色工业彩蛋小玩具](twilight-easter-egg-toys.md)：按热区、高塔、冰川主题各提出两件候选，通过可复用机械部件、多个功能总成与多步汇合装配形成制造目标。各区最终机械和精确配方仍待定；彩蛋是可选体验内容，不替代主机械目录，不作为终端升级或碎片的前置。
+用户最新决定：彩蛋只保留弹跳封带，与现有打包工具合成弹力打包工具，详见 [弹力打包工具规格](twilight-easter-egg-toys.md)。只有玩家被该工具打包后成为史莱姆色系弹力包裹，增加原版史莱姆机制的落地弹跳，以及平地长按 Shift、3 秒满蓄力、松开后向视角方向发射的玩法；其余行为保持原样。其他五件玩具和旧附件结构均撤回。当前先完成 [暮色全物品清单](twilight-item-registry-inventory.md)，之后再选择弹力材料、确定地区成果关联与复杂制造工艺。各区最终机械和精确配方仍待定；彩蛋是可选体验内容，不替代主机械目录，不作为终端升级或碎片的前置。
 
 本轮证据范围：官方 README 与 [机械手实体交互源码](https://github.com/Creators-of-Create/Create/blob/mc1.20.1/dev/src/main/java/com/simibubi/create/content/kinetics/deployer/DeployerHandler.java)说明理念与交互路径；官方源码分支是移动来源，不作为固定版运行验证。本地清单、既有配方/能力文档，以及固定 Jar 的女仆动物繁殖任务与 Create Connected 可编程脉冲部件定义用于识别已有能力，不代表已测试所有布局或暮色生物兼容。
 

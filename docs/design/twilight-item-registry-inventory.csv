@@ -1,0 +1,563 @@
+序号,物品ID,中文名称,英文名称,注册来源,中文名称来源,中文语言键,物品模型路径
+1,twilightforest:alpha_yeti_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.alpha_yeti_banner_pattern,assets/twilightforest/models/item/alpha_yeti_banner_pattern.json
+2,twilightforest:alpha_yeti_fur,雪怪首领毛皮,Alpha Yeti Fur,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.alpha_yeti_fur,assets/twilightforest/models/item/alpha_yeti_fur.json
+3,twilightforest:alpha_yeti_trophy,雪怪首领奖杯,Alpha Yeti Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.alpha_yeti_trophy,assets/twilightforest/models/item/alpha_yeti_trophy.json
+4,twilightforest:arctic_boots,极地靴子,Arctic Boots,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.arctic_boots,assets/twilightforest/models/item/arctic_boots.json
+5,twilightforest:arctic_chestplate,极地皮衣,Arctic Jacket,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.arctic_chestplate,assets/twilightforest/models/item/arctic_chestplate.json
+6,twilightforest:arctic_fur,极地毛皮,Arctic Fur,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.arctic_fur,assets/twilightforest/models/item/arctic_fur.json
+7,twilightforest:arctic_helmet,极地风帽,Arctic Hood,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.arctic_helmet,assets/twilightforest/models/item/arctic_helmet.json
+8,twilightforest:arctic_leggings,极地护腿,Arctic Leggings,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.arctic_leggings,assets/twilightforest/models/item/arctic_leggings.json
+9,twilightforest:armor_shard,装甲碎片,Armor Shard,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.armor_shard,assets/twilightforest/models/item/armor_shard.json
+10,twilightforest:armor_shard_cluster,装甲碎片堆,Armor Shard Cluster,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.armor_shard_cluster,assets/twilightforest/models/item/armor_shard_cluster.json
+11,twilightforest:block_and_chain,链锤,Block and Chain,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.block_and_chain,assets/twilightforest/models/item/block_and_chain.json
+12,twilightforest:borer_essence,蛀虫精华,Borer Essence,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.borer_essence,assets/twilightforest/models/item/borer_essence.json
+13,twilightforest:brittle_potion_flask,易碎药水瓶,Brittle Potion Flask,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.brittle_potion_flask,assets/twilightforest/models/item/brittle_potion_flask.json
+14,twilightforest:canopy_boat,苍穹木船,Canopy Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.canopy_boat,assets/twilightforest/models/item/canopy_boat.json
+15,twilightforest:canopy_chest_boat,苍穹木运输船,Canopy Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.canopy_chest_boat,assets/twilightforest/models/item/canopy_chest_boat.json
+16,twilightforest:canopy_hanging_sign,悬挂式苍穹木告示牌,Canopy Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.canopy_hanging_sign,assets/twilightforest/models/item/canopy_hanging_sign.json
+17,twilightforest:canopy_sign,苍穹木告示牌,Canopy Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.canopy_sign,assets/twilightforest/models/item/canopy_sign.json
+18,twilightforest:carminite,砷铅铁矿石,Carminite,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.carminite,assets/twilightforest/models/item/carminite.json
+19,twilightforest:charm_of_keeping_1,保管符咒 I,Charm of Keeping I,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.charm_of_keeping_1,assets/twilightforest/models/item/charm_of_keeping_1.json
+20,twilightforest:charm_of_keeping_2,保管符咒 II,Charm of Keeping II,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.charm_of_keeping_2,assets/twilightforest/models/item/charm_of_keeping_2.json
+21,twilightforest:charm_of_keeping_3,保管符咒 III,Charm of Keeping III,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.charm_of_keeping_3,assets/twilightforest/models/item/charm_of_keeping_3.json
+22,twilightforest:charm_of_life_1,生命符咒 I,Charm of Life I,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.charm_of_life_1,assets/twilightforest/models/item/charm_of_life_1.json
+23,twilightforest:charm_of_life_2,生命符咒 II,Charm of Life II,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.charm_of_life_2,assets/twilightforest/models/item/charm_of_life_2.json
+24,twilightforest:cicada,蝉,Cicada,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.cicada,assets/twilightforest/models/item/cicada.json
+25,twilightforest:cooked_meef,牛头人肉排,Meef Steak,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.cooked_meef,assets/twilightforest/models/item/cooked_meef.json
+26,twilightforest:cooked_venison,鹿肉排,Venison Steak,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.cooked_venison,assets/twilightforest/models/item/cooked_venison.json
+27,twilightforest:creeper_skull_candle,苦力怕头颅烛台,Creeper Skull Candle,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.creeper_skull_candle,assets/twilightforest/models/item/creeper_skull_candle.json
+28,twilightforest:crumble_horn,瓦解之号角,Crumble Horn,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.crumble_horn,assets/twilightforest/models/item/crumble_horn.json
+29,twilightforest:cube_of_annihilation,湮灭立方,Cube of Annihilation,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.cube_of_annihilation,assets/twilightforest/models/item/cube_of_annihilation.json
+30,twilightforest:cube_talisman,立方护符,Talisman of the Cube,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.cube_talisman,assets/twilightforest/models/item/cube_talisman.json
+31,twilightforest:dark_boat,黑木船,Darkwood Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.dark_boat,assets/twilightforest/models/item/dark_boat.json
+32,twilightforest:dark_chest_boat,黑木运输船,Darkwood Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.dark_chest_boat,assets/twilightforest/models/item/dark_chest_boat.json
+33,twilightforest:dark_hanging_sign,悬挂式黑木告示牌,Darkwood Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.dark_hanging_sign,assets/twilightforest/models/item/dark_hanging_sign.json
+34,twilightforest:dark_sign,黑木告示牌,Darkwood Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.dark_sign,assets/twilightforest/models/item/dark_sign.json
+35,twilightforest:diamond_minotaur_axe,钻石米诺陶战斧,Diamond Minotaur Axe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.diamond_minotaur_axe,assets/twilightforest/models/item/diamond_minotaur_axe.json
+36,twilightforest:ender_bow,末影弓,Ender Bow,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ender_bow,assets/twilightforest/models/item/ender_bow.json
+37,twilightforest:experiment_115,试验物品115,Experiment 115,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.experiment_115,assets/twilightforest/models/item/experiment_115.json
+38,twilightforest:fallen_leaves,落叶,Fallen Leaves,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.fallen_leaves,assets/twilightforest/models/item/fallen_leaves.json
+39,twilightforest:fiery_blood,炽热的血液,Fiery Blood,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_blood,assets/twilightforest/models/item/fiery_blood.json
+40,twilightforest:fiery_boots,炽铁靴子,Fiery Boots,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_boots,assets/twilightforest/models/item/fiery_boots.json
+41,twilightforest:fiery_chestplate,炽铁胸甲,Fiery Chestplate,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_chestplate,assets/twilightforest/models/item/fiery_chestplate.json
+42,twilightforest:fiery_helmet,炽铁头盔,Fiery Helmet,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_helmet,assets/twilightforest/models/item/fiery_helmet.json
+43,twilightforest:fiery_ingot,炽铁锭,Fiery Ingot,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_ingot,assets/twilightforest/models/item/fiery_ingot.json
+44,twilightforest:fiery_leggings,炽铁护腿,Fiery Leggings,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_leggings,assets/twilightforest/models/item/fiery_leggings.json
+45,twilightforest:fiery_pickaxe,炽铁镐,Fiery Pickaxe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_pickaxe,assets/twilightforest/models/item/fiery_pickaxe.json
+46,twilightforest:fiery_sword,炽铁剑,Fiery Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_sword,assets/twilightforest/models/item/fiery_sword.json
+47,twilightforest:fiery_tears,炽热之泪,Fiery Tears,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fiery_tears,assets/twilightforest/models/item/fiery_tears.json
+48,twilightforest:filled_magic_map,魔法地图,Magic Map,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.filled_magic_map,assets/twilightforest/models/item/filled_magic_map.json
+49,twilightforest:filled_maze_map,迷宫地图,Maze Map,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.filled_maze_map,assets/twilightforest/models/item/filled_maze_map.json
+50,twilightforest:filled_ore_map,迷宫/矿石地图,Maze/Ore Map,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.filled_ore_map,assets/twilightforest/models/item/filled_ore_map.json
+51,twilightforest:firefly,萤火虫,Firefly,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.firefly,assets/twilightforest/models/item/firefly.json
+52,twilightforest:fortification_scepter,护盾权杖,Scepter of Fortification,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.fortification_scepter,assets/twilightforest/models/item/fortification_scepter.json
+53,twilightforest:giant_pickaxe,巨人镐,Giant's Pickaxe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.giant_pickaxe,assets/twilightforest/models/item/giant_pickaxe.json
+54,twilightforest:giant_sword,巨人剑,Giant's Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.giant_sword,assets/twilightforest/models/item/giant_sword.json
+55,twilightforest:glass_sword,玻璃剑,Glass Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.glass_sword,assets/twilightforest/models/item/glass_sword.json
+56,twilightforest:gold_minotaur_axe,金米诺陶战斧,Golden Minotaur Axe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.gold_minotaur_axe,assets/twilightforest/models/item/gold_minotaur_axe.json
+57,twilightforest:greater_potion_flask,大型药水瓶,Greater Potion Flask,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.greater_potion_flask,assets/twilightforest/models/item/greater_potion_flask.json
+58,twilightforest:hollow_acacia_log,空心金合欢原木,Hollow Acacia Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_acacia_log_vertical,assets/twilightforest/models/item/hollow_acacia_log.json
+59,twilightforest:hollow_birch_log,空心白桦原木,Hollow Birch Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_birch_log_vertical,assets/twilightforest/models/item/hollow_birch_log.json
+60,twilightforest:hollow_canopy_log,空心苍穹木原木,Hollow Canopy Tree Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_canopy_log_vertical,assets/twilightforest/models/item/hollow_canopy_log.json
+61,twilightforest:hollow_cherry_log,空心樱桃原木,Hollow Cherry Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_cherry_log_vertical,assets/twilightforest/models/item/hollow_cherry_log.json
+62,twilightforest:hollow_crimson_stem,空心绯红菌柄,Hollow Crimson Stem,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_crimson_stem_vertical,assets/twilightforest/models/item/hollow_crimson_stem.json
+63,twilightforest:hollow_dark_log,空心黑木原木,Hollow Darkwood Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_dark_log_vertical,assets/twilightforest/models/item/hollow_dark_log.json
+64,twilightforest:hollow_dark_oak_log,空心深色橡木原木,Hollow Dark Oak Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_dark_oak_log_vertical,assets/twilightforest/models/item/hollow_dark_oak_log.json
+65,twilightforest:hollow_jungle_log,空心丛林原木,Hollow Jungle Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_jungle_log_vertical,assets/twilightforest/models/item/hollow_jungle_log.json
+66,twilightforest:hollow_mangrove_log,空心红树原木,Hollow Mangrove Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_mangrove_log_vertical,assets/twilightforest/models/item/hollow_mangrove_log.json
+67,twilightforest:hollow_mining_log,空心矿石原木,Hollow Minewood Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_mining_log_vertical,assets/twilightforest/models/item/hollow_mining_log.json
+68,twilightforest:hollow_oak_log,空心橡木原木,Hollow Oak Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_oak_log_vertical,assets/twilightforest/models/item/hollow_oak_log.json
+69,twilightforest:hollow_sorting_log,空心分类原木,Hollow Sortingwood Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_sorting_log_vertical,assets/twilightforest/models/item/hollow_sorting_log.json
+70,twilightforest:hollow_spruce_log,空心云杉原木,Hollow Spruce Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_spruce_log_vertical,assets/twilightforest/models/item/hollow_spruce_log.json
+71,twilightforest:hollow_time_log,空心时光原木,Hollow Timewood Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_time_log_vertical,assets/twilightforest/models/item/hollow_time_log.json
+72,twilightforest:hollow_transformation_log,空心变化原木,Hollow Transwood Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_transformation_log_vertical,assets/twilightforest/models/item/hollow_transformation_log.json
+73,twilightforest:hollow_twilight_oak_log,空心暮色橡木原木,Hollow Twilight Oak Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_twilight_oak_log_vertical,assets/twilightforest/models/item/hollow_twilight_oak_log.json
+74,twilightforest:hollow_vangrove_log,空心红树原木,Hollow Mangrove Log,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_vangrove_log_vertical,assets/twilightforest/models/item/hollow_vangrove_log.json
+75,twilightforest:hollow_warped_stem,空心诡异菌柄,Hollow Warped Stem,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hollow_warped_stem_vertical,assets/twilightforest/models/item/hollow_warped_stem.json
+76,twilightforest:huge_lily_pad,巨型睡莲,Huge Lily Pad,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.huge_lily_pad,assets/twilightforest/models/item/huge_lily_pad.json
+77,twilightforest:huge_water_lily,巨型荷花,Huge Water Lily,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.huge_water_lily,assets/twilightforest/models/item/huge_water_lily.json
+78,twilightforest:hydra_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.hydra_banner_pattern,assets/twilightforest/models/item/hydra_banner_pattern.json
+79,twilightforest:hydra_chop,九头蛇肉排,Hydra Chop,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.hydra_chop,assets/twilightforest/models/item/hydra_chop.json
+80,twilightforest:hydra_trophy,九头蛇奖杯,Hydra Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.hydra_trophy,assets/twilightforest/models/item/hydra_trophy.json
+81,twilightforest:ice_bomb,冰霜炸弹,Ice Bomb,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ice_bomb,assets/twilightforest/models/item/ice_bomb.json
+82,twilightforest:ice_bow,寒冰弓,Ice Bow,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ice_bow,assets/twilightforest/models/item/ice_bow.json
+83,twilightforest:ice_sword,寒冰剑,Ice Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ice_sword,assets/twilightforest/models/item/ice_sword.json
+84,twilightforest:ironwood_axe,铁木斧,Ironwood Axe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_axe,assets/twilightforest/models/item/ironwood_axe.json
+85,twilightforest:ironwood_boots,铁木靴子,Ironwood Boots,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_boots,assets/twilightforest/models/item/ironwood_boots.json
+86,twilightforest:ironwood_chestplate,铁木胸甲,Ironwood Chestplate,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_chestplate,assets/twilightforest/models/item/ironwood_chestplate.json
+87,twilightforest:ironwood_helmet,铁木头盔,Ironwood Helmet,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_helmet,assets/twilightforest/models/item/ironwood_helmet.json
+88,twilightforest:ironwood_hoe,铁木锄,Ironwood Hoe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_hoe,assets/twilightforest/models/item/ironwood_hoe.json
+89,twilightforest:ironwood_ingot,铁木锭,Ironwood Ingot,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_ingot,assets/twilightforest/models/item/ironwood_ingot.json
+90,twilightforest:ironwood_leggings,铁木护腿,Ironwood Leggings,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_leggings,assets/twilightforest/models/item/ironwood_leggings.json
+91,twilightforest:ironwood_pickaxe,铁木镐,Ironwood Pickaxe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_pickaxe,assets/twilightforest/models/item/ironwood_pickaxe.json
+92,twilightforest:ironwood_shovel,铁木锹,Ironwood Shovel,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_shovel,assets/twilightforest/models/item/ironwood_shovel.json
+93,twilightforest:ironwood_sword,铁木剑,Ironwood Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ironwood_sword,assets/twilightforest/models/item/ironwood_sword.json
+94,twilightforest:knight_phantom_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knight_phantom_banner_pattern,assets/twilightforest/models/item/knight_phantom_banner_pattern.json
+95,twilightforest:knight_phantom_trophy,幻影骑士奖杯,Knight Phantom Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.knight_phantom_trophy,assets/twilightforest/models/item/knight_phantom_trophy.json
+96,twilightforest:knightmetal_axe,骑士斧,Knightmetal Axe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_axe,assets/twilightforest/models/item/knightmetal_axe.json
+97,twilightforest:knightmetal_boots,骑士靴子,Knightmetal Boots,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_boots,assets/twilightforest/models/item/knightmetal_boots.json
+98,twilightforest:knightmetal_chestplate,骑士胸甲,Knightmetal Chestplate,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_chestplate,assets/twilightforest/models/item/knightmetal_chestplate.json
+99,twilightforest:knightmetal_helmet,骑士头盔,Knightmetal Helmet,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_helmet,assets/twilightforest/models/item/knightmetal_helmet.json
+100,twilightforest:knightmetal_ingot,骑士金属锭,Knightmetal Ingot,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_ingot,assets/twilightforest/models/item/knightmetal_ingot.json
+101,twilightforest:knightmetal_leggings,骑士护腿,Knightmetal Greaves,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_leggings,assets/twilightforest/models/item/knightmetal_leggings.json
+102,twilightforest:knightmetal_pickaxe,骑士镐,Knightmetal Pickaxe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_pickaxe,assets/twilightforest/models/item/knightmetal_pickaxe.json
+103,twilightforest:knightmetal_ring,骑士金属环,Knightmetal Loop,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_ring,assets/twilightforest/models/item/knightmetal_ring.json
+104,twilightforest:knightmetal_shield,骑士盾牌,Knightmetal Shield,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_shield,assets/twilightforest/models/item/knightmetal_shield.json
+105,twilightforest:knightmetal_sword,骑士剑,Knightmetal Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.knightmetal_sword,assets/twilightforest/models/item/knightmetal_sword.json
+106,twilightforest:lamp_of_cinders,余烬之灯,Lamp of Cinders,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.lamp_of_cinders,assets/twilightforest/models/item/lamp_of_cinders.json
+107,twilightforest:lich_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.lich_banner_pattern,assets/twilightforest/models/item/lich_banner_pattern.json
+108,twilightforest:lich_trophy,巫妖奖杯,Lich Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.lich_trophy,assets/twilightforest/models/item/lich_trophy.json
+109,twilightforest:lifedrain_scepter,吸血权杖,Scepter of Life Draining,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.lifedrain_scepter,assets/twilightforest/models/item/lifedrain_scepter.json
+110,twilightforest:liveroot,活根,Liveroot,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.liveroot,assets/twilightforest/models/item/liveroot.json
+111,twilightforest:magic_beans,魔豆,Magic Beans,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.magic_beans,assets/twilightforest/models/item/magic_beans.json
+112,twilightforest:magic_map,空白魔法地图,Blank Magic Map,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.magic_map,assets/twilightforest/models/item/magic_map.json
+113,twilightforest:magic_map_focus,魔法地图核心,Magic Map Focus,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.magic_map_focus,assets/twilightforest/models/item/magic_map_focus.json
+114,twilightforest:magic_painting,魔法画作,Magic Painting,TFItems 显式物品注册,整合包汉化,item.twilightforest.magic_painting,assets/twilightforest/models/item/magic_painting.json
+115,twilightforest:mangrove_boat,红树木船,Mangrove Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.mangrove_boat,assets/twilightforest/models/item/mangrove_boat.json
+116,twilightforest:mangrove_chest_boat,红树木运输船,Mangrove Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.mangrove_chest_boat,assets/twilightforest/models/item/mangrove_chest_boat.json
+117,twilightforest:mangrove_hanging_sign,悬挂式红树木告示牌,Mangrove Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.mangrove_hanging_sign,assets/twilightforest/models/item/mangrove_hanging_sign.json
+118,twilightforest:mangrove_sign,红树木告示牌,Mangrove Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.mangrove_sign,assets/twilightforest/models/item/mangrove_sign.json
+119,twilightforest:maze_map,空白迷宫地图,Blank Maze Map,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.maze_map,assets/twilightforest/models/item/maze_map.json
+120,twilightforest:maze_map_focus,迷宫地图核心,Maze Map Focus,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.maze_map_focus,assets/twilightforest/models/item/maze_map_focus.json
+121,twilightforest:maze_wafer,迷宫薄饼,Maze Wafer,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.maze_wafer,assets/twilightforest/models/item/maze_wafer.json
+122,twilightforest:mazebreaker_pickaxe,迷宫破坏者,Mazebreaker,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.mazebreaker_pickaxe,assets/twilightforest/models/item/mazebreaker_pickaxe.json
+123,twilightforest:meef_stroganoff,牛头人沙拉酱肉,Meef Stroganoff,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.meef_stroganoff,assets/twilightforest/models/item/meef_stroganoff.json
+124,twilightforest:mining_boat,矿石木船,Minewood Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.mining_boat,assets/twilightforest/models/item/mining_boat.json
+125,twilightforest:mining_chest_boat,矿石木运输船,Minewood Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.mining_chest_boat,assets/twilightforest/models/item/mining_chest_boat.json
+126,twilightforest:mining_hanging_sign,悬挂式矿石木告示牌,Minewood Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.mining_hanging_sign,assets/twilightforest/models/item/mining_hanging_sign.json
+127,twilightforest:mining_sign,矿石木告示牌,Minewood Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.mining_sign,assets/twilightforest/models/item/mining_sign.json
+128,twilightforest:minoshroom_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.minoshroom_banner_pattern,assets/twilightforest/models/item/minoshroom_banner_pattern.json
+129,twilightforest:minoshroom_trophy,米诺菇奖杯,Minoshroom Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.minoshroom_trophy,assets/twilightforest/models/item/minoshroom_trophy.json
+130,twilightforest:moon_dial,月相罗盘,Moon Dial,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.moon_dial,assets/twilightforest/models/item/moon_dial.json
+131,twilightforest:moonworm,月光蠕虫,Moonworm,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.moonworm,assets/twilightforest/models/item/moonworm.json
+132,twilightforest:moonworm_queen,月光蠕虫女王,Moonworm Queen,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.moonworm_queen,assets/twilightforest/models/item/moonworm_queen.json
+133,twilightforest:music_disc_findings,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_findings,assets/twilightforest/models/item/music_disc_findings.json
+134,twilightforest:music_disc_home,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_home,assets/twilightforest/models/item/music_disc_home.json
+135,twilightforest:music_disc_maker,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_maker,assets/twilightforest/models/item/music_disc_maker.json
+136,twilightforest:music_disc_motion,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_motion,assets/twilightforest/models/item/music_disc_motion.json
+137,twilightforest:music_disc_radiance,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_radiance,assets/twilightforest/models/item/music_disc_radiance.json
+138,twilightforest:music_disc_steps,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_steps,assets/twilightforest/models/item/music_disc_steps.json
+139,twilightforest:music_disc_superstitious,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_superstitious,assets/twilightforest/models/item/music_disc_superstitious.json
+140,twilightforest:music_disc_thread,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_thread,assets/twilightforest/models/item/music_disc_thread.json
+141,twilightforest:music_disc_wayfarer,音乐唱片,Music Disc,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.music_disc_wayfarer,assets/twilightforest/models/item/music_disc_wayfarer.json
+142,twilightforest:naga_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.naga_banner_pattern,assets/twilightforest/models/item/naga_banner_pattern.json
+143,twilightforest:naga_chestplate,娜迦胸甲,Naga Scale Tunic,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.naga_chestplate,assets/twilightforest/models/item/naga_chestplate.json
+144,twilightforest:naga_leggings,娜迦护腿,Naga Scale Leggings,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.naga_leggings,assets/twilightforest/models/item/naga_leggings.json
+145,twilightforest:naga_scale,娜迦鳞片,Naga Scale,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.naga_scale,assets/twilightforest/models/item/naga_scale.json
+146,twilightforest:naga_trophy,娜迦奖杯,Naga Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.naga_trophy,assets/twilightforest/models/item/naga_trophy.json
+147,twilightforest:ore_magnet,矿石磁铁,Ore Magnet,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ore_magnet,assets/twilightforest/models/item/ore_magnet.json
+148,twilightforest:ore_map,空白迷宫/矿石地图,Blank Maze/Ore Map,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ore_map,assets/twilightforest/models/item/ore_map.json
+149,twilightforest:ore_meter,矿石感应仪,Ore Meter,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ore_meter,assets/twilightforest/models/item/ore_meter.json
+150,twilightforest:peacock_feather_fan,孔雀羽扇,Peacock Feather Fan,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.peacock_feather_fan,assets/twilightforest/models/item/peacock_feather_fan.json
+151,twilightforest:phantom_chestplate,幻影胸甲,Phantom Chestplate,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.phantom_chestplate,assets/twilightforest/models/item/phantom_chestplate.json
+152,twilightforest:phantom_helmet,幻影头盔,Phantom Helmet,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.phantom_helmet,assets/twilightforest/models/item/phantom_helmet.json
+153,twilightforest:piglin_skull_candle,猪灵头颅烛台,Piglin Skull Candle,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.piglin_skull_candle,assets/twilightforest/models/item/piglin_skull_candle.json
+154,twilightforest:player_skull_candle,头颅烛台,Player Skull Candle,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.player_skull_candle,assets/twilightforest/models/item/player_skull_candle.json
+155,twilightforest:quest_ram_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.quest_ram_banner_pattern,assets/twilightforest/models/item/quest_ram_banner_pattern.json
+156,twilightforest:quest_ram_trophy,谜题羊奖杯,Quest Ram Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.quest_ram_trophy,assets/twilightforest/models/item/quest_ram_trophy.json
+157,twilightforest:raven_feather,渡鸦羽毛,Raven Feather,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.raven_feather,assets/twilightforest/models/item/raven_feather.json
+158,twilightforest:raw_ironwood,粗铁木,Raw Ironwood,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.raw_ironwood,assets/twilightforest/models/item/raw_ironwood.json
+159,twilightforest:raw_meef,生牛头人肉,Raw Meef,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.raw_meef,assets/twilightforest/models/item/raw_meef.json
+160,twilightforest:raw_venison,生鹿肉,Raw Venison,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.raw_venison,assets/twilightforest/models/item/raw_venison.json
+161,twilightforest:seeker_bow,追踪弓,Seeker Bow,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.seeker_bow,assets/twilightforest/models/item/seeker_bow.json
+162,twilightforest:skeleton_skull_candle,骷髅头烛台,Skeleton Skull Candle,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.skeleton_skull_candle,assets/twilightforest/models/item/skeleton_skull_candle.json
+163,twilightforest:snow_queen_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.snow_queen_banner_pattern,assets/twilightforest/models/item/snow_queen_banner_pattern.json
+164,twilightforest:snow_queen_trophy,冰雪女王奖杯,Snow Queen Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.snow_queen_trophy,assets/twilightforest/models/item/snow_queen_trophy.json
+165,twilightforest:sorting_boat,分类木船,Sortingwood Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.sorting_boat,assets/twilightforest/models/item/sorting_boat.json
+166,twilightforest:sorting_chest_boat,分类木运输船,Sortingwood Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.sorting_chest_boat,assets/twilightforest/models/item/sorting_chest_boat.json
+167,twilightforest:sorting_hanging_sign,悬挂式分类木告示牌,Sortingwood Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.sorting_hanging_sign,assets/twilightforest/models/item/sorting_hanging_sign.json
+168,twilightforest:sorting_sign,分类木告示牌,Sortingwood Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.sorting_sign,assets/twilightforest/models/item/sorting_sign.json
+169,twilightforest:steeleaf_axe,钢叶斧,Steeleaf Axe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_axe,assets/twilightforest/models/item/steeleaf_axe.json
+170,twilightforest:steeleaf_boots,钢叶靴子,Steeleaf Boots,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_boots,assets/twilightforest/models/item/steeleaf_boots.json
+171,twilightforest:steeleaf_chestplate,钢叶胸甲,Steeleaf Chestplate,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_chestplate,assets/twilightforest/models/item/steeleaf_chestplate.json
+172,twilightforest:steeleaf_helmet,钢叶头盔,Steeleaf Helmet,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_helmet,assets/twilightforest/models/item/steeleaf_helmet.json
+173,twilightforest:steeleaf_hoe,钢叶锄,Steeleaf Hoe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_hoe,assets/twilightforest/models/item/steeleaf_hoe.json
+174,twilightforest:steeleaf_ingot,钢叶,Steeleaf,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_ingot,assets/twilightforest/models/item/steeleaf_ingot.json
+175,twilightforest:steeleaf_leggings,钢叶护腿,Steeleaf Leggings,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_leggings,assets/twilightforest/models/item/steeleaf_leggings.json
+176,twilightforest:steeleaf_pickaxe,钢叶镐,Steeleaf Pickaxe,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_pickaxe,assets/twilightforest/models/item/steeleaf_pickaxe.json
+177,twilightforest:steeleaf_shovel,钢叶锹,Steeleaf Shovel,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_shovel,assets/twilightforest/models/item/steeleaf_shovel.json
+178,twilightforest:steeleaf_sword,钢叶剑,Steeleaf Sword,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.steeleaf_sword,assets/twilightforest/models/item/steeleaf_sword.json
+179,twilightforest:time_boat,时光木船,Timewood Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.time_boat,assets/twilightforest/models/item/time_boat.json
+180,twilightforest:time_chest_boat,时光木运输船,Timewood Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.time_chest_boat,assets/twilightforest/models/item/time_chest_boat.json
+181,twilightforest:time_hanging_sign,悬挂式时光木告示牌,Timewood Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.time_hanging_sign,assets/twilightforest/models/item/time_hanging_sign.json
+182,twilightforest:time_sign,时光木告示牌,Timewood Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.time_sign,assets/twilightforest/models/item/time_sign.json
+183,twilightforest:torchberries,火炬浆果,Torchberries,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.torchberries,assets/twilightforest/models/item/torchberries.json
+184,twilightforest:tower_key,塔钥匙,Tower Key,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.tower_key,assets/twilightforest/models/item/tower_key.json
+185,twilightforest:transformation_boat,变化木船,Transwood Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.transformation_boat,assets/twilightforest/models/item/transformation_boat.json
+186,twilightforest:transformation_chest_boat,变化木运输船,Transwood Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.transformation_chest_boat,assets/twilightforest/models/item/transformation_chest_boat.json
+187,twilightforest:transformation_hanging_sign,悬挂式变化木告示牌,Transwood Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.transformation_hanging_sign,assets/twilightforest/models/item/transformation_hanging_sign.json
+188,twilightforest:transformation_powder,转换粉,Transformation Powder,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.transformation_powder,assets/twilightforest/models/item/transformation_powder.json
+189,twilightforest:transformation_sign,变化木告示牌,Transwood Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.transformation_sign,assets/twilightforest/models/item/transformation_sign.json
+190,twilightforest:triple_bow,三发弓,Tri-Bow,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.triple_bow,assets/twilightforest/models/item/triple_bow.json
+191,twilightforest:twilight_oak_boat,暮色橡木船,Twilight Oak Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.twilight_oak_boat,assets/twilightforest/models/item/twilight_oak_boat.json
+192,twilightforest:twilight_oak_chest_boat,暮色橡木运输船,Twilight Oak Chest Boat,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.twilight_oak_chest_boat,assets/twilightforest/models/item/twilight_oak_chest_boat.json
+193,twilightforest:twilight_oak_hanging_sign,悬挂式暮色橡木告示牌,Twilight Oak Hanging Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_hanging_sign,assets/twilightforest/models/item/twilight_oak_hanging_sign.json
+194,twilightforest:twilight_oak_sign,暮色橡木告示牌,Twilight Oak Sign,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_sign,assets/twilightforest/models/item/twilight_oak_sign.json
+195,twilightforest:twilight_scepter,黄昏权杖,Scepter of Twilight,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.twilight_scepter,assets/twilightforest/models/item/twilight_scepter.json
+196,twilightforest:ur_ghast_banner_pattern,旗帜图案,Banner Pattern,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.ur_ghast_banner_pattern,assets/twilightforest/models/item/ur_ghast_banner_pattern.json
+197,twilightforest:ur_ghast_trophy,暮初恶魂奖杯,Ur-Ghast Trophy,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.ur_ghast_trophy,assets/twilightforest/models/item/ur_ghast_trophy.json
+198,twilightforest:wither_skeleton_skull_candle,凋灵骷髅头烛台,Wither Skeleton Skull Candle,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.wither_skeleton_skull_candle,assets/twilightforest/models/item/wither_skeleton_skull_candle.json
+199,twilightforest:yeti_boots,雪怪靴子,Yeti Boots,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.yeti_boots,assets/twilightforest/models/item/yeti_boots.json
+200,twilightforest:yeti_chestplate,雪怪皮衣,Yeti Jacket,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.yeti_chestplate,assets/twilightforest/models/item/yeti_chestplate.json
+201,twilightforest:yeti_helmet,雪怪角盔,Yeti Horned Helm,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.yeti_helmet,assets/twilightforest/models/item/yeti_helmet.json
+202,twilightforest:yeti_leggings,雪怪护腿,Yeti Leggings,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.yeti_leggings,assets/twilightforest/models/item/yeti_leggings.json
+203,twilightforest:zombie_scepter,僵尸权杖,Zombie Scepter,TFItems 显式物品注册,暮色原版语言文件,item.twilightforest.zombie_scepter,assets/twilightforest/models/item/zombie_scepter.json
+204,twilightforest:zombie_skull_candle,僵尸头颅烛台,Zombie Skull Candle,TFItems 显式物品注册,暮色原版语言文件,block.twilightforest.zombie_skull_candle,assets/twilightforest/models/item/zombie_skull_candle.json
+205,twilightforest:acacia_banister,金合欢木栏杆,Acacia Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.acacia_banister,assets/twilightforest/models/item/acacia_banister.json
+206,twilightforest:alpha_yeti_boss_spawner,雪怪首领Boss刷怪笼,Alpha Yeti Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.alpha_yeti_boss_spawner,assets/twilightforest/models/item/alpha_yeti_boss_spawner.json
+207,twilightforest:antibuilder,反建器,Antibuilder,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.antibuilder,assets/twilightforest/models/item/antibuilder.json
+208,twilightforest:arctic_fur_block,极地毛皮块,Block of Arctic Fur,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.arctic_fur_block,assets/twilightforest/models/item/arctic_fur_block.json
+209,twilightforest:aurora_block,极光方块,Aurora Block,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.aurora_block,assets/twilightforest/models/item/aurora_block.json
+210,twilightforest:aurora_pillar,极光柱,Aurora Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.aurora_pillar,assets/twilightforest/models/item/aurora_pillar.json
+211,twilightforest:aurora_slab,极光台阶,Aurora Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.aurora_slab,assets/twilightforest/models/item/aurora_slab.json
+212,twilightforest:auroralized_glass,极光玻璃,Auroralized Glass,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.auroralized_glass,assets/twilightforest/models/item/auroralized_glass.json
+213,twilightforest:bamboo_banister,竹栏杆,Bamboo Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.bamboo_banister,assets/twilightforest/models/item/bamboo_banister.json
+214,twilightforest:beanstalk_leaves,豆茎叶,Beanstalk Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.beanstalk_leaves,assets/twilightforest/models/item/beanstalk_leaves.json
+215,twilightforest:birch_banister,白桦木栏杆,Birch Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.birch_banister,assets/twilightforest/models/item/birch_banister.json
+216,twilightforest:blue_castle_door,蓝色城堡门,Blue Castle Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.blue_castle_door,assets/twilightforest/models/item/blue_castle_door.json
+217,twilightforest:blue_castle_rune_brick,蓝色城堡符文砖,Blue Castle Rune Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.blue_castle_rune_brick,assets/twilightforest/models/item/blue_castle_rune_brick.json
+218,twilightforest:blue_force_field,蓝色力场,Blue Force Field,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.blue_force_field,assets/twilightforest/models/item/blue_force_field.json
+219,twilightforest:bold_castle_brick_pillar,粗纹城堡砖柱,Bold Castle Brick Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.bold_castle_brick_pillar,assets/twilightforest/models/item/bold_castle_brick_pillar.json
+220,twilightforest:bold_castle_brick_stairs,粗纹城堡砖楼梯,Bold Castle Brick Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.bold_castle_brick_stairs,assets/twilightforest/models/item/bold_castle_brick_stairs.json
+221,twilightforest:bold_castle_brick_tile,粗纹城堡砖瓦,Bold Castle Brick Tile,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.bold_castle_brick_tile,assets/twilightforest/models/item/bold_castle_brick_tile.json
+222,twilightforest:bold_stone_pillar,石巨柱,Bold Stone Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.bold_stone_pillar,assets/twilightforest/models/item/bold_stone_pillar.json
+223,twilightforest:brown_thorns,荆棘,Thorns,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.brown_thorns,assets/twilightforest/models/item/brown_thorns.json
+224,twilightforest:burnt_thorns,烧焦荆棘,Burnt Thorns,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.burnt_thorns,assets/twilightforest/models/item/burnt_thorns.json
+225,twilightforest:candelabra,烛台,Candelabra,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.candelabra,assets/twilightforest/models/item/candelabra.json
+226,twilightforest:canopy_banister,苍穹木栏杆,Canopy Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_banister,assets/twilightforest/models/item/canopy_banister.json
+227,twilightforest:canopy_bookshelf,苍穹木书架,Canopy Bookshelf,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_bookshelf,assets/twilightforest/models/item/canopy_bookshelf.json
+228,twilightforest:canopy_button,苍穹木按钮,Canopy Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_button,assets/twilightforest/models/item/canopy_button.json
+229,twilightforest:canopy_chest,苍穹木箱子,Canopy Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_chest,assets/twilightforest/models/item/canopy_chest.json
+230,twilightforest:canopy_door,苍穹木门,Canopy Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_door,assets/twilightforest/models/item/canopy_door.json
+231,twilightforest:canopy_fence,苍穹木栅栏,Canopy Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_fence,assets/twilightforest/models/item/canopy_fence.json
+232,twilightforest:canopy_fence_gate,苍穹木栅栏门,Canopy Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_fence_gate,assets/twilightforest/models/item/canopy_fence_gate.json
+233,twilightforest:canopy_leaves,苍穹树叶,Canopy Tree Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_leaves,assets/twilightforest/models/item/canopy_leaves.json
+234,twilightforest:canopy_log,苍穹原木,Canopy Tree Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_log,assets/twilightforest/models/item/canopy_log.json
+235,twilightforest:canopy_planks,苍穹木板,Canopy Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_planks,assets/twilightforest/models/item/canopy_planks.json
+236,twilightforest:canopy_pressure_plate,苍穹木压力板,Canopy Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_pressure_plate,assets/twilightforest/models/item/canopy_pressure_plate.json
+237,twilightforest:canopy_sapling,苍穹树苗,Canopy Tree Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_sapling,assets/twilightforest/models/item/canopy_sapling.json
+238,twilightforest:canopy_slab,苍穹木台阶,Canopy Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_slab,assets/twilightforest/models/item/canopy_slab.json
+239,twilightforest:canopy_stairs,苍穹木楼梯,Canopy Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_stairs,assets/twilightforest/models/item/canopy_stairs.json
+240,twilightforest:canopy_trapdoor,苍穹木活板门,Canopy Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_trapdoor,assets/twilightforest/models/item/canopy_trapdoor.json
+241,twilightforest:canopy_wood,苍穹木,Canopy Tree Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.canopy_wood,assets/twilightforest/models/item/canopy_wood.json
+242,twilightforest:carminite_block,砷铅铁块,Block of Carminite,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.carminite_block,assets/twilightforest/models/item/carminite_block.json
+243,twilightforest:carminite_builder,砷铅铁建造器,Carminite Builder,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.carminite_builder,assets/twilightforest/models/item/carminite_builder.json
+244,twilightforest:carminite_reactor,砷铅铁反应堆,Carminite Reactor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.carminite_reactor,assets/twilightforest/models/item/carminite_reactor.json
+245,twilightforest:castle_brick,城堡砖,Castle Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.castle_brick,assets/twilightforest/models/item/castle_brick.json
+246,twilightforest:castle_brick_stairs,城堡砖楼梯,Castle Brick Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.castle_brick_stairs,assets/twilightforest/models/item/castle_brick_stairs.json
+247,twilightforest:castle_roof_tile,城堡顶瓦,Castle Roof Tile,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.castle_roof_tile,assets/twilightforest/models/item/castle_roof_tile.json
+248,twilightforest:cherry_banister,樱花木栏杆,Cherry Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cherry_banister,assets/twilightforest/models/item/cherry_banister.json
+249,twilightforest:cicada_jar,蝉罐子,Cicada Jar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cicada_jar,assets/twilightforest/models/item/cicada_jar.json
+250,twilightforest:cinder_furnace,余烬熔炉,Cinder Furnace,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cinder_furnace,assets/twilightforest/models/item/cinder_furnace.json
+251,twilightforest:cinder_log,余烬原木,Cinder Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cinder_log,assets/twilightforest/models/item/cinder_log.json
+252,twilightforest:cinder_wood,余烬木,Cinder Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cinder_wood,assets/twilightforest/models/item/cinder_wood.json
+253,twilightforest:clover_patch,三叶草,Clover Patch,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.clover_patch,assets/twilightforest/models/item/clover_patch.json
+254,twilightforest:cracked_castle_brick,裂纹城堡砖,Cracked Castle Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_castle_brick,assets/twilightforest/models/item/cracked_castle_brick.json
+255,twilightforest:cracked_castle_brick_stairs,裂纹城堡砖楼梯,Cracked Castle Brick Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_castle_brick_stairs,assets/twilightforest/models/item/cracked_castle_brick_stairs.json
+256,twilightforest:cracked_deadrock,裂纹死岩,Cracked Deadrock,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_deadrock,assets/twilightforest/models/item/cracked_deadrock.json
+257,twilightforest:cracked_etched_nagastone,裂纹蚀刻娜迦石,Cracked Etched Nagastone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_etched_nagastone,assets/twilightforest/models/item/cracked_etched_nagastone.json
+258,twilightforest:cracked_mazestone,裂纹迷宫石砖,Cracked Mazestone Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_mazestone,assets/twilightforest/models/item/cracked_mazestone.json
+259,twilightforest:cracked_nagastone_pillar,裂纹娜迦石柱,Cracked Nagastone Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_nagastone_pillar,assets/twilightforest/models/item/cracked_nagastone_pillar.json
+260,twilightforest:cracked_nagastone_stairs_left,裂纹娜迦石楼梯(左),Cracked Nagastone Stairs (Left),TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_nagastone_stairs_left,assets/twilightforest/models/item/cracked_nagastone_stairs_left.json
+261,twilightforest:cracked_nagastone_stairs_right,裂纹娜迦石楼梯(右),Cracked Nagastone Stairs (Right),TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_nagastone_stairs_right,assets/twilightforest/models/item/cracked_nagastone_stairs_right.json
+262,twilightforest:cracked_towerwood,破裂塔木木板,Cracked Towerwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_towerwood,assets/twilightforest/models/item/cracked_towerwood.json
+263,twilightforest:cracked_underbrick,裂纹地下砖,Cracked Underbrick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cracked_underbrick,assets/twilightforest/models/item/cracked_underbrick.json
+264,twilightforest:crimson_banister,绯红木栏杆,Crimson Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.crimson_banister,assets/twilightforest/models/item/crimson_banister.json
+265,twilightforest:cut_mazestone,錾制迷宫石,Cut Mazestone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.cut_mazestone,assets/twilightforest/models/item/cut_mazestone.json
+266,twilightforest:dark_banister,黑木栏杆,Darkwood Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_banister,assets/twilightforest/models/item/dark_banister.json
+267,twilightforest:dark_button,黑木按钮,Darkwood Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_button,assets/twilightforest/models/item/dark_button.json
+268,twilightforest:dark_chest,黑木箱子,Darkwood Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_chest,assets/twilightforest/models/item/dark_chest.json
+269,twilightforest:dark_door,黑木门,Darkwood Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_door,assets/twilightforest/models/item/dark_door.json
+270,twilightforest:dark_fence,黑木栅栏,Darkwood Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_fence,assets/twilightforest/models/item/dark_fence.json
+271,twilightforest:dark_fence_gate,黑木栅栏门,Darkwood Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_fence_gate,assets/twilightforest/models/item/dark_fence_gate.json
+272,twilightforest:dark_leaves,黑树树叶,Darkwood Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_leaves,assets/twilightforest/models/item/dark_leaves.json
+273,twilightforest:dark_log,黑木原木,Darkwood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_log,assets/twilightforest/models/item/dark_log.json
+274,twilightforest:dark_oak_banister,深色橡木栏杆,Dark Oak Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_oak_banister,assets/twilightforest/models/item/dark_oak_banister.json
+275,twilightforest:dark_planks,黑木木板,Darkwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_planks,assets/twilightforest/models/item/dark_planks.json
+276,twilightforest:dark_pressure_plate,黑木压力板,Darkwood Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_pressure_plate,assets/twilightforest/models/item/dark_pressure_plate.json
+277,twilightforest:dark_slab,黑木台阶,Darkwood Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_slab,assets/twilightforest/models/item/dark_slab.json
+278,twilightforest:dark_stairs,黑木楼梯,Darkwood Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_stairs,assets/twilightforest/models/item/dark_stairs.json
+279,twilightforest:dark_trapdoor,黑木活板门,Darkwood Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_trapdoor,assets/twilightforest/models/item/dark_trapdoor.json
+280,twilightforest:dark_wood,黑木,Darkwood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.dark_wood,assets/twilightforest/models/item/dark_wood.json
+281,twilightforest:darkwood_sapling,黑树树苗,Darkwood Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.darkwood_sapling,assets/twilightforest/models/item/darkwood_sapling.json
+282,twilightforest:deadrock,死岩,Deadrock,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.deadrock,assets/twilightforest/models/item/deadrock.json
+283,twilightforest:death_tome_spawner,死灵书柜,Death Tome Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.death_tome_spawner,assets/twilightforest/models/item/death_tome_spawner.json
+284,twilightforest:decorative_mazestone,装饰迷宫石砖,Decorative Mazestone Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.decorative_mazestone,assets/twilightforest/models/item/decorative_mazestone.json
+285,twilightforest:empty_canopy_bookshelf,空苍穹书架,Empty Canopy Bookshelf,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.empty_canopy_bookshelf,assets/twilightforest/models/item/empty_canopy_bookshelf.json
+286,twilightforest:encased_castle_brick_pillar,黑纹城堡砖柱,Encased Castle Brick Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.encased_castle_brick_pillar,assets/twilightforest/models/item/encased_castle_brick_pillar.json
+287,twilightforest:encased_castle_brick_stairs,黑纹城堡砖楼梯,Encased Castle Brick Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.encased_castle_brick_stairs,assets/twilightforest/models/item/encased_castle_brick_stairs.json
+288,twilightforest:encased_castle_brick_tile,黑纹城堡砖瓦,Encased Castle Brick Tile,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.encased_castle_brick_tile,assets/twilightforest/models/item/encased_castle_brick_tile.json
+289,twilightforest:encased_fire_jet,封装射焰方块,Encased Fire Jet,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.encased_fire_jet,assets/twilightforest/models/item/encased_fire_jet.json
+290,twilightforest:encased_smoker,封装烟雾方块,Encased Smoker,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.encased_smoker,assets/twilightforest/models/item/encased_smoker.json
+291,twilightforest:encased_towerwood,封装塔木木板,Encased Towerwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.encased_towerwood,assets/twilightforest/models/item/encased_towerwood.json
+292,twilightforest:etched_nagastone,蚀刻娜迦石,Etched Nagastone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.etched_nagastone,assets/twilightforest/models/item/etched_nagastone.json
+293,twilightforest:fiddlehead,暮色蕨,Fiddlehead Fern,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.fiddlehead,assets/twilightforest/models/item/fiddlehead.json
+294,twilightforest:fiery_block,炽铁块,Block of Fiery Metal,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.fiery_block,assets/twilightforest/models/item/fiery_block.json
+295,twilightforest:final_boss_boss_spawner,高原首领Boss刷怪笼,Final Boss Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.final_boss_boss_spawner,assets/twilightforest/models/item/final_boss_boss_spawner.json
+296,twilightforest:fire_jet,射焰方块,Fire Jet,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.fire_jet,assets/twilightforest/models/item/fire_jet.json
+297,twilightforest:firefly_jar,萤火虫罐子,Firefly Jar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.firefly_jar,assets/twilightforest/models/item/firefly_jar.json
+298,twilightforest:firefly_particle_spawner,萤火粒子罐,Firefly Particle Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.firefly_particle_spawner,assets/twilightforest/models/item/firefly_particle_spawner.json
+299,twilightforest:fluffy_cloud,浮云,Fluffy Cloud,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.fluffy_cloud,assets/twilightforest/models/item/fluffy_cloud.json
+300,twilightforest:ghast_trap,恶魂陷阱,Ghast Trap,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.ghast_trap,assets/twilightforest/models/item/ghast_trap.json
+301,twilightforest:giant_cobblestone,巨型圆石,Giant Cobblestone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.giant_cobblestone,assets/twilightforest/models/item/giant_cobblestone.json
+302,twilightforest:giant_leaves,巨型树叶,Giant Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.giant_leaves,assets/twilightforest/models/item/giant_leaves.json
+303,twilightforest:giant_log,巨型原木,Giant Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.giant_log,assets/twilightforest/models/item/giant_log.json
+304,twilightforest:giant_obsidian,巨型黑曜石,Giant Obsidian,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.giant_obsidian,assets/twilightforest/models/item/giant_obsidian.json
+305,twilightforest:green_force_field,绿色力场,Green Force Field,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.green_force_field,assets/twilightforest/models/item/green_force_field.json
+306,twilightforest:green_thorns,翠绿荆棘,Green Thorns,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.green_thorns,assets/twilightforest/models/item/green_thorns.json
+307,twilightforest:hedge,树篱,Hedge,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.hedge,assets/twilightforest/models/item/hedge.json
+308,twilightforest:hollow_oak_sapling,高大暮色橡树树苗,Robust Twilight Oak Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.hollow_oak_sapling,assets/twilightforest/models/item/hollow_oak_sapling.json
+309,twilightforest:huge_mushgloom,巨型荧光蘑菇块,Huge Mushgloom Block,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.huge_mushgloom,assets/twilightforest/models/item/huge_mushgloom.json
+310,twilightforest:huge_mushgloom_stem,巨型荧光蘑菇柄,Huge Mushgloom Stem,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.huge_mushgloom_stem,assets/twilightforest/models/item/huge_mushgloom_stem.json
+311,twilightforest:huge_stalk,巨茎,Huge Stalk,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.huge_stalk,assets/twilightforest/models/item/huge_stalk.json
+312,twilightforest:hydra_boss_spawner,九头蛇Boss刷怪笼,Hydra Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.hydra_boss_spawner,assets/twilightforest/models/item/hydra_boss_spawner.json
+313,twilightforest:infested_towerwood,虫蛀塔木木板,Infested Towerwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.infested_towerwood,assets/twilightforest/models/item/infested_towerwood.json
+314,twilightforest:iron_ladder,铁梯子,Iron Ladder,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.iron_ladder,assets/twilightforest/models/item/iron_ladder.json
+315,twilightforest:ironwood_block,铁木块,Block of Ironwood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.ironwood_block,assets/twilightforest/models/item/ironwood_block.json
+316,twilightforest:jungle_banister,丛林木栏杆,Jungle Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.jungle_banister,assets/twilightforest/models/item/jungle_banister.json
+317,twilightforest:keepsake_casket,遗物匣,Keepsake Casket,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.keepsake_casket,assets/twilightforest/models/item/keepsake_casket.json
+318,twilightforest:knight_phantom_boss_spawner,幻影骑士Boss刷怪笼,Knight Phantom Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.knight_phantom_boss_spawner,assets/twilightforest/models/item/knight_phantom_boss_spawner.json
+319,twilightforest:knightmetal_block,骑士金属块,Block of Knightmetal,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.knightmetal_block,assets/twilightforest/models/item/knightmetal_block.json
+320,twilightforest:lich_boss_spawner,巫妖Boss刷怪笼,Lich Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.lich_boss_spawner,assets/twilightforest/models/item/lich_boss_spawner.json
+321,twilightforest:lich_tower_miniature_structure,巫妖怪塔微缩雕塑,Miniature Lich Tower,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.lich_tower_miniature_structure,assets/twilightforest/models/item/lich_tower_miniature_structure.json
+322,twilightforest:liveroot_block,活根,Liveroots,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.liveroot_block,assets/twilightforest/models/item/liveroot_block.json
+323,twilightforest:locked_vanishing_block,锁定的消失方块,Locked Vanishing Block,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.locked_vanishing_block,assets/twilightforest/models/item/locked_vanishing_block.json
+324,twilightforest:mangrove_banister,红树木栏杆,Mangrove Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_banister,assets/twilightforest/models/item/mangrove_banister.json
+325,twilightforest:mangrove_button,红树木按钮,Mangrove Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_button,assets/twilightforest/models/item/mangrove_button.json
+326,twilightforest:mangrove_chest,红树木箱子,Mangrove Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_chest,assets/twilightforest/models/item/mangrove_chest.json
+327,twilightforest:mangrove_door,红树木门,Mangrove Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_door,assets/twilightforest/models/item/mangrove_door.json
+328,twilightforest:mangrove_fence,红树木栅栏,Mangrove Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_fence,assets/twilightforest/models/item/mangrove_fence.json
+329,twilightforest:mangrove_fence_gate,红树木栅栏门,Mangrove Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_fence_gate,assets/twilightforest/models/item/mangrove_fence_gate.json
+330,twilightforest:mangrove_leaves,红树树叶,Mangrove Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_leaves,assets/twilightforest/models/item/mangrove_leaves.json
+331,twilightforest:mangrove_log,红树原木,Mangrove Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_log,assets/twilightforest/models/item/mangrove_log.json
+332,twilightforest:mangrove_planks,红树木板,Mangrove Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_planks,assets/twilightforest/models/item/mangrove_planks.json
+333,twilightforest:mangrove_pressure_plate,红树木压力板,Mangrove Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_pressure_plate,assets/twilightforest/models/item/mangrove_pressure_plate.json
+334,twilightforest:mangrove_root,红树根,Mangrove Roots,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_root,assets/twilightforest/models/item/mangrove_root.json
+335,twilightforest:mangrove_sapling,红树树苗,Mangrove Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_sapling,assets/twilightforest/models/item/mangrove_sapling.json
+336,twilightforest:mangrove_slab,红树木台阶,Mangrove Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_slab,assets/twilightforest/models/item/mangrove_slab.json
+337,twilightforest:mangrove_stairs,红树木楼梯,Mangrove Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_stairs,assets/twilightforest/models/item/mangrove_stairs.json
+338,twilightforest:mangrove_trapdoor,红树木活板门,Mangrove Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_trapdoor,assets/twilightforest/models/item/mangrove_trapdoor.json
+339,twilightforest:mangrove_wood,红树木,Mangrove Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mangrove_wood,assets/twilightforest/models/item/mangrove_wood.json
+340,twilightforest:mayapple,鬼臼果,Mayapple,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mayapple,assets/twilightforest/models/item/mayapple.json
+341,twilightforest:mazestone,迷宫石,Mazestone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mazestone,assets/twilightforest/models/item/mazestone.json
+342,twilightforest:mazestone_border,迷宫石沿,Mazestone Border,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mazestone_border,assets/twilightforest/models/item/mazestone_border.json
+343,twilightforest:mazestone_brick,迷宫石砖,Mazestone Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mazestone_brick,assets/twilightforest/models/item/mazestone_brick.json
+344,twilightforest:mazestone_mosaic,迷宫镶石,Mazestone Mosaic,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mazestone_mosaic,assets/twilightforest/models/item/mazestone_mosaic.json
+345,twilightforest:mining_banister,矿石木栏杆,Minewood Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_banister,assets/twilightforest/models/item/mining_banister.json
+346,twilightforest:mining_button,矿石木按钮,Minewood Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_button,assets/twilightforest/models/item/mining_button.json
+347,twilightforest:mining_chest,矿石木箱子,Minewood Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_chest,assets/twilightforest/models/item/mining_chest.json
+348,twilightforest:mining_door,矿石木门,Minewood Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_door,assets/twilightforest/models/item/mining_door.json
+349,twilightforest:mining_fence,矿石木栅栏,Minewood Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_fence,assets/twilightforest/models/item/mining_fence.json
+350,twilightforest:mining_fence_gate,矿石木栅栏门,Minewood Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_fence_gate,assets/twilightforest/models/item/mining_fence_gate.json
+351,twilightforest:mining_leaves,矿石树叶,Miner's Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_leaves,assets/twilightforest/models/item/mining_leaves.json
+352,twilightforest:mining_log,矿石原木,Minewood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_log,assets/twilightforest/models/item/mining_log.json
+353,twilightforest:mining_log_core,矿石树核心,Minewood Core,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_log_core,assets/twilightforest/models/item/mining_log_core.json
+354,twilightforest:mining_planks,矿石木板,Minewood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_planks,assets/twilightforest/models/item/mining_planks.json
+355,twilightforest:mining_pressure_plate,矿石木压力板,Minewood Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_pressure_plate,assets/twilightforest/models/item/mining_pressure_plate.json
+356,twilightforest:mining_sapling,矿石树苗,Miner's Tree Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_sapling,assets/twilightforest/models/item/mining_sapling.json
+357,twilightforest:mining_slab,矿石木台阶,Minewood Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_slab,assets/twilightforest/models/item/mining_slab.json
+358,twilightforest:mining_stairs,矿石木楼梯,Minewood Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_stairs,assets/twilightforest/models/item/mining_stairs.json
+359,twilightforest:mining_trapdoor,矿石木活板门,Minewood Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_trapdoor,assets/twilightforest/models/item/mining_trapdoor.json
+360,twilightforest:mining_wood,矿石木,Minewood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mining_wood,assets/twilightforest/models/item/mining_wood.json
+361,twilightforest:minoshroom_boss_spawner,米诺菇Boss刷怪笼,Minoshroom Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.minoshroom_boss_spawner,assets/twilightforest/models/item/minoshroom_boss_spawner.json
+362,twilightforest:moss_patch,苔藓块,Moss Patch,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.moss_patch,assets/twilightforest/models/item/moss_patch.json
+363,twilightforest:mossy_castle_brick,生苔城堡砖,Mossy Castle Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_castle_brick,assets/twilightforest/models/item/mossy_castle_brick.json
+364,twilightforest:mossy_castle_brick_stairs,生苔城堡砖楼梯,Mossy Castle Brick Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_castle_brick_stairs,assets/twilightforest/models/item/mossy_castle_brick_stairs.json
+365,twilightforest:mossy_etched_nagastone,蚀刻娜迦苔石,Mossy Etched Nagastone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_etched_nagastone,assets/twilightforest/models/item/mossy_etched_nagastone.json
+366,twilightforest:mossy_mazestone,生苔迷宫石砖,Mossy Mazestone Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_mazestone,assets/twilightforest/models/item/mossy_mazestone.json
+367,twilightforest:mossy_nagastone_pillar,娜迦苔石柱,Mossy Nagastone Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_nagastone_pillar,assets/twilightforest/models/item/mossy_nagastone_pillar.json
+368,twilightforest:mossy_nagastone_stairs_left,娜迦苔石楼梯（左）,Mossy Nagastone Stairs (Left),TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_nagastone_stairs_left,assets/twilightforest/models/item/mossy_nagastone_stairs_left.json
+369,twilightforest:mossy_nagastone_stairs_right,娜迦苔石楼梯（右）,Mossy Nagastone Stairs (Right),TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_nagastone_stairs_right,assets/twilightforest/models/item/mossy_nagastone_stairs_right.json
+370,twilightforest:mossy_towerwood,塔木板,Mossy Towerwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_towerwood,assets/twilightforest/models/item/mossy_towerwood.json
+371,twilightforest:mossy_underbrick,生苔地下砖,Mossy Underbrick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mossy_underbrick,assets/twilightforest/models/item/mossy_underbrick.json
+372,twilightforest:mushgloom,荧光蘑菇,Mushgloom,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.mushgloom,assets/twilightforest/models/item/mushgloom.json
+373,twilightforest:naga_boss_spawner,娜迦Boss刷怪笼,Naga Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.naga_boss_spawner,assets/twilightforest/models/item/naga_boss_spawner.json
+374,twilightforest:naga_courtyard_miniature_structure,娜迦庭院微缩雕塑,Miniature Naga Courtyard,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.naga_courtyard_miniature_structure,assets/twilightforest/models/item/naga_courtyard_miniature_structure.json
+375,twilightforest:nagastone,娜迦石,Nagastone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.nagastone,assets/twilightforest/models/item/nagastone.json
+376,twilightforest:nagastone_head,娜迦石首,Nagastone Head,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.nagastone_head,assets/twilightforest/models/item/nagastone_head.json
+377,twilightforest:nagastone_pillar,娜迦石柱,Nagastone Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.nagastone_pillar,assets/twilightforest/models/item/nagastone_pillar.json
+378,twilightforest:nagastone_stairs_left,娜迦石楼梯（左）,Nagastone Stairs (Left),TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.nagastone_stairs_left,assets/twilightforest/models/item/nagastone_stairs_left.json
+379,twilightforest:nagastone_stairs_right,娜迦石楼梯（右）,Nagastone Stairs (Right),TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.nagastone_stairs_right,assets/twilightforest/models/item/nagastone_stairs_right.json
+380,twilightforest:oak_banister,橡木栏杆,Oak Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.oak_banister,assets/twilightforest/models/item/oak_banister.json
+381,twilightforest:orange_force_field,橙色力场,Orange Force Field,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.orange_force_field,assets/twilightforest/models/item/orange_force_field.json
+382,twilightforest:pink_castle_door,品红色城堡门,Magenta Castle Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.pink_castle_door,assets/twilightforest/models/item/pink_castle_door.json
+383,twilightforest:pink_castle_rune_brick,品红色城堡符文砖,Magenta Castle Rune Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.pink_castle_rune_brick,assets/twilightforest/models/item/pink_castle_rune_brick.json
+384,twilightforest:pink_force_field,品红色力场,Magenta Force Field,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.pink_force_field,assets/twilightforest/models/item/pink_force_field.json
+385,twilightforest:rainbow_oak_leaves,彩虹橡树树叶,Rainbow Oak Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.rainbow_oak_leaves,assets/twilightforest/models/item/rainbow_oak_leaves.json
+386,twilightforest:rainbow_oak_sapling,彩虹橡树树苗,Rainbow Oak Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.rainbow_oak_sapling,assets/twilightforest/models/item/rainbow_oak_sapling.json
+387,twilightforest:rainy_cloud,雨云,Rainy Cloud,TFBlocks 方块物品注册,整合包汉化,block.twilightforest.rainy_cloud,assets/twilightforest/models/item/rainy_cloud.json
+388,twilightforest:reappearing_block,重现方块,Reappearing Block,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.reappearing_block,assets/twilightforest/models/item/reappearing_block.json
+389,twilightforest:red_thread,红线,Red Thread,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.red_thread,assets/twilightforest/models/item/red_thread.json
+390,twilightforest:root,根,Roots,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.root,assets/twilightforest/models/item/root.json
+391,twilightforest:root_strand,根须,Root Strands,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.root_strand,assets/twilightforest/models/item/root_strand.json
+392,twilightforest:slider,滑动陷阱,Slide Trap,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.slider,assets/twilightforest/models/item/slider.json
+393,twilightforest:smoker,烟雾方块,Smoker,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.smoker,assets/twilightforest/models/item/smoker.json
+394,twilightforest:snow_queen_boss_spawner,冰雪女王Boss刷怪笼,Snow Queen Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.snow_queen_boss_spawner,assets/twilightforest/models/item/snow_queen_boss_spawner.json
+395,twilightforest:snowy_cloud,雪云,Snowy Cloud,TFBlocks 方块物品注册,整合包汉化,block.twilightforest.snowy_cloud,assets/twilightforest/models/item/snowy_cloud.json
+396,twilightforest:sorting_banister,分类木栏杆,Sortingwood Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_banister,assets/twilightforest/models/item/sorting_banister.json
+397,twilightforest:sorting_button,分类木按钮,Sortingwood Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_button,assets/twilightforest/models/item/sorting_button.json
+398,twilightforest:sorting_chest,分类木箱子,Sortingwood Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_chest,assets/twilightforest/models/item/sorting_chest.json
+399,twilightforest:sorting_door,分类木门,Sortingwood Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_door,assets/twilightforest/models/item/sorting_door.json
+400,twilightforest:sorting_fence,分类木栅栏,Sortingwood Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_fence,assets/twilightforest/models/item/sorting_fence.json
+401,twilightforest:sorting_fence_gate,分类木栅栏门,Sortingwood Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_fence_gate,assets/twilightforest/models/item/sorting_fence_gate.json
+402,twilightforest:sorting_leaves,分类树叶,Sorting Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_leaves,assets/twilightforest/models/item/sorting_leaves.json
+403,twilightforest:sorting_log,分类原木,Sortingwood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_log,assets/twilightforest/models/item/sorting_log.json
+404,twilightforest:sorting_log_core,分类树引擎,Sortingwood Engine,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_log_core,assets/twilightforest/models/item/sorting_log_core.json
+405,twilightforest:sorting_planks,分类木板,Sortingwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_planks,assets/twilightforest/models/item/sorting_planks.json
+406,twilightforest:sorting_pressure_plate,分类木压力板,Sortingwood Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_pressure_plate,assets/twilightforest/models/item/sorting_pressure_plate.json
+407,twilightforest:sorting_sapling,分类树苗,Sorting Tree Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_sapling,assets/twilightforest/models/item/sorting_sapling.json
+408,twilightforest:sorting_slab,分类木台阶,Sortingwood Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_slab,assets/twilightforest/models/item/sorting_slab.json
+409,twilightforest:sorting_stairs,分类木楼梯,Sortingwood Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_stairs,assets/twilightforest/models/item/sorting_stairs.json
+410,twilightforest:sorting_trapdoor,分类木活板门,Sortingwood Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_trapdoor,assets/twilightforest/models/item/sorting_trapdoor.json
+411,twilightforest:sorting_wood,分类木,Sortingwood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.sorting_wood,assets/twilightforest/models/item/sorting_wood.json
+412,twilightforest:spiral_bricks,螺旋石砖,Spiral Bricks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.spiral_bricks,assets/twilightforest/models/item/spiral_bricks.json
+413,twilightforest:spruce_banister,云杉木栏杆,Spruce Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.spruce_banister,assets/twilightforest/models/item/spruce_banister.json
+414,twilightforest:steeleaf_block,钢叶块,Block of Steeleaf,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.steeleaf_block,assets/twilightforest/models/item/steeleaf_block.json
+415,twilightforest:stripped_canopy_log,去皮苍穹原木,Stripped Canopy Tree Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_canopy_log,assets/twilightforest/models/item/stripped_canopy_log.json
+416,twilightforest:stripped_canopy_wood,去皮苍穹木,Stripped Canopy Tree Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_canopy_wood,assets/twilightforest/models/item/stripped_canopy_wood.json
+417,twilightforest:stripped_dark_log,去皮黑木原木,Stripped Darkwood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_dark_log,assets/twilightforest/models/item/stripped_dark_log.json
+418,twilightforest:stripped_dark_wood,去皮黑木,Stripped Darkwood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_dark_wood,assets/twilightforest/models/item/stripped_dark_wood.json
+419,twilightforest:stripped_mangrove_log,去皮红树原木,Stripped Mangrove Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_mangrove_log,assets/twilightforest/models/item/stripped_mangrove_log.json
+420,twilightforest:stripped_mangrove_wood,去皮红树木,Stripped Mangrove Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_mangrove_wood,assets/twilightforest/models/item/stripped_mangrove_wood.json
+421,twilightforest:stripped_mining_log,去皮矿石原木,Stripped Minewood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_mining_log,assets/twilightforest/models/item/stripped_mining_log.json
+422,twilightforest:stripped_mining_wood,去皮矿石木,Stripped Minewood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_mining_wood,assets/twilightforest/models/item/stripped_mining_wood.json
+423,twilightforest:stripped_sorting_log,去皮分类原木,Stripped Sortingwood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_sorting_log,assets/twilightforest/models/item/stripped_sorting_log.json
+424,twilightforest:stripped_sorting_wood,去皮分类木,Stripped Sortingwood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_sorting_wood,assets/twilightforest/models/item/stripped_sorting_wood.json
+425,twilightforest:stripped_time_log,去皮时光原木,Stripped Timewood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_time_log,assets/twilightforest/models/item/stripped_time_log.json
+426,twilightforest:stripped_time_wood,去皮时光木,Stripped Timewood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_time_wood,assets/twilightforest/models/item/stripped_time_wood.json
+427,twilightforest:stripped_transformation_log,去皮变化原木,Stripped Transwood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_transformation_log,assets/twilightforest/models/item/stripped_transformation_log.json
+428,twilightforest:stripped_transformation_wood,去皮变化木,Stripped Transwood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_transformation_wood,assets/twilightforest/models/item/stripped_transformation_wood.json
+429,twilightforest:stripped_twilight_oak_log,去皮暮色橡木原木,Stripped Twilight Oak Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_twilight_oak_log,assets/twilightforest/models/item/stripped_twilight_oak_log.json
+430,twilightforest:stripped_twilight_oak_wood,去皮暮色橡木,Stripped Twilight Oak Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stripped_twilight_oak_wood,assets/twilightforest/models/item/stripped_twilight_oak_wood.json
+431,twilightforest:stronghold_shield,要塞护盾,Stronghold Shield,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.stronghold_shield,assets/twilightforest/models/item/stronghold_shield.json
+432,twilightforest:thick_castle_brick,厚重城堡砖,Thick Castle Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.thick_castle_brick,assets/twilightforest/models/item/thick_castle_brick.json
+433,twilightforest:thorn_leaves,荆棘叶,Thorn Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.thorn_leaves,assets/twilightforest/models/item/thorn_leaves.json
+434,twilightforest:thorn_rose,荆棘玫瑰,Thorn Rose,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.thorn_rose,assets/twilightforest/models/item/thorn_rose.json
+435,twilightforest:time_banister,时光木栏杆,Timewood Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_banister,assets/twilightforest/models/item/time_banister.json
+436,twilightforest:time_button,时光木按钮,Timewood Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_button,assets/twilightforest/models/item/time_button.json
+437,twilightforest:time_chest,时光木箱子,Timewood Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_chest,assets/twilightforest/models/item/time_chest.json
+438,twilightforest:time_door,时光木门,Timewood Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_door,assets/twilightforest/models/item/time_door.json
+439,twilightforest:time_fence,时光木栅栏,Timewood Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_fence,assets/twilightforest/models/item/time_fence.json
+440,twilightforest:time_fence_gate,时光木栅栏门,Timewood Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_fence_gate,assets/twilightforest/models/item/time_fence_gate.json
+441,twilightforest:time_leaves,时光树叶,Timewood Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_leaves,assets/twilightforest/models/item/time_leaves.json
+442,twilightforest:time_log,时光原木,Timewood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_log,assets/twilightforest/models/item/time_log.json
+443,twilightforest:time_log_core,时光树时钟,Timewood Clock,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_log_core,assets/twilightforest/models/item/time_log_core.json
+444,twilightforest:time_planks,时光木板,Timewood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_planks,assets/twilightforest/models/item/time_planks.json
+445,twilightforest:time_pressure_plate,时光木压力板,Timewood Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_pressure_plate,assets/twilightforest/models/item/time_pressure_plate.json
+446,twilightforest:time_sapling,时光树苗,Tree of Time Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_sapling,assets/twilightforest/models/item/time_sapling.json
+447,twilightforest:time_slab,时光木台阶,Timewood Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_slab,assets/twilightforest/models/item/time_slab.json
+448,twilightforest:time_stairs,时光木楼梯,Timewood Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_stairs,assets/twilightforest/models/item/time_stairs.json
+449,twilightforest:time_trapdoor,时光木活板门,Timewood Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_trapdoor,assets/twilightforest/models/item/time_trapdoor.json
+450,twilightforest:time_wood,时光木,Timewood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.time_wood,assets/twilightforest/models/item/time_wood.json
+451,twilightforest:torchberry_plant,火炬浆果植物,Torchberry Plant,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.torchberry_plant,assets/twilightforest/models/item/torchberry_plant.json
+452,twilightforest:towerwood,塔木木板,Towerwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.towerwood,assets/twilightforest/models/item/towerwood.json
+453,twilightforest:transformation_banister,变化木栏杆,Transwood Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_banister,assets/twilightforest/models/item/transformation_banister.json
+454,twilightforest:transformation_button,变化木按钮,Transwood Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_button,assets/twilightforest/models/item/transformation_button.json
+455,twilightforest:transformation_chest,变化木箱子,Transwood Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_chest,assets/twilightforest/models/item/transformation_chest.json
+456,twilightforest:transformation_door,变化木门,Transwood Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_door,assets/twilightforest/models/item/transformation_door.json
+457,twilightforest:transformation_fence,变化木栅栏,Transwood Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_fence,assets/twilightforest/models/item/transformation_fence.json
+458,twilightforest:transformation_fence_gate,变化木栅栏门,Transwood Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_fence_gate,assets/twilightforest/models/item/transformation_fence_gate.json
+459,twilightforest:transformation_leaves,变化树叶,Leaves of Transformation,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_leaves,assets/twilightforest/models/item/transformation_leaves.json
+460,twilightforest:transformation_log,变化原木,Transwood Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_log,assets/twilightforest/models/item/transformation_log.json
+461,twilightforest:transformation_log_core,变化树心脏,Heart of Transformation,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_log_core,assets/twilightforest/models/item/transformation_log_core.json
+462,twilightforest:transformation_planks,变化木板,Transwood Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_planks,assets/twilightforest/models/item/transformation_planks.json
+463,twilightforest:transformation_pressure_plate,变化木压力板,Transwood Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_pressure_plate,assets/twilightforest/models/item/transformation_pressure_plate.json
+464,twilightforest:transformation_sapling,变化树苗,Tree of Transformation Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_sapling,assets/twilightforest/models/item/transformation_sapling.json
+465,twilightforest:transformation_slab,变化木台阶,Transwood Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_slab,assets/twilightforest/models/item/transformation_slab.json
+466,twilightforest:transformation_stairs,变化木楼梯,Transwood Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_stairs,assets/twilightforest/models/item/transformation_stairs.json
+467,twilightforest:transformation_trapdoor,变化木活板门,Transwood Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_trapdoor,assets/twilightforest/models/item/transformation_trapdoor.json
+468,twilightforest:transformation_wood,变化木,Transwood Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.transformation_wood,assets/twilightforest/models/item/transformation_wood.json
+469,twilightforest:trollber,巨魔莓,Trollber,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.trollber,assets/twilightforest/models/item/trollber.json
+470,twilightforest:trollsteinn,巨魔岩石,Trollsteinn,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.trollsteinn,assets/twilightforest/models/item/trollsteinn.json
+471,twilightforest:trollvidr,巨魔藤蔓,Trollvidr,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.trollvidr,assets/twilightforest/models/item/trollvidr.json
+472,twilightforest:trophy_pedestal,奖杯基座,Trophy Pedestal,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.trophy_pedestal,assets/twilightforest/models/item/trophy_pedestal.json
+473,twilightforest:twilight_oak_banister,暮色橡木栏杆,Twilight Oak Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_banister,assets/twilightforest/models/item/twilight_oak_banister.json
+474,twilightforest:twilight_oak_button,暮色橡木按钮,Twilight Oak Button,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_button,assets/twilightforest/models/item/twilight_oak_button.json
+475,twilightforest:twilight_oak_chest,暮色橡木箱子,Twilight Oak Chest,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_chest,assets/twilightforest/models/item/twilight_oak_chest.json
+476,twilightforest:twilight_oak_door,暮色橡木门,Twilight Oak Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_door,assets/twilightforest/models/item/twilight_oak_door.json
+477,twilightforest:twilight_oak_fence,暮色橡木栅栏,Twilight Oak Fence,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_fence,assets/twilightforest/models/item/twilight_oak_fence.json
+478,twilightforest:twilight_oak_fence_gate,暮色橡木栅栏门,Twilight Oak Fence Gate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_fence_gate,assets/twilightforest/models/item/twilight_oak_fence_gate.json
+479,twilightforest:twilight_oak_leaves,暮色橡树树叶,Twilight Oak Leaves,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_leaves,assets/twilightforest/models/item/twilight_oak_leaves.json
+480,twilightforest:twilight_oak_log,暮色橡木原木,Twilight Oak Log,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_log,assets/twilightforest/models/item/twilight_oak_log.json
+481,twilightforest:twilight_oak_planks,暮色橡木木板,Twilight Oak Planks,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_planks,assets/twilightforest/models/item/twilight_oak_planks.json
+482,twilightforest:twilight_oak_pressure_plate,暮色橡木压力板,Twilight Oak Pressure Plate,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_pressure_plate,assets/twilightforest/models/item/twilight_oak_pressure_plate.json
+483,twilightforest:twilight_oak_sapling,暮色橡树树苗,Sickly Twilight Oak Sapling,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_sapling,assets/twilightforest/models/item/twilight_oak_sapling.json
+484,twilightforest:twilight_oak_slab,暮色橡木台阶,Twilight Oak Slab,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_slab,assets/twilightforest/models/item/twilight_oak_slab.json
+485,twilightforest:twilight_oak_stairs,暮色橡木楼梯,Twilight Oak Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_stairs,assets/twilightforest/models/item/twilight_oak_stairs.json
+486,twilightforest:twilight_oak_trapdoor,暮色橡木活板门,Twilight Oak Trapdoor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_trapdoor,assets/twilightforest/models/item/twilight_oak_trapdoor.json
+487,twilightforest:twilight_oak_wood,暮色橡木,Twilight Oak Wood,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_oak_wood,assets/twilightforest/models/item/twilight_oak_wood.json
+488,twilightforest:twilight_portal_miniature_structure,暮色森林传送门微缩雕塑,Miniature Twilight Forest Portal,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twilight_portal_miniature_structure,assets/twilightforest/models/item/twilight_portal_miniature_structure.json
+489,twilightforest:twisted_stone,螺纹石,Twisted Stone,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twisted_stone,assets/twilightforest/models/item/twisted_stone.json
+490,twilightforest:twisted_stone_pillar,螺纹石柱,Twisted Stone Pillar,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.twisted_stone_pillar,assets/twilightforest/models/item/twisted_stone_pillar.json
+491,twilightforest:uberous_soil,肥沃泥土,Uberous Soil,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.uberous_soil,assets/twilightforest/models/item/uberous_soil.json
+492,twilightforest:uncrafting_table,拆解台,Uncrafting Table,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.uncrafting_table,assets/twilightforest/models/item/uncrafting_table.json
+493,twilightforest:underbrick,地下砖,Underbrick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.underbrick,assets/twilightforest/models/item/underbrick.json
+494,twilightforest:underbrick_floor,抛光地下砖,Underbrick Floor,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.underbrick_floor,assets/twilightforest/models/item/underbrick_floor.json
+495,twilightforest:unripe_trollber,未熟的巨魔莓,Unripe Trollber,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.unripe_trollber,assets/twilightforest/models/item/unripe_trollber.json
+496,twilightforest:ur_ghast_boss_spawner,暮初恶魂Boss刷怪笼,Ur-Ghast Boss Spawner,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.ur_ghast_boss_spawner,assets/twilightforest/models/item/ur_ghast_boss_spawner.json
+497,twilightforest:vangrove_banister,红树木栏杆,Mangrove Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.vangrove_banister,assets/twilightforest/models/item/vangrove_banister.json
+498,twilightforest:vanishing_block,消失方块,Vanishing Block,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.vanishing_block,assets/twilightforest/models/item/vanishing_block.json
+499,twilightforest:violet_castle_door,紫色城堡门,Violet Castle Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.violet_castle_door,assets/twilightforest/models/item/violet_castle_door.json
+500,twilightforest:violet_castle_rune_brick,紫色城堡符文砖,Violet Castle Rune Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.violet_castle_rune_brick,assets/twilightforest/models/item/violet_castle_rune_brick.json
+501,twilightforest:violet_force_field,紫色力场,Violet Force Field,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.violet_force_field,assets/twilightforest/models/item/violet_force_field.json
+502,twilightforest:warped_banister,诡异木栏杆,Warped Banister,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.warped_banister,assets/twilightforest/models/item/warped_banister.json
+503,twilightforest:weathered_deadrock,风化死岩,Weathered Deadrock,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.weathered_deadrock,assets/twilightforest/models/item/weathered_deadrock.json
+504,twilightforest:wispy_cloud,薄云,Wispy Cloud,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.wispy_cloud,assets/twilightforest/models/item/wispy_cloud.json
+505,twilightforest:worn_castle_brick,磨损城堡砖,Worn Castle Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.worn_castle_brick,assets/twilightforest/models/item/worn_castle_brick.json
+506,twilightforest:worn_castle_brick_stairs,磨损城堡砖楼梯,Worn Castle Brick Stairs,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.worn_castle_brick_stairs,assets/twilightforest/models/item/worn_castle_brick_stairs.json
+507,twilightforest:wrought_iron_fence,锻铁栅栏,Wrought Iron Fence,TFBlocks 方块物品注册,整合包汉化,block.twilightforest.wrought_iron_fence,assets/twilightforest/models/item/wrought_iron_fence.json
+508,twilightforest:yellow_castle_door,黄色城堡门,Yellow Castle Door,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.yellow_castle_door,assets/twilightforest/models/item/yellow_castle_door.json
+509,twilightforest:yellow_castle_rune_brick,黄色城堡符文砖,Yellow Castle Rune Brick,TFBlocks 方块物品注册,暮色原版语言文件,block.twilightforest.yellow_castle_rune_brick,assets/twilightforest/models/item/yellow_castle_rune_brick.json
+510,twilightforest:adherent_spawn_egg,信徒刷怪蛋,Adherent Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.adherent_spawn_egg,assets/twilightforest/models/item/adherent_spawn_egg.json
+511,twilightforest:alpha_yeti_spawn_egg,雪怪首领刷怪蛋,Alpha Yeti Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.alpha_yeti_spawn_egg,assets/twilightforest/models/item/alpha_yeti_spawn_egg.json
+512,twilightforest:armored_giant_spawn_egg,武装巨人刷怪蛋,Armored Giant Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.armored_giant_spawn_egg,assets/twilightforest/models/item/armored_giant_spawn_egg.json
+513,twilightforest:bighorn_sheep_spawn_egg,大角羊刷怪蛋,Bighorn Sheep Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.bighorn_sheep_spawn_egg,assets/twilightforest/models/item/bighorn_sheep_spawn_egg.json
+514,twilightforest:blockchain_goblin_spawn_egg,链锤哥布林刷怪蛋,Block and Chain Goblin Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.blockchain_goblin_spawn_egg,assets/twilightforest/models/item/blockchain_goblin_spawn_egg.json
+515,twilightforest:boar_spawn_egg,野猪刷怪蛋,Boar Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.boar_spawn_egg,assets/twilightforest/models/item/boar_spawn_egg.json
+516,twilightforest:carminite_broodling_spawn_egg,砷铅铁寄生虫刷怪蛋,Carminite Broodling Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.carminite_broodling_spawn_egg,assets/twilightforest/models/item/carminite_broodling_spawn_egg.json
+517,twilightforest:carminite_ghastguard_spawn_egg,砷铅铁守卫刷怪蛋,Carminite Ghastguard Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.carminite_ghastguard_spawn_egg,assets/twilightforest/models/item/carminite_ghastguard_spawn_egg.json
+518,twilightforest:carminite_ghastling_spawn_egg,砷铅铁恶灵刷怪蛋,Carminite Ghastling Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.carminite_ghastling_spawn_egg,assets/twilightforest/models/item/carminite_ghastling_spawn_egg.json
+519,twilightforest:carminite_golem_spawn_egg,砷铅铁傀儡刷怪蛋,Carminite Golem Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.carminite_golem_spawn_egg,assets/twilightforest/models/item/carminite_golem_spawn_egg.json
+520,twilightforest:death_tome_spawn_egg,死灵书刷怪蛋,Death Tome Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.death_tome_spawn_egg,assets/twilightforest/models/item/death_tome_spawn_egg.json
+521,twilightforest:deer_spawn_egg,鹿刷怪蛋,Deer Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.deer_spawn_egg,assets/twilightforest/models/item/deer_spawn_egg.json
+522,twilightforest:dwarf_rabbit_spawn_egg,侏儒兔刷怪蛋,Dwarf Rabbit Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.dwarf_rabbit_spawn_egg,assets/twilightforest/models/item/dwarf_rabbit_spawn_egg.json
+523,twilightforest:fire_beetle_spawn_egg,喷火甲虫刷怪蛋,Fire Beetle Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.fire_beetle_spawn_egg,assets/twilightforest/models/item/fire_beetle_spawn_egg.json
+524,twilightforest:giant_miner_spawn_egg,巨人矿工刷怪蛋,Giant Miner Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.giant_miner_spawn_egg,assets/twilightforest/models/item/giant_miner_spawn_egg.json
+525,twilightforest:harbinger_cube_spawn_egg,噩兆方块刷怪蛋,Harbinger Cube Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.harbinger_cube_spawn_egg,assets/twilightforest/models/item/harbinger_cube_spawn_egg.json
+526,twilightforest:hedge_spider_spawn_egg,树篱蜘蛛刷怪蛋,Hedge Spider Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.hedge_spider_spawn_egg,assets/twilightforest/models/item/hedge_spider_spawn_egg.json
+527,twilightforest:helmet_crab_spawn_egg,寄居蟹刷怪蛋,Helmet Crab Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.helmet_crab_spawn_egg,assets/twilightforest/models/item/helmet_crab_spawn_egg.json
+528,twilightforest:hostile_wolf_spawn_egg,恶狼刷怪蛋,Hostile Wolf Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.hostile_wolf_spawn_egg,assets/twilightforest/models/item/hostile_wolf_spawn_egg.json
+529,twilightforest:hydra_spawn_egg,九头蛇刷怪蛋,Hydra Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.hydra_spawn_egg,assets/twilightforest/models/item/hydra_spawn_egg.json
+530,twilightforest:ice_crystal_spawn_egg,冰晶刷怪蛋,Ice Crystal Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.ice_crystal_spawn_egg,assets/twilightforest/models/item/ice_crystal_spawn_egg.json
+531,twilightforest:king_spider_spawn_egg,国王蜘蛛刷怪蛋,King Spider Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.king_spider_spawn_egg,assets/twilightforest/models/item/king_spider_spawn_egg.json
+532,twilightforest:knight_phantom_spawn_egg,幻影骑士刷怪蛋,Knight Phantom Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.knight_phantom_spawn_egg,assets/twilightforest/models/item/knight_phantom_spawn_egg.json
+533,twilightforest:kobold_spawn_egg,狗头人刷怪蛋,Kobold Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.kobold_spawn_egg,assets/twilightforest/models/item/kobold_spawn_egg.json
+534,twilightforest:lich_spawn_egg,巫妖刷怪蛋,Lich Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.lich_spawn_egg,assets/twilightforest/models/item/lich_spawn_egg.json
+535,twilightforest:lower_goblin_knight_spawn_egg,哥布林骑士刷怪蛋,Goblin Knight Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.lower_goblin_knight_spawn_egg,assets/twilightforest/models/item/lower_goblin_knight_spawn_egg.json
+536,twilightforest:maze_slime_spawn_egg,迷宫史莱姆刷怪蛋,Maze Slime Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.maze_slime_spawn_egg,assets/twilightforest/models/item/maze_slime_spawn_egg.json
+537,twilightforest:minoshroom_spawn_egg,米诺菇刷怪蛋,Minoshroom Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.minoshroom_spawn_egg,assets/twilightforest/models/item/minoshroom_spawn_egg.json
+538,twilightforest:minotaur_spawn_egg,牛头人刷怪蛋,Minotaur Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.minotaur_spawn_egg,assets/twilightforest/models/item/minotaur_spawn_egg.json
+539,twilightforest:mist_wolf_spawn_egg,迷雾狼刷怪蛋,Mist Wolf Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.mist_wolf_spawn_egg,assets/twilightforest/models/item/mist_wolf_spawn_egg.json
+540,twilightforest:mosquito_swarm_spawn_egg,蚊群刷怪蛋,Mosquito Swarm Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.mosquito_swarm_spawn_egg,assets/twilightforest/models/item/mosquito_swarm_spawn_egg.json
+541,twilightforest:naga_spawn_egg,娜迦刷怪蛋,Naga Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.naga_spawn_egg,assets/twilightforest/models/item/naga_spawn_egg.json
+542,twilightforest:penguin_spawn_egg,企鹅刷怪蛋,Penguin Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.penguin_spawn_egg,assets/twilightforest/models/item/penguin_spawn_egg.json
+543,twilightforest:pinch_beetle_spawn_egg,巨钳甲虫刷怪蛋,Pinch Beetle Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.pinch_beetle_spawn_egg,assets/twilightforest/models/item/pinch_beetle_spawn_egg.json
+544,twilightforest:quest_ram_spawn_egg,谜题羊刷怪蛋,Quest Ram Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.quest_ram_spawn_egg,assets/twilightforest/models/item/quest_ram_spawn_egg.json
+545,twilightforest:raven_spawn_egg,乌鸦刷怪蛋,Raven Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.raven_spawn_egg,assets/twilightforest/models/item/raven_spawn_egg.json
+546,twilightforest:redcap_sapper_spawn_egg,红帽工兵刷怪蛋,Redcap Sapper Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.redcap_sapper_spawn_egg,assets/twilightforest/models/item/redcap_sapper_spawn_egg.json
+547,twilightforest:redcap_spawn_egg,小红帽刷怪蛋,Redcap Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.redcap_spawn_egg,assets/twilightforest/models/item/redcap_spawn_egg.json
+548,twilightforest:skeleton_druid_spawn_egg,骷髅德鲁伊刷怪蛋,Skeleton Druid Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.skeleton_druid_spawn_egg,assets/twilightforest/models/item/skeleton_druid_spawn_egg.json
+549,twilightforest:slime_beetle_spawn_egg,黏液甲虫刷怪蛋,Slime Beetle Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.slime_beetle_spawn_egg,assets/twilightforest/models/item/slime_beetle_spawn_egg.json
+550,twilightforest:snow_guardian_spawn_egg,冰雪守卫刷怪蛋,Snow Guardian Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.snow_guardian_spawn_egg,assets/twilightforest/models/item/snow_guardian_spawn_egg.json
+551,twilightforest:snow_queen_spawn_egg,冰雪女王刷怪蛋,Snow Queen Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.snow_queen_spawn_egg,assets/twilightforest/models/item/snow_queen_spawn_egg.json
+552,twilightforest:squirrel_spawn_egg,松鼠刷怪蛋,Squirrel Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.squirrel_spawn_egg,assets/twilightforest/models/item/squirrel_spawn_egg.json
+553,twilightforest:stable_ice_core_spawn_egg,冰精灵刷怪蛋,Stable Ice Core Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.stable_ice_core_spawn_egg,assets/twilightforest/models/item/stable_ice_core_spawn_egg.json
+554,twilightforest:swarm_spider_spawn_egg,集群蜘蛛刷怪蛋,Swarm Spider Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.swarm_spider_spawn_egg,assets/twilightforest/models/item/swarm_spider_spawn_egg.json
+555,twilightforest:tiny_bird_spawn_egg,小鸟刷怪蛋,Tiny Bird Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.tiny_bird_spawn_egg,assets/twilightforest/models/item/tiny_bird_spawn_egg.json
+556,twilightforest:towerwood_borer_spawn_egg,塔木蛀虫刷怪蛋,Towerwood Borer Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.towerwood_borer_spawn_egg,assets/twilightforest/models/item/towerwood_borer_spawn_egg.json
+557,twilightforest:troll_spawn_egg,巨魔刷怪蛋,Troll Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.troll_spawn_egg,assets/twilightforest/models/item/troll_spawn_egg.json
+558,twilightforest:unstable_ice_core_spawn_egg,破碎冰精灵刷怪蛋,Unstable Ice Core Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.unstable_ice_core_spawn_egg,assets/twilightforest/models/item/unstable_ice_core_spawn_egg.json
+559,twilightforest:ur_ghast_spawn_egg,暮初恶魂刷怪蛋,Ur-Ghast Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.ur_ghast_spawn_egg,assets/twilightforest/models/item/ur_ghast_spawn_egg.json
+560,twilightforest:winter_wolf_spawn_egg,寒冬狼刷怪蛋,Winter Wolf Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.winter_wolf_spawn_egg,assets/twilightforest/models/item/winter_wolf_spawn_egg.json
+561,twilightforest:wraith_spawn_egg,游魂刷怪蛋,Wraith Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.wraith_spawn_egg,assets/twilightforest/models/item/wraith_spawn_egg.json
+562,twilightforest:yeti_spawn_egg,雪怪刷怪蛋,Yeti Spawn Egg,TFEntities 刷怪蛋注册,暮色原版语言文件,item.twilightforest.yeti_spawn_egg,assets/twilightforest/models/item/yeti_spawn_egg.json
