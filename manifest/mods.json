@@ -1599,6 +1599,17 @@
       "url": "https://modrinth.com/mod/titanium"
     },
     {
+      "id": "toofast",
+      "name": "Too Fast",
+      "source": "modrinth",
+      "project_id": "w6JSkKSH",
+      "version": "0.4.3.5",
+      "version_id": "2pix3xrW",
+      "required": true,
+      "environment": "both",
+      "url": "https://modrinth.com/mod/too-fast"
+    },
+    {
       "id": "touhou_little_maid",
       "name": "Touhou Little Maid",
       "source": "modrinth",
