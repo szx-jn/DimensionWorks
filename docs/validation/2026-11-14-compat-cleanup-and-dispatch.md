@@ -49,13 +49,21 @@ gradle -p mods/dimensionworks-mek-stress test build runGameTestServer --no-daemo
 
 完整整包使用真实已重混淆 JAR 和流体能力接口完成原生功能验证：升级配方实际加载，五档低损耗卡存在且旧名称未注册，退役暮色方块未注册；两种牛油果叶剪刀掉落正确；茶壶掉落携带 500 mB 流体并能重新载入，不复制另行掉落的输入物品；全部 21 种世界熔液实际转换；敞口工作盆从 1,000 mB 普通熔液完成结晶与无压力析出，产出三颗无用结晶并剩余 400 mB 普通熔液；覆盖工作盆的 1,000 mB 铜熔液保持不变。14 个启动脚本和 25 个生产服务端脚本加一个本地测试脚本均加载无脚本错误，保存及退出成功，进程返回 0。日志为 `build/local-validation/full-pack/server-native-functional-pass.log`，检查结果为对应测试目录的 `kubejs/native-functional-results.json`。
 
-## 正式发布结果与剩余阻碍
+## 正式发布结果与同步排查
 
 源码提交 `1ce10ad6` 已推送。正式发布工作流自动采用 `0.3.50`，客户端、服务端、增量包、更新器测试、Linux 原生更新事务、产物校验及 GitHub 发行步骤全部通过；工作流回写的版本提交 `8f68c1a7` 已同步到本地。正式产物由 Actions 生成：[GitHub v0.3.50](https://github.com/szx-jn/DimensionWorks/releases/tag/v0.3.50)。下载正式客户端 MRPack 后另行核对 SHA-256 与 GitHub 资产摘要一致、ZIP 完整、升级配方与数据修正包含其中，且没有本地测试脚本、运行产物或已移除的旧资源。
 
-[发布运行 43617868958](https://github.com/szx-jn/DimensionWorks/actions/runs/43617868958) 的 BBSMC 同步未完成。初次运行及仅补跑失败同步任务的第二次运行，都在上传约 9.6 MiB 客户端、创建版本的 `POST /v2/version` 请求等待 600 秒后报 `The read operation timed out`，尚未进入服务端附件上传。两个运行节点均返回相同错误；之后的无缓存只读查询仍没有 BBSMC `0.3.50`。因此 GitHub 产物可下载，但整个工作流最终结论为失败，不能称整个发布流程成功。没有修改上传协议、删除远端版本或把超时当作成功。
+[发布运行 43617868958](https://github.com/szx-jn/DimensionWorks/actions/runs/43617868958) 的两次 BBSMC 同步都在约 9.6 MiB 客户端的 `POST /v2/version` 请求等待 600 秒后报 `The read operation timed out`，尚未进入服务端附件上传；事后的无缓存查询没有版本 `0.3.50`。该历史运行的最终结论为失败，GitHub 正式产物及版本号回写已成功保留。
 
-同步错误日志保留在本机 `build/local-validation/bbsmc-sync-failure.log` 与 `build/local-validation/bbsmc-evidence/retry-failure.log`。BBSMC 创建版本接口恢复后，可仅补跑同步任务；没有重新构建或重复发布 GitHub 产物。
+进一步核对 BBSMC 当前上传与文件校验源码、此前 0.3.49 成功日志及实际公开接口。失败版本使用的上传脚本与 0.3.49 相同，文件数量、大小和 API 字段没有越过已验证的平台限制。同一份 0.3.50 客户端 multipart，在本地分别使用 HTTP/1.1 和 HTTP/2，无令牌探测均约三秒返回 HTTP 401；这是未创建版本的网络探测，不能当作鉴权上传成功。原 urllib 错误没有实际发送量或 HTTP 状态，不能仅凭它断定服务端附件过大、文件校验失败或具体 CDN 节点故障。
+
+HTTP 请求改为统一使用已有 curl，HTTPS 协商 HTTP/2，记录 HTTP 状态、实际发送量、响应与总耗时；令牌只通过标准输入配置传入，不出现在进程参数中。增加真实本地 HTTP 测试，验证二进制 multipart 字节、鉴权头、GET 响应与附件 HTTP 204；原有最新版本、重复/部分同步、冲突、超时不自动重试、中文日志与三文件摘要检查继续通过。全部 100 项 Python 测试、Python AST 与 `git diff --check` 通过后提交并推送 `a94916ab`，没有重新构建或发布 GitHub 产物。
+
+[补同步运行 43656202504](https://github.com/szx-jn/DimensionWorks/actions/runs/43656202504) 于 2026-11-15 08:07 北京时间成功完成。三个写请求均使用 HTTP/2，实际发送量等于请求体完整长度：客户端建版 HTTP 200，用时 13.882 秒；增量附件 HTTP 204，用时 4.113 秒；完整服务端附件 HTTP 204，用时 227.957 秒。任务读回并核对三个文件的 SHA-512、主文件与发行说明后返回成功。原建版超时在新传输路径未再发生，旧日志不足以进一步证明 BBSMC 内部或 CDN 的具体阻塞原因。
+
+[BBSMC 0.3.50](https://bbsmc.net/modpack/dimensionworks) 的版本 ID 为 `nJZSV5eC`。本地通过公开 API 再次确认已列出、三个文件唯一且齐全，大小分别为 10,083,718、583,725,148 和 1,336,217 字节，与 GitHub 资产相同；客户端 SHA-512、主文件标记及发行说明逐字一致。GitHub 与 BBSMC 已完整同步，没有删除远端版本、重复创建发行或改动 `VERSION`。
+
+两次旧错误日志及本次探测证据保留在本机 `build/local-validation/bbsmc-evidence/`，首轮完整日志为 `build/local-validation/bbsmc-sync-failure.log`；成功同步日志为 `bbsmc-evidence/curl-sync-success.log`，公开最终版本响应为 `bbsmc-evidence/version50-final.json`。
 
 ## 证据与边界
 
