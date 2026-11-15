@@ -4,10 +4,13 @@ import copy
 from email.parser import BytesParser
 from email.policy import default
 import hashlib
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import io
 import json
 from pathlib import Path
 import sys
+import subprocess
+import threading
 import unittest
 from unittest import mock
 import zipfile
@@ -215,17 +218,28 @@ class BbsmcSyncTest(unittest.TestCase):
         self.assertEqual(upload.call_count, 2)
         self.assertEqual(list(upload.call_args.args[1]), [list(self.files)[-1]])
 
+    def curl_response(self, command: list[str], **kwargs: object) -> subprocess.CompletedProcess:
+        body = b"" if self.curl_status == 204 else json.dumps(self.uploaded).encode()
+        Path(command[command.index("--output") + 1]).write_bytes(body)
+        return subprocess.CompletedProcess(command, self.curl_returncode, json.dumps({
+            "http_code": self.curl_status, "http_version": "2", "size_upload": 0,
+            "time_starttransfer": 0.1, "time_total": 0.2,
+        }), "Operation timed out" if self.curl_returncode == 28 else "")
+
     def test_network_timeout_reports_request_method_and_endpoint(self) -> None:
+        self.curl_status = 0
+        self.curl_returncode = 28
         for endpoint, data, method in (
             ("project/doVGSZq0/version", None, "GET"),
             ("version/new-version/file", b"payload", "POST"),
         ):
             with (
                 self.subTest(method=method),
-                mock.patch.object(sync.urllib.request, "urlopen", side_effect=TimeoutError("The read operation timed out")),
-                self.assertRaisesRegex(RuntimeError, f"BBSMC {method} {endpoint}: The read operation timed out"),
+                mock.patch.object(sync.subprocess, "run", side_effect=self.curl_response) as run,
+                self.assertRaisesRegex(RuntimeError, f"BBSMC {method} {endpoint} HTTP 0: Operation timed out"),
             ):
                 sync.bbsmc_json(endpoint, "token", data=data)
+            run.assert_called_once()
 
     def test_partial_completion_only_adds_remaining_file_and_dry_run_cannot_write(self) -> None:
         existing = dict(self.uploaded, files=self.uploaded["files"][:2])
@@ -272,27 +286,30 @@ class BbsmcSyncTest(unittest.TestCase):
     def test_multipart_creation_and_append_preserve_all_bytes_and_handle_204(self) -> None:
         for append in (False, True):
             captured = []
+            self.curl_status = 204 if append else 201
+            self.curl_returncode = 0
 
-            def open_url(request: object, timeout: int) -> io.BytesIO:
-                captured.append(request)
-                self.assertEqual(timeout, 600)
-                response = io.BytesIO(b"" if append else json.dumps(self.uploaded).encode())
-                response.status = 204 if append else 200
-                return response
+            def run_curl(command: list[str], **kwargs: object) -> subprocess.CompletedProcess:
+                captured.append((command, kwargs["input"],
+                                 Path(command[command.index("--data-binary") + 1][1:]).read_bytes()))
+                return self.curl_response(command, **kwargs)
 
-            with self.subTest(append=append), mock.patch.object(sync.urllib.request, "urlopen", side_effect=open_url):
+            with self.subTest(append=append), mock.patch.object(sync.subprocess, "run", side_effect=run_curl):
                 result = sync.upload_files(
                     self.metadata, self.files, "test-token", version_id="new-version" if append else None,
                 )
                 self.assertEqual(result, None if append else self.uploaded)
-            request = captured[0]
+            command, config, body = captured[0]
             suffix = "version/new-version/file" if append else "version"
-            self.assertEqual(request.full_url, f"https://api.bbsmc.net/v2/{suffix}")
-            self.assertEqual(request.get_method(), "POST")
-            self.assertEqual(request.get_header("Authorization"), "Bearer test-token")
+            self.assertIn(f"https://api.bbsmc.net/v2/{suffix}", command)
+            self.assertEqual(command[command.index("--max-time") + 1], "600")
+            self.assertEqual(command[command.index("--config") + 1], "-")
+            self.assertNotIn("test-token", " ".join(command))
+            headers = [json.loads(line.removeprefix("header = ")) for line in config.splitlines()]
+            self.assertIn("Authorization: Bearer test-token", headers)
+            content_type = next(header for header in headers if header.startswith("Content-Type:"))
             message = BytesParser(policy=default).parsebytes(
-                f"Content-Type: {request.get_header('Content-type')}\r\nMIME-Version: 1.0\r\n\r\n".encode()
-                + request.data,
+                f"{content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode() + body,
             )
             parts = list(message.iter_parts())
             self.assertEqual(len(parts), 4)
@@ -301,6 +318,45 @@ class BbsmcSyncTest(unittest.TestCase):
             self.assertEqual(
                 {part.get_filename(): part.get_payload(decode=True) for part in parts[1:]}, self.files,
             )
+
+    def test_real_curl_transmits_binary_multipart_and_reads_get_and_204(self) -> None:
+        captured = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(handler) -> None:
+                handler.send_response(200)
+                handler.end_headers()
+                handler.wfile.write(b'[{"id":"version"}]')
+
+            def do_POST(handler) -> None:
+                data = handler.rfile.read(int(handler.headers["Content-Length"]))
+                captured.append((handler.path, dict(handler.headers), data))
+                handler.send_response(204)
+                handler.end_headers()
+
+            def log_message(handler, *args: object) -> None:
+                pass
+
+        with HTTPServer(("127.0.0.1", 0), Handler) as server:
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                with mock.patch.object(sync, "BBSMC_API", f"http://127.0.0.1:{server.server_port}/v2"):
+                    self.assertEqual(sync.bbsmc_json("version", "test-token"), [{"id": "version"}])
+                    binary = bytes(range(256)) * 4096 + b"\r\n\x00\xff"
+                    self.assertIsNone(sync.upload_files(
+                        self.metadata, {"server.zip": binary}, "test-token", version_id="version",
+                    ))
+            finally:
+                server.shutdown()
+                thread.join()
+        path, headers, data = captured[0]
+        self.assertEqual(path, "/v2/version/version/file")
+        self.assertEqual(headers["Authorization"], "Bearer test-token")
+        message = BytesParser(policy=default).parsebytes(
+            f"Content-Type: {headers['Content-Type']}\r\nMIME-Version: 1.0\r\n\r\n".encode() + data,
+        )
+        self.assertEqual(list(message.iter_parts())[1].get_payload(decode=True), binary)
 
 
 if __name__ == "__main__":

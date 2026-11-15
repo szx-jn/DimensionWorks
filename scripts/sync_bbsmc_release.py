@@ -13,8 +13,6 @@ import re
 import subprocess
 import sys
 import tempfile
-import urllib.error
-import urllib.request
 import uuid
 import zipfile
 
@@ -87,24 +85,46 @@ def version_metadata(release: dict, project_id: str, files: dict[str, bytes]) ->
 
 def bbsmc_json(endpoint: str, token: str, *, data: bytes | None = None,
                content_type: str = "application/json") -> dict | list | None:
-    headers = {
-        "User-Agent": "DimensionWorks-BBSMC-Sync/1.0 (github.com/szx-jn/DimensionWorks)",
-        "Accept": "application/json",
-        "Content-Type": content_type,
-    }
+    headers = [
+        "User-Agent: DimensionWorks-BBSMC-Sync/1.0 (github.com/szx-jn/DimensionWorks)",
+        "Accept: application/json",
+        f"Content-Type: {content_type}",
+    ]
     if token:
-        headers["Authorization"] = f"Bearer {token}"
-    request = urllib.request.Request(f"{BBSMC_API}/{endpoint}", data=data, headers=headers)
-    try:
-        with urllib.request.urlopen(request, timeout=600 if data is not None else 180) as response:
-            if response.status == 204:
-                return None
-            return json.load(response)
-    except urllib.error.HTTPError as error:
-        detail = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"BBSMC {request.get_method()} {endpoint} HTTP {error.code}: {detail}") from None
-    except OSError as error:
-        raise RuntimeError(f"BBSMC {request.get_method()} {endpoint}: {error}") from None
+        headers.append(f"Authorization: Bearer {token}")
+    method = "GET" if data is None else "POST"
+    with tempfile.TemporaryDirectory(prefix="dimensionworks-bbsmc-http-") as directory:
+        response_path = Path(directory) / "response.json"
+        command = [
+            "curl", "--disable", "--http2", "--silent", "--show-error", "--fail-with-body",
+            "--connect-timeout", "30", "--max-time", "600" if data is not None else "180",
+            "--config", "-", "--output", str(response_path),
+            "--write-out", "%{json}", f"{BBSMC_API}/{endpoint}",
+        ]
+        if data is not None:
+            body_path = Path(directory) / "request.multipart"
+            body_path.write_bytes(data)
+            command.extend(["--data-binary", f"@{body_path}"])
+        # 令牌只经标准输入传入 curl 配置，不进入进程参数或诊断输出。
+        config = "".join(f"header = {json.dumps(header)}\n" for header in headers)
+        result = subprocess.run(command, input=config, capture_output=True, text=True)
+        stats = json.loads(result.stdout)
+        status = stats["http_code"]
+        if data is not None:
+            print(
+                f"BBSMC HTTP: {method} {endpoint} status={status} "
+                f"protocol={stats['http_version']} uploaded={stats['size_upload']}/{len(data)} "
+                f"response={stats['time_starttransfer']:.3f}s total={stats['time_total']:.3f}s",
+                flush=True,
+            )
+        if result.returncode:
+            detail = response_path.read_text() if response_path.exists() else ""
+            raise RuntimeError(
+                f"BBSMC {method} {endpoint} HTTP {status}: {result.stderr.strip()} {detail}".strip()
+            )
+        if status == 204:
+            return None
+        return json.loads(response_path.read_bytes())
 
 
 def matching_version(versions: list, metadata: dict, files: dict[str, bytes]) -> dict | None:
