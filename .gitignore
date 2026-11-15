@@ -60,3 +60,6 @@ run-alex-dispatch*/
 
 # Staged Minecraft/third-party skins; reconstruct from local archives
 /remotion/public/promo/textures/
+
+# Baked models and extracted Minecraft/third-party assets for the 3D film
+/remotion/public/promo/3d/

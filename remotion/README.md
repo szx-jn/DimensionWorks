@@ -1,43 +1,72 @@
 # 维度工序视频工程
 
-## 6 分钟宣传片
+## 六分钟 3D 宣传片
 
-新增 `DimensionWorksPromo`：1920×1080、30 fps、10,800 帧（6:00），按[已确认企划](../docs/design/six-minute-promo-content-plan.md)组织 11 章、60 组六秒镜头。原有 `DimensionWorksIntro` 保留为独立 90 秒合成。
+`DimensionWorksPromo` 为 1920×1080、30 fps、10,800 帧（6:00）。按[原企划](../docs/design/six-minute-promo-content-plan.md)保留 11 章、60 镜头，重新安排为 3–9 秒的不同长度。具体镜头、母题与内容状态见[3D 制作稿](../docs/design/six-minute-promo-3d.md)。`DimensionWorksIntro` 仍为独立的 90 秒历史工程。
 
-故事沿用天地异变与三万年后苏醒；主体为原创方块人物、结合实际游戏贴图的机械插画、动态管线和剖面演示，采用开发者导览。ME机械输入与AE供电分支分开画，五代六类卡共30张同时展示，气体盆盖密封与世界流体露天结晶使用不同场景。专用跨维端点、云盘、洞穴工厂和工业考核段持续标为开发预览；动画不代表新增玩法或游戏实测。
+主体使用 Three.js / React Three Fiber / `@remotion/three` 的真实透视场景。方块从 Minecraft 与对应模组的 JSON、OBJ、Java 方块实体模型或 Bedrock 实体几何烘焙，物品按原贴图的透明轮廓挤出。当前资源集包含 217 个模型、325 张贴图；人物、机器、传动轴、压力机压头、搅拌头、青蛙、锁链与包裹均有实际几何，保留像素贴图的最近邻采样。
 
-### 预览与导出
+铜色传动线作为母题：前 3 秒在第28、56、84帧完成线、环、齿轮与分支线路的转场，后续作为传动、回流、ME线路和包裹路径复现。进场使用显式参数弹簧，同时改变位置、缩放与角度；组内间隔4帧，出场10帧。背景叠加渐变纹理、3D内容、颗粒和暗角，镜头中包含6帧的视觉重音。持续动作具有不同的周期或相位。
+
+### 准备与预览
+
+本次环境为 macOS、Python 3.13、Node.js 24、FFmpeg。首次安装 Python 依赖建议使用独立虚拟环境，避免改动系统环境：
 
 ```sh
-npm run promo:textures
+python3 -m venv ~/.cache/dimensionworks-promo-3d/venv
+source ~/.cache/dimensionworks-promo-3d/venv/bin/activate
+python -m pip install -r requirements-promo.txt
+npm ci
+npm run promo:models
 npm run promo:audio
 npx remotion studio src/index.ts --no-open
-npx tsc --noEmit
-npm run promo:render
 ```
 
-Studio 选择 `/DimensionWorksPromo`；`PromoScenes` 文件夹提供60个单镜头合成。主时间轴将每个镜头写为独立 JSX Sequence，可分别编辑起止时间，默认每镜头180帧。动画均由帧驱动，无CSS动画或随机帧状态。
+默认读取 `~/Library/Application Support/minecraft/versions/DimensionWorks/mods` 与同安装目录的 Minecraft 1.20.1 资源档案。可向模型脚本传入 `--minecraft 路径 --instance 实例名`。仓库自研资源优先于已安装的旧 JAR；第三方资源只从脚本所列固定版本提取，风力机 Java 模型固定到 Mekanism `v1.20.1-10.4.16.80` 标签。缺失资源与未支持的加载器会报错，需要核对原路径。
 
-`promo:audio` 在macOS调用本机中文语音 `Tingting`，通过 FFmpeg 生成59组旁白（齿轮坠落镜头留白），按每句实际音频时长生成字幕；旁白对照企划缩短重复表达，保持六秒镜头内自然可听。中文字体使用本机 PingFang SC。脚本需要macOS `say` 与 FFmpeg，Python只用标准库；没有调用外部配音服务。
+`public/promo/3d/` 包含烘焙模型、原资产副本、纹理与 `sources.json` 来源/哈希记录，整个目录不提交。第三方资源遵循原模组许可，不作为仓库原创代码分发。没有修改游戏文件或整合包清单。
 
-原创配乐由固定种子的风声、和弦、低频脉冲、钟表节奏与心跳合成。两个音轨均为360秒、24 kHz PCM16单声道；MP4导出为H.264/AAC。生成音轨位于忽略的 `public/promo/audio/`，首次预览前需运行生成脚本。字幕 JSON 和完整镜头数据保留为可维护源文件，主画面不显示拍摄指令。
+Studio 选择 `/DimensionWorksPromo`。`PromoScenes` 中60个单镜头合成与主时间轴使用相同起止时长。主时间轴仍使用显式 JSX Sequence，便于逐镜头编辑。
 
-`promo:textures` 从本机 Minecraft 实例的已安装 JAR 与仓库自研资源中提取选定的57张贴图。默认实例为 `DimensionWorks`；可用 `python3 scripts/prepare_promo_textures.py --minecraft 路径 --instance 实例名` 指定安装位置。提取目录 `public/promo/textures/` 不提交，`sources.json` 记录每张贴图的来源及档案内路径。第三方贴图保持原来源，不作为本项目原创资源发布；只在宣传片中用于对应设备与物料的识别。没有修改游戏文件或新增整合包依赖。
+### 配音与内存
 
-桌面交付另附烧录字幕对应的SRT、11章章节表和包含必要素材的可编辑工程ZIP。成片音轨统一至约-16 LUFS并输出48 kHz AAC。2026-11-14已完成TypeScript/Python语法、时间轴/字幕/锁文件检查、60组关键帧检查及MP4全片解码；最终媒体为360.000秒、10,800帧，更新的弹力镜头另做成片对照。
+配音使用免费的 Edge 神经语音 `zh-CN-YunxiNeural`，正常语速 `+0%`，不调用 macOS `say`。第一次合成需要联网；59段请求逐个执行并缓存，之后可复用。旁白经过精简，镜头时间按实际录音长度分配，不通过音频加速塞进固定时长。
 
-### 内容与维护入口
+字幕来自语音服务的实测句边界，保存在 `src/promo/captions.json`。原创合成配乐与旁白进行侧链避让，立体声混音使用两遍实测响度归一化；`mix.wav` 为360秒、48 kHz立体声，主片仅使用这条新混音。SRT与章节表位于 `public/promo/audio/`。
 
-- `src/promo/shots.json`：完整60镜头、原企划360个逐秒动作、旁白工作稿及画面类别；参数变化时对照模组与KubeJS真相源修改。
-- `src/promo/captions.json`：按实际旁白时长排布的字幕，字段为text/startMs/endMs/timestampMs/confidence。
-- `scripts/prepare_promo_textures.py`：按明确资源路径提取游戏与自研贴图，生成来源记录。
-- `scripts/generate_promo_audio.py`：离线配音、简化旁白和原创配乐生成；修改旁白后重新生成字幕与音轨。
+模型按场景载入纹理，地面使用实例化网格，几何与材质复用，Canvas按需绘制，不让静止预览持续空转。先完成配音，再渲染视频；导出固定单并发、Node堆上限1.5 GB、编码2线程，不启动 Minecraft、Blender或本地大型语音模型。
 
-制作期间同步了提交 `6116ae5c` 的弹力包裹更新：正常20 TPS下两秒满蓄力，满蓄力力度为此前五倍；动画按真实两秒演示，旁白时间不变。
+### 自检与导出
 
-日常体验修复与未开放内容分别说明。当前图解包括矿物循环、热态与气体、30秒露天/敞口工作盆结晶、压力分档、玩家包裹、中转领地、竖直带运动，以及暮色打包工具与终端升级；具体游戏实现与验证状态以所属模块文档为准。
+```sh
+npx tsc --noEmit
+npm run promo:check
+npm run promo:qa
+npm run promo:sample
+npm run promo:render
+python scripts/extract_promo_frames.py out/dimensionworks-promo-3d.mp4
+```
 
-2026-11-14 的暮色清理同步替换宣传工程中退役的浸出、野猪调理和回用镜头，移除旧素材引用，更新木头与可重复奖杯配方、六洞穴发运说明及字幕。原有已导出成片不代表本次更新后的内容；本次不重新导出完整视频。
+`promo:check` 使用 TypeScript AST 检查当前宣传片引用的源码中所有 `interpolate` 的 easing/clamp、spring参数，核对60个不同长度镜头、注册时长、实测字幕与资源路径，并检查视觉事件间隔。历史90秒片没有被本次改成3D，不在本次动效规则检查的范围内。
+
+`promo:qa` 使用一个浏览器逐个渲染60个镜头和片头第1、15、30、45、60、85、89帧，输出到忽略的 `out/qa/`。成片后 `extract_promo_frames.py` 的 `extractFrames` 再从实际MP4抽出指定帧与每镜头代表帧。需要人工看构图、遮挡和液面等内容；源码检查不能替代画面检查。
+
+`promo:render` 输出 `out/dimensionworks-promo-3d.mp4`，H.264 / AAC，CRF18、1080p。追加绝对输出路径可改变位置。发布到桌面前须检查时长、帧率、帧数、全片解码、响度与成片抽帧结果。
+
+2026-11-15 成片验证：TypeScript、Python、JSON、依赖锁与动效规则检查通过，视觉事件最大间隔62帧。实际MP4的10,800帧与完整音轨解码通过，第1、15、30、45、60帧及60个镜头代表帧已检查构图。最终混音为−16.2 LUFS、−1.35 dBTP；音轨校准后66个抽帧校验和保持一致。桌面成片与工程导出文件的SHA-256一致。
+
+### 内容边界
+
+当前稿同步了一级跨维端点与物质球解包器的生存配方、云盘回收路径、原版能量板与 `low_loss` 卡型。二、三级端点及最终卡仍暂无生存配方；六洞穴旅行已开放，渊海工业体系有首版，其余洞穴工业内容与工业考核仍按开发状态说明。视频中的结构剖面、压力检查、结晶和长时间效果均标明示意或时间压缩，视频验证不代表游戏内运行验证。
+
+### 维护入口
+
+- `src/promo/shots.json`：镜头内容、正常语速旁白和实际起止时间；保留原企划的动作描述供对照。
+- `src/promo/model-sources.json`、`scripts/prepare_promo_models.py`：实际资产路径和轻量模型烘焙。
+- `src/promo/CoreWorlds.tsx`、`ProcessWorlds.tsx`、`TransitWorlds.tsx`：各章节的3D场景与机械动作。
+- `src/promo/scene-plan.ts`、`motion.ts`：取景、视觉事件、弹簧与显式缓动。
+- `scripts/generate_promo_neural_audio.py`：自然语速旁白、实测字幕、配乐与新混音。
+- `scripts/render_promo.mjs`、`check_promo.mjs`、`extract_promo_frames.py`：单并发渲染与完整自检入口。
 
 ## 既有 90 秒开场
 
