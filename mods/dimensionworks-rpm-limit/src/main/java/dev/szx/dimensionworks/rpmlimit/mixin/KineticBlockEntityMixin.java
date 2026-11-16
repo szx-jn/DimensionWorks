@@ -1,9 +1,11 @@
 package dev.szx.dimensionworks.rpmlimit.mixin;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dev.szx.dimensionworks.rpmlimit.OverspeedBonus;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
+import dev.szx.dimensionworks.rpmlimit.RpmLimitMath;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticPersistence;
 import com.simibubi.create.content.kinetics.KineticNetwork;
@@ -38,7 +40,10 @@ public abstract class KineticBlockEntityMixin {
     @Inject(method = "getSpeed", at = @At("RETURN"), cancellable = true, remap = false)
     private void dimensionworks$capEffectiveSpeed(CallbackInfoReturnable<Float> cir) {
         KineticBlockEntity self = (KineticBlockEntity) (Object) this;
-        cir.setReturnValue(RpmLimitManager.clamp(self, cir.getReturnValueF()));
+        float speed = cir.getReturnValueF();
+        if (self instanceof BeltBlockEntity)
+            speed = RpmLimitMath.cap(speed, RpmLimitMath.MAX_BELT_RPM);
+        cir.setReturnValue(RpmLimitManager.clamp(self, speed));
     }
 
     /**

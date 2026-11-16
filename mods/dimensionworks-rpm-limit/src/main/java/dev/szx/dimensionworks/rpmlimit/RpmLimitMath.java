@@ -5,6 +5,9 @@ public final class RpmLimitMath {
 
     private RpmLimitMath() {}
 
+    /** Create belt interactions resolve by segment and require a movement step no larger than 0.5 blocks/tick. */
+    public static final int MAX_BELT_RPM = 240;
+
     public static float cap(float speed, int limit) {
         if (!Float.isFinite(speed) || speed == 0)
             return 0;
