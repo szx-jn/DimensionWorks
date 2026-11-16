@@ -4,7 +4,9 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 	"unsafe"
@@ -43,6 +45,9 @@ var (
 	procGetWindowRect    = user32DLL.NewProc("GetWindowRect")
 	procSetForeground    = user32DLL.NewProc("SetForegroundWindow")
 	procSetCursorPos     = user32DLL.NewProc("SetCursorPos")
+	procOpenProcess      = syscall.NewLazyDLL("kernel32.dll").NewProc("OpenProcess")
+	procQueryProcessPath = syscall.NewLazyDLL("kernel32.dll").NewProc("QueryFullProcessImageNameW")
+	procCloseHandle      = syscall.NewLazyDLL("kernel32.dll").NewProc("CloseHandle")
 
 	iidIUnknown = winGUID{Data4: [8]byte{0xC0, 0, 0, 0, 0, 0, 0, 0x46}}
 	iidIDataObj = winGUID{Data1: 0x0000010E, Data4: [8]byte{0xC0, 0, 0, 0, 0, 0, 0, 0x46}}
@@ -124,11 +129,56 @@ func launcherWindowForPID(pid uint32) (uintptr, winRect) {
 	return best, bestRect
 }
 
-func waitLauncherWindow(pid uint32) (uintptr, winRect, error) {
+func launcherWindowForExecutable(executable string) (uintptr, winRect) {
+	var best uintptr
+	var bestRect winRect
+	var bestArea int64
+	callback := syscall.NewCallback(func(hwnd, _ uintptr) uintptr {
+		if visible, _, _ := procIsWindowVisible.Call(hwnd); visible == 0 {
+			return 1
+		}
+		var pid uint32
+		procGetWindowPID.Call(hwnd, uintptr(unsafe.Pointer(&pid)))
+		process, _, _ := procOpenProcess.Call(0x1000, 0, uintptr(pid)) // PROCESS_QUERY_LIMITED_INFORMATION
+		if process == 0 {
+			return 1
+		}
+		defer procCloseHandle.Call(process)
+		buffer := make([]uint16, 32768)
+		size := uint32(len(buffer))
+		if ok, _, _ := procQueryProcessPath.Call(process, 0, uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&size))); ok == 0 {
+			return 1
+		}
+		if !strings.EqualFold(syscall.UTF16ToString(buffer[:size]), executable) {
+			return 1
+		}
+		var rect winRect
+		if result, _, _ := procGetWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&rect))); result == 0 {
+			return 1
+		}
+		area := int64(rect.Right-rect.Left) * int64(rect.Bottom-rect.Top)
+		if area > bestArea {
+			best, bestRect, bestArea = hwnd, rect, area
+		}
+		return 1
+	})
+	procEnumWindows.Call(callback, 0)
+	runtime.KeepAlive(callback)
+	return best, bestRect
+}
+
+func waitLauncherWindow(pid uint32, executable string) (uintptr, winRect, error) {
 	deadline := time.Now().Add(20 * time.Second)
 	for time.Now().Before(deadline) {
 		if hwnd, rect := launcherWindowForPID(pid); hwnd != 0 {
+			time.Sleep(500 * time.Millisecond)
 			return hwnd, rect, nil
+		}
+		if executable != "" {
+			if hwnd, rect := launcherWindowForExecutable(executable); hwnd != 0 {
+				time.Sleep(500 * time.Millisecond)
+				return hwnd, rect, nil
+			}
 		}
 		time.Sleep(250 * time.Millisecond)
 	}
@@ -202,7 +252,11 @@ func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
 	pid := uint32(cmd.Process.Pid)
 	go func() { _ = cmd.Wait() }()
 
-	hwnd, rect, err := waitLauncherWindow(pid)
+	executable := launcher.Path
+	if strings.EqualFold(filepath.Ext(executable), ".jar") {
+		executable = ""
+	}
+	hwnd, rect, err := waitLauncherWindow(pid, executable)
 	if err != nil {
 		return err
 	}
