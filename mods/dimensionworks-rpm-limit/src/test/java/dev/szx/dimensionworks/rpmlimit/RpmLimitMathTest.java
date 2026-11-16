@@ -44,4 +44,11 @@ class RpmLimitMathTest {
     void usesTheLowestActiveOwnerLimitOnSharedNetworks() {
         assertEquals(128, RpmLimitMath.lowestLimit(10240, 0, 128));
     }
+
+    @Test
+    void capsBeltMovementAtHalfABlockPerTickWithoutChangingTheNetworkLimit() {
+        assertEquals(0.5F, RpmLimitMath.cap(10240.0F, RpmLimitMath.MAX_BELT_RPM) / 480.0F, 0.0F);
+        assertEquals(-0.5F, RpmLimitMath.cap(-10240.0F, RpmLimitMath.MAX_BELT_RPM) / 480.0F, 0.0F);
+        assertEquals(0.25F, RpmLimitMath.cap(120.0F, RpmLimitMath.MAX_BELT_RPM) / 480.0F, 0.0F);
+    }
 }
