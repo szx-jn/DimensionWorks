@@ -204,7 +204,7 @@ func resolveCustomLauncher(path string) (Launcher, error) {
 	return launcher, nil
 }
 
-func launcherCommand(launcher Launcher, packagePath string) *exec.Cmd {
+func launcherCommand(launcher Launcher, _ string) *exec.Cmd {
 	cmd := exec.Command(launcher.Path)
 	if strings.EqualFold(filepath.Ext(launcher.Path), ".jar") {
 		cmd = exec.Command("java", "-jar", launcher.Path)
