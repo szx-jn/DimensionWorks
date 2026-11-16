@@ -169,10 +169,6 @@ func registryExecutable(value string) string {
 	return ""
 }
 
-func openMRPackWithLauncher(launcher Launcher, packagePath string) error {
-	return startLauncherCommand(launcherCommand(launcher, packagePath))
-}
-
 func revealMRPack(packagePath string) error {
 	return startLauncherCommand(exec.Command("explorer.exe", "/select,", packagePath))
 }
@@ -208,9 +204,6 @@ func launcherCommand(launcher Launcher, _ string) *exec.Cmd {
 	cmd := exec.Command(launcher.Path)
 	if strings.EqualFold(filepath.Ext(launcher.Path), ".jar") {
 		cmd = exec.Command("java", "-jar", launcher.Path)
-	}
-	if launcher.Name == "Prism Launcher" {
-		cmd.Args = append(cmd.Args, "--import", packagePath)
 	}
 	if launcher.Arguments != "" {
 		// Preserve the shortcut's arguments without interpreting them in a shell.
