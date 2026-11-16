@@ -5,6 +5,7 @@ import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dev.szx.dimensionworks.rpmlimit.OverspeedBonus;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
+import dev.szx.dimensionworks.rpmlimit.RpmLimitMath;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticPersistence;
 import com.simibubi.create.content.kinetics.KineticNetwork;
