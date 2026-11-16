@@ -73,17 +73,21 @@ func selectAndOpenMRPack(packagePath string) error {
 	fmt.Printf("[启动器] 使用 %s：%s\n", selected.Name, selected.Path)
 	fmt.Println("[MRPack] 本次差量包：", packagePath)
 	if err := openMRPackWithLauncher(selected, packagePath); err != nil {
-		return fmt.Errorf("无法通过 %s 打开 MRPack：%w", selected.Name, err)
+		return fmt.Errorf("无法通过 %s 导入 MRPack：%w", selected.Name, err)
 	}
-	if err := revealMRPack(packagePath); err != nil {
-		fmt.Printf("[文件管理器] 无法展示差量包：%v\n请手动打开文件所在目录：%s\n", err, filepath.Dir(packagePath))
+	if runtime.GOOS == "windows" {
+		fmt.Printf("[启动器] 已向 %s 执行 OLE 文件拖放，请在启动器中完成导入。\n", selected.Name)
 	} else {
-		fmt.Println("[文件管理器] 已请求打开所在文件夹并选中差量 MRPack，可将该文件拖入启动器导入界面。")
-	}
-	if selected.Name == "Prism Launcher" {
-		fmt.Println("[启动器] 已请求 Prism Launcher 导入 MRPack。请在启动器中完成下载。")
-	} else {
-		fmt.Printf("[启动器] 已启动 %s。请在启动器的导入界面选择文件：%s\n", selected.Name, packagePath)
+		if err := revealMRPack(packagePath); err != nil {
+			fmt.Printf("[文件管理器] 无法展示差量包：%v\n请手动打开文件所在目录：%s\n", err, filepath.Dir(packagePath))
+		} else {
+			fmt.Println("[文件管理器] 已请求打开所在文件夹并选中差量 MRPack。")
+		}
+		if selected.Name == "Prism Launcher" {
+			fmt.Println("[启动器] 已请求 Prism Launcher 导入 MRPack。请在启动器中完成下载。")
+		} else {
+			fmt.Printf("[启动器] 已启动 %s。请在启动器的导入界面选择文件：%s\n", selected.Name, packagePath)
+		}
 	}
 	return nil
 }
