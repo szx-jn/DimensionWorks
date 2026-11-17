@@ -107,3 +107,8 @@ jobs:
         if: matrix.module == 'dimensionworks-rpm-limit'
         working-directory: mods/dimensionworks-rpm-limit
         run: gradle runGameTestServer --no-daemon
+
+      - name: ME 齿轮箱 getter 重入回归
+        if: matrix.module == 'dimensionworks-mek-stress'
+        working-directory: mods/dimensionworks-mek-stress
+        run: gradle runGameTestServer --no-daemon

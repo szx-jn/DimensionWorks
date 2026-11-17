@@ -7,6 +7,7 @@ import com.loliball.appliedcreate.energy.MEGearboxBlockEntity;
 import dev.szx.dimensionworks.mekstress.api.IMEGearboxExportState;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.core.StressTransfer;
+import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
 import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -42,11 +43,20 @@ public abstract class MEGearboxBlockEntityMixin implements IMEGearboxExportState
     @Inject(method = "tick", at = @At("RETURN"), remap = false)
     private void dimensionworks$refreshLiveAllocation(CallbackInfo ci) { dimensionworks$refresh(); }
 
+    @Inject(method = {"onConfigChanged", "toggleMode", "setMode"}, at = @At("TAIL"), remap = false)
+    private void dimensionworks$invalidateAllocationOnGearboxChange(CallbackInfo ci) {
+        // A stopped export may have no kinetic network to invalidate the AE snapshot through.
+        // Configuration and mode changes must invalidate the grid budget independently.
+        MemoryGridService.invalidateForKineticMember((MEGearboxBlockEntity) (Object) this);
+    }
+
     @Inject(method = "getGeneratedSpeed", at = @At("RETURN"), cancellable = true, remap = false)
     private void dimensionworks$getActualOutputSpeed(CallbackInfoReturnable<Float> cir) {
         MEGearboxBlockEntity self = (MEGearboxBlockEntity) (Object) this;
         if (self.getMode() != MEGearboxBlockEntity.Mode.EXPORT) return;
-        dimensionworks$refresh();
+        // Create reads this getter while iterating kinetic network maps. Refreshing AE2 here can
+        // re-enter updateGeneratedRotation() and mutate the same maps during that iteration.
+        // GridService and the block entity tick own refresh timing; this getter only reads state.
         cir.setReturnValue(dimensionworks$exportRunning
             ? Math.copySign(dimensionworks$outputRpm, self.getConfiguredSpeed()) : 0.0F);
     }
