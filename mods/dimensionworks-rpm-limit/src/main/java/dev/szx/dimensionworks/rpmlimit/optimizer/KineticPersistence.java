@@ -4,8 +4,6 @@ import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.szx.dimensionworks.rpmlimit.api.IRuntimeKineticMember;
 import dev.szx.dimensionworks.rpmlimit.mixin.KineticNetworkAccessor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.nbt.CompoundTag;
@@ -63,11 +61,7 @@ public final class KineticPersistence {
             KineticNetworkAccessor state = (KineticNetworkAccessor) network;
             float capacity = state.dimensionworks$unloadedCapacity(), stress = state.dimensionworks$unloadedStress();
             int count = state.dimensionworks$unloadedMembers();
-            // Snapshot membership before calculating contributions. Create and its integrations
-            // may prune or rebind members while a save is in progress; never keep a live HashMap
-            // iterator across calls into kinetic accounting.
-            List<KineticBlockEntity> members = new ArrayList<>(network.members.keySet());
-            for (KineticBlockEntity physical : members) {
+            for (KineticBlockEntity physical : network.members.keySet()) {
                 if (physical instanceof IRuntimeKineticMember) continue;
                 stress += network.getActualStressOf(physical);
                 if (network.sources.containsKey(physical)) capacity += network.getActualCapacityOf(physical);
