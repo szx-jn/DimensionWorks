@@ -289,6 +289,10 @@ jobs:
                 -ldflags="-s -w -X main.defaultKind=${kind}" \
                 -o "$output" .
               test -s "$output"
+              if [[ "$goos" != "windows" ]]; then
+                mv "$output" "${output}.update"
+                output="${output}.update"
+              fi
               case "$goos" in
                 windows) file "$output" | grep -q 'PE32+ executable' ;;
                 linux) file "$output" | grep -q 'ELF 64-bit' ;;
@@ -303,7 +307,7 @@ jobs:
 
       - name: 验证 Linux 单文件更新事务
         if: ${{ !inputs.skip_tests }}
-        run: python3 scripts/integration/updater_linux_e2e.py dist/update-dimensionworks-server-linux-amd64
+        run: python3 scripts/integration/updater_linux_e2e.py dist/update-dimensionworks-server-linux-amd64.update
 
       - name: 检查发布文件
         env:
@@ -362,11 +366,11 @@ jobs:
           fi
           [[ -s "dist/DimensionWorks-${PACK_VERSION}-update-manifest.tsv" ]]
           [[ -s "dist/DimensionWorks-Server-${PACK_VERSION}-update-manifest.tsv" ]]
-          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
+          if unzip -Z1 "dist/DimensionWorks-${PACK_VERSION}.mrpack" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)(\.update)?$)'; then
             echo "Updater script embedded in client package" >&2
             exit 1
           fi
-          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)$)'; then
+          if unzip -Z1 "dist/DimensionWorks-Server-${PACK_VERSION}.zip" | grep -E '(^|/)update-dimensionworks-.*(\.(sh|bat|exe)|-(linux|macos)-(amd64|arm64)(\.update)?$)'; then
             echo "Updater script embedded in server package" >&2
             exit 1
           fi
