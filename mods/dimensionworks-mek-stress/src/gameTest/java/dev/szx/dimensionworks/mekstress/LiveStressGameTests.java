@@ -8,8 +8,10 @@ import dev.szx.dimensionworks.mekstress.api.IMEGearboxExportState;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.api.MemoryNetworkStatus;
 import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
+import dev.szx.dimensionworks.rpmlimit.optimizer.KineticPersistence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -103,8 +105,22 @@ public class LiveStressGameTests {
             secondOutput.setConfiguredStress(0);
             output.setConfiguredSpeed(16);
             output.setConfiguredStress(4);
+            helper.assertTrue(service.snapshot(0).status() == MemoryNetworkStatus.OK,
+                "Removing the second output must restore the remaining gearbox");
+            helper.assertTrue(output.getGeneratedSpeed() == 16, "Remaining export must be running before save");
+
+            // A dirty AE snapshot would stop this output and remove it from the kinetic network.
+            // Persistence reads generated capacity while iterating network.members; that getter
+            // must not perform the snapshot itself or mutate the map being iterated.
             input.setConfiguredStress(0);
-            helper.assertTrue(service.snapshot(0).capacitySu() == 0, "Editing source must immediately change total");
+            var outputNetwork = output.getOrCreateNetwork();
+            var membersBeforeSave = java.util.Set.copyOf(outputNetwork.members.keySet());
+            KineticPersistence.write(output, new CompoundTag(), false);
+            helper.assertTrue(outputNetwork.members.keySet().equals(membersBeforeSave),
+                "Serializing a dirty ME allocation must not mutate kinetic network membership");
+            helper.assertTrue(output.getGeneratedSpeed() == 16,
+                "Generated-speed reads during persistence must not refresh the AE grid");
+            helper.assertTrue(service.snapshot(0).capacitySu() == 0, "Explicit grid refresh must apply the source edit");
             helper.assertTrue(output.getGeneratedSpeed() == 0, "Zero input must stop outputs");
             input.setConfiguredStress(8);
             helper.assertTrue(service.snapshot(0).capacitySu() == 128, "Source edit must recover without filling energy");
