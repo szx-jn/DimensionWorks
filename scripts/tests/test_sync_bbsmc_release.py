@@ -36,6 +36,7 @@ class BbsmcSyncTest(unittest.TestCase):
         self.filename = "DimensionWorks-0.3.41.mrpack"
         self.files = {
             self.filename: mrpack(),
+            "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
             "update-dimensionworks-server-windows-amd64.exe": b"windows-server-updater",
             "update-dimensionworks-server-linux-amd64": b"linux-server-updater",
             "update-dimensionworks-server-macos-arm64": b"macos-server-updater",
@@ -88,7 +89,7 @@ class BbsmcSyncTest(unittest.TestCase):
                 self.assertIn("SKIP", self.run_sync())
             bbsmc.assert_not_called()
 
-    def test_uploads_client_and_three_server_updaters_with_exact_release_body(self) -> None:
+    def test_uploads_client_delta_and_three_server_updaters_with_exact_release_body(self) -> None:
         initial = dict(self.uploaded, files=self.uploaded["files"][:1])
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
@@ -99,7 +100,7 @@ class BbsmcSyncTest(unittest.TestCase):
             self.assertIn("BBSMC OK", self.run_sync())
         self.assertEqual(download.call_args_list, [
             mock.call("szx-jn/DimensionWorks", "v0.3.41", asset)
-            for asset in self.release["assets"][:4]
+            for asset in self.release["assets"][:5]
         ])
         self.assertEqual(bbsmc.call_args_list, [
             mock.call("project/doVGSZq0/version", "token"),
@@ -240,7 +241,7 @@ class BbsmcSyncTest(unittest.TestCase):
                 sync.bbsmc_json(endpoint, "token", data=data)
             run.assert_called_once()
 
-    def test_partial_completion_only_adds_remaining_updater_and_dry_run_cannot_write(self) -> None:
+    def test_partial_completion_only_adds_remaining_asset_and_dry_run_cannot_write(self) -> None:
         existing = dict(self.uploaded, files=self.uploaded["files"][:3])
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
@@ -263,10 +264,10 @@ class BbsmcSyncTest(unittest.TestCase):
         upload.assert_not_called()
 
     def test_missing_asset_empty_log_wrong_pack_version_or_missing_token_refuses_upload(self) -> None:
-        for case in ("client", "windows", "linux", "macos", "body", "version", "token"):
+        for case in ("client", "delta", "windows", "linux", "macos", "body", "version", "token"):
             release = copy.deepcopy(self.release)
-            if case in ("client", "windows", "linux", "macos"):
-                release["assets"].pop(("client", "windows", "linux", "macos").index(case))
+            if case in ("client", "delta", "windows", "linux", "macos"):
+                release["assets"].pop(("client", "delta", "windows", "linux", "macos").index(case))
             elif case == "body":
                 release["body"] = " \n"
             elif case == "version":
