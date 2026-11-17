@@ -331,7 +331,7 @@ jobs:
             echo "Loose aria2 engines must not be published" >&2
             exit 1
           fi
-          for target in windows-amd64.exe linux-amd64 macos-arm64; do
+          for target in windows-amd64.exe linux-amd64.update macos-arm64.update; do
             case "$target" in
               windows-amd64.exe) expected='PE32+ executable' ;;
               linux-*) expected='ELF 64-bit' ;;
@@ -383,9 +383,9 @@ jobs:
               aria2-third-party-source.tar.gz \
               update-dimensionworks-client-windows-amd64.exe \
               update-dimensionworks-server-windows-amd64.exe \
-              update-dimensionworks-server-linux-amd64 \
-              update-dimensionworks-client-macos-arm64 \
-              update-dimensionworks-server-macos-arm64 \
+              update-dimensionworks-server-linux-amd64.update \
+              update-dimensionworks-client-macos-arm64.update \
+              update-dimensionworks-server-macos-arm64.update \
               > SHA256SUMS
           )
           [[ -s "dist/SHA256SUMS" ]] || { echo "Missing SHA256SUMS" >&2; exit 1; }
@@ -443,9 +443,9 @@ jobs:
             "dist/SHA256SUMS"
             "dist/update-dimensionworks-client-windows-amd64.exe"
             "dist/update-dimensionworks-server-windows-amd64.exe"
-            "dist/update-dimensionworks-server-linux-amd64"
-            "dist/update-dimensionworks-client-macos-arm64"
-            "dist/update-dimensionworks-server-macos-arm64"
+            "dist/update-dimensionworks-server-linux-amd64.update"
+            "dist/update-dimensionworks-client-macos-arm64.update"
+            "dist/update-dimensionworks-server-macos-arm64.update"
           )
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists; refusing to overwrite it." >&2
