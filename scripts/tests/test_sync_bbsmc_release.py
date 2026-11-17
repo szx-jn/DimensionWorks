@@ -174,7 +174,7 @@ class BbsmcSyncTest(unittest.TestCase):
 
     def test_attachment_timeout_is_not_retried_and_next_run_resumes_remaining_file(self) -> None:
         initial = dict(self.uploaded, files=self.uploaded["files"][:1])
-        missing_name = list(self.files)[1]
+        missing_name = sorted(list(self.files)[1:], key=lambda name: len(self.files[name]))[0]
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
             self.downloads(),
@@ -215,7 +215,7 @@ class BbsmcSyncTest(unittest.TestCase):
         ):
             self.assertIn("SKIP", self.run_sync())
         self.assertEqual(upload.call_count, 2)
-        self.assertEqual(list(upload.call_args.args[1]), [list(self.files)[1]])
+        self.assertEqual(list(upload.call_args.args[1]), [sorted(list(self.files)[1:], key=lambda name: len(self.files[name]))[0]])
 
     def curl_response(self, command: list[str], **kwargs: object) -> subprocess.CompletedProcess:
         body = b"" if self.curl_status == 204 else json.dumps(self.uploaded).encode()
