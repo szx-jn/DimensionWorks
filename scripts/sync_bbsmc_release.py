@@ -197,6 +197,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     files = {}
     for filename in (
         f"DimensionWorks-{version}.mrpack",
+        f"DimensionWorks-Server-{version}-delta.zip",
         "update-dimensionworks-server-windows-amd64.exe",
         "update-dimensionworks-server-linux-amd64",
         "update-dimensionworks-server-macos-arm64",
@@ -212,7 +213,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     if existing is not None and len(existing["files"]) == len(files):
         return f"BBSMC OK: {tag} 文件与更新日志已同步，无需重复上传"
     if dry_run:
-        return f"BBSMC DRY-RUN OK: {tag} 已核对客户端、三个平台服务端更新器与发行日志，未上传"
+        return f"BBSMC DRY-RUN OK: {tag} 已核对客户端、服务端增量 ZIP、三个平台服务端更新器与发行日志，未上传"
     # 下载期间可能已有更晚版本完成发布；写入前再次确认最新正式版身份。
     if not is_latest_release(repository, release):
         return f"BBSMC SKIP: {tag} 已被更新的 GitHub 正式版替代"
@@ -225,7 +226,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
             raise ValueError("BBSMC 返回的版本或客户端文件与本次上传不一致")
     names = {file["filename"] for file in existing["files"]}
     missing = {filename: data for filename, data in files.items() if filename not in names}
-    # 建版请求只含客户端；三个平台服务端更新器逐个追加，避免合并为大请求。
+    # 建版请求只含客户端；服务端增量 ZIP 与三个平台更新器逐个追加，避免合并为大请求。
     for filename in sorted(missing, key=lambda name: len(missing[name])):
         if not is_latest_release(repository, release):
             return f"BBSMC SKIP: {tag} 已被更新的 GitHub 正式版替代"
@@ -233,7 +234,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     uploaded = bbsmc_json(f"version/{existing['id']}", token)
     if not already_synced([uploaded], metadata, files):
         raise ValueError("BBSMC 返回的版本、文件或更新日志与本次上传不一致")
-    return f"BBSMC OK: {tag} 客户端与三个平台服务端更新器及发行日志已同步（{uploaded['id']}）"
+    return f"BBSMC OK: {tag} 客户端、服务端增量 ZIP 与三个平台服务端更新器及发行日志已同步（{uploaded['id']}）"
 
 
 def main() -> int:
