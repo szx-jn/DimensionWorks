@@ -56,5 +56,5 @@ AE2 15.4.10 的目标版本源码没有独立 Grinder 配方类型/机器实现�
 
 - 铁矿粉碎配方通过 Create 磨石注册，避开 Create 原版粗铁的粉碎轮配方。
 - 洞穴维度脚本中的 Create 粉碎铀碎片与磨制薄荷粉也迁移到共享入口。
-- Node 语法检查和 Python 静态测试由 .github/workflows/validate-version-gate.yml 执行。
+- Node 语法检查和 Python 静态测试由 .github/workflows/validate-project-config.yml 执行。
 - 仍需在实际游戏中检查 CEI 流体配方解码、JEI 展示、机器输入输出与自动化；仓库静态测试不能替代游戏内验证。
