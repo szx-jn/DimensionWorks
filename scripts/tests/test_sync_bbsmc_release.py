@@ -181,12 +181,13 @@ class BbsmcSyncTest(unittest.TestCase):
             self.downloads(),
             mock.patch.object(sync, "bbsmc_json", return_value=[initial]),
             mock.patch.object(sync, "upload_files", side_effect=[
+                None,
                 RuntimeError("BBSMC POST version/new-version/file: The read operation timed out"),
             ]) as upload,
             self.assertRaisesRegex(RuntimeError, "read operation timed out"),
         ):
             self.run_sync()
-        self.assertEqual(upload.call_count, 1)
+        self.assertEqual(upload.call_count, 2)
         partial = dict(self.uploaded, files=[
             file for file in self.uploaded["files"] if file["filename"] != missing_name
         ])
@@ -242,7 +243,7 @@ class BbsmcSyncTest(unittest.TestCase):
             run.assert_called_once()
 
     def test_partial_completion_only_adds_remaining_asset_and_dry_run_cannot_write(self) -> None:
-        existing = dict(self.uploaded, files=self.uploaded["files"][:3])
+        existing = dict(self.uploaded, files=self.uploaded["files"][:4])
         with (
             mock.patch.object(sync, "github_json", return_value=self.release),
             self.downloads(),
