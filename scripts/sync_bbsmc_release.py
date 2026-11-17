@@ -195,18 +195,19 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
         raise ValueError("未配置 GitHub Actions Secret BBSMC_TOKEN")
     version = tag[1:]
     files = {}
-    for filename in (
-        f"DimensionWorks-{version}.mrpack",
-        f"DimensionWorks-Server-{version}-delta.zip",
-        "update-dimensionworks-server-windows-amd64.exe",
-        "update-dimensionworks-server-linux-amd64",
-        "update-dimensionworks-server-macos-arm64",
-    ):
-        assets = [asset for asset in release["assets"] if asset["name"] == filename]
+    assets_to_sync = (
+        (f"DimensionWorks-{version}.mrpack", f"DimensionWorks-{version}.mrpack"),
+        (f"DimensionWorks-Server-{version}-delta.zip", f"DimensionWorks-Server-{version}-delta.zip"),
+        ("update-dimensionworks-server-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.exe"),
+        ("update-dimensionworks-server-linux-amd64", "update-dimensionworks-server-linux-amd64.update"),
+        ("update-dimensionworks-server-macos-arm64", "update-dimensionworks-server-macos-arm64.update"),
+    )
+    for asset_name, upload_name in assets_to_sync:
+        assets = [asset for asset in release["assets"] if asset["name"] == asset_name]
         if len(assets) != 1 or assets[0]["state"] != "uploaded":
-            raise ValueError(f"GitHub 发行版缺少唯一且已上传的 {filename}")
-        print(f"BBSMC download: {filename}", flush=True)
-        files[filename] = download_asset(repository, tag, assets[0])
+            raise ValueError(f"GitHub 发行版缺少唯一且已上传的 {asset_name}")
+        print(f"BBSMC download: {asset_name} -> {upload_name}", flush=True)
+        files[upload_name] = download_asset(repository, tag, assets[0])
     metadata = version_metadata(release, project_id, files)
     versions = bbsmc_json(f"project/{project_id}/version", token)
     existing = matching_version(versions, metadata, files)
