@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: 同步客户端与三个平台服务端更新器及发行日志
+      - name: 同步客户端、服务端增量 ZIP 与三个平台服务端更新器及发行日志
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
