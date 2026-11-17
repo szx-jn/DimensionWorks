@@ -94,7 +94,7 @@ class BbsmcSyncTest(unittest.TestCase):
             mock.patch.object(sync, "github_json", return_value=self.release),
             self.downloads() as download,
             mock.patch.object(sync, "bbsmc_json", side_effect=[[], self.uploaded]) as bbsmc,
-            mock.patch.object(sync, "upload_files", side_effect=[initial, None, None]) as upload,
+            mock.patch.object(sync, "upload_files", side_effect=[initial, None, None, None]) as upload,
         ):
             self.assertIn("BBSMC OK", self.run_sync())
         self.assertEqual(download.call_args_list, [
@@ -111,7 +111,7 @@ class BbsmcSyncTest(unittest.TestCase):
                       {self.filename: self.files[self.filename]}, "token"),
             *[
                 mock.call(self.metadata, {name: self.files[name]}, "token", version_id="new-version")
-                for name in server_updaters
+                for name in sorted(server_updaters, key=lambda name: len(self.files[name]))
             ],
         ])
         self.assertEqual(self.metadata["file_parts"], list(self.files))
@@ -263,10 +263,10 @@ class BbsmcSyncTest(unittest.TestCase):
         upload.assert_not_called()
 
     def test_missing_asset_empty_log_wrong_pack_version_or_missing_token_refuses_upload(self) -> None:
-        for case in ("client", "full", "delta", "body", "version", "token"):
+        for case in ("client", "windows", "linux", "macos", "body", "version", "token"):
             release = copy.deepcopy(self.release)
-            if case in ("client", "full", "delta"):
-                release["assets"].pop(("client", "full", "delta").index(case))
+            if case in ("client", "windows", "linux", "macos"):
+                release["assets"].pop(("client", "windows", "linux", "macos").index(case))
             elif case == "body":
                 release["body"] = " \n"
             elif case == "version":
