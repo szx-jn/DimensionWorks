@@ -157,17 +157,17 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 正式发布工作流中的 `sync-bbsmc` 任务只在 GitHub 发布任务成功、且成功创建了本次发行标签后运行。脚本再次查询 GitHub Latest Release，确认本次发行仍是最新的非草稿、非预发布版本；上传前再检查一次，避免下载期间已有更新版本发布。普通提交、推送、PR、独立构建和旧发行版不会触发同步。
 
-发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。同步同一正式发行中的四个固定资产：`DimensionWorks-<版本>.mrpack`，以及 Windows、Linux、macOS 三个平台的服务端更新器 `update-dimensionworks-server-windows-amd64.exe`、`update-dimensionworks-server-linux-amd64`、`update-dimensionworks-server-macos-arm64`。不再向 BBSMC 上传服务端完整 ZIP 或增量 ZIP。逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge 类型从 MRPack 索引确定，MRPack 始终为主文件，三个平台服务端更新器为附加下载。每个下载核对资产大小及 GitHub 提供的 SHA-256，上传后核对四个文件的 SHA-512、主文件和更新日志。同步不上传更新清单、客户端更新器或其他发行资产，也不修改 BBSMC 项目设置。
+发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。同步同一正式发行中的五个固定资产：`DimensionWorks-<版本>.mrpack`、`DimensionWorks-Server-<版本>-delta.zip`，以及 Windows、Linux、macOS 三个平台的服务端更新器 `update-dimensionworks-server-windows-amd64.exe`、`update-dimensionworks-server-linux-amd64`、`update-dimensionworks-server-macos-arm64`。不再向 BBSMC 上传服务端完整 ZIP；服务端增量 ZIP 保留同步。逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge 类型从 MRPack 索引确定，MRPack 始终为主文件，服务端增量 ZIP 与三个平台服务端更新器为附加下载。每个下载核对资产大小及 GitHub 提供的 SHA-256，上传后核对五个文件的 SHA-512、主文件和更新日志。同步不上传更新清单、客户端更新器、服务端完整 ZIP 或其他发行资产，也不修改 BBSMC 项目设置。
 
 目标为已有的 [维度工序 BBSMC 项目](https://bbsmc.net/modpack/dimensionworks)，项目 ID `doVGSZq0`。首次启用前，登录后直接打开 [BBSMC 个人访问令牌页面](https://bbsmc.net/settings/pats)（当前设置侧栏隐藏了此入口），创建拥有「创建版本、读取版本、修改版本」权限的令牌，其所属账号还须具备项目上传权限；补齐已有版本附件需要 `VERSION_WRITE`。将令牌保存在 GitHub 仓库 Actions Secret `BBSMC_TOKEN` 中，不写入代码、日志或聊天。缺少令牌时同步任务明确失败，已成功发布的 GitHub Release 与版本号回写保留。
 
 同步先只上传 MRPack 创建版本，再按文件大小从小到大逐个追加服务端附件，每次请求只携带一个文件，避免将客户端包与服务端大型压缩包合并上传；三个小型服务端更新器分别追加。HTTP 请求统一使用运行环境已有的 curl，HTTPS 协商 HTTP/2；令牌通过标准输入配置传入，不出现在进程参数中。每次上传前确认仍是最新正式版；日志记录文件、接口、HTTP 状态、实际发送量及响应耗时，网络错误包含请求方法和接口，便于区分下载、建版、上传链路和服务端响应阶段。
 
-同步失败后，在该正式发布运行中选择 **Re-run failed jobs**，只补跑失败的同步任务。脚本已修复时，手动运行 `.github/workflows/sync-bbsmc.yml`，使用最新脚本补齐当前正式版，不重建或重发 GitHub Release。若 BBSMC 已存在相同版本，先验证已列出、更新日志、现有文件名/摘要与 MRPack 主文件；四个文件齐全则直接成功，只缺服务端附件时通过追加文件接口逐个补齐。已有内容不同或尚未列出时停止报告冲突，不覆盖。若 GitHub 已发布更晚版本，则跳过旧版本补同步。上传请求不会自动重试，中断后重跑会先核对并保留已上传文件，只补缺失附件。BBSMC 的审核和账户限额仍由平台控制。
+同步失败后，在该正式发布运行中选择 **Re-run failed jobs**，只补跑失败的同步任务。脚本已修复时，手动运行 `.github/workflows/sync-bbsmc.yml`，使用最新脚本补齐当前正式版，不重建或重发 GitHub Release。若 BBSMC 已存在相同版本，先验证已列出、更新日志、现有文件名/摘要与 MRPack 主文件；五个文件齐全则直接成功，只缺服务端附件时通过追加文件接口逐个补齐。已有内容不同或尚未列出时停止报告冲突，不覆盖。若 GitHub 已发布更晚版本，则跳过旧版本补同步。上传请求不会自动重试，中断后重跑会先核对并保留已上传文件，只补缺失附件。BBSMC 的审核和账户限额仍由平台控制。
 
 API 依据：[Modrinth 创建版本](https://docs.modrinth.com/api/operations/createversion/)使用 `file_parts` 与 `primary_file` 的多文件 multipart 请求；[追加版本文件](https://docs.modrinth.com/api/operations/addfilestoversion/)使用 `POST /version/{id}/file`、`VERSION_WRITE` 权限并返回 HTTP 204。另核对 [BBSMC 文件校验实现](https://github.com/bbsmc/app/blob/main/apps/labrinth/src/validate/mod.rs)与[上传实现](https://github.com/bbsmc/app/blob/main/apps/labrinth/src/routes/v3/version_creation.rs)：BBSMC 每文件上限 1 GiB；本次同步的更新器文件远小于该限制。2026-11-14 的 0.3.46 原同步任务已实际成功使用 `BBSMC_TOKEN` 创建 MRPack 版本，不能仅凭令牌页面此前的「从未使用」判断鉴权失败。
 
-无需令牌即可执行只读验证，命令下载并核对最新发行的四个文件及更新日志，不创建或修改 BBSMC 版本：
+无需令牌即可执行只读验证，命令下载并核对最新发行的五个文件及更新日志，不创建或修改 BBSMC 版本：
 
 ```sh
 GITHUB_REPOSITORY=szx-jn/DimensionWorks BBSMC_PROJECT_ID=doVGSZq0 \
