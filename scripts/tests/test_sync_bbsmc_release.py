@@ -38,8 +38,8 @@ class BbsmcSyncTest(unittest.TestCase):
             self.filename: mrpack(),
             "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
             "update-dimensionworks-server-windows-amd64.exe": b"windows-server-updater",
-            "update-dimensionworks-server-linux-amd64": b"linux-server-updater",
-            "update-dimensionworks-server-macos-arm64": b"macos-server-updater",
+            "update-dimensionworks-server-linux-amd64.update": b"linux-server-updater",
+            "update-dimensionworks-server-macos-arm64.update": b"macos-server-updater",
         }
         self.release = {
             "id": 41, "tag_name": "v0.3.41", "draft": False, "prerelease": False,
@@ -47,7 +47,13 @@ class BbsmcSyncTest(unittest.TestCase):
             "body": "第一行更新日志\n\nfix(release): 保留换行与中文\n",
             "assets": [
                 {"name": filename, "state": "uploaded", "size": len(data)}
-                for filename, data in self.files.items()
+                for filename, data in (
+                    (self.filename, self.files[self.filename]),
+                    ("DimensionWorks-Server-0.3.41-delta.zip", self.files["DimensionWorks-Server-0.3.41-delta.zip"]),
+                    ("update-dimensionworks-server-windows-amd64.exe", self.files["update-dimensionworks-server-windows-amd64.exe"]),
+                    ("update-dimensionworks-server-linux-amd64", self.files["update-dimensionworks-server-linux-amd64.update"]),
+                    ("update-dimensionworks-server-macos-arm64", self.files["update-dimensionworks-server-macos-arm64.update"]),
+                )
             ] + [{"name": "SHA256SUMS", "state": "uploaded"}],
         }
         self.metadata = sync.version_metadata(self.release, "doVGSZq0", self.files)
@@ -66,7 +72,10 @@ class BbsmcSyncTest(unittest.TestCase):
     def downloads(self):
         return mock.patch.object(
             sync, "download_asset",
-            side_effect=lambda repo, tag, asset: self.files[asset["name"]],
+            side_effect=lambda repo, tag, asset: self.files[{
+                "update-dimensionworks-server-linux-amd64": "update-dimensionworks-server-linux-amd64.update",
+                "update-dimensionworks-server-macos-arm64": "update-dimensionworks-server-macos-arm64.update",
+            }.get(asset["name"], asset["name"])],
         )
 
     def test_only_latest_non_draft_non_prerelease_can_reach_bbsmc(self) -> None:
