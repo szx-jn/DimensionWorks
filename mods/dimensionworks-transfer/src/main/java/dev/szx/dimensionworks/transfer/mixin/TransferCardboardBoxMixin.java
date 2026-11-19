@@ -2,7 +2,6 @@ package dev.szx.dimensionworks.transfer.mixin;
 
 import dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
