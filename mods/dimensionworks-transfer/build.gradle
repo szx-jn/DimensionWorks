@@ -58,6 +58,8 @@ if (project.hasProperty('transferTestModsDir')) {
             runtimeOnly fg.deobf('dw-test:appliedenergistics2-forge:15.4.10')
             runtimeOnly fg.deobf('dw-test:guideme:20.1.15')
             runtimeOnly fg.deobf('dw-test:Mekanism:1.20.1-10.4.16.80')
+            runtimeOnly fg.deobf('dw-test:sophisticatedcore:1.20.1-1.5.26.2457')
+            runtimeOnly fg.deobf('dw-test:sophisticatedstorage:1.20.1-1.5.15.2220')
             if (!project.hasProperty('alexDispatchCheck')) {
                 runtimeOnly fg.deobf('dw-test:MekanismGenerators:1.20.1-10.4.16.80')
                 runtimeOnly fg.deobf('dw-test:megacells-forge:2.4.6-1.20.1')
