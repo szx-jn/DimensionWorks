@@ -100,9 +100,9 @@ public final class CardboardPackingGameTests {
                 var storage = block(id);
                 level.setBlock(pos, storage.defaultBlockState(), FLAGS);
                 var original = level.getBlockEntity(pos);
-                var inventory = original.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+                var inventory = original.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
                 h.assertTrue(inventory != null, id + " must expose its storage inventory");
-                inventory.setStackInSlot(0, new ItemStack(Items.DIAMOND, 7));
+                h.assertTrue(inventory.insertItem(0, new ItemStack(Items.DIAMOND, 7), false).isEmpty(), id + " must accept test contents");
 
                 h.assertTrue(pack(p, pos, tool("mekanism:cardboard_box")).consumesAction(), id + " must pack");
                 var box = level.getBlockEntity(pos);
@@ -114,7 +114,7 @@ public final class CardboardPackingGameTests {
 
                 unpack(p, pos);
                 var restored = level.getBlockEntity(pos);
-                var restoredInventory = restored.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+                var restoredInventory = restored.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
                 h.assertTrue(restoredInventory != null && restoredInventory.getStackInSlot(0).getCount() == 7
                     && restoredInventory.getStackInSlot(0).is(Items.DIAMOND), id + " inventory must survive packing");
                 h.assertTrue(!restored.saveWithoutMetadata().getBoolean("packed"), id + " must be active after unpacking");
