@@ -3,6 +3,8 @@ package dev.szx.dimensionworks.transfer.mixin;
 import dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -19,6 +21,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(targets = "mekanism.common.block.BlockCardboardBox", remap = false)
 public abstract class TransferCardboardBoxMixin {
     @Inject(method = {"use", "m_6227_"}, at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = {"use", "m_6227_"}, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V",
+            shift = At.Shift.AFTER), remap = false)
+    private void dimensionworks$unpackSophisticatedStorage(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof SophisticatedStoragePackedAccessor accessor) {
+            accessor.dimensionworks$setPacked(false);
+            blockEntity.setChanged();
+        }
+    }
+
     private void dimensionworks$denyUnboxing(BlockState state, Level level, BlockPos pos, Player player,
             InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
         if (player.isShiftKeyDown() && TransferBlockPolicy.inTransfer(level)
