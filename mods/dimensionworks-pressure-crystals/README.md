@@ -4,9 +4,9 @@
 
 ## 熔液结晶
 
-- 普通熔融金属在**敞口工作盆**连续暴露 600 tick（30 秒）后，全部变为同种结晶熔融流体，保留体积与流体 NBT；不要求工作盆处于露天。
+- 普通熔融金属在**敞口工作盆**连续暴露 600 tick（30 秒）后，全部变为同种结晶熔融流体，保留体积与流体数据组件；不要求工作盆处于露天。
 - 盆上方一格为空气或打开的 Create Diesel Generators 盆盖时为敞口；关闭盆盖或直接遮住盆口会重置计时。压缩机仍放在盆上方两格。
-- 两个输入槽分别计时；补料、排空或改换金属会重新计时。当前计时随工作盆 NBT 保存。
+- 两个输入槽分别计时；补料、排空或改换金属会重新计时。当前计时随工作盆原生 NBT 保存。
 - 世界中的熔液沿用 Cave Factory 的连续露天 30 秒规则。
 
 ## 结算规则
@@ -29,25 +29,19 @@
 
 ## 构建与测试
 
-```sh
-gradle test --no-daemon
-gradle build --no-daemon
-```
-
-压力边界由 `PressureTierTest` 覆盖；完整构建还会检查 Forge、Create 与 Mixin 编译配置。
-
-专项服务器回归使用本地整合包中固定版本的依赖和仓库的 `molten_metals.js`，在忽略的 `run-gametest-pressure/` 临时世界运行，测试源码不会进入正式 JAR：
+目标基线为 Minecraft 1.21.1 / NeoForge 21.1.267 / Java 21 / Create 6.0.10 / Vintage Improvements 1.21.1-0.0.0.8。在仓库根目录使用 Wrapper：
 
 ```sh
-gradle -PpressureCheck -PpressureMods='<整合包 mods 目录>' test build runGameTestServer --offline --no-daemon
+./gradlew :dimensionworks-pressure-crystals:build :dimensionworks-pressure-crystals:runGameTestServer
 ```
 
-覆盖空闲工作盆的无压力结晶、停转与减压、三档奇妙结晶、第二输入槽、来源特质、600 mB 扣料与剩余流体还原，以及输出满仓不扣料。测试通过真实大齿轮与压缩机小齿轮啮合驱动转速，检查 21 种金属的四档产物；长期产线与多人运行仍需持续验收。
+4 项压力边界 JUnit 与 19 项原生服务器 GameTest 已通过。隔离 `run-gametest/` 中使用固定 KubeJS/Rhino/KubeJS Create、真实 21 金属注册、柴油模组盆盖、Create/RPM 与 Vintage 压缩机；测试源码、结构和运行数据不进入分发 JAR。
 
+测试覆盖真实大齿轮驱动 21 金属 × 四档压力、敞口结晶、停机/减压、两槽补料和换液、满仓拒绝与恢复、599/600 mB 边界和第二槽继续结算。新增流体组件经过实际工作盆保存重载、敞口转换和剩余流体还原的保全检查，以及非法计时数据拒绝且不部分覆盖有效状态的检查。全客户端画面、长时间自动化与实际旧档转换仍待整包验收。
 
 ## 金属来源特质
 
-每次结晶产出的低压、中压、高压结晶都会写入 `DimensionWorks.Metal` 字符串 NBT，值为来源金属 ID（例如 `netherite`、`azure_neodymium`）。相同压力等级、不同金属来源的结晶因此不会堆叠为同一物品栈；KubeJS 下界合金碎片序列组装使用该字段进行部分 NBT 匹配，禁止混用不同来源。
+每次结晶产出的低压、中压、高压结晶都会写入 `minecraft:custom_data` 中的 `DimensionWorks.Metal` 字符串，值为来源金属 ID（例如 `netherite`、`azure_neodymium`）。相同压力等级、不同金属来源的结晶因此不会堆叠为同一物品栈；KubeJS 下界合金碎片序列组装使用该字段据此匹配材料来源（整包脚本迁移另行验收），禁止混用不同来源。
 
 ## 0.1.1：空闲工作盆正常析出
 
@@ -62,3 +56,9 @@ gradle -PpressureCheck -PpressureMods='<整合包 mods 目录>' test build runGa
 加入普通熔液的敞口计时与当前 NBT 保存；结晶流体按其源流体识别金属，源/流动两种输入都能正确析出。每次结算只消耗 600 mB，空间不足不扣料，无压力产物不附加金属特质。
 
 本地 Java 17 构建、4 项 JUnit 和 17 项实际服务器 GameTest 通过，包含 21 种金属 × 4 档压力、21 种金属敞口转换、真实齿轮驱动完整高压流程、关闭/打开盆盖、两槽补料与换液、当前 NBT 重载、599/600 mB 边界、满仓恢复及第一槽受阻时第二槽继续结算。每秒只查看两个已加载输入槽，不添加区块加载票据、世界扫描或掉落实体。
+
+## NeoForge 移植验证
+
+注册 ID、压力边界、600 mB/3 物品的结算与原计时键保持。原生流体 `DataComponentPatch` 在敞口转换和剩余流体还原时保留；物品金属来源使用当前自定义数据组件。工作盆 Mixin 绑定当前带注册表参数的 read/write；非法已存在计时列表、流体或时间戳直接拒绝，不静默清空。没有历史计时字段的新工作盆正常从新计时开始，旧格式由整包一次性离线转换器处理。
+
+每秒仅观察两个已加载输入槽，每十秒结算；不扫描世界、不增加区块票据或掉落实体。统一创造页签仍由洞穴工厂收录本命名空间物品，未新建页签。历史 0.1.1/0.1.2 段落为当时 Forge 验证记录，不替代当前旧档验收。

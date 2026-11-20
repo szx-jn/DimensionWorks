@@ -4,6 +4,7 @@ import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import dev.szx.dimensionworks.pressurecrystals.BasinMoltenExposure;
 import dev.szx.dimensionworks.pressurecrystals.PressureCrystallization;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,12 +36,12 @@ public abstract class BasinCrystallizationMixin {
     }
 
     @Inject(method = "read", at = @At("RETURN"), remap = false)
-    private void dimensionworks$readExposure(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
-        if (!clientPacket) dimensionworks$moltenExposure.read(tag);
+    private void dimensionworks$readExposure(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
+        if (!clientPacket) dimensionworks$moltenExposure.read(tag, registries);
     }
 
     @Inject(method = "write", at = @At("RETURN"), remap = false)
-    private void dimensionworks$writeExposure(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
-        if (!clientPacket) dimensionworks$moltenExposure.write(tag);
+    private void dimensionworks$writeExposure(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
+        if (!clientPacket) dimensionworks$moltenExposure.write(tag, registries);
     }
 }

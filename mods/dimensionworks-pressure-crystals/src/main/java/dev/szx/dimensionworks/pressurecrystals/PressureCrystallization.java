@@ -6,14 +6,17 @@ import com.simibubi.create.foundation.fluid.SmartFluidTank;
 import dev.szx.dimensionworks.pressurecrystals.mixin.BasinTankAccessor;
 import dev.szx.dimensionworks.pressurecrystals.mixin.VacuumChamberModeAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.List;
 
@@ -40,25 +43,29 @@ public final class PressureCrystallization {
 
             Fluid source = crystallized.getFluid();
             if (source instanceof FlowingFluid flowing) source = flowing.getSource();
-            ResourceLocation id = ForgeRegistries.FLUIDS.getKey(source);
+            ResourceLocation id = BuiltInRegistries.FLUID.getKey(source);
             if (id == null || !id.getNamespace().equals("dimensionworks_cave_factory")
                 || !id.getPath().startsWith(CRYSTALLIZED_PREFIX)) continue;
 
             String metal = id.getPath().substring(CRYSTALLIZED_PREFIX.length());
-            Fluid molten = ForgeRegistries.FLUIDS.getValue(
-                new ResourceLocation("dimensionworks", "molten_" + metal));
-            if (molten == null) continue;
+            ResourceLocation moltenId = ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_" + metal);
+            Fluid molten = BuiltInRegistries.FLUID.getOptional(moltenId)
+                .orElseThrow(() -> new IllegalStateException("Missing ordinary molten fluid for " + id));
 
             ItemStack crystalStack = new ItemStack(crystal, CRYSTAL_OUTPUT);
             if (tier != PressureTier.NONE) {
-                crystalStack.getOrCreateTagElement("DimensionWorks").putString("Metal", metal);
+                CompoundTag traits = new CompoundTag();
+                traits.putString("Metal", metal);
+                CompoundTag custom = new CompoundTag();
+                custom.put("DimensionWorks", traits);
+                crystalStack.set(DataComponents.CUSTOM_DATA, CustomData.of(custom));
             }
             List<ItemStack> output = List.of(crystalStack);
             if (!basin.acceptOutputs(output, List.of(), true)) continue;
             if (!basin.acceptOutputs(output, List.of(), false)) return;
 
             int remaining = crystallized.getAmount() - PRECIPITATION_AMOUNT;
-            tank.setFluid(remaining > 0 ? new FluidStack(molten, remaining) : FluidStack.EMPTY);
+            tank.setFluid(remaining > 0 ? new FluidStack(molten.builtInRegistryHolder(), remaining, crystallized.getComponentsPatch()) : FluidStack.EMPTY);
             basin.notifyChangeOfContents();
             basin.notifyUpdate();
             return;

@@ -145,6 +145,16 @@ KubeJS 弹力脚本迁移原生十步配方字段与具名 `modifyRecipeResult` 
 
 阶段最终根构建 `build :dimensionworks-transfer:runGameTestServer -PalexDispatchCheck -PtransferSnapshot=<封存源路径>` 通过（`transfer-port/stage-final-validation-v1.log`），已接入的 13 个模块共 300 项 JUnit，0 失败/错误/跳过；Transfer 联合 52 项再次通过。生产 `dimensionworks_transfer-0.3.14.jar` 为 207051 字节、94 个 Java 21 类，SHA-256 `cd293f9c8b401ec0a34fcb05efa3bfb64357b56fee47ebfbeb35451103e8a73d`；核对 NeoForge TOML/JSON 且不含测试类、专项结构或客户端夹具。另两个尚未接入工程的历史测试报告不计入上述数量。客户端运行目录新增忽略规则，未提交运行时数据。
 
+## 压力结晶原生移植
+
+Pressure Crystals 0.1.2 接入根工程，原四个注册 ID、压力边界、21 金属与 600 mB/3 结晶行为保持；Vintage 固定 CF 1255448/8941692，工作盆 Mixin 使用原生注册表参数，流体转换与剩余流体保持 DataComponentPatch，金属特质转入 minecraft:custom_data。存在的计时列表严格解码两个槽，错误拒绝且不部分覆盖当前状态；新建工作盆无计时字段时正常开始，旧格式转换仍待离线迁移器。
+
+4 项 JUnit、19 项实际 GameTest 已通过（`pressure-port/native-tests-v2.log`），包含真实压缩机/大齿轮传动、21×4 档产出、敞口/盖子、600 tick 连续暴露、两槽补料换液、满仓不扣料及恢复、599/600 mB、第二槽独立结算、当前工作盆保存重载及流体组件往返。实际注册时保留统一创造页签策略，没有新页签；完整客户端界面与实际旧档尚未验证。
+
+柴油模组目标 UoPH8lO1 1.21.1-1.3.15 经官方 SHA-512 校验，JAR SHA-256 `56ef1d574278fc311f1ffa223dbd613077b899354a18d01ae8dca2578a4e2990`，声明 MIT，NeoForge >=21.1.174、Create [6.0.7,6.1.0)、可选 Struts >=1.3.0。其未装 Struts 时的掉落表无条件引用未注册物品，整包自有数据覆盖保持原掉落并增加 mod_loaded 条件；专项也装入已有固定 KubeJS Create 以供 Vintage 原生脚本使用。修正后服务器日志 0 ERROR、KubeJS 启动/服务端 0 错误/警告，19 项全部通过并保存退出。可选 Sable 的上游 Mixin 未发现警告仍存在，不称完整依赖闭包已验证。
+
+生产 JAR 为 20948 字节、8 个 Java 21 类，SHA-256 `69cf9485d1524c592d8d82300e7b1d9d8cd399c24ffa955a9265b30975371e51`；JSON/TOML、测试结构与类排除、git diff --check 均检查通过。根 VERSION 保持 0.3.52，不发布发行版；后续继续 Maid AE Crank、JEI Ticks、全包闭包/脚本和真实旧档迁移。
+
 ## 下一阶段准入
 
 私有快照验证及全档读取审计已完成；随后确定缺失注册 ID 的处理、锁定完整目标依赖闭包，移植其余模块和脚本，再实现一次性 NBT/组件转换器。完整客户端/服务端冷启动、重启、库存语义对账、玩家身份及真实生产链验收通过前，禁止给玩家开放跨版本更新。

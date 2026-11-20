@@ -14,17 +14,20 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.component.CustomData;
 
 @GameTestHolder(DimensionWorksPressureCrystals.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -118,12 +121,12 @@ public final class PressureCrystallizationGameTests {
         }
         helper.runAfterDelay(590, () -> {
             for (int i = 0; i < metals.size(); i++)
-                helper.assertTrue(inputTank(basins.get(i), 0).getFluid().isFluidStackIdentical(molten(metals.get(i), 1000)),
+                helper.assertTrue(FluidStack.matches(inputTank(basins.get(i), 0).getFluid(), molten(metals.get(i), 1000)),
                     "Open basin must wait 600 ticks: " + metals.get(i));
         });
         helper.runAfterDelay(650, () -> {
             for (int i = 0; i < metals.size(); i++)
-                helper.assertTrue(inputTank(basins.get(i), 0).getFluid().isFluidStackIdentical(crystal(metals.get(i), 1000)),
+                helper.assertTrue(FluidStack.matches(inputTank(basins.get(i), 0).getFluid(), crystal(metals.get(i), 1000)),
                     "An open basin must crystallize all its molten " + metals.get(i));
             helper.succeed();
         });
@@ -144,19 +147,19 @@ public final class PressureCrystallizationGameTests {
     @GameTest(template = "empty", timeoutTicks = 1100)
     public static void closedLidRestartsBasinExposure(GameTestHelper helper) {
         var basin = createBasin(helper, BASIN_POS, null, false);
-        var lid = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("createdieselgenerators", "basin_lid"));
+        var lid = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("createdieselgenerators", "basin_lid"));
         helper.setBlock(BASIN_POS.above(), lid.defaultBlockState().setValue(BlockStateProperties.OPEN, false));
         blockOutput(basin);
         fill(helper, basin, molten("iron", 1000));
         helper.runAfterDelay(400, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(molten("iron", 1000)),
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), molten("iron", 1000)),
                 "A closed actual basin lid must prevent crystallization");
             helper.setBlock(BASIN_POS.above(), lid.defaultBlockState().setValue(BlockStateProperties.OPEN, true));
         });
-        helper.runAfterDelay(950, () -> helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(molten("iron", 1000)),
+        helper.runAfterDelay(950, () -> helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), molten("iron", 1000)),
             "Opening the lid starts a fresh 600-tick exposure"));
         helper.runAfterDelay(1050, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(crystal("iron", 1000)),
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), crystal("iron", 1000)),
                 "An open actual basin lid must allow crystallization");
             helper.succeed();
         });
@@ -170,18 +173,18 @@ public final class PressureCrystallizationGameTests {
         fill(helper, basin, molten("copper", 1000));
         helper.runAfterDelay(500, () -> {
             fill(helper, basin, molten("iron", 600));
-            IFluidHandler handler = basin.getCapability(ForgeCapabilities.FLUID_HANDLER).orElseThrow(AssertionError::new);
+            IFluidHandler handler = java.util.Objects.requireNonNull(helper.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, basin.getBlockPos(), null), "Actual basin fluid capability");
             helper.assertTrue(handler.drain(molten("copper", 1000), IFluidHandler.FluidAction.EXECUTE).getAmount() == 1000,
                 "Drain the second input through the actual basin fluid capability");
             fill(helper, basin, molten("gold", 1000));
         });
         helper.runAfterDelay(1050, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(molten("iron", 1000)), "Topping up restarts exposure");
-            helper.assertTrue(inputTank(basin, 1).getFluid().isFluidStackIdentical(molten("gold", 1000)), "Changing metal restarts exposure");
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), molten("iron", 1000)), "Topping up restarts exposure");
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 1).getFluid(), molten("gold", 1000)), "Changing metal restarts exposure");
         });
         helper.runAfterDelay(1170, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(crystal("iron", 1000)), "First input must crystallize");
-            helper.assertTrue(inputTank(basin, 1).getFluid().isFluidStackIdentical(crystal("gold", 1000)), "Second input must crystallize");
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), crystal("iron", 1000)), "First input must crystallize");
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 1).getFluid(), crystal("gold", 1000)), "Second input must crystallize");
             helper.succeed();
         });
     }
@@ -193,13 +196,13 @@ public final class PressureCrystallizationGameTests {
         fill(helper, basin, molten("iron", 1000));
         BasinBlockEntity[] current = {basin};
         helper.runAfterDelay(500, () -> {
-            var saved = current[0].saveWithFullMetadata();
+            var saved = current[0].saveWithFullMetadata(helper.getLevel().registryAccess());
             helper.setBlock(BASIN_POS, Blocks.AIR);
             current[0] = createBasin(helper, BASIN_POS, null, false);
-            current[0].load(saved);
+            current[0].loadWithComponents(saved, helper.getLevel().registryAccess());
         });
         helper.runAfterDelay(650, () -> {
-            helper.assertTrue(inputTank(current[0], 0).getFluid().isFluidStackIdentical(crystal("iron", 1000)),
+            helper.assertTrue(FluidStack.matches(inputTank(current[0], 0).getFluid(), crystal("iron", 1000)),
                 "Current basin NBT must retain continuous exposure across save/load");
             helper.succeed();
         });
@@ -210,7 +213,7 @@ public final class PressureCrystallizationGameTests {
         var basin = createBasin(helper, BASIN_POS, null, false);
         fill(helper, basin, crystal("iron", 599));
         helper.runAfterDelay(205, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(crystal("iron", 599)),
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), crystal("iron", 599)),
                 "599 mB must be preserved");
             helper.assertTrue(basin.getOutputInventory().isEmpty(), "Insufficient fluid must not produce crystals");
             helper.succeed();
@@ -234,7 +237,7 @@ public final class PressureCrystallizationGameTests {
         blockOutput(basin);
         fill(helper, basin, crystal("iron", 1000));
         helper.runAfterDelay(205, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(crystal("iron", 1000)),
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), crystal("iron", 1000)),
                 "Blocked output must not consume fluid");
             for (int slot = 0; slot < basin.getOutputInventory().getSlots(); slot++)
                 basin.getOutputInventory().setStackInSlot(slot, ItemStack.EMPTY);
@@ -250,14 +253,18 @@ public final class PressureCrystallizationGameTests {
         var basin = createBasin(helper, BASIN_POS, 512F, true);
         blockOutput(basin);
         ItemStack copperCrystals = new ItemStack(DimensionWorksPressureCrystals.LOW_PRESSURE_CRYSTAL.get(), 61);
-        copperCrystals.getOrCreateTagElement("DimensionWorks").putString("Metal", "copper");
+        CompoundTag traits = new CompoundTag();
+        traits.putString("Metal", "copper");
+        CompoundTag custom = new CompoundTag();
+        custom.put("DimensionWorks", traits);
+        copperCrystals.set(DataComponents.CUSTOM_DATA, CustomData.of(custom));
         basin.getOutputInventory().setStackInSlot(0, copperCrystals);
         fill(helper, basin, crystal("iron", 1000));
         fill(helper, basin, crystal("copper", 1000));
         helper.runAfterDelay(205, () -> {
-            helper.assertTrue(inputTank(basin, 0).getFluid().isFluidStackIdentical(crystal("iron", 1000)),
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 0).getFluid(), crystal("iron", 1000)),
                 "The blocked first metal must remain untouched");
-            helper.assertTrue(inputTank(basin, 1).getFluid().isFluidStackIdentical(molten("copper", 400)),
+            helper.assertTrue(FluidStack.matches(inputTank(basin, 1).getFluid(), molten("copper", 400)),
                 "The second metal must settle when its own output fits");
             helper.assertTrue(basin.getOutputInventory().getStackInSlot(0).getCount() == 64,
                 "Exactly three copper crystals must join the matching output stack");
@@ -265,23 +272,91 @@ public final class PressureCrystallizationGameTests {
         });
     }
 
+    @GameTest(template = "empty", timeoutTicks = 900)
+    public static void exposureReloadAndPrecipitationRetainFluidComponents(GameTestHelper helper) {
+        BasinBlockEntity[] current = {createBasin(helper, BASIN_POS, null, false)};
+        blockOutput(current[0]);
+        FluidStack input = molten("iron", 1000);
+        CompoundTag custom = new CompoundTag();
+        custom.putLong("batch", 987654321234L);
+        input.set(DataComponents.CUSTOM_DATA, CustomData.of(custom));
+        fill(helper, current[0], input);
+        helper.runAfterDelay(500, () -> {
+            var saved = current[0].saveWithFullMetadata(helper.getLevel().registryAccess());
+            helper.setBlock(BASIN_POS, Blocks.AIR);
+            current[0] = createBasin(helper, BASIN_POS, null, false);
+            current[0].loadWithComponents(saved, helper.getLevel().registryAccess());
+            helper.assertTrue(FluidStack.matches(inputTank(current[0], 0).getFluid(), input),
+                "Native basin load must preserve the input components and amount");
+        });
+        helper.runAfterDelay(650, () -> {
+            FluidStack converted = inputTank(current[0], 0).getFluid();
+            helper.assertTrue(converted.is(crystal("iron", 1000).getFluid()) && converted.getAmount() == 1000
+                && converted.getComponentsPatch().equals(input.getComponentsPatch()),
+                "600-tick exposure must resume and retain all fluid components");
+            for (int slot = 0; slot < current[0].getOutputInventory().getSlots(); slot++)
+                current[0].getOutputInventory().setStackInSlot(slot, ItemStack.EMPTY);
+        });
+        helper.runAfterDelay(850, () -> {
+            FluidStack remainder = inputTank(current[0], 0).getFluid();
+            helper.assertTrue(remainder.is(input.getFluid()) && remainder.getAmount() == 400
+                && remainder.getComponentsPatch().equals(input.getComponentsPatch()),
+                "Precipitation must retain the remaining fluid components");
+            ItemStack output = current[0].getOutputInventory().getStackInSlot(0);
+            helper.assertTrue(output.is(DimensionWorksPressureCrystals.USELESS_CRYSTAL.get())
+                && output.getCount() == 3 && !output.has(DataComponents.CUSTOM_DATA),
+                "No-pressure output must not acquire the fluid's custom data");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 10)
+    public static void invalidExposureRejectsWithoutPartiallyReplacingCurrentState(GameTestHelper helper) {
+        var basin = createBasin(helper, BASIN_POS, null, false);
+        fill(helper, basin, molten("iron", 1000));
+        var registries = helper.getLevel().registryAccess();
+        var exposure = new BasinMoltenExposure();
+        exposure.observe(basin);
+        CompoundTag valid = new CompoundTag();
+        exposure.write(valid, registries);
+        for (int kind = 0; kind < 5; kind++) {
+            CompoundTag bad = valid.copy();
+            var entries = bad.getList("MoltenExposure", net.minecraft.nbt.Tag.TAG_COMPOUND);
+            switch (kind) {
+                case 0 -> entries.remove(1);
+                case 1 -> entries.getCompound(1).putString("Started", "invalid");
+                case 2 -> entries.getCompound(1).putLong("Started", -2);
+                case 3 -> entries.getCompound(1).getCompound("Fluid").putString("id", "dimensionworks:missing_fluid");
+                case 4 -> bad.putString("MoltenExposure", "invalid");
+            }
+            boolean rejected = false;
+            try { exposure.read(bad, registries); }
+            catch (IllegalArgumentException expected) { rejected = true; }
+            helper.assertTrue(rejected, "Invalid exposure case " + kind + " must reject");
+            CompoundTag after = new CompoundTag();
+            exposure.write(after, registries);
+            helper.assertTrue(after.equals(valid), "Invalid data must not partially replace the active timers");
+        }
+        helper.succeed();
+    }
+
     private static java.util.List<String> moltenMetals() {
-        return ForgeRegistries.FLUIDS.getKeys().stream()
+        return BuiltInRegistries.FLUID.keySet().stream()
             .filter(id -> id.getNamespace().equals("dimensionworks") && id.getPath().startsWith("molten_"))
-            .filter(id -> ForgeRegistries.FLUIDS.getValue(id) instanceof FlowingFluid fluid && fluid.getSource() == fluid)
+            .filter(id -> BuiltInRegistries.FLUID.get(id) instanceof FlowingFluid fluid && fluid.getSource() == fluid)
             .map(id -> id.getPath().substring(7)).sorted().toList();
     }
     private static BlockPos matrixPos(int metal, int tier) {
         return new BlockPos(1 + metal % 7 * 4, 1, 1 + metal / 7 * 4 + tier * 12);
     }
     private static FluidStack molten(String metal, int amount) {
-        return new FluidStack(ForgeRegistries.FLUIDS.getValue(new ResourceLocation("dimensionworks", "molten_" + metal)), amount);
+        return new FluidStack(BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_" + metal)), amount);
     }
     private static FluidStack crystal(String metal, int amount) {
-        return new FluidStack(ForgeRegistries.FLUIDS.getValue(new ResourceLocation("dimensionworks_cave_factory", "crystallized_molten_" + metal)), amount);
+        return new FluidStack(BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath("dimensionworks_cave_factory", "crystallized_molten_" + metal)), amount);
     }
     private static void fill(GameTestHelper helper, BasinBlockEntity basin, FluidStack fluid) {
-        IFluidHandler handler = basin.getCapability(ForgeCapabilities.FLUID_HANDLER).orElseThrow(AssertionError::new);
+        IFluidHandler handler = java.util.Objects.requireNonNull(helper.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, basin.getBlockPos(), null), "Actual basin fluid capability");
         helper.assertTrue(handler.fill(fluid, IFluidHandler.FluidAction.EXECUTE) == fluid.getAmount(),
             "Actual basin capability must accept " + fluid);
     }
@@ -293,11 +368,11 @@ public final class PressureCrystallizationGameTests {
         ItemStack result = basin.getOutputInventory().getStackInSlot(0);
         helper.assertTrue(result.is(expected) && result.getCount() == 3, "Expected three " + expected + " from " + metal + ", got " + result);
         if (expected == DimensionWorksPressureCrystals.USELESS_CRYSTAL.get())
-            helper.assertTrue(!result.hasTag(), "No-pressure crystals must not acquire a metal trait");
-        else helper.assertTrue(result.hasTag() && metal.equals(result.getTag().getCompound("DimensionWorks").getString("Metal")),
+            helper.assertTrue(!result.has(DataComponents.CUSTOM_DATA), "No-pressure crystals must not acquire a metal trait");
+        else helper.assertTrue(result.has(DataComponents.CUSTOM_DATA) && metal.equals(result.get(DataComponents.CUSTOM_DATA).copyTag().getCompound("DimensionWorks").getString("Metal")),
             "Pressure output must retain metal " + metal);
         FluidStack actual = inputTank(basin, 0).getFluid();
-        helper.assertTrue(remainder == 0 ? actual.isEmpty() : actual.isFluidStackIdentical(molten(metal, remainder)),
+        helper.assertTrue(remainder == 0 ? actual.isEmpty() : FluidStack.matches(actual, molten(metal, remainder)),
             "Consume exactly 600 mB and restore the ordinary molten remainder: " + actual);
     }
 
@@ -309,7 +384,7 @@ public final class PressureCrystallizationGameTests {
         helper.runAfterDelay(setupDelay, () -> {
             BasinBlockEntity basin = createBasin(helper, BASIN_POS, rpm, pressurizing);
             SmartFluidTank tank = inputTank(basin, inputSlot);
-            FluidStack original = new FluidStack(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(
+            FluidStack original = new FluidStack(BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath(
                 "dimensionworks_cave_factory", "crystallized_molten_" + metal)), 1000);
             tank.setFluid(original);
             if (blocked) {
@@ -319,22 +394,22 @@ public final class PressureCrystallizationGameTests {
             basin.tick();
             helper.runAfterDelay(205, () -> {
                 if (blocked) {
-                    helper.assertTrue(tank.getFluid().isFluidStackIdentical(original),
+                    helper.assertTrue(FluidStack.matches(tank.getFluid(), original),
                         "Full output must preserve the input fluid");
                 } else {
                     ItemStack result = basin.getOutputInventory().getStackInSlot(0);
                     helper.assertTrue(result.is(expected) && result.getCount() == 3,
                         "An idle basin must produce three crystals of the expected pressure tier; got " + result);
                     if (expected == DimensionWorksPressureCrystals.USELESS_CRYSTAL.get()) {
-                        helper.assertTrue(!result.hasTag(), "Useless crystals must not carry a metal trait");
+                        helper.assertTrue(!result.has(DataComponents.CUSTOM_DATA), "Useless crystals must not carry a metal trait");
                     } else {
-                        helper.assertTrue(result.hasTag()
-                            && metal.equals(result.getTag().getCompound("DimensionWorks").getString("Metal")),
+                        helper.assertTrue(result.has(DataComponents.CUSTOM_DATA)
+                            && metal.equals(result.get(DataComponents.CUSTOM_DATA).copyTag().getCompound("DimensionWorks").getString("Metal")),
                             "Pressure crystals must retain their source metal");
                     }
                     FluidStack remaining = tank.getFluid();
-                    helper.assertTrue(remaining.getAmount() == 400 && remaining.getFluid() == ForgeRegistries.FLUIDS.getValue(
-                        new ResourceLocation("dimensionworks", "molten_" + metal)),
+                    helper.assertTrue(remaining.getAmount() == 400 && remaining.getFluid() == BuiltInRegistries.FLUID.get(
+                        ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_" + metal)),
                         "Consume 600 mB and turn the remaining 400 mB into ordinary molten metal");
                 }
                 helper.succeed();
@@ -347,7 +422,7 @@ public final class PressureCrystallizationGameTests {
         helper.setBlock(pos.above(), Blocks.AIR);
         if (rpm != null) {
             BlockPos compressorPos = pos.above(2);
-            var block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("vintageimprovements", "vacuum_chamber"));
+            var block = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("vintageimprovements", "vacuum_chamber"));
             helper.setBlock(compressorPos, block.defaultBlockState());
             var compressor = (VacuumChamberBlockEntity) helper.getBlockEntity(compressorPos);
             BlockPos gearPos = compressorPos.east().south();

@@ -1,97 +1,41 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
+
 version = '0.1.2'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_pressure_crystals'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            mods { dimensionworks_pressure_crystals { source sourceSets.main } }
-        }
-        client {}
-        server { args '--nogui' }
-    }
-}
-repositories {
-    maven { name = 'Create'; url = 'https://maven.createmod.net' }
-    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
-    maven { name = 'CurseMaven'; url = 'https://www.cursemaven.com' }
-    mavenCentral()
-}
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+apply from: rootProject.file('gradle/neoforge-create.gradle')
+
+repositories { maven { url = 'https://www.cursemaven.com'; content { includeGroup 'curse.maven' } } }
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
-    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
-    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    compileOnly fg.deobf(project.hasProperty('pressureCheck')
-        ? 'dw-test:vintageimprovements:1.20.1-0.3.7.9'
-        : 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941689')
-    runtimeOnly fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
-    runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation project(':dimensionworks-cave-factory')
+    implementation 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941692'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
-mixin {
-    add sourceSets.main, 'dimensionworks_pressure_crystals.refmap.json'
-    config 'dimensionworks_pressure_crystals.mixins.json'
-}
-tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
-
-tasks.named('test') { useJUnitPlatform() }
-jar {
-    manifest.attributes(['MixinConfigs': 'dimensionworks_pressure_crystals.mixins.json'])
-    finalizedBy 'reobfJar'
+test { useJUnitPlatform() }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
 }
 
-// Explicit server regression check with the pack's pinned local runtime jars.
-if (project.hasProperty('pressureCheck')) {
-    if (!project.hasProperty('pressureMods')) {
-        throw new GradleException('Supply -PpressureMods=<DimensionWorks mods directory> for pressureCheck')
-    }
-    repositories {
-        flatDir { dirs '../dimensionworks-cave-factory/build/libs', '../dimensionworks-rpm-limit/build/libs' }
-        flatDir { dirs project.property('pressureMods') }
-    }
-    dependencies {
-        [
-            'vintageimprovements:1.20.1-0.3.7.9', 'alexscaves:2.0.2',
-            "Dimensions-of-Alex's-Caves:1.20.1-1.0.4", 'citadel:2.6.3-1.20.1',
-            'Mekanism:1.20.1-10.4.16.80', 'appliedenergistics2-forge:15.4.10',
-            'guideme:20.1.15', 'curios-forge:5.14.1+1.20.1',
-            'kubejs-forge:2001.6.5-build.26', 'rhino-forge:2001.2.3-build.10',
-            'architectury:9.2.14-forge', 'createdieselgenerators:1.20.1-1.3.12'
-        ].each { coordinate -> runtimeOnly fg.deobf("dw-test:${coordinate}") }
-        ['dimensionworks-cave-factory', 'dimensionworks-rpm-limit'].each { name ->
-            def versionMatch = file("../${name}/build.gradle").getText('UTF-8') =~ /(?m)^version = '([^']+)'$/
-            if (!versionMatch.find()) throw new GradleException("Cannot determine test dependency version: ${name}")
-            runtimeOnly fg.deobf("dw-test:${name.replace('-', '_')}:${versionMatch.group(1)}")
-        }
-    }
-    sourceSets {
-        pressureCheck {
-            compileClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-        }
-    }
-    minecraft.runs {
-        gameTestServer {
-            workingDirectory project.file('run-gametest-pressure')
-            args '--nogui'
-            property 'forge.enabledGameTestNamespaces', 'dimensionworks_pressure_crystals'
-            mods.dimensionworks_pressure_crystals { sources = [sourceSets.main, sourceSets.pressureCheck] }
-        }
-    }
-    tasks.register('preparePressureCheck', Copy) {
-        from '../../kubejs/startup_scripts/molten_metals.js'
-        into 'run-gametest-pressure/kubejs/startup_scripts'
-    }
-    tasks.matching { it.name == 'runGameTestServer' }.configureEach { dependsOn 'preparePressureCheck' }
+ext.gameTestCount = 19
+apply from: rootProject.file('gradle/neoforge-gametest.gradle')
+sourceSets.gameTest {
+    java.srcDir 'src/pressureCheck/java'
+    resources.srcDir 'src/pressureCheck/resources'
 }
+dependencies {
+    gameTestRuntimeOnly 'maven.modrinth:create-diesel-generators:UoPH8lO1'
+    gameTestRuntimeOnly 'maven.modrinth:kubejs-create:1qmcLagN'
+    gameTestRuntimeOnly 'maven.modrinth:kubejs:GDXCpKlp'
+    gameTestRuntimeOnly 'maven.modrinth:rhino:SqkDvOLG'
+    gameTestRuntimeOnly 'maven.modrinth:better-advanced-tooltips:uPFbnD32'
+}
+neoForge.runs.gameTestServer { jvmArgument '-XX:ActiveProcessorCount=2' }
+tasks.register('preparePressureCheck', Copy) {
+    from(rootProject.file('kubejs/startup_scripts/molten_metals.js')) { into 'startup_scripts' }
+    from(rootProject.file('kubejs/data/vintageimprovements/recipe/craft/fiery_wire.json')) { into 'data/vintageimprovements/recipe/craft' }
+    from(rootProject.file('kubejs/data/createdieselgenerators/loot_table/blocks/andesite_girder_strut.json')) { into 'data/createdieselgenerators/loot_table/blocks' }
+    into 'run-gametest/kubejs'
+}
+tasks.named('runGameTestServer') { dependsOn 'preparePressureCheck' }
