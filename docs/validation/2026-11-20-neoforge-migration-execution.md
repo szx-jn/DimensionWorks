@@ -291,3 +291,11 @@ manifest/mods.json 已移除这四项，从 182 项变为 178 项；其余平台
 新增只读 preflight_registries.py，复用既有完整源审计及目标运行注册表，按方块/物品/实体/维度分别比较。旧报告中 467 个带 Count 的经验球实体根记录单独记账，嵌套 Item 仍保留；没有按任意注册表同名或统一字符串替换判断兼容。原档中的未知记录继续阻止预检通过，不能默默删去。原始 Count 合计仍区分于物流 Amount 和 AE2/Mek 数量；报告保持私有权限、两份输入 SHA-256、拒绝覆盖。
 
 实际 source-registry-preflight-v1.json 输出：8 个缺失方块 ID、12 个缺失物品 ID、0 个缺失实体类型、1 个缺失维度定义、0 个未定类型 Count 记录。预检按契约以 1 退出，表示这些差异尚需转换，**不是旧档已经通过验收**。8 个方块包括原版 grass（4,823,571 个，交给原版 DFU 改名）、葡萄、矿工乐事及 ExtendedAE 设备；12 个物品还包含唯一无限元件；凋零风暴 bowels 定义需定点清理。四个舍弃模组在该唯一服务器审计中实际方块/实体/物品栈均为零。15 项迁移工具测试通过，含新预检 7 项；未重复全世界扫描或打开封存世界，实际转换、保存/重启对账仍待完成。
+
+## 目标清单正式切换与必需依赖闭合
+
+manifest/mods.json 已切换为 Minecraft 1.21.1 / NeoForge：共 183 项固定来源，150 Modrinth、15 CurseForge、15 本仓库自研、3 github-source 原包定制 fork。现成候选全部使用既有校验资产；Iris 替换 Oculus、Sodium 替换 Embeddium，不引用 Forge 渲染器。新增 6 项对应真实依赖链：owo（Aether 侧运行依赖）、MezzConfig（JEI）、Lodestone（矿工乐事）、Sodium / Sodium Options API（保留原 Sodium Extras）、Reese（Options API 的必需依赖）。只做目标版本、加载器、文件 SHA 与依赖元数据检查，没有第三方功能专项。
+
+首次草案没有加入 Reese，实际 Options API JAR 的 mandatory 依赖检查失败；随后补齐同一已取得的固定候选，native-manifest-closure-audit-v2.log 为 **183 个顶层 JAR、73 个内嵌依赖、217 个 modId，0 错误、1 条既有 l2damagetracker 相同版本字节差异警告**。草案不包含额外报警工程；原包 15 个自研 JAR 版本与各 build.gradle 相符。三个原有 fork 使用已推送固定提交、源码 SHA 与产物 SHA，不使用移动分支、Actions 产物或新 Release。root README 平台及直接升级报告同步更新。主清单检查、JSON、唯一 ID 与 git diff --check 通过；固定源码、预检钩子及服务端打包的 20 项既有 Python 检查通过（7 / 9 / 4 项），见 native-manifest-*-tests.log。
+
+该切换不等于完整交付：其余配置/汉化引用、完整打包、唯一旧世界的一次性数据转换、真实认证、保存和重启对账仍待完成。生产原档保持封存状态，未打开或升级。根 VERSION 仍为 0.3.52，未触发发行工作流、未创建 Release。
