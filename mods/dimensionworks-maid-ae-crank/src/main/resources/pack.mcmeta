@@ -1,6 +1,10 @@
 {
   "pack": {
-    "description": "DimensionWorks Maid AE2 Crank resources",
-    "pack_format": 15
+    "description": "DimensionWorks Maid AE2 Crank",
+    "pack_format": 34,
+    "supported_formats": {
+      "min_inclusive": 34,
+      "max_inclusive": 48
+    }
   }
 }

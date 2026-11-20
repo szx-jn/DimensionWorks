@@ -15,12 +15,10 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
-import java.util.stream.Stream;
 
 public final class UseAE2Crank extends MaidCheckRateTask {
     private static final int INTERACTION_INTERVAL = 18;
@@ -69,7 +67,7 @@ public final class UseAE2Crank extends MaidCheckRateTask {
         if (maid.getScheduleDetail() != Activity.WORK || crankPos == null) {
             return false;
         }
-        if (!(level.getBlockEntity(crankPos) instanceof CrankBlockEntity)) {
+        if (!level.hasChunkAt(crankPos) || !(level.getBlockEntity(crankPos) instanceof CrankBlockEntity)) {
             return false;
         }
         if (maid.position().distanceToSqr(Vec3.atCenterOf(getWorkPosition(level, crankPos))) > REACH_SQR) {
@@ -116,6 +114,7 @@ public final class UseAE2Crank extends MaidCheckRateTask {
 
         return BlockPos.betweenClosedStream(min, max)
                 .map(BlockPos::immutable)
+                .filter(level::hasChunkAt)
                 .filter(pos -> level.getBlockEntity(pos) instanceof CrankBlockEntity)
                 .filter(pos -> canTurn(level, pos))
                 .min(Comparator.comparingDouble(pos -> maid.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)))
@@ -123,6 +122,7 @@ public final class UseAE2Crank extends MaidCheckRateTask {
     }
 
     private boolean canTurn(ServerLevel level, BlockPos pos) {
+        if (!level.hasChunkAt(pos)) return false;
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof CrankBlock crankBlock)) {
             return false;

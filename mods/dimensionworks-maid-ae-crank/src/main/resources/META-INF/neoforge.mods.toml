@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[4,)"
 license="MIT"
 
 [[mods]]
@@ -10,29 +10,29 @@ authors="szx-jn"
 description='''Adds a Touhou Little Maid work task that safely operates Applied Energistics 2 wooden cranks.'''
 
 [[dependencies.dimensionworks_maid_ae_crank]]
-modId="forge"
-mandatory=true
-versionRange="[47.4.16,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,21.2)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.dimensionworks_maid_ae_crank]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1,1.21.2)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.dimensionworks_maid_ae_crank]]
 modId="ae2"
-mandatory=true
-versionRange="[15.4.10,15.5)"
+type="required"
+versionRange="[19.2.20,20)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.dimensionworks_maid_ae_crank]]
 modId="touhou_little_maid"
-mandatory=true
-versionRange="[1,)"
+type="required"
+versionRange="[1.5.3,)"
 ordering="AFTER"
 side="BOTH"

@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.maidaecrank;
 
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 
 @Mod(DimensionWorksMaidAECrank.MOD_ID)
 public final class DimensionWorksMaidAECrank {

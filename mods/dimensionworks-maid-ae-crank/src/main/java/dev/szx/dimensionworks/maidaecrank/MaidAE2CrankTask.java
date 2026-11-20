@@ -17,7 +17,7 @@ import java.util.List;
 
 public final class MaidAE2CrankTask implements IMaidTask {
     private static final ResourceLocation UID =
-            new ResourceLocation(DimensionWorksMaidAECrank.MOD_ID, "ae2_crank_task");
+            ResourceLocation.fromNamespaceAndPath(DimensionWorksMaidAECrank.MOD_ID, "ae2_crank_task");
     private static ItemStack icon;
 
     @Override
@@ -30,7 +30,7 @@ public final class MaidAE2CrankTask implements IMaidTask {
         if (icon == null) {
             icon = new ItemStack(AEBlocks.CRANK.asItem());
         }
-        return icon;
+        return icon.copy();
     }
 
     @Override
