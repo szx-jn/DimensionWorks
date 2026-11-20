@@ -180,7 +180,7 @@ JEI Ticks 0.1.1 接入根工程，全部 16 个自研模组已编译。固定 JE
 
 ## TrueUUID 原生移植与玩家身份保护
 
-独立 fork 从原服固定 `v1.0.10` 提交 `7102fb449bfd5fcbfb383cc59d99ea01fc8294be` 移植，已推送 `szx-jn/TrueUUID-DimensionWorks` 的 `codex/dimensionworks-neoforge-migration` 分支，固定提交 `b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89`。源码归档 SHA-256 为 `e10d9bed03fc066141a3adc225d2c4a51905cfea7f27f9e1c3dd8d8bd67f719b`。本地验证 JAR `trueuuid-1.0.10-neoforge1.21.1.jar` 为 83,501 字节、37 个 Java 21 类，SHA-256 为 `06919ff0da0ebb53b6a507531b128ad9a12f965b5f9e50d235ea8650ac2da423`。固定源码构建仍须接入整包流水线；原服 Forge 清单尚未切换，不把这一步描述为整包已升级。源码 LGPL-3.0，与整合包原创 MIT 文件分开。
+独立 fork 从原服固定 `v1.0.10` 提交 `7102fb449bfd5fcbfb383cc59d99ea01fc8294be` 移植，已推送 `szx-jn/TrueUUID-DimensionWorks` 的 `codex/dimensionworks-neoforge-migration` 分支，固定提交 `b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89`。源码归档 SHA-256 为 `e10d9bed03fc066141a3adc225d2c4a51905cfea7f27f9e1c3dd8d8bd67f719b`。本地验证 JAR `trueuuid-1.0.10-neoforge1.21.1.jar` 为 83,501 字节、37 个 Java 21 类，SHA-256 为 `06919ff0da0ebb53b6a507531b128ad9a12f965b5f9e50d235ea8650ac2da423`。固定源码归档在独立目录重建后与工作副本 JAR 逐字节一致，构建记录 trueuuid-port/fixed-source-build-v1.log。固定源码构建仍须接入整包流水线；原服 Forge 清单尚未切换，不把这一步描述为整包已升级。源码 LGPL-3.0，与整合包原创 MIT 文件分开。
 
 LOGIN 认证改为原生查询/响应 payload，专用 decoder 保留 nullable 标志与全部字段；畸形响应拒绝解码，其他查询保留原版处理。服务端等待认证时暂停原版 VERIFYING 推进，独立 hasJoined 成功后设置 authenticatedProfile 再进入原版配置阶段。客户端使用原生 User UUID 调用 session service，不传输令牌。配置路径、命令/API、Mojang/Yggdrasil 来源及已有认证策略保留。
 
@@ -199,3 +199,14 @@ LOGIN 认证改为原生查询/响应 payload，专用 decoder 保留 nullable �
 私有候选集合下载完成 150 个 Modrinth、15 个 CurseForge 固定资产，并检查实际 JAR/JarJar 依赖。此前候选 182 个顶层 JAR、73 个内嵌依赖、216 个 modId 的静态闭合检查为 0 错误，仍有一个相同版本内嵌库字节差异警告。候选服务端在隔离新世界实际 Done 并导出注册表，停止后全部维度保存，但日志仍含大量第三方数据错误，且尚未加载完整脚本与旧世界。
 
 真实目标注册表对照原档发现 ExtendedAE 设备、葡萄作物、矿工乐事等 ID 差异，必须逐项核对其状态/NBT并转换。审计中的 minecraft:experience_orb 来自实体 NBT，不能当成丢失的物品栈；原版 grass 应交由 DFU 改为 short_grass，禁止直接删除。目标注册表目前还未加载全部 KubeJS 注册项，相关缺口不能误判为可放弃内容。
+
+
+## 百味厨房自动化原生 fork
+
+原固定 Forge 资产对应提交 87cf3ce0eeedb3afa80efd828660f17c24674a34，其主工程已有 NeoForge 1.21.1 源码，旧 Forge 资产由独立二进制补丁子工程生成。本次在独立 fork 删除旧平台补丁工程，保留原生自动化行为和两处教程食谱修复，固定 Java 21、NeoForge 21.1.267、Create UjX6dr61 与 Cookery g8w0b2ly。已推送 szx-jn/KaleidoscopeCookery-Automation 固定提交 9053486f76a7ffb05a44a6c6be54fbb5e7c9a7e7，没有创建发行版。
+
+原生容器 API 与库存语义逐项核对：食谱引用保存 ID、重载后从当前管理器解析；蒸笼只操作实际可见槽位；锅和汤锅拒绝无容量或不适配容器的插入；抽取按实际消耗份数返回，避免多份成品只消耗一份以及覆盖剩余烤肉。物流移交通过模拟与实际抽取保持数量，食谱包裹按实际成品份数请求容器。原注册 ID、生成标签和四个教程保留，没有为旧二进制格式增加运行时猜测。
+
+23 项必需 GameTest 通过（automation-port/native-tests-v8.log），覆盖真实蒸笼 1200 tick 烹饪、汤锅七份实际取出、普通锅整批容量、桶返还、半蒸笼隐藏槽位、组件/库存/进度重载、失效食谱和食谱订单容器数量。实际客户端四个原教程全部注册、绘制并执行指令，随后正常保存三维度退出（native-client-v2.log）。上游 Cookery 在这一小依赖夹具有可选兼容及数据错误，完整合包仍待处理；此记录不代表旧世界或所有料理内容已验收。
+
+验证 JAR kaleidoscopecookery_automation-1.21.1-1.0.1-dimensionworks.2.jar 为 107050 字节、49 个 Java 21 类，SHA-256 856f4368d5b23413fd7b96303ffa9ddad5bbe746384b94d8fd9edfa68ee18235，包含原生成资源与 BSD-3-Clause LICENSE，不包含测试类。固定源码 ZIP 为 156042 字节，SHA-256 b79d03118286cf059736aa87249498497650096b7a0c2c08a422b23448079281，独立重建 JAR 与工作副本逐字节一致（fixed-source-build-v1.log）。整包清单/源码构建流水线尚待接入。原 Forge 工作副本及服务器冷备未修改。
