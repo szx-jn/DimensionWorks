@@ -27,15 +27,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("dimensionworks_elastic")
 @PrefixGameTestTemplate(false)
 public final class ElasticVerticalBeltGameTests {
     private static ServerPlayer player(GameTestHelper h, boolean elastic) {
-        var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "BeltParcel"));
-        p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new Connection(PacketFlow.SERVERBOUND), p);
+        var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "BeltParcel"), net.minecraft.server.level.ClientInformation.createDefault());
+        p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new dev.szx.dimensionworks.transfer.FixtureConnection(), p, net.minecraft.server.network.CommonListenerCookie.createInitial(p.getGameProfile(), false));
         p.setItemInHand(InteractionHand.MAIN_HAND, elastic ? ElasticItems.PACKAGER.get().getDefaultInstance() : CMPItems.MOBILE_PACKAGER.asStack());
         PackPlayerPacket.pack(p, p, true);
         return p;
@@ -59,7 +59,12 @@ public final class ElasticVerticalBeltGameTests {
     }
 
     private static void speed(GameTestHelper h, BlockPos base, float rpm) {
-        for (int index = 0; index < 6; index++) ((BeltBlockEntity) h.getLevel().getBlockEntity(base.above(index))).setSpeed(rpm);
+        for (int index = 0; index < 6; index++) {
+            var segment = (BeltBlockEntity) h.getLevel().getBlockEntity(base.above(index));
+            segment.getPersistentData().putUUID("dimensionworks_owner", new UUID(107, base.asLong()));
+            segment.getPersistentData().putInt("dimensionworks_machine_rpm_limit", 10240);
+            segment.setSpeed(rpm);
+        }
     }
 
     private static void touch(GameTestHelper h, ServerPlayer p, BlockPos pos, Direction side, double y) {
@@ -113,7 +118,7 @@ public final class ElasticVerticalBeltGameTests {
                 p.fallDistance = 20;
                 p.travel(Vec3.ZERO);
                 h.assertTrue(Math.abs(p.getDeltaMovement().y - .1) < 1e-6 && p.fallDistance == 0,
-                        "Every segment must carry at fixed belt speed and reset falling");
+                        "Every segment must carry at fixed belt speed and reset falling: tick=" + tick + " velocity=" + p.getDeltaMovement() + " falling=" + p.fallDistance + " contact=" + ElasticVerticalBelt.findContact(p) + " box=" + p.getBoundingBox() + " obstacles=" + java.util.stream.StreamSupport.stream(h.getLevel().getBlockCollisions(p, p.getBoundingBox().expandTowards(0,.2,0)).spliterator(), false).map(Object::toString).toList());
                 h.assertTrue(!p.noPhysics && !p.isNoGravity() && !p.onGround(), "No noclip, gravity flag or grounded charge may remain");
             }
             h.assertTrue(Math.abs(p.getY() - before - 3) < 1e-6, "Must cross three segment joins without losing speed");

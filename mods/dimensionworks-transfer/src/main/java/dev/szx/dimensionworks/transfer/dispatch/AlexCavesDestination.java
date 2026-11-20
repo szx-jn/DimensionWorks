@@ -30,7 +30,7 @@ public enum AlexCavesDestination {
 
     public String route() { return route; }
     public ResourceKey<Level> key() {
-        return ResourceKey.create(Registries.DIMENSION, new ResourceLocation("alex_caves_dimensions", path));
+        return ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", path));
     }
 
     public static AlexCavesDestination fromRoute(String route) {
@@ -48,6 +48,10 @@ public enum AlexCavesDestination {
             source == null ? 0 : source.x(), 64, source == null ? 0 : source.z());
         var landing = SafeLanding.around(destination, desired, 24,
             destination.getMinBuildHeight() + 1, destination.getMaxBuildHeight() - 3, pos -> true);
+        if (landing.isEmpty() && this == ABYSSAL) {
+            int surfaceY = destination.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, desired.getX(), desired.getZ());
+            landing = SafeLanding.prepareDryOceanPlatform(destination, new BlockPos(desired.getX(), surfaceY, desired.getZ()));
+        }
         if (landing.isEmpty()) return false;
 
         player.getPersistentData().putBoolean(AUTHORIZATION, true);

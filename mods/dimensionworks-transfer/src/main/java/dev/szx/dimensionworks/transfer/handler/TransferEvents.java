@@ -18,19 +18,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID)
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID)
 public final class TransferEvents {
     private TransferEvents() {
     }
@@ -78,7 +78,7 @@ public final class TransferEvents {
     }
 
     @SubscribeEvent
-    public static void onStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
+    public static void onStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         TerritoryManager.clear();
         UnpackFireworks.clear();
         FROG_RIDES.clear();
@@ -86,10 +86,8 @@ public final class TransferEvents {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+
         TerritoryBuilder.tick();
         dev.szx.dimensionworks.transfer.territory.PlotChunkLoading.sendReadyChunks();
         UnpackFireworks.tick(event.getServer());
@@ -103,13 +101,12 @@ public final class TransferEvents {
         net.minecraft.core.BlockPos connection, int ticks) {}
 
     @SubscribeEvent
-    public static void synchronizeParcelTag(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.START)
-            dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport.synchronize(event.player);
+    public static void synchronizeParcelTag(net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre event) {
+            dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport.synchronize(event.getEntity());
     }
 
     @SubscribeEvent
-    public static void parcelDamage(net.minecraftforge.event.entity.living.LivingAttackEvent event) {
+    public static void parcelDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
             || !dev.szx.dimensionworks.transfer.compat.PlayerParcel.isPacked(player)) return;
         if (event.getSource().is(net.minecraft.tags.DamageTypeTags.IS_FALL)
@@ -134,11 +131,9 @@ public final class TransferEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-        if (!(event.player instanceof ServerPlayer player)) {
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
         TutorialManager.check(player);
@@ -375,7 +370,7 @@ public final class TransferEvents {
         }
         if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
             forbidden |= multi.getReplacedBlockSnapshots().stream()
-                .anyMatch(snapshot -> TransferBlockPolicy.forbidden(snapshot.getCurrentBlock()));
+                .anyMatch(snapshot -> TransferBlockPolicy.forbidden(snapshot.getCurrentState()));
         }
         if (forbidden) {
             event.setCanceled(true);

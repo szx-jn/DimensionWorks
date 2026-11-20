@@ -1,162 +1,96 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
+
 version = '0.3.14'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_transfer'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+apply from: rootProject.file('gradle/neoforge-create.gradle')
 
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            mods {
-                dimensionworks_transfer {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {}
-        server {
-            args '--nogui'
-        }
-    }
-}
-
-repositories {
-    // The pack already requires this fixed CMP fork release. Use its public API,
-    // without embedding or copying third-party code into this module.
-    ivy {
-        url = 'https://github.com/szx-jn/Create-Mobile-Packages/releases/download'
-        patternLayout { artifact '[revision]/[artifact]-[revision].[ext]' }
-        metadataSources { artifact() }
-        content { includeModule 'dw-cmp', 'create_mobile_packages' }
-    }
-    maven { url = 'https://maven.createmod.net' }
-    maven { url = 'https://maven.tterrag.com' }
-    maven { url = 'https://maven.theillusivec4.top' }
-    mavenCentral()
-}
-
-// Opt-in local runtime verification uses pinned installed release JARs, remapped for userdev.
-// These verification dependencies are never embedded in the mod JAR or added to the pack.
-if (project.hasProperty('transferTestModsDir')) {
-    repositories {
-        flatDir { dirs project.property('transferTestModsDir') }
-        if (project.hasProperty('alexDispatchCheck')) {
-            flatDir { dirs '../dimensionworks-cave-factory/build/libs', '../dimensionworks-rpm-limit/build/libs' }
-        }
-    }
-    dependencies {
-        runtimeOnly fg.deobf('dw-test:twilightforest:1.20.1-4.3.2508-universal')
-        if (!project.hasProperty('alexDispatchClientCheck')) {
-            runtimeOnly fg.deobf('dw-test:appliedenergistics2-forge:15.4.10')
-            runtimeOnly fg.deobf('dw-test:guideme:20.1.15')
-            runtimeOnly fg.deobf('dw-test:Mekanism:1.20.1-10.4.16.80')
-            if (!project.hasProperty('alexDispatchCheck')) {
-                runtimeOnly fg.deobf('dw-test:MekanismGenerators:1.20.1-10.4.16.80')
-                runtimeOnly fg.deobf('dw-test:megacells-forge:2.4.6-1.20.1')
-                runtimeOnly fg.deobf('dw-test:Applied-Mekanistics:1.4.3')
-                runtimeOnly fg.deobf('dw-test:cloth-config:11.1.136-forge')
-            }
-        }
-        if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispatchCheck')) {
-            runtimeOnly fg.deobf('dw-test:kubejs-forge:2001.6.5-build.26')
-            runtimeOnly fg.deobf('dw-test:kubejs-create-forge:2001.3.0-build.8')
-            runtimeOnly fg.deobf('dw-test:rhino-forge:2001.2.3-build.10')
-            runtimeOnly fg.deobf('dw-test:architectury:9.2.14-forge')
-            if (project.hasProperty('elasticRecipeCheck')) runtimeOnly fg.deobf('dw-test:vintageimprovements:1.20.1-0.3.7.9')
-        }
-        if (project.hasProperty('alexDispatchCheck')) {
-            runtimeOnly fg.deobf('dw-test:alexscaves:2.0.2')
-            runtimeOnly fg.deobf("dw-test:Dimensions-of-Alex's-Caves:1.20.1-1.0.4")
-            runtimeOnly fg.deobf('dw-test:citadel:2.6.3-1.20.1')
-            ['dimensionworks-cave-factory', 'dimensionworks-rpm-limit'].each { name ->
-                def versionMatch = file("../${name}/build.gradle").getText('UTF-8') =~ /(?m)^version = '([^']+)'$/
-                if (!versionMatch.find()) throw new GradleException("Cannot determine test dependency version: ${name}")
-                runtimeOnly fg.deobf("dw-test:${name.replace('-', '_')}:${versionMatch.group(1)}")
-            }
-        }
-    }
-}
-
+repositories { maven { url = 'https://www.cursemaven.com'; content { includeGroup 'curse.maven' } } }
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
-    implementation fg.deobf('dw-cmp:create_mobile_packages:1.20.1-0.6.1-dimensionworks.15')
-    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
-    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    implementation fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
-    implementation fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
-    implementation fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
-    runtimeOnly 'io.github.llamalad7:mixinextras-forge:0.4.1'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation 'maven.modrinth:curios:KJsZIQrT'
+    implementation 'curse.maven:the-twilight-forest-227639:7797302'
+    implementation 'maven.modrinth:mekanism:5KzzycBT'
+    implementation 'maven.modrinth:ae2:7Ac6mXbf'
+    runtimeOnly 'maven.modrinth:guideme:QeYKsstN'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+apply from: rootProject.file('gradle/neoforge-cmp.gradle')
+
+test { useJUnitPlatform() }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
+}
+ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 52 : project.hasProperty('elasticRecipeCheck') ? 43 : 40
+apply from: rootProject.file('gradle/neoforge-gametest.gradle')
+
+neoForge.runs.gameTestServer {
+    systemProperty 'neoforge.enabledGameTestNamespaces', 'dimensionworks_transfer,dimensionworks_elastic,dimensionworks_cardboard'
+    jvmArgument '-XX:ActiveProcessorCount=2'
 }
 
-test {
-    useJUnitPlatform()
+if (project.hasProperty('transferSnapshot')) {
+    test { systemProperty 'dimensionworks.transferSnapshot', file(project.property('transferSnapshot')).absolutePath }
 }
 
-// Opt-in Forge runtime checks, excluded from the production and release JAR.
-sourceSets {
-    gameTest {
+if (project.hasProperty('transferClientCheck')) {
+    def mode = project.property('transferClientCheck').toString()
+    def checks = [elastic: ['dimensionworks.elasticClientCheck', 'ELASTIC_CLIENT_CHECK_PASS:'],
+                  vertical: ['dimensionworks.elasticVerticalBeltClientCheck', 'ELASTIC_VERTICAL_BELT_CLIENT_CHECK_PASS:'],
+                  dispatch: ['dimensionworks.dispatchClientCheck', 'ALEX_DISPATCH_GUI_PASS:'],
+                  transfer: ['dimensionworks.transferTravelClientCheck', 'TRANSFER TRAVEL CLIENT CHECK PASSED:']]
+    if (!checks.containsKey(mode)) throw new GradleException('transferClientCheck must be elastic, vertical, dispatch or transfer')
+    sourceSets.create('clientCheck') {
+        java.srcDirs = ['src/clientCheck/java', 'src/elasticClientTest/java', 'src/dispatchClientCheck/java']
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
-}
-minecraft.runs {
-    gameTestServer {
-        workingDirectory project.file(project.hasProperty('alexDispatchCheck') ? 'run-alex-dispatch-check' : 'run-gametest-recovery')
-        property 'forge.enabledGameTestNamespaces', project.findProperty('transferGameTestNamespaces') ?: 'dimensionworks_transfer'
-        mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.gameTest]
-    }
-}
-
-// Local visual/physics smoke check only; never included in the production JAR or CI.
-if (project.hasProperty('elasticClientCheck')) {
-    sourceSets {
-        elasticClientTest {
-            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    neoForge {
+        mods { dimensionworks_transfer { sourceSet sourceSets.clientCheck } }
+        runs.client {
+            sourceSet = sourceSets.clientCheck
+            gameDirectory = project.file('run-client-' + mode)
+            systemProperty checks[mode][0], 'true'
+            jvmArguments.addAll('-Xmx2G', '-XX:ActiveProcessorCount=2')
+            programArguments.addAll('--width', '1024', '--height', '600')
         }
     }
-    minecraft.runs.client {
-        workingDirectory project.file('run-elastic-client')
-        args '--quickPlaySingleplayer', 'ElasticCheck', '--width', '1100', '--height', '750'
-        mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.elasticClientTest]
-        if (project.hasProperty('elasticVerticalBeltClientCheck'))
-            property 'dimensionworks.elasticVerticalBeltClientCheck', 'true'
-    }
-}
-
-if (project.hasProperty('alexDispatchClientCheck')) {
-    sourceSets {
-        dispatchClientCheck {
-            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    tasks.named('runClient') {
+        def resultLog = project.file('run-client-' + mode + '/logs/latest.log')
+        doFirst { resultLog.delete() }
+        doLast {
+            if (!resultLog.exists() || !resultLog.getText('UTF-8').contains(checks[mode][1])) {
+                throw new GradleException('Transfer client check incomplete: ' + mode)
+            }
         }
     }
-    minecraft.runs.client {
-        workingDirectory project.file('run-alex-dispatch-client')
-        args '--width', '1100', '--height', '750'
-        mods.dimensionworks_transfer.sources = [sourceSets.main, sourceSets.dispatchClientCheck]
+}
+
+if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispatchCheck')) {
+    dependencies {
+        runtimeOnly 'maven.modrinth:kubejs:GDXCpKlp'
+        runtimeOnly 'maven.modrinth:rhino:SqkDvOLG'
+        runtimeOnly 'maven.modrinth:kubejs-create:1qmcLagN'
+        runtimeOnly 'maven.modrinth:better-advanced-tooltips:uPFbnD32'
+        runtimeOnly 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941692'
     }
+    neoForge.runs.gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', 'dimensionworks_transfer,dimensionworks_elastic,dimensionworks_cardboard,dimensionworks_elastic_recipe'
+    }
+    tasks.register('prepareElasticRecipeCheck', Copy) {
+        from(rootProject.file('kubejs/startup_scripts/elastic_packager.js')) { into 'startup_scripts' }
+        from(rootProject.file('kubejs/server_scripts/elastic_packager.js')) { into 'server_scripts' }
+        from(rootProject.file('kubejs/data/dimensionworks_transfer')) { into 'data/dimensionworks_transfer' }
+        from(rootProject.file('kubejs/data/vintageimprovements/recipe/craft/fiery_wire.json')) { into 'data/vintageimprovements/recipe/craft' }
+        into 'run-gametest/kubejs'
+    }
+    tasks.named('runGameTestServer') { dependsOn 'prepareElasticRecipeCheck' }
 }
 
-mixin { add sourceSets.main, 'dimensionworks_transfer.refmap.json'; config 'dimensionworks_transfer.mixins.json' }
-
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-jar {
-    manifest.attributes(['MixinConfigs': 'dimensionworks_transfer.mixins.json'])
-    finalizedBy 'reobfJar'
+if (project.hasProperty('alexDispatchCheck')) {
+    dependencies { runtimeOnly project(':dimensionworks-cave-factory') }
+    neoForge.runs.gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', 'dimensionworks_transfer,dimensionworks_elastic,dimensionworks_cardboard,dimensionworks_elastic_recipe,dimensionworks_alex_dispatch'
+    }
 }

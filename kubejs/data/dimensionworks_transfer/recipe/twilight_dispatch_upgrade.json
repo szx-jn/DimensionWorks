@@ -6,5 +6,5 @@
     { "tag": "dimensionworks_transfer:twilight_boss_trophies" },
     { "tag": "dimensionworks_transfer:twilight_boss_trophies" }
   ],
-  "result": { "item": "dimensionworks_transfer:twilight_dispatch_upgrade" }
+  "result": { "id": "dimensionworks_transfer:twilight_dispatch_upgrade" }
 }

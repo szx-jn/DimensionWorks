@@ -16,6 +16,9 @@ public record ReturnPoint(
 
     public ReturnPoint {
         Objects.requireNonNull(dimension, "dimension");
+        if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z) || !Float.isFinite(yaw) || !Float.isFinite(pitch)) {
+            throw new IllegalArgumentException("Non-finite saved return position");
+        }
     }
 
     public CompoundTag save() {

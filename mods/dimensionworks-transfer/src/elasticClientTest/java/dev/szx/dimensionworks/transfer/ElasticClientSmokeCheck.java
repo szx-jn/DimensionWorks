@@ -19,15 +19,15 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Opt-in disposable client check. All world/option changes stay under run-elastic-client. */
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
 public final class ElasticClientSmokeCheck {
     private static int stage;
     private static int ticks;
@@ -43,15 +43,15 @@ public final class ElasticClientSmokeCheck {
     }
 
     @SubscribeEvent
-    public static void beforeMovement(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && stage == 3 && event.player == Minecraft.getInstance().player)
-            peakLaunchSpeed = Math.max(peakLaunchSpeed, event.player.getDeltaMovement().length());
+    public static void beforeMovement(net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre event) {
+        if (stage == 3 && event.getEntity() == Minecraft.getInstance().player)
+            peakLaunchSpeed = Math.max(peakLaunchSpeed, event.getEntity().getDeltaMovement().length());
     }
 
     @SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (Boolean.getBoolean("dimensionworks.elasticVerticalBeltClientCheck")) return;
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!Boolean.getBoolean("dimensionworks.elasticClientCheck")) return;
+
         Minecraft mc = Minecraft.getInstance();
         if (started == 0) started = System.currentTimeMillis();
         if (System.currentTimeMillis() - started > 150_000) throw new AssertionError("Elastic client check timed out at stage " + stage);

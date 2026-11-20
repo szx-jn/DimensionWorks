@@ -9,25 +9,26 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Disposable GUI render/navigation check, excluded from the release JAR. */
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
 public final class AlexDispatchClientCheck {
     private static int stage;
     private static int ticks;
     private static long started;
 
     @SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+
+        if (!Boolean.getBoolean("dimensionworks.dispatchClientCheck")) return;
         Minecraft mc = Minecraft.getInstance();
         if (started == 0) started = System.currentTimeMillis();
         if (System.currentTimeMillis() - started > 120_000) throw new AssertionError("Dispatch GUI check timed out");
-        if (mc.getOverlay() != null || mc.screen == null) return;
+        if (mc.getOverlay() != null || mc.player == null) return;
         if (stage == 0) { DispatchScreen.open(BlockPos.ZERO, false); stage = 1; ticks = 0; return; }
         if (++ticks < 20) return;
         if (stage == 1) {

@@ -29,7 +29,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.ITeleporter;
 
 /** Validates parcel dispatch requests and performs the selected dimension transfer. */
 public final class DispatchController {
@@ -196,12 +195,12 @@ public final class DispatchController {
         if (Level.OVERWORLD.equals(respawnDimension)
             && destination != null
             && player.getRespawnPosition() != null) {
-            target = Player.findRespawnPositionAndUseSpawnBlock(
-                destination,
-                player.getRespawnPosition(),
-                yaw,
-                player.isRespawnForced(),
-                true).orElse(null);
+            var transition = player.findRespawnPositionAndUseSpawnBlock(true,
+                net.minecraft.world.level.portal.DimensionTransition.DO_NOTHING);
+            if (transition.newLevel() == destination && !transition.missingRespawnBlock()) {
+                target = transition.pos();
+                yaw = transition.yRot();
+            }
         }
 
         if (target == null) {
@@ -259,7 +258,7 @@ public final class DispatchController {
         if (destination == null) {
             return false;
         }
-        ServerLevel.makeObsidianPlatform(destination);
+        net.minecraft.world.level.levelgen.feature.EndPlatformFeature.createEndPlatform(destination, ServerLevel.END_SPAWN_POINT.below(), true);
         BlockPos spawn = ServerLevel.END_SPAWN_POINT;
         player.teleportTo(destination, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, 90, 0);
         return player.serverLevel() == destination;
@@ -280,20 +279,12 @@ public final class DispatchController {
             (source == null ? 0 : source.x()) * scale, 64, (source == null ? 0 : source.z()) * scale);
         destination.getChunk(desired);
         desired = destination.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, desired);
-        // This stable TF method performs its progression/biome rerouting without makePortal().
-        var reroute = Class.forName("twilightforest.world.TFTeleporter").getDeclaredMethod(
-            "moveToSafeCoords", ServerLevel.class, net.minecraft.world.entity.Entity.class, BlockPos.class);
-        reroute.setAccessible(true);
-        var info = (net.minecraft.world.level.portal.PortalInfo) reroute.invoke(null, destination, player, desired);
-        var safeAround = Class.forName("twilightforest.world.TFTeleporter").getMethod(
-            "isSafeAround", Level.class, BlockPos.class, net.minecraft.world.entity.Entity.class, boolean.class);
-        boolean enforced = (boolean) Class.forName("twilightforest.util.LandmarkUtil")
-            .getMethod("isProgressionEnforced", Level.class).invoke(null, destination);
-        var landing = SafeLanding.around(destination, BlockPos.containing(info.pos), 24,
-            destination.getMinBuildHeight() + 1, destination.getMaxBuildHeight() - 3, pos -> {
-                try { return (boolean) safeAround.invoke(null, destination, pos, player, enforced); }
-                catch (ReflectiveOperationException e) { throw new IllegalStateException(e); }
-            });
+        // Use TF's native progression/biome rerouting without creating a traditional portal.
+        var safeCoords = dev.szx.dimensionworks.transfer.mixin.TFTeleporterAccess.dimensionworks$moveToSafeCoords(destination, player, desired);
+        boolean enforced = twilightforest.util.landmarks.LandmarkUtil.isProgressionEnforced(destination);
+        var landing = SafeLanding.around(destination, BlockPos.containing(safeCoords), 24,
+            destination.getMinBuildHeight() + 1, destination.getMaxBuildHeight() - 3,
+            pos -> twilightforest.world.TFTeleporter.isSafeAround(destination, pos, player, enforced));
         if (landing.isEmpty()) return false;
         AUTHORIZED_TWILIGHT_TRAVEL.add(player.getUUID());
         boolean previous = player.getPersistentData().getBoolean(TwilightDestination.AUTHORIZATION);

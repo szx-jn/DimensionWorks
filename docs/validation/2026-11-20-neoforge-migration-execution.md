@@ -113,17 +113,37 @@ KubeJS 2101 真实启动发现旧 thickTexture/bucketColor API 移除，已按�
 
 ## 定制 Mobile Packages NeoForge 移植
 
-独立 fork 开发分支 `codex/dimensionworks-neoforge-migration` 已提交并推送 `57bf726`（完整提交见 GitHub），基于上游固定 1.21.1-0.7.8 `53ec8db0d247718fdadb431531426826560267cc`，逐项核对并迁移原已固定 Forge .15 `4e435c2a5b181e311d681a6f29d8ec0038fc24b6` 的补丁。没有修改原 Forge 工作副本，没有发布 fork 或整包发行版，尚未把开发 JAR 写入正式 manifest。其新建夹具通过不等于全包旧档迁移完成。
+独立 fork 开发分支 `codex/dimensionworks-neoforge-migration` 已提交并推送 `57bf726`，随后修复分部方块并推送 `62db6a8c2a6737eff659cc4f840a97f9e640a754`（完整提交见 GitHub），基于上游固定 1.21.1-0.7.8 `53ec8db0d247718fdadb431531426826560267cc`，逐项核对并迁移原已固定 Forge .15 `4e435c2a5b181e311d681a6f29d8ec0038fc24b6` 的补丁。没有修改原 Forge 工作副本，没有发布 fork 或整包发行版，尚未把开发 JAR 写入正式 manifest。其新建夹具通过不等于全包旧档迁移完成。
 
-本地完整构建、3 项 JUnit 与 18 项必需 GameTest 通过（`cmp-port/native-tests-v17.log`）；独立实际客户端的新建平坦世界通过原生打包载荷、打包尺寸/第三人称渲染与蜜蜂模型、五次脱离、回收菜单路线和 31 个命名物品同步、超大 NBT 警告（`cmp-port/client-validation-v2.log`）。客户端只加载专项依赖，不代表整个整合包 UI 已验收。测试和日志不打入分发 JAR。
+本地完整构建、3 项 JUnit 与 19 项必需 GameTest 通过（初次 18 项记录 `cmp-port/native-tests-v17.log`；分部方块修复后最终 `cmp-port/native-tests-v18.log`）；独立实际客户端的新建平坦世界通过原生打包载荷、打包尺寸/第三人称渲染与蜜蜂模型、五次脱离、回收菜单路线和 31 个命名物品同步、超大 NBT 警告（`cmp-port/client-validation-v2.log`）。客户端只加载专项依赖，不代表整个整合包 UI 已验收。测试和日志不打入分发 JAR。
 
 保留全部原翻译键、注册 ID、网络/玩家/无人机 UUID、完整组件货物与回收槽位。原生 ENTITY_DATA 直接恢复快照，解决刷怪蛋替换 UUID 以及落沙等仅 OP 可设置实体数据被跳过的问题；实际 Create 开包恢复 TNT 原 UUID/fuse，载具及乘客完整移除和恢复。UUID 重复拒绝且快照不消耗。NBT 写入前拒绝原生 StringTag modified-UTF 溢出，避免原生写入日志后用空字符串替换导致打包吞数据。
 
 Mek 原生 BlockData 已改为不可变组件，来源标记移到自有 packager_origin，真实保存/掉落/重放置/拆箱及普通纸箱对照通过。原生 BreakEvent/机器权限保持，禁止 barrier 与本包派遣终端；命名箱和嵌套物品数量/长整数通过。无人机目标和实体位置刷新漏更新已修复；完整投递与原港口回程通过。真实负例发现回程访问未加载原港口会强制加载区块，且旧孤儿删除可丢蜜蜂；改为已加载港口查询和保留虚拟蜜蜂，货物及空载回程在 100 tick 后均保持且不加载区块。
 
-原来的跨维度玩家候选搜索恢复并保留网络/所有者权限，但完整跨维度无人机/移动 Sable 子世界/Carry On 场景仍须合包验证。旧 Forge ItemStack、ENTITY_DATA 内嵌实体及 Create 包裹、Mek 纸箱/原标记、无人机 cargo/回收槽位必须经一次性转换，当前运行代码不猜旧格式。开发 JAR SHA-256 `c2357548351711774aea3e74ebad76d66658e09186e79b00d36a2017726b172a` 仅供隔离 Transfer 编译验证；正式交付按禁止中途发行版的要求另行完成固定来源构建链。
+原来的跨维度玩家候选搜索恢复并保留网络/所有者权限，但完整跨维度无人机/移动 Sable 子世界/Carry On 场景仍须合包验证。旧 Forge ItemStack、ENTITY_DATA 内嵌实体及 Create 包裹、Mek 纸箱/原标记、无人机 cargo/回收槽位必须经一次性转换，当前运行代码不猜旧格式。当前开发 JAR SHA-256 `eadd0adaf57f37d0aa87168ab9d3e8e08dfa6d370a5e408869174135a7ff5b06`。共享源码构建从固定提交及归档 SHA-256 `af6dade670680565467b552954d8a652ca945b57c40183738c62618c772ec9c9` 在忽略的构建目录生成依赖，不需要中间发行版。本地工作副本与固定源码归档构建的 JAR 逐字节一致；正式整包清单与正式构建流水线仍须接入该固定来源。
 
 CFA 1.6.0 是上游内嵌原依赖，JAR SHA-256 `e545dc2863842ccf473c6ad26e7ca73a37e1bb45dd529f1e5105b263320f1107`，许可声明 All Rights Reserved；未复制或修改依赖源码，正式分发前核对其许可条件。原 MIT 项目与第三方许可不能混为一谈。
+
+## 中转维度、玩家包裹与六洞穴发运移植
+
+Transfer 接入根 NeoForge 工程，Java 21、Create 6.0.10、Curios 9 与原生有方向载荷。中转协议 4、弹力协议 3，客户端界面处理隔离于客户端类；CMP 调用删除必需接口反射/吞错。暮色直接调用固定 4.8.3345 原生 API 与受保护落点 Invoker，传统传送门入口单独拒绝；原 `dw:transfer`、螺旋领地、文件名、返回点和教程键保留。数据目录迁移为 `recipe`/`tags/item`/`tags/block`，Mixin 只绑定当前原生方法，defaultRequire=1。资源声明覆盖目标客户端格式 34 与数据格式 48。
+
+领地与返回点拒绝非法列表/UUID、重复索引/玩家、偏离螺旋网格和非有限位置，不再静默跳过。34 项 JUnit 已通过，明确提供封存快照路径的专用检查使用原生 NBT 读取原服务器三份 SavedData，逐项核对全部领地、升级/完成标志、分配游标、返回位置和教程载荷；没有写入源文件。教程内旧物品格式仍待整包离线组件转换，不宣称全世界已迁移。
+
+原 1.20 区块追踪方法已改变，改用固定 PlotChunkView 与原生 PlayerChunkSender，保留批次确认及实体跟踪。九个领地运行票据和外围 5×5 渲染覆盖保持；JUnit 核对负坐标和视图差分。真实客户端原生钥匙载荷验证未解锁拒绝、解锁进入、完整 25 块接收、边缘移动不卸载、外圈不发送，返回恢复原位置及七个命名钻石/长整数组件并清理返回点（`transfer-port/client-travel-v1.log`）。
+
+原生 Mek 纸箱/AE2 部件使用组件参数，拦截先于消耗/创建；真实源维度打包、封箱物品放置、拆箱拒绝与完整机器数据保留通过。联合测试暴露 Mek 固定数字 35 没有目标 `UPDATE_KNOWN_SHAPE=16`，造成打包一半门后另一半移除；在定制 fork 中使用当前命名标志并增加门/床/高花回归（19 项 fork GameTest）。未改第三方原仓库或发布发行版。
+
+四个独立实际客户端夹具通过：目的地/六洞穴页面和返回；同模型弹力外观、两秒蓄力金色 HUD、实际 18.5625 发射与脱包；真实马达竖直带上/下行、反转、停机重力及客户端/服务端位置；原生中转往返。日志为 `client-dispatch-v1.log`、`client-elastic-v1.log`、`client-vertical-v1.log`、`client-travel-v1.log`，资源限制 2 GiB/2 CPU/30 FPS，均正常保存退出。部分进程仍有开发帐号公钥服务返回 HTML 和退出音频 ERROR，不把这些夹具称为整个整包无错误验证。
+
+KubeJS 弹力脚本迁移原生十步配方字段与具名 `modifyRecipeResult` 事件，通过 `event.exit(完整物品)` 提交结果，避免普通 return 产生空结果与 String 重载歧义。实际 KubeJS GDXCpKlp/Rhino SqkDvOLG/KubeJS Create 1qmcLagN 和 Vintage CF 1255448/8941692 加载；十步真实序列推进、两类铁木弹簧原料、完成胶带与完整组件升级通过。Vintage 原/目标 JAR 均有不存在的 minecraft:blaze_wire 输出，整包数据层改回真实 vintageimprovements:fiery_wire；保留原料标签，其可达性仍待完整材料闭包审计。Vintage JAR 声明 MIT、页面 LGPL2.1，最终分发许可继续核对。
+
+默认 40 项、配方专项 43 项、六洞穴联合专项 52 项必需 GameTest 均覆盖对应前项；最终联合 52 项已通过（`transfer-port/alex-tests-v2.log`），KubeJS 启动/服务端脚本 0 错误和 0 警告、0 failed recipes。六洞穴均实际发运到达安全位置并拆包、清理临时授权与返回点。渊海原/目标生成器一致，但水域没有干燥支撑，新增严格检查后只在水面空气增加九格平台；占位/库存负例保持原状，生成器、水体与旧建筑不改写。联合 RPM 会按机器归属限速，竖直带测试明确配置高限额归属来隔离运输能力，未添加运行时绕过。
+
+此阶段仍只使用隔离新建世界和封存数据的只读检查。剩余 Pressure Crystals、Maid AE Crank、JEI Ticks、完整第三方闭包、全脚本/配置、更新器、一次性转换器与实际旧世界/生产部署继续推进。根 VERSION 保持，未创建任何发行版。
+
+阶段最终根构建 `build :dimensionworks-transfer:runGameTestServer -PalexDispatchCheck -PtransferSnapshot=<封存源路径>` 通过（`transfer-port/stage-final-validation-v1.log`），已接入的 13 个模块共 300 项 JUnit，0 失败/错误/跳过；Transfer 联合 52 项再次通过。生产 `dimensionworks_transfer-0.3.14.jar` 为 207051 字节、94 个 Java 21 类，SHA-256 `cd293f9c8b401ec0a34fcb05efa3bfb64357b56fee47ebfbeb35451103e8a73d`；核对 NeoForge TOML/JSON 且不含测试类、专项结构或客户端夹具。另两个尚未接入工程的历史测试报告不计入上述数量。客户端运行目录新增忽略规则，未提交运行时数据。
 
 ## 下一阶段准入
 

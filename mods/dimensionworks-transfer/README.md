@@ -1,6 +1,6 @@
 # DimensionWorks Transfer
 
-为维度工坊提供 `dw:transfer` 个人中转领地、维度钥匙引导和玩家包裹发运。
+为维度工坊提供 `dw:transfer` 个人中转领地、维度钥匙引导和玩家包裹发运。当前分支目标为 Minecraft 1.21.1、NeoForge 21.1.267、Java 21，使用根 Gradle Wrapper；模组版本仍为 0.3.14。
 
 ## 弹力打包工具
 
@@ -11,14 +11,14 @@
 - 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
 - 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
-- 工具继承整合包已必需的 CMP 固定 fork Release `0.6.1-dimensionworks.15`，构建直接依赖该公开资产，不内嵌第三方类。
-- 直接交互 Mixin 同时匹配开发环境与正式 JAR 的 `interactLivingEntity` / `m_6880_`，避免正式客户端与专用服务器在模组初始化时崩溃。
+- 工具依赖定制 CMP NeoForge 固定源码提交 `62db6a8c2a6737eff659cc4f840a97f9e640a754`。根共享脚本核对源码归档 SHA-256 后，在忽略的构建目录执行 fork 的 `jar` 任务；没有中途发行版，也不内嵌第三方类。
+- 直接交互 Mixin 只绑定目标版本的原生 `interactLivingEntity`。网络改用有明确方向的 NeoForge 载荷，中转协议为 `4`、弹力协议为 `3`；服务端保留权限与状态验证。
 
 详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)、[两秒蓄力增强验证](../../docs/validation/2026-11-14-elastic-charge.md)、[竖直带运输验证](../../docs/validation/2026-11-14-elastic-vertical-belt.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
 
 ## 进入与物品
 
-- 齿轮之心第二阶段完成后授予一次性维度钥匙。引导记录完整主手 NBT 与快捷栏槽位，冻结操作；主手右键成功进入领地后，在下一服务端 tick 恢复物品并完整同步背包。消费逻辑只操作使用开始时捕获的钥匙，不消费恢复后的物品。
+- 齿轮之心第二阶段完成后授予一次性维度钥匙。引导记录完整主手物品组件 与快捷栏槽位，冻结操作；主手右键成功进入领地后，在下一服务端 tick 恢复物品并完整同步背包。消费逻辑只操作使用开始时捕获的钥匙，不消费恢复后的物品。
 - 引导完成后，默认 `P` 在来源位置与个人中转领地之间切换；普通 P 传送不改变背包或主手。OP 2 `/dwtransfer` 使用独立管理权限路径。
 - 每次进入都在本人领地内搜索安全落点：脚部与头部连续两格无碰撞、无流体空间，脚下有完整支撑，脚下至头顶无危险方块。找不到时拒绝进入，不破坏建筑。
 - 危险落点标签为 `dimensionworks_transfer:unsafe_landing_blocks`，可由数据包追加第三方危险方块。
@@ -30,7 +30,7 @@
 - `y=-128` 为基岩，`-127..-64` 为石头；上方供玩家建造，边缘与世界顶层为屏障。
 - 首次进入同步铺设站立层，地下与边界每 tick 最多写入 4096 个方块；主人离开或下线暂停，回来继续，结束服务器清理任务状态。
 - 中转玩家不使用原版视距半径票据，只为本人九个区块添加临时运行票据，离开或下线移除。
-- 服务端在追踪、首次发送和更新广播入口检查玩家领地。客户端接收本人九个领地区块及外围一圈空区块（5×5），使 Embeddium 的邻居数据/光照就绪检查通过；不发送其他玩家领地。固定覆盖不随玩家在领地内移动而卸载。
+- 服务端使用固定 PlotChunkView，并在原生追踪与更新广播入口检查玩家领地。客户端接收本人九个领地区块及外围一圈空区块（5×5），使 Embeddium 的邻居数据/光照就绪检查通过；不发送其他玩家领地。固定覆盖不随玩家在领地内移动而卸载。
 - 原版光照和区块状态升级仍需要周围空区块作为内部依赖；其中紧邻领地的一圈作为渲染依赖发送到客户端，不主动运行领地外机器。不能宣称服务端完全没有边缘依赖区块。
 - 没有常驻实体或保存到存档的强制加载设置，怪物不能加入中转维度。
 
@@ -39,10 +39,10 @@
 `dw:transfer` 禁止新放置 AE2 及其附属提供的方块，包括创造模式、自动放置、直接区块写入与线缆/面板部件。覆盖清单中的 `ae2`、`ae2ct`、`ae2omnicells`、`ae2wtlib`、`appliedcreate`、`appmek`、`expatternprovider`、`megacells`、`meplacementtool`、`neoecoae`，并在启动时识别第三方对 AE2 附属的必需依赖。通用模组的可选兼容依赖与整合包自研模块不会被整体禁止。
 
 - Mekanism 纸箱与 CMP 打包工具封装的方块同样检查内层内容。封装纸箱可携带/放置，解开 AE2 内容时返回失败并显示红色提示，保留纸箱、完整 NBT 和 CMP 来源标记，不掉落空箱。
-- 普通方块、普通纸箱解包、其他维度的 AE2 网络和随身无线终端照常使用。存档已有方块不扫描删除，状态更新、拆除及 Forge 快照恢复仍可用。
-- CMP fork 0.6.1-dimensionworks.15 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。
+- 普通方块、普通纸箱解包、其他维度的 AE2 网络和随身无线终端照常使用。存档已有方块不扫描删除，状态更新、拆除及 NeoForge 快照恢复仍可用。
+- 当前 CMP NeoForge fork 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。
 
-可用 `-PtransferGameTestNamespaces=dimensionworks_cardboard` 配合现有 `runGameTestServer` 单独运行全方块纸箱集成测试：真实打包/拆包、黑名单覆盖、分体方块、搬运后的物品与来源保留，以及禁包和破坏权限拦截。测试用黑名单标签仅位于 `src/gameTest/resources`，不会进入发行 JAR。
+根 `:dimensionworks-transfer:runGameTestServer` 默认执行包含纸箱检查在内的 40 项测试：真实打包/拆包、黑名单覆盖、分体方块、搬运后的物品与来源保留，以及禁包和破坏权限拦截。测试用黑名单标签仅位于 `src/gameTest/resources`，不会进入发行 JAR。
 - 数据包可用 `dimensionworks_transfer:forbidden_transfer_blocks` 追加受限方块。检查不轮询、不新增区块加载票据。
 
 ## 发运
@@ -51,7 +51,7 @@
 
 - `dimensionworks_transfer:twilight_dispatch_upgrade` 暮色终端升级卡由 1 块 `#twilightforest:logs` 木头与任意 3 个暮色 Boss 奖杯无序合成，允许重复。八种击杀 Boss 奖杯有效；谜题羊奖杯不属于该条件。
 - 手持卡右键本人领地终端，消耗一张卡并开放六洞穴；重复安装或对他人终端使用不会消耗。升级按 UUID 存在已有领地 SavedData 中，新领地默认为未升级，死亡、重连、重启与终端恢复保留升级。
-- Alex 入口打开独立的六洞穴选择页，各洞穴有专属像素插画及返回按钮。客户端开启 GUI 时接收终端升级状态，服务端重新检查真实记录；网络协议更新为 `3`，两端须使用相同版本。
+- Alex 入口打开独立的六洞穴选择页，各洞穴有专属像素插画及返回按钮。客户端开启 GUI 时接收终端升级状态，服务端重新检查真实记录；中转网络协议为 `4`，两端须使用相同版本。
 - 暮色新增主线仅保留弹力打包工具和终端升级。规则见 [暮色收尾与 Alex 洞穴发运](../../docs/design/twilight-dispatch-upgrade.md)。
 
 | 目的地 | 行为 |
@@ -60,7 +60,7 @@
 | 下界 | 按来源维度坐标比例搜索两格高的安全落点，不查找、不创建、不站入传送门，排除下界顶层 |
 | 末地 | 原版黑曜石平台 |
 | 暮色森林 | 按需加载暮色自身维度数据与生成器，调用 TF 的生物群系/进度落点检查，再搜索两格高空间；不生成传送门 |
-| Alex 六洞穴 | 升级后按选择进入相应 `alex_caves_dimensions` 维度；使用其原始数据与生成器，有限邻域搜索安全落点，不创建传送门 |
+| Alex 六洞穴 | 升级后按选择进入相应 `alex_caves_dimensions` 维度；使用其原始数据与生成器，有限邻域搜索安全落点。渊海无干燥落点时，只在水面上方完整空域增加 3×3 石质落脚平台，空间被占据则拒绝；不创建传送门 |
 | 天境 | 保持锁定 |
 
 暮色终端发运使用调用期间的临时授权；已永久解锁中转通路的玩家也可通过 TP 进入暮色。两套入口锁采用相同规则；传统暮色门按 TFTeleporter 单独拦截，对已解锁玩家仍禁用。成功发运拆包并清除来源返回点；失败保留包裹和来源返回点。所有 CMP 玩家从包裹状态转为正常状态的入口都会播放同一条解包特效：固定在解包瞬间的维度与包裹中心，在 3×3×3 范围内持续 60 tick 发出彩色尘粒与烟花火花，不跟随玩家移动或跨维度。每 5 tick 一批，每批 24 个尘粒和 12 个火花，密度为原来的三倍；每次最多 432 个粒子，不创建实体或加载票据，原点区块卸载时跳过喷发。
@@ -73,11 +73,29 @@
 
 ## 本地验证
 
-使用 Java 17 与 Gradle 8.8：`gradle test build --no-daemon`。JUnit 覆盖负坐标九区块边界和 AE2 附属依赖识别。可选 `gradle -PtransferTestModsDir=<整合包mods目录> runGameTestServer --no-daemon` 使用固定的暮色、CMP、AE2、MEGA Cells、Applied Mekanistics、Mekanism 与所需库发行 JAR，检查安全落点/终端/暮色按需加载，以及受限方块/部件写入、物品保留、真实工具打包与纸箱解包的 NBT 保留。测试使用独立 `run-gametest-recovery` 世界；编译、单测与 GameTest 不代替真实玩家的客户端交互验证。
+使用 Java 21 与根 Gradle Wrapper：
+
+```sh
+./gradlew :dimensionworks-transfer:test :dimensionworks-transfer:build :dimensionworks-transfer:runGameTestServer
+./gradlew -PelasticRecipeCheck :dimensionworks-transfer:runGameTestServer
+./gradlew -PalexDispatchCheck :dimensionworks-transfer:runGameTestServer
+./gradlew -PtransferClientCheck=dispatch :dimensionworks-transfer:runClient
+./gradlew -PtransferClientCheck=elastic :dimensionworks-transfer:runClient
+./gradlew -PtransferClientCheck=vertical :dimensionworks-transfer:runClient
+./gradlew -PtransferClientCheck=transfer :dimensionworks-transfer:runClient
+```
+
+默认 40 项 GameTest 覆盖玩家运输、落点、暮色、AE2 禁放、真实纸箱搬运、弹性包裹与竖直带；配方专项增加三项（共 43 项），使用实际 KubeJS 2101、KubeJS Create 与 Vintage Improvements 固定 JAR，验证全部十步组装、原料解析和保留组件的升级回调。新版回调先 `.modifyResult(固定名称)`，再在 `ServerEvents.modifyRecipeResult` 中 `event.exit(ElasticPackager.upgrade(stack))` 提交完整结果。
+
+客户端检查只在本模块忽略的 `run-client-*` 目录创建新平坦世界，限制 2 GiB/2 CPU/30 FPS，完成后正常保存退出。不会指向玩家安装目录。已实际通过界面导航、弹力外观/蓄力/发射/解包、真实马达带动的上下输送与客户端/服务端位置，以及中转钥匙权限、固定 25 区块覆盖和原位置/物品往返。六洞穴专项共 52 项 GameTest，实际到达六维并拆包；渊海平台测试证明仅改变九格空气、保留水体，建筑/库存占位时不写入。模拟连接使用 NeoForge 的 mock 通道，只用于玩法测试；真实载荷另外由客户端验证。
+
+34 项 JUnit 包含领地、返回点、负坐标边界、数据组件与错误数据拒绝。`-PtransferSnapshot=<封存快照目录>` 额外读入原始三份 SavedData，检查全部记录、标志、位置与教程数据往返；未提供时该专用检查明确跳过。原服务器快照已实际通过此项，但尚未在 NeoForge 中打开整个旧世界，不能据此声明整包存档转换完成。
+
+中转、返回点与教程文件名和原有键保持。存档加载拒绝损坏列表、重复玩家/索引、偏离螺旋网格、无效 UUID 和非有限位置，不再静默丢弃。原 Forge 的物品 NBT、附件及教程主手仍须在整包一次性离线转换中迁移；原生 SavedData/方块实体加载器会捕获异常，因此离线预检仍是开放玩家更新的必要条件。
 
 规格见 [中转维度安全与云盘回收](../../docs/design/transfer-safety-cloud-disk.md)。
 
-渲染依赖补发每位玩家最多检查 25 个已加载区块，数据与光照就绪后每块只补发一次；全部发完后跳过查询，离开清理记录。不新增区块加载票据或常驻实体。
+渲染依赖补发每位玩家最多检查 25 个已加载区块，数据与光照就绪后每块只交给原生 PlayerChunkSender 一次，保留批次确认和实体跟踪；全部发完后跳过查询，离开清理记录。不新增区块加载票据或常驻实体。
 
 ## 玩家包裹特性
 

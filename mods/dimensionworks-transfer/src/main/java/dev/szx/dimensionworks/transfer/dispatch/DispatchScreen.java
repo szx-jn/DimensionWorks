@@ -106,7 +106,7 @@ public final class DispatchScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
+        renderBackground(graphics, mouseX, mouseY, partialTick);
         graphics.drawCenteredString(font, title, width / 2, 13, 0xFFFFFFFF);
 
         int gridWidth = COLUMNS * CELL_WIDTH + (COLUMNS - 1) * GAP;

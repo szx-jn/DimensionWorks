@@ -19,7 +19,7 @@ import net.minecraft.world.phys.AABB;
 /** Checks the standing player's full height even when the traveller is currently packed. */
 public final class SafeLanding {
     public static final TagKey<Block> UNSAFE = TagKey.create(Registries.BLOCK,
-        new ResourceLocation(WDTransfer.MOD_ID, "unsafe_landing_blocks"));
+        ResourceLocation.fromNamespaceAndPath(WDTransfer.MOD_ID, "unsafe_landing_blocks"));
 
     private SafeLanding() {}
 
@@ -59,6 +59,30 @@ public final class SafeLanding {
             }
         }
         return Optional.empty();
+    }
+
+    /** A dry ocean arrival can only add nine floor blocks in existing air above water. */
+    public static Optional<BlockPos> prepareDryOceanPlatform(ServerLevel level, BlockPos surface) {
+        BlockPos feet = surface.above();
+        if (surface.getY() <= level.getMinBuildHeight() || surface.getY() + 3 >= level.getMaxBuildHeight()
+                || !level.getWorldBorder().isWithinBounds(surface.offset(-1, 0, -1))
+                || !level.getWorldBorder().isWithinBounds(surface.offset(1, 0, 1))) return Optional.empty();
+        for (BlockPos floor : BlockPos.betweenClosed(surface.offset(-1, 0, -1), surface.offset(1, 0, 1))) {
+            if (!level.hasChunkAt(floor) || !level.getFluidState(floor.below()).is(net.minecraft.tags.FluidTags.WATER)) {
+                return Optional.empty();
+            }
+            for (int dy = 0; dy <= 3; dy++) {
+                if (!level.getBlockState(floor.above(dy)).isAir()) return Optional.empty();
+            }
+        }
+        if (!level.noCollision(new AABB(feet.getX() - 1, feet.getY(), feet.getZ() - 1,
+                feet.getX() + 2, feet.getY() + 2, feet.getZ() + 2))) return Optional.empty();
+        for (BlockPos floor : BlockPos.betweenClosed(surface.offset(-1, 0, -1), surface.offset(1, 0, 1))) {
+            if (!level.setBlock(floor, Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE)) {
+                throw new IllegalStateException("Ocean arrival platform placement was rejected");
+            }
+        }
+        return safe(level, feet) ? Optional.of(feet) : Optional.empty();
     }
 
     public static boolean safe(ServerLevel level, BlockPos feet) {

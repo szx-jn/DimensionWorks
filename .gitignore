@@ -38,6 +38,7 @@ build/
 bin/
 run/
 run-gametest*/
+run-client-*/
 out/
 
 # Local secrets

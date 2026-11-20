@@ -19,13 +19,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** 仅在忽略的独立客户端世界运行；检查实际客户端运动和服务端位置，不截取图片。 */
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
 public final class ElasticVerticalBeltClientCheck {
     private static final BlockPos BASE = new BlockPos(0, 80, 0);
     private static final BlockPos MOTOR = BASE.west();
@@ -36,15 +36,15 @@ public final class ElasticVerticalBeltClientCheck {
     private static volatile boolean ready;
 
     @SubscribeEvent
-    public static void serverTick(TickEvent.ServerTickEvent event) {
-        if (!Boolean.getBoolean("dimensionworks.elasticVerticalBeltClientCheck") || event.phase != TickEvent.Phase.END || !ready) return;
+    public static void serverTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!Boolean.getBoolean("dimensionworks.elasticVerticalBeltClientCheck") || !ready) return;
         var server = event.getServer();
         if (!server.getPlayerList().getPlayers().isEmpty()) serverY = server.getPlayerList().getPlayers().get(0).getY();
     }
 
     @SubscribeEvent
-    public static void clientTick(TickEvent.ClientTickEvent event) {
-        if (!Boolean.getBoolean("dimensionworks.elasticVerticalBeltClientCheck") || event.phase != TickEvent.Phase.END) return;
+    public static void clientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!Boolean.getBoolean("dimensionworks.elasticVerticalBeltClientCheck")) return;
         Minecraft mc = Minecraft.getInstance();
         mc.options.pauseOnLostFocus = false;
         if (started == 0) started = System.currentTimeMillis();

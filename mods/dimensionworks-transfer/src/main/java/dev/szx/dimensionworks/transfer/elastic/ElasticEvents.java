@@ -2,19 +2,19 @@ package dev.szx.dimensionworks.transfer.elastic;
 
 import dev.szx.dimensionworks.transfer.WDTransfer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID)
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID)
 public final class ElasticEvents {
     private ElasticEvents() {}
 
     @SubscribeEvent
-    public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer player) ElasticParcelState.tick(player);
+    public static void tick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer player) ElasticParcelState.tick(player);
     }
 
     @SubscribeEvent

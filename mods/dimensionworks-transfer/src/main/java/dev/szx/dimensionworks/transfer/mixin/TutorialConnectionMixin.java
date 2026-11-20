@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import net.minecraftforge.network.NetworkEvent;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class TutorialConnectionMixin {
@@ -76,10 +75,10 @@ public abstract class TutorialConnectionMixin {
 @Pseudo
 abstract class TutorialPackedEscapeMixin {
     @Inject(method = "handle", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$freezeEscape(NetworkEvent.Context context,
-            CallbackInfoReturnable<Boolean> callback) {
-        if (context.getSender() != null && TutorialManager.locked(context.getSender())) {
-            callback.setReturnValue(true);
+    private void dimensionworks$freezeEscape(ServerPlayer player,
+            CallbackInfo callback) {
+        if (TutorialManager.locked(player)) {
+            callback.cancel();
         }
     }
 }

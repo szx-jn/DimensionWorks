@@ -35,11 +35,11 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Opt-in checks with the actual Twilight, Alex cave, Cave Factory and KubeJS release dependencies. */
 @GameTestHolder("dimensionworks_alex_dispatch")
@@ -48,7 +48,7 @@ public final class AlexDispatchGameTests {
     private static final String TEMPLATE = "empty";
 
     private static ItemStack item(String id) {
-        ItemStack stack = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
+        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
         if (stack.isEmpty()) throw new AssertionError("Missing item " + id);
         return stack;
     }
@@ -56,8 +56,8 @@ public final class AlexDispatchGameTests {
     private static ServerPlayer player(GameTestHelper helper) throws java.io.IOException {
         var server = helper.getLevel().getServer();
         var level = DispatchLevel.getOrLoad(server, WDKeys.TRANSFER_LEVEL);
-        var player = new ServerPlayer(server, level, new GameProfile(UUID.randomUUID(), "AlexDispatchTest"));
-        player.connection = new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), player);
+        var player = new ServerPlayer(server, level, new GameProfile(UUID.randomUUID(), "AlexDispatchTest"), net.minecraft.server.level.ClientInformation.createDefault());
+        player.connection = new ServerGamePacketListenerImpl(server, new dev.szx.dimensionworks.transfer.FixtureConnection(), player, net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
         player.addTag(TransferAccess.UNLOCK_TAG);
         var territory = TerritorySavedData.get(server.overworld()).getOrAssign(player.getUUID());
         DispatchController.ensure(level, territory);
@@ -86,7 +86,7 @@ public final class AlexDispatchGameTests {
     @GameTest(template = TEMPLATE)
     public static void actualRecipeAcceptsRepeatedTrophiesAndRejectsWrongMaterials(GameTestHelper helper) {
         var recipe = (CraftingRecipe) helper.getLevel().getRecipeManager()
-            .byKey(new ResourceLocation("dimensionworks_transfer:twilight_dispatch_upgrade")).orElseThrow();
+            .byKey(ResourceLocation.parse("dimensionworks_transfer:twilight_dispatch_upgrade")).orElseThrow().value();
         var menu = new AbstractContainerMenu(null, -1) {
             @Override public ItemStack quickMoveStack(Player player, int slot) { return ItemStack.EMPTY; }
             @Override public boolean stillValid(Player player) { return true; }
@@ -94,20 +94,20 @@ public final class AlexDispatchGameTests {
         var grid = new TransientCraftingContainer(menu, 2, 2);
         grid.setItem(0, item("twilightforest:twilight_oak_log"));
         for (int slot = 1; slot < 4; slot++) grid.setItem(slot, item("twilightforest:naga_trophy"));
-        helper.assertTrue(recipe.matches(grid, helper.getLevel()), "Three identical Boss trophies must be accepted");
-        helper.assertTrue(recipe.assemble(grid, helper.getLevel().registryAccess()).is(DispatchItems.TWILIGHT_UPGRADE.get()),
+        helper.assertTrue(recipe.matches(grid.asCraftInput(), helper.getLevel()), "Three identical Boss trophies must be accepted");
+        helper.assertTrue(recipe.assemble(grid.asCraftInput(), helper.getLevel().registryAccess()).is(DispatchItems.TWILIGHT_UPGRADE.get()),
             "Actual recipe must produce the registered terminal upgrade");
         grid.setItem(0, item("twilightforest:stripped_canopy_wood"));
         grid.setItem(2, item("twilightforest:lich_trophy"));
-        helper.assertTrue(recipe.matches(grid, helper.getLevel()), "Mixed trophies and stripped Twilight wood must work");
+        helper.assertTrue(recipe.matches(grid.asCraftInput(), helper.getLevel()), "Mixed trophies and stripped Twilight wood must work");
         grid.setItem(3, ItemStack.EMPTY);
-        helper.assertTrue(!recipe.matches(grid, helper.getLevel()), "Two trophies are insufficient");
+        helper.assertTrue(!recipe.matches(grid.asCraftInput(), helper.getLevel()), "Two trophies are insufficient");
         grid.setItem(3, item("twilightforest:naga_trophy"));
         grid.setItem(0, new ItemStack(Items.OAK_LOG));
-        helper.assertTrue(!recipe.matches(grid, helper.getLevel()), "Vanilla wood must not substitute for Twilight wood");
+        helper.assertTrue(!recipe.matches(grid.asCraftInput(), helper.getLevel()), "Vanilla wood must not substitute for Twilight wood");
         grid.setItem(0, item("twilightforest:twilight_oak_log"));
         grid.setItem(3, item("twilightforest:quest_ram_trophy"));
-        helper.assertTrue(!recipe.matches(grid, helper.getLevel()), "Quest Ram is not a killed Boss trophy");
+        helper.assertTrue(!recipe.matches(grid.asCraftInput(), helper.getLevel()), "Quest Ram is not a killed Boss trophy");
         helper.succeed();
     }
 
@@ -125,7 +125,7 @@ public final class AlexDispatchGameTests {
                 "Installation consumes exactly one card and unlocks routes");
             helper.assertTrue(install(owner, terminal(owner)) == InteractionResult.FAIL && owner.getMainHandItem().getCount() == 1,
                 "Repeated installation must not consume another card");
-            CompoundTag saved = TerritorySavedData.get(owner.server.overworld()).save(new CompoundTag());
+            CompoundTag saved = TerritorySavedData.get(owner.server.overworld()).save(new CompoundTag(), owner.registryAccess());
             var reloaded = TerritorySavedData.load(saved);
             helper.assertTrue(reloaded.alexCavesUnlocked(owner.getUUID()) && !reloaded.alexCavesUnlocked(visitor.getUUID()),
                 "Save/load must retain the owner upgrade without unlocking other plots");
@@ -147,12 +147,12 @@ public final class AlexDispatchGameTests {
             helper.assertTrue(player.level().dimension().equals(WDKeys.TRANSFER_LEVEL) && PlayerParcel.isPacked(player)
                 && returns.get(player.getUUID()).orElseThrow().equals(source), "Rejected dispatch must preserve traveller and source");
             var blocked = new EntityTravelToDimensionEvent(player, AlexCavesDestination.MAGNETIC.key());
-            MinecraftForge.EVENT_BUS.post(blocked);
+            NeoForge.EVENT_BUS.post(blocked);
             helper.assertTrue(blocked.isCanceled(), "Cave Factory must still reject unauthorized cave travel");
             player.getPersistentData().putBoolean(AlexCavesDestination.AUTHORIZATION, true);
             var aether = new EntityTravelToDimensionEvent(player, net.minecraft.resources.ResourceKey.create(
-                net.minecraft.core.registries.Registries.DIMENSION, new ResourceLocation("aether", "the_aether")));
-            MinecraftForge.EVENT_BUS.post(aether);
+                net.minecraft.core.registries.Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath("aether", "the_aether")));
+            NeoForge.EVENT_BUS.post(aether);
             helper.assertTrue(aether.isCanceled(), "Cave authorization must never unlock Aether");
             player.getPersistentData().remove(AlexCavesDestination.AUTHORIZATION);
             TerritorySavedData.get(player.server.overworld()).unlockAlexCaves(player.getUUID());

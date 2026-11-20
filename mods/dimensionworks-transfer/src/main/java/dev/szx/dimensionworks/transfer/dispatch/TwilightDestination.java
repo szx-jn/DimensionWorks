@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 
 public final class TwilightDestination {
     public static final ResourceKey<Level> KEY = ResourceKey.create(Registries.DIMENSION,
-        new ResourceLocation("twilightforest", "twilight_forest"));
+        ResourceLocation.fromNamespaceAndPath("twilightforest", "twilight_forest"));
     public static final String AUTHORIZATION = "dw_dispatch_twilight_authorized";
 
     private TwilightDestination() {}

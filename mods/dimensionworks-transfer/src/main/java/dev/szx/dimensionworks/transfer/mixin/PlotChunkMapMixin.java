@@ -3,12 +3,9 @@ package dev.szx.dimensionworks.transfer.mixin;
 import dev.szx.dimensionworks.transfer.WDKeys;
 import dev.szx.dimensionworks.transfer.territory.PlotChunkLoading;
 import java.util.List;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.LevelChunk;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,17 +21,22 @@ public abstract class PlotChunkMapMixin {
         if (player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) ci.setReturnValue(true);
     }
 
-    @Inject(method = "updateChunkTracking", at = @At("HEAD"), cancellable = true)
-    private void dimensionworks$onlyPlotTracking(ServerPlayer player, ChunkPos chunk,
-            MutableObject<ClientboundLevelChunkWithLightPacket> packet, boolean wasLoaded,
-            boolean load, CallbackInfo ci) {
-        if (!PlotChunkLoading.maySend(player, chunk) || (!load && player.level().dimension().equals(WDKeys.TRANSFER_LEVEL))) ci.cancel();
-    }
+    @org.spongepowered.asm.mixin.gen.Invoker("applyChunkTrackingView")
+    protected abstract void dimensionworks$applyView(ServerPlayer player, net.minecraft.server.level.ChunkTrackingView view);
 
-    @Inject(method = "playerLoadedChunk", at = @At("HEAD"), cancellable = true)
-    private void dimensionworks$onlyPlotPacket(ServerPlayer player,
-            MutableObject<ClientboundLevelChunkWithLightPacket> packet, LevelChunk chunk, CallbackInfo ci) {
-        if (!PlotChunkLoading.maySend(player, chunk.getPos())) ci.cancel();
+    @Inject(method = "updateChunkTracking", at = @At("HEAD"), cancellable = true)
+    private void dimensionworks$fixedPlotTracking(ServerPlayer player, CallbackInfo ci) {
+        if (!level.dimension().equals(WDKeys.TRANSFER_LEVEL)) return;
+        var territory = dev.szx.dimensionworks.transfer.territory.TerritoryManager.getTerritory(player);
+        net.minecraft.server.level.ChunkTrackingView view = territory == null
+            ? net.minecraft.server.level.ChunkTrackingView.EMPTY
+            : new dev.szx.dimensionworks.transfer.territory.PlotChunkView(territory.chunkX(), territory.chunkZ());
+        if (!view.equals(player.getChunkTrackingView())) {
+            if (territory != null) player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket(
+                territory.chunkX() + 1, territory.chunkZ() + 1));
+            dimensionworks$applyView(player, view);
+        }
+        ci.cancel();
     }
 
     @Inject(method = "getPlayers", at = @At("HEAD"), cancellable = true)

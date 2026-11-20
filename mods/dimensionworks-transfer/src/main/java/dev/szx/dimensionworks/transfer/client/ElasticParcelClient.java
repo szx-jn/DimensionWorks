@@ -12,14 +12,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
 public final class ElasticParcelClient {
     private static ElasticCharge charge = new ElasticCharge();
     private static boolean pressed;
@@ -44,8 +44,8 @@ public final class ElasticParcelClient {
     private static void reset() { charge = new ElasticCharge(); pressed = false; }
 
     @SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+
         Minecraft mc = Minecraft.getInstance();
         if (localPlayer != mc.player || level != mc.level) {
             reset();
@@ -68,9 +68,9 @@ public final class ElasticParcelClient {
     }
 
     @SubscribeEvent
-    public static void overlay(RenderGuiOverlayEvent.Post event) {
+    public static void overlay(RenderGuiLayerEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (!event.getOverlay().id().equals(VanillaGuiOverlay.HOTBAR.id()) || mc.player == null
+        if (!event.getName().equals(VanillaGuiLayers.HOTBAR) || mc.player == null
             || !ElasticParcelState.isElastic(mc.player) || charge.ticks() == 0) return;
         var g = event.getGuiGraphics();
         int left = g.guiWidth() / 2 - 62;
@@ -94,21 +94,16 @@ public final class ElasticParcelClient {
     private static final class SlimeColor implements VertexConsumer {
         private final VertexConsumer delegate;
         private SlimeColor(VertexConsumer delegate) { this.delegate = delegate; }
-        @Override public VertexConsumer vertex(double x, double y, double z) { delegate.vertex(x, y, z); return this; }
-        @Override public VertexConsumer color(int r, int g, int b, int a) {
+        @Override public VertexConsumer addVertex(float x, float y, float z) { delegate.addVertex(x, y, z); return this; }
+        @Override public VertexConsumer setColor(int r, int g, int b, int a) {
             int shade = (r + g + b) / 3;
-            delegate.color((int)(shade * 0.58), Math.min(255, (int)(shade * 1.15)), (int)(shade * 0.42), (int)(a * 0.88));
+            delegate.setColor((int)(shade * 0.58), Math.min(255, (int)(shade * 1.15)), (int)(shade * 0.42), (int)(a * 0.88));
             return this;
         }
-        @Override public VertexConsumer uv(float u, float v) { delegate.uv(u, v); return this; }
-        @Override public VertexConsumer overlayCoords(int u, int v) { delegate.overlayCoords(u, v); return this; }
-        @Override public VertexConsumer uv2(int u, int v) { delegate.uv2(u, v); return this; }
-        @Override public VertexConsumer normal(float x, float y, float z) { delegate.normal(x, y, z); return this; }
-        @Override public void endVertex() { delegate.endVertex(); }
-        @Override public void defaultColor(int r, int g, int b, int a) {
-            int shade = (r + g + b) / 3;
-            delegate.defaultColor((int)(shade * 0.58), Math.min(255, (int)(shade * 1.15)), (int)(shade * 0.42), (int)(a * 0.88));
-        }
-        @Override public void unsetDefaultColor() { delegate.unsetDefaultColor(); }
+        @Override public VertexConsumer setUv(float u, float v) { delegate.setUv(u, v); return this; }
+        @Override public VertexConsumer setUv1(int u, int v) { delegate.setUv1(u, v); return this; }
+        @Override public VertexConsumer setUv2(int u, int v) { delegate.setUv2(u, v); return this; }
+        @Override public VertexConsumer setNormal(float x, float y, float z) { delegate.setNormal(x, y, z); return this; }
+
     }
 }

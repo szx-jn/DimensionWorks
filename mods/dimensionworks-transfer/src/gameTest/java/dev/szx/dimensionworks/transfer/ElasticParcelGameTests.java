@@ -28,15 +28,15 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("dimensionworks_elastic")
 @PrefixGameTestTemplate(false)
 public final class ElasticParcelGameTests {
     private static ServerPlayer player(GameTestHelper h) {
-        var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "ElasticTest"));
-        p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new Connection(PacketFlow.SERVERBOUND), p);
+        var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "ElasticTest"), net.minecraft.server.level.ClientInformation.createDefault());
+        p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new dev.szx.dimensionworks.transfer.FixtureConnection(), p, net.minecraft.server.network.CommonListenerCookie.createInitial(p.getGameProfile(), false));
         p.setItemInHand(InteractionHand.MAIN_HAND, ElasticItems.PACKAGER.get().getDefaultInstance());
         return p;
     }
@@ -54,10 +54,10 @@ public final class ElasticParcelGameTests {
             pack(elastic); pack(normal);
             h.assertTrue(ElasticParcelState.isElastic(elastic) && !ElasticParcelState.isElastic(normal), "Only the upgraded tool selects elastic state");
             var a=elastic.getDimensions(elastic.getPose()); var b=normal.getDimensions(normal.getPose());
-            h.assertTrue(a.width==b.width && a.height==b.height, "Package dimensions must match");
+            h.assertTrue(a.width()==b.width() && a.height()==b.height(), "Package dimensions must match");
             h.assertTrue(elastic.getAttributeValue(Attributes.MOVEMENT_SPEED) == normal.getAttributeValue(Attributes.MOVEMENT_SPEED), "Movement modifier must match");
             h.assertTrue(elastic.getPersistentData().getInt(PackedPlayerState.ESCAPES) == normal.getPersistentData().getInt(PackedPlayerState.ESCAPES), "Escape state must match");
-            var style = ElasticItems.PACKAGER.get().getRarity(ElasticItems.PACKAGER.get().getDefaultInstance()).getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
+            var style = ElasticItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
             h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Tool rarity must actually be green");
             h.assertTrue(PlayerParcel.unpack(elastic) && !elastic.getPersistentData().contains(ElasticParcelState.ELASTIC), "Unpack must clear elastic state");
             h.succeed();
@@ -68,10 +68,10 @@ public final class ElasticParcelGameTests {
     public static void immunityIsPreservedAndActualOffhandSelectsElastic(GameTestHelper h) {
         var source = player(h); var target = player(h);
         try {
-            target.addEffect(new net.minecraft.world.effect.MobEffectInstance(CMPPlayerPack.IMMUNITY.get(), 200));
+            target.addEffect(new net.minecraft.world.effect.MobEffectInstance(CMPPlayerPack.IMMUNITY, 200));
             PackPlayerPacket.pack(source, target, false);
             h.assertTrue(!PlayerParcel.isPacked(target) && !ElasticParcelState.isElastic(target), "Existing immunity must reject packing");
-            target.removeEffect(CMPPlayerPack.IMMUNITY.get());
+            target.removeEffect(CMPPlayerPack.IMMUNITY);
             source.setShiftKeyDown(true);
             source.setItemInHand(InteractionHand.MAIN_HAND, CMPItems.MOBILE_PACKAGER.asStack());
             ItemStack tool = ElasticItems.PACKAGER.get().getDefaultInstance();
@@ -80,8 +80,8 @@ public final class ElasticParcelGameTests {
             h.assertTrue(ElasticParcelState.isElastic(target), "The actual offhand interaction must select elastic");
             h.assertTrue(target.getPersistentData().getBoolean(PackedPlayerState.PACKED_BY_OTHER), "Packed-by-other flag must be preserved");
             for (int i=0;i<5;i++) PackedPlayerState.escape(target);
-            h.assertTrue(!ElasticParcelState.isElastic(target) && target.hasEffect(CMPPlayerPack.IMMUNITY.get()), "Existing five-click escape and immunity must work");
-            target.removeEffect(CMPPlayerPack.IMMUNITY.get());
+            h.assertTrue(!ElasticParcelState.isElastic(target) && target.hasEffect(CMPPlayerPack.IMMUNITY), "Existing five-click escape and immunity must work");
+            target.removeEffect(CMPPlayerPack.IMMUNITY);
             source.setItemInHand(InteractionHand.MAIN_HAND, tool);
             ItemStack ordinary=CMPItems.MOBILE_PACKAGER.asStack();
             source.setItemInHand(InteractionHand.OFF_HAND, ordinary);
@@ -181,7 +181,7 @@ public final class ElasticParcelGameTests {
             ItemStack box=p.getInventory().items.stream().filter(PackageItem::isPackage).findFirst().orElseThrow();
             ItemStack egg=PackageItem.getContents(box).getStackInSlot(0);
             h.assertTrue(egg.is(CMPItems.PACKED_MOB_SPAWN_EGG.get()),"Mobs must remain the existing ordinary packed-mob item");
-            h.assertTrue(!ElasticParcelState.isElastic(p) && !egg.getOrCreateTag().contains(ElasticParcelState.ELASTIC),"No elastic mob or player state may be created");
+            h.assertTrue(!ElasticParcelState.isElastic(p) && !egg.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag().contains(ElasticParcelState.ELASTIC),"No elastic mob or player state may be created");
             h.succeed();
         } finally { close(p); mob.discard(); }
     }
@@ -189,14 +189,14 @@ public final class ElasticParcelGameTests {
     @GameTest(template="empty")
     public static void upgradePreservesCompleteToolNbtAndLeavesInputIntact(GameTestHelper h) {
         ItemStack original=CMPItems.MOBILE_PACKAGER.asStack();
-        original.setHoverName(Component.literal("My original packager"));
-        original.enchant(Enchantments.UNBREAKING,2);
-        original.getOrCreateTag().putString("packager_payload","address and saved settings");
-        CompoundTag before=original.save(new CompoundTag());
+        original.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("My original packager"));
+        original.enchant(h.getLevel().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING),2);
+        net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, original, tag -> tag.putString("packager_payload","address and saved settings"));
+        var before=original.save(h.getLevel().registryAccess());
         ItemStack upgraded=ElasticPackager.upgrade(original);
         h.assertTrue(upgraded.is(ElasticItems.PACKAGER.get()),"Upgrade must change the registered item");
-        h.assertTrue(upgraded.getTag().equals(original.getTag()),"All original item NBT must survive");
-        h.assertTrue(original.save(new CompoundTag()).equals(before),"Crafting preview must not mutate the input");
+        h.assertTrue(upgraded.getComponentsPatch().equals(original.getComponentsPatch()),"All original item NBT must survive");
+        h.assertTrue(original.save(h.getLevel().registryAccess()).equals(before),"Crafting preview must not mutate the input");
         h.succeed();
     }
 }

@@ -21,16 +21,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 @GameTestHolder(WDTransfer.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class PackedPlayerTransportGameTests {
     private static ServerPlayer player(GameTestHelper h) {
-        var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "ParcelTest"));
-        p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new Connection(PacketFlow.SERVERBOUND), p);
+        var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "ParcelTest"), net.minecraft.server.level.ClientInformation.createDefault());
+        p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new dev.szx.dimensionworks.transfer.FixtureConnection(), p, net.minecraft.server.network.CommonListenerCookie.createInitial(p.getGameProfile(), false));
         return p;
     }
     private static void pack(ServerPlayer p) {
@@ -110,10 +110,10 @@ public class PackedPlayerTransportGameTests {
         var p=player(h);
         try {
             pack(p);
-            var fall=new LivingAttackEvent(p,p.damageSources().fall(),10);
+            var fall=new LivingIncomingDamageEvent(p,new net.neoforged.neoforge.common.damagesource.DamageContainer(p.damageSources().fall(),10));
             TransferEvents.parcelDamage(fall);
             h.assertTrue(fall.isCanceled() && PlayerParcel.isPacked(p), "Package fall must not harm or unpack");
-            var hit=new LivingAttackEvent(p,p.damageSources().generic(),10);
+            var hit=new LivingIncomingDamageEvent(p,new net.neoforged.neoforge.common.damagesource.DamageContainer(p.damageSources().generic(),10));
             TransferEvents.parcelDamage(hit);
             h.assertTrue(hit.isCanceled() && !PlayerParcel.isPacked(p), "Ordinary damage must pop package using CMP unpack");
             h.assertTrue(p.isAlive(), "Popping the package must not remove the player");

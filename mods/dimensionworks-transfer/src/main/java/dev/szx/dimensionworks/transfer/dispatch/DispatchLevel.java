@@ -18,8 +18,8 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.DerivedLevelData;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.level.LevelEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 /** Loads a destination's owning datapack definition, without copying third-party generators. */
 public final class DispatchLevel {
@@ -30,27 +30,26 @@ public final class DispatchLevel {
         if (existing != null) return existing;
         LevelStem stem = server.registryAccess().registryOrThrow(Registries.LEVEL_STEM).get(key.location());
         if (stem == null) {
-            var resource = server.getResourceManager().getResource(new ResourceLocation(
+            var resource = server.getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath(
                 key.location().getNamespace(), "dimension/" + key.location().getPath() + ".json"));
             if (resource.isEmpty()) return null;
             try (var reader = resource.get().openAsReader()) {
                 stem = LevelStem.CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, server.registryAccess()),
-                    JsonParser.parseReader(reader)).getOrThrow(false,
-                        error -> WDTransfer.LOGGER.error("Cannot decode destination dimension {}: {}", key.location(), error));
+                    JsonParser.parseReader(reader)).getOrThrow(error -> new IOException("Cannot decode destination dimension " + key.location() + ": " + error));
             }
         }
         MinecraftServerAccess access = (MinecraftServerAccess) server;
         var worldData = server.getWorldData();
         ServerLevel level = new ServerLevel(server, access.dimensionworks$executor(), access.dimensionworks$storage(),
             new DerivedLevelData(worldData, worldData.overworldData()), key, stem,
-            new LoggerChunkProgressListener(0), worldData.isDebugWorld(),
+            LoggerChunkProgressListener.create(0), worldData.isDebugWorld(),
             BiomeManager.obfuscateSeed(worldData.worldGenOptions().seed()), List.of(), false,
             server.overworld().getRandomSequences());
         server.overworld().getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(level.getWorldBorder()));
         level.getWorldBorder().applySettings(server.overworld().getWorldBorder().createSettings());
         access.dimensionworks$levels().put(key, level);
         server.markWorldsDirty();
-        MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(level));
+        NeoForge.EVENT_BUS.post(new LevelEvent.Load(level));
         return level;
     }
 }

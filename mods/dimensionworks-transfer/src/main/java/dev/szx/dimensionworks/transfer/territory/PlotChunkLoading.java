@@ -62,8 +62,7 @@ public final class PlotChunkLoading {
                     if (active.sent().contains(key)) continue;
                     var chunk = active.level().getChunkSource().getChunkNow(x, z);
                     if (chunk == null || !chunk.isLightCorrect()) continue;
-                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket(
-                        chunk, active.level().getChunkSource().getLightEngine(), null, null));
+                    player.connection.chunkSender.markChunkPendingToSend(chunk);
                     active.sent().add(key);
                 }
             }

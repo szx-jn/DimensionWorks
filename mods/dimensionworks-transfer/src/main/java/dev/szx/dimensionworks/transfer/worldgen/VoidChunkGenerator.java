@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.transfer.worldgen;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -29,7 +29,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
     public static final int MIN_Y = -128;
     public static final int HEIGHT = 448;
 
-    public static final Codec<VoidChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance
+    public static final MapCodec<VoidChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
             .group(BiomeSource.CODEC.fieldOf("biome_source").forGetter(ChunkGenerator::getBiomeSource))
             .apply(instance, VoidChunkGenerator::new));
 
@@ -38,7 +38,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 
@@ -90,7 +90,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState randomState,
+    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState,
                                                         StructureManager structureManager, ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }

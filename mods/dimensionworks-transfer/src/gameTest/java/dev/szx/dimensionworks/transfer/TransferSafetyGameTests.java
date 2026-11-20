@@ -7,8 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(WDTransfer.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -78,7 +78,8 @@ public final class TransferSafetyGameTests {
             loaded = TwilightDestination.getOrLoad(server);
             helper.assertTrue(loaded != null && loaded != original && server.getLevel(TwilightDestination.KEY) == loaded,
                 "Dispatch must instantiate and register TF's missing level");
-            helper.assertTrue(loaded.getChunkSource().getGenerator().getClass().getName().contains("ChunkGeneratorTwilight"),
+            helper.assertTrue(loaded.getChunkSource().getGenerator() instanceof net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator generator
+                && generator.generatorSettings().unwrapKey().orElseThrow().location().equals(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("twilightforest", "twilight_noise_gen")),
                 "Lazy level must use TF's own generator");
         } catch (Exception e) { throw new AssertionError("Missing Twilight level must load", e); }
         finally {
@@ -87,6 +88,30 @@ public final class TransferSafetyGameTests {
             server.markWorldsDirty();
             if (loaded != null) try { loaded.close(); } catch (java.io.IOException e) { throw new AssertionError(e); }
         }
+        helper.succeed();
+    }
+    @GameTest(template = "empty")
+    public static void dryOceanArrivalAddsOnlyAirFloorAndRejectsOccupiedSpace(GameTestHelper helper) {
+        var level = helper.getLevel(); var surface = helper.absolutePos(new BlockPos(3, 2, 3));
+        for (var floor : BlockPos.betweenClosed(surface.offset(-1, 0, -1), surface.offset(1, 0, 1))) {
+            level.setBlockAndUpdate(floor.below(), Blocks.WATER.defaultBlockState());
+            for (int dy = 0; dy <= 3; dy++) level.setBlockAndUpdate(floor.above(dy), Blocks.AIR.defaultBlockState());
+        }
+        level.setBlockAndUpdate(surface.east().above(), Blocks.CHEST.defaultBlockState());
+        var chest = level.getBlockEntity(surface.east().above());
+        ((net.minecraft.world.Container) chest).setItem(0, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND, 7));
+        helper.assertTrue(SafeLanding.prepareDryOceanPlatform(level, surface).isEmpty(), "Occupied arrival volume must be refused");
+        helper.assertTrue(level.getBlockEntity(surface.east().above()) == chest && ((net.minecraft.world.Container) chest).getItem(0).getCount() == 7,
+            "Refusal must retain the existing chest and inventory");
+        helper.assertTrue(level.getBlockState(surface).isAir(), "Refusal must not build a partial platform");
+        level.setBlockAndUpdate(surface.east().above(), Blocks.AIR.defaultBlockState());
+        var landing = SafeLanding.prepareDryOceanPlatform(level, surface);
+        helper.assertTrue(landing.orElseThrow().equals(surface.above()) && SafeLanding.safe(level, landing.get()), "Ocean arrival must be dry and supported");
+        for (var floor : BlockPos.betweenClosed(surface.offset(-1, 0, -1), surface.offset(1, 0, 1))) {
+            helper.assertTrue(level.getBlockState(floor).is(Blocks.STONE) && level.getFluidState(floor.below()).is(net.minecraft.tags.FluidTags.WATER),
+                "Only the nine air floor cells may change; ocean must remain intact");
+        }
+        helper.assertTrue(SafeLanding.prepareDryOceanPlatform(level, surface).isEmpty(), "A platform must never overwrite an existing floor");
         helper.succeed();
     }
 }

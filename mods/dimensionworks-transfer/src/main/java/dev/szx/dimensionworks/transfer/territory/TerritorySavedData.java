@@ -22,35 +22,43 @@ public class TerritorySavedData extends SavedData {
 
     public static TerritorySavedData get(ServerLevel level) {
         return level.getDataStorage()
-                .computeIfAbsent(TerritorySavedData::load, TerritorySavedData::new, DATA_NAME);
+                .computeIfAbsent(new SavedData.Factory<>(TerritorySavedData::new, (tag, provider) -> load(tag)), DATA_NAME);
     }
 
     public static TerritorySavedData load(CompoundTag tag) {
         TerritorySavedData data = new TerritorySavedData();
+        if (!tag.contains("NextSpiralIndex", Tag.TAG_INT) || tag.getInt("NextSpiralIndex") < 0) {
+            throw new IllegalArgumentException("Invalid saved territory allocation index");
+        }
         data.nextSpiralIndex = tag.getInt("NextSpiralIndex");
-
-        ListTag list = tag.getList("Territories", Tag.TAG_COMPOUND);
+        if (!tag.contains("Territories", Tag.TAG_LIST) || !(tag.get("Territories") instanceof ListTag list)
+                || (!list.isEmpty() && list.getElementType() != Tag.TAG_COMPOUND)) {
+            throw new IllegalArgumentException("Invalid saved territory list");
+        }
+        Set<Integer> allocated = new HashSet<>();
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
-            UUID id = parseUuid(entry.getString("Player"));
-            if (id == null) {
-                continue;
+            UUID id = UUID.fromString(entry.getString("Player"));
+            for (String key : new String[]{"SpiralIndex", "GridX", "GridZ"}) {
+                if (!entry.contains(key, Tag.TAG_INT)) throw new IllegalArgumentException("Invalid saved territory coordinate: " + key);
             }
-            Territory territory = new Territory(
-                    entry.getInt("SpiralIndex"), entry.getInt("GridX"), entry.getInt("GridZ"));
-            data.territories.put(id, territory);
-            if (entry.getBoolean("Completed")) {
-                data.completed.add(id);
+            for (String key : new String[]{"Completed", "AlexCavesUnlocked"}) {
+                if (entry.contains(key) && !entry.contains(key, Tag.TAG_BYTE)) throw new IllegalArgumentException("Invalid saved territory flag: " + key);
             }
-            if (entry.getBoolean("AlexCavesUnlocked")) {
-                data.alexCavesUnlocked.add(id);
-            }
+            Territory territory = new Territory(entry.getInt("SpiralIndex"), entry.getInt("GridX"), entry.getInt("GridZ"));
+            int index = territory.spiralIndex();
+            if (index < 0 || index >= data.nextSpiralIndex || !allocated.add(index)) throw new IllegalArgumentException("Invalid or duplicate saved territory allocation");
+            int[] expected = SpiralAllocator.indexToGrid(index);
+            if (expected[0] != territory.gridX() || expected[1] != territory.gridZ()) throw new IllegalArgumentException("Saved territory grid differs from its allocation");
+            if (data.territories.putIfAbsent(id, territory) != null) throw new IllegalArgumentException("Duplicate saved territory owner: " + id);
+            if (entry.getBoolean("Completed")) data.completed.add(id);
+            if (entry.getBoolean("AlexCavesUnlocked")) data.alexCavesUnlocked.add(id);
         }
         return data;
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, net.minecraft.core.HolderLookup.Provider provider) {
         tag.putInt("NextSpiralIndex", nextSpiralIndex);
 
         ListTag list = new ListTag();
@@ -105,11 +113,4 @@ public class TerritorySavedData extends SavedData {
         if (alexCavesUnlocked.add(player)) setDirty();
     }
 
-    private static UUID parseUuid(String raw) {
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
-    }
 }

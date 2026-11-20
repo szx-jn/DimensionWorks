@@ -3,7 +3,7 @@ package dev.szx.dimensionworks.transfer.mixin;
 import dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
@@ -28,7 +28,7 @@ public abstract class TransferAePartPlacementMixin {
 
     @Inject(method = "placePart", at = @At("HEAD"), cancellable = true, remap = false)
     private static void dimensionworks$denyDirectPart(Player player, Level level, @Coerce Object partItem,
-            CompoundTag settings, BlockPos pos, Direction side, CallbackInfoReturnable<Object> cir) {
+            DataComponentMap settings, BlockPos pos, Direction side, CallbackInfoReturnable<Object> cir) {
         if (TransferBlockPolicy.inTransfer(level)) {
             TransferBlockPolicy.notifyDenied(player);
             cir.setReturnValue(null);

@@ -1,0 +1,53 @@
+// 固定源码及校验和构建定制 CMP；无需中间发行版或开发者机器上的 JAR。
+def commit = '62db6a8c2a6737eff659cc4f840a97f9e640a754'
+def checksum = 'af6dade670680565467b552954d8a652ca945b57c40183738c62618c772ec9c9'
+def sourceDirectory = layout.buildDirectory.dir("cmp-source/${commit}")
+def sourceArchive = layout.buildDirectory.file("cmp-source/${commit}.zip")
+def jarName = 'create_mobile_packages-1.21.1-0.7.8-dimensionworks.1.jar'
+
+if (project.hasProperty('cmpTestJar')) {
+    def developmentJar = file(project.property('cmpTestJar'))
+    if (!developmentJar.isFile()) throw new GradleException("缺少 CMP 开发验证 JAR: ${developmentJar}")
+    dependencies { implementation files(developmentJar) }
+} else {
+    def prepareSource = tasks.register('prepareCMPSource') {
+        inputs.property('commit', commit)
+        inputs.property('archiveSHA256', checksum)
+        outputs.file(sourceDirectory.map { it.file('gradle.properties') })
+        doLast {
+            def archive = sourceArchive.get().asFile
+            archive.parentFile.mkdirs()
+            def connection = new URL("https://codeload.github.com/szx-jn/Create-Mobile-Packages/zip/${commit}").openConnection()
+            connection.connectTimeout = 20000
+            connection.readTimeout = 120000
+            connection.inputStream.withCloseable { input -> archive.withOutputStream { output -> output << input } }
+            def digest = java.security.MessageDigest.getInstance('SHA-256')
+            archive.withInputStream { input ->
+                byte[] buffer = new byte[65536]
+                int count
+                while ((count = input.read(buffer)) != -1) digest.update(buffer, 0, count)
+            }
+            if (digest.digest().encodeHex().toString() != checksum) {
+                throw new GradleException('固定 CMP 源码校验失败；拒绝构建')
+            }
+            copy {
+                from zipTree(archive)
+                into sourceDirectory
+                eachFile { details -> details.path = details.path.substring(details.path.indexOf('/') + 1) }
+                includeEmptyDirs = false
+            }
+        }
+    }
+    def sourceJar = sourceDirectory.map { it.file("build/libs/${jarName}") }
+    def buildSource = tasks.register('buildCMPSource', Exec) {
+        dependsOn prepareSource
+        inputs.property('commit', commit)
+        outputs.file(sourceJar)
+        workingDir sourceDirectory
+        commandLine 'bash', 'gradlew', '--no-daemon', '--max-workers=2', '--console=plain', 'jar'
+        // 不继承 CI 的分支/构建号后缀，也不执行 fork 的发布任务。
+        environment 'BRANCH_NAME', ''
+        environment 'BUILD_NUMBER', ''
+    }
+    dependencies { implementation files(sourceJar).builtBy(buildSource) }
+}

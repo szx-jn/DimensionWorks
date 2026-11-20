@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import top.theillusivec4.curios.api.CuriosApi;
 
 /** Owns the one-time Gear Heart to logistics-dimension tutorial. */
@@ -81,11 +81,11 @@ public final class TutorialManager {
     }
 
     public static boolean isKey(ItemStack stack) {
-        return KEY_ID.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()));
+        return KEY_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 
     private static ItemStack createKey() {
-        var item = ForgeRegistries.ITEMS.getValue(KEY_ID);
+        var item = BuiltInRegistries.ITEM.get(KEY_ID);
         return item == null ? ItemStack.EMPTY : new ItemStack(item);
     }
 
@@ -131,7 +131,7 @@ public final class TutorialManager {
         }
 
         CompoundTag state = new CompoundTag();
-        state.put(SAVED_HAND, player.getMainHandItem().save(new CompoundTag()));
+        state.put(SAVED_HAND, player.getMainHandItem().saveOptional(player.registryAccess()));
         state.putInt(SAVED_SLOT, player.getInventory().selected);
         state.putDouble("X", player.getX());
         state.putDouble("Y", player.getY());
@@ -145,16 +145,16 @@ public final class TutorialManager {
 
     private static boolean hasReachedStageTwo(ServerPlayer player) {
         return CuriosApi.getCuriosInventory(player)
-            .resolve()
             .map(inventory -> inventory.findFirstCurio(stack -> {
-                ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(stack.getItem());
+                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
                 if (BLESSED_HEART_ID.equals(itemId)) {
-                    return !stack.hasTag() || stack.getTag().getInt("CustomModelData") != 2;
+                    var model = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
+                    return model == null || model.value() != 2;
                 }
-                if (!HEART_ID.equals(itemId) || !stack.hasTag()) {
+                if (!HEART_ID.equals(itemId)) {
                     return false;
                 }
-                int repairedMask = stack.getTag().getInt("DimensionWorksGearHeartRepaired");
+                int repairedMask = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag().getInt("DimensionWorksGearHeartRepaired");
                 return (repairedMask & 3) == 3;
             }).isPresent())
             .orElse(false);
@@ -166,7 +166,7 @@ public final class TutorialManager {
         }
 
         player.getInventory().selected = state.getInt(SAVED_SLOT);
-        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.of(state.getCompound(SAVED_HAND)));
+        player.setItemInHand(InteractionHand.MAIN_HAND, savedHand(state, player.registryAccess()));
         player.getInventory().setChanged();
         player.inventoryMenu.sendAllDataToRemote();
         if (player.containerMenu != player.inventoryMenu) player.containerMenu.sendAllDataToRemote();
@@ -175,4 +175,10 @@ public final class TutorialManager {
         savedData.setDirty();
         TransferNetwork.tutorial(player, false);
     }
+    private static ItemStack savedHand(CompoundTag state, net.minecraft.core.HolderLookup.Provider registries) {
+        if (!state.contains(SAVED_HAND, net.minecraft.nbt.Tag.TAG_COMPOUND)) throw new IllegalArgumentException("Invalid saved tutorial hand");
+        var saved=state.getCompound(SAVED_HAND);
+        return saved.isEmpty() ? ItemStack.EMPTY : ItemStack.parse(registries,saved).orElseThrow(()->new IllegalArgumentException("Invalid saved tutorial item"));
+    }
+
 }

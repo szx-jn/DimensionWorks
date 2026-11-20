@@ -18,29 +18,27 @@ public class ReturnPointSavedData extends SavedData {
 
     public static ReturnPointSavedData get(ServerLevel level) {
         return level.getDataStorage()
-                .computeIfAbsent(ReturnPointSavedData::load, ReturnPointSavedData::new, DATA_NAME);
+                .computeIfAbsent(new SavedData.Factory<>(ReturnPointSavedData::new, (tag, provider) -> load(tag)), DATA_NAME);
     }
 
     public static ReturnPointSavedData load(CompoundTag tag) {
         ReturnPointSavedData data = new ReturnPointSavedData();
-        ListTag list = tag.getList("ReturnPoints", Tag.TAG_COMPOUND);
+        if (!tag.contains("ReturnPoints", Tag.TAG_LIST) || !(tag.get("ReturnPoints") instanceof ListTag list)
+                || (!list.isEmpty() && list.getElementType() != Tag.TAG_COMPOUND)) {
+            throw new IllegalArgumentException("Invalid saved return-point list");
+        }
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
-            UUID player = parseUuid(entry.getString("Player"));
-            if (player == null || !entry.contains("ReturnPoint", Tag.TAG_COMPOUND)) {
-                continue;
-            }
-            try {
-                data.points.put(player, ReturnPoint.load(entry.getCompound("ReturnPoint")));
-            } catch (IllegalArgumentException exception) {
-                // Ignore corrupt entries instead of preventing the whole world from loading.
-            }
+            UUID player = UUID.fromString(entry.getString("Player"));
+            if (!entry.contains("ReturnPoint", Tag.TAG_COMPOUND)) throw new IllegalArgumentException("Missing saved return point");
+            var point = ReturnPoint.load(entry.getCompound("ReturnPoint"));
+            if (data.points.putIfAbsent(player, point) != null) throw new IllegalArgumentException("Duplicate saved return-point owner: " + player);
         }
         return data;
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, net.minecraft.core.HolderLookup.Provider provider) {
         ListTag list = new ListTag();
         points.forEach((player, point) -> {
             CompoundTag entry = new CompoundTag();
@@ -67,11 +65,4 @@ public class ReturnPointSavedData extends SavedData {
         }
     }
 
-    private static UUID parseUuid(String raw) {
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
-    }
 }

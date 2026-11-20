@@ -15,12 +15,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public final class TransferBlockPolicy {
     public static final TagKey<Block> FORBIDDEN = TagKey.create(Registries.BLOCK,
-        new ResourceLocation(WDTransfer.MOD_ID, "forbidden_transfer_blocks"));
+        ResourceLocation.fromNamespaceAndPath(WDTransfer.MOD_ID, "forbidden_transfer_blocks"));
     private static volatile Set<String> namespaces = AeBlockNamespaces.PACK_ADDONS;
 
     private TransferBlockPolicy() {}
@@ -29,7 +29,7 @@ public final class TransferBlockPolicy {
         var dependencies = new HashMap<String, Set<String>>();
         for (var mod : ModList.get().getMods()) {
             dependencies.put(mod.getModId(), mod.getDependencies().stream()
-                .filter(dependency -> dependency.isMandatory())
+                .filter(dependency -> dependency.getType() == net.neoforged.neoforgespi.language.IModInfo.DependencyType.REQUIRED)
                 .map(dependency -> dependency.getModId()).collect(Collectors.toSet()));
         }
         namespaces = AeBlockNamespaces.resolve(dependencies);
@@ -40,7 +40,7 @@ public final class TransferBlockPolicy {
     }
 
     public static boolean forbidden(BlockState state) {
-        var id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        var id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return (id != null && namespaces.contains(id.getNamespace())) || state.is(FORBIDDEN);
     }
 
@@ -51,14 +51,9 @@ public final class TransferBlockPolicy {
 
     /** Read Mekanism's saved original block without mutating or consuming the box. */
     public static boolean forbiddenBoxContents(Level level, BlockPos pos) {
-        var tile = level.getBlockEntity(pos);
-        if (tile == null) return false;
-        var original = tile.saveWithoutMetadata().getCompound("data").getCompound("blockState");
-        var id = ResourceLocation.tryParse(original.getString("Name"));
-        if (id == null) return false;
-        if (namespaces.contains(id.getNamespace())) return true;
-        var block = ForgeRegistries.BLOCKS.getValue(id);
-        return block != null && forbidden(block.defaultBlockState());
+        if (!(level.getBlockEntity(pos) instanceof mekanism.common.tile.TileEntityCardboardBox tile)) return false;
+        var data = tile.components().get(mekanism.common.registries.MekanismDataComponents.BLOCK_DATA.get());
+        return data != null && forbidden(data.blockState());
     }
 
     public static void notifyDenied(Player player) {

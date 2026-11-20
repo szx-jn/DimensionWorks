@@ -31,14 +31,14 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Exercises actual CMP and Mekanism JARs in an isolated world. */
 @GameTestHolder("dimensionworks_cardboard")
@@ -52,7 +52,7 @@ public final class CardboardPackingGameTests {
     }
 
     private static Block block(String id) {
-        var result = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
+        var result = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
         if (result == null || result == Blocks.AIR) throw new AssertionError("Missing runtime block: " + id);
         return result;
     }
@@ -62,7 +62,7 @@ public final class CardboardPackingGameTests {
     }
 
     private static ItemStack tool(String id) {
-        var result = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
+        var result = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
         if (result.isEmpty()) throw new AssertionError("Missing runtime packing item: " + id);
         return result;
     }
@@ -75,12 +75,12 @@ public final class CardboardPackingGameTests {
 
     private static void unpack(FakePlayer player, BlockPos pos) {
         player.setShiftKeyDown(true);
-        player.level().getBlockState(pos).use(player.level(), player, InteractionHand.MAIN_HAND, hit(pos));
+        player.level().getBlockState(pos).useWithoutItem(player.level(), player, hit(pos));
     }
 
     private static long emptyBoxes(ServerLevel level, BlockPos pos) {
         return level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(2)).stream()
-            .filter(e -> e.getItem().is(ForgeRegistries.ITEMS.getValue(new ResourceLocation("mekanism:cardboard_box"))))
+            .filter(e -> e.getItem().is(BuiltInRegistries.ITEM.get(ResourceLocation.parse("mekanism:cardboard_box"))))
             .mapToLong(e -> e.getItem().getCount()).sum();
     }
 
@@ -99,7 +99,7 @@ public final class CardboardPackingGameTests {
         var policy = Class.forName("de.theidler.create_mobile_packages.items.mobile_packager.CardboardBoxPackagingPolicy")
             .getMethod("canPack", ResourceLocation.class);
         int excluded = 0;
-        for (var entry : ForgeRegistries.BLOCKS.getEntries()) {
+        for (var entry : BuiltInRegistries.BLOCK.entrySet()) {
             if (entry.getValue().defaultBlockState().isAir()) continue;
             boolean allowed = (boolean) policy.invoke(null, entry.getKey().location());
             boolean forbidden = entry.getValue() == Blocks.BARRIER || entry.getValue() == DispatchBlocks.TERMINAL.get();
@@ -133,10 +133,9 @@ public final class CardboardPackingGameTests {
                     var tile = level.getBlockEntity(pos);
                     if (tile != null) tile.getPersistentData().putString("dw_cardboard_probe", id);
                     if (id.equals("minecraft:stone")) h.assertTrue(level.getBlockState(pos).is(TagKey.create(Registries.BLOCK,
-                        new ResourceLocation("mekanism:cardboard_blacklist"))), "Exercise an actual block blacklist");
-                    if (id.equals("minecraft:chest")) h.assertTrue(ForgeRegistries.BLOCK_ENTITY_TYPES.tags()
-                        .getTag(TagKey.create(Registries.BLOCK_ENTITY_TYPE, new ResourceLocation("mekanism:cardboard_blacklist")))
-                        .contains(tile.getType()), "Exercise an actual block-entity blacklist");
+                        ResourceLocation.parse("c:relocation_not_supported"))), "Exercise an actual block blacklist");
+                    if (id.equals("minecraft:chest")) h.assertTrue(BuiltInRegistries.BLOCK_ENTITY_TYPE.getTag(TagKey.create(Registries.BLOCK_ENTITY_TYPE, ResourceLocation.parse("c:relocation_not_supported")))
+                        .orElseThrow().contains(BuiltInRegistries.BLOCK_ENTITY_TYPE.wrapAsHolder(tile.getType())), "Exercise an actual block-entity blacklist");
                     var stack = tool(packer);
                     h.assertTrue(pack(p, pos, stack).consumesAction() && level.getBlockState(pos).is(block("mekanism:cardboard_box")),
                         packer + " must package " + id);
@@ -175,7 +174,7 @@ public final class CardboardPackingGameTests {
                 level.setBlock(pos, first, FLAGS);
                 level.setBlock(other, second, FLAGS);
                 h.assertTrue(pack(p, pos, tool(packer)).consumesAction(), "First part must pack");
-                h.assertTrue(level.getBlockState(other).equals(second), "Packing one part must retain the other");
+                h.assertTrue(level.getBlockState(other).equals(second), "Packing one part must retain the other: " + packer + " / " + target + " / " + level.getBlockState(other));
                 h.assertTrue(pack(p, other, tool(packer)).consumesAction(), "Other part must pack");
                 unpack(p, pos);
                 h.assertTrue(level.getBlockState(pos).equals(first), "Restore the first part while the other is still boxed");
@@ -207,19 +206,21 @@ public final class CardboardPackingGameTests {
                 ((Container) level.getBlockEntity(source)).setItem(0, new ItemStack(Items.DIAMOND, 7));
                 h.assertTrue(pack(p, source, tool(packer)).consumesAction(), "Chest must pack");
                 var box = level.getBlockEntity(source);
-                var saved = box.saveWithFullMetadata();
-                box.load(saved);
-                h.assertTrue(saved.getCompound("data").getBoolean("create_mobile_packages:from_mobile_packager")
+                var saved = box.saveWithFullMetadata(level.registryAccess());
+                var payload = ((mekanism.common.tile.TileEntityCardboardBox) box).components().get(mekanism.common.registries.MekanismDataComponents.BLOCK_DATA.get());
+                box.loadWithComponents(saved, level.registryAccess());
+                h.assertTrue(((de.theidler.create_mobile_packages.items.mobile_packager.MobilePackagerCardboardBox) box).createMobilePackages$isFromMobilePackager()
                     == packer.equals(PACKERS.get(1)), "Origin must persist in BlockData");
-                var drops = Block.getDrops(level.getBlockState(source), level, source, box, p, new ItemStack(Items.DIAMOND_PICKAXE));
+                h.assertTrue(level.destroyBlock(source, true, p), "Actual harvesting must destroy the sealed box");
+                var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(source).inflate(2));
                 h.assertTrue(drops.size() == 1, "The packed box must yield exactly one transported item");
-                var transported = drops.get(0);
+                var transported = drops.get(0).getItem().copy();
                 clear(level, source);
                 p.setShiftKeyDown(false);
                 p.setItemInHand(InteractionHand.MAIN_HAND, transported);
                 h.assertTrue(((BlockItem) transported.getItem()).place(new BlockPlaceContext(
                     new UseOnContext(p, InteractionHand.MAIN_HAND, hit(destination.below())))).consumesAction(), "Transported box must place");
-                h.assertTrue(saved.getCompound("data").equals(level.getBlockEntity(destination).saveWithoutMetadata().getCompound("data")),
+                h.assertTrue(payload.equals(((mekanism.common.tile.TileEntityCardboardBox) level.getBlockEntity(destination)).components().get(mekanism.common.registries.MekanismDataComponents.BLOCK_DATA.get())),
                     "The complete payload must survive harvesting, moving and placement");
                 unpack(p, destination);
                 h.assertTrue(level.getBlockState(destination).is(Blocks.CHEST), "Transported chest must restore");
@@ -246,18 +247,18 @@ public final class CardboardPackingGameTests {
                 h.assertTrue(!pack(p, pos, stack).consumesAction(), "Protected block must reject " + packer);
                 h.assertTrue(level.getBlockState(pos).is(target) && stack.getCount() == 1, "Retain protected block and packing item");
             }
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, BlockEvent.BreakEvent.class, denial);
+            NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, BlockEvent.BreakEvent.class, denial);
             level.setBlock(pos, Blocks.CHEST.defaultBlockState(), FLAGS);
             ((Container) level.getBlockEntity(pos)).setItem(0, new ItemStack(Items.DIAMOND, 7));
             var tile = level.getBlockEntity(pos);
-            var before = tile.saveWithFullMetadata();
+            var before = tile.saveWithFullMetadata(level.registryAccess());
             for (String packer : PACKERS) {
                 var stack = tool(packer);
                 h.assertTrue(pack(p, pos, stack) == InteractionResult.FAIL, "Break permission must reject " + packer);
-                h.assertTrue(level.getBlockEntity(pos) == tile && before.equals(tile.saveWithFullMetadata()) && stack.getCount() == 1,
+                h.assertTrue(level.getBlockEntity(pos) == tile && before.equals(tile.saveWithFullMetadata(level.registryAccess())) && stack.getCount() == 1,
                     "Permission denial must retain complete inventory, block and packing item");
             }
-        } finally { MinecraftForge.EVENT_BUS.unregister(denial); p.discard(); clear(level, pos); }
+        } finally { NeoForge.EVENT_BUS.unregister(denial); p.discard(); clear(level, pos); }
         h.succeed();
     }
 }

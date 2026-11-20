@@ -22,24 +22,23 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(WDTransfer.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class UnpackFireworksGameTests {
-    private static class RecordingConnection extends Connection {
+    private static class RecordingConnection extends dev.szx.dimensionworks.transfer.FixtureConnection {
         final List<ClientboundLevelParticlesPacket> particles = new ArrayList<>();
-        RecordingConnection() { super(PacketFlow.SERVERBOUND); }
-        @Override public void send(Packet<?> packet, PacketSendListener listener) {
+        @Override protected void record(Packet<?> packet) {
             if (packet instanceof ClientboundLevelParticlesPacket particle) particles.add(particle);
         }
     }
 
     private static ServerPlayer player(GameTestHelper h, RecordingConnection connection) {
         var player = new ServerPlayer(h.getLevel().getServer(), h.getLevel(),
-            new GameProfile(UUID.randomUUID(), "UnpackTest"));
-        player.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), connection, player);
+            new GameProfile(UUID.randomUUID(), "UnpackTest"), net.minecraft.server.level.ClientInformation.createDefault());
+        player.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), connection, player, net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
         player.setNoGravity(true);
         return player;
     }

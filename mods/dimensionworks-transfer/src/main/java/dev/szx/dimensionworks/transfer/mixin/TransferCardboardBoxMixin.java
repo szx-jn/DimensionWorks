@@ -18,9 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Pseudo
 @Mixin(targets = "mekanism.common.block.BlockCardboardBox", remap = false)
 public abstract class TransferCardboardBoxMixin {
-    @Inject(method = {"use", "m_6227_"}, at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "useWithoutItem", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$denyUnboxing(BlockState state, Level level, BlockPos pos, Player player,
-            InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
+            BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
         if (player.isShiftKeyDown() && TransferBlockPolicy.inTransfer(level)
                 && TransferBlockPolicy.forbiddenBoxContents(level, pos)) {
             TransferBlockPolicy.notifyDenied(player);

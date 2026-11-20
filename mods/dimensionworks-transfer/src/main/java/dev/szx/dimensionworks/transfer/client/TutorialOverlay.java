@@ -4,12 +4,12 @@ import dev.szx.dimensionworks.transfer.WDTransfer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = WDTransfer.MOD_ID, value = Dist.CLIENT)
 public final class TutorialOverlay {
     private static boolean locked;
     private static int frame;
@@ -18,7 +18,7 @@ public final class TutorialOverlay {
     public static boolean isLocked() { return locked; }
 
     @SubscribeEvent
-    public static void render(RenderGuiOverlayEvent.Post event) {
+    public static void render(RenderGuiLayerEvent.Post event) {
         if (!locked || Minecraft.getInstance().player == null) return;
         frame++;
         var g = event.getGuiGraphics();

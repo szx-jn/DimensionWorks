@@ -17,10 +17,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(WDTransfer.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -44,15 +44,15 @@ public final class FrogportPlayerGameTests {
         var conveyor = (ChainConveyorBlockEntity) level.getBlockEntity(chain);
         conveyor.setSpeed(32);
         ((FrogportBlockEntity) level.getBlockEntity(frog)).target =
-            new ChainConveyorFrogportTarget(chain.subtract(frog), 0, null);
+            new ChainConveyorFrogportTarget(chain.subtract(frog), 0, (BlockPos) null, false);
         // A server player with a real packet listener, but no client or automatic world ticks.
-        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "FrogportTest"));
-        player.connection = new ServerGamePacketListenerImpl(level.getServer(), new Connection(PacketFlow.SERVERBOUND), player);
+        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "FrogportTest"), net.minecraft.server.level.ClientInformation.createDefault());
+        player.connection = new ServerGamePacketListenerImpl(level.getServer(), new dev.szx.dimensionworks.transfer.FixtureConnection(), player, net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
         var fixture = new Fixture(player, frog, conveyor);
         fixture.near();
         fixture.packed(true);
         player.tickCount = 5;
-        TransferEvents.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, player));
+        TransferEvents.onPlayerTick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(player));
         player.tickCount = 6;
         return fixture;
     }
@@ -105,15 +105,15 @@ public final class FrogportPlayerGameTests {
             TransferEvents.tickFrogport(f.player());
             f.packed(false);
             // Exercise the owning tick event: previously it skipped cleanup for unpacked players.
-            TransferEvents.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, f.player()));
+            TransferEvents.onPlayerTick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(f.player()));
             Vec3 afterEscape = f.player().position();
             f.packed(true);
-            TransferEvents.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, f.player()));
+            TransferEvents.onPlayerTick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(f.player()));
             unchanged(helper, f.player(), afterEscape, "Even immediate repackaging near the frog must not revive the cancelled task");
             f.player().setPos(f.frog().getX() + 100, f.frog().getY(), f.frog().getZ());
             f.packed(true);
             Vec3 before = f.player().position();
-            TransferEvents.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, f.player()));
+            TransferEvents.onPlayerTick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(f.player()));
             unchanged(helper, f.player(), before, "Repackaging elsewhere must not resume the previous frog's pull");
             helper.succeed();
         } finally { f.close(); }
@@ -167,7 +167,7 @@ public final class FrogportPlayerGameTests {
             try {
                 if (scenario == 0) {
                     f.player().setHealth(0);
-                    TransferEvents.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, f.player()));
+                    TransferEvents.onPlayerTick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(f.player()));
                     f.player().setHealth(20);
                 }
                 if (scenario == 1) TransferEvents.onRespawn(new PlayerEvent.PlayerRespawnEvent(f.player(), false));

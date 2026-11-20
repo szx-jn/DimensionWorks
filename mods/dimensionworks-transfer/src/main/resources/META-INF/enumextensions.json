@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/world/item/Rarity",
+      "name": "DIMENSIONWORKS_TRANSFER_ELASTIC",
+      "constructor": "(ILjava/lang/String;Ljava/util/function/UnaryOperator;)V",
+      "parameters": {
+        "class": "dev/szx/dimensionworks/transfer/elastic/ElasticRarityParameters",
+        "method": "parameter"
+      }
+    }
+  ]
+}
