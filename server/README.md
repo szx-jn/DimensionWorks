@@ -5,11 +5,11 @@
 服务端包由 `scripts/package_server.py` 从以下现有来源生成：
 
 - `manifest/mods.json`：筛选 `environment` 为 `both` 或 `server` 的必需 Mod。
-- `mods/<name>/`：构建自研 Mod，并在 `environment` 允许时加入服务端。
+- `mods/<name>/`：构建自研 Mod，并在 `environment` 允许时加入服务端。固定第三方 fork 通过 `scripts/fixed_source.py` 校验源码与 JAR 后加入。
 - `config/`、`defaultconfigs/`、`kubejs/`：随包分发的服务端配置、脚本与数据。
-- 固定版 Forge `47.4.23`：包含已安装的 `libraries/` 与启动参数。
+- Minecraft 1.21.1 / 固定版 NeoForge（版本来自根 `gradle.properties`），Java 21：包含已安装的 `libraries/` 与启动参数。
 
-生成命令：
+迁移期间清单若仍指向 Forge，打包会明确拒绝，禁止生成混合加载器包。目标清单闭合并验证后，生成命令：
 
 ```sh
 python3 scripts/package_server.py
@@ -21,11 +21,11 @@ python3 scripts/package_server.py
 
 ## MSL 与正版双重认证
 
-整合包固定使用 [TrueUUID `1.0.10`](https://github.com/szx-jn/TrueUUID-DimensionWorks/releases/tag/v1.0.10)（Forge 1.20.1）。该版本以官方 TrueUUID 1.0.9 为基线，仅在其原有认证与迁移机制上增加自动继承：Mojang 正版登录以及 MSL/Yggdrasil 统一认证成功后，自动检查并继承同名离线玩家数据。客户端与服务端必须使用同一版本，且各自 `mods/` 中只保留一份 TrueUUID。
+整合包迁移候选使用 [TrueUUID 原生 fork 固定提交](https://github.com/szx-jn/TrueUUID-DimensionWorks/tree/b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89)，保留原 1.0.10 认证策略和身份注册表。源码与产物均固定校验值，不发布中间发行版。客户端与服务端必须使用同一版本，且各自 `mods/` 中只保留一份 TrueUUID。
 
-MSL Skin 的 authlib-injector 服务端认证路径使用原生在线验证（`online-mode=true`）；TrueUUID 的自定义离线握手路径则仍由服务端独立完成会话验证。自动继承只在对应认证成功后执行，不以客户端单方面声明作为认证依据。迁移前会备份相关玩家数据；迁移失败会拒绝本次登录，避免玩家以不完整数据进入。
+MSL Skin 的 authlib-injector 服务端认证路径使用原生在线验证（`online-mode=true`）；TrueUUID 的自定义握手仍由服务端独立完成会话验证。认证成功后才继承同名离线玩家数据，已存在的验证身份档案优先，不覆盖后续进度。继承操作先备份并标记 pending，全部复制完成后记录 complete；失败拒绝本次登录。
 
-修改版尚未完成游戏内 Mojang/MSL 双路径登录及 FTB 缓存的实际验收。构建成功仅代表 JAR 编译和发布完成，不等于真实服务器兼容性验收。部署前请先完整备份世界、配置和权限数据，并在测试服验证两种登录路径及玩家背包、位置、末影箱、任务数据。
+4 项 JUnit、13 项原生 GameTest 和隔离开发客户端检查已通过，原服 9 条现役身份记录在副本上保持一致。真实 Mojang/MSL 登录与完整整包尚待验收；模拟认证与构建通过不能代替实际登录。世界的跨版本转换由独立迁移流程完成，不能仅替换 mods 后直接启动旧世界。
 
 ## FTB Chunks 强加载限制
 

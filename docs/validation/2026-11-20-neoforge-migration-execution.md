@@ -225,3 +225,11 @@ JAR mekanismdelight-1.21.1-1.1.3-dimensionworks.1.jar 为 120370 字节、23 个
 ## 光影专项停止点
 
 用户要求停止继续跑光影测试，后续不再执行光影专项。已取得的实际客户端记录：原 Chocapic13 V6 六份预设、Unbound r5.9.3 和 Sildur Extreme-VL 在候选 Iris/Sodium 下实际启用并输出非空场景；原 Photon v1.3b 与官方 v1.4 在低负载配置并关闭 SH_SKYLIGHT/CLOUD_SHADOWS 后成功渲染（photon-native-client-v6.log）。Mac 默认 Photon 有 16 采样器上限及 compute shader 限制；仅关闭三个选项的后续精简配置仍失败，不能用该精简配置替代已通过配置。实际图片保存在私有 shader-port 下。整包联动/特殊维度未验收，不能把专项结果描述为整个迁移已完成。
+
+## NeoForge 安装器、启动脚本与更新依赖
+
+服务端安装器改为官方固定 NeoForge 21.1.267；Java 检测要求 21 以上，显式指定不存在或 Java 17 的路径直接拒绝。Linux/Windows 启动参数转为 net/neoforged/neoforge，保留实例路径和 TrueUUID/authlib-injector 设置。客户端 MRPack 依赖改为 neoforge；两种打包入口在下载前核对清单必须为 1.21.1/neoforge，防止迁移中的旧清单生成混合包。发行工作流工具链改为 Java 21/Gradle 9.2.1，首步禁止本迁移分支发行的规则保留，未触发工作流。
+
+官方安装器在隔离目录实际完成安装（16.61 秒），两个平台参数文件与服务端树检查通过。生成 start.sh 使用 1 GiB/2 CPU 在 loopback 新世界实际 Done (0.305s)，总进程 9.57 秒，stdin stop 正常保存三维度并以 0 退出（pack-closure/installer-server-v1.log）。测试超平坦配置缺 generator-settings 有一条 No key layers 数据错误，不能称为无错完整整包启动；此夹具无原存档、无生产模组。
+
+25 项相关 Python 检查通过（native-packaging-tests-v2.log），覆盖旧加载器清单拒绝、Java 17/错误路径拒绝、Windows 参数缺失和含空格目录的实际启动命令/退出码。跨平台 Go 更新器测试 go test ./... 通过（7.635 秒），受限下载差量 MRPack 保留 Minecraft 1.21.1 / NeoForge 依赖。YAML 和发行说明四类别样例换行检查通过；未执行任何发布命令。VERSION 仍为 0.3.52，目标清单及存档迁移仍继续推进。

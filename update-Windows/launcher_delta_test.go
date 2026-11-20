@@ -33,8 +33,8 @@ func TestCreateLauncherDeltaMRPackKeepsDependenciesAndOnlySelectedFiles(t *testi
   "versionId": "1.2.3",
   "name": "DimensionWorks",
   "dependencies": {
-    "minecraft": "1.20.1",
-    "forge": "47.4.23"
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.267"
   },
   "files": [
     {
@@ -87,7 +87,7 @@ func TestCreateLauncherDeltaMRPackKeepsDependenciesAndOnlySelectedFiles(t *testi
 	if len(got.Files) != 1 || got.Files[0].Path != "mods/restricted.jar" {
 		t.Fatalf("delta files = %#v, want only restricted.jar", got.Files)
 	}
-	if got.Dependencies["minecraft"] != "1.20.1" || got.Dependencies["forge"] != "47.4.23" {
+	if got.Dependencies["minecraft"] != "1.21.1" || got.Dependencies["neoforge"] != "21.1.267" || got.Dependencies["forge"] != "" {
 		t.Fatalf("delta dependencies were not preserved: %#v", got.Dependencies)
 	}
 	if len(delta.entries) != 1 {

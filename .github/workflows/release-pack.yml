@@ -18,7 +18,7 @@ on:
         default: false
         type: boolean
       release_features:
-        description: "新增功能；每行一条，如 feat(release): 同步客户端与服务端产物到 BBSMC"
+        description: "新增功能；每行一条，如 feat(create): 增加跨维度工业物流"
         required: false
         type: string
       release_fixes:
@@ -30,7 +30,7 @@ on:
         required: false
         type: string
       release_other:
-        description: "其他变更；每行一条，如 chore(release): 最新正式版自动同步 BBSMC"
+        description: "其他变更；每行一条，如 build(neoforge): 使用 Java 21 与原生加载器"
         required: false
         type: string
 permissions:
@@ -76,15 +76,12 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-
-      - name: 准备固定版本 Create 编译依赖
-        run: python3 scripts/prepare_create_build_repository.py
+          java-version: '21'
 
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.8'
+          gradle-version: '9.2.1'
 
       - name: 确定发布版本
         id: version

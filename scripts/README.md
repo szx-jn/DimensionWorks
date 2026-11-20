@@ -54,13 +54,13 @@ python3 scripts/package_mrpack.py --major-bump --version 1.0.0
 
 ## 打包服务端
 
-生成可直接解压开服的完整 Forge 服务端 zip：
+生成可直接解压开服的完整 NeoForge 服务端 zip：
 
 ```sh
 python3 scripts/package_server.py
 ```
 
-脚本从同一份 `manifest/mods.json` 中筛选 `environment` 为 `both` 或 `server` 的必需 Mod，排除仅客户端 Mod，并构建 `source` 为 `in-repo` 的自研 Mod。它会安装固定版 Forge `47.4.23`，写入已安装的 `libraries/`、服务端 `config/`、`defaultconfigs/`、`kubejs/`、`server.properties`、`eula.txt`、`user_jvm_args.txt`、Linux/Windows 启动脚本和中文开服说明。
+脚本从同一份 `manifest/mods.json` 中筛选 `environment` 为 `both` 或 `server` 的必需 Mod，排除仅客户端 Mod，并构建 `source` 为 `in-repo` 的自研 Mod。它会安装根 `gradle.properties` 固定的 NeoForge（Minecraft 1.21.1 / Java 21），写入已安装的 `libraries/`、服务端 `config/`、`defaultconfigs/`、`kubejs/`、`server.properties`、`eula.txt`、`user_jvm_args.txt`、Linux/Windows 启动脚本和中文开服说明。
 
 默认输出到 `dist/DimensionWorks-Server-<当前 VERSION>.zip`，不递增 `VERSION`。服务端包不包含世界存档、日志、玩家名单、RCON 密码或其他运行时私有数据。Linux/开服面板启动命令为 `bash start.sh`；Windows 运行 `start.bat`。首次启动前仍需由服主阅读并同意 Minecraft EULA，把 `eula.txt` 改为 `eula=true`。
 
@@ -145,7 +145,7 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 2. 确认 `manifest/mods.json` 的 `environment` 标记正确，仅客户端 Mod 不应进入服务端。
 3. 运行 `python3 scripts/package_server.py`；钩子会先做静态检查和自研 Mod 构建。
 4. 检查服务端 zip 中的 `mods/`、`config/`、`defaultconfigs/`、`kubejs/`、`libraries/` 和启动脚本。
-5. 服务端交付前，至少验证压缩包可解压、Forge 启动参数路径存在，并尽可能实际启动一次服务端。
+5. 服务端交付前，至少验证压缩包可解压、NeoForge 启动参数路径存在，并尽可能实际启动一次服务端。
 
 ## GitHub Actions 发行
 

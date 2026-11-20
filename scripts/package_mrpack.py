@@ -30,7 +30,11 @@ SHADER_MANIFEST = ROOT / "manifest" / "shaderpacks.json"
 DEFAULT_INSTANCE_DIR = (
     Path.home() / "Library" / "Application Support" / "minecraft" / "versions" / "DimensionWorks"
 )
-FORGE_VERSION = "47.4.23"
+NEOFORGE_VERSION = next(
+    line.split("=", 1)[1].strip()
+    for line in (ROOT / "gradle.properties").read_text().splitlines()
+    if line.startswith("neoforge_version=")
+)
 USER_AGENT = "DimensionWorks-Packager/0.1"
 CF_API_KEY = os.environ.get("CF_API_KEY", "").strip()
 GITHUB_TOKEN = (
@@ -358,6 +362,12 @@ def copy_override_file(
     return 1
 
 
+def validate_platform(manifest: dict[str, Any]) -> None:
+    minecraft = manifest.get("minecraft", {})
+    if minecraft.get("version") != "1.21.1" or minecraft.get("loader") != "neoforge":
+        raise ValueError("packaging requires a complete Minecraft 1.21.1 NeoForge manifest")
+
+
 def build_pack(
     version: str,
     output: Path,
@@ -367,6 +377,7 @@ def build_pack(
     base_release: str | None = None,
 ) -> str:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    validate_platform(manifest)
     shader_manifest = json.loads(SHADER_MANIFEST.read_text(encoding="utf-8"))
     index_files: list[dict[str, Any]] = []
     in_repo_mods: list[Path] = []
@@ -436,7 +447,7 @@ def build_pack(
         "files": index_files,
         "dependencies": {
             "minecraft": manifest["minecraft"]["version"],
-            "forge": FORGE_VERSION,
+            "neoforge": NEOFORGE_VERSION,
         },
     }
     (staging / "modrinth.index.json").write_text(

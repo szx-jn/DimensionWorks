@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a complete DimensionWorks Forge server pack from manifest/mods.json."""
+"""Build a complete DimensionWorks NeoForge server pack from manifest/mods.json."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -28,14 +29,14 @@ ROOT = package_mrpack.ROOT
 MANIFEST = package_mrpack.MANIFEST
 DEFAULT_INSTANCE_DIR = package_mrpack.DEFAULT_INSTANCE_DIR
 DEFAULT_CACHE_DIR = Path("/private/tmp/dimensionworks-pack-cache")
-FORGE_VERSION = package_mrpack.FORGE_VERSION
+NEOFORGE_VERSION = package_mrpack.NEOFORGE_VERSION
 USER_AGENT = "DimensionWorks-Server-Packager/0.1"
 SERVER_OVERRIDE_DIRS = ("config", "defaultconfigs", "kubejs")
 IGNORED_FILES = frozenset({".DS_Store", "README", "README.md", "__pycache__"})
 INSTALL_TIMEOUT_SECONDS = 1200
 INSTALLER_URL = (
-    "https://maven.minecraftforge.net/net/minecraftforge/forge/"
-    f"1.20.1-{FORGE_VERSION}/forge-1.20.1-{FORGE_VERSION}-installer.jar"
+    "https://maven.neoforged.net/releases/net/neoforged/neoforge/"
+    f"{NEOFORGE_VERSION}/neoforge-{NEOFORGE_VERSION}-installer.jar"
 )
 
 SERVER_PROPERTIES = """\
@@ -118,14 +119,14 @@ START_SH = f"""\
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "${{BASH_SOURCE[0]}}")"
-exec java -Dauthlibinjector.ignoredPackages=cn.alini.trueuuid. "-Ddimensionworks.instanceDir=$PWD" @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-{FORGE_VERSION}/unix_args.txt nogui "$@"
+exec java -Dauthlibinjector.ignoredPackages=cn.alini.trueuuid. "-Ddimensionworks.instanceDir=$PWD" @user_jvm_args.txt @libraries/net/neoforged/neoforge/{NEOFORGE_VERSION}/unix_args.txt nogui "$@"
 """
 
 START_BAT = f"""\
 @echo off
 setlocal
 cd /d "%~dp0"
-java -Dauthlibinjector.ignoredPackages=cn.alini.trueuuid. "-Ddimensionworks.instanceDir=%CD%" @user_jvm_args.txt @libraries\\net\\minecraftforge\\forge\\1.20.1-{FORGE_VERSION}\\win_args.txt nogui %*
+java -Dauthlibinjector.ignoredPackages=cn.alini.trueuuid. "-Ddimensionworks.instanceDir=%CD%" @user_jvm_args.txt @libraries\\net\\neoforged\\neoforge\\{NEOFORGE_VERSION}\\win_args.txt nogui %*
 """
 
 
@@ -216,13 +217,15 @@ def cached_download(
 def find_java(explicit: str | None) -> str:
     candidates: list[str] = []
     if explicit:
+        if not Path(explicit).is_file():
+            raise FileNotFoundError(f"Java executable not found: {explicit}")
         candidates.append(explicit)
-    if java_home := os.environ.get("JAVA_HOME"):
+    if not explicit and (java_home := os.environ.get("JAVA_HOME")):
         candidates.append(str(Path(java_home) / "bin" / "java"))
-    if sys.platform == "darwin":
+    if not explicit and sys.platform == "darwin":
         try:
             detected = subprocess.check_output(
-                ["/usr/libexec/java_home", "-v", "17"],
+                ["/usr/libexec/java_home", "-v", "21"],
                 stderr=subprocess.DEVNULL,
                 text=True,
             ).strip()
@@ -230,17 +233,27 @@ def find_java(explicit: str | None) -> str:
             pass
         else:
             candidates.append(str(Path(detected) / "bin" / "java"))
-    candidates.extend(
-        [
-            "/usr/lib/jvm/java-17-openjdk/bin/java",
-            "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+    if not explicit:
+        candidates.extend([
+            "/usr/lib/jvm/java-21-openjdk/bin/java",
+            "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
             shutil.which("java") or "",
-        ]
-    )
+        ])
+    rejected: list[str] = []
     for candidate in candidates:
-        if candidate and Path(candidate).is_file():
+        if not candidate or not Path(candidate).is_file():
+            continue
+        result = subprocess.run(
+            [candidate, "-version"], stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, timeout=10,
+        )
+        version = re.search(r'version "(\d+)', result.stdout)
+        if result.returncode == 0 and version and int(version.group(1)) >= 21:
             return candidate
-    raise FileNotFoundError("Java not found; pass --java /path/to/java")
+        rejected.append(candidate)
+        if explicit:
+            raise ValueError(f"Java 21 or newer required: {candidate}")
+    raise FileNotFoundError("Java 21 not found; pass --java /path/to/java; rejected: " + ", ".join(rejected))
 
 
 def copy_tree(source: Path, destination: Path) -> int:
@@ -313,19 +326,19 @@ def resolve_server_mod(
     return source in {"in-repo", "github-source"}
 
 
-def install_forge(staging: Path, cache_dir: Path, java: str, *, verbose: bool) -> None:
+def install_neoforge(staging: Path, cache_dir: Path, java: str, *, verbose: bool) -> None:
     installer = cached_download(
         cache_dir,
-        "forge",
-        f"forge-1.20.1-{FORGE_VERSION}-installer.jar",
+        "neoforge",
+        f"neoforge-{NEOFORGE_VERSION}-installer.jar",
         INSTALLER_URL,
         sha1=read_text(INSTALLER_URL + ".sha1"),
         verbose=verbose,
     )
     if verbose:
-        print(f"install Forge {FORGE_VERSION}: {staging}")
+        print(f"install NeoForge {NEOFORGE_VERSION}: {staging}")
     process = subprocess.run(
-        [java, "-jar", str(installer), "--installServer", str(staging)],
+        [java, "-Xmx512M", "-XX:ActiveProcessorCount=2", "-jar", str(installer), "--installServer", str(staging)],
         cwd=str(staging),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -334,15 +347,18 @@ def install_forge(staging: Path, cache_dir: Path, java: str, *, verbose: bool) -
     )
     if process.returncode != 0:
         tail = process.stdout.splitlines()[-40:]
-        raise RuntimeError("Forge installer failed:\n" + "\n".join(tail))
+        raise RuntimeError("NeoForge installer failed:\n" + "\n".join(tail))
 
-    forge_root = (
-        staging / "libraries" / "net" / "minecraftforge" / "forge" / f"1.20.1-{FORGE_VERSION}"
+    neoforge_root = (
+        staging / "libraries" / "net" / "neoforged" / "neoforge" / NEOFORGE_VERSION
     )
-    required = (staging / "run.sh", staging / "run.bat", forge_root / "unix_args.txt")
+    required = (
+        staging / "run.sh", staging / "run.bat",
+        neoforge_root / "unix_args.txt", neoforge_root / "win_args.txt",
+    )
     missing = [str(path) for path in required if not path.is_file()]
     if missing:
-        raise FileNotFoundError("Forge installer did not create: " + ", ".join(missing))
+        raise FileNotFoundError("NeoForge installer did not create: " + ", ".join(missing))
 
 
 def write_server_files(staging: Path, *, pack_version_value: str, servers_mods: int) -> None:
@@ -360,9 +376,9 @@ def write_server_files(staging: Path, *, pack_version_value: str, servers_mods: 
     readme = f"""\
 # DimensionWorks 服务端
 
-- Minecraft 1.20.1
-- Forge {FORGE_VERSION}
-- Java 17
+- Minecraft 1.21.1
+- NeoForge {NEOFORGE_VERSION}
+- Java 21
 - 整合包版本 {pack_version_value}
 - 服务端 Mod {servers_mods} 个
 
@@ -396,7 +412,7 @@ bash start.sh
 - `config/`、`defaultconfigs/`：整合包配置。
 - `kubejs/`：配方、标签、服务端脚本与数据。
 - `server.properties`：默认服务端设置，可在开服后自行修改。
-- `libraries/`：固定 Forge {FORGE_VERSION} 的运行库，已经预装，不需要再次运行安装器。
+- `libraries/`：固定 NeoForge {NEOFORGE_VERSION} 的运行库，已经预装，不需要再次运行安装器。
 
 这个压缩包不包含世界存档、日志、RCON 密码、玩家名单或其他运行时私有数据。
 """
@@ -416,8 +432,8 @@ def validate_server_tree(staging: Path, expected_mods: int) -> None:
         Path("eula.txt"),
         Path("user_jvm_args.txt"),
         Path("README.md"),
-        Path("libraries") / "net" / "minecraftforge" / "forge" / f"1.20.1-{FORGE_VERSION}" / "unix_args.txt",
-        Path("libraries") / "net" / "minecraftforge" / "forge" / f"1.20.1-{FORGE_VERSION}" / "win_args.txt",
+        Path("libraries") / "net" / "neoforged" / "neoforge" / NEOFORGE_VERSION / "unix_args.txt",
+        Path("libraries") / "net" / "neoforged" / "neoforge" / NEOFORGE_VERSION / "win_args.txt",
     )
     missing = [str(path) for path in required_paths if not (staging / path).is_file()]
     if missing:
@@ -456,8 +472,7 @@ def build_server_pack(
     base_release: str | None = None,
 ) -> str:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    if manifest.get("minecraft", {}).get("loader") != "forge":
-        raise ValueError("server packaging currently supports Forge only")
+    package_mrpack.validate_platform(manifest)
 
     server_mods = [
         mod
@@ -472,7 +487,7 @@ def build_server_pack(
     staging = temporary_root / "pack"
     staging.mkdir(parents=True)
     try:
-        install_forge(staging, cache_dir, java, verbose=verbose)
+        install_neoforge(staging, cache_dir, java, verbose=verbose)
         copied = 0
         for directory in SERVER_OVERRIDE_DIRS:
             copied += copy_tree(ROOT / directory, staging / directory)
@@ -533,7 +548,7 @@ def main() -> int:
         help="previous release tag used by update compatibility",
     )
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
-    parser.add_argument("--java", default=None, help="Java executable used only by the Forge installer")
+    parser.add_argument("--java", default=None, help="Java executable used only by the NeoForge installer")
     parser.add_argument("--instance-dir", type=Path, default=DEFAULT_INSTANCE_DIR)
     parser.add_argument(
         "--dimension-complete",
