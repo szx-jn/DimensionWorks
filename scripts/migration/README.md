@@ -80,6 +80,14 @@ Sophisticated 背包和升级的组件使用固定目标 JAR 自带的 `LegacyBa
 
 AE2 部分 codec 会把无法解析的键变成缺失内容占位项，即使 `getOrThrow` 未抛错。原生批处理递归拒绝 `ae2:missing_content_error` 组件；对账仍须核对每个键的原生类型、ID、组件和 Long 储量，不能只检查加载成功或组件总数。
 
+`mek_data.py` 对照本服固定 Mekanism 10.4.16.80 与目标 10.7.19.85 的持久化字段，将机器、封箱、已打包机器物品和 SavedData 准备成作者原生接口可以读取的结构。物品库存递归交给完整物品转换回调；化学库存保持 Long，流体保持原单位，热量保持 Double，库存 UUID、所有者和升级原值保留。侧面配置保留旧 transmission 编号并转为 IntArray，由作者接口合并新版化学传输配置；配置工具按模式含义映射，不能直接沿用旧序号。未知根字段、能力、化学名称、配置或冲突阻止转换。
+
+纸箱载荷转为 `mekanism:block_data`，其中 `state` 与 `block_entity_tag` 分别交给方块状态和方块实体转换回调；不能只转换外壳。Create Mobile Packages 来源转为已有的 `create_mobile_packages:packager_origin` 组件。机器物品的旧 `mekData` 保留到原生方块 `collectComponents()` 完成后才删除，避免提前丢掉内含库存。安全频率保留所有者，蒸馏塔缓存保留库存绑定和各类存储槽数。
+
+`java/NativeMekBatch.java` 同样仅用于仓库外的隔离夹具，编译类路径增加固定 Mekanism / Sophisticated Core JAR，不加入整包清单。输入 `local/migration-mek-input.nbt` 的 `format=1`、`mode=convert`，`rows` 逐项指定 `label` 和 `kind`：`block_entity` 含准备后的 `data` 与实际 `state`；`item` 含组件栈 `stack`，机器物品另含 `tile_data`；`security_frequency` / `evaporation_cache` 含准备后的 `data`。它只在内存创建临时方块实体，调用作者加载/保存接口，再复读方块实体并比较；不把方块放入世界、不启动旧机器或读取旧档。输出新建的私有 `local/migration-mek-output.nbt`，完成后移除临时 Mod。
+
+原生读写仍需语义对账。新版 Mekanism 将旧 gas / infusion / pigment / slurry 库存合并为 chemical；空库存、默认弹出器或公开安全模式可能不再显式保存，不能按字段数判断丢失。目标热电阻加热器将本服唯一的旧小数配置 `energyUsage="2.5000"` 原生保存为 Long `energy_usage=2`，须进入台账；这不是储能余额。新版暮色极光方块没有旧 `variant` 状态，封箱中的旧颜色值也须记账，方块 ID、载荷和库存继续保留。仅原生解码成功、样本对账或夹具正常保存均不等于整档机械与玩家库存已经验收。
+
 ```sh
 python3 -m unittest discover -s scripts/tests -p 'test_verify_snapshot.py' -v
 /absolute/private-lab/python/bin/python -m unittest discover -s scripts/migration/tests -v
