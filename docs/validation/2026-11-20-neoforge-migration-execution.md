@@ -111,6 +111,20 @@ KubeJS 2101 真实启动发现旧 thickTexture/bucketColor API 移除，已按�
 
 以上世界全部为新建隔离夹具，尚未使用 NeoForge 转换或打开原服务器存档。剩余 Transfer、Pressure Crystals、Maid AE Crank、JEI Ticks，以及第三方闭包、全脚本/配置、更新器、旧档一次性转换和正式部署继续推进；根 VERSION 和模组版本保持，未创建发行版。
 
+## 定制 Mobile Packages NeoForge 移植
+
+独立 fork 开发分支 `codex/dimensionworks-neoforge-migration` 已提交并推送 `57bf726`（完整提交见 GitHub），基于上游固定 1.21.1-0.7.8 `53ec8db0d247718fdadb431531426826560267cc`，逐项核对并迁移原已固定 Forge .15 `4e435c2a5b181e311d681a6f29d8ec0038fc24b6` 的补丁。没有修改原 Forge 工作副本，没有发布 fork 或整包发行版，尚未把开发 JAR 写入正式 manifest。其新建夹具通过不等于全包旧档迁移完成。
+
+本地完整构建、3 项 JUnit 与 18 项必需 GameTest 通过（`cmp-port/native-tests-v17.log`）；独立实际客户端的新建平坦世界通过原生打包载荷、打包尺寸/第三人称渲染与蜜蜂模型、五次脱离、回收菜单路线和 31 个命名物品同步、超大 NBT 警告（`cmp-port/client-validation-v2.log`）。客户端只加载专项依赖，不代表整个整合包 UI 已验收。测试和日志不打入分发 JAR。
+
+保留全部原翻译键、注册 ID、网络/玩家/无人机 UUID、完整组件货物与回收槽位。原生 ENTITY_DATA 直接恢复快照，解决刷怪蛋替换 UUID 以及落沙等仅 OP 可设置实体数据被跳过的问题；实际 Create 开包恢复 TNT 原 UUID/fuse，载具及乘客完整移除和恢复。UUID 重复拒绝且快照不消耗。NBT 写入前拒绝原生 StringTag modified-UTF 溢出，避免原生写入日志后用空字符串替换导致打包吞数据。
+
+Mek 原生 BlockData 已改为不可变组件，来源标记移到自有 packager_origin，真实保存/掉落/重放置/拆箱及普通纸箱对照通过。原生 BreakEvent/机器权限保持，禁止 barrier 与本包派遣终端；命名箱和嵌套物品数量/长整数通过。无人机目标和实体位置刷新漏更新已修复；完整投递与原港口回程通过。真实负例发现回程访问未加载原港口会强制加载区块，且旧孤儿删除可丢蜜蜂；改为已加载港口查询和保留虚拟蜜蜂，货物及空载回程在 100 tick 后均保持且不加载区块。
+
+原来的跨维度玩家候选搜索恢复并保留网络/所有者权限，但完整跨维度无人机/移动 Sable 子世界/Carry On 场景仍须合包验证。旧 Forge ItemStack、ENTITY_DATA 内嵌实体及 Create 包裹、Mek 纸箱/原标记、无人机 cargo/回收槽位必须经一次性转换，当前运行代码不猜旧格式。开发 JAR SHA-256 `c2357548351711774aea3e74ebad76d66658e09186e79b00d36a2017726b172a` 仅供隔离 Transfer 编译验证；正式交付按禁止中途发行版的要求另行完成固定来源构建链。
+
+CFA 1.6.0 是上游内嵌原依赖，JAR SHA-256 `e545dc2863842ccf473c6ad26e7ca73a37e1bb45dd529f1e5105b263320f1107`，许可声明 All Rights Reserved；未复制或修改依赖源码，正式分发前核对其许可条件。原 MIT 项目与第三方许可不能混为一谈。
+
 ## 下一阶段准入
 
 私有快照验证及全档读取审计已完成；随后确定缺失注册 ID 的处理、锁定完整目标依赖闭包，移植其余模块和脚本，再实现一次性 NBT/组件转换器。完整客户端/服务端冷启动、重启、库存语义对账、玩家身份及真实生产链验收通过前，禁止给玩家开放跨版本更新。
