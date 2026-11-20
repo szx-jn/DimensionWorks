@@ -5,9 +5,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,8 +26,8 @@ public final class MoltenCrystallizationEvents {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)
             || level.getGameTime() % CHECK_INTERVAL_TICKS != 0) {
             return;
         }
@@ -63,8 +62,8 @@ public final class MoltenCrystallizationEvents {
                 tracked.put(packedPos, now);
                 data.setDirty();
             } else if (now - startedAt >= EXPOSURE_TICKS) {
-                String fluidId = ForgeRegistries.BLOCKS.getKey(level.getBlockState(pos).getBlock()).getPath();
-                var crystal = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(
+                String fluidId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()).getPath();
+                var crystal = net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath(
                     DimensionWorksCaveFactory.MOD_ID, "crystallized_" + fluidId));
                 if (crystal instanceof net.minecraft.world.level.material.FlowingFluid flowing) {
                     var original = level.getFluidState(pos);
@@ -84,7 +83,7 @@ public final class MoltenCrystallizationEvents {
     }
 
     private static boolean isMoltenMetal(BlockState state) {
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return id != null && id.getNamespace().equals("dimensionworks")
             && id.getPath().startsWith("molten_");
     }

@@ -1,26 +1,27 @@
 package dev.szx.dimensionworks.cavefactory.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
+import java.util.Optional;
+
 import dev.szx.dimensionworks.cavefactory.logic.FactoryModule;
 import dev.szx.dimensionworks.cavefactory.logic.FactoryPhase;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
@@ -30,7 +31,6 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
         }
     }
 
-    private final ResourceLocation id;
     private final MachineType machine;
     private final FactoryPhase phase;
     private final List<IngredientStack> ingredients;
@@ -42,7 +42,6 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
     private final MachineType residue;
 
     public CaveProcessingRecipe(
-        ResourceLocation id,
         MachineType machine,
         FactoryPhase phase,
         List<IngredientStack> ingredients,
@@ -53,7 +52,6 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
         FactoryModule requiredModule,
         MachineType residue
     ) {
-        this.id = id;
         this.machine = machine;
         this.phase = phase;
         this.ingredients = List.copyOf(ingredients);
@@ -124,7 +122,7 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
     public boolean matches(CaveProcessingInput input, Level level) {
         if (fluidInput.getAmount() > 0
             && (input.fluidInput().isEmpty()
-                || !fluidInput.isFluidEqual(input.fluidInput())
+                || !FluidStack.isSameFluidSameComponents(fluidInput, input.fluidInput())
                 || input.fluidInput().getAmount() < fluidInput.getAmount())) {
             return false;
         }
@@ -162,7 +160,7 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
     }
 
     @Override
-    public ItemStack assemble(CaveProcessingInput input, RegistryAccess registries) {
+    public ItemStack assemble(CaveProcessingInput input, HolderLookup.Provider registries) {
         return getResultItem(registries).copy();
     }
 
@@ -172,7 +170,7 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess registries) {
+    public ItemStack getResultItem(HolderLookup.Provider registries) {
         return itemOutputs.isEmpty() ? ItemStack.EMPTY : itemOutputs.get(0).copy();
     }
 
@@ -186,11 +184,6 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
     }
 
     @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
     public RecipeSerializer<?> getSerializer() {
         return dev.szx.dimensionworks.cavefactory.registry.CFRecipes.CAVE_PROCESSING_SERIALIZER.get();
     }
@@ -201,142 +194,26 @@ public final class CaveProcessingRecipe implements Recipe<CaveProcessingInput> {
     }
 
     public static final class Serializer implements RecipeSerializer<CaveProcessingRecipe> {
-        @Override
-        public CaveProcessingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            MachineType machine = MachineType.fromId(GsonHelper.getAsString(json, "machine"));
-            if (machine == null) {
-                throw new IllegalArgumentException("Unknown machine " + GsonHelper.getAsString(json, "machine"));
-            }
-            FactoryPhase phase = parsePhase(GsonHelper.getAsString(json, "phase", "phase_a"));
-            List<IngredientStack> ingredients = parseIngredients(GsonHelper.getAsJsonArray(json, "ingredients"));
-            FluidStack fluidInput = parseFluid(json.getAsJsonObject("fluid_input"));
-            List<ItemStack> outputs = parseItems(GsonHelper.getAsJsonArray(json, "results"));
-            FluidStack fluidOutput = parseFluid(json.getAsJsonObject("fluid_output"));
-            int duration = GsonHelper.getAsInt(json, "duration", 100);
-            FactoryModule module = parseModule(json);
-            MachineType residue = json.has("residue")
-                ? MachineType.fromId(GsonHelper.getAsString(json, "residue"))
-                : machine;
-            return new CaveProcessingRecipe(
-                id, machine, phase, ingredients, fluidInput, outputs, fluidOutput, duration, module, residue
-            );
-        }
-
-        @Override
-        public CaveProcessingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-            MachineType machine = MachineType.values()[buffer.readVarInt()];
-            FactoryPhase phase = buffer.readEnum(FactoryPhase.class);
-            int ingredientCount = buffer.readVarInt();
-            List<IngredientStack> ingredients = new ArrayList<>(ingredientCount);
-            for (int i = 0; i < ingredientCount; i++) {
-                ingredients.add(new IngredientStack(Ingredient.fromNetwork(buffer), buffer.readVarInt()));
-            }
-            FluidStack fluidInput = FluidStack.readFromPacket(buffer);
-            int outputCount = buffer.readVarInt();
-            List<ItemStack> outputs = new ArrayList<>(outputCount);
-            for (int i = 0; i < outputCount; i++) {
-                outputs.add(buffer.readItem());
-            }
-            FluidStack fluidOutput = FluidStack.readFromPacket(buffer);
-            int duration = buffer.readVarInt();
-            FactoryModule module = readModule(buffer);
-            MachineType residue = buffer.readBoolean() ? MachineType.values()[buffer.readVarInt()] : null;
-            return new CaveProcessingRecipe(
-                id, machine, phase, ingredients, fluidInput, outputs, fluidOutput, duration, module, residue
-            );
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buffer, CaveProcessingRecipe recipe) {
-            buffer.writeVarInt(recipe.machine.ordinal());
-            buffer.writeEnum(recipe.phase);
-            buffer.writeVarInt(recipe.ingredients.size());
-            for (IngredientStack stack : recipe.ingredients) {
-                stack.ingredient().toNetwork(buffer);
-                buffer.writeVarInt(stack.count());
-            }
-            recipe.fluidInput.writeToPacket(buffer);
-            buffer.writeVarInt(recipe.itemOutputs.size());
-            for (ItemStack output : recipe.itemOutputs) {
-                buffer.writeItem(output);
-            }
-            recipe.fluidOutput.writeToPacket(buffer);
-            buffer.writeVarInt(recipe.duration);
-            writeModule(buffer, recipe.requiredModule);
-            buffer.writeBoolean(recipe.residue != null);
-            if (recipe.residue != null) {
-                buffer.writeVarInt(recipe.residue.ordinal());
-            }
-        }
-
-        private static FactoryPhase parsePhase(String value) {
-            return switch (value.toLowerCase()) {
-                case "phase_a", "a", "primary" -> FactoryPhase.PHASE_A;
-                case "phase_b", "b", "variant" -> FactoryPhase.PHASE_B;
-                default -> throw new IllegalArgumentException("Unknown phase " + value);
-            };
-        }
-
-        private static List<IngredientStack> parseIngredients(JsonArray array) {
-            List<IngredientStack> ingredients = new ArrayList<>();
-            for (JsonElement element : array) {
-                JsonObject object = element.getAsJsonObject();
-                JsonElement ingredientJson = object.has("ingredient") ? object.get("ingredient") : object;
-                int count = object.has("count") ? GsonHelper.getAsInt(object, "count", 1) : 1;
-                ingredients.add(new IngredientStack(Ingredient.fromJson(ingredientJson), Math.max(1, count)));
-            }
-            return ingredients;
-        }
-
-        private static List<ItemStack> parseItems(JsonArray array) {
-            List<ItemStack> stacks = new ArrayList<>();
-            for (JsonElement element : array) {
-                JsonObject object = element.getAsJsonObject();
-                ResourceLocation itemId = new ResourceLocation(GsonHelper.getAsString(object, "item"));
-                ItemStack stack = new ItemStack(ForgeRegistries.ITEMS.getValue(itemId));
-                if (stack.isEmpty()) {
-                    throw new IllegalArgumentException("Unknown output item " + itemId);
-                }
-                stack.setCount(Math.max(1, GsonHelper.getAsInt(object, "count", 1)));
-                stacks.add(stack);
-            }
-            return stacks;
-        }
-
-        private static FluidStack parseFluid(JsonObject object) {
-            if (object == null) {
-                return FluidStack.EMPTY;
-            }
-            ResourceLocation fluidId = new ResourceLocation(GsonHelper.getAsString(object, "fluid"));
-            net.minecraft.world.level.material.Fluid fluid = ForgeRegistries.FLUIDS.getValue(fluidId);
-            if (fluid == null) {
-                throw new IllegalArgumentException("Unknown fluid " + fluidId);
-            }
-            return new FluidStack(fluid, Math.max(1, GsonHelper.getAsInt(object, "amount", 1)));
-        }
-
-        private static FactoryModule parseModule(JsonObject json) {
-            String module = GsonHelper.getAsString(json, "required_module", "");
-            if (module.isBlank()) {
-                return null;
-            }
-            for (FactoryModule candidate : FactoryModule.values()) {
-                if (candidate.id().equals(module) || candidate.name().equalsIgnoreCase(module)) {
-                    return candidate;
-                }
-            }
-            throw new IllegalArgumentException("Unknown module " + module);
-        }
-
-        private static FactoryModule readModule(FriendlyByteBuf buffer) {
-            return buffer.readBoolean() ? FactoryModule.values()[buffer.readVarInt()] : null;
-        }
-
-        private static void writeModule(FriendlyByteBuf buffer, FactoryModule module) {
-            buffer.writeBoolean(module != null);
-            if (module != null) {
-                buffer.writeVarInt(module.ordinal());
-            }
-        }
+        private static final Codec<IngredientStack> INGREDIENT = RecordCodecBuilder.create(instance -> instance.group(
+            Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(IngredientStack::ingredient),
+            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(IngredientStack::count)
+        ).apply(instance, IngredientStack::new));
+        private static final MapCodec<CaveProcessingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            FactoryRecipeCodecs.MACHINE.fieldOf("machine").forGetter(CaveProcessingRecipe::machine),
+            FactoryRecipeCodecs.PHASE.optionalFieldOf("phase", FactoryPhase.PHASE_A).forGetter(CaveProcessingRecipe::phase),
+            INGREDIENT.listOf().fieldOf("ingredients").forGetter(CaveProcessingRecipe::ingredients),
+            FluidStack.CODEC.optionalFieldOf("fluid_input", FluidStack.EMPTY).forGetter(CaveProcessingRecipe::fluidInput),
+            ItemStack.CODEC.listOf().fieldOf("results").forGetter(CaveProcessingRecipe::itemOutputs),
+            FluidStack.CODEC.optionalFieldOf("fluid_output", FluidStack.EMPTY).forGetter(CaveProcessingRecipe::fluidOutput),
+            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("duration", 100).forGetter(CaveProcessingRecipe::duration),
+            FactoryRecipeCodecs.MODULE.optionalFieldOf("required_module").forGetter(r -> Optional.ofNullable(r.requiredModule)),
+            FactoryRecipeCodecs.MACHINE.optionalFieldOf("residue").forGetter(r -> Optional.ofNullable(r.residue))
+        ).apply(instance, (machine, phase, ingredients, fluidInput, outputs, fluidOutput, duration, module, residue) ->
+            new CaveProcessingRecipe(machine, phase, ingredients, fluidInput, outputs, fluidOutput, duration,
+                module.orElse(null), residue.orElse(machine))));
+        private static final StreamCodec<RegistryFriendlyByteBuf, CaveProcessingRecipe> STREAM =
+            ByteBufCodecs.fromCodecWithRegistries(CODEC.codec());
+        @Override public MapCodec<CaveProcessingRecipe> codec() { return CODEC; }
+        @Override public StreamCodec<RegistryFriendlyByteBuf, CaveProcessingRecipe> streamCodec() { return STREAM; }
     }
 }

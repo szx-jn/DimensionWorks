@@ -1,12 +1,16 @@
 package dev.szx.dimensionworks.cavefactory.logic;
 
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 public interface ModuleHost {
-    Capability<ModuleHost> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
+    net.neoforged.neoforge.capabilities.BlockCapability<ModuleHost, net.minecraft.core.Direction> CAPABILITY =
+        net.neoforged.neoforge.capabilities.BlockCapability.createSided(
+            dev.szx.dimensionworks.cavefactory.DimensionWorksCaveFactory.id("module_host"), ModuleHost.class);
+
+    static ModuleHost find(net.minecraft.world.level.block.entity.BlockEntity owner) {
+        return owner.getLevel() == null || owner.isRemoved() ? null
+            : owner.getLevel().getCapability(CAPABILITY, owner.getBlockPos(), null);
+    }
 
     ItemStackHandler moduleInventory();
 

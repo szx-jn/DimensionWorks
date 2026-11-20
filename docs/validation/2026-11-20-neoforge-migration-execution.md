@@ -12,12 +12,13 @@
 
 | 范围 | 当前结果 | 未完成的验收 |
 |---|---|---|
-| 构建基线 | 根 Wrapper 9.2.1，JAR 与分发包固定官方 SHA-256；MDG 2.0.148、NeoForge 21.1.267、Java 21；共享构建与独立 JAR | 其余 5 个自研项目逐项移植 |
+| 构建基线 | 根 Wrapper 9.2.1，JAR 与分发包固定官方 SHA-256；MDG 2.0.148、NeoForge 21.1.267、Java 21；共享构建与独立 JAR | 其余 4 个自研项目逐项移植 |
 | 拾取保护 | NeoForge 构建；已移除实体与部分转移两项真实 GameTest 通过 | Create 与背包同时拾取的实际产线 |
 | 掉落寿命 | NeoForge 构建；改用公开 FTB API，删除反射及静默查询失败；四种组件稀有度的真实 GameTest 通过 | 真实玩家已圈地区块的 5 分钟规则 |
 | FTB 强加载限制 | NeoForge 构建；真实团队与圈地 GameTest 通过，强加载被拒绝、正时间不生效、取消圈地可用；目标类与 lambda 注入重定位 | 客户端地图、旧圈地恢复、真实玩家退出与完整停服 |
 | RPM 与齿轮之心 | NeoForge 构建；83 项 JUnit、34 项服务器 GameTest 通过；实际玩家附件/物品组件落盘、动力恢复、Mek 缓存操作及 AE2 双 CPU 提交/输出配额 | 图形控制器/拓扑、实际玩家与真实配方生产链、旧档转换和重启对账 |
 | ME 机械供能与跨维存储 | NeoForge 编译、111 项 JUnit 与 17 项服务器 GameTest；真实 AE 网络分配、气体运输、能量能力限制、库存组件/数量往返和驱动器拆除 | 实际客户端、龙堆/多方块长期运行、安瓿接口与整包旧档转换 |
+| 洞穴工厂与熔液结晶 | NeoForge 编译；31 项 JUnit、16 项必需 GameTest；原有 16 条配方、真实渊海生产与独立重启、42 张动画和统一创造页签检查 | 原档方块/封装转换，完整 JEI/Jade/Ponder 交互与整包产线 |
 | 汉化资源 | 资源型 lowcodefml 与格式 34；269 个资源全部逐字节进入目标 JAR，构建通过 | 对目标第三方 JAR 重审全部语言键、指南与客户端显示 |
 | 版本检查 | NeoForge 配置任务与确认载荷；22 项 JUnit 与 1 项服务器 GameTest 通过，每次登录重新读取 VERSION | 真实客户端匹配/不匹配握手、更新界面与终端交接 |
 | F4 旁观 | NeoForge 载荷；10 项 JUnit 与 2 项服务器 GameTest 通过，坐标/朝向/游戏模式及停服清理 | 真实客户端 F4、跨维度、碰撞、死亡和重连 |
@@ -27,7 +28,7 @@
 | 冷备份校验 | 压缩包/清单 SHA-256、逐文件校验、原子交付与异常阻断；4 项工具测试通过 | 本地真实快照全量验证见下节 |
 | 只读审计 | 所有维度区域与 SavedData/玩家/FTB SNBT，物流真实数量及身份审计；8 项针对性测试通过 | 原服全档读取通过；迁移后的语义对账待完成 |
 
-十一个目标项目由根 `settings.gradle` 明确收录。旧清单与未移植工程暂时保留供逐项比较，不能作为目标版本运行或发布。没有把任意第三方 Forge JAR 直接塞入 NeoForge。
+十二个目标项目由根 `settings.gradle` 明确收录。旧清单与未移植工程暂时保留供逐项比较，不能作为目标版本运行或发布。没有把任意第三方 Forge JAR 直接塞入 NeoForge。
 
 实际发现并处理了一次测试假成功：GameTest 模板命名空间与过滤命名空间不一致，Minecraft 报 `No test functions were given!`，Gradle 却返回成功。改用各自命名空间的独立模板，增加测试任务日志断言，要求注册数量、完成数量及全部必需测试通过一致。随后实际执行拾取保护 2 项、掉落寿命 1 项、FTB 圈地/强加载 1 项并通过。
 
@@ -60,7 +61,7 @@
 
 ## 阶段检查
 
-十一个模块实际构建通过，服务器 GameTest 共 63 项通过；已移植模块共 235 项 JUnit 通过；审计回归 8 项和现有脚本检查 104 项通过。现有 BBSMC 测试夹具同步当前 `.update` 资产与按大小排列的附件契约，未改发布实现、未上传附件。PR 构建工作流改用 Java 21 与根 Wrapper，只构建已接入 NeoForge 的项目；共享构建变更覆盖所有已接入项目。
+十二个模块实际构建通过，服务器 GameTest 共 79 项通过（洞穴基础检查与专项检查合计按 16 个不同测试计）；已移植模块共 266 项 JUnit 通过；审计回归 8 项和现有脚本检查 104 项通过。现有 BBSMC 测试夹具同步当前 `.update` 资产与按大小排列的附件契约，未改发布实现、未上传附件。PR 构建工作流改用 Java 21 与根 Wrapper，只构建已接入 NeoForge 的项目；共享构建变更覆盖所有已接入项目。
 
 ## Create 接入与测试配置
 
@@ -91,6 +92,24 @@ ME 模块主代码改用 NeoForge 的生命周期、载荷、能力和物品组�
 本次最终根构建、111 项模块 JUnit 与 17 项必需 GameTest 通过，私有日志为 `mek-stage-final-validation-v2.log`。测试覆盖实际供电网络分配/总转速过载/内存卡即时撤销/移除动力源、工作盆泵气/智能过滤/开放排放、云盘隔离/部分领取与重复领取、物质球拆分及解包器组件/数量往返、非法所有者/物品/列表拒绝和带卡驱动器实际拆除。测试专用代码不进入生产 JAR。此处往返使用目标格式夹具，不等于原服务器存档已经转换。
 
 当前测试依赖集缺少 Create Factory Logistics，Package Couriers 的 `jar_plane` 配方报缺失物品，完整目标清单阶段必须闭合；非法物品拒绝测试另有预期解析错误。因此不能声称整包日志干净。真实客户端、独立客户端探针、龙堆与多方块长期生产、安瓿与洞穴工厂目标接口仍待验证。自动快照提交 `725f4466` 曾保存中途尚未编译通过的移植，不能用该自动提交作为验证依据；本阶段结果以上述实际检查为准。
+
+## 洞穴工厂与熔液结晶移植
+
+Cave Factory 按 Java 21/NeoForge/Create 6.0.10 迁移；拆出测试 sourceSet，不把空白 GameTest 结构或测试标签打入生产 JAR。公开能力改为 NeoForge 注册，五类 Create 模块宿主使用附件管理生命周期和原有持久化键。删除 mandatory RPM 接口的反射/吞错；重载代数使配方缓存随数据包更新失效，不依赖 RecipeManager 对象变化。
+
+全部六维控制器/流体/基质/残渣/模块 ID 及 16 条原有配方保留。数据目录使用目标 `recipe`、`tags/item`、`tags/fluid`；三种原生 Codec/StreamCodec 保存完整物品/流体组件。稳定化输入省略 amount 时仍读取服务端配置，网络携带已解析的数值。工厂库存读取先验证列表、槽位与物品，拒绝重复槽位/不合法流体/容量越界/归属 UUID/相位；原生方块实体加载器会捕获加载异常，因此全包旧档仍须离线预检，不能用局部抛错当作整个存档安全保证。
+
+封装改用不可变 `ampoule_fluid` 组件，保留自定义名称、其他组件和来源/到期/残渣数据。实际发现可变 FluidStack 不满足物品组件 equals/hashCode 契约，已改为保存 Holder、数量和 DataComponentPatch 的不可变值。实际槽位/流体/模块/归属往返、模拟/部分排出、叠堆拒绝和到期转换均通过。稳定器整批输出可容纳后才申请最终生产额度和消耗流体；真实测试覆盖额度拒绝、满输出、成功生产及重载后新配方生效。
+
+KubeJS 2101 真实启动发现旧 thickTexture/bucketColor API 移除，已按目标纹理/tint API 迁移。旧 Forge sprite_loader 改为 NeoForge SpriteSource；输出到 KubeJS 实际引用的 generated 路径，42 张动画保留所有帧。客户端首次创造页签补测又发现只读集合删除导致真实崩溃，改用 BuildCreativeModeTabContentsEvent.remove；测试主菜单缺动态注册表/标签的问题改为实际进入隔离新世界后验证，未在运行代码添加兼容绕过。
+
+固定目标依赖经下载及官方 SHA-512 校验：Alex 端口 pC1MYhqR 2.0.10、维度端口 OJpP9UtE 1.1.0、Citadel Port mIylVpkN 2.7.6（原调查 XjY0RcQj 是项目 ID）、JEI kmb7KviL 19.71.0.470、Jade eYz2YBGT 15.10.6；专项 KubeJS GDXCpKlp 2101.7.2-build381、Rhino SqkDvOLG 2101.2.8-build91、Better Advanced Tooltips uPFbnD32。Alex JAR 声明 GPL-3.0 而页面 LGPL，记录差异，最终再核对分发许可；未复制第三方源码。端口新增 prismatic_depths 不属于原六维规划，默认入口限制同样拦截，完整脚本/维度工具仍待同步。
+
+31 项 JUnit 与 16 项必需 GameTest 通过，包含 21 金属自然放置/桶/天空遮挡/流量结晶、16 条原始配方实际加载、真实 Create 工作盆模块加产与保存、工厂 13 槽/两个储罐往返及拒绝错误数据。客户端专项检查 21 源流体、42 动画、桶/储罐和统一创造页签；铁流体预览与原公式逐像素一致，0 差异像素。该客户端只加载专项依赖，不等于全部 JEI/Jade/Ponder 功能验证。
+
+专用新建服务器（2 GiB、2 CPU、loopback、平坦主世界）真实加载六个原有洞穴维度，在渊海生成一块区块，用实际动力端口完成两条原配方并保存。正常停服后，第二个独立 JVM 重启核对珍珠 1、重骨 1、海玻璃 2、卤水 500 mB、phase_b 与所有者；`cave-real-server-validation-v3.log` / `cave-real-server-reload-v1.log` 均通过且进程正常退出。准备复制和启动均要求专用目录标记，不能指向生产目录；实际负例确认无标记目录在复制前拒绝且保持为空（cave-directory-guard-check.log）。最终根构建/GameTest 日志 `cave-stage-final-validation-v2.log`，客户端最终日志 `cave-client-crystal-validation-v8.log` 保存于私有实验目录。客户端仍有上游两个缺失字幕 ERROR，不能声称日志无错误。
+
+以上世界全部为新建隔离夹具，尚未使用 NeoForge 转换或打开原服务器存档。剩余 Transfer、Pressure Crystals、Maid AE Crank、JEI Ticks，以及第三方闭包、全脚本/配置、更新器、旧档一次性转换和正式部署继续推进；根 VERSION 和模组版本保持，未创建发行版。
 
 ## 下一阶段准入
 

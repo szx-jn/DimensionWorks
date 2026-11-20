@@ -8,10 +8,11 @@ import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import dev.szx.dimensionworks.cavefactory.registry.CFFluids;
 import dev.szx.dimensionworks.cavefactory.registry.CFItems;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import dev.szx.dimensionworks.cavefactory.registry.CFDataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -20,14 +21,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import java.util.List;
 
@@ -42,8 +39,13 @@ public class FluidAmpouleItem extends Item {
         super(properties);
     }
 
+    public static FluidStack storedFluid(ItemStack stack) {
+        AmpouleFluid value = stack.get(CFDataComponents.AMPOULE_FLUID.get());
+        return value == null ? FluidStack.EMPTY : value.toStack();
+    }
+
     public AmpouleState readState(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (tag == null) {
             return AmpouleState.fresh("");
         }
@@ -53,9 +55,10 @@ public class FluidAmpouleItem extends Item {
     }
 
     public void writeState(ItemStack stack, AmpouleState state) {
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putString(ORIGIN_KEY, state.originDimension());
-        tag.putLong(EXPIRY_KEY, state.expiresAtMillis());
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            tag.putString(ORIGIN_KEY, state.originDimension());
+            tag.putLong(EXPIRY_KEY, state.expiresAtMillis());
+        });
     }
 
     public ItemStack emptyStack() {
@@ -80,8 +83,7 @@ public class FluidAmpouleItem extends Item {
         return ItemStack.EMPTY;
     }
     public boolean hasStoredFluid(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains(FLUID_KEY);
+        return !storedFluid(stack).isEmpty();
     }
 
     public static void setOrigin(ItemStack stack, FactoryDimension dimension) {
@@ -173,7 +175,7 @@ public class FluidAmpouleItem extends Item {
         }
 
         int expiredCount = stack.getCount();
-        stack.setTag(null);
+        AmpouleFluidHandler.clearStoredState(stack);
         if (!settled.residue().isEmpty()) {
             ItemStack residue = settled.residue().copyWithCount(expiredCount);
             if (!player.getInventory().add(residue)) {
@@ -183,14 +185,14 @@ public class FluidAmpouleItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        CompoundTag tag = stack.getTag();
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (tag == null) {
             tooltip.add(Component.translatable("tooltip.dimensionworks_cave_factory.ampoule.empty")
                 .withStyle(ChatFormatting.GRAY));
             return;
         }
-        FluidStack fluid = FluidStack.loadFluidStackFromNBT(tag.getCompound(FLUID_KEY));
+        FluidStack fluid = storedFluid(stack);
         if (fluid.isEmpty()) {
             tooltip.add(Component.translatable("tooltip.dimensionworks_cave_factory.ampoule.empty")
                 .withStyle(ChatFormatting.GRAY));
@@ -217,21 +219,16 @@ public class FluidAmpouleItem extends Item {
         }
     }
 
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        return new AmpouleFluidHandler(stack);
-    }
-
-    private static final class AmpouleFluidHandler implements IFluidHandlerItem, ICapabilityProvider {
+    public static final class AmpouleFluidHandler implements IFluidHandlerItem {
         private final ItemStack container;
 
-        private AmpouleFluidHandler(ItemStack container) {
+        public AmpouleFluidHandler(ItemStack container) {
             this.container = container;
         }
 
         @Override
         public ItemStack getContainer() {
-            return container.copy();
+            return container;
         }
 
         @Override
@@ -241,11 +238,7 @@ public class FluidAmpouleItem extends Item {
 
         @Override
         public FluidStack getFluidInTank(int tank) {
-            CompoundTag tag = container.getTag();
-            if (tag == null || !tag.contains(FLUID_KEY)) {
-                return FluidStack.EMPTY;
-            }
-            return FluidStack.loadFluidStackFromNBT(tag.getCompound(FLUID_KEY));
+            return tank == 0 ? storedFluid(container).copy() : FluidStack.EMPTY;
         }
 
         @Override
@@ -255,7 +248,8 @@ public class FluidAmpouleItem extends Item {
 
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
-            return CFFluids.isFactoryFluid(stack);
+            return tank == 0 && container.getCount() == 1 && CFFluids.isFactoryFluid(stack)
+                && (getFluidInTank(0).isEmpty() || FluidStack.isSameFluidSameComponents(getFluidInTank(0), stack));
         }
 
         @Override
@@ -270,16 +264,16 @@ public class FluidAmpouleItem extends Item {
                 return accepted;
             }
             FluidStack result = current.isEmpty()
-                ? new FluidStack(resource, accepted)
-                : new FluidStack(current, current.getAmount() + accepted);
-            container.getOrCreateTag().put(FLUID_KEY, result.writeToNBT(new CompoundTag()));
+                ? resource.copyWithAmount(accepted)
+                : current.copyWithAmount(current.getAmount() + accepted);
+            container.set(CFDataComponents.AMPOULE_FLUID.get(), AmpouleFluid.of(result));
             return accepted;
         }
 
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
             FluidStack current = getFluidInTank(0);
-            if (current.isEmpty() || !current.isFluidEqual(resource)) {
+            if (current.isEmpty() || !FluidStack.isSameFluidSameComponents(current, resource)) {
                 return FluidStack.EMPTY;
             }
             return drain(Math.min(current.getAmount(), resource.getAmount()), action);
@@ -292,37 +286,24 @@ public class FluidAmpouleItem extends Item {
                 return FluidStack.EMPTY;
             }
             int drained = Math.min(current.getAmount(), maxDrain);
-            FluidStack result = new FluidStack(current, drained);
+            FluidStack result = current.copyWithAmount(drained);
             if (action.execute()) {
-                CompoundTag tag = container.getOrCreateTag();
                 if (drained >= current.getAmount()) {
                     clearStoredState(container);
                 } else {
-                    tag.put(FLUID_KEY, new FluidStack(current, current.getAmount() - drained)
-                        .writeToNBT(new CompoundTag()));
+                    container.set(CFDataComponents.AMPOULE_FLUID.get(), AmpouleFluid.of(current.copyWithAmount(current.getAmount() - drained)));
                 }
             }
             return result;
         }
 
         private static void clearStoredState(ItemStack stack) {
-            CompoundTag tag = stack.getTag();
-            if (tag == null) {
-                return;
-            }
-            tag.remove(FLUID_KEY);
-            tag.remove(ORIGIN_KEY);
-            tag.remove(EXPIRY_KEY);
-            tag.remove(RESIDUE_KEY);
-            if (tag.isEmpty()) {
-                stack.setTag(null);
-            }
-        }
-        @Override
-        public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable net.minecraft.core.Direction side) {
-            return capability == net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER_ITEM
-                ? net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER_ITEM.orEmpty(capability, LazyOptional.of(() -> this))
-                : LazyOptional.empty();
+            stack.remove(CFDataComponents.AMPOULE_FLUID.get());
+            CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+                tag.remove(ORIGIN_KEY);
+                tag.remove(EXPIRY_KEY);
+                tag.remove(RESIDUE_KEY);
+            });
         }
     }
 }

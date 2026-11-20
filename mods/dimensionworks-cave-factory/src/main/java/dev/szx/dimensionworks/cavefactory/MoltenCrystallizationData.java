@@ -19,13 +19,12 @@ public final class MoltenCrystallizationData extends SavedData {
 
     public static MoltenCrystallizationData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            MoltenCrystallizationData::load,
-            MoltenCrystallizationData::new,
+            new SavedData.Factory<>(MoltenCrystallizationData::new, MoltenCrystallizationData::load),
             DATA_NAME
         );
     }
 
-    private static MoltenCrystallizationData load(CompoundTag tag) {
+    private static MoltenCrystallizationData load(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         MoltenCrystallizationData data = new MoltenCrystallizationData();
         ListTag entries = tag.getList("positions", Tag.TAG_COMPOUND);
         for (int i = 0; i < entries.size(); i++) {
@@ -36,7 +35,7 @@ public final class MoltenCrystallizationData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         ListTag entries = new ListTag();
         exposureStarted.forEach((pos, started) -> {
             CompoundTag entry = new CompoundTag();

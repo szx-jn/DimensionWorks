@@ -9,7 +9,7 @@ rootProject.name = 'dimensionworks'
 
 // 逐项接入并验证；未移植的 Forge 工程不能混入目标构建。
 include 'dimensionworks-item-pickup-guard', 'dimensionworks-localization', 'dimensionworks-drop-lifetime',
-        'dimensionworks-ftbchunks-no-forceload', 'dimensionworks-version-gate', 'dimensionworks-spectator-toggle', 'dimensionworks-magic-egg', 'dimensionworks-stress-gauge-alarm', 'dimensionworks-wrench-compat', 'dimensionworks-rpm-limit', 'dimensionworks-mek-stress'
+        'dimensionworks-ftbchunks-no-forceload', 'dimensionworks-version-gate', 'dimensionworks-spectator-toggle', 'dimensionworks-magic-egg', 'dimensionworks-stress-gauge-alarm', 'dimensionworks-wrench-compat', 'dimensionworks-rpm-limit', 'dimensionworks-mek-stress', 'dimensionworks-cave-factory'
 rootProject.children.each { module ->
     module.projectDir = file("mods/${module.name}")
 }

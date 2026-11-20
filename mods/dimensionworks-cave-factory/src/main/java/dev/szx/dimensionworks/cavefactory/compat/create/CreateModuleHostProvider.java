@@ -1,41 +1,28 @@
 package dev.szx.dimensionworks.cavefactory.compat.create;
 
+import com.simibubi.create.content.kinetics.mixer.MechanicalMixerBlockEntity;
+import com.simibubi.create.content.kinetics.press.MechanicalPressBlockEntity;
+import com.simibubi.create.content.kinetics.saw.SawBlockEntity;
+import com.simibubi.create.content.kinetics.millstone.MillstoneBlockEntity;
+import com.simibubi.create.content.kinetics.crusher.CrushingWheelControllerBlockEntity;
 import dev.szx.dimensionworks.cavefactory.logic.MachineCapability;
-import dev.szx.dimensionworks.cavefactory.logic.ModuleHost;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import org.jetbrains.annotations.Nullable;
 
-public final class CreateModuleHostProvider implements ICapabilityProvider {
-    private final LazyOptional<ModuleHost> host;
+/** Host state lives on the owning block entity; inventories persist in its native persistent data. */
+public final class CreateModuleHostProvider {
+    private CreateModuleHostProvider() {}
 
-    public CreateModuleHostProvider(BlockEntity owner, MachineCapability capability) {
-        this.host = LazyOptional.of(() -> new CreateModuleHost(owner, capability));
-    }
-
-    public static MachineCapability capabilityFor(BlockEntity blockEntity) {
-        return capabilityFor(blockEntity.getClass());
-    }
+    public static MachineCapability capabilityFor(BlockEntity owner) { return capabilityFor(owner.getClass()); }
 
     public static MachineCapability capabilityFor(Class<?> type) {
-        String name = type.getName();
-        if (name.endsWith("MechanicalMixerBlockEntity")
-            || name.endsWith("MechanicalPressBlockEntity")) {
+        if (MechanicalMixerBlockEntity.class.isAssignableFrom(type)
+            || MechanicalPressBlockEntity.class.isAssignableFrom(type)) {
             return MachineCapability.ITEM_AND_MAPPED_RECIPES;
         }
-        if (name.endsWith("SawBlockEntity")
-            || name.endsWith("MillstoneBlockEntity")
-            || name.endsWith("CrushingWheelControllerBlockEntity")) {
+        if (SawBlockEntity.class.isAssignableFrom(type) || MillstoneBlockEntity.class.isAssignableFrom(type)
+            || CrushingWheelControllerBlockEntity.class.isAssignableFrom(type)) {
             return MachineCapability.ITEM_ONLY;
         }
         return MachineCapability.NONE;
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
-        return capability == ModuleHost.CAPABILITY ? host.cast() : LazyOptional.empty();
     }
 }

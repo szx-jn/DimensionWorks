@@ -8,7 +8,6 @@ import dev.szx.dimensionworks.cavefactory.logic.MachineCapability;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import dev.szx.dimensionworks.cavefactory.logic.FactoryPhase;
 import dev.szx.dimensionworks.cavefactory.logic.FactoryModule;
-import dev.szx.dimensionworks.cavefactory.logic.ModuleHost;
 import dev.szx.dimensionworks.cavefactory.logic.StructureLayout;
 import dev.szx.dimensionworks.cavefactory.recipe.CaveProcessingInput;
 import dev.szx.dimensionworks.cavefactory.recipe.CaveProcessingRecipe;
@@ -17,18 +16,14 @@ import dev.szx.dimensionworks.cavefactory.registry.CFBlocks;
 import dev.szx.dimensionworks.cavefactory.registry.CFItems;
 import dev.szx.dimensionworks.cavefactory.registry.CFRecipes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,6 +36,7 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
     private boolean structureValid;
     private boolean structureDirty = true;
     private int processProgress;
+    private long cachedRecipeGeneration = -1;
     private RecipeManager cachedRecipeManager;
     private CaveProcessingRecipe cachedRecipe;
     private FactoryPhase cachedPhase;
@@ -177,7 +173,7 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
                 insertOutput(output);
             }
             if (!recipe.fluidOutput().isEmpty()) {
-                outputTank().fill(recipe.fluidOutput().copy(), net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                outputTank().fill(recipe.fluidOutput().copy(), net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
             }
             moveFilledAmpoules();
             recordSuccessfulBatch();
@@ -197,10 +193,11 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
         FluidStack fluid = inputTank().getFluid();
         if (recipeCacheValid
             && manager == cachedRecipeManager
+            && cachedRecipeGeneration == dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.generation()
             && phase == cachedPhase
             && numericModule == cachedNumericModule
             && mechanismModule == cachedMechanismModule
-            && fluid.isFluidStackIdentical(cachedFluid)
+            && FluidStack.matches(fluid, cachedFluid)
             && inputsMatchCache()) {
             return cachedRecipe;
         }
@@ -210,7 +207,8 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
             getStack(0), getStack(1), getStack(2), getStack(3)
         ), fluid);
         CaveProcessingRecipe match = null;
-        for (CaveProcessingRecipe recipe : manager.getAllRecipesFor(CFRecipes.CAVE_PROCESSING_TYPE.get())) {
+        for (var holder : manager.getAllRecipesFor(CFRecipes.CAVE_PROCESSING_TYPE.get())) {
+            CaveProcessingRecipe recipe = holder.value();
             if (recipe.matchesInventory(machineType, phase, numericModule, input)
                 || recipe.matchesInventory(machineType, phase, mechanismModule, input)) {
                 match = recipe;
@@ -219,6 +217,7 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
         }
 
         cachedRecipeManager = manager;
+        cachedRecipeGeneration = dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.generation();
         cachedRecipe = match;
         cachedPhase = phase;
         cachedNumericModule = numericModule;
@@ -251,7 +250,7 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
         FluidStack fluidOutput = recipe.fluidOutput();
         if (!fluidOutput.isEmpty()) {
             FluidStack current = outputTank().getFluid();
-            if (!current.isEmpty() && !current.isFluidEqual(fluidOutput)) {
+            if (!current.isEmpty() && !FluidStack.isSameFluidSameComponents(current, fluidOutput)) {
                 return false;
             }
             int amount = current.isEmpty() ? 0 : current.getAmount();
@@ -284,7 +283,7 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
         }
         if (!recipe.fluidInput().isEmpty()) {
             inputTank().drain(recipe.fluidInput().getAmount(),
-                net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
         }
         setChanged();
     }
@@ -301,19 +300,18 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
         ItemStack filled = empty.copyWithCount(1);
         int toMove = Math.min(dev.szx.dimensionworks.cavefactory.item.FluidAmpouleItem.capacity(), available.getAmount());
         FluidStack drain = outputTank().drain(toMove,
-            net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE);
+            net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE);
         if (drain.isEmpty()) {
             return;
         }
-        filled.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER_ITEM)
-            .ifPresent(handler -> handler.fill(drain, net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE));
-        filled.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER_ITEM)
-            .ifPresent(handler -> dev.szx.dimensionworks.cavefactory.item.FluidAmpouleItem.setOrigin(filled, machineType.dimension()));
+        var handler = filled.getCapability(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.ITEM);
+        if (handler == null || handler.fill(drain, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE) != drain.getAmount()) return;
+        dev.szx.dimensionworks.cavefactory.item.FluidAmpouleItem.setOrigin(filled, machineType.dimension());
         if (insertInternal(ampouleOutput(), 0, filled, true).isEmpty()) {
             ampouleInput().extractItem(0, 1, false);
             insertInternal(ampouleOutput(), 0, filled, false);
             outputTank().drain(drain.getAmount(),
-                net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
         }
     }
 
@@ -335,15 +333,15 @@ public class FactoryControllerBlockEntity extends FactoryMachineBlockEntity {
     }
 
     @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
+    protected void write(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
         tag.putBoolean(VALID_KEY, structureValid);
         tag.putInt(PROCESS_PROGRESS_KEY, processProgress);
     }
 
     @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
+    protected void read(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
         structureValid = tag.getBoolean(VALID_KEY);
         processProgress = tag.getInt(PROCESS_PROGRESS_KEY);
         structureDirty = true;

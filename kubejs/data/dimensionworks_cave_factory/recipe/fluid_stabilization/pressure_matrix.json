@@ -1,0 +1,10 @@
+{
+  "type": "dimensionworks_cave_factory:fluid_stabilization",
+  "input": {
+    "id": "dimensionworks_cave_factory:abyssal_brine"
+  },
+  "result": {
+    "count": 1,
+    "id": "dimensionworks_cave_factory:pressure_matrix"
+  }
+}

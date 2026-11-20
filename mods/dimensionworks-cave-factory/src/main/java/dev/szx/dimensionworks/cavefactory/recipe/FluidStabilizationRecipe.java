@@ -1,37 +1,38 @@
 package dev.szx.dimensionworks.cavefactory.recipe;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
+import java.util.Optional;
+
 import dev.szx.dimensionworks.cavefactory.logic.FactoryModule;
 import dev.szx.dimensionworks.cavefactory.registry.CFFluids;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInput> {
-    private final ResourceLocation id;
     private final net.minecraft.world.level.material.Fluid inputFluid;
     private final int inputAmount;
     private final ItemStack result;
     private final FactoryModule requiredModule;
 
     public FluidStabilizationRecipe(
-        ResourceLocation id,
         net.minecraft.world.level.material.Fluid inputFluid,
         int inputAmount,
         ItemStack result,
         FactoryModule requiredModule
     ) {
-        this.id = id;
         this.inputFluid = inputFluid;
         this.inputAmount = Math.max(1, inputAmount);
         this.result = result.copy();
@@ -67,7 +68,7 @@ public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInpu
     }
 
     @Override
-    public ItemStack assemble(CaveProcessingInput input, RegistryAccess registries) {
+    public ItemStack assemble(CaveProcessingInput input, HolderLookup.Provider registries) {
         return result.copy();
     }
 
@@ -77,18 +78,13 @@ public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInpu
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess registries) {
+    public ItemStack getResultItem(HolderLookup.Provider registries) {
         return result.copy();
     }
 
     @Override
     public NonNullList<Ingredient> getIngredients() {
         return NonNullList.create();
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
     }
 
     @Override
@@ -102,76 +98,23 @@ public final class FluidStabilizationRecipe implements Recipe<CaveProcessingInpu
     }
 
     public static final class Serializer implements RecipeSerializer<FluidStabilizationRecipe> {
-        @Override
-        public FluidStabilizationRecipe fromJson(ResourceLocation id, JsonObject json) {
-            JsonObject input = GsonHelper.getAsJsonObject(json, "input");
-            ResourceLocation fluidId = new ResourceLocation(GsonHelper.getAsString(input, "fluid"));
-            net.minecraft.world.level.material.Fluid fluid = ForgeRegistries.FLUIDS.getValue(fluidId);
-            if (fluid == null || !CFFluids.isFactoryFluid(new FluidStack(fluid, 1))) {
-                throw new IllegalArgumentException("Unknown factory fluid " + fluidId);
-            }
-            JsonObject resultJson = GsonHelper.getAsJsonObject(json, "result");
-            ResourceLocation itemId = new ResourceLocation(GsonHelper.getAsString(resultJson, "item"));
-            net.minecraft.world.item.Item outputItem = ForgeRegistries.ITEMS.getValue(itemId);
-            if (outputItem == null || outputItem == net.minecraft.world.item.Items.AIR) {
-                throw new IllegalArgumentException("Unknown output item " + itemId);
-            }
-            ItemStack result = new ItemStack(outputItem);
-            result.setCount(Math.max(1, GsonHelper.getAsInt(resultJson, "count", 1)));
-            String moduleName = GsonHelper.getAsString(json, "required_module", "");
-            FactoryModule module = null;
-            if (!moduleName.isBlank()) {
-                for (FactoryModule candidate : FactoryModule.values()) {
-                    if (candidate.id().equals(moduleName)) {
-                        module = candidate;
-                        break;
-                    }
-                }
-                if (module == null) {
-                    throw new IllegalArgumentException("Unknown required module " + moduleName);
-                }
-            }
-            return new FluidStabilizationRecipe(
-                id,
-                fluid,
-                GsonHelper.getAsInt(input, "amount", dev.szx.dimensionworks.cavefactory.CaveFactoryConfig.stabilizationInput()),
-                result,
-                module
-            );
-        }
-
-        @Override
-        public FluidStabilizationRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-            ResourceLocation fluidId = buffer.readResourceLocation();
-            net.minecraft.world.level.material.Fluid fluid = ForgeRegistries.FLUIDS.getValue(fluidId);
-            if (fluid == null || !CFFluids.isFactoryFluid(new FluidStack(fluid, 1))) {
-                throw new IllegalArgumentException("Unknown factory fluid " + fluidId);
-            }
-            int amount = buffer.readVarInt();
-            ItemStack result = buffer.readItem();
-            FactoryModule module = null;
-            if (buffer.readBoolean()) {
-                int moduleIndex = buffer.readVarInt();
-                if (moduleIndex < 0 || moduleIndex >= FactoryModule.values().length) {
-                    throw new IllegalArgumentException("Unknown required module index " + moduleIndex);
-                }
-                module = FactoryModule.values()[moduleIndex];
-            }
-            if (result.isEmpty()) {
-                throw new IllegalArgumentException("Invalid fluid stabilization result item");
-            }
-            return new FluidStabilizationRecipe(id, fluid, amount, result, module);
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buffer, FluidStabilizationRecipe recipe) {
-            buffer.writeResourceLocation(ForgeRegistries.FLUIDS.getKey(recipe.inputFluid));
-            buffer.writeVarInt(recipe.inputAmount);
-            buffer.writeItem(recipe.result);
-            buffer.writeBoolean(recipe.requiredModule != null);
-            if (recipe.requiredModule != null) {
-                buffer.writeVarInt(recipe.requiredModule.ordinal());
-            }
-        }
+        private record Input(net.minecraft.core.Holder<net.minecraft.world.level.material.Fluid> fluid, Optional<Integer> amount) {}
+        private static final Codec<Input> INPUT = RecordCodecBuilder.create(instance -> instance.group(
+            FluidStack.FLUID_NON_EMPTY_CODEC.validate(holder -> CFFluids.isFactoryFluid(new FluidStack(holder, 1))
+                ? com.mojang.serialization.DataResult.success(holder)
+                : com.mojang.serialization.DataResult.error(() -> "Expected factory fluid"))
+                .fieldOf("id").forGetter(Input::fluid),
+            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("amount").forGetter(Input::amount)
+        ).apply(instance, Input::new));
+        private static final MapCodec<FluidStabilizationRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            INPUT.fieldOf("input").forGetter(r -> new Input(r.inputFluid.builtInRegistryHolder(), Optional.of(r.inputAmount))),
+            ItemStack.CODEC.fieldOf("result").forGetter(FluidStabilizationRecipe::result),
+            FactoryRecipeCodecs.MODULE.optionalFieldOf("required_module").forGetter(r -> Optional.ofNullable(r.requiredModule))
+        ).apply(instance, (input, result, module) -> new FluidStabilizationRecipe(
+            input.fluid().value(), input.amount().orElseGet(dev.szx.dimensionworks.cavefactory.CaveFactoryConfig::stabilizationInput), result, module.orElse(null))));
+        private static final StreamCodec<RegistryFriendlyByteBuf, FluidStabilizationRecipe> STREAM =
+            ByteBufCodecs.fromCodecWithRegistries(CODEC.codec());
+        @Override public MapCodec<FluidStabilizationRecipe> codec() { return CODEC; }
+        @Override public StreamCodec<RegistryFriendlyByteBuf, FluidStabilizationRecipe> streamCodec() { return STREAM; }
     }
 }

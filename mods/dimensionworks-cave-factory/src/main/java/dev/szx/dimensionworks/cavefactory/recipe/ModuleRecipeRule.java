@@ -1,14 +1,17 @@
 package dev.szx.dimensionworks.cavefactory.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
+
 import dev.szx.dimensionworks.cavefactory.logic.FactoryModule;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -16,16 +19,13 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-public final class ModuleRecipeRule implements Recipe<Container> {
-    private final ResourceLocation id;
+public final class ModuleRecipeRule implements Recipe<net.minecraft.world.item.crafting.RecipeInput> {
     private final FactoryModule module;
     private final Set<ResourceLocation> recipeIds;
 
-    public ModuleRecipeRule(ResourceLocation id, FactoryModule module, Set<ResourceLocation> recipeIds) {
-        this.id = id;
+    public ModuleRecipeRule(FactoryModule module, Set<ResourceLocation> recipeIds) {
         this.module = module;
         this.recipeIds = Set.copyOf(recipeIds);
     }
@@ -43,12 +43,12 @@ public final class ModuleRecipeRule implements Recipe<Container> {
     }
 
     @Override
-    public boolean matches(Container container, Level level) {
+    public boolean matches(net.minecraft.world.item.crafting.RecipeInput container, Level level) {
         return false;
     }
 
     @Override
-    public ItemStack assemble(Container container, RegistryAccess registries) {
+    public ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput container, HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -58,7 +58,7 @@ public final class ModuleRecipeRule implements Recipe<Container> {
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess registries) {
+    public ItemStack getResultItem(HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -73,11 +73,6 @@ public final class ModuleRecipeRule implements Recipe<Container> {
     }
 
     @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
     public RecipeSerializer<?> getSerializer() {
         return dev.szx.dimensionworks.cavefactory.registry.CFRecipes.MODULE_RECIPE_RULE_SERIALIZER.get();
     }
@@ -88,45 +83,13 @@ public final class ModuleRecipeRule implements Recipe<Container> {
     }
 
     public static final class Serializer implements RecipeSerializer<ModuleRecipeRule> {
-        @Override
-        public ModuleRecipeRule fromJson(ResourceLocation id, JsonObject json) {
-            String moduleName = GsonHelper.getAsString(json, "module");
-            FactoryModule module = null;
-            for (FactoryModule candidate : FactoryModule.values()) {
-                if (candidate.id().equals(moduleName) || candidate.name().equalsIgnoreCase(moduleName)) {
-                    module = candidate;
-                    break;
-                }
-            }
-            if (module == null) {
-                throw new IllegalArgumentException("Unknown module " + moduleName);
-            }
-            JsonArray recipes = GsonHelper.getAsJsonArray(json, "recipes");
-            Set<ResourceLocation> ids = new LinkedHashSet<>();
-            for (var element : recipes) {
-                ids.add(new ResourceLocation(element.getAsString()));
-            }
-            return new ModuleRecipeRule(id, module, ids);
-        }
-
-        @Override
-        public ModuleRecipeRule fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-            FactoryModule module = FactoryModule.values()[buffer.readVarInt()];
-            int count = buffer.readVarInt();
-            Set<ResourceLocation> ids = new LinkedHashSet<>();
-            for (int i = 0; i < count; i++) {
-                ids.add(buffer.readResourceLocation());
-            }
-            return new ModuleRecipeRule(id, module, ids);
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buffer, ModuleRecipeRule recipe) {
-            buffer.writeVarInt(recipe.module.ordinal());
-            buffer.writeVarInt(recipe.recipeIds.size());
-            for (ResourceLocation recipeId : recipe.recipeIds) {
-                buffer.writeResourceLocation(recipeId);
-            }
-        }
+        private static final MapCodec<ModuleRecipeRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            FactoryRecipeCodecs.MODULE.fieldOf("module").forGetter(ModuleRecipeRule::module),
+            ResourceLocation.CODEC.listOf().fieldOf("recipes").forGetter(r -> r.recipeIds.stream().sorted().toList())
+        ).apply(instance, (module, ids) -> new ModuleRecipeRule(module, Set.copyOf(ids))));
+        private static final StreamCodec<RegistryFriendlyByteBuf, ModuleRecipeRule> STREAM =
+            ByteBufCodecs.fromCodecWithRegistries(CODEC.codec());
+        @Override public MapCodec<ModuleRecipeRule> codec() { return CODEC; }
+        @Override public StreamCodec<RegistryFriendlyByteBuf, ModuleRecipeRule> streamCodec() { return STREAM; }
     }
 }

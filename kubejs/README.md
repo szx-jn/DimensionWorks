@@ -66,7 +66,7 @@
 
 ## 洞穴维度工厂数据
 
-`data/dimensionworks_cave_factory/recipes/survival/` 提供渊海端生存获得链；`recipes/cave_processing/`、`recipes/fluid_stabilization/` 和 `recipes/module_recipe_rule/` 分别承载签名机加工、稳定化与机制模块映射。
+`data/dimensionworks_cave_factory/recipe/survival/` 提供渊海端生存获得链；`recipe/cave_processing/`、`recipe/fluid_stabilization/` 和 `recipe/module_recipe_rule/` 分别承载签名机加工、稳定化与机制模块映射。
 `data/ae2/recipes/network/cells/` 把渊压基质接入 128³ 空间存储元件配方。
 
 ## 洞穴基础产物自增殖
@@ -79,7 +79,7 @@
 
 Create 的 Mixer、Press、Crushing Wheels、Saw、Deployer、Spout、Fan 等加工配方每个条目只消耗一个物品，所以 `"2x item"` 的写法会由脚本中的 `expandIngredients` 展开成重复条目。调整配比时只需改这个前缀。
 
-目标组标签位于 `data/dimensionworks_cave_factory/tags/items/self_propagation/` 与同结构的 `tags/fluids/self_propagation/`，供任务、JEI 说明与后续模块映射引用。
+目标组标签位于 `data/dimensionworks_cave_factory/tags/item/self_propagation/` 与同结构的 `tags/fluid/self_propagation/`，供任务、JEI 说明与后续模块映射引用。
 
 ## 基础矿物与常规金属三路线
 

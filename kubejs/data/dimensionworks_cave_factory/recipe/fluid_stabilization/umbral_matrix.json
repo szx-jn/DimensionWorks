@@ -1,0 +1,10 @@
+{
+  "type": "dimensionworks_cave_factory:fluid_stabilization",
+  "input": {
+    "id": "dimensionworks_cave_factory:umbral_condensate"
+  },
+  "result": {
+    "count": 1,
+    "id": "dimensionworks_cave_factory:umbral_matrix"
+  }
+}

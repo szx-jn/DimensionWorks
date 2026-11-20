@@ -2,7 +2,7 @@ package dev.szx.dimensionworks.cavefactory.logic;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public interface MachineInventory {
     int ITEM_INPUT_START = 0;

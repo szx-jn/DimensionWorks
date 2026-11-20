@@ -1,9 +1,8 @@
 package dev.szx.dimensionworks.cavefactory.logic;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public final class AtomicOutputPlanner {
     public record SlotState(Object key, int count, int slotLimit, int maxStackSize) {}
     public record OutputState(Object key, int count, int maxStackSize) {}
 
-    private record ItemIdentity(Item item, CompoundTag tag) {}
+    private record ItemIdentity(Item item, net.minecraft.core.component.DataComponentMap components) {}
 
     /** Simulates all output stacks in slot order without mutating the supplied inventory. */
     public static boolean canFitOutputs(IItemHandler inventory, List<ItemStack> outputs) {
@@ -56,7 +55,7 @@ public final class AtomicOutputPlanner {
     private static Object keyOf(ItemStack stack) {
         return stack.isEmpty() ? null : new ItemIdentity(
             stack.getItem(),
-            stack.getTag() == null ? null : stack.getTag().copy()
+            stack.getComponents()
         );
     }
 

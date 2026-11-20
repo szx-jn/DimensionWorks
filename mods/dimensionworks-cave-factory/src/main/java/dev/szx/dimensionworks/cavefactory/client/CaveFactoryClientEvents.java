@@ -2,24 +2,18 @@ package dev.szx.dimensionworks.cavefactory.client;
 
 import dev.szx.dimensionworks.cavefactory.DimensionWorksCaveFactory;
 import dev.szx.dimensionworks.cavefactory.registry.CFMenus;
-import dev.szx.dimensionworks.cavefactory.registry.CFBlocks;
 import net.createmod.ponder.foundation.PonderIndex;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.Map;
 
-@Mod.EventBusSubscriber(
+@EventBusSubscriber(
     modid = DimensionWorksCaveFactory.MOD_ID,
-    bus = Mod.EventBusSubscriber.Bus.MOD,
+    bus = EventBusSubscriber.Bus.MOD,
     value = Dist.CLIENT
 )
 public final class CaveFactoryClientEvents {
@@ -39,10 +33,19 @@ public final class CaveFactoryClientEvents {
 
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> MenuScreens.register(
-            CFMenus.factoryMachine(),
-            FactoryMachineScreen::new
-        ));
         event.enqueueWork(() -> PonderIndex.addPlugin(new CaveFactoryPonderPlugin()));
+    }    @SubscribeEvent
+    public static void registerFluidExtensions(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
+        for (var machine : dev.szx.dimensionworks.cavefactory.logic.MachineType.values()) {
+            event.registerFluidType(new net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions() {
+                @Override public ResourceLocation getStillTexture() { return ResourceLocation.withDefaultNamespace("block/water_still"); }
+                @Override public ResourceLocation getFlowingTexture() { return ResourceLocation.withDefaultNamespace("block/water_flow"); }
+                @Override public int getTintColor() { return dev.szx.dimensionworks.cavefactory.registry.CFFluids.colorFor(machine); }
+            }, dev.szx.dimensionworks.cavefactory.registry.CFFluids.get(machine).type().get());
+        }
     }
+    @SubscribeEvent public static void registerScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+        event.register(CFMenus.factoryMachine(), FactoryMachineScreen::new);
+    }
+
 }

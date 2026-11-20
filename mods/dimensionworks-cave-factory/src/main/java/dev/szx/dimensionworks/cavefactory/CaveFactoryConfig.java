@@ -1,22 +1,22 @@
 package dev.szx.dimensionworks.cavefactory;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public final class CaveFactoryConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.IntValue STABILITY_SECONDS;
-    public static final ForgeConfigSpec.IntValue PHASE_BATCHES;
-    public static final ForgeConfigSpec.IntValue AMPOULE_CAPACITY;
-    public static final ForgeConfigSpec.IntValue STABILIZATION_INPUT;
-    public static final ForgeConfigSpec.IntValue KINETIC_SATURATION_RPM;
-    public static final ForgeConfigSpec.DoubleValue STRESS_IMPACT;
-    public static final ForgeConfigSpec.IntValue NUMERIC_MODULE_PERCENT;
-    public static final ForgeConfigSpec.BooleanValue BLOCK_AETHER_AND_ALEX_CAVES;
-    public static final ForgeConfigSpec.BooleanValue BLOCK_TWILIGHT_FOREST;
+    public static final ModConfigSpec.IntValue STABILITY_SECONDS;
+    public static final ModConfigSpec.IntValue PHASE_BATCHES;
+    public static final ModConfigSpec.IntValue AMPOULE_CAPACITY;
+    public static final ModConfigSpec.IntValue STABILIZATION_INPUT;
+    public static final ModConfigSpec.IntValue KINETIC_SATURATION_RPM;
+    public static final ModConfigSpec.DoubleValue STRESS_IMPACT;
+    public static final ModConfigSpec.IntValue NUMERIC_MODULE_PERCENT;
+    public static final ModConfigSpec.BooleanValue BLOCK_AETHER_AND_ALEX_CAVES;
+    public static final ModConfigSpec.BooleanValue BLOCK_TWILIGHT_FOREST;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("factory");
         STABILITY_SECONDS = builder
             .comment("Real-time seconds before a filled ampoule decays after leaving its origin dimension.")

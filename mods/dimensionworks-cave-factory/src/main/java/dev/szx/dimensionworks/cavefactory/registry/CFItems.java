@@ -10,42 +10,43 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = DimensionWorksCaveFactory.MOD_ID,
-    bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.MOD)
+@net.neoforged.fml.common.EventBusSubscriber(modid = DimensionWorksCaveFactory.MOD_ID,
+    bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD)
 public final class CFItems {
-    @net.minecraftforge.eventbus.api.SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
-    public static void keepDedicatedItemsInSharedTab(net.minecraftforge.event.BuildCreativeModeTabContentsEvent event) {
+    @net.neoforged.bus.api.SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    public static void keepDedicatedItemsInSharedTab(net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().location().equals(CREATIVE_TAB.getId())
             || event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.SEARCH) return;
-        var iterator = event.getEntries().iterator();
-        while (iterator.hasNext()) {
-            var id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(iterator.next().getKey().getItem());
-            if (id != null && (id.getNamespace().equals("dimensionworks") || id.getNamespace().startsWith("dimensionworks_") || id.getNamespace().equals("kubejs")))
-                iterator.remove();
-        }
+        java.util.function.Predicate<ItemStack> dedicated = stack -> {
+            var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+            return id != null && (id.getNamespace().equals("dimensionworks") || id.getNamespace().startsWith("dimensionworks_") || id.getNamespace().equals("kubejs"));
+        };
+        java.util.stream.Stream.concat(event.getParentEntries().stream(), event.getSearchEntries().stream())
+            .filter(dedicated).toList()
+            .forEach(stack -> event.remove(stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
     }
 
-    private static final Map<MachineType, RegistryObject<Item>> MATRICES = new EnumMap<>(MachineType.class);
-    private static final Map<MachineType, RegistryObject<Item>> RESIDUES = new EnumMap<>(MachineType.class);
-    private static final Map<MachineType, RegistryObject<BlockItem>> CONTROLLER_ITEMS =
-        new EnumMap<>(MachineType.class);
-    private static final Map<FactoryModule, RegistryObject<Item>> MODULES =
-        new EnumMap<>(FactoryModule.class);
-    private static final List<RegistryObject<? extends Item>> CREATIVE_ORDER = new ArrayList<>();
 
-    public static RegistryObject<BlockItem> FACTORY_CASING;
-    public static RegistryObject<BlockItem> FACTORY_PORT;
-    public static RegistryObject<BlockItem> FLUID_STABILIZER;
-    public static RegistryObject<FluidAmpouleItem> FLUID_AMPOULE;
-    public static RegistryObject<CreativeModeTab> CREATIVE_TAB;
+    private static final Map<MachineType, DeferredHolder<Item, Item>> MATRICES = new EnumMap<>(MachineType.class);
+    private static final Map<MachineType, DeferredHolder<Item, Item>> RESIDUES = new EnumMap<>(MachineType.class);
+    private static final Map<MachineType, DeferredHolder<Item, BlockItem>> CONTROLLER_ITEMS =
+        new EnumMap<>(MachineType.class);
+    private static final Map<FactoryModule, DeferredHolder<Item, Item>> MODULES =
+        new EnumMap<>(FactoryModule.class);
+    private static final List<DeferredHolder<Item, ? extends Item>> CREATIVE_ORDER = new ArrayList<>();
+
+    public static DeferredHolder<Item, BlockItem> FACTORY_CASING;
+    public static DeferredHolder<Item, BlockItem> FACTORY_PORT;
+    public static DeferredHolder<Item, BlockItem> FLUID_STABILIZER;
+    public static DeferredHolder<Item, FluidAmpouleItem> FLUID_AMPOULE;
+    public static DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB;
 
     private static boolean registered;
 
@@ -82,7 +83,7 @@ public final class CFItems {
         CREATIVE_ORDER.add(FLUID_AMPOULE);
 
         for (FactoryModule module : FactoryModule.values()) {
-            RegistryObject<Item> holder = DimensionWorksCaveFactory.CFRegistry.ITEMS.register(
+            DeferredHolder<Item, Item> holder = DimensionWorksCaveFactory.CFRegistry.ITEMS.register(
                 module.id(),
                 () -> new ModuleItem(module, new Item.Properties().stacksTo(1))
             );
@@ -97,7 +98,7 @@ public final class CFItems {
                 .icon(() -> new ItemStack(CFBlocks.controller(MachineType.ABYSSAL).get()))
                 .displayItems((parameters, output) -> {
                     // One shared tab for all pack-owned namespaces, including future additions.
-                    net.minecraftforge.registries.ForgeRegistries.ITEMS.getEntries().stream()
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.entrySet().stream()
                         .filter(entry -> entry.getKey().location().getNamespace().equals("dimensionworks")
                             || entry.getKey().location().getNamespace().startsWith("dimensionworks_")
                             || entry.getKey().location().getNamespace().equals("kubejs"))
@@ -109,27 +110,27 @@ public final class CFItems {
         );
     }
 
-    public static RegistryObject<Item> matrix(MachineType machine) {
+    public static DeferredHolder<Item, Item> matrix(MachineType machine) {
         return MATRICES.get(machine);
     }
 
-    public static RegistryObject<Item> residue(MachineType machine) {
+    public static DeferredHolder<Item, Item> residue(MachineType machine) {
         return RESIDUES.get(machine);
     }
 
-    public static RegistryObject<Item> module(FactoryModule module) {
+    public static DeferredHolder<Item, Item> module(FactoryModule module) {
         return MODULES.get(module);
     }
 
-    public static RegistryObject<BlockItem> controllerItem(MachineType machine) {
+    public static DeferredHolder<Item, BlockItem> controllerItem(MachineType machine) {
         return CONTROLLER_ITEMS.get(machine);
     }
 
-    private static RegistryObject<BlockItem> registerBlockItem(
+    private static DeferredHolder<Item, BlockItem> registerBlockItem(
         String id,
-        RegistryObject<? extends net.minecraft.world.level.block.Block> block
+        DeferredHolder<net.minecraft.world.level.block.Block, ? extends net.minecraft.world.level.block.Block> block
     ) {
-        RegistryObject<BlockItem> holder = DimensionWorksCaveFactory.CFRegistry.ITEMS.register(
+        DeferredHolder<Item, BlockItem> holder = DimensionWorksCaveFactory.CFRegistry.ITEMS.register(
             id,
             () -> new BlockItem(block.get(), new Item.Properties())
         );
@@ -137,8 +138,8 @@ public final class CFItems {
         return holder;
     }
 
-    private static RegistryObject<Item> registerSimpleItem(String id, Item.Properties properties) {
-        RegistryObject<Item> holder = DimensionWorksCaveFactory.CFRegistry.ITEMS.register(
+    private static DeferredHolder<Item, Item> registerSimpleItem(String id, Item.Properties properties) {
+        DeferredHolder<Item, Item> holder = DimensionWorksCaveFactory.CFRegistry.ITEMS.register(
             id,
             () -> new Item(properties)
         );

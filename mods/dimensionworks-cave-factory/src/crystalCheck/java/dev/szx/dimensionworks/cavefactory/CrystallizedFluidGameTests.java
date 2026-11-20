@@ -12,18 +12,18 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 @GameTestHolder("dimensionworks_cave_factory")
 @PrefixGameTestTemplate(false)
 public final class CrystallizedFluidGameTests {
     @GameTest(template = "fluid_grid", timeoutTicks = 700)
     public static void allTwentyOnePlacedMoltenSourcesCrystallize(GameTestHelper helper) {
-        List<ResourceLocation> metals = ForgeRegistries.FLUIDS.getKeys().stream()
+        List<ResourceLocation> metals = net.minecraft.core.registries.BuiltInRegistries.FLUID.keySet().stream()
             .filter(id -> id.getNamespace().equals("dimensionworks") && id.getPath().startsWith("molten_"))
-            .filter(id -> ForgeRegistries.FLUIDS.getValue(id) instanceof FlowingFluid fluid
+            .filter(id -> net.minecraft.core.registries.BuiltInRegistries.FLUID.get(id) instanceof FlowingFluid fluid
                 && fluid.getSource() == fluid).sorted().toList();
         helper.assertTrue(metals.size() == 21, "Test every registered molten metal, expected 21: " + metals);
         for (int i = 0; i < metals.size(); i++) {
@@ -98,9 +98,9 @@ public final class CrystallizedFluidGameTests {
         BlockPos flow = source.east();
         contain(helper, source);
         contain(helper, flow);
-        helper.setBlock(source, fluid(new ResourceLocation("dimensionworks", "molten_iron"))
+        helper.setBlock(source, fluid(ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_iron"))
             .defaultFluidState().createLegacyBlock());
-        helper.setBlock(flow, ((FlowingFluid) fluid(new ResourceLocation("dimensionworks", "molten_iron")))
+        helper.setBlock(flow, ((FlowingFluid) fluid(ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_iron")))
             .getFlowing(7, false).createLegacyBlock());
         helper.runAfterDelay(650, () -> {
             var actual = helper.getLevel().getFluidState(helper.absolutePos(flow));
@@ -111,20 +111,35 @@ public final class CrystallizedFluidGameTests {
         });
     }
 
+    @GameTest(template = "empty_9x9x9")
+    public static void authoredFactoryRecipesLoadWithOriginalOutputs(GameTestHelper helper) {
+        var manager = helper.getLevel().getRecipeManager();
+        var types = dev.szx.dimensionworks.cavefactory.registry.CFRecipes.class;
+        var stabilizations = manager.getAllRecipesFor(dev.szx.dimensionworks.cavefactory.registry.CFRecipes.FLUID_STABILIZATION_TYPE.get());
+        helper.assertTrue(stabilizations.size() == 6, "Six authored stabilization recipes must load");
+        for (var holder : stabilizations) helper.assertTrue(holder.value().inputAmount() == 1000 && holder.value().result().getCount() == 1, "Original 4:1 stabilization output changed");
+        helper.assertTrue(manager.getAllRecipesFor(dev.szx.dimensionworks.cavefactory.registry.CFRecipes.CAVE_PROCESSING_TYPE.get()).size() == 2, "Both abyssal phase recipes must load");
+        helper.assertTrue(manager.getAllRecipesFor(dev.szx.dimensionworks.cavefactory.registry.CFRecipes.MODULE_RECIPE_RULE_TYPE.get()).size() == 1, "Original module mapping must load");
+        for (String item : java.util.List.of("phase_converter", "pressure_buffer", "abyssal_pressure_tower", "fluid_stabilizer", "factory_casing", "fluid_ampoule", "factory_port")) {
+            helper.assertTrue(manager.byKey(ResourceLocation.fromNamespaceAndPath("dimensionworks_cave_factory", "survival/" + item)).isPresent(), "Survival crafting recipe missing: " + item);
+        }
+        helper.succeed();
+    }
+
     private static BlockPos gridPos(int i) { return new BlockPos(1 + i % 7 * 3, 200, 1 + i / 7 * 3); }
-    private static Fluid fluid(ResourceLocation id) { return ForgeRegistries.FLUIDS.getValue(id); }
+    private static Fluid fluid(ResourceLocation id) { return net.minecraft.core.registries.BuiltInRegistries.FLUID.get(id); }
     private static Fluid crystal(String metal) {
-        return fluid(new ResourceLocation("dimensionworks_cave_factory", "crystallized_molten_" + metal));
+        return fluid(ResourceLocation.fromNamespaceAndPath("dimensionworks_cave_factory", "crystallized_molten_" + metal));
     }
     private static void assertMolten(GameTestHelper helper, BlockPos pos) {
         helper.assertTrue(helper.getLevel().getFluidState(helper.absolutePos(pos)).getType()
-            == fluid(new ResourceLocation("dimensionworks", "molten_iron")),
+            == fluid(ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_iron")),
             "Metal must remain molten before continuous exposure completes; actual="
                 + helper.getLevel().getFluidState(helper.absolutePos(pos)) + ", block=" + helper.getBlockState(pos));
     }
     private static void pour(GameTestHelper helper, BlockPos pos) {
-        ItemStack bucket = new ItemStack(ForgeRegistries.ITEMS.getValue(
-            new ResourceLocation("dimensionworks", "molten_iron_bucket")));
+        ItemStack bucket = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+            ResourceLocation.fromNamespaceAndPath("dimensionworks", "molten_iron_bucket")));
         helper.assertTrue(((BucketItem) bucket.getItem()).emptyContents(
             null, helper.getLevel(), helper.absolutePos(pos), null, bucket), "Actual molten bucket must place its fluid");
         assertMolten(helper, pos);

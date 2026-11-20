@@ -15,21 +15,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class FluidStabilizerBlockEntity extends FactoryMachineBlockEntity {
-    private final LazyOptional<IFluidHandler> publicFluidCapability = LazyOptional.of(this::inputTank);
-    private final LazyOptional<IItemHandler> publicItemOutputCapability = LazyOptional.of(this::outputItems);
+    private long cachedRecipeGeneration = -1;
     private RecipeManager cachedRecipeManager;
     private FluidStabilizationRecipe cachedRecipe;
     private FactoryModule cachedNumericModule;
@@ -41,23 +36,8 @@ public class FluidStabilizerBlockEntity extends FactoryMachineBlockEntity {
         super(CFBlockEntities.STABILIZER.get(), pos, state);
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
-        if (capability == ForgeCapabilities.FLUID_HANDLER) {
-            return publicFluidCapability.cast();
-        }
-        if (capability == ForgeCapabilities.ITEM_HANDLER) {
-            return publicItemOutputCapability.cast();
-        }
-        return super.getCapability(capability, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        publicFluidCapability.invalidate();
-        publicItemOutputCapability.invalidate();
-        super.invalidateCaps();
-    }
+    @Override public IFluidHandler fluidHandler(@Nullable Direction side) { return isRemoved() ? null : inputTank(); }
+    @Override public IItemHandler itemHandler(@Nullable Direction side) { return isRemoved() ? null : outputItems(); }
 
     @Override
     protected void onModuleSlotsChanged() {
@@ -90,7 +70,9 @@ public class FluidStabilizerBlockEntity extends FactoryMachineBlockEntity {
         ).outputs();
         int operations = Math.min(Math.max(1, batchesThisTick()), availableOperations);
         ItemStack result = recipe.result();
-        long gateAmount = saturatedMultiply(result.getCount(), operations);
+        operations = (int) Math.min(operations, outputRoom(result) / result.getCount());
+        if (operations == 0) return;
+        long gateAmount = (long) result.getCount() * operations;
         if (!canAccept(result)
             || !FinalProductionGate.tryConsumeItem(
                 GearHeartOwnerResolver.normalize(owner()), result, gateAmount,
@@ -104,12 +86,14 @@ public class FluidStabilizerBlockEntity extends FactoryMachineBlockEntity {
         }
     }
 
-    private static long saturatedMultiply(long value, int count) {
-        if (value <= 0L || count <= 0) {
-            return 0L;
+    private long outputRoom(ItemStack result) {
+        long room = 0;
+        for (int slot = 0; slot < outputItems().getSlots(); slot++) {
+            ItemStack present = outputItems().getStackInSlot(slot);
+            if (!present.isEmpty() && !ItemStack.isSameItemSameComponents(present, result)) continue;
+            room += Math.max(0, Math.min(outputItems().getSlotLimit(slot), result.getMaxStackSize()) - present.getCount());
         }
-        long result = value * (long) count;
-        return result < 0L || result > Long.MAX_VALUE ? Long.MAX_VALUE : result;
+        return room;
     }
 
     private FluidStabilizationRecipe findRecipe() {
@@ -122,20 +106,23 @@ public class FluidStabilizerBlockEntity extends FactoryMachineBlockEntity {
         FluidStack fluid = inputTank().getFluid();
         if (recipeCacheValid
             && manager == cachedRecipeManager
+            && cachedRecipeGeneration == dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.generation()
             && numericModule == cachedNumericModule
             && mechanismModule == cachedMechanismModule
-            && fluid.isFluidStackIdentical(cachedFluid)) {
+            && FluidStack.matches(fluid, cachedFluid)) {
             return cachedRecipe;
         }
 
         FluidStabilizationRecipe match = null;
-        for (FluidStabilizationRecipe recipe : manager.getAllRecipesFor(CFRecipes.FLUID_STABILIZATION_TYPE.get())) {
+        for (var holder : manager.getAllRecipesFor(CFRecipes.FLUID_STABILIZATION_TYPE.get())) {
+            FluidStabilizationRecipe recipe = holder.value();
             if (recipe.matches(fluid, numericModule) || recipe.matches(fluid, mechanismModule)) {
                 match = recipe;
                 break;
             }
         }
         cachedRecipeManager = manager;
+        cachedRecipeGeneration = dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.generation();
         cachedRecipe = match;
         cachedNumericModule = numericModule;
         cachedMechanismModule = mechanismModule;

@@ -1,0 +1,191 @@
+package dev.szx.dimensionworks.cavefactory;
+
+import dev.szx.dimensionworks.cavefactory.api.AmpouleExpiry;
+import dev.szx.dimensionworks.cavefactory.compat.create.CreateModuleHost;
+import dev.szx.dimensionworks.cavefactory.item.ModuleItem;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.neoforged.neoforge.event.level.BlockEvent.EntityPlaceEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import dev.szx.dimensionworks.cavefactory.logic.ModuleHost;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.minecraft.resources.ResourceLocation;
+
+public final class CFEvents {
+    private static final java.util.Set<ResourceLocation> BLOCKED_DIMENSIONS = java.util.Set.of(
+        ResourceLocation.fromNamespaceAndPath("aether", "the_aether"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "abyssal_chasm"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "candy_cavity"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "prismatic_depths"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "forlorn_hollows"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "magnetic_caves"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "primordial_caves"),
+        ResourceLocation.fromNamespaceAndPath("alex_caves_dimensions", "toxic_caves")
+    );
+    private static final ResourceLocation TWILIGHT_FOREST = ResourceLocation.fromNamespaceAndPath("twilightforest", "twilight_forest");
+
+    private CFEvents() {}
+
+    public static void register() {
+        NeoForge.EVENT_BUS.register(CFEvents.class);
+        NeoForge.EVENT_BUS.register(MoltenCrystallizationEvents.class);
+    }
+
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        CFCapabilities.register(event);
+    }
+
+    @SubscribeEvent
+    public static void onRecipesReloaded(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+        if (event.getPlayer() == null) dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.invalidate();
+    }
+
+    @SubscribeEvent
+    public static void claimModuleHost(EntityPlaceEvent event) {
+        if (!(event.getEntity() instanceof Player player) || !(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        BlockEntity blockEntity = level.getBlockEntity(event.getPos());
+        if (blockEntity == null) {
+            return;
+        }
+        ModuleHost host = ModuleHost.find(blockEntity);
+        if (host != null) {
+            if (host instanceof CreateModuleHost createHost) {
+                createHost.claimOwner(player);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void blockRestrictedDimensionTravel(EntityTravelToDimensionEvent event) {
+        if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
+            return;
+        }
+        ResourceLocation destination = event.getDimension().location();
+        if (destination.getNamespace().equals("alex_caves_dimensions") && BLOCKED_DIMENSIONS.contains(destination)
+            && player.level().dimension().location().equals(ResourceLocation.fromNamespaceAndPath("dw", "transfer"))
+            && player.getPersistentData().getBoolean("dw_dispatch_alex_caves_authorized")) return;
+        // Unlocked players may use command travel; the transfer mod separately blocks TF portals.
+        if (TWILIGHT_FOREST.equals(destination)
+            && (player.getTags().contains("dimensionworks_transfer.unlocked")
+                || (player.level().dimension().location().equals(ResourceLocation.fromNamespaceAndPath("dw", "transfer"))
+                    && player.getPersistentData().getBoolean("dw_dispatch_twilight_authorized")))) return;
+        if (!(CaveFactoryConfig.blockAetherAndAlexCaves() && BLOCKED_DIMENSIONS.contains(destination))
+            && !(CaveFactoryConfig.blockTwilightForest() && TWILIGHT_FOREST.equals(destination))) {
+            return;
+        }
+        event.setCanceled(true);
+        player.displayClientMessage(Component.literal("该维度暂未开放。"), true);
+    }
+
+    @SubscribeEvent
+    public static void interactWithModuleHost(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide || event.getEntity().isSpectator()) {
+            return;
+        }
+        BlockEntity blockEntity = event.getLevel().getBlockEntity(event.getPos());
+        if (blockEntity == null) {
+            return;
+        }
+        ModuleHost host = ModuleHost.find(blockEntity);
+        if (!(host instanceof CreateModuleHost createHost)) {
+            return;
+        }
+        Player player = event.getEntity();
+        ItemStack held = player.getMainHandItem();
+        if (held.getItem() instanceof ModuleItem) {
+            if (!createHost.isOwner(player)) {
+                player.displayClientMessage(Component.translatable(
+                    "message.dimensionworks_cave_factory.not_owner"
+                ), true);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.FAIL);
+                return;
+            }
+            if (!createHost.install(player, held)) {
+                player.displayClientMessage(Component.translatable(
+                    "message.dimensionworks_cave_factory.module_incompatible"
+                ), true);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.FAIL);
+                return;
+            }
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+        if (held.isEmpty() && player.isShiftKeyDown()) {
+            if (!createHost.isOwner(player)) {
+                player.displayClientMessage(Component.translatable(
+                    "message.dimensionworks_cave_factory.not_owner"
+                ), true);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.FAIL);
+                return;
+            }
+            if (createHost.ejectModules()) {
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void ejectModulesOnBreak(BlockEvent.BreakEvent event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        BlockEntity blockEntity = level.getBlockEntity(event.getPos());
+        if (blockEntity != null) {
+            ModuleHost host = ModuleHost.find(blockEntity);
+            if (host != null) host.ejectModules();
+        }
+    }
+
+    @SubscribeEvent
+    public static void playerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        Player player = event.getEntity();
+        long now = System.currentTimeMillis();
+        long window = CaveFactoryConfig.STABILITY_SECONDS.get() * 1_000L;
+        String dimension = event.getTo().location().toString();
+        for (int slot = 0; slot < player.getInventory().items.size(); slot++) {
+            ItemStack settled = settleStack(player, player.getInventory().items.get(slot), dimension, now, window);
+            player.getInventory().items.set(slot, settled);
+        }
+        for (int slot = 0; slot < player.getInventory().offhand.size(); slot++) {
+            ItemStack settled = settleStack(player, player.getInventory().offhand.get(slot), dimension, now, window);
+            player.getInventory().offhand.set(slot, settled);
+        }
+        ItemStack carried = settleStack(player, player.containerMenu.getCarried(), dimension, now, window);
+        player.containerMenu.setCarried(carried);
+    }
+
+    private static ItemStack settleStack(Player player, ItemStack stack, String dimension, long now, long window) {
+        if (stack.isEmpty()) {
+            return stack;
+        }
+        AmpouleExpiry.observe(stack, dimension, now, window);
+        AmpouleExpiry.Settlement settlement = AmpouleExpiry.settle(stack, now);
+        if (!settlement.expired()) {
+            return stack;
+        }
+        int expiredCount = stack.getCount();
+        if (!settlement.residue().isEmpty()) {
+            ItemStack residue = settlement.residue().copyWithCount(expiredCount);
+            if (!player.getInventory().add(residue)) {
+                player.drop(residue, false);
+            }
+        }
+        return settlement.stack().copyWithCount(expiredCount);
+    }
+}

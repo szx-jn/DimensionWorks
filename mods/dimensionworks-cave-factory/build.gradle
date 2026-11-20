@@ -1,139 +1,113 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
 
 version = '0.1.7'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_cave_factory'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-def rpmLimitBuild = file('../dimensionworks-rpm-limit/build.gradle').getText('UTF-8')
-def rpmLimitVersionMatch = rpmLimitBuild =~ /(?m)^version = '([^']+)'$/
-if (!rpmLimitVersionMatch.find()) {
-    throw new GradleException('Could not determine the RPM limit project version')
-}
-def rpmLimitVersion = rpmLimitVersionMatch.group(1)
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            mods {
-                dimensionworks_cave_factory {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {}
-        server {
-            args '--nogui'
-        }
-        gameTestServer {
-            args '--nogui'
-            property 'forge.enabledGameTestNamespaces', 'dimensionworks_cave_factory'
-        }
-    }
-}
-
-repositories {
-    maven { name = 'ModMaven'; url = 'https://modmaven.dev' }
-    maven { name = 'Curios'; url = 'https://maven.theillusivec4.top/' }
-    maven { name = 'BlameJared'; url = 'https://maven.blamejared.com' }
-    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
-    maven { name = 'Create'; url = 'https://maven.createmod.net' }
-    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
-    mavenCentral()
-}
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+apply from: rootProject.file('gradle/neoforge-create.gradle')
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
-    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
-    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    compileOnly fg.deobf(files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}.jar"))
-    compileOnly 'mezz.jei:jei-1.20.1-forge-api:15.20.0.115'
-    compileOnly 'mezz.jei:jei-1.20.1-common-api:15.20.0.115'
-    compileOnly 'maven.modrinth:jade:11.13.2+forge'
-
-    runtimeOnly fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
-    runtimeOnly 'io.github.llamalad7:mixinextras-forge:0.4.1'
-    runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
-
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation project(':dimensionworks-rpm-limit')
+    compileOnly 'maven.modrinth:jei:kmb7KviL'
+    compileOnly 'maven.modrinth:jade:eYz2YBGT'
+    runtimeOnly 'maven.modrinth:guideme:QeYKsstN'
+    runtimeOnly 'maven.modrinth:alexs-caves-unofficial-port:pC1MYhqR'
+    runtimeOnly 'maven.modrinth:dimensions-of-alexs-caves-unofficial-port:OJpP9UtE'
+    runtimeOnly 'maven.modrinth:citadel-1.21.1-port:mIylVpkN'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
-
-mixin {
-    add sourceSets.main, 'dimensionworks_cave_factory.refmap.json'
-    config 'dimensionworks_cave_factory.mixins.json'
-    debug.verbose = true
+test { useJUnitPlatform() }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.compileClasspath
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':reobfJar')
-}
+ext.gameTestCount = project.hasProperty('crystalCheck') ? 16 : 11
+apply from: rootProject.file('gradle/neoforge-gametest.gradle')
 
-tasks.named('test') {
-    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':reobfJar')
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-jar {
-    manifest.attributes([
-        'MixinConfigs': 'dimensionworks_cave_factory.mixins.json'
-    ])
-    finalizedBy 'reobfJar'
-}
-
-// Opt-in verification uses the pack's pinned local runtime releases.
+// 按需验证实际 KubeJS 熔融材料脚本与客户端图集；这些检查类不会进入模组 JAR。
 if (project.hasProperty('crystalCheck')) {
-    if (!project.hasProperty('crystalMods')) {
-        throw new GradleException('Supply -PcrystalMods=<DimensionWorks mods directory> for crystalCheck')
-    }
-    repositories {
-        flatDir { dirs '../dimensionworks-rpm-limit/build/libs' }
-        flatDir { dirs project.property('crystalMods') }
-    }
     dependencies {
-        runtimeOnly fg.deobf("dw-test:dimensionworks_rpm_limit:${rpmLimitVersion}")
-        [
-            'Mekanism:1.20.1-10.4.16.80', 'appliedenergistics2-forge:15.4.10',
-            'curios-forge:5.14.1+1.20.1', 'kubejs-forge:2001.6.5-build.26',
-            'rhino-forge:2001.2.3-build.10', 'architectury:9.2.14-forge',
-            'alexscaves:2.0.2', "Dimensions-of-Alex's-Caves:1.20.1-1.0.4",
-            'citadel:2.6.3-1.20.1', 'guideme:20.1.15'
-        ].each { coordinate -> runtimeOnly fg.deobf("dw-test:${coordinate}") }
+        runtimeOnly 'maven.modrinth:kubejs:GDXCpKlp'
+        runtimeOnly 'maven.modrinth:rhino:SqkDvOLG'
+        runtimeOnly 'maven.modrinth:better-advanced-tooltips:uPFbnD32'
     }
     sourceSets {
         crystalCheck {
-            compileClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
             runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
         }
     }
-    minecraft.runs {
-        client {
-            workingDirectory project.file('run-crystal-check')
-            property 'dimensionworks.verifyCrystallizedFluids', 'true'
-            mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.crystalCheck] }
-        }
-        gameTestServer {
-            workingDirectory project.file('run-crystal-check')
-            property 'forge.enabledGameTestNamespaces', 'dimensionworks_cave_factory'
-            mods.dimensionworks_cave_factory { sources = [sourceSets.main, sourceSets.crystalCheck] }
+    neoForge {
+        mods { "${base.archivesName.get()}" { sourceSet sourceSets.crystalCheck } }
+        runs {
+            client {
+                sourceSet = sourceSets.crystalCheck
+                gameDirectory = project.file('run-crystal-check')
+                systemProperty 'dimensionworks.verifyCrystallizedFluids', 'true'
+                jvmArguments.addAll('-Xmx2G', '-XX:ActiveProcessorCount=2')
+                programArguments.addAll('--width', '1024', '--height', '600')
+            }
+            gameTestServer { sourceSet = sourceSets.crystalCheck }
         }
     }
     tasks.register('prepareCrystalCheck', Copy) {
-        from '../../kubejs/startup_scripts/molten_metals.js'
+        from rootProject.file('kubejs/startup_scripts/molten_metals.js')
+        into 'run-gametest/kubejs/startup_scripts'
+    }
+    tasks.register('prepareCrystalClientCheck', Copy) {
+        from rootProject.file('kubejs/startup_scripts/molten_metals.js')
         into 'run-crystal-check/kubejs/startup_scripts'
     }
-    tasks.matching { it.name in ['runGameTestServer', 'runClient'] }.configureEach { dependsOn 'prepareCrystalCheck' }
+    tasks.register('prepareFactoryDataCheck', Copy) {
+        from rootProject.file('kubejs/data/dimensionworks_cave_factory')
+        into 'run-gametest/kubejs/data/dimensionworks_cave_factory'
+    }
+    tasks.named('runGameTestServer') { dependsOn 'prepareCrystalCheck', 'prepareFactoryDataCheck' }
+    tasks.named('runClient') {
+        dependsOn 'prepareCrystalClientCheck'
+        doLast {
+            def log = file('run-crystal-check/logs/latest.log').getText('UTF-8')
+            if (!log.contains('SHARED CREATIVE TAB CHECK PASSED:') || !log.contains('CRYSTALLIZED FLUID CHECK PASSED:')) {
+                throw new GradleException('Actual crystallized fluid and shared creative tab checks did not complete')
+            }
+        }
+    }
+}
+
+if (project.hasProperty('caveServerDir')) {
+    if (!project.hasProperty('crystalCheck')) throw new GradleException('caveServerDir requires -PcrystalCheck')
+    def checkDirectory = file(project.property('caveServerDir'))
+    neoForge.runs {
+        caveServerCheck {
+            server()
+            sourceSet = sourceSets.crystalCheck
+            gameDirectory = checkDirectory
+            systemProperty 'dimensionworks.verifyCaveServer', 'true'
+            systemProperty 'dimensionworks.verifyCaveReload', project.hasProperty('caveReloadOnly').toString()
+            jvmArguments.addAll('-Xmx2G', '-XX:ActiveProcessorCount=2')
+            programArgument '--nogui'
+        }
+    }
+    def requireIsolatedWorld = {
+        def marker = new File(checkDirectory, 'dimensionworks-cave-check.marker')
+        if (!marker.isFile() || marker.getText('UTF-8').trim() != 'isolated-cave-check') {
+            throw new GradleException('Cave checks require an explicitly marked isolated world directory')
+        }
+    }
+    tasks.register('prepareCaveServerCheck', Copy) {
+        doFirst { requireIsolatedWorld() }
+        from(rootProject.file('kubejs/startup_scripts/molten_metals.js')) { into 'kubejs/startup_scripts' }
+        from(rootProject.file('kubejs/data/dimensionworks_cave_factory')) { into 'kubejs/data/dimensionworks_cave_factory' }
+        into checkDirectory
+    }
+    tasks.named('runCaveServerCheck') {
+        dependsOn 'prepareCaveServerCheck'
+        doFirst { requireIsolatedWorld() }
+        doLast {
+            if (!new File(checkDirectory, 'logs/latest.log').getText('UTF-8').contains(project.hasProperty('caveReloadOnly') ? 'CAVE RELOAD CHECK PASSED:' : 'CAVE SERVER CHECK PASSED:')) {
+                throw new GradleException('Actual cave server checks did not complete')
+            }
+        }
+    }
 }

@@ -4,9 +4,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
-public final class CaveProcessingInput implements Container {
+public final class CaveProcessingInput implements Container, net.minecraft.world.item.crafting.RecipeInput {
     private final NonNullList<ItemStack> items;
     private final FluidStack fluid;
 
@@ -18,6 +18,8 @@ public final class CaveProcessingInput implements Container {
     public FluidStack fluidInput() {
         return fluid;
     }
+
+    @Override public int size() { return getContainerSize(); }
 
     @Override
     public int getContainerSize() {

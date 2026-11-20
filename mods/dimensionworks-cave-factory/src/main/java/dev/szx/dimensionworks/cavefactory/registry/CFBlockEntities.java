@@ -6,12 +6,12 @@ import dev.szx.dimensionworks.cavefactory.blockentity.FactoryPortBlockEntity;
 import dev.szx.dimensionworks.cavefactory.blockentity.FluidStabilizerBlockEntity;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public final class CFBlockEntities {
-    public static RegistryObject<BlockEntityType<FactoryControllerBlockEntity>> CONTROLLER;
-    public static RegistryObject<BlockEntityType<FactoryPortBlockEntity>> PORT;
-    public static RegistryObject<BlockEntityType<FluidStabilizerBlockEntity>> STABILIZER;
+    public static DeferredHolder<BlockEntityType<?>, BlockEntityType<FactoryControllerBlockEntity>> CONTROLLER;
+    public static DeferredHolder<BlockEntityType<?>, BlockEntityType<FactoryPortBlockEntity>> PORT;
+    public static DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidStabilizerBlockEntity>> STABILIZER;
 
     private CFBlockEntities() {}
 

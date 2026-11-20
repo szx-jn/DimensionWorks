@@ -21,24 +21,18 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -137,12 +131,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
             onStorageContentsChanged();
         }
     };
-    private final LazyOptional<IItemHandler> inputItemCapability = LazyOptional.of(() -> inputItems);
-    private final LazyOptional<IItemHandler> outputItemCapability = LazyOptional.of(
-        () -> new FactoryOutputItemHandler(outputItems, residue, ampouleOutput)
-    );
-    private final LazyOptional<IFluidHandler> inputFluidCapability = LazyOptional.of(() -> inputTank);
-    private final LazyOptional<IFluidHandler> outputFluidCapability = LazyOptional.of(() -> outputTank);
+    private final IItemHandler outputItemCapability = new FactoryOutputItemHandler(outputItems, residue, ampouleOutput);
 
     private final Map<Direction, PortMode> portModes = new EnumMap<>(Direction.class);
     private UUID owner;
@@ -229,50 +218,24 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     }
 
     public float effectiveRpm() {
-        try {
-            return dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp(this, getTheoreticalSpeed());
-        } catch (LinkageError | RuntimeException ignored) {
-            return getTheoreticalSpeed();
-        }
+        return dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp(this, getTheoreticalSpeed());
     }
 
     public double overspeedMultiplier() {
-        try {
-            if (!dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_ENABLED.get()) {
-                return 1.0D;
-            }
-            return dev.szx.dimensionworks.rpmlimit.OverspeedCurve.multiplier(
-                effectiveRpm(),
-                CaveFactoryConfig.KINETIC_SATURATION_RPM.get(),
-                dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_CAP.get()
-            );
-        } catch (LinkageError | RuntimeException ignored) {
-            float rpm = effectiveRpm();
-            return rpm <= 0 ? 1 : Math.max(1, rpm / CaveFactoryConfig.KINETIC_SATURATION_RPM.get());
-        }
+        if (!dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_ENABLED.get()) return 1.0D;
+        return dev.szx.dimensionworks.rpmlimit.OverspeedCurve.multiplier(effectiveRpm(),
+            CaveFactoryConfig.KINETIC_SATURATION_RPM.get(), dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_CAP.get());
     }
 
     public float stressImpactWithOverspeed(float baseImpact) {
         float impact = Math.max(0, baseImpact);
-        try {
-            if (!dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_STRESS_SCALING.get()
-                || dev.szx.dimensionworks.rpmlimit.OverspeedBonus.isWhitelisted(this)) {
-                return impact;
-            }
-        } catch (LinkageError | RuntimeException ignored) {
-        }
+        if (!dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_STRESS_SCALING.get()
+            || dev.szx.dimensionworks.rpmlimit.OverspeedBonus.isWhitelisted(this)) return impact;
         return (float) (impact * overspeedMultiplier());
     }
 
     public int batchesThisTick() {
-        try {
-            return dev.szx.dimensionworks.rpmlimit.OverspeedCurve.batches(
-                overspeedMultiplier(),
-                level == null ? 0 : level.getGameTime()
-            );
-        } catch (LinkageError | RuntimeException ignored) {
-            return (int) Math.max(1, overspeedMultiplier());
-        }
+        return dev.szx.dimensionworks.rpmlimit.OverspeedCurve.batches(overspeedMultiplier(), level == null ? 0 : level.getGameTime());
     }
 
     protected void recordSuccessfulBatch() {
@@ -309,11 +272,15 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
             next = next.next();
         }
         portModes.put(direction, next);
+        if (level != null) {
+            level.invalidateCapabilities(worldPosition);
+            for (Direction adjacent : Direction.values()) level.invalidateCapabilities(worldPosition.relative(adjacent));
+        }
         refreshKineticConnection(direction);
         if (level != null) {
             BlockEntity port = level.getBlockEntity(worldPosition.relative(direction));
             if (port != null) {
-                port.invalidateCaps();
+                level.invalidateCapabilities(port.getBlockPos());
                 level.sendBlockUpdated(port.getBlockPos(), port.getBlockState(), port.getBlockState(), 3);
             }
         }
@@ -529,7 +496,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
             }
             return stack.copyWithCount(stack.getCount() - moved);
         }
-        if (!ItemStack.isSameItemSameTags(existing, stack)) {
+        if (!ItemStack.isSameItemSameComponents(existing, stack)) {
             return stack;
         }
         int limit = Math.min(handler.getSlotLimit(slot), existing.getMaxStackSize());
@@ -668,7 +635,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         for (var rule : level.getRecipeManager().getAllRecipesFor(
             dev.szx.dimensionworks.cavefactory.registry.CFRecipes.MODULE_RECIPE_RULE_TYPE.get()
         )) {
-            if (rule.module() == module && !rule.recipeIds().isEmpty()) {
+            if (rule.value().module() == module && !rule.value().recipeIds().isEmpty()) {
                 return true;
             }
         }
@@ -764,60 +731,41 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         return level != null && !isRemoved();
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
-        if (capability == ModuleHost.CAPABILITY) {
-            return moduleCapability.cast();
-        }
-        if (side != null) {
-            PortMode mode = portMode(side);
-            if (capability == ForgeCapabilities.ITEM_HANDLER) {
-                if (mode == PortMode.ITEM_INPUT) {
-                    return inputItemCapability.cast();
-                }
-                if (mode == PortMode.ITEM_OUTPUT) {
-                    return outputItemCapability.cast();
-                }
-            }
-            if (capability == ForgeCapabilities.FLUID_HANDLER) {
-                if (mode == PortMode.FLUID_INPUT) {
-                    return inputFluidCapability.cast();
-                }
-                if (mode == PortMode.FLUID_OUTPUT) {
-                    return outputFluidCapability.cast();
-                }
-            }
-        }
-        return super.getCapability(capability, side);
+    @Nullable
+    public IItemHandler itemHandler(@Nullable Direction side) {
+        if (side == null || isRemoved()) return null;
+        return switch (portMode(side)) {
+            case ITEM_INPUT -> inputItems;
+            case ITEM_OUTPUT -> outputItemCapability;
+            default -> null;
+        };
     }
 
-    private final LazyOptional<ModuleHost> moduleCapability = LazyOptional.of(() -> this);
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        inputItemCapability.invalidate();
-        outputItemCapability.invalidate();
-        inputFluidCapability.invalidate();
-        outputFluidCapability.invalidate();
-        moduleCapability.invalidate();
+    @Nullable
+    public IFluidHandler fluidHandler(@Nullable Direction side) {
+        if (side == null || isRemoved()) return null;
+        return switch (portMode(side)) {
+            case FLUID_INPUT -> inputTank;
+            case FLUID_OUTPUT -> outputTank;
+            default -> null;
+        };
     }
 
     @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
+    protected void write(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
         tag.putString(OWNER_KEY, owner == null ? "" : owner.toString());
         tag.putString(OWNER_NAME_KEY, ownerName);
         tag.putString(PHASE_KEY, phaseCycle.phase().name());
         tag.putInt(PHASE_PROGRESS_KEY, phaseCycle.progress());
-        tag.put(INPUT_ITEMS_KEY, inputItems.serializeNBT());
-        tag.put(OUTPUT_ITEMS_KEY, outputItems.serializeNBT());
-        tag.put(RESIDUE_KEY, residue.serializeNBT());
-        tag.put(AMPOULE_IN_KEY, ampouleInput.serializeNBT());
-        tag.put(AMPOULE_OUT_KEY, ampouleOutput.serializeNBT());
-        tag.put(MODULES_KEY, modules.serializeNBT());
-        tag.put(INPUT_FLUID_KEY, inputTank.writeToNBT(new CompoundTag()));
-        tag.put(OUTPUT_FLUID_KEY, outputTank.writeToNBT(new CompoundTag()));
+        tag.put(INPUT_ITEMS_KEY, inputItems.serializeNBT(registries));
+        tag.put(OUTPUT_ITEMS_KEY, outputItems.serializeNBT(registries));
+        tag.put(RESIDUE_KEY, residue.serializeNBT(registries));
+        tag.put(AMPOULE_IN_KEY, ampouleInput.serializeNBT(registries));
+        tag.put(AMPOULE_OUT_KEY, ampouleOutput.serializeNBT(registries));
+        tag.put(MODULES_KEY, modules.serializeNBT(registries));
+        tag.put(INPUT_FLUID_KEY, inputTank.writeToNBT(registries, new CompoundTag()));
+        tag.put(OUTPUT_FLUID_KEY, outputTank.writeToNBT(registries, new CompoundTag()));
         CompoundTag modes = new CompoundTag();
         for (Direction direction : Direction.values()) {
             modes.putString(direction.getName(), portMode(direction).id());
@@ -826,25 +774,21 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     }
 
     @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
+    protected void read(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
         owner = tag.getString(OWNER_KEY).isBlank() ? null : UUID.fromString(tag.getString(OWNER_KEY));
         ownerName = tag.getString(OWNER_NAME_KEY);
-        FactoryPhase phase = FactoryPhase.PHASE_A;
-        try {
-            phase = FactoryPhase.valueOf(tag.getString(PHASE_KEY));
-        } catch (IllegalArgumentException ignored) {
-        }
+        FactoryPhase phase = tag.contains(PHASE_KEY) ? FactoryPhase.valueOf(tag.getString(PHASE_KEY)) : FactoryPhase.PHASE_A;
         phaseCycle = PhaseCycle.fromState(phase, tag.getInt(PHASE_PROGRESS_KEY), CaveFactoryConfig.PHASE_BATCHES.get());
-        if (tag.contains(INPUT_ITEMS_KEY)) inputItems.deserializeNBT(tag.getCompound(INPUT_ITEMS_KEY));
-        if (tag.contains(OUTPUT_ITEMS_KEY)) outputItems.deserializeNBT(tag.getCompound(OUTPUT_ITEMS_KEY));
-        if (tag.contains(RESIDUE_KEY)) residue.deserializeNBT(tag.getCompound(RESIDUE_KEY));
-        if (tag.contains(AMPOULE_IN_KEY)) ampouleInput.deserializeNBT(tag.getCompound(AMPOULE_IN_KEY));
-        if (tag.contains(AMPOULE_OUT_KEY)) ampouleOutput.deserializeNBT(tag.getCompound(AMPOULE_OUT_KEY));
-        if (tag.contains(MODULES_KEY)) modules.deserializeNBT(tag.getCompound(MODULES_KEY));
+        if (tag.contains(INPUT_ITEMS_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(INPUT_ITEMS_KEY), inputItems);
+        if (tag.contains(OUTPUT_ITEMS_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(OUTPUT_ITEMS_KEY), outputItems);
+        if (tag.contains(RESIDUE_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(RESIDUE_KEY), residue);
+        if (tag.contains(AMPOULE_IN_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(AMPOULE_IN_KEY), ampouleInput);
+        if (tag.contains(AMPOULE_OUT_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(AMPOULE_OUT_KEY), ampouleOutput);
+        if (tag.contains(MODULES_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(MODULES_KEY), modules);
         refreshFluidCapacity();
-        if (tag.contains(INPUT_FLUID_KEY)) inputTank.readFromNBT(tag.getCompound(INPUT_FLUID_KEY));
-        if (tag.contains(OUTPUT_FLUID_KEY)) outputTank.readFromNBT(tag.getCompound(OUTPUT_FLUID_KEY));
+        if (tag.contains(INPUT_FLUID_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readFluid(registries, tag.getCompound(INPUT_FLUID_KEY), inputTank);
+        if (tag.contains(OUTPUT_FLUID_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readFluid(registries, tag.getCompound(OUTPUT_FLUID_KEY), outputTank);
         CompoundTag modes = tag.getCompound(PORT_MODES_KEY);
         for (Direction direction : Direction.values()) {
             String id = modes.getString(direction.getName());
@@ -860,8 +804,8 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return writeClient(new CompoundTag());
+    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        return writeClient(new CompoundTag(), registries);
     }
 
     @Override

@@ -25,7 +25,8 @@ public abstract class ContraptionMixin {
         }
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity != null) {
-            blockEntity.getCapability(ModuleHost.CAPABILITY).ifPresent(ModuleHost::ejectModules);
+            ModuleHost host = ModuleHost.find(blockEntity);
+            if (host != null) host.ejectModules();
         }
     }
 }

@@ -10,8 +10,9 @@ function MoltenMetalFluidDefinition(id, displayName, color) {
 
 MoltenMetalFluidDefinition.prototype.register = function(event) {
   return event.create(this.id)
-    .thickTexture(this.color)
-    .bucketColor(this.color)
+    .stillTexture('kubejs:block/thick_fluid_still')
+    .flowingTexture('kubejs:block/thick_fluid_flow')
+    .tint(this.color)
     .displayName(this.displayName)
 }
 
@@ -52,11 +53,11 @@ StartupEvents.registry('fluid', event => {
   DW_MOLTEN_METALS.forEach(([id, displayName, color]) => {
     new MoltenMetalFluidDefinition(id, displayName, color).register(event)
     const metal = id.substring('dimensionworks:molten_'.length)
+    // KubeJS 7 从熔融底纹生成同色桶；洞穴工厂图集来源为实际 generated 流体贴图叠加结晶层。
     event.create(`dimensionworks_cave_factory:crystallized_molten_${metal}`)
-      .stillTexture(`dimensionworks_cave_factory:block/crystallized_molten_${metal}_still`)
-      .flowingTexture(`dimensionworks_cave_factory:block/crystallized_molten_${metal}_flow`)
-      .color(0xFFFFFF)
-      .bucketColor(color)
+      .stillTexture('kubejs:block/thick_fluid_still')
+      .flowingTexture('kubejs:block/thick_fluid_flow')
+      .tint(color)
       .displayName(`结晶${displayName}`)
   })
 })

@@ -1,6 +1,5 @@
 package dev.szx.dimensionworks.cavefactory.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.szx.dimensionworks.cavefactory.menu.FactoryMachineMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

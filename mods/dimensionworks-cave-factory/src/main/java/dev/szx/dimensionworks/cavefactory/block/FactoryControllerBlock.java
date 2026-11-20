@@ -8,7 +8,6 @@ import dev.szx.dimensionworks.cavefactory.registry.CFBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class FactoryControllerBlock extends BaseEntityBlock
@@ -36,13 +34,18 @@ public class FactoryControllerBlock extends BaseEntityBlock
         return machineType;
     }
 
+    @Override protected com.mojang.serialization.MapCodec<? extends BaseEntityBlock> codec() {
+        return com.mojang.serialization.codecs.RecordCodecBuilder.<FactoryControllerBlock>mapCodec(instance -> instance.group(
+            MachineType.CODEC.fieldOf("machine").forGetter(b -> b.machineType),
+            propertiesCodec()).apply(instance, FactoryControllerBlock::new));
+    }
+
     @Override
-    public InteractionResult use(
+    protected InteractionResult useWithoutItem(
         BlockState state,
         Level level,
         BlockPos pos,
         Player player,
-        InteractionHand hand,
         BlockHitResult hit
     ) {
         if (level.isClientSide) {
@@ -52,7 +55,7 @@ public class FactoryControllerBlock extends BaseEntityBlock
         if (controller == null) {
             return InteractionResult.PASS;
         }
-        NetworkHooks.openScreen((ServerPlayer) player, controller, controller.getBlockPos());
+        ((ServerPlayer) player).openMenu(controller, controller.getBlockPos());
         return InteractionResult.CONSUME;
     }
 

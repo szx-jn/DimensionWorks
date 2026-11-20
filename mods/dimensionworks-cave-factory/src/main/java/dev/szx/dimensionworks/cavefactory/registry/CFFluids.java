@@ -2,26 +2,23 @@ package dev.szx.dimensionworks.cavefactory.registry;
 
 import dev.szx.dimensionworks.cavefactory.DimensionWorksCaveFactory;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public final class CFFluids {
     public record FluidEntry(
         MachineType machine,
-        RegistryObject<FluidType> type,
-        RegistryObject<ForgeFlowingFluid.Source> still,
-        RegistryObject<ForgeFlowingFluid.Flowing> flowing,
-        RegistryObject<LiquidBlock> block
+        DeferredHolder<FluidType, FluidType> type,
+        DeferredHolder<net.minecraft.world.level.material.Fluid, BaseFlowingFluid.Source> still,
+        DeferredHolder<net.minecraft.world.level.material.Fluid, BaseFlowingFluid.Flowing> flowing,
+        DeferredHolder<net.minecraft.world.level.block.Block, LiquidBlock> block
     ) {}
 
     private static final Map<MachineType, FluidEntry> BY_MACHINE = new EnumMap<>(MachineType.class);
@@ -43,7 +40,7 @@ public final class CFFluids {
         return BY_MACHINE.get(machine);
     }
 
-    public static boolean isFactoryFluid(net.minecraftforge.fluids.FluidStack stack) {
+    public static boolean isFactoryFluid(net.neoforged.neoforge.fluids.FluidStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
@@ -57,64 +54,44 @@ public final class CFFluids {
 
     private static void registerFluid(MachineType machine, int color) {
         String id = machine.fluidId();
-        RegistryObject<FluidType> type = DimensionWorksCaveFactory.CFRegistry.FLUID_TYPES.register(
+        DeferredHolder<FluidType, FluidType> type = DimensionWorksCaveFactory.CFRegistry.FLUID_TYPES.register(
             id,
             () -> new FluidType(FluidType.Properties.create()
                 .descriptionId("fluid_type.dimensionworks_cave_factory." + id)
                 .density(1_100)
-                .viscosity(1_400)) {
-                @Override
-                public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
-                    consumer.accept(new IClientFluidTypeExtensions() {
-                        @Override
-                        public ResourceLocation getStillTexture() {
-                            return new ResourceLocation("minecraft", "block/water_still");
-                        }
-
-                        @Override
-                        public ResourceLocation getFlowingTexture() {
-                            return new ResourceLocation("minecraft", "block/water_flow");
-                        }
-
-                        @Override
-                        public int getTintColor() {
-                            return color;
-                        }
-                    });
-                }
-            }
+                .viscosity(1_400))
         );
 
-        RegistryObject<ForgeFlowingFluid.Source> still =
+        DeferredHolder<net.minecraft.world.level.material.Fluid, BaseFlowingFluid.Source> still =
             DimensionWorksCaveFactory.CFRegistry.FLUIDS.register(
                 id,
-                () -> new ForgeFlowingFluid.Source(properties(machine))
+                () -> new BaseFlowingFluid.Source(properties(machine))
             );
 
-        RegistryObject<ForgeFlowingFluid.Flowing> flowing =
+        DeferredHolder<net.minecraft.world.level.material.Fluid, BaseFlowingFluid.Flowing> flowing =
             DimensionWorksCaveFactory.CFRegistry.FLUIDS.register(
                 id + "_flowing",
-                () -> new ForgeFlowingFluid.Flowing(properties(machine))
+                () -> new BaseFlowingFluid.Flowing(properties(machine))
             );
 
-        RegistryObject<LiquidBlock> block =
+        DeferredHolder<net.minecraft.world.level.block.Block, LiquidBlock> block =
             DimensionWorksCaveFactory.CFRegistry.BLOCKS.register(
                 id,
-                () -> new LiquidBlock(still::get, BlockBehaviour.Properties.copy(Blocks.WATER).noLootTable())
+                () -> new LiquidBlock(still.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable())
             );
 
         BY_MACHINE.put(machine, new FluidEntry(machine, type, still, flowing, block));
     }
 
-    private static ForgeFlowingFluid.Properties properties(MachineType machine) {
-        return new ForgeFlowingFluid.Properties(
+    private static BaseFlowingFluid.Properties properties(MachineType machine) {
+        return new BaseFlowingFluid.Properties(
             () -> BY_MACHINE.get(machine).type().get(),
             () -> BY_MACHINE.get(machine).still().get(),
             () -> BY_MACHINE.get(machine).flowing().get()
         ).block(() -> BY_MACHINE.get(machine).block().get());
     }
 
-    private static int colorFor(MachineType machine) {
+    public static int colorFor(MachineType machine) {
         return switch (machine) {
             case MAGNETIC -> 0xFFE85D5D;
             case PRIMORDIAL -> 0xFF6FAE4B;

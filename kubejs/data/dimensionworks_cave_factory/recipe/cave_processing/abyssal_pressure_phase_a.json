@@ -1,0 +1,37 @@
+{
+  "type": "dimensionworks_cave_factory:cave_processing",
+  "machine": "abyssal_pressure_tower",
+  "phase": "phase_a",
+  "ingredients": [
+    {
+      "ingredient": {
+        "item": "alexscaves:abyssmarine"
+      },
+      "count": 4
+    },
+    {
+      "ingredient": {
+        "item": "alexscaves:bioluminesscence"
+      },
+      "count": 2
+    },
+    {
+      "ingredient": {
+        "item": "alexscaves:marine_snow"
+      },
+      "count": 2
+    }
+  ],
+  "fluid_output": {
+    "amount": 250,
+    "id": "dimensionworks_cave_factory:abyssal_brine"
+  },
+  "results": [
+    {
+      "count": 1,
+      "id": "alexscaves:pearl"
+    }
+  ],
+  "duration": 120,
+  "residue": "abyssal_pressure_tower"
+}

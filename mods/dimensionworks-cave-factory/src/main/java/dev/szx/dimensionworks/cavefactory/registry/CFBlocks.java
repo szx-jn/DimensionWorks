@@ -9,21 +9,19 @@ import dev.szx.dimensionworks.cavefactory.logic.MachineType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class CFBlocks {
-    private static final Map<MachineType, RegistryObject<FactoryControllerBlock>> CONTROLLERS =
+    private static final Map<MachineType, DeferredHolder<net.minecraft.world.level.block.Block, FactoryControllerBlock>> CONTROLLERS =
         new EnumMap<>(MachineType.class);
     private static boolean registered;
 
-    public static RegistryObject<FactoryCasingBlock> FACTORY_CASING;
-    public static RegistryObject<FactoryPortBlock> FACTORY_PORT;
-    public static RegistryObject<FluidStabilizerBlock> FLUID_STABILIZER;
+    public static DeferredHolder<net.minecraft.world.level.block.Block, FactoryCasingBlock> FACTORY_CASING;
+    public static DeferredHolder<net.minecraft.world.level.block.Block, FactoryPortBlock> FACTORY_PORT;
+    public static DeferredHolder<net.minecraft.world.level.block.Block, FluidStabilizerBlock> FLUID_STABILIZER;
     private CFBlocks() {}
 
     public static void register() {
@@ -34,21 +32,21 @@ public final class CFBlocks {
 
         FACTORY_CASING = DimensionWorksCaveFactory.CFRegistry.BLOCKS.register(
             "factory_casing",
-            () -> new FactoryCasingBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+            () -> new FactoryCasingBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                 .strength(4.0F, 8.0F)
                 .requiresCorrectToolForDrops())
         );
 
         FACTORY_PORT = DimensionWorksCaveFactory.CFRegistry.BLOCKS.register(
             "factory_port",
-            () -> new FactoryPortBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+            () -> new FactoryPortBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                 .strength(4.0F, 8.0F)
                 .requiresCorrectToolForDrops())
         );
 
         FLUID_STABILIZER = DimensionWorksCaveFactory.CFRegistry.BLOCKS.register(
             "fluid_stabilizer",
-            () -> new FluidStabilizerBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+            () -> new FluidStabilizerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                 .strength(5.0F, 10.0F)
                 .requiresCorrectToolForDrops())
         );
@@ -60,7 +58,7 @@ public final class CFBlocks {
                     machine.id(),
                     () -> new FactoryControllerBlock(
                         machine,
-                        BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+                        BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                             .strength(5.0F, 12.0F)
                             .requiresCorrectToolForDrops()
                     )
@@ -69,7 +67,7 @@ public final class CFBlocks {
         }
     }
 
-    public static RegistryObject<FactoryControllerBlock> controller(MachineType machine) {
+    public static DeferredHolder<net.minecraft.world.level.block.Block, FactoryControllerBlock> controller(MachineType machine) {
         return CONTROLLERS.get(machine);
     }
 }

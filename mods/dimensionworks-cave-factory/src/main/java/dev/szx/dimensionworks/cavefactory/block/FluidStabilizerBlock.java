@@ -7,7 +7,6 @@ import dev.szx.dimensionworks.cavefactory.registry.CFBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +18,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class FluidStabilizerBlock extends BaseEntityBlock
@@ -38,13 +36,14 @@ public class FluidStabilizerBlock extends BaseEntityBlock
         return CFBlockEntities.STABILIZER.get();
     }
 
+    @Override protected com.mojang.serialization.MapCodec<? extends BaseEntityBlock> codec() { return simpleCodec(FluidStabilizerBlock::new); }
+
     @Override
-    public InteractionResult use(
+    protected InteractionResult useWithoutItem(
         BlockState state,
         Level level,
         BlockPos pos,
         Player player,
-        InteractionHand hand,
         BlockHitResult hit
     ) {
         if (level.isClientSide) {
@@ -54,7 +53,7 @@ public class FluidStabilizerBlock extends BaseEntityBlock
         if (machine == null) {
             return InteractionResult.PASS;
         }
-        NetworkHooks.openScreen((ServerPlayer) player, machine, machine.getBlockPos());
+        ((ServerPlayer) player).openMenu(machine, machine.getBlockPos());
         return InteractionResult.CONSUME;
     }
 

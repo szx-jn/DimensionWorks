@@ -5,7 +5,6 @@ import dev.szx.dimensionworks.cavefactory.logic.DeterministicBonus;
 import dev.szx.dimensionworks.cavefactory.logic.FactoryModule;
 import dev.szx.dimensionworks.cavefactory.logic.MachineCapability;
 import dev.szx.dimensionworks.cavefactory.logic.ModuleHost;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -15,7 +14,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +28,7 @@ public final class CreateModuleHost implements ModuleHost {
     private static final String MODULES_KEY = "DimensionWorksModules";
     private final BlockEntity owner;
     private final MachineCapability capability;
+    private long cachedRecipeGeneration = -1;
     private RecipeManager mappedRecipeManager;
     private Set<ResourceLocation> mappedRecipeIds = Set.of();
     private UUID ownerId;
@@ -44,7 +44,7 @@ public final class CreateModuleHost implements ModuleHost {
 
         @Override
         protected void onContentsChanged(int slot) {
-            owner.getPersistentData().put(MODULES_KEY, serializeNBT());
+            owner.getPersistentData().put(MODULES_KEY, serializeNBT(owner.getLevel().registryAccess()));
             owner.setChanged();
         }
     };
@@ -54,17 +54,11 @@ public final class CreateModuleHost implements ModuleHost {
         this.capability = capability;
         CompoundTag data = owner.getPersistentData();
         String storedOwner = data.getString(OWNER_KEY);
-        if (!storedOwner.isBlank()) {
-            try {
-                ownerId = UUID.fromString(storedOwner);
-            } catch (IllegalArgumentException ignored) {
-                ownerId = null;
-            }
-        }
+        ownerId = storedOwner.isBlank() ? null : UUID.fromString(storedOwner);
         ownerName = data.getString(OWNER_NAME_KEY);
         CompoundTag persisted = owner.getPersistentData().getCompound(MODULES_KEY);
         if (!persisted.isEmpty()) {
-            modules.deserializeNBT(persisted);
+            dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(owner.getLevel().registryAccess(), persisted, modules);
         }
     }
 
@@ -172,26 +166,30 @@ public final class CreateModuleHost implements ModuleHost {
             return;
         }
         RecipeManager manager = level.getRecipeManager();
-        if (manager == mappedRecipeManager) {
+        if (manager == mappedRecipeManager && cachedRecipeGeneration == dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.generation()) {
             return;
         }
         Set<ResourceLocation> ids = new HashSet<>();
         for (var rule : manager.getAllRecipesFor(
             dev.szx.dimensionworks.cavefactory.registry.CFRecipes.MODULE_RECIPE_RULE_TYPE.get()
         )) {
-            if (rule.module() == FactoryModule.PHASE_CONVERTER) {
-                ids.addAll(rule.recipeIds());
+            if (rule.value().module() == FactoryModule.PHASE_CONVERTER) {
+                ids.addAll(rule.value().recipeIds());
             }
         }
         mappedRecipeManager = manager;
+        cachedRecipeGeneration = dev.szx.dimensionworks.cavefactory.logic.FactoryRecipeReload.generation();
         mappedRecipeIds = Set.copyOf(ids);
     }
 
-    private boolean recordMappedSuccess(ResourceLocation recipeId) {
-        if (moduleAt(1) != FactoryModule.PHASE_CONVERTER || !isMappedRecipe(recipeId)) {
-            return false;
+    private boolean recordMappedSuccess(Recipe<?> recipe) {
+        if (moduleAt(1) != FactoryModule.PHASE_CONVERTER) return false;
+        refreshMappedRecipes();
+        for (ResourceLocation id : mappedRecipeIds) {
+            var holder = owner.getLevel().getRecipeManager().byKey(id);
+            if (holder.isPresent() && holder.get().value() == recipe) return true;
         }
-        return true;
+        return false;
     }
 
     private boolean recordMappedSuccess() {
@@ -202,9 +200,9 @@ public final class CreateModuleHost implements ModuleHost {
     }
 
     public static void applyBasinBonus(BlockEntity hostEntity, BasinBlockEntity basin, Recipe<?> recipe) {
-        ModuleHost host = hostEntity.getCapability(ModuleHost.CAPABILITY).orElse(null);
+        ModuleHost host = ModuleHost.find(hostEntity);
         if (!(host instanceof CreateModuleHost createHost)
-            || !createHost.recordMappedSuccess(recipe.getId())) {
+            || !createHost.recordMappedSuccess(recipe)) {
             return;
         }
         ItemStack bonus = recipe.getResultItem(basin.getLevel().registryAccess()).copyWithCount(1);

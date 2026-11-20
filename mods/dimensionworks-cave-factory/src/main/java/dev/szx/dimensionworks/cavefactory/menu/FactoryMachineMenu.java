@@ -5,15 +5,14 @@ import dev.szx.dimensionworks.cavefactory.item.ModuleItem;
 import dev.szx.dimensionworks.cavefactory.logic.MachineInventory;
 import dev.szx.dimensionworks.cavefactory.registry.CFMenus;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class FactoryMachineMenu extends AbstractContainerMenu {
     private static final int MACHINE_SLOT_START = 0;

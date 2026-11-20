@@ -1,14 +1,11 @@
 package dev.szx.dimensionworks.cavefactory.blockentity;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import dev.szx.dimensionworks.cavefactory.block.FactoryPortBlock;
 import dev.szx.dimensionworks.cavefactory.registry.CFBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
 public class FactoryPortBlockEntity extends KineticBlockEntity {
@@ -26,6 +23,7 @@ public class FactoryPortBlockEntity extends KineticBlockEntity {
             return null;
         }
         for (Direction direction : Direction.values()) {
+            if (!level.hasChunkAt(worldPosition.relative(direction))) continue;
             BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
             if (blockEntity instanceof FactoryControllerBlockEntity) {
                 return direction;
@@ -50,17 +48,16 @@ public class FactoryPortBlockEntity extends KineticBlockEntity {
         return blockEntity instanceof FactoryControllerBlockEntity controller ? controller : null;
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
-        FactoryControllerBlockEntity controller = controller();
-        if (controller != null) {
-            Direction outward = inwardDirection() == null ? null : inwardDirection().getOpposite();
-            LazyOptional<T> remote = controller.getCapability(capability, outward);
-            if (remote.isPresent()) {
-                return remote;
-            }
-        }
-        return super.getCapability(capability, side);
+    @Nullable
+    public net.neoforged.neoforge.items.IItemHandler itemHandler(@Nullable Direction side) {
+        var controller = controller();
+        return controller == null ? null : controller.itemHandler(outwardDirection());
+    }
+
+    @Nullable
+    public net.neoforged.neoforge.fluids.capability.IFluidHandler fluidHandler(@Nullable Direction side) {
+        var controller = controller();
+        return controller == null ? null : controller.fluidHandler(outwardDirection());
     }
 
     @Override

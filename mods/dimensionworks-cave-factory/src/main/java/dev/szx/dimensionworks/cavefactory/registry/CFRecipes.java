@@ -6,16 +6,16 @@ import dev.szx.dimensionworks.cavefactory.recipe.FluidStabilizationRecipe;
 import dev.szx.dimensionworks.cavefactory.recipe.ModuleRecipeRule;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public final class CFRecipes {
-    public static RegistryObject<RecipeType<CaveProcessingRecipe>> CAVE_PROCESSING_TYPE;
-    public static RegistryObject<RecipeType<FluidStabilizationRecipe>> FLUID_STABILIZATION_TYPE;
-    public static RegistryObject<RecipeType<ModuleRecipeRule>> MODULE_RECIPE_RULE_TYPE;
+    public static DeferredHolder<RecipeType<?>, RecipeType<CaveProcessingRecipe>> CAVE_PROCESSING_TYPE;
+    public static DeferredHolder<RecipeType<?>, RecipeType<FluidStabilizationRecipe>> FLUID_STABILIZATION_TYPE;
+    public static DeferredHolder<RecipeType<?>, RecipeType<ModuleRecipeRule>> MODULE_RECIPE_RULE_TYPE;
 
-    public static RegistryObject<RecipeSerializer<CaveProcessingRecipe>> CAVE_PROCESSING_SERIALIZER;
-    public static RegistryObject<RecipeSerializer<FluidStabilizationRecipe>> FLUID_STABILIZATION_SERIALIZER;
-    public static RegistryObject<RecipeSerializer<ModuleRecipeRule>> MODULE_RECIPE_RULE_SERIALIZER;
+    public static DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CaveProcessingRecipe>> CAVE_PROCESSING_SERIALIZER;
+    public static DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FluidStabilizationRecipe>> FLUID_STABILIZATION_SERIALIZER;
+    public static DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModuleRecipeRule>> MODULE_RECIPE_RULE_SERIALIZER;
 
     private CFRecipes() {}
 

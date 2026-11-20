@@ -146,6 +146,12 @@ public enum MachineType {
         return this == ABYSSAL;
     }
 
+    public static final com.mojang.serialization.Codec<MachineType> CODEC = com.mojang.serialization.Codec.STRING.comapFlatMap(id -> {
+        MachineType value = fromId(id);
+        return value == null ? com.mojang.serialization.DataResult.error(() -> "Unknown factory machine " + id)
+            : com.mojang.serialization.DataResult.success(value);
+    }, MachineType::id);
+
     public static MachineType fromId(String id) {
         for (MachineType type : values()) {
             if (type.id.equals(id)) {
