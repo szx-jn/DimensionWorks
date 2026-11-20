@@ -4,7 +4,7 @@ import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.FTBUltiminePlayerData;
 import dev.ftb.mods.ftbultimine.api.rightclick.RightClickHandler;
-import dev.ftb.mods.ftbultimine.shape.ShapeContext;
+import dev.ftb.mods.ftbultimine.api.shape.ShapeContext;
 import java.util.Collection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,23 +22,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.util.TriState;
+import net.minecraft.world.ItemInteractionResult;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
  * Replays the server-side block interaction that FTB's generic right-click path misses.
  *
  * <p>Create's own wrenchable blocks are already handled by Create Ultimine's mixin. This
  * handler only runs after that mixin reports no work, and it deliberately targets
- * event-based AE2 blocks and Mekanism's {@code Block#use} path.</p>
+ * event-based AE2 blocks and Mekanism's {@code Block#useItemOn} path.</p>
  */
 public final class WrenchCompatRightClickHandler implements RightClickHandler {
     public static final WrenchCompatRightClickHandler INSTANCE = new WrenchCompatRightClickHandler();
 
-    private static final TagKey<Item> FORGE_WRENCHES =
-        ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "tools/wrench"));
+    private static final TagKey<Item> WRENCHES =
+        ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"));
     private static final ThreadLocal<Boolean> REPLAYING = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     private WrenchCompatRightClickHandler() {
@@ -60,14 +61,14 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
         }
 
         ItemStack wrench = player.getItemInHand(hand);
-        if (!(wrench.getItem() instanceof WrenchItem) || !wrench.is(FORGE_WRENCHES)) {
+        if (!(wrench.getItem() instanceof WrenchItem) || !wrench.is(WRENCHES)) {
             return 0;
         }
 
         Level level = player.level();
         BlockHitResult tracedHit = traceHit(player);
         FTBUltiminePlayerData playerData = getPlayerData(player);
-        boolean suspendUltimine = playerData != null && playerData.isPressed();
+        boolean suspendUltimine = playerData.isPressed();
 
         if (suspendUltimine) {
             // The synthetic event must not re-enter FTB's right-click dispatcher.
@@ -98,7 +99,7 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
 
                 PlayerInteractEvent.RightClickBlock event =
                     new PlayerInteractEvent.RightClickBlock(player, hand, pos, hitResult);
-                MinecraftForge.EVENT_BUS.post(event);
+                NeoForge.EVENT_BUS.post(event);
                 if (event.isCanceled()) {
                     // AE2 and other event-based wrenches set a consuming result when they did work.
                     InteractionResult cancellationResult = event.getCancellationResult();
@@ -108,7 +109,7 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
                     continue;
                 }
 
-                if (!mekanismLike) {
+                if (!mekanismLike || event.getUseBlock() == TriState.FALSE) {
                     continue;
                 }
 
@@ -116,8 +117,11 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
                 if (currentState.isAir()) {
                     continue;
                 }
-                InteractionResult result = currentState.use(level, player, hand, hitResult);
+                ItemInteractionResult result = currentState.useItemOn(wrench, level, player, hand, hitResult);
                 if (result.consumesAction()) {
+                    didWork++;
+                } else if (result == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+                        && currentState.useWithoutItem(level, player, hitResult).consumesAction()) {
                     didWork++;
                 }
             }
@@ -131,11 +135,11 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
     }
 
     private static FTBUltiminePlayerData getPlayerData(ServerPlayer player) {
-        return FTBUltimine.instance == null ? null : FTBUltimine.instance.getOrCreatePlayerData(player);
+        return FTBUltimine.getInstance().getOrCreatePlayerData(player);
     }
 
     private static BlockHitResult traceHit(ServerPlayer player) {
-        double reach = player.getAttributeValue(ForgeMod.BLOCK_REACH.get());
+        double reach = player.blockInteractionRange();
         HitResult hit = player.pick(reach, 1.0F, false);
         return hit instanceof BlockHitResult blockHit ? blockHit : null;
     }
@@ -187,7 +191,7 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
     }
 
     private static boolean namespaceMatches(BlockState state, String... prefixes) {
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         if (id == null) {
             return false;
         }
@@ -202,7 +206,7 @@ public final class WrenchCompatRightClickHandler implements RightClickHandler {
     }
 
     private static boolean namespaceContains(BlockState state, String value) {
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return id != null && id.getNamespace().contains(value);
     }
 }

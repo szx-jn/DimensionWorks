@@ -12,6 +12,7 @@ neoForge {
     runs {
         gameTestServer {
             type = 'gameTestServer'
+            sourceSet = sourceSets.gameTest
             gameDirectory = project.file('run-gametest')
             systemProperty 'neoforge.enabledGameTestNamespaces', base.archivesName.get()
             jvmArgument '-Xmx2G'

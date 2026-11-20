@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 
 [[mods]]
@@ -10,43 +10,43 @@ authors="szx-jn"
 description='''Replays FTB Ultimine right-click interactions for Create wrench compatibility with AE2 and Mekanism.'''
 
 [[dependencies.dimensionworks_wrench_compat]]
-modId="forge"
-mandatory=true
-versionRange="[47.4.16,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.dimensionworks_wrench_compat]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.dimensionworks_wrench_compat]]
 modId="create"
-mandatory=true
-versionRange="[6.0.8,6.1)"
+type="required"
+versionRange="[6.0.10]"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.dimensionworks_wrench_compat]]
 modId="ftbultimine"
-mandatory=true
-versionRange="[2001.1.8,2002)"
+type="required"
+versionRange="[2101.1.15]"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.dimensionworks_wrench_compat]]
 modId="ae2"
-mandatory=false
-versionRange="[15.4.10,15.5)"
+type="optional"
+versionRange="[19.2.20,19.3)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.dimensionworks_wrench_compat]]
 modId="mekanism"
-mandatory=false
-versionRange="[10.4.16,10.5)"
+type="optional"
+versionRange="[10.7.19,10.8)"
 ordering="AFTER"
 side="BOTH"

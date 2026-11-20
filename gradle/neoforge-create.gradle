@@ -1,0 +1,41 @@
+// 编译和测试使用同一份官方 Create 发行 JAR，避免 Maven 的滚动构建与整包运行版本不同。
+repositories {
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+}
+
+configurations {
+    createDistribution {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+configurations.implementation.extendsFrom(configurations.createDistribution)
+dependencies { createDistribution 'maven.modrinth:create:UjX6dr61' }
+
+// 只供编译器读取发行 JAR 内的原始依赖；不复制源码、不另行封装或分发第三方 JAR。
+def libraryNames = ['Registrate-MC1.21-1.3.0+67.jar', 'ponder-neoforge-1.0.82+mc1.21.1.jar',
+                    'flywheel-neoforge-1.21.1-1.0.6.jar']
+def libraryDirectory = layout.buildDirectory.dir('create-compiler-libraries')
+def extractLibraries = tasks.register('extractCreateCompilerLibraries', Sync) {
+    from({ zipTree(configurations.createDistribution.singleFile) }) {
+        include libraryNames.collect { "META-INF/jarjar/${it}" }
+        eachFile { details -> details.path = details.name }
+        includeEmptyDirs = false
+    }
+    into libraryDirectory
+    doLast {
+        libraryNames.each { name ->
+            if (!libraryDirectory.get().file(name).asFile.isFile()) {
+                throw new GradleException("固定 Create 发行 JAR 缺少编译依赖 ${name}")
+            }
+        }
+    }
+}
+dependencies {
+    compileOnly files(libraryNames.collect { name -> libraryDirectory.map { it.file(name) } })
+            .builtBy(extractLibraries)
+}

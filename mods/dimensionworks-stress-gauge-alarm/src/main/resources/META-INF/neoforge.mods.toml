@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_stress_gauge_alarm"
@@ -8,20 +8,23 @@ displayName="DimensionWorks Stress Gauge Alarm"
 authors="szx-jn"
 description='''Emits a redstone signal from Create stress gauges while their kinetic network is overstressed.'''
 [[dependencies.dimensionworks_stress_gauge_alarm]]
-modId="forge"
-mandatory=true
-versionRange="[47.0,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_stress_gauge_alarm]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_stress_gauge_alarm]]
 modId="create"
-mandatory=true
-versionRange="[6.0.8,6.0.9)"
+type="required"
+versionRange="[6.0.10]"
 ordering="AFTER"
 side="BOTH"
+
+[[mixins]]
+config="dimensionworks_stress_gauge_alarm.mixins.json"

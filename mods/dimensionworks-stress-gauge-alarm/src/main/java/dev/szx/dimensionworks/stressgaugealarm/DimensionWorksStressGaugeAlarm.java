@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.stressgaugealarm;
 
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 
 @Mod(DimensionWorksStressGaugeAlarm.MOD_ID)
 public final class DimensionWorksStressGaugeAlarm {
