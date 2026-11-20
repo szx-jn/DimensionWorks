@@ -107,6 +107,8 @@ def convert_payload(id: str, value: n.Base) -> tuple[str, n.Base]:
 def convert_entity_data(source: n.Compound) -> EntityDataConversion:
     data = deepcopy(source)
     removed = {}
+    if "Attributes" in data:
+        raise ValueError("实体旧 Attributes 尚未通过原版属性转换")
     # attributes 的字段结构由原版 DFU 处理；这里只映射实际旧 Forge ID。
     if "attributes" in data:
         attributes = n.List[n.Compound]()

@@ -2,9 +2,23 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import io
 from typing import Callable
 
 import nbtlib as n
+
+
+def key_identity(value: n.Compound) -> bytes:
+    """忽略 Compound 顺序，保留组件中的 NBT 类型和 List 顺序；value 不含储量。"""
+    def ordered(v):
+        if isinstance(v, n.Compound):
+            return n.Compound({key: ordered(v[key]) for key in sorted(v)})
+        if isinstance(v, n.List):
+            return type(v)(ordered(child) for child in v)
+        return deepcopy(v)
+    output = io.BytesIO()
+    n.File(ordered(value)).write(output)
+    return output.getvalue()
 
 
 def convert_key(source: n.Compound, convert_item: Callable[[n.Compound], n.Compound]) -> n.Compound:
@@ -50,12 +64,22 @@ def convert_storage_cell(source: n.Compound, target: n.Compound,
     if sum(int(value) for value in amounts) != int(tag["ic"]):
         raise ValueError("存储元件缓存总量与逐键储量不符")
     entries = n.List[n.Compound]()
+    positions = {}
     for key, amount in zip(keys, amounts):
         if "#" in key or int(amount) <= 0:
             raise ValueError("存储元件键含重复储量或非正数")
         entry = convert_key(key, convert_item)
-        entry["#"] = n.Long(int(amount))
-        entries.append(entry)
+        identity = key_identity(entry)
+        if identity in positions:
+            stored = entries[positions[identity]]
+            merged = int(stored["#"]) + int(amount)
+            if merged > 9223372036854775807:
+                raise ValueError("相同目标 AE2 键合并后的储量超出 Long")
+            stored["#"] = n.Long(merged)
+        else:
+            positions[identity] = len(entries)
+            entry["#"] = n.Long(int(amount))
+            entries.append(entry)
     data = deepcopy(target)
     components = data.setdefault("components", n.Compound())
     if "ae2:storage_cell_inv" in components:

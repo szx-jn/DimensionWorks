@@ -63,6 +63,29 @@ class ItemComponentTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "数量无效"):
             authoritative_count(n.Compound({"Count": n.Byte(-64)}))
 
+    def test_actual_empty_drink_cap_is_logged_without_removing_wine_or_quality(self):
+        source = n.parse_nbt('{id:"kaleidoscope_tavern:wine",Count:1b,tag:{BrewLevel:6},'
+                            'ForgeCaps:{"creategearsandtavern:drink_fluid":{}}}')
+        target = self.target(source)
+        target["components"]["minecraft:custom_data"] = deepcopy(source["tag"])
+        original = deepcopy(source)
+        converted = convert_item_components(source, target, self.nested)
+        self.assertEqual(converted.data["id"], source["id"])
+        self.assertEqual(converted.data["count"], 1)
+        self.assertEqual(converted.data["components"]["minecraft:custom_data"]["BrewLevel"], 6)
+        self.assertNotIn("ForgeCaps", converted.data)
+        self.assertEqual(converted.removed, {"creategearsandtavern:drink_fluid": n.Compound()})
+        self.assertEqual(source, original)
+
+    def test_nonempty_drink_cap_or_same_empty_cap_on_unknown_item_blocks(self):
+        source = n.parse_nbt('{id:"kaleidoscope_tavern:wine",Count:1b,'
+                            'ForgeCaps:{"creategearsandtavern:drink_fluid":{stored:1000}}}')
+        with self.assertRaisesRegex(ValueError, "未覆盖的物品"):
+            convert_item_components(source, self.target(source), self.nested)
+        source = n.parse_nbt('{id:"minecraft:apple",Count:1b,ForgeCaps:{"creategearsandtavern:drink_fluid":{}}}')
+        with self.assertRaisesRegex(ValueError, "未覆盖的物品"):
+            convert_item_components(source, self.target(source), self.nested)
+
 
 if __name__ == "__main__":
     unittest.main()

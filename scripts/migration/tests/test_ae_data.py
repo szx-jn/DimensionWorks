@@ -71,6 +71,25 @@ class AeDataTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "与输入不符"):
             convert_storage_cell(source, target, self.item)
 
+    def test_old_distinct_keys_that_normalize_to_one_native_key_merge_long_amounts(self):
+        source = self.source()
+        source["tag"] = n.parse_nbt('{keys:[{"#c":"ae2:i",id:"minecraft:dirt",tag:{}},'
+                                  '{"#c":"ae2:i",id:"minecraft:dirt"}],amts:[L;23L,24L],ic:47L}')
+        def normalized(value):
+            return n.Compound({"id": value["id"], "count": n.Int(1)})
+        result = convert_storage_cell(source, self.target(source), normalized)
+        entries = result["components"]["ae2:storage_cell_inv"]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["#"], n.Long(47))
+        self.assertEqual(int(source["tag"]["ic"]), sum(int(row["#"]) for row in entries))
+
+    def test_different_component_nbt_types_do_not_merge_storage_keys(self):
+        source = self.source()
+        source["tag"] = n.parse_nbt('{keys:[{"#c":"ae2:i",id:"minecraft:dirt",tag:{quota:1L}},'
+                                  '{"#c":"ae2:i",id:"minecraft:dirt",tag:{quota:1}}],amts:[L;23L,24L],ic:47L}')
+        result = convert_storage_cell(source, self.target(source), self.item)
+        self.assertEqual(len(result["components"]["ae2:storage_cell_inv"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

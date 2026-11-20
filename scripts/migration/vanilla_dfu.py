@@ -66,6 +66,28 @@ class VanillaDfu:
             raise ValueError(result["error"])
         return n.Compound(n.File.parse(io.BytesIO(base64.b64decode(result["nbt"], validate=True))))
 
+    def update_entity(self, value: n.Compound) -> n.Compound:
+        if "Attributes" in value and "attributes" in value:
+            raise ValueError("实体新旧属性列表冲突")
+        data = self.update(value, "entity")
+        # 原版 schema 不识别女仆等模组实体；其 Attributes 会留在 remainder 中。
+        # 只用已知 player 上下文转换这一个属性字段，不更改模组实体类型或其它数据。
+        if "Attributes" in data:
+            original = value.get("Attributes")
+            if not isinstance(original, n.List):
+                raise ValueError("实体旧属性列表结构不符")
+            attributes = self.update(n.Compound({"Attributes": original}), "player")
+            if "attributes" not in attributes or "Attributes" in attributes:
+                raise ValueError("原版独立属性转换未完成")
+            if len(attributes["attributes"]) != len(original):
+                raise ValueError("原版独立属性转换改变了属性数量")
+            # 原生 bee 的 DFU 会同时留下旧列表与等价的新列表；只清理已核对的重复。
+            if "attributes" in data and data["attributes"] != attributes["attributes"]:
+                raise ValueError("原版实体与独立属性转换结果冲突")
+            data["attributes"] = attributes["attributes"]
+            del data["Attributes"]
+        return data
+
     def close(self):
         code = None
         if self.process:

@@ -1,8 +1,14 @@
 package dev.szx.dimensionworks.migration;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
@@ -49,12 +55,41 @@ public final class NativeComponentBatch {
                 results.add(result);
             }
             CompoundTag report = new CompoundTag(); report.putInt("format", 1); report.put("rows", results);
+            if (source.contains("default_item_ids", Tag.TAG_LIST)) {
+                CompoundTag defaults = new CompoundTag();
+                for (Tag value : source.getList("default_item_ids", Tag.TAG_STRING)) {
+                    String id = value.getAsString();
+                    if (!BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(id)))
+                        throw new IllegalStateException("Unknown default item");
+                    ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
+                    defaults.put(id, DataComponentMap.CODEC.encodeStart(ops, stack.getComponents()).getOrThrow());
+                }
+                report.put("default_items", defaults);
+            }
+            if (source.getBoolean("export_block_state_schema")) {
+                CompoundTag blocks = new CompoundTag();
+                for (var entry : BuiltInRegistries.BLOCK.entrySet()) {
+                    CompoundTag row = new CompoundTag(), properties = new CompoundTag();
+                    for (Property<?> property : entry.getValue().getStateDefinition().getProperties())
+                        properties.put(property.getName(), propertyValues(property));
+                    row.put("properties", properties);
+                    row.put("default_state", BlockState.CODEC.encodeStart(ops, entry.getValue().defaultBlockState()).getOrThrow());
+                    blocks.put(entry.getKey().location().toString(), row);
+                }
+                report.put("block_state_schema", blocks);
+            }
             Files.createFile(output, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
             NbtIo.writeCompressed(report, output);
             System.out.println("MIGRATION_COMPONENT_BATCH_DONE rows=" + results.size());
         } catch (Exception error) {
             throw new RuntimeException("Native migration component batch failed", error);
         }
+    }
+
+    private static <T extends Comparable<T>> ListTag propertyValues(Property<T> property) {
+        ListTag values = new ListTag();
+        for (T value : property.getPossibleValues()) values.add(StringTag.valueOf(property.getName(value)));
+        return values;
     }
 
     private static void rejectMissingContent(Tag value) {

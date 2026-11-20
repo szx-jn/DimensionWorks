@@ -48,22 +48,34 @@ def convert_item_components(source: n.Compound, target: n.Compound,
         components[key] = value
 
     caps = source.get("ForgeCaps", n.Compound())
+    if not isinstance(caps, n.Compound):
+        raise ValueError("物品 ForgeCaps 不是复合标签")
     if caps:
-        if str(source.get("id")) != "supplementaries:quiver" or set(caps) != {"Parent"}:
+        empty_drink_cap = (str(source.get("id")) == "kaleidoscope_tavern:wine" and
+                           set(caps) == {"creategearsandtavern:drink_fluid"} and
+                           isinstance(caps["creategearsandtavern:drink_fluid"], n.Compound) and
+                           not caps["creategearsandtavern:drink_fluid"])
+        if empty_drink_cap:
+            removed["creategearsandtavern:drink_fluid"] = deepcopy(caps["creategearsandtavern:drink_fluid"])
+        elif str(source.get("id")) != "supplementaries:quiver" or set(caps) != {"Parent"}:
             raise ValueError("未覆盖的物品 ForgeCaps")
-        value = caps["Parent"]
-        if not isinstance(value, n.Compound) or set(value) != {"Size", "Items", "SelectedSlot"}:
-            raise ValueError("箭袋 Parent 结构不符")
-        inv = n.Compound({"Size": value["Size"], "Items": value["Items"]})
-        selected = int(value["SelectedSlot"])
-        if not 0 <= selected < int(value["Size"]):
-            raise ValueError("箭袋选中槽位越界")
-        items = n.List[n.Compound]()
-        for old in inventory_items(inv):
-            item = convert_nested(old) if old else n.Compound()
-            item.pop("Slot", None)
-            items.append(item)
-        put("supplementaries:quiver_content", n.Compound({"items": items, "selected_slot": n.Int(selected)}))
+        else:
+            value = caps["Parent"]
+            if not isinstance(value, n.Compound) or set(value) != {"Size", "Items", "SelectedSlot"}:
+                raise ValueError("箭袋 Parent 结构不符")
+            inv = n.Compound({"Size": value["Size"], "Items": value["Items"]})
+            selected = int(value["SelectedSlot"])
+            if not 0 <= selected < int(value["Size"]):
+                raise ValueError("箭袋选中槽位越界")
+            items = n.List[n.Compound]()
+            for old in inventory_items(inv):
+                item = convert_nested(old) if old else n.Compound()
+                item.pop("Slot", None)
+                items.append(item)
+            put("supplementaries:quiver_content", n.Compound({"items": items, "selected_slot": n.Int(selected)}))
+    if "ForgeCaps" in source:
+        if not caps:
+            removed["ForgeCaps"] = deepcopy(caps)
         if "ForgeCaps" in data:
             if data["ForgeCaps"] != caps:
                 raise ValueError("DFU 后物品能力与原数据不一致")

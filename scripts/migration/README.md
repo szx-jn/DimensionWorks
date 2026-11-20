@@ -72,11 +72,21 @@ python3 scripts/migration/retention_scope.py /absolute/private-lab/source-audit.
 
 `vanilla_dfu.py` / `java/VanillaDfuBridge.java` 编译临时类并复用一个 Java 21 进程执行原版 DFU，固定为本服的 3465 → 3955。类路径不为 1.21.1 时阻止启动；按指定的原生类型转换 NBT，不打开世界。私有日志拒绝覆盖。原版 DFU 不处理所有模组的自定义物品/机器数据，不能只改 DataVersion 就交付存档。
 
+`VanillaDfu.update_entity` 处理实际照片/蜂巢中实体的旧属性：若 entity DFU 未转换 `Attributes`，只将原属性列表交给原生 player DFU 上下文，保持原实体类型、UUID 和其它数据。原生 bee DFU 同时留下新旧两份属性时，须确认新列表与该独立结果一致，才能删除旧副本；冲突阻止转换。`entity_data.py` 拒绝仍带旧属性列表的输入。嵌套物品须从原始记录完整转换后放回同一库存位置，不能再次转换已组件化的中间栈。
+
 `item_components.py` 把箭袋 Parent 的库存、空槽和选中槽位转为 `supplementaries:quiver_content`，嵌套旧箭交给调用方转换；未知物品能力、重复/越界槽位或组件冲突阻止转换。`authoritative_count` 仅在已确认的 Sophisticated 库存中读取 Int `realCount`，不按 byte 溢出猜测。
+
+已审计的酒瓶空 `creategearsandtavern:drink_fluid` 能力及空根能力进入 `removed` 台账；非空能力不套用此规则。`create_data.py` 将过滤器和包裹的槽位库存、容量、地址、黑白名单及 NBT 匹配标志转换为现有 Create 组件，保留空槽位置，嵌套物品递归转换。`mod_item_data.py` 将女仆照片实体、酒品质及料理记录转换为固定目标作者的原生组件；料理输入顺序、重复项、产物和配方类型保留，照片内实体与库存交给完整回调。
+
+`registry_ids.py` 只提供已核对的官方升级注册名：原版 grass、旧 Miner's Delight / Brewin Compatibility Delight 名称及 ExtendedAE 设备/物品，仍要求目标运行注册表存在。唯一旧无限元件须完整匹配圆石记录，才映射为作者的 `extendedae:infinity_cobblestone_cell`，旧记录进入台账。未知记录或缺失注册项不猜测，不替换为空气。
 
 Sophisticated 背包和升级的组件使用固定目标 JAR 自带的 `LegacyBackpackDataMigration.normalizeLegacyData` / `LegacyUpgradeDataMigration.migrate`，不在本仓库重复实现其旧字段映射。`java/NativeComponentBatch.java` 只供仓库外的隔离转换夹具使用，不加入整包清单：编译时增加固定 Sophisticated Core / Backpacks JAR，作为临时 Mod 放入带 `dimensionworks-pack-check.marker=isolated-pack-check` 的夹具。输入 `local/migration-component-input.nbt` 的 `format=1`，`rows` 每项包含 `label`、已做原版 DFU 的 `stack`、`normalize_sophisticated` 及 `item_kind`（`backpack` / `upgrade`）。原生组件严格解码、调用作者现有接口，再编码至新建的私有 `migration-component-output.nbt`；完成后移除临时 Mod。它不读生产世界、不能代表完整旧档或所有背包已经迁移。
 
+该夹具可选接收 `default_item_ids` 和 `export_block_state_schema`，输出所选物品的原生默认组件及全部方块的属性允许值/默认状态，用于识别默认字段省略及检查旧机械方块状态。只读注册表，不放置或运行第三方机器。
+
 `ae_data.py` 转换实际旧 AE2 item / fluid 键，类型字段由 `#c` 改为原生 `#t`；物品元数据和能力交给完整物品转换回调，流体数量不改单位。存储元件的 `keys` / LongArray `amts` / Long `ic` 转为 `ae2:storage_cell_inv`，先核对数组长度和缓存总量；未知字段、类型或储量冲突阻止转换。不得绕过物品回调，把尚未处理的 Mekanism、背包或其他物品状态当作已经保留。
+
+`key_identity` 按 NBT 类型、组件及列表顺序比较键，只忽略 Compound 的字段顺序。若不同旧编码转为同一原生键，合并其 Long 储量并检查溢出；不同状态或类型不合并。实际 7 个元件的 439 个键未发生合并，已完成离线原生逐键及 Long 对账（详见执行记录），仍须接入整档与实际保存重启验收。
 
 AE2 部分 codec 会把无法解析的键变成缺失内容占位项，即使 `getOrThrow` 未抛错。原生批处理递归拒绝 `ae2:missing_content_error` 组件；对账仍须核对每个键的原生类型、ID、组件和 Long 储量，不能只检查加载成功或组件总数。
 
