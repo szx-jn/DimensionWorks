@@ -309,3 +309,13 @@ manifest/mods.json 已切换为 Minecraft 1.21.1 / NeoForge：共 183 项固定�
 新增 `entity_data.py`：离线映射 NeoForgeData、原生附件及实际数值/字段，保留 Curios 库存、UUID、持久化数据及所有者字段；Aether 四种饰品槽位分别映射，避免把原生槽位与通用饰品槽位合并丢失。舍弃能力和新版不持久化的临时字段返回台账，未知能力或字段冲突阻止转换。24 项迁移工具测试通过（其中新增 9 项），私有实际能力样本生成的 18 种目标附件 ID 全部存在。此处只证明转换规则、样本结构和注册 ID；完整旧档原生解码、库存/机器对账及保存重启尚未完成。
 
 进一步核对负数 Count：共有 71 条，69 条来自背包 SavedData，2 条来自 Sophisticated Storage 方块库存，实际数据另有 Int `realCount`（例如石英 448、赛特斯石英粉 3067）。目标 Sophisticated 库存使用自身的 oversized ItemStack codec，数量应转入 Int `count`，不能把旧 byte 当作库存量或按无符号数猜测。箭袋 Parent 与背包/机器组件规则继续实现中，封存原档未改写，VERSION 仍为 0.3.52，未发布。
+
+## 原版 DFU 桥接与背包/箭袋数据原生读写
+
+新增单进程 `VanillaDfu` 桥接，使用固定 Java 21 / Native Minecraft 类路径执行 3465 → 3955 原版 DFU。实际桥接检查通过：grass 物品及方块状态转为 short_grass，槽位/自定义数据保留，不支持的类型阻止转换；类路径版本检查、二进制 NBT 请求/响应及正常退出均完成。未知模组物品内嵌旧栈仍须递归处理，原版 DFU 不能替代模组组件转换。
+
+只读补充扫描同一 319,192 个文档，得到 217 类带旧 tag 的实际物品、AE2 的 item / fluid 键结构及 46 类 Mekanism 设备数据；报告 `source-item-shapes-v1.json` 保持私有。确认固定新版 Sophisticated 已提供旧背包/升级组件迁移接口，本仓库复用这些作者接口，避免重复维护字段和枚举映射；包括颜色的 alpha 转换及旧过滤器/流体/唱片库存。箭袋和数量判断保留必要的离线规则，新增 4 项测试，迁移工具共 28 项通过。
+
+`NativeComponentBatch` 在隔离空世界对 91 条转换样本严格解码/编码，其中 19 类本服实际使用的 Sophisticated 标签样本、1 个实际箭袋能力样本，以及全部 71 条负数 Count 记录。`native-component-batch-v1.log` 为 Done (0.870s)、MIGRATION_COMPONENT_BATCH_DONE rows=91、40 tick 正常保存停服、Gradle 成功；临时 JAR 已移出夹具。私有 `component-roundtrip-v1.json` 核对：71 条实际库存合计 **80,432 个物品**，各 ID / Int 数量一致；箭袋转换前后目标结构完全一致；36 项背包 UUID、容量、颜色、战利品定义/比例值保留，所选 Sophisticated 样本没有遗留旧自定义字段。输入/输出 SHA 均记录。其余第三方可选兼容与网络日志保留，不称为整包无错，也未运行第三方玩法专项或光影专项。
+
+此处仍是转换样本与数量验证，**不代表 50 个背包存储记录、所有玩家或整个世界已经迁移**。AE2 键及储量、Mekanism 机器/打包数据、实体属性新格式、整档生成及保存重启对账继续待完成；生产封存原档未改写，VERSION 仍为 0.3.52，未发布。

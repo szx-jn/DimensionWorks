@@ -56,6 +56,12 @@ python3 scripts/migration/preflight_registries.py /absolute/private-lab/source-a
 
 该模块只返回新 NBT，不写世界、不更新 DataVersion，也不代表物品、机器或所有玩家已经迁移。箭袋的 `ForgeCaps/Parent` 是物品库存，必须先走独立物品组件转换，不能当作实体附件处理。
 
+`vanilla_dfu.py` / `java/VanillaDfuBridge.java` 编译临时类并复用一个 Java 21 进程执行原版 DFU，固定为本服的 3465 → 3955。类路径不为 1.21.1 时阻止启动；按指定的原生类型转换 NBT，不打开世界。私有日志拒绝覆盖。原版 DFU 不处理所有模组的自定义物品/机器数据，不能只改 DataVersion 就交付存档。
+
+`item_components.py` 把箭袋 Parent 的库存、空槽和选中槽位转为 `supplementaries:quiver_content`，嵌套旧箭交给调用方转换；未知物品能力、重复/越界槽位或组件冲突阻止转换。`authoritative_count` 仅在已确认的 Sophisticated 库存中读取 Int `realCount`，不按 byte 溢出猜测。
+
+Sophisticated 背包和升级的组件使用固定目标 JAR 自带的 `LegacyBackpackDataMigration.normalizeLegacyData` / `LegacyUpgradeDataMigration.migrate`，不在本仓库重复实现其旧字段映射。`java/NativeComponentBatch.java` 只供仓库外的隔离转换夹具使用，不加入整包清单：编译时增加固定 Sophisticated Core / Backpacks JAR，作为临时 Mod 放入带 `dimensionworks-pack-check.marker=isolated-pack-check` 的夹具。输入 `local/migration-component-input.nbt` 的 `format=1`，`rows` 每项包含 `label`、已做原版 DFU 的 `stack`、`normalize_sophisticated` 及 `item_kind`（`backpack` / `upgrade`）。原生组件严格解码、调用作者现有接口，再编码至新建的私有 `migration-component-output.nbt`；完成后移除临时 Mod。它不读生产世界、不能代表完整旧档或所有背包已经迁移。
+
 ```sh
 python3 -m unittest discover -s scripts/tests -p 'test_verify_snapshot.py' -v
 /absolute/private-lab/python/bin/python -m unittest discover -s scripts/migration/tests -v
