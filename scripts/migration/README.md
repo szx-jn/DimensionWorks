@@ -50,6 +50,18 @@ python3 scripts/migration/preflight_registries.py /absolute/private-lab/source-a
 
 用户已明确舍弃 `caves_delight`、`mekanismdelight`、`kaleidoscope_sauce`、`witherstormmod`。原服务器未发现这四项的实际方块、实体或物品栈，但含 `witherstormmod:bowels` 维度定义。预检继续报告缺失项；后续一次性转换须在新副本中定点处理并记录，不删除同一容器/机器中的其他数据。用户已确认此服务器是唯一旧存档，只针对该封存快照完成转换和对账，不开发任意历史版本或其他单人旧档适配。
 
+## 当前资产保留范围
+
+核心范围为原版、Create、AE2、Mekanism（含官方 Generators）。玩家背包、末影箱、精妙背包及其他存储内的实际物品整体保留，包含其他模组物品；容器、contentsUuid / SavedData 绑定、已有机械用到的附属设备、支撑与连接同样保护。其它内容只在确认不承载这些资产后舍弃，目标 Mod 清单不因此缩减。
+
+```sh
+python3 scripts/migration/retention_scope.py /absolute/private-lab/source-audit.json /absolute/private-lab/target-registry.json --output /absolute/private-lab/retention-scope.json
+```
+
+工具复用已有只读审计，不扫描或写回原世界。它列出核心和实际使用的附属机械方块、全部已识别物品记录、库存所在的外层实体/方块实体或 SavedData、待清理的其它方块、仍缺少目标注册项的受保护物品与方块。旧审计中的 Count 记录也包括过滤器、模板和展示栈；精确归类前保守保护，不据记录数或 Count 合计计算实物库存。经验球根 Count 不算物品，未知记录仍阻止通过。
+
+其它方块只列 `candidate_for_omission`；没有容器/机械及空间支撑核查之前，`automatic_block_removal_allowed` 始终为 false。清理已舍弃模组外壳时，也必须逐层回收其内部应保留资产，不递归删除内含物。这个报告不等于完整迁移验收，不允许据此直接启动唯一旧档；报告私有、拒绝覆盖，受保护项缺注册或记录未定类型时以 1 退出。
+
 ## 工具验证
 
 `entity_data.py` 根据唯一服务器的实际旧能力结构及固定目标 JAR 的持久化格式，将实体 `ForgeData` 转为 `NeoForgeData`、`ForgeCaps` 转为 `neoforge:attachments`。处理 Aether 字段/槽位、女仆数值、Mekanism 辐射、暮色护盾、酿酒状态及 L2 附件；Curios 库存和嵌套数据保留，仍须接入物品组件转换。舍弃的凋零风暴能力、新暮色不持久化的两个瞬时控制状态及新版 L2 不保存的死亡计时器通过 `removed` 返回给私有台账，不静默删除。未知能力、目标字段冲突或结构不符阻止转换。
