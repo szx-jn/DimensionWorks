@@ -3,22 +3,18 @@ package dev.szx.dimensionworks.spectatortoggle.client;
 import dev.szx.dimensionworks.spectatortoggle.DimensionWorksSpectatorToggle;
 import dev.szx.dimensionworks.spectatortoggle.network.SpectatorToggleNetwork;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = DimensionWorksSpectatorToggle.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = DimensionWorksSpectatorToggle.MOD_ID, value = Dist.CLIENT)
 public final class SpectatorToggleKeyHandler {
     private SpectatorToggleKeyHandler() {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
         while (SpectatorToggleKeyMappings.TOGGLE_SPECTATOR.consumeClick()) {
             if (minecraft.player != null && minecraft.screen == null) {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.world.entity.player.Player;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,7 +18,7 @@ class SelectionHistoryTest {
         SelectionHistory.save(original, List.of("minecraft:speed", "minecraft:poison"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         NbtIo.writeCompressed(original, output);
-        CompoundTag reloaded = NbtIo.readCompressed(new ByteArrayInputStream(output.toByteArray()));
+        CompoundTag reloaded = NbtIo.readCompressed(new ByteArrayInputStream(output.toByteArray()), NbtAccounter.create(1_048_576));
         CompoundTag replacement = new CompoundTag();
         CompoundTag otherMod = new CompoundTag();
         otherMod.putBoolean("other_mod_state", true);

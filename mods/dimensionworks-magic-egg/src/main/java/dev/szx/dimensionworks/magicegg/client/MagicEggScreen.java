@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** 完全使用文字、矩形与代码绘制的勾选框，不使用物品槽或新增 GUI 贴图。 */
 public final class MagicEggScreen extends Screen {
@@ -59,7 +59,7 @@ public final class MagicEggScreen extends Screen {
         super(text("title"));
         this.token = token;
         this.catalogue = catalogue.stream().map(id -> new Entry(id,
-                ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.parse(id))))
+                BuiltInRegistries.MOB_EFFECT.getOptional(ResourceLocation.parse(id)).orElseThrow()))
                 .sorted(Comparator.comparing(entry -> entry.name().getString())).toList();
         this.previous = this.catalogue.stream().filter(entry -> previous.contains(entry.id())).toList();
         this.reusePrompt = hasPrevious;
@@ -184,7 +184,6 @@ public final class MagicEggScreen extends Screen {
 
     @Override
     public void tick() {
-        if (search != null && !reusePrompt) search.tick();
         if (minecraft.player == null || !minecraft.player.isAlive()) onClose();
     }
 
@@ -192,7 +191,7 @@ public final class MagicEggScreen extends Screen {
     public boolean isPauseScreen() { return false; }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double delta) {
         int scrollBottom = reusePrompt ? top + panelHeight - 46 : listBottom;
         if (mouseX >= left && mouseX <= left + panelWidth && mouseY >= listTop && mouseY < scrollBottom) {
             if (reusePrompt) {
@@ -204,7 +203,7 @@ public final class MagicEggScreen extends Screen {
             }
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, horizontal, delta);
     }
 
     @Override

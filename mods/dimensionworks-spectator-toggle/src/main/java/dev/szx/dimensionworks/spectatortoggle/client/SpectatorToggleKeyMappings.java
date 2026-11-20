@@ -3,15 +3,15 @@ package dev.szx.dimensionworks.spectatortoggle.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.szx.dimensionworks.spectatortoggle.DimensionWorksSpectatorToggle;
 import net.minecraft.client.KeyMapping;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(
+@EventBusSubscriber(
         modid = DimensionWorksSpectatorToggle.MOD_ID,
-        bus = Mod.EventBusSubscriber.Bus.MOD,
+        bus = EventBusSubscriber.Bus.MOD,
         value = Dist.CLIENT)
 public final class SpectatorToggleKeyMappings {
     public static final KeyMapping TOGGLE_SPECTATOR = new KeyMapping(

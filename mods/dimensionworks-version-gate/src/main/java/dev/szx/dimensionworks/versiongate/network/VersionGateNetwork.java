@@ -5,64 +5,58 @@ import dev.szx.dimensionworks.versiongate.PackVersion;
 import dev.szx.dimensionworks.versiongate.client.ClientVersionGate;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.function.Consumer;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.server.network.ConfigurationTask;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.network.configuration.ICustomConfigurationTask;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 
 public final class VersionGateNetwork {
-    private static final String PROTOCOL = "1";
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(DimensionWorksVersionGate.MOD_ID, "login"),
-            () -> PROTOCOL,
-            ignored -> true,
-            ignored -> true);
+    static final ConfigurationTask.Type TASK_TYPE = new ConfigurationTask.Type(
+            ResourceLocation.fromNamespaceAndPath(DimensionWorksVersionGate.MOD_ID, "check_pack_version"));
 
     private VersionGateNetwork() {}
 
-    public static void register() {
-        CHANNEL.messageBuilder(LoginVersionPacket.class, 0, NetworkDirection.LOGIN_TO_CLIENT)
-                .encoder(LoginVersionPacket::encode)
-                .decoder(LoginVersionPacket::new)
-                .consumerNetworkThread(VersionGateNetwork::handleLoginVersion)
-                .loginIndex(LoginVersionPacket::getAsInt, LoginVersionPacket::setLoginIndex)
-                .markAsLoginPacket()
-                .noResponse()
-                .buildLoginPacketList(isLocal -> List.of(Pair.of(
-                        "dimensionworks_version_gate:server_version",
-                        new LoginVersionPacket(readServerVersion(), 0))))
-                .add();
+    public static void register(IEventBus modBus, Dist dist) {
+        // The client method reference is created only on the physical client.
+        IPayloadHandler<LoginVersionPacket> clientHandler = dist == Dist.CLIENT
+                ? ClientVersionGate::handleServerVersion
+                : (packet, context) -> { throw new IllegalStateException("Client payload received on a dedicated server"); };
+        Path directory = dist == Dist.CLIENT ? ClientVersionGate.gameDirectory()
+                : FMLPaths.GAMEDIR.get().toAbsolutePath().normalize();
+        modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) -> {
+            var registrar = event.registrar("2");
+            registrar.configurationToClient(LoginVersionPacket.TYPE, LoginVersionPacket.STREAM_CODEC, clientHandler);
+            registrar.configurationToServer(VersionAcceptedPacket.TYPE, VersionAcceptedPacket.STREAM_CODEC,
+                    (packet, context) -> context.finishCurrentTask(TASK_TYPE));
+        });
+        modBus.addListener((net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent event) ->
+                event.register(new VersionTask(directory)));
     }
 
-    private static String readServerVersion() {
-        Path gameDirectory = DistExecutor.unsafeRunForDist(
-                () -> ClientVersionGate::gameDirectory,
-                () -> () -> FMLPaths.GAMEDIR.get().toAbsolutePath().normalize());
-        try {
-            String version = PackVersion.readVersion(gameDirectory).toString();
-            DimensionWorksVersionGate.LOGGER.info("DimensionWorks server VERSION: {} = {}",
-                    gameDirectory.resolve("VERSION"), version);
-            return version;
-        } catch (IOException exception) {
-            DimensionWorksVersionGate.LOGGER.error("Cannot read DimensionWorks server VERSION: {}",
-                    exception.getMessage());
-            return "";
+    record VersionTask(Path gameDirectory) implements ICustomConfigurationTask {
+        @Override
+        public void run(Consumer<CustomPacketPayload> sender) {
+            String version;
+            try {
+                version = PackVersion.readVersion(gameDirectory).toString();
+                DimensionWorksVersionGate.LOGGER.info("DimensionWorks server VERSION: {} = {}",
+                        gameDirectory.resolve("VERSION"), version);
+            } catch (IOException exception) {
+                DimensionWorksVersionGate.LOGGER.error("Cannot read DimensionWorks server VERSION: {}: {}",
+                        gameDirectory.resolve("VERSION"), exception.getMessage());
+                version = "";
+            }
+            sender.accept(new LoginVersionPacket(version));
         }
-    }
 
-    private static void handleLoginVersion(
-            LoginVersionPacket packet,
-            java.util.function.Supplier<NetworkEvent.Context> contextSupplier) {
-        NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-                () -> () -> ClientVersionGate.checkServerVersion(
-                        packet.serverVersion(), context.getNetworkManager())));
-        context.setPacketHandled(true);
+        @Override
+        public ConfigurationTask.Type type() {
+            return TASK_TYPE;
+        }
     }
 }

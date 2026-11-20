@@ -1,41 +1,20 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
 
 version = '0.1.4'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_version_gate'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            mods {
-                dimensionworks_version_gate {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {}
-        server { args '--nogui' }
-    }
-}
-
-repositories { mavenCentral() }
+apply from: rootProject.file('gradle/neoforge-module.gradle')
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.23'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
 
 test { useJUnitPlatform() }
 
-tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
+}
 
-jar { finalizedBy 'reobfJar' }
+ext.gameTestCount = 1
+apply from: rootProject.file('gradle/neoforge-gametest.gradle')

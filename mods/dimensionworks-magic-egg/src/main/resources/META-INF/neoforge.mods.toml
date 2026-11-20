@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_magic_egg"
@@ -8,14 +8,14 @@ displayName="DimensionWorks Magic Egg"
 authors="szx-jn"
 description='''魔法皮蛋的效果选择界面与持久化选择记录，配合整合包 KubeJS 使用。'''
 [[dependencies.dimensionworks_magic_egg]]
-modId="forge"
-mandatory=true
-versionRange="[47.4.23,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_magic_egg]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"

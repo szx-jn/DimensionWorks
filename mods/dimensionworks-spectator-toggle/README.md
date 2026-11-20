@@ -1,6 +1,6 @@
 # DimensionWorks Spectator Toggle
 
-Minecraft 1.20.1 Forge 自研模组，让玩家通过 **F4** 切换旁观模式。客户端与服务端都需要安装，不需要 OP 权限。
+Minecraft 1.21.1 NeoForge 自研模组，让玩家通过 **F4** 切换旁观模式。客户端与服务端都需要安装，不需要 OP 权限。
 
 - 第一次按 F4 保存当前维度、精确坐标、朝向和游戏模式，再进入旁观模式。
 - 第二次按 F4 返回保存位置，恢复原游戏模式，然后清除本轮记录。
@@ -22,8 +22,10 @@ Minecraft 1.20.1 Forge 自研模组，让玩家通过 **F4** 切换旁观模式�
 ## 本地验证
 
 ```sh
-gradle build --no-daemon # Gradle 8.8、Java 17；本地产物仅用于开发验证
+./gradlew :dimensionworks-spectator-toggle:build :dimensionworks-spectator-toggle:runGameTestServer --no-daemon # 仓库根目录，Java 21；本地产物仅用于开发验证
 ```
+
+已通过 10 项 JUnit 状态恢复回归和 2 项实际服务器 GameTest：精确返回点/朝向/冒险模式恢复，以及停服清理在当前位置恢复创造模式。GameTest 使用模拟玩家，不等同于真实客户端 F4、跨维度碰撞、死亡与重连验收。返回点 NBT 键和字段保留；Forge 玩家外层持久化数据由离线转换阶段搬运，不能直接宣称旧档已迁移。
 
 ## 更新记录
 

@@ -41,7 +41,7 @@ public final class VersionMismatchScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderDirtBackground(graphics);
+        renderBackground(graphics, mouseX, mouseY, partialTick);
         int boxWidth = Math.min(330, width - 24);
         int boxHeight = 116;
         int left = (width - boxWidth) / 2;

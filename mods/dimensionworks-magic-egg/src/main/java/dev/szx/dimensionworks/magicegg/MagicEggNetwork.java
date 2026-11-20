@@ -6,59 +6,67 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 
 public final class MagicEggNetwork {
     // 协议中的集合上限，用于限制网络包分配；超过此规模的效果注册表不支持。
     private static final int MAX_EFFECTS = 4096;
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.fromNamespaceAndPath(DimensionWorksMagicEgg.MOD_ID, "selection"),
-            () -> "1", "1"::equals, "1"::equals);
 
-    private record Open(UUID token, List<String> catalogue, boolean hasPrevious, List<String> previous) {}
-    private record Submit(UUID token, boolean reuse, List<String> selected) {}
-    private record Cancel(UUID token) {}
+    record Open(UUID token, List<String> catalogue, boolean hasPrevious, List<String> previous) implements CustomPacketPayload {
+        static final Type<Open> TYPE = new Type<>(id("open"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.of((buffer, message) -> {
+            buffer.writeUUID(message.token());
+            writeIds(buffer, message.catalogue());
+            buffer.writeBoolean(message.hasPrevious());
+            writeIds(buffer, message.previous());
+        }, buffer -> new Open(buffer.readUUID(), readIds(buffer), buffer.readBoolean(), readIds(buffer)));
+        @Override public Type<Open> type() { return TYPE; }
+    }
+
+    record Submit(UUID token, boolean reuse, List<String> selected) implements CustomPacketPayload {
+        static final Type<Submit> TYPE = new Type<>(id("submit"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Submit> CODEC = StreamCodec.of((buffer, message) -> {
+            buffer.writeUUID(message.token());
+            buffer.writeBoolean(message.reuse());
+            writeIds(buffer, message.selected());
+        }, buffer -> new Submit(buffer.readUUID(), buffer.readBoolean(), readIds(buffer)));
+        @Override public Type<Submit> type() { return TYPE; }
+    }
+
+    record Cancel(UUID token) implements CustomPacketPayload {
+        static final Type<Cancel> TYPE = new Type<>(id("cancel"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Cancel> CODEC = StreamCodec.of(
+                (buffer, message) -> buffer.writeUUID(message.token()), buffer -> new Cancel(buffer.readUUID()));
+        @Override public Type<Cancel> type() { return TYPE; }
+    }
 
     private MagicEggNetwork() {}
 
-    public static void register() {
-        CHANNEL.messageBuilder(Open.class, 0, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder((message, buffer) -> {
-                    buffer.writeUUID(message.token());
-                    writeIds(buffer, message.catalogue());
-                    buffer.writeBoolean(message.hasPrevious());
-                    writeIds(buffer, message.previous());
-                })
-                .decoder(buffer -> new Open(buffer.readUUID(), readIds(buffer), buffer.readBoolean(), readIds(buffer)))
-                .consumerMainThread((message, context) -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-                        () -> () -> MagicEggScreen.open(message.token(), message.catalogue(),
-                                message.hasPrevious(), message.previous())))
-                .add();
-        CHANNEL.messageBuilder(Submit.class, 1, NetworkDirection.PLAY_TO_SERVER)
-                .encoder((message, buffer) -> {
-                    buffer.writeUUID(message.token());
-                    buffer.writeBoolean(message.reuse());
-                    writeIds(buffer, message.selected());
-                })
-                .decoder(buffer -> new Submit(buffer.readUUID(), buffer.readBoolean(), readIds(buffer)))
-                .consumerMainThread((message, context) -> {
-                    ServerPlayer player = context.get().getSender();
-                    if (player != null) MagicEggSelection.submit(player, message.token(), message.reuse(), message.selected());
-                }).add();
-        CHANNEL.messageBuilder(Cancel.class, 2, NetworkDirection.PLAY_TO_SERVER)
-                .encoder((message, buffer) -> buffer.writeUUID(message.token()))
-                .decoder(buffer -> new Cancel(buffer.readUUID()))
-                .consumerMainThread((message, context) -> {
-                    ServerPlayer player = context.get().getSender();
-                    if (player != null) MagicEggSelection.cancel(player, message.token());
-                }).add();
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(DimensionWorksMagicEgg.MOD_ID, path);
+    }
+
+    public static void register(IEventBus modBus, Dist dist) {
+        IPayloadHandler<Open> openHandler = dist == Dist.CLIENT
+                ? (message, context) -> MagicEggScreen.open(message.token(), message.catalogue(),
+                        message.hasPrevious(), message.previous())
+                : (message, context) -> { throw new IllegalStateException("Client payload received on a dedicated server"); };
+        modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) -> {
+            var registrar = event.registrar("2");
+            registrar.playToClient(Open.TYPE, Open.CODEC, openHandler);
+            registrar.playToServer(Submit.TYPE, Submit.CODEC, (message, context) ->
+                    MagicEggSelection.submit((ServerPlayer) context.player(), message.token(), message.reuse(), message.selected()));
+            registrar.playToServer(Cancel.TYPE, Cancel.CODEC, (message, context) ->
+                    MagicEggSelection.cancel((ServerPlayer) context.player(), message.token()));
+        });
     }
 
     private static void writeIds(FriendlyByteBuf buffer, List<String> ids) {
@@ -76,15 +84,15 @@ public final class MagicEggNetwork {
     }
 
     public static void open(ServerPlayer player, SelectionSession session) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new Open(session.token(),
+        PacketDistributor.sendToPlayer(player, new Open(session.token(),
                 session.catalogue(), session.hasPrevious(), session.previous()));
     }
 
     public static void submit(UUID token, boolean reuse, List<String> selected) {
-        CHANNEL.sendToServer(new Submit(token, reuse, selected));
+        PacketDistributor.sendToServer(new Submit(token, reuse, selected));
     }
 
     public static void cancel(UUID token) {
-        CHANNEL.sendToServer(new Cancel(token));
+        PacketDistributor.sendToServer(new Cancel(token));
     }
 }

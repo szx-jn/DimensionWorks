@@ -11,13 +11,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.core.registries.BuiltInRegistries;
 
-@Mod.EventBusSubscriber(modid = DimensionWorksMagicEgg.MOD_ID)
+@EventBusSubscriber(modid = DimensionWorksMagicEgg.MOD_ID)
 public final class MagicEggSelection {
     public static final int DURATION_TICKS = 20 * 60 * 10;
     private static final String PENDING = "dw_magic_century_egg_pending";
@@ -31,9 +31,9 @@ public final class MagicEggSelection {
         if (!player.isAlive() || countdownData.getBoolean(PENDING)) return;
         player.closeContainer();
         // 与原菜单相同，按增益、中立、减益依次应用，同类保留注册顺序。
-        List<String> catalogue = ForgeRegistries.MOB_EFFECTS.getValues().stream()
+        List<String> catalogue = BuiltInRegistries.MOB_EFFECT.stream()
                 .sorted(Comparator.comparingInt(effect -> categoryOrder(effect.getCategory())))
-                .map(effect -> ForgeRegistries.MOB_EFFECTS.getKey(effect).toString()).toList();
+                .map(effect -> BuiltInRegistries.MOB_EFFECT.getKey(effect).toString()).toList();
         SelectionSession session = new SelectionSession(catalogue,
                 SelectionHistory.read(player.getPersistentData()), SelectionHistory.exists(player.getPersistentData()), countdownData);
         SESSIONS.put(player.getUUID(), session);
@@ -55,11 +55,12 @@ public final class MagicEggSelection {
         session.countdownData().putBoolean(PENDING, true);
         session.countdownData().putLong(DEADLINE, player.tickCount + DURATION_TICKS);
         for (String id : selected) {
-            MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.parse(id));
+            var holder = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(id)).orElseThrow();
+            MobEffect effect = holder.value();
             if (effect.isInstantenous()) {
                 effect.applyInstantenousEffect(player, player, player, 4, 1.0);
             } else {
-                player.addEffect(new MobEffectInstance(effect, DURATION_TICKS, 4, false, true));
+                player.addEffect(new MobEffectInstance(holder, DURATION_TICKS, 4, false, true));
             }
             if (!player.isAlive()) return;
         }
