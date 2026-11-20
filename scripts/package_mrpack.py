@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import fixed_source  # noqa: E402
 import pack_hook  # noqa: E402  (sibling packaging preflight hook)
 import pack_manifest  # noqa: E402  (sibling update manifest helpers)
 import pack_version  # noqa: E402  (sibling release version rules)
@@ -379,13 +380,13 @@ def build_pack(
             entry = resolve_curseforge(mod, cache_dir)
         elif source == "github-release":
             entry = resolve_github(mod, cache_dir)
-        elif source == "in-repo":
-            jar = in_repo_jar(mod)
+        elif source in {"in-repo", "github-source"}:
+            jar = in_repo_jar(mod) if source == "in-repo" else fixed_source.build_jar(mod, cache_dir)
             destination_name = jar.name
             entry = mod_file(
                 mod,
                 destination_name,
-                f"in-repo://{mod['project_path']}",
+                f"built-source://{mod['id']}",
                 "",
                 "",
                 0,
@@ -401,7 +402,7 @@ def build_pack(
         if path in seen_paths:
             raise ValueError(f"duplicate pack path: {path}")
         seen_paths.add(path)
-        if source != "in-repo":
+        if source not in {"in-repo", "github-source"}:
             index_files.append(entry)
 
     shaderpacks = shader_manifest["shaderpacks"]

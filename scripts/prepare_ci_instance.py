@@ -77,6 +77,9 @@ def stage_client_mods(instance_dir: Path, cache_dir: Path) -> tuple[int, int]:
                     cache_dir, "curseforge", filename, url
                 )
                 shutil.copy2(cached, mods_dir / filename)
+            elif source == "github-source":
+                jar = package_mrpack.fixed_source.build_jar(mod, cache_dir)
+                shutil.copy2(jar, mods_dir / jar.name)
             elif source == "github-release":
                 filename = mod["asset"]
                 url = (

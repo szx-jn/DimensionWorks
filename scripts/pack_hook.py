@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import fixed_source  # noqa: E402
 import check_localization  # noqa: E402  (sibling localization coverage check)
 import check_jei_details  # noqa: E402  (client tooltip metadata and fuel data)
 import pack_manifest  # noqa: E402  (sibling update manifest helpers)
@@ -84,6 +85,7 @@ def check_manifest() -> CheckResult:
         "modrinth": ("project_id", "version_id"),
         "curseforge": ("file_id", "file_name"),
         "github-release": ("repository", "release", "asset"),
+        "github-source": ("repository", "commit", "source_sha256", "file_name", "sha256", "version"),
         "in-repo": ("project_path", "version"),
     }
     for mod in manifest.get("mods", []):
@@ -91,6 +93,11 @@ def check_manifest() -> CheckResult:
         if source not in required_fields:
             problems.append(f"{mod.get('id')}: unsupported source {source!r}")
             continue
+        if source == "github-source":
+            try:
+                fixed_source.validate_source(mod)
+            except ValueError as error:
+                problems.append(f"{mod.get('id')}: {error}")
         for field_name in required_fields[source]:
             value = mod.get(field_name)
             if not value:

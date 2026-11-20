@@ -29,6 +29,20 @@ ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=.*$")
 SHELL_NAMES = {"bash", "dash", "sh", "zsh"}
 
 
+def python_packaging_arguments(arguments: list[str]) -> list[str] | None:
+    for index, argument in enumerate(arguments):
+        if argument == "-m":
+            if index + 1 < len(arguments) and arguments[index + 1] == PACK_SCRIPT_NAME[:-3]:
+                return arguments[index + 2 :]
+            return None
+        if argument in {"-c", "-"}:
+            return None
+        if argument.startswith("-"):
+            continue
+        return arguments[index + 1 :] if Path(argument).name == PACK_SCRIPT_NAME else None
+    return None
+
+
 def executable_and_arguments(tokens: list[str]) -> tuple[str, list[str]]:
     remaining = list(tokens)
     while remaining:
@@ -58,11 +72,7 @@ def is_packaging_tokens(tokens: list[str], depth: int = 0) -> bool:
         return True
 
     if executable.startswith("python") and arguments:
-        for argument in arguments:
-            if Path(argument).name == PACK_SCRIPT_NAME:
-                return True
-            if argument == "-m" and PACK_SCRIPT_NAME[:-3] in arguments:
-                return True
+        return python_packaging_arguments(arguments) is not None
 
     if depth < 2 and executable in SHELL_NAMES:
         for index, argument in enumerate(arguments):
@@ -95,9 +105,9 @@ def packaging_tokens(command: str) -> list[str]:
         if executable == PACK_SCRIPT_NAME:
             return arguments
         if executable.startswith("python"):
-            for index, argument in enumerate(arguments):
-                if Path(argument).name == PACK_SCRIPT_NAME:
-                    return arguments[index + 1 :]
+            pack_arguments = python_packaging_arguments(arguments)
+            if pack_arguments is not None:
+                return pack_arguments
     return []
 
 
@@ -179,7 +189,8 @@ def main() -> int:
             "DimensionWorks packaging preflight could not start.",
         )
 
-    hook_command = [sys.executable, str(PACK_HOOK), "--skip-build"]
+    # 与打包工具使用同一 PATH 中的 Python；macOS 系统 Python 不含 tomllib。
+    hook_command = ["python3", str(PACK_HOOK), "--skip-build"]
     version = option_value(tokens, "--version")
     if version:
         hook_command.extend(["--version", version])

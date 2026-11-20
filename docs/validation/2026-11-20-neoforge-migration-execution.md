@@ -210,3 +210,18 @@ LOGIN 认证改为原生查询/响应 payload，专用 decoder 保留 nullable �
 23 项必需 GameTest 通过（automation-port/native-tests-v8.log），覆盖真实蒸笼 1200 tick 烹饪、汤锅七份实际取出、普通锅整批容量、桶返还、半蒸笼隐藏槽位、组件/库存/进度重载、失效食谱和食谱订单容器数量。实际客户端四个原教程全部注册、绘制并执行指令，随后正常保存三维度退出（native-client-v2.log）。上游 Cookery 在这一小依赖夹具有可选兼容及数据错误，完整合包仍待处理；此记录不代表旧世界或所有料理内容已验收。
 
 验证 JAR kaleidoscopecookery_automation-1.21.1-1.0.1-dimensionworks.2.jar 为 107050 字节、49 个 Java 21 类，SHA-256 856f4368d5b23413fd7b96303ffa9ddad5bbe746384b94d8fd9edfa68ee18235，包含原生成资源与 BSD-3-Clause LICENSE，不包含测试类。固定源码 ZIP 为 156042 字节，SHA-256 b79d03118286cf059736aa87249498497650096b7a0c2c08a422b23448079281，独立重建 JAR 与工作副本逐字节一致（fixed-source-build-v1.log）。整包清单/源码构建流水线尚待接入。原 Forge 工作副本及服务器冷备未修改。
+
+
+## Mekanism Delight 原内容移植与构建入口
+
+从原作者公开源码 757f569d5097105082bcfae8de45b5417f51a039 建立独立 szx-jn/MekanismDelight fork，已推送 ccb1d24622c530b4b19dc5e20421367020457121。原服务器 JAR 的 42 个配方文件逐项对照；保留原整包实际启用的 18 个物品、拼盘方块与 15 条配方。基础果冻原来经拼盘取得，上游没有独立果冻配方，不把不存在的文件当作迁移丢失。原整包未安装 Mekanism Tools/Evolved Mekanism，不编译其刀具材料适配，原通用合金附加代码及可选资源保留。
+
+原生化学 codec、15 条实际配方及标签、完整物品组件、分级奶昔及取消药效移除事件、原辐射剂量、三种拼盘份数检查通过，6 项必需 GameTest 均通过（mekdelight-port/native-tests-v2.log），该日志 0 ERROR；此前切菜配方 codec 和进度条件错误已修复。核对旧 Mek 实际源码，核合成按完整工序消耗化学品、注射室持续消耗；原 10000 化学量/24000 tick 等配置保持。删除旧平台 datagen，数据文件使用原生单数路径。实际客户端与完整整包仍待验收。
+
+JAR mekanismdelight-1.21.1-1.1.3-dimensionworks.1.jar 为 120370 字节、23 个 Java 21 类，SHA-256 849527b68c780d2ef0b37586853f93947733de70c5fb2596ad9196a78e76c745，保留原 MIT LICENSE，不含测试类。源码归档 1586107 字节，SHA-256 ad593a116e5e450f18df541b261127c09595022d8f584676bdee52e72b78bc79，没有中间 Release。
+
+整包新建固定源码构建入口，客户端/服务端/CI 接入同一个校验构建 helper；32 项相关 Python 检查通过。预检钩子此前误把 py_compile 当作执行打包，并使用旧系统 Python，已限制到实际脚本或模块执行并使用工具 PATH 的 Python。完整目标清单、NeoForge 安装器和更新器切换仍继续推进。
+
+## 光影专项停止点
+
+用户要求停止继续跑光影测试，后续不再执行光影专项。已取得的实际客户端记录：原 Chocapic13 V6 六份预设、Unbound r5.9.3 和 Sildur Extreme-VL 在候选 Iris/Sodium 下实际启用并输出非空场景；原 Photon v1.3b 与官方 v1.4 在低负载配置并关闭 SH_SKYLIGHT/CLOUD_SHADOWS 后成功渲染（photon-native-client-v6.log）。Mac 默认 Photon 有 16 采样器上限及 compute shader 限制；仅关闭三个选项的后续精简配置仍失败，不能用该精简配置替代已通过配置。实际图片保存在私有 shader-port 下。整包联动/特殊维度未验收，不能把专项结果描述为整个迁移已完成。

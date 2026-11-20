@@ -187,3 +187,12 @@ python3 -m unittest discover -s scripts/tests -p 'test_sync_bbsmc_release.py' -v
 该步骤不编译或修改第三方 Java 类，保留所需编译依赖，不改变整合包分发的 Create 原包，不关闭 HTTPS 验证。升级清单中的 Create 版本时必须同步审查此脚本的版本与哈希。普通模组构建、独立客户端验证、正式发布共同使用该准备步骤。
 
 `python3 scripts/draw_dispatch_terminal_assets.py` 生成中转发运终端的完整六面模型、不透明 16×16 PNG 材质、暮色升级卡图标，以及六个 Alex 洞穴的 108×82 像素插画和总览图。只使用 Python 标准库；GUI 按实际卡片尺寸缩放整张图像。
+
+
+## 固定源码 fork 构建
+
+NeoForge 移植阶段不发布中间发行版。第三方 fork 可使用清单 source=github-source，必须固定 repository、完整 40 位 commit、源码归档 source_sha256、file_name、JAR sha256 和 version。scripts/fixed_source.py 从该提交下载源码，在隔离缓存内使用仓库 Wrapper 的 jar 任务构建，并校验实际 JAR；移动分支、无校验值或不匹配产物均拒绝。
+
+客户端 .mrpack 将这种 JAR 放入 overrides/mods，更新清单引用整包归档成员；服务端与 CI 实例使用同一构建入口。不会引用本机开发目录，不会运行 fork 发布任务。Java 21 与 Python 3.11 以上为目标工具要求；源码依赖及 Wrapper 版本由固定提交确定。
+
+已有预检继续执行，Python 的 py_compile、其他脚本参数或 -c 文本提及打包脚本不应触发打包钩子；实际执行打包仍禁止 --skip-hook。预检子进程使用 PATH 中的 Python，避免 macOS 系统旧 Python 缺少 tomllib。

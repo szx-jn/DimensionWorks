@@ -301,8 +301,8 @@ def resolve_server_mod(
             sha512=entry["hashes"]["sha512"],
             verbose=verbose,
         )
-    elif source == "in-repo":
-        cached_path = package_mrpack.in_repo_jar(mod)
+    elif source in {"in-repo", "github-source"}:
+        cached_path = package_mrpack.in_repo_jar(mod) if source == "in-repo" else package_mrpack.fixed_source.build_jar(mod, cache_dir)
         entry = {"path": f"mods/{cached_path.name}"}
     else:
         raise ValueError(f"{mod['id']}: unsupported source {source!r}")
@@ -310,7 +310,7 @@ def resolve_server_mod(
     destination = staging / entry["path"]
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(cached_path, destination)
-    return source == "in-repo"
+    return source in {"in-repo", "github-source"}
 
 
 def install_forge(staging: Path, cache_dir: Path, java: str, *, verbose: bool) -> None:
