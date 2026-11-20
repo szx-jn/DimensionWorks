@@ -299,3 +299,13 @@ manifest/mods.json 已切换为 Minecraft 1.21.1 / NeoForge：共 183 项固定�
 首次草案没有加入 Reese，实际 Options API JAR 的 mandatory 依赖检查失败；随后补齐同一已取得的固定候选，native-manifest-closure-audit-v2.log 为 **183 个顶层 JAR、73 个内嵌依赖、217 个 modId，0 错误、1 条既有 l2damagetracker 相同版本字节差异警告**。草案不包含额外报警工程；原包 15 个自研 JAR 版本与各 build.gradle 相符。三个原有 fork 使用已推送固定提交、源码 SHA 与产物 SHA，不使用移动分支、Actions 产物或新 Release。root README 平台及直接升级报告同步更新。主清单检查、JSON、唯一 ID 与 git diff --check 通过；固定源码、预检钩子及服务端打包的 20 项既有 Python 检查通过（7 / 9 / 4 项），见 native-manifest-*-tests.log。
 
 该切换不等于完整交付：其余配置/汉化引用、完整打包、唯一旧世界的一次性数据转换、真实认证、保存和重启对账仍待完成。生产原档保持封存状态，未打开或升级。根 VERSION 仍为 0.3.52，未触发发行工作流、未创建 Release。
+
+## 唯一旧档的实体附件转换规则
+
+只读 native NBT 探针扫描封存世界 319,192 个 `.dat` / 区域文档，发现 23 种旧能力和 38 种 ForgeData 顶层字段；包括被打包物品携带的嵌套实体，不能只转换玩家文件。使用 `RandomAccessFile("r")` 读取区域，未使用会以读写方式打开文件的原生 RegionFile。`source-cap-shapes-v1.json` 为私有报告，不含在仓库中。
+
+在隔离空世界导出固定 NeoForge 目标的持久化附件、组件编码及目标方块状态属性，不操作第三方玩法。`native-schema-export-v1.log` 正常启动、导出 14 个默认持久化附件 / 218 项组件编码描述、40 tick 后保存停服；临时导出 Mod 及旧私有料理探针已移出测试夹具。Mekanism 默认辐射因等于基线而不写盘，已另核对其 Double codec；暮色的投掷与巨镐控制附件没有序列化器。
+
+新增 `entity_data.py`：离线映射 NeoForgeData、原生附件及实际数值/字段，保留 Curios 库存、UUID、持久化数据及所有者字段；Aether 四种饰品槽位分别映射，避免把原生槽位与通用饰品槽位合并丢失。舍弃能力和新版不持久化的临时字段返回台账，未知能力或字段冲突阻止转换。24 项迁移工具测试通过（其中新增 9 项），私有实际能力样本生成的 18 种目标附件 ID 全部存在。此处只证明转换规则、样本结构和注册 ID；完整旧档原生解码、库存/机器对账及保存重启尚未完成。
+
+进一步核对负数 Count：共有 71 条，69 条来自背包 SavedData，2 条来自 Sophisticated Storage 方块库存，实际数据另有 Int `realCount`（例如石英 448、赛特斯石英粉 3067）。目标 Sophisticated 库存使用自身的 oversized ItemStack codec，数量应转入 Int `count`，不能把旧 byte 当作库存量或按无符号数猜测。箭袋 Parent 与背包/机器组件规则继续实现中，封存原档未改写，VERSION 仍为 0.3.52，未发布。

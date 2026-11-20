@@ -1,6 +1,6 @@
 # 一次性存档迁移工具
 
-本目录服务于已获批准的 1.20.1 Forge → 1.21.1 NeoForge 存档保全任务。当前实现备份校验与只读审计，尚未实现存档转换；禁止据此直接用目标版本打开生产存档。
+本目录服务于已获批准的 1.20.1 Forge → 1.21.1 NeoForge 存档保全任务。当前实现备份校验、只读审计及部分离线数据转换规则，尚未完成整个存档转换；禁止据此直接用目标版本打开生产存档。
 
 服务器停机并确认没有 Minecraft Java 进程、监听端口或控制器自动拉起后，制作冷备份。备份包应含当前世界、身份映射、团队、配置、脚本、模组与依赖，并提供：
 
@@ -51,6 +51,10 @@ python3 scripts/migration/preflight_registries.py /absolute/private-lab/source-a
 用户已明确舍弃 `caves_delight`、`mekanismdelight`、`kaleidoscope_sauce`、`witherstormmod`。原服务器未发现这四项的实际方块、实体或物品栈，但含 `witherstormmod:bowels` 维度定义。预检继续报告缺失项；后续一次性转换须在新副本中定点处理并记录，不删除同一容器/机器中的其他数据。用户已确认此服务器是唯一旧存档，只针对该封存快照完成转换和对账，不开发任意历史版本或其他单人旧档适配。
 
 ## 工具验证
+
+`entity_data.py` 根据唯一服务器的实际旧能力结构及固定目标 JAR 的持久化格式，将实体 `ForgeData` 转为 `NeoForgeData`、`ForgeCaps` 转为 `neoforge:attachments`。处理 Aether 字段/槽位、女仆数值、Mekanism 辐射、暮色护盾、酿酒状态及 L2 附件；Curios 库存和嵌套数据保留，仍须接入物品组件转换。舍弃的凋零风暴能力、新暮色不持久化的两个瞬时控制状态及新版 L2 不保存的死亡计时器通过 `removed` 返回给私有台账，不静默删除。未知能力、目标字段冲突或结构不符阻止转换。
+
+该模块只返回新 NBT，不写世界、不更新 DataVersion，也不代表物品、机器或所有玩家已经迁移。箭袋的 `ForgeCaps/Parent` 是物品库存，必须先走独立物品组件转换，不能当作实体附件处理。
 
 ```sh
 python3 -m unittest discover -s scripts/tests -p 'test_verify_snapshot.py' -v
