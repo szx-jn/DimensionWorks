@@ -6,6 +6,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,6 +26,18 @@ public abstract class TransferCardboardBoxMixin {
                 && TransferBlockPolicy.forbiddenBoxContents(level, pos)) {
             TransferBlockPolicy.notifyDenied(player);
             cir.setReturnValue(InteractionResult.FAIL);
+        }
+    }
+
+    @Inject(method = {"use", "m_6227_"}, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/entity/BlockEntity;load(Lnet/minecraft/nbt/CompoundTag;)V",
+            shift = At.Shift.AFTER), remap = false)
+    private void dimensionworks$unpackSophisticatedStorage(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof SophisticatedStoragePackedAccessor accessor) {
+            accessor.dimensionworks$setPacked(false);
+            blockEntity.setChanged();
         }
     }
 }

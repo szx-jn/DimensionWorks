@@ -32,6 +32,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.level.BlockEvent;
@@ -87,6 +88,43 @@ public final class CardboardPackingGameTests {
     private static void clear(ServerLevel level, BlockPos pos) {
         level.setBlock(pos, Blocks.AIR.defaultBlockState(), FLAGS);
         level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(2)).forEach(ItemEntity::discard);
+    }
+
+    @GameTest(template = "empty")
+    public static void sophisticatedStorageContentsSurviveCardboardPacking(GameTestHelper h) {
+        var level = h.getLevel();
+        var pos = h.absolutePos(new BlockPos(3, 2, 3));
+        var p = player(h);
+        try {
+            for (String id : List.of("sophisticatedstorage:chest", "sophisticatedstorage:barrel")) {
+                var storage = block(id);
+                level.setBlock(pos, storage.defaultBlockState(), FLAGS);
+                var original = level.getBlockEntity(pos);
+                var inventory = original.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
+                h.assertTrue(inventory != null, id + " must expose its storage inventory");
+                h.assertTrue(inventory.insertItem(0, new ItemStack(Items.DIAMOND, 7), false).isEmpty(), id + " must accept test contents");
+
+                h.assertTrue(pack(p, pos, tool("mekanism:cardboard_box")).consumesAction(), id + " must pack");
+                var box = level.getBlockEntity(pos);
+                var saved = box.saveWithFullMetadata();
+                var packedTag = saved.getCompound("data").getCompound("tileTag");
+                h.assertTrue(packedTag.getBoolean("packed"), id + " must be marked packed before its block entity is saved");
+                h.assertTrue(level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(2)).stream()
+                    .noneMatch(entity -> entity.getItem().is(Items.DIAMOND)), id + " contents must not spill as item entities");
+
+                unpack(p, pos);
+                var restored = level.getBlockEntity(pos);
+                var restoredInventory = restored.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
+                h.assertTrue(restoredInventory != null && restoredInventory.getStackInSlot(0).getCount() == 7
+                    && restoredInventory.getStackInSlot(0).is(Items.DIAMOND), id + " inventory must survive packing");
+                h.assertTrue(!restored.saveWithoutMetadata().getBoolean("packed"), id + " must be active after unpacking");
+                clear(level, pos);
+            }
+        } finally {
+            p.discard();
+            clear(level, pos);
+        }
+        h.succeed();
     }
 
     @GameTest(template = "empty")

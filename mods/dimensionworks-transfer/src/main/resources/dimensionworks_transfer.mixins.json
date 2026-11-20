@@ -20,6 +20,8 @@
     "TransferLevelPlacementMixin",
     "TransferChunkPlacementMixin",
     "TransferCardboardBoxMixin",
+    "SophisticatedStoragePackedAccessor",
+    "SophisticatedStorageCardboardPackingMixin",
     "TransferAePartPlacementMixin",
     "PackedPlayerMovementMixin",
     "PackedPlayerConnectionMixin"
