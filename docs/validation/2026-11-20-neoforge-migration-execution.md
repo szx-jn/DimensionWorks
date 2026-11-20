@@ -319,3 +319,13 @@ manifest/mods.json 已切换为 Minecraft 1.21.1 / NeoForge：共 183 项固定�
 `NativeComponentBatch` 在隔离空世界对 91 条转换样本严格解码/编码，其中 19 类本服实际使用的 Sophisticated 标签样本、1 个实际箭袋能力样本，以及全部 71 条负数 Count 记录。`native-component-batch-v1.log` 为 Done (0.870s)、MIGRATION_COMPONENT_BATCH_DONE rows=91、40 tick 正常保存停服、Gradle 成功；临时 JAR 已移出夹具。私有 `component-roundtrip-v1.json` 核对：71 条实际库存合计 **80,432 个物品**，各 ID / Int 数量一致；箭袋转换前后目标结构完全一致；36 项背包 UUID、容量、颜色、战利品定义/比例值保留，所选 Sophisticated 样本没有遗留旧自定义字段。输入/输出 SHA 均记录。其余第三方可选兼容与网络日志保留，不称为整包无错，也未运行第三方玩法专项或光影专项。
 
 此处仍是转换样本与数量验证，**不代表 50 个背包存储记录、所有玩家或整个世界已经迁移**。AE2 键及储量、Mekanism 机器/打包数据、实体属性新格式、整档生成及保存重启对账继续待完成；生产封存原档未改写，VERSION 仍为 0.3.52，未发布。
+
+## AE2 原生键类型及储量规则
+
+新增 `ae_data.py`，按本服旧结构转换 item / fluid 键、嵌套物品元数据及元件 Long 储量，检查旧 `keys` / `amts` / `ic` 长度、总量、字段、类型和组件冲突。调用方仍须完成键所携物品的完整组件转换。新增 5 项工具测试，合计 33 项通过（ae-data-tests-v2.log）。
+
+首次原生读写 `native-ae-component-batch-v1.log` 发现新版类型字段是 `#t`，旧 `#c` 会触发 AE2 缺失内容回退：流体键被写为物品类型及 `ae2:missing_content_error`。这批结果未通过对账，输入/输出保留在私有诊断目录。修正类型字段并为 NativeComponentBatch 增加递归占位错误拒绝；`native-ae-component-batch-v2.log` 为 Done (0.696s)、rows=2、40 tick 正常保存停服、Gradle 成功。两条**合成 codec 样本**的目标输入/输出结构完全一致：item 键的 9,000,000,000,000,000 Long 数量、损耗 17、精准采集 1，以及 fluid 键的 16,000 Long 数量与原生类型保留。报告 ae-component-roundtrip-v2.json 含输入/输出 SHA，未将合成数量冒充原档库存；临时 JAR 已移出夹具。没有验证第三方玩法或光影。
+
+只读定点提取实际 `region/r.-1.0.mca` 内全部 7 个现役 AE2 物品元件，439 个键，原始缓存总量合计 **3,281,878**；其中 76 个键带旧 tag、1 个键带旧 caps。caps 为酒瓶的 `creategearsandtavern:drink_fluid={}`，仍须按实际原生物品格式处理。私有 source-ae-storage-cells-v1.nbt 保留完整键、储量、损耗、附魔、Mekanism/背包数据、蜂巢内嵌实体等；没有拿物品模板 Count 代替库存数。**实际 7 个元件尚未完成整体转换和对账**，其所携物品、嵌套实体和机器状态继续处理。
+
+玩家的实际原版 DFU 输出还显示：`Attributes` 已转为 `attributes`，条目字段变为 `id` / `base`，但 5 种 Forge 属性 ID 未改名。11 份玩家文件的旧 gravity / swim / step / reach 基值已只读核对，均无这 5 项的永久修饰器；全档属性结构补充审计继续进行，不能仅依据玩家样本判断所有嵌套实体。完整旧档转换、真实身份登录及保存重启验收仍未完成，VERSION 为 0.3.52，未发布。

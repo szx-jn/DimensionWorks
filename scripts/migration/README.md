@@ -62,6 +62,10 @@ python3 scripts/migration/preflight_registries.py /absolute/private-lab/source-a
 
 Sophisticated 背包和升级的组件使用固定目标 JAR 自带的 `LegacyBackpackDataMigration.normalizeLegacyData` / `LegacyUpgradeDataMigration.migrate`，不在本仓库重复实现其旧字段映射。`java/NativeComponentBatch.java` 只供仓库外的隔离转换夹具使用，不加入整包清单：编译时增加固定 Sophisticated Core / Backpacks JAR，作为临时 Mod 放入带 `dimensionworks-pack-check.marker=isolated-pack-check` 的夹具。输入 `local/migration-component-input.nbt` 的 `format=1`，`rows` 每项包含 `label`、已做原版 DFU 的 `stack`、`normalize_sophisticated` 及 `item_kind`（`backpack` / `upgrade`）。原生组件严格解码、调用作者现有接口，再编码至新建的私有 `migration-component-output.nbt`；完成后移除临时 Mod。它不读生产世界、不能代表完整旧档或所有背包已经迁移。
 
+`ae_data.py` 转换实际旧 AE2 item / fluid 键，类型字段由 `#c` 改为原生 `#t`；物品元数据和能力交给完整物品转换回调，流体数量不改单位。存储元件的 `keys` / LongArray `amts` / Long `ic` 转为 `ae2:storage_cell_inv`，先核对数组长度和缓存总量；未知字段、类型或储量冲突阻止转换。不得绕过物品回调，把尚未处理的 Mekanism、背包或其他物品状态当作已经保留。
+
+AE2 部分 codec 会把无法解析的键变成缺失内容占位项，即使 `getOrThrow` 未抛错。原生批处理递归拒绝 `ae2:missing_content_error` 组件；对账仍须核对每个键的原生类型、ID、组件和 Long 储量，不能只检查加载成功或组件总数。
+
 ```sh
 python3 -m unittest discover -s scripts/tests -p 'test_verify_snapshot.py' -v
 /absolute/private-lab/python/bin/python -m unittest discover -s scripts/migration/tests -v

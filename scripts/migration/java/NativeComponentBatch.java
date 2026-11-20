@@ -41,7 +41,9 @@ public final class NativeComponentBatch {
                 }
                 CompoundTag result = new CompoundTag();
                 result.putString("label", row.getString("label"));
-                result.put("stack", CodecHelper.OVERSIZED_ITEM_STACK_CODEC.encodeStart(ops, stack).getOrThrow());
+                Tag encoded = CodecHelper.OVERSIZED_ITEM_STACK_CODEC.encodeStart(ops, stack).getOrThrow();
+                rejectMissingContent(encoded);
+                result.put("stack", encoded);
                 var remaining = stack.get(DataComponents.CUSTOM_DATA);
                 if (remaining != null) result.put("remaining_custom_data", remaining.copyTag());
                 results.add(result);
@@ -53,5 +55,13 @@ public final class NativeComponentBatch {
         } catch (Exception error) {
             throw new RuntimeException("Native migration component batch failed", error);
         }
+    }
+
+    private static void rejectMissingContent(Tag value) {
+        if (value instanceof CompoundTag compound) {
+            if (compound.getCompound("components").contains("ae2:missing_content_error"))
+                throw new IllegalStateException("AE2 codec returned a missing-content placeholder");
+            for (String key : compound.getAllKeys()) rejectMissingContent(compound.get(key));
+        } else if (value instanceof ListTag list) for (Tag child : list) rejectMissingContent(child);
     }
 }
