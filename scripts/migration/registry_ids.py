@@ -16,7 +16,7 @@ ITEM_IDS = {
     **{f"miners_delight:{name}": f"minersdelight:{name}" for name in
        ("bat_wing", "cave_carrot", "copper_carrot", "gossypium", "tentacles")},
     **{f"expatternprovider:{name}": f"extendedae:{name}" for name in
-       ("ex_charger", "ex_drive", "ex_inscriber", "circuit_cutter", "silicon_block", "ex_import_bus_part")},
+       ("ex_charger", "ex_drive", "ex_inscriber", "circuit_cutter", "silicon_block", "ex_import_bus_part", "ex_export_bus_part")},
 }
 BLOCK_IDS = {
     "minecraft:grass": "minecraft:short_grass",
@@ -26,6 +26,31 @@ BLOCK_IDS = {
     **{f"expatternprovider:{name}": f"extendedae:{name}" for name in
        ("ex_charger", "ex_drive", "ex_inscriber", "circuit_cutter")},
 }
+ENCHANTMENT_IDS = {"draconicevolution:reaper_enchantment": "draconicevolution:reaper"}
+
+
+def convert_enchantment_components(target: n.Compound, native_ids: set[str]) -> ItemComponentConversion:
+    """原版 DFU 不映射第三方附魔；只更名已核对项，不用其它附魔代替失效效果。"""
+    result = deepcopy(target)
+    removed = {}
+    for key in ("minecraft:enchantments", "minecraft:stored_enchantments"):
+        component = result.get("components", {}).get(key)
+        if component is None:
+            continue
+        if not isinstance(component, n.Compound) or not isinstance(component.get("levels"), n.Compound):
+            raise ValueError("附魔组件没有原生 levels 结构")
+        levels = n.Compound()
+        for old, level in component["levels"].items():
+            id = ENCHANTMENT_IDS.get(old, old)
+            if id not in native_ids:
+                raise ValueError(f"附魔无法直接升级：{old}")
+            if not isinstance(level, n.Int) or not 0 <= int(level) <= 255 or id in levels:
+                raise ValueError("附魔等级类型、范围或更名后的键冲突")
+            levels[id] = deepcopy(level)
+            if id != old:
+                removed[old] = deepcopy(level)
+        component["levels"] = levels
+    return ItemComponentConversion(result, removed)
 
 
 def mapped_id(source: str, target_ids: set[str], *, block: bool = False) -> str:

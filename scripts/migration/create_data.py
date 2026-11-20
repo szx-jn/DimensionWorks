@@ -1,8 +1,9 @@
-"""唯一旧档中 Create 过滤器/包裹的库存组件转换，不写世界。"""
+"""唯一旧档中 Create 容器、装配进度和移动机械的组件转换，不写世界。"""
 from __future__ import annotations
 
 from copy import deepcopy
 from typing import Callable
+import re
 
 import nbtlib as n
 
@@ -65,4 +66,43 @@ def convert_container_item(source: n.Compound, target: n.Compound,
         del custom[field]
     if "minecraft:custom_data" in components and not custom:
         del components["minecraft:custom_data"]
+    return ItemComponentConversion(result, {})
+
+
+def convert_mechanical_item(source: n.Compound, target: n.Compound,
+                            convert_contraption: Callable[[n.Compound], n.Compound] | None = None) -> ItemComponentConversion:
+    id = str(source.get("id", ""))
+    if not id.startswith("create:") or str(target.get("id", "")) != id:
+        raise ValueError("移动机械/装配物品注册名不符")
+    tag = source.get("tag", n.Compound())
+    if not isinstance(tag, n.Compound):
+        raise ValueError("Create 机械物品原标签不符")
+    result = deepcopy(target)
+    components = result.setdefault("components", n.Compound())
+    custom = components.get("minecraft:custom_data", n.Compound())
+
+    def move(old, key, value):
+        if key in components or custom.get(old) != tag[old]:
+            raise ValueError("Create 机械组件或原版 DFU 数据冲突")
+        components[key] = value
+        del custom[old]
+
+    if "SequencedAssembly" in tag:
+        old = tag["SequencedAssembly"]
+        if (not isinstance(old, n.Compound) or set(old) != {"id", "Step", "Progress"} or
+            not isinstance(old["id"], n.String) or not re.fullmatch(r"[a-z0-9_.-]+:[a-z0-9_./-]+", str(old["id"])) or
+            not isinstance(old["Step"], n.Int) or int(old["Step"]) < 0 or
+            not isinstance(old["Progress"], n.Float) or not 0 <= float(old["Progress"]) <= 1):
+            raise ValueError("序列装配进度字段或类型不符")
+        move("SequencedAssembly", "create:sequenced_assembly",
+             n.Compound({"id": deepcopy(old["id"]), "step": deepcopy(old["Step"]), "progress": deepcopy(old["Progress"])}))
+    if "Contraption" in tag:
+        if (id not in {f"create:{prefix}minecart_contraption" for prefix in ("", "furnace_", "chest_")} or
+            not isinstance(tag["Contraption"], n.Compound) or convert_contraption is None):
+            raise ValueError("矿车机械缺少完整移动装置转换")
+        move("Contraption", "create:minecart_contraption_data", convert_contraption(deepcopy(tag["Contraption"])))
+    if "minecraft:custom_data" in components and not custom:
+        del components["minecraft:custom_data"]
+    if not components:
+        result.pop("components", None)
     return ItemComponentConversion(result, {})

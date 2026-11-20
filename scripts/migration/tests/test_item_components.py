@@ -9,6 +9,16 @@ from migration.item_components import authoritative_count, convert_item_componen
 
 
 class ItemComponentTest(unittest.TestCase):
+    def test_only_verified_empty_soul_sail_cap_can_be_removed(self):
+        source = n.parse_nbt('{id:"kaleidoscope_sculk:soul_sail",Count:1b,ForgeCaps:{Parent:{}}}')
+        target = n.parse_nbt('{id:"kaleidoscope_sculk:soul_sail",count:1,ForgeCaps:{Parent:{}}}')
+        result = convert_item_components(source, target, lambda value: value)
+        self.assertNotIn("ForgeCaps", result.data)
+        self.assertEqual(result.removed, {"Parent": n.Compound()})
+        source["ForgeCaps"]["Parent"]["stored"] = n.Int(12)
+        with self.assertRaisesRegex(ValueError, "未覆盖"):
+            convert_item_components(source, target, lambda value: value)
+
     def quiver(self):
         return n.Compound({"id": n.String("supplementaries:quiver"), "Count": n.Byte(1),
                            "ForgeCaps": n.Compound({"Parent": n.Compound({

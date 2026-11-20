@@ -6,7 +6,7 @@ import unittest
 import nbtlib as n
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from migration.create_data import convert_container_item
+from migration.create_data import convert_container_item, convert_mechanical_item
 
 
 def item(value):
@@ -20,6 +20,24 @@ def target(source):
 
 
 class CreateDataTest(unittest.TestCase):
+    def test_sequence_progress_keeps_recipe_step_and_float_value(self):
+        source = n.parse_nbt('{id:"create:incomplete_precision_mechanism",Count:1b,tag:{SequencedAssembly:{id:"create:sequenced_assembly/precision_mechanism",Step:3,Progress:0.2f}}}')
+        data = convert_mechanical_item(source, target(source)).data
+        value = data["components"]["create:sequenced_assembly"]
+        self.assertEqual(str(value["id"]), "create:sequenced_assembly/precision_mechanism")
+        self.assertEqual(value["step"], n.Int(3))
+        self.assertEqual(value["progress"], source["tag"]["SequencedAssembly"]["Progress"])
+        self.assertNotIn("minecraft:custom_data", data["components"])
+
+    def test_minecart_requires_full_payload_conversion_and_preserves_machine_data(self):
+        source = n.parse_nbt('{id:"create:minecart_contraption",Count:1b,tag:{Contraption:{Type:"Mounted",Blocks:[{Pos:[I;1,2,3],State:{Name:"create:depot"},Data:{inventory:{Items:[{id:"minecraft:iron_ingot",Count:64b,Slot:0}],Size:1}}}]}}}')
+        with self.assertRaisesRegex(ValueError, "完整移动装置转换"):
+            convert_mechanical_item(source, target(source))
+        data = convert_mechanical_item(source, target(source), deepcopy).data
+        value = data["components"]["create:minecart_contraption_data"]
+        self.assertEqual(value, source["tag"]["Contraption"])
+        self.assertEqual(value["Blocks"][0]["Data"]["inventory"]["Items"][0]["Count"], 64)
+
     def test_filter_keeps_foreign_item_metadata_last_slot_and_modes(self):
         source = n.parse_nbt('{id:"create:filter",Count:1b,tag:{Items:{Size:18,Items:[{Slot:17,'
                              'id:"farmersdelight:beef_stew",Count:5b,tag:{customStock:42L}}]},Blacklist:1b,RespectNBT:1b}}')

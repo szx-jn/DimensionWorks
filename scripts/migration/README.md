@@ -80,7 +80,7 @@ python3 scripts/migration/retention_scope.py /absolute/private-lab/source-audit.
 
 `registry_ids.py` 只提供已核对的官方升级注册名：原版 grass、旧 Miner's Delight / Brewin Compatibility Delight 名称及 ExtendedAE 设备/物品，仍要求目标运行注册表存在。唯一旧无限元件须完整匹配圆石记录，才映射为作者的 `extendedae:infinity_cobblestone_cell`，旧记录进入台账。未知记录或缺失注册项不猜测，不替换为空气。
 
-Sophisticated 背包和升级的组件使用固定目标 JAR 自带的 `LegacyBackpackDataMigration.normalizeLegacyData` / `LegacyUpgradeDataMigration.migrate`，不在本仓库重复实现其旧字段映射。`java/NativeComponentBatch.java` 只供仓库外的隔离转换夹具使用，不加入整包清单：编译时增加固定 Sophisticated Core / Backpacks JAR，作为临时 Mod 放入带 `dimensionworks-pack-check.marker=isolated-pack-check` 的夹具。输入 `local/migration-component-input.nbt` 的 `format=1`，`rows` 每项包含 `label`、已做原版 DFU 的 `stack`、`normalize_sophisticated` 及 `item_kind`（`backpack` / `upgrade`）。原生组件严格解码、调用作者现有接口，再编码至新建的私有 `migration-component-output.nbt`；完成后移除临时 Mod。它不读生产世界、不能代表完整旧档或所有背包已经迁移。
+Sophisticated 背包和升级的组件使用固定目标 JAR 自带的 `LegacyBackpackDataMigration.normalizeLegacyData` / `LegacyUpgradeDataMigration.migrate`，不在本仓库重复实现其旧字段映射。`java/NativeComponentBatch.java` 只供仓库外的隔离转换夹具使用，不加入整包清单：编译时增加固定 Sophisticated Core / Backpacks / Storage JAR，作为临时 Mod 放入带 `dimensionworks-pack-check.marker=isolated-pack-check` 的夹具。输入 `local/migration-component-input.nbt` 的 `format=1`，`rows` 每项包含 `label`、已做原版 DFU 的 `stack`、`normalize_sophisticated` 及 `item_kind`（`backpack` / `storage` / `upgrade`）。原生组件严格解码、调用作者现有接口，再编码至新建的私有 `migration-component-output.nbt`；完成后移除临时 Mod。它不读生产世界、不能代表完整旧档或所有背包已经迁移。
 
 该夹具可选接收 `default_item_ids` 和 `export_block_state_schema`，输出所选物品的原生默认组件及全部方块的属性允许值/默认状态，用于识别默认字段省略及检查旧机械方块状态。只读注册表，不放置或运行第三方机器。
 
@@ -104,3 +104,18 @@ python3 -m unittest discover -s scripts/tests -p 'test_verify_snapshot.py' -v
 ```
 
 NBT 审计测试单独运行，以免给现有无关脚本检查引入不必要的 Python 依赖。
+
+
+## 递归库存转换与严格原生对账
+
+`item_pipeline.py` 按完整原始 NBT 元数据缓存单位模板，真实数量、槽位与 Sophisticated `realCount` 在每次转换时独立恢复。嵌套物品需要作者迁移接口时，先完成子项，才生成外层过滤器、容器或元件；未处理的无线终端、通用元件与移动机械明确阻止转换，不返回空物品。缓存中的原生结果必须来自已独立核对的原始记录，注册名、数量或同一元数据的结果冲突均阻止接入。
+
+`block_states.py` 使用固定目标原生状态目录保留方块注册名与每项现有属性。仅接受已核对的作者移除项：暮色极光的旧 variant、火蝇/蝉的 false waterlogged 和下界粉状甘蔗的 false leave/base；移除项进入私有台账，不能以目标默认值吞掉未知属性。实际 5,892 种旧状态已对照目标 6,362 种方块目录通过；这不等于机器放置或运行验证。
+
+`potion_data.py` 核对旧 Miner's Delight 与 L2 固定资产的药水效果、时长、等级，再映射作者新预设。原药箭和自定义效果、数量、颜色保留；已舍弃凋零风暴的三种药水本来只应用原版凋零效果，转换为等时长/等级的原版自定义效果，并在 custom_data 与私有台账保留源药水 ID，不新增替代 Mod。未核对的药水或效果、变更后的目标预设阻止转换。`registry_ids.py` 同样严格核对附魔：收割者按作者更名保留等级，生命攫取没有等价更名，等待用户取舍，不能换成另一附魔或静默移除。
+
+新增女仆智能收容块、熔岩背包、棋谱与 Patchouli 书籍组件转换；女仆实体原本没有 id 时，只在独立 DFU 上下文提供类型，持久化结果保留原来是否有该字段。Create 序列装配的配方、步骤和 Float 进度保留；矿车机械必须提供完整载荷转换回调。空灵魂风帆能力只在完整匹配 `{Parent:{}}` 时记账处理，非空数据阻止转换。
+
+原生组件桥接检查物品 ID、数量、再次编码结果及完整有效组件的原生编码。含 ItemStack 的作者组件可能以对象身份实现 Java equals，不能把这种差异误报为存档丢失；仍要求完整持久数据和有效组件重新编码相等。可选 `collect_errors=true` 仅用于诊断，必须提供私有 `diagnostic_id`：输出 `complete=false`、逐行错误和完整私有异常日志后仍以失败结束。默认失败即停止；只有 `complete=true`、全部行完整且外部源数据对账通过，才可将结果用于下一阶段。`export_potion_effects` 可导出固定原生预设证据。
+
+当前 91 项 Python 规则测试通过；实际索引的 2,731 种单位元数据中，2,712 条通过原生组件保存/重读，包括作者接口处理的 45 种背包和 25 种升级元数据。余下 9 条被明确阻止，另有 10 种空 air 模板。这些是元数据模板，不是物理库存数量；仍须完成全部背包 SavedData、其它存储、真实玩家库存、机械结构和完整世界保存/重启对账，不能据此交付存档。

@@ -55,8 +55,12 @@ def convert_item_components(source: n.Compound, target: n.Compound,
                            set(caps) == {"creategearsandtavern:drink_fluid"} and
                            isinstance(caps["creategearsandtavern:drink_fluid"], n.Compound) and
                            not caps["creategearsandtavern:drink_fluid"])
+        empty_soul_cap = (str(source.get("id")) == "kaleidoscope_sculk:soul_sail" and
+                          set(caps) == {"Parent"} and isinstance(caps["Parent"], n.Compound) and not caps["Parent"])
         if empty_drink_cap:
             removed["creategearsandtavern:drink_fluid"] = deepcopy(caps["creategearsandtavern:drink_fluid"])
+        elif empty_soul_cap:
+            removed["Parent"] = deepcopy(caps["Parent"])
         elif str(source.get("id")) != "supplementaries:quiver" or set(caps) != {"Parent"}:
             raise ValueError("未覆盖的物品 ForgeCaps")
         else:
