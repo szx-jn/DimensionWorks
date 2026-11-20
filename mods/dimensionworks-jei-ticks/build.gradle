@@ -1,46 +1,66 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-}
+plugins { id 'java-library' }
 
 version = '0.1.1'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_jei_ticks'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-}
-
-repositories {
-    maven { url = 'https://maven.blamejared.com' }
-    maven { url = 'https://api.modrinth.com/maven' }
-    maven { url = 'https://modmaven.dev' }
-    mavenCentral()
-}
-
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+apply from: rootProject.file('gradle/neoforge-create.gradle')
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.23'
-    implementation fg.deobf('mezz.jei:jei-1.20.1-forge:15.20.0.130')
-    compileOnly fg.deobf('maven.modrinth:jade:LecuGude')
-    compileOnly fg.deobf('mekanism:Mekanism:1.20.1-10.4.16.80')
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation 'maven.modrinth:jei:kmb7KviL'
+    runtimeOnly 'maven.modrinth:mezzconfig:sPQlt1iR'
+    compileOnly 'maven.modrinth:jade:eYz2YBGT'
+    compileOnly 'maven.modrinth:mekanism:5KzzycBT'
+    compileOnly 'maven.modrinth:create-enchantment-industry:qUpvzZ83'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
-
-mixin {
-    add sourceSets.main, 'dimensionworks_jei_ticks.refmap.json'
-    config 'dimensionworks_jei_ticks.mixins.json'
+test { useJUnitPlatform() }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-tasks.named('test') { useJUnitPlatform() }
-
-jar {
-    manifest.attributes(['MixinConfigs': 'dimensionworks_jei_ticks.mixins.json'])
-    finalizedBy 'reobfJar'
+if (project.hasProperty('jeiClientCheck')) {
+    sourceSets.create('clientCheck') {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    sourceSets.clientCheck.resources.srcDir layout.buildDirectory.dir('client-check-resources')
+    tasks.register('prepareJeiClientData', Copy) {
+        from(rootProject.file('kubejs/data/createdieselgenerators')) { into 'data/createdieselgenerators' }
+        from(rootProject.file('kubejs/data/create_enchantment_industry/loot_table')) { into 'data/create_enchantment_industry/loot_table' }
+        into layout.buildDirectory.dir('client-check-resources')
+    }
+    tasks.named('processClientCheckResources') { dependsOn 'prepareJeiClientData' }
+    dependencies {
+        clientCheckImplementation 'maven.modrinth:jade:eYz2YBGT'
+        clientCheckImplementation 'maven.modrinth:mekanism:5KzzycBT'
+        clientCheckRuntimeOnly 'maven.modrinth:guideme:QeYKsstN'
+        clientCheckRuntimeOnly 'maven.modrinth:create-diesel-generators:UoPH8lO1'
+        clientCheckRuntimeOnly 'maven.modrinth:create-enchantment-industry:qUpvzZ83'
+        clientCheckRuntimeOnly 'maven.modrinth:create-dragons-plus:b0u9vk8C'
+        clientCheckRuntimeOnly 'maven.modrinth:create-liquid-fuel:rLn2bDVE'
+        clientCheckRuntimeOnly 'maven.modrinth:draconic-evolution:84xwXpNh'
+        clientCheckRuntimeOnly 'maven.modrinth:brandons-core:56nwe5IX'
+        clientCheckRuntimeOnly 'maven.modrinth:codechicken-lib:vLDGhjNJ'
+        clientCheckRuntimeOnly 'maven.modrinth:curios:KJsZIQrT'
+    }
+    neoForge {
+        mods { dimensionworks_jei_ticks { sourceSet sourceSets.clientCheck } }
+        runs.client {
+            sourceSet = sourceSets.clientCheck
+            gameDirectory = project.file('run-client-jei')
+            systemProperty 'dimensionworks.jeiClientCheck', 'true'
+            jvmArguments.addAll('-Xmx2G', '-XX:ActiveProcessorCount=2')
+            programArguments.addAll('--width', '1024', '--height', '600')
+        }
+    }
+    tasks.named('runClient') {
+        doFirst { file('run-client-jei/logs/latest.log').delete() }
+        doLast {
+            def log = file('run-client-jei/logs/latest.log')
+            if (!log.exists() || !log.getText('UTF-8').contains('JEI NATIVE CLIENT CHECK PASSED:')) {
+                throw new GradleException('Actual native JEI client check did not complete')
+            }
+        }
+    }
 }

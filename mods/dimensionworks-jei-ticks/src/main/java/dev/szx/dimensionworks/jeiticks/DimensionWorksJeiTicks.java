@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.jeiticks;
 
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 
 @Mod(DimensionWorksJeiTicks.MOD_ID)
 public final class DimensionWorksJeiTicks {

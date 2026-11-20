@@ -8,9 +8,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public record FuelIcon(ItemStack stack, ResourceLocation sprite, int tint, Component name) {
     public static FuelIcon item(ItemStack stack) {
@@ -18,10 +18,10 @@ public record FuelIcon(ItemStack stack, ResourceLocation sprite, int tint, Compo
     }
 
     public static FuelIcon item(ResourceLocation id) {
-        if (!ForgeRegistries.ITEMS.containsKey(id)) {
+        if (!BuiltInRegistries.ITEM.containsKey(id)) {
             return null;
         }
-        var item = ForgeRegistries.ITEMS.getValue(id);
+        var item = BuiltInRegistries.ITEM.get(id);
         return item == null ? null : item(new ItemStack(item));
     }
 
@@ -29,11 +29,11 @@ public record FuelIcon(ItemStack stack, ResourceLocation sprite, int tint, Compo
         FluidStack contents = new FluidStack(fluid, 1000);
         ItemStack bucket = FluidUtil.getFilledBucket(contents);
         if (!bucket.isEmpty()) {
-            return new FuelIcon(bucket, null, 0xFFFFFF, contents.getDisplayName());
+            return new FuelIcon(bucket, null, 0xFFFFFF, contents.getHoverName());
         }
-        var extension = net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
+        var extension = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid);
         return new FuelIcon(ItemStack.EMPTY, extension.getStillTexture(contents), extension.getTintColor(contents),
-            contents.getDisplayName());
+            contents.getHoverName());
     }
 
     public void draw(GuiGraphics graphics, int x, int y) {

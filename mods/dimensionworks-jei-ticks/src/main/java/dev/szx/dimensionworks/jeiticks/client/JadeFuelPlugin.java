@@ -25,7 +25,7 @@ public final class JadeFuelPlugin implements IWailaPlugin {
     }
 
     private static final class Provider implements IBlockComponentProvider {
-        private static final ResourceLocation UID = new ResourceLocation("dimensionworks_jei_ticks", "fuel_consumption");
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath("dimensionworks_jei_ticks", "fuel_consumption");
 
         @Override
         public ResourceLocation getUid() {

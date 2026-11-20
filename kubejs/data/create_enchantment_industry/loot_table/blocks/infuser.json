@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "create_enchantment_industry:infuser"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "create_enchantment_industry:blocks/infuser",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:item_exists",
+      "item": "create_enchantment_industry:infuser"
+    }
+  ]
+}

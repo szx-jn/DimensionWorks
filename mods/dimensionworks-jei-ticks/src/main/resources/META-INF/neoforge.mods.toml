@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[4,)"
 license="MIT"
 clientSideOnly=true
 
@@ -12,26 +12,29 @@ displayTest="IGNORE_ALL_VERSION"
 description='''在 JEI 加工箭头内显示游戏刻数，并在背包提示和 Jade 中显示机械动力及附属、龙之进化的燃料消耗。'''
 
 [[dependencies.dimensionworks_jei_ticks]]
-modId="forge"
-mandatory=true
-versionRange="[47.0,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,21.2)"
 ordering="NONE"
 side="CLIENT"
 [[dependencies.dimensionworks_jei_ticks]]
 modId="jade"
-mandatory=false
-versionRange="[11.13.2,12)"
+type="optional"
+versionRange="[15.10.6,16)"
 ordering="AFTER"
 side="CLIENT"
 [[dependencies.dimensionworks_jei_ticks]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1,1.21.2)"
 ordering="NONE"
 side="CLIENT"
 [[dependencies.dimensionworks_jei_ticks]]
 modId="jei"
-mandatory=true
-versionRange="[15.20.0.130,15.21)"
+type="required"
+versionRange="[19.71.0.470,20)"
 ordering="AFTER"
 side="CLIENT"
+
+[[mixins]]
+config="dimensionworks_jei_ticks.mixins.json"

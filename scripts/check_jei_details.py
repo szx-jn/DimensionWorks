@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from pathlib import Path
 import tomllib
 
@@ -18,21 +19,28 @@ def check() -> list[str]:
     manifest = json.loads((ROOT / "manifest/mods.json").read_text())
     mods = {mod["id"]: mod for mod in manifest["mods"]}
     entry = mods["dimensionworks_jei_ticks"]
-    metadata = tomllib.loads((RESOURCES / "META-INF/mods.toml").read_text())
+    metadata = tomllib.loads((RESOURCES / "META-INF/neoforge.mods.toml").read_text())
     declared = metadata["mods"][0]
     if (entry["environment"], entry["project_path"], entry["version"]) != (
         "client", "mods/dimensionworks-jei-ticks", declared["version"]
     ):
         problems.append("JEI details manifest does not match client-only module metadata")
     gradle = (PROJECT / "build.gradle").read_text()
-    for dependency in (
-        f"version = '{entry['version']}'",
-        f"jei-1.20.1-forge:{mods['jei']['version']}",
-        f"maven.modrinth:jade:{mods['jade']['version_id']}",
-    ):
-        if dependency not in gradle:
-            problems.append(f"Missing fixed dependency/version: {dependency}")
+    if f"version = '{entry['version']}'" not in gradle:
+        problems.append("JEI details module version differs from manifest")
+    for dependency in ("jei", "jade"):
+        if not re.search(rf"['\"]maven\.modrinth:{dependency}:[A-Za-z0-9]{{8}}['\"]", gradle):
+            problems.append(f"Missing immutable Modrinth version ID for {dependency}")
+    dependencies = {row["modId"]: row for row in metadata["dependencies"]["dimensionworks_jei_ticks"]}
+    if dependencies["neoforge"].get("type") != "required" or dependencies["jei"].get("type") != "required":
+        problems.append("NeoForge and JEI must be required client dependencies")
+    if dependencies["jade"].get("type") != "optional":
+        problems.append("Jade must remain optional")
+    if dependencies["minecraft"]["versionRange"] != "[1.21.1,1.21.2)":
+        problems.append("JEI details must target Minecraft 1.21.1")
     mixins = json.loads((RESOURCES / "dimensionworks_jei_ticks.mixins.json").read_text())
+    if mixins.get("compatibilityLevel") != "JAVA_21":
+        problems.append("JEI details mixins must use Java 21")
     if mixins.get("mixins") or mixins.get("server"):
         problems.append("JEI details mixins must remain client-only")
     package_path = Path(*mixins["package"].split("."))

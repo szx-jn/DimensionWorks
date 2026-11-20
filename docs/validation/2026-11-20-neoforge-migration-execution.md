@@ -163,6 +163,16 @@ Maid AE Crank 0.1.0 接入根工程，固定 AE2 7Ac6mXbf 19.2.20、Touhou Littl
 
 生产 JAR 9057 字节、4 个 Java 21 类，SHA-256 `e730b90c77449ebc9ca54964cf6593d5a748baefc823d048b969827cbc7ba926`；JSON/TOML、测试类/结构排除与 git diff --check 检查通过。根 VERSION 保持 0.3.52，没有新发行版。后续继续 JEI Ticks 和完整整包/旧档迁移。
 
+## JEI 耗时与燃料提示原生移植
+
+JEI Ticks 0.1.1 接入根工程，全部 16 个自研模组已编译。固定 JEI kmb7KviL 19.71.0.470 / MezzConfig sPQlt1iR 0.6.11 / Jade eYz2YBGT 15.10.6，Java 21、客户端 Mixin。原生 JEI widget 移到 lambda 绘制，旧三处重定向改为整个 drawRecipe 的单一 try/finally 上下文；解包 RecipeHolder，风扇直接读当前 Create 服务端配置，Mek 使用原生分类 ID，附魔工业直接读原生经验燃料数据映射。保持注册 ID / 燃料资源接口 / 服务端排除规则。
+
+3 项 JUnit、实际新建世界客户端专项通过（jei-port/client-validation-v7.log，22 秒，正常保存退出，0 ERROR），验证两条 43t/271t 分类与 widget / positioned drawable 上下文隔离，以及原生烧炼 50t、Create 粉碎 250t、Mek 富集 200t 实际绘制。原始截图放大确认 200t 标签正常；缩小预览的误判没有引入额外补丁。NeoForge GatherComponents 注册事件、原生提示组件工厂、269 项燃料的小屏翻页布局、Jade 注册提供者及其元素实际绘制通过；Jade BlockAccessor 为测试构造，不冒充完整世界射线悬停。
+
+实际选装 Diesel UoPH8lO1 / Liquid Fuel rLn2bDVE / CEI qUpvzZ83 / Dragons Plus b0u9vk8C / DE 84xwXpNh 及原生库。附魔工业 8 项、龙堆 3 项、发电机 265 项、高级传送器 1 项燃料 API 返回值通过；CEI 六张引用未注册可选物品的掉落表在整包数据层补 item_exists 条件，保留原始掉落。首次缺 MezzConfig 的真实启动失败已补必需依赖；没有吞掉错误。上游可选数据映射和未装 Sable 警告仍待全闭包核对；目标柴油喷射器真实扣量、45 脚本中的自定义燃料和完整交互仍须后续核实。
+
+最终 root build -PtransferSnapshot=<封存源> 通过（jei-port/root-final-validation-v1.log），16 模块共 307 JUnit，0 失败/错误/跳过；未因无新变化重跑其余服务器专项。生产 JAR 51192 字节、25 个 Java 21 类，SHA-256 d7054cbeb6ab0c6946efdec4d880f024950027a47a2ccc3090315844d64ab5a8，无探针/测试数据。NeoForge TOML/资源 JSON 与 check_jei_details.py 检查通过。根 VERSION 0.3.52 不变，没有中间发行版；完整第三方闭包、全脚本/配置/更新器、一次性转换及真实旧世界仍继续推进。
+
 ## 下一阶段准入
 
 私有快照验证及全档读取审计已完成；随后确定缺失注册 ID 的处理、锁定完整目标依赖闭包，移植其余模块和脚本，再实现一次性 NBT/组件转换器。完整客户端/服务端冷启动、重启、库存语义对账、玩家身份及真实生产链验收通过前，禁止给玩家开放跨版本更新。

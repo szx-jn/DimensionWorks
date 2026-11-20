@@ -1,15 +1,15 @@
 package dev.szx.dimensionworks.jeiticks.client;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Fuel UI scope is deliberately independent of JEI's recipe-duration coverage. */
 public final class FuelScope {
     private FuelScope() {}
 
     public static boolean includes(ItemStack stack) {
-        var id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id == null) {
             return false;
         }

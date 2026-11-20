@@ -26,9 +26,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Explicit fuel consumers plus live registries. A fluid tank alone does not make an item a fuel consumer. */
 public final class FuelCatalog {
@@ -53,7 +52,7 @@ public final class FuelCatalog {
             cachedLevel = new WeakReference<>(level);
             invalidated = false;
         }
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(device.getItem());
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(device.getItem());
         return id == null ? List.of() : CACHE.computeIfAbsent(id, key -> load(device, key));
     }
 
@@ -67,7 +66,7 @@ public final class FuelCatalog {
             } else if (id.getNamespace().equals("createdieselgenerators")) {
                 dieselFuels(result, id.getPath());
             } else if (id.getNamespace().equals("create_enchantment_industry")) {
-                enchantmentFuels(result, id.getPath());
+                EnchantmentFuelProvider.append(result, id.getPath());
             } else if (id.toString().equals("create:schematicannon")) {
                 schematicannon(result);
             } else if (id.toString().equals("create:train_controls")) {
@@ -75,9 +74,9 @@ public final class FuelCatalog {
             } else if (id.toString().equals("draconicevolution:reactor_core")) {
                 reactor(result);
             } else if (id.toString().equals("draconicevolution:generator")) {
-                for (Item fuel : ForgeRegistries.ITEMS) {
+                for (Item fuel : BuiltInRegistries.ITEM) {
                     ItemStack stack = new ItemStack(fuel);
-                    int burn = ForgeHooks.getBurnTime(stack, null);
+                    int burn = stack.getBurnTime(null);
                     if (burn > 0) {
                         result.add(FuelEntry.timed(FuelIcon.item(stack), 4.0 / burn, "个", 1,
                             "NORMAL 满负荷基础平均值；实际随模式及内部能量缓冲变化，其他模式倍率见模组说明；本包已禁用此设备合成"));
@@ -101,11 +100,11 @@ public final class FuelCatalog {
 
     private static void solidFuels(List<FuelEntry> entries, RecipeType<?> type, double multiplier,
                                   boolean blaze, String condition) {
-        TagKey<Item> special = TagKey.create(Registries.ITEM, new ResourceLocation("create", "blaze_burner_fuel/special"));
-        TagKey<Item> regular = TagKey.create(Registries.ITEM, new ResourceLocation("create", "blaze_burner_fuel/regular"));
-        for (Item item : ForgeRegistries.ITEMS) {
+        TagKey<Item> special = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("create", "blaze_burner_fuel/special"));
+        TagKey<Item> regular = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("create", "blaze_burner_fuel/regular"));
+        for (Item item : BuiltInRegistries.ITEM) {
             ItemStack fuel = new ItemStack(item);
-            int burn = ForgeHooks.getBurnTime(fuel, type);
+            int burn = fuel.getBurnTime(type);
             if (blaze && fuel.is(special)) {
                 burn = 3200;
             } else if (blaze && burn <= 0 && fuel.is(regular)) {
@@ -113,11 +112,11 @@ public final class FuelCatalog {
             }
             if (burn > 0) {
                 if (blaze) {
-                    var handler = fuel.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(null);
+                    var handler = fuel.getCapability(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.ITEM);
                     if (handler != null && handler.getTanks() > 0) {
                         var contents = handler.getFluidInTank(0);
                         if (!contents.isEmpty() && entries.stream().anyMatch(entry ->
-                                entry.icon().name().equals(contents.getDisplayName()))) {
+                                entry.icon().name().equals(contents.getHoverName()))) {
                             // Liquid Fuel intercepts this container before the normal solid-fuel path.
                             continue;
                         }
@@ -163,7 +162,7 @@ public final class FuelCatalog {
         if (engine == null) {
             return;
         }
-        ResourceKey<Registry<Object>> key = ResourceKey.createRegistryKey(new ResourceLocation("createdieselgenerators", "fuel_type"));
+        ResourceKey<Registry<Object>> key = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("createdieselgenerators", "fuel_type"));
         var registry = Minecraft.getInstance().level.registryAccess().registry(key);
         if (registry.isEmpty()) {
             return;
@@ -205,11 +204,8 @@ public final class FuelCatalog {
         }
     }
 
-    private static void schematicannon(List<FuelEntry> entries) throws ReflectiveOperationException {
-        Object server = callStatic("com.simibubi.create.infrastructure.config.AllConfigs", "server");
-        Object schematics = server.getClass().getField("schematics").get(server);
-        Object shotsSetting = schematics.getClass().getField("schematicannonShotsPerGunpowder").get(schematics);
-        long shots = ((Number) call(shotsSetting, "get")).longValue();
+    private static void schematicannon(List<FuelEntry> entries) {
+        long shots = com.simibubi.create.infrastructure.config.AllConfigs.server().schematics.schematicannonShotsPerGunpowder.get();
         entries.add(new FuelEntry(FuelIcon.item(new ItemStack(net.minecraft.world.item.Items.GUNPOWDER)),
             Component.literal("每 " + shots + " 次发射消耗 1 个"),
             Component.literal("按发射次数计费，无固定时间周期；快速蓝图炮附属会改变发射速度")));
@@ -221,7 +217,7 @@ public final class FuelCatalog {
         String[] forms = {"awakened_draconium_block", "awakened_draconium_ingot", "awakened_draconium_nugget"};
         double[] units = {1296, 144, 16};
         for (int i = 0; i < forms.length; i++) {
-            FuelIcon icon = FuelIcon.item(new ResourceLocation("draconicevolution", forms[i]));
+            FuelIcon icon = FuelIcon.item(ResourceLocation.fromNamespaceAndPath("draconicevolution", forms[i]));
             if (icon != null) {
                 entries.add(FuelEntry.timed(icon, 0.005 * multiplier / units[i], "个", 1,
                     "基础值：温度因子=1、能量饱和度=0；实际乘温度因子×(1−饱和度)，超过 8000℃ 耗量升高；三种形态等价折算"));
@@ -232,8 +228,8 @@ public final class FuelCatalog {
     private static void dislocator(List<FuelEntry> entries) throws ReflectiveOperationException {
         long blinks = Class.forName("com.brandon3055.draconicevolution.DEConfig")
             .getField("dislocatorBlinksPerPearl").getInt(null);
-        var tag = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "ender_pearls"));
-        for (Item item : ForgeRegistries.ITEMS) {
+        var tag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ender_pearls"));
+        for (Item item : BuiltInRegistries.ITEM) {
             ItemStack stack = new ItemStack(item);
             if (stack.is(tag)) {
                 entries.add(new FuelEntry(FuelIcon.item(stack),
@@ -243,43 +239,8 @@ public final class FuelCatalog {
         }
     }
 
-    private static void enchantmentFuels(List<FuelEntry> entries, String path) throws ReflectiveOperationException {
-        if (!Set.of("blaze_forger", "blaze_enchanter", "classic_blaze_enchanter").contains(path)) {
-            return;
-        }
-        var experienceId = new ResourceLocation("create_enchantment_industry", "experience");
-        if (!ForgeRegistries.FLUIDS.containsKey(experienceId)) {
-            return;
-        }
-        String operation = path.equals("blaze_forger") ? "锻造" : "附魔";
-        entries.add(new FuelEntry(FuelIcon.fluid(ForgeRegistries.FLUIDS.getValue(experienceId)),
-            Component.literal("每次" + operation + "消耗 C mB"),
-            Component.literal("C 是当前输入和模式计算出的作业费用；" +
-                (path.equals("blaze_forger") ? "基础准备阶段 200t，费用在完成时扣除；" : "按作业完成次数扣除；") +
-                "待机不消耗，不能给出通用于全部输入的固定每秒速率")));
-        Object fuelMap = Class.forName("plus.dragons.createenchantmentindustry.common.registry.CEIDataMaps")
-            .getField("EXPERIENCE_FUEL").get(null);
-        try (var values = (java.util.stream.Stream<?>) call(fuelMap, "entries")) {
-            for (Object value : values.toList()) {
-                if (!(value instanceof Pair<?, ?> pair) || !(pair.getFirst() instanceof Item item)) {
-                    continue;
-                }
-                ItemStack stack = new ItemStack(item);
-                Object fuel = pair.getSecond();
-                long experience = ((Number) call(fuel, "experience")).longValue();
-                if (experience <= 0) {
-                    continue;
-                }
-                boolean special = (Boolean) call(fuel, "special");
-                entries.add(new FuelEntry(FuelIcon.item(stack),
-                    Component.literal("每次补充消耗 1 个，补充 " + experience + " mB；单次作业折算 C/" + experience + " 个"),
-                    Component.literal((special ? "超级" : "普通") + "储槽；C 为当前作业经验费用，按作业扣除，非持续燃烧")));
-            }
-        }
-    }
-
     private static void profiles(List<FuelEntry> entries, ResourceLocation device) {
-        ResourceLocation location = new ResourceLocation("dimensionworks_jei_ticks", "fuel_profiles.json");
+        ResourceLocation location = ResourceLocation.fromNamespaceAndPath("dimensionworks_jei_ticks", "fuel_profiles.json");
         var resource = Minecraft.getInstance().getResourceManager().getResource(location);
         if (resource.isEmpty()) {
             return;
@@ -291,11 +252,11 @@ public final class FuelCatalog {
             }
             for (var value : root.getAsJsonArray(device.toString())) {
                 JsonObject row = value.getAsJsonObject();
-                var fuelId = new ResourceLocation(row.get("fuel").getAsString());
+                var fuelId = ResourceLocation.parse(row.get("fuel").getAsString());
                 FuelIcon icon = switch (row.get("kind").getAsString()) {
                     case "item" -> FuelIcon.item(fuelId);
-                    case "fluid" -> ForgeRegistries.FLUIDS.containsKey(fuelId)
-                        ? FuelIcon.fluid(ForgeRegistries.FLUIDS.getValue(fuelId)) : null;
+                    case "fluid" -> BuiltInRegistries.FLUID.containsKey(fuelId)
+                        ? FuelIcon.fluid(BuiltInRegistries.FLUID.get(fuelId)) : null;
                     default -> null;
                 };
                 if (icon == null || entries.stream().anyMatch(entry -> entry.icon().name().equals(icon.name()))) {
@@ -319,10 +280,6 @@ public final class FuelCatalog {
 
     private static Object call(Object instance, String method) throws ReflectiveOperationException {
         return instance.getClass().getMethod(method).invoke(instance);
-    }
-
-    private static Object callStatic(String type, String method) throws ReflectiveOperationException {
-        return Class.forName(type).getMethod(method).invoke(null);
     }
 
     private static void warn(String provider, Exception exception) {

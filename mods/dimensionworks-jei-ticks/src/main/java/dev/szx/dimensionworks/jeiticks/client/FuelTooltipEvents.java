@@ -7,18 +7,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RecipesUpdatedEvent;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
-@Mod.EventBusSubscriber(modid = DimensionWorksJeiTicks.MOD_ID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = DimensionWorksJeiTicks.MOD_ID, value = Dist.CLIENT)
 public final class FuelTooltipEvents {
     private static ResourceLocation hovered;
     private static long lastSeen;
@@ -36,7 +36,7 @@ public final class FuelTooltipEvents {
             hovered = null;
             return;
         }
-        var id = ForgeRegistries.ITEMS.getKey(event.getItemStack().getItem());
+        var id = BuiltInRegistries.ITEM.getKey(event.getItemStack().getItem());
         if (!id.equals(hovered)) {
             page = 0;
         }
@@ -59,7 +59,7 @@ public final class FuelTooltipEvents {
         var mouse = Minecraft.getInstance().mouseHandler;
         if (Screen.hasShiftDown() && hovered != null && pages > 1 && Util.getMillis() - lastSeen < 250
                 && Math.abs(mouse.xpos() - mouseX) < 2 && Math.abs(mouse.ypos() - mouseY) < 2) {
-            page = Math.floorMod(page + (event.getScrollDelta() < 0 ? 1 : -1), pages);
+            page = Math.floorMod(page + (event.getScrollDeltaY() < 0 ? 1 : -1), pages);
             event.setCanceled(true);
         }
     }
@@ -74,7 +74,7 @@ public final class FuelTooltipEvents {
         FuelCatalog.invalidate();
     }
 
-    @Mod.EventBusSubscriber(modid = DimensionWorksJeiTicks.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = DimensionWorksJeiTicks.MOD_ID, value = Dist.CLIENT, bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD)
     public static final class Registration {
         private Registration() {}
 
