@@ -1,43 +1,41 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
 
 version = '0.1.2'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_drop_lifetime'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+apply from: rootProject.file('gradle/neoforge-module.gradle')
 
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            mods {
-                dimensionworks_drop_lifetime {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {}
-        server { args '--nogui' }
+repositories {
+    maven {
+        url = 'https://cursemaven.com'
+        content { includeGroup 'curse.maven' }
+        metadataSources { artifact() }
+    }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.23'
+    implementation 'curse.maven:ftb-chunks-314906:9594476'
+    implementation 'curse.maven:ftb-library-404465:9650381'
+    runtimeOnly 'curse.maven:ftb-teams-404468:9434081'
+    runtimeOnly 'maven.modrinth:architectury-api:13.0.12+neoforge'
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
+ext.gameTestCount = 1
+apply from: rootProject.file('gradle/neoforge-gametest.gradle')
 
-jar {
-    finalizedBy 'reobfJar'
+// 一次性迁移工具复用已锁定的 Minecraft/FTB 运行依赖，不另搭构建或下载链。
+def migrationClasspath = sourceSets.main.runtimeClasspath
+def migrationClasspathFile = rootProject.layout.buildDirectory.file('migration/classpath.txt')
+tasks.register('writeMigrationClasspath') {
+    dependsOn tasks.named('classes')
+    inputs.files(migrationClasspath)
+    outputs.file(migrationClasspathFile)
+    doLast {
+        def target = migrationClasspathFile.get().asFile
+        target.parentFile.mkdirs()
+        target.text = migrationClasspath.files.collect { it.absolutePath }.join('\n') + '\n'
+    }
 }

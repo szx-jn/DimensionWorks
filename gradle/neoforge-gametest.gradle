@@ -1,0 +1,35 @@
+sourceSets {
+    gameTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+neoForge {
+    mods {
+        "${base.archivesName.get()}" { sourceSet sourceSets.gameTest }
+    }
+    runs {
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = project.file('run-gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', base.archivesName.get()
+            jvmArgument '-Xmx2G'
+        }
+    }
+}
+
+tasks.named('runGameTestServer') {
+    def resultLog = project.file('run-gametest/logs/latest.log')
+    def expected = project.gameTestCount
+    doFirst { resultLog.delete() }
+    doLast {
+        def log = resultLog.exists() ? resultLog.getText('UTF-8') : ''
+        // Minecraft 初始化失败可能仍返回 0；必须证明测试实际注册、执行且全部通过。
+        if (!log.contains("${expected} tests are now running")
+                || !log.contains("${expected} GAME TESTS COMPLETE")
+                || !log.contains("All ${expected} required tests passed")) {
+            throw new GradleException("GameTest 未完成 ${expected} 项必需测试；检查 ${resultLog}")
+        }
+    }
+}

@@ -2,6 +2,8 @@
 
 **Minecraft 1.20.1 · Forge 47 · Java 17**
 
+> `1.21.1-neoforge` 分支正在完整迁移至 Minecraft 1.21.1 / NeoForge / Java 21，期间禁止发行，旧存档尚未通过目标版验收。实际完成情况见[迁移执行记录](docs/validation/2026-11-20-neoforge-migration-execution.md)。下述下载与正式版说明仍对应现有 Forge 版本。
+
 维度工序（DimensionWorks）是一款以多维度探索、工业化生产、自动化资源获取和跨维度物流为核心的 Minecraft 工业整合包。
 
 > **当前正式版：** [![最新正式版](https://img.shields.io/github/v/release/szx-jn/DimensionWorks?label=%E6%9C%80%E6%96%B0%E6%AD%A3%E5%BC%8F%E7%89%88)](https://github.com/szx-jn/DimensionWorks/releases/latest) · [查看全部发行版](https://github.com/szx-jn/DimensionWorks/releases)

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_ftbchunks_no_forceload"
@@ -8,20 +8,23 @@ displayName="DimensionWorks FTB Chunks Force-load Disable"
 authors="szx-jn"
 description='''Disables FTB Chunks force-loading while preserving claims and protection.'''
 [[dependencies.dimensionworks_ftbchunks_no_forceload]]
-modId="forge"
-mandatory=true
-versionRange="[47.0,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_ftbchunks_no_forceload]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_ftbchunks_no_forceload]]
 modId="ftbchunks"
-mandatory=true
-versionRange="[2001.3.8,2001.3.9)"
+type="required"
+versionRange="[2101.1.24,)"
 ordering="AFTER"
 side="BOTH"
+
+[[mixins]]
+config="dimensionworks_ftbchunks_no_forceload.mixins.json"

@@ -1,5 +1,6 @@
 package dev.szx.dimensionworks.ftbchunksnoforceload.mixin;
 
+import dev.ftb.mods.ftbchunks.api.ClaimResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,18 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(targets = "dev.ftb.mods.ftbchunks.data.ChunkTeamDataImpl", remap = false)
 abstract class ChunkTeamDataImplMixin {
     @Inject(method = "forceLoad", at = @At("HEAD"), cancellable = true)
-    private void dimensionworks$denyForceLoad(CallbackInfoReturnable<Object> cir) {
-        try {
-            Class<?> problemClass = Class.forName(
-                    "dev.ftb.mods.ftbchunks.api.ClaimResult$StandardProblem",
-                    false,
-                    getClass().getClassLoader()
-            );
-            Object denied = problemClass.getField("NOT_ENOUGH_POWER").get(null);
-            cir.setReturnValue(denied);
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to resolve FTB Chunks force-load denial result", exception);
-        }
+    private void dimensionworks$denyForceLoad(CallbackInfoReturnable<ClaimResult> cir) {
+        cir.setReturnValue(ClaimResult.StandardProblem.NOT_ENOUGH_POWER);
     }
 
     @Inject(method = "updateChunkTickets", at = @At("HEAD"), cancellable = true)

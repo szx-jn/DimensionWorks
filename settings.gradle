@@ -1,0 +1,15 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.neoforged.net/releases' }
+    }
+}
+
+rootProject.name = 'dimensionworks'
+
+// 逐项接入并验证；未移植的 Forge 工程不能混入目标构建。
+include 'dimensionworks-item-pickup-guard', 'dimensionworks-localization', 'dimensionworks-drop-lifetime',
+        'dimensionworks-ftbchunks-no-forceload'
+rootProject.children.each { module ->
+    module.projectDir = file("mods/${module.name}")
+}

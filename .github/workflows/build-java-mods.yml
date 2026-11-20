@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'mods/dimensionworks-*/**'
+      - 'gradle/**'
+      - 'gradlew*'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
       - '.github/workflows/build-java-mods.yml'
 
 concurrency:
@@ -46,6 +51,7 @@ jobs:
           fi
           matrix="$(python3 - "$base" "$HEAD_SHA" <<'PY'
           import json
+          from pathlib import Path
           import subprocess
           import sys
 
@@ -53,13 +59,20 @@ jobs:
               ["git", "diff", "--name-only", sys.argv[1], sys.argv[2]],
               text=True,
           ).splitlines()
+          target_modules = {
+              path.parents[4].name
+              for path in Path("mods").glob("dimensionworks-*/src/main/resources/META-INF/neoforge.mods.toml")
+          }
           modules = sorted({
               parts[1]
               for path in changed
               if len(parts := path.split("/")) > 1
               and parts[0] == "mods"
-              and parts[1].startswith("dimensionworks-")
+              and parts[1] in target_modules
           })
+          shared = {"build.gradle", "settings.gradle", "gradle.properties", "gradlew", "gradlew.bat"}
+          if any(path in shared or path.startswith("gradle/") for path in changed):
+              modules = sorted(set(modules) | target_modules)
           print(json.dumps({"module": modules}, separators=(",", ":")))
           PY
           )"
@@ -89,26 +102,18 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-
-      - name: 准备固定版本 Create 编译依赖
-        run: python3 scripts/prepare_create_build_repository.py
+          java-version: '21'
 
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.8'
 
       - name: 构建并测试模组
-        working-directory: mods/${{ matrix.module }}
-        run: gradle build --no-daemon
+        run: ./gradlew :${{ matrix.module }}:build --no-daemon --console=plain
 
-      - name: 动力网络保存恢复回归
-        if: matrix.module == 'dimensionworks-rpm-limit'
-        working-directory: mods/dimensionworks-rpm-limit
-        run: gradle runGameTestServer --no-daemon
-
-      - name: ME 齿轮箱 getter 重入回归
-        if: matrix.module == 'dimensionworks-mek-stress'
-        working-directory: mods/dimensionworks-mek-stress
-        run: gradle runGameTestServer --no-daemon
+      - name: 运行已接入的服务器 GameTest
+        env:
+          MODULE: ${{ matrix.module }}
+        run: |
+          if [[ -d "mods/$MODULE/src/gameTest" ]]; then
+            ./gradlew ":$MODULE:runGameTestServer" --no-daemon --console=plain
+          fi

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: "指定发布版本，例如 0.2.0；留空则自动计算"
+        description: "指定发布版本，例如 0.2.0；留空则自动计算；1.21.1-neoforge 迁移分支禁止发行"
         required: false
         type: string
       dimension_complete:
@@ -47,6 +47,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      - name: 阻止迁移中的分支发行
+        if: github.ref == 'refs/heads/1.21.1-neoforge'
+        run: |
+          echo "::error::用户禁止迁移期间发布发行版；请仅进行本地验证和源码提交。"
+          exit 1
+
       - name: 检查本次发行说明
         env:
           RELEASE_FEATURES: ${{ inputs.release_features }}

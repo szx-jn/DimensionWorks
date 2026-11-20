@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_item_pickup_guard"
@@ -8,14 +8,17 @@ displayName="DimensionWorks Item Pickup Guard"
 authors="szx-jn"
 description='''Prevents removed ground item entities from being picked up more than once.'''
 [[dependencies.dimensionworks_item_pickup_guard]]
-modId="forge"
-mandatory=true
-versionRange="[47.0,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_item_pickup_guard]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"
+
+[[mixins]]
+config="dimensionworks_item_pickup_guard.mixins.json"

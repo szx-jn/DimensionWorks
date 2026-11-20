@@ -1,37 +1,9 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
 
 version = '0.1.5'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_localization'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
-}
+apply from: rootProject.file('gradle/neoforge-module.gradle')
 
 processResources {
-    from('assets') {
-        into 'assets'
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-jar {
-    finalizedBy 'reobfJar'
+    from('assets') { into 'assets' }
 }

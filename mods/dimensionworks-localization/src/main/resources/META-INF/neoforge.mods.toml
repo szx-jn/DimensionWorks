@@ -1,5 +1,5 @@
 modLoader="lowcodefml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 
 [[mods]]
@@ -10,15 +10,15 @@ authors="szx-jn"
 description='''DimensionWorks 客户端简体中文覆盖，只补充第三方 Mod 缺失的语言键与指南页面。'''
 
 [[dependencies.dimensionworks_localization]]
-modId="forge"
-mandatory=true
-versionRange="[47.0,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.dimensionworks_localization]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"

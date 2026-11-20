@@ -1,12 +1,12 @@
 package dev.szx.dimensionworks.ftbchunksnoforceload.mixin.client;
 
 import net.minecraft.client.gui.screens.Screen;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -27,21 +27,14 @@ abstract class ChunkScreenPanelMixin {
             cancellable = true,
             remap = false
     )
-    private void dimensionworks$disableShiftLeftForceLoad(@Coerce Object button, CallbackInfo ci) {
-        if (!Screen.hasShiftDown() || selectedChunks.isEmpty() || !isLeftButton(button)) {
+    private void dimensionworks$disableShiftLeftForceLoad(MouseButton button, CallbackInfo ci) {
+        if (!Screen.hasShiftDown() || selectedChunks.isEmpty() || !button.isLeft()) {
             return;
         }
 
-        // In FTB Chunks 2001.3.8, Shift+left-click is the force-load action.
+        // Shift+左键是 FTB Chunks 的强加载操作；普通圈地不受影响。
         selectedChunks.clear();
         ci.cancel();
     }
 
-    private static boolean isLeftButton(Object button) {
-        try {
-            return Boolean.TRUE.equals(button.getClass().getMethod("isLeft").invoke(button));
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to inspect FTB Library mouse button", exception);
-        }
-    }
 }

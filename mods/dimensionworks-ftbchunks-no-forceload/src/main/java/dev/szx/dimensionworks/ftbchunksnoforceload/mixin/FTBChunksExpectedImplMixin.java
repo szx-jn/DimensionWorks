@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.UUID;
 
 @Pseudo
-@Mixin(targets = "dev.ftb.mods.ftbchunks.forge.FTBChunksExpectedImpl", remap = false)
+@Mixin(targets = "dev.ftb.mods.ftbchunks.neoforge.FTBChunksExpectedImpl", remap = false)
 abstract class FTBChunksExpectedImplMixin {
     @Inject(method = "addChunkToForceLoaded", at = @At("HEAD"), cancellable = true, remap = false)
     private static void dimensionworks$denyFtbChunksTicket(

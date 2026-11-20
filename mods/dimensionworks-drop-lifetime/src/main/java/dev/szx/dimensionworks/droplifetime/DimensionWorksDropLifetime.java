@@ -5,13 +5,13 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
+import dev.ftb.mods.ftbchunks.api.FTBChunksAPI;
+import dev.ftb.mods.ftblibrary.math.ChunkDimPos;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 @Mod(DimensionWorksDropLifetime.MOD_ID)
 public final class DimensionWorksDropLifetime {
@@ -20,10 +20,7 @@ public final class DimensionWorksDropLifetime {
     public DimensionWorksDropLifetime() {
     }
 
-    @Mod.EventBusSubscriber(
-            modid = MOD_ID,
-            bus = Mod.EventBusSubscriber.Bus.FORGE
-    )
+    @EventBusSubscriber(modid = MOD_ID)
     public static final class ItemLifetimeHandler {
         private static final int BASE_LIFETIME_SECONDS = 25;
         private static final int MAX_LIFETIME_SECONDS = 180;
@@ -56,35 +53,16 @@ public final class DimensionWorksDropLifetime {
                 case UNCOMMON -> 50;
                 case RARE -> 75;
                 case EPIC -> MAX_LIFETIME_SECONDS;
-                // Forge permits other mods to add rarities at runtime.
+                // NeoForge 允许模组扩展稀有度。
                 default -> BASE_LIFETIME_SECONDS;
             };
             itemEntity.lifespan = lifetimeSeconds * TICKS_PER_SECOND;
         }
 
         private static boolean isClaimedByPlayer(Level level, BlockPos pos) {
-            if (!ModList.get().isLoaded("ftbchunks")) {
-                return false;
-            }
-
-            try {
-                Class<?> apiClass = Class.forName("dev.ftb.mods.ftbchunks.api.FTBChunksAPI");
-                Object api = apiClass.getMethod("api").invoke(null);
-                Class<?> apiInterface = Class.forName("dev.ftb.mods.ftbchunks.api.FTBChunksAPI$API");
-                if (!Boolean.TRUE.equals(apiInterface.getMethod("isManagerLoaded").invoke(api))) {
-                    return false;
-                }
-
-                Object manager = apiInterface.getMethod("getManager").invoke(api);
-                Class<?> chunkDimPosClass = Class.forName("dev.ftb.mods.ftblibrary.math.ChunkDimPos");
-                Constructor<?> positionConstructor = chunkDimPosClass.getConstructor(Level.class, BlockPos.class);
-                Object chunkPosition = positionConstructor.newInstance(level, pos);
-                Class<?> managerInterface = Class.forName("dev.ftb.mods.ftbchunks.api.ClaimedChunkManager");
-                Method getChunk = managerInterface.getMethod("getChunk", chunkDimPosClass);
-                return getChunk.invoke(manager, chunkPosition) != null;
-            } catch (ReflectiveOperationException | LinkageError exception) {
-                return false;
-            }
+            var api = FTBChunksAPI.api();
+            return api.isManagerLoaded()
+                    && api.getManager().getChunk(new ChunkDimPos(level, pos)) != null;
         }
     }
 }

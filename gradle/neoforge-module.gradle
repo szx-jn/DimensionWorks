@@ -1,0 +1,36 @@
+apply plugin: 'java-library'
+apply plugin: 'net.neoforged.moddev'
+
+group = 'dev.szx.dimensionworks'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenCentral()
+}
+
+neoForge {
+    enable {
+        version = providers.gradleProperty('neoforge_version').get()
+        // 使用官方支持的二进制处理，避免本机反编译整个游戏的内存与 CPU 开销。
+        disableRecompilation = true
+    }
+    mods {
+        "${base.archivesName.get()}" {
+            sourceSet sourceSets.main
+        }
+    }
+    runs {
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        configureEach {
+            gameDirectory = project.file('run')
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 [[mods]]
 modId="dimensionworks_drop_lifetime"
@@ -8,14 +8,21 @@ displayName="DimensionWorks Drop Lifetime"
 authors="szx-jn"
 description='''Sets ground item lifetime according to the item's vanilla rarity.'''
 [[dependencies.dimensionworks_drop_lifetime]]
-modId="forge"
-mandatory=true
-versionRange="[47.0,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.dimensionworks_drop_lifetime]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
+type="required"
+versionRange="[1.21.1]"
 ordering="NONE"
+side="BOTH"
+
+[[dependencies.dimensionworks_drop_lifetime]]
+modId="ftbchunks"
+type="required"
+versionRange="[2101.1.24,)"
+ordering="AFTER"
 side="BOTH"

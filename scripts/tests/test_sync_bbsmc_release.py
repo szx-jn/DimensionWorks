@@ -51,8 +51,8 @@ class BbsmcSyncTest(unittest.TestCase):
                     (self.filename, self.files[self.filename]),
                     ("DimensionWorks-Server-0.3.41-delta.zip", self.files["DimensionWorks-Server-0.3.41-delta.zip"]),
                     ("update-dimensionworks-server-windows-amd64.exe", self.files["update-dimensionworks-server-windows-amd64.exe"]),
-                    ("update-dimensionworks-server-linux-amd64", self.files["update-dimensionworks-server-linux-amd64.update"]),
-                    ("update-dimensionworks-server-macos-arm64", self.files["update-dimensionworks-server-macos-arm64.update"]),
+                    ("update-dimensionworks-server-linux-amd64.update", self.files["update-dimensionworks-server-linux-amd64.update"]),
+                    ("update-dimensionworks-server-macos-arm64.update", self.files["update-dimensionworks-server-macos-arm64.update"]),
                 )
             ] + [{"name": "SHA256SUMS", "state": "uploaded"}],
         }
@@ -72,10 +72,7 @@ class BbsmcSyncTest(unittest.TestCase):
     def downloads(self):
         return mock.patch.object(
             sync, "download_asset",
-            side_effect=lambda repo, tag, asset: self.files[{
-                "update-dimensionworks-server-linux-amd64": "update-dimensionworks-server-linux-amd64.update",
-                "update-dimensionworks-server-macos-arm64": "update-dimensionworks-server-macos-arm64.update",
-            }.get(asset["name"], asset["name"])],
+            side_effect=lambda repo, tag, asset: self.files[asset["name"]],
         )
 
     def test_only_latest_non_draft_non_prerelease_can_reach_bbsmc(self) -> None:
@@ -104,7 +101,7 @@ class BbsmcSyncTest(unittest.TestCase):
             mock.patch.object(sync, "github_json", return_value=self.release),
             self.downloads() as download,
             mock.patch.object(sync, "bbsmc_json", side_effect=[[], self.uploaded]) as bbsmc,
-            mock.patch.object(sync, "upload_files", side_effect=[initial, None, None, None]) as upload,
+            mock.patch.object(sync, "upload_files", side_effect=[initial] + [None] * (len(self.files) - 1)) as upload,
         ):
             self.assertIn("BBSMC OK", self.run_sync())
         self.assertEqual(download.call_args_list, [
@@ -178,7 +175,7 @@ class BbsmcSyncTest(unittest.TestCase):
             self.assertIn("BBSMC OK", self.run_sync())
         self.assertEqual(upload.call_args_list, [
             mock.call(self.metadata, {name: self.files[name]}, "token", version_id="new-version")
-            for name in list(self.files)[1:]
+            for name in sorted(list(self.files)[1:], key=lambda name: len(self.files[name]))
         ])
         self.assertEqual(bbsmc.call_args_list[-1], mock.call("version/new-version", "token"))
 
@@ -322,7 +319,7 @@ class BbsmcSyncTest(unittest.TestCase):
                 f"{content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode() + body,
             )
             parts = list(message.iter_parts())
-            self.assertEqual(len(parts), 4)
+            self.assertEqual(len(parts), 1 + len(self.files))
             self.assertEqual(parts[0].get_param("name", header="content-disposition"), "data")
             self.assertEqual(json.loads(parts[0].get_payload(decode=True)), {} if append else self.metadata)
             self.assertEqual(

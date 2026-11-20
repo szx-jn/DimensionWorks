@@ -1,6 +1,6 @@
 # DimensionWorks 简体中文汉化
 
-`dimensionworks_localization` 是随 DimensionWorks 客户端分发的资源型 Forge Mod，只补充当前锁定版本中第三方 Mod 缺失的简体中文内容，不注册物品、方块、命令、网络包或 Java API。
+`dimensionworks_localization` 是随 DimensionWorks 客户端分发的资源型 NeoForge Mod，目标为 Minecraft 1.21.1，不注册物品、方块、命令、网络包或 Java API。现有译文在迁移阶段完整保留；下述覆盖数字来自原 1.20.1 内容，须在目标第三方 JAR 锁定后重新审计源键和指南路径，不能视为 1.21.1 已完成汉化验收。
 
 ## 覆盖范围
 
@@ -30,13 +30,13 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 
 ## 构建
 
-在本目录执行：
+在仓库根目录使用 Java 21 执行：
 
 ```sh
-gradle build --no-daemon
+./gradlew :dimensionworks-localization:build --no-daemon
 ```
 
-当前产物为 `build/libs/dimensionworks_localization-0.1.5.jar`。根级 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录。
+当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.5.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
 
 ## 校验
 

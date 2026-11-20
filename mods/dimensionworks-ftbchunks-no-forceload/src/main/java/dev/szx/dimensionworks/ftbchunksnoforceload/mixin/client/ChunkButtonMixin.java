@@ -12,12 +12,12 @@ import java.util.Optional;
 @Mixin(targets = "dev.ftb.mods.ftbchunks.client.gui.ChunkScreenPanel$ChunkButton", remap = false)
 abstract class ChunkButtonMixin {
     @Redirect(
-            method = {"drawBackground", "addMouseOverText", "mouseScrolled"},
+            method = {"drawBackground", "lambda$addMouseOverText$4", "mouseScrolled"},
             at = @At(
                     value = "INVOKE",
                     target = "Ldev/ftb/mods/ftbchunks/client/map/MapChunk;getForceLoadedDate()Ljava/util/Optional;"
             ),
-            require = 0
+            require = 1
     )
     private Optional<?> dimensionworks$hideForceLoadStatus(@Coerce Object chunk) {
         return Optional.empty();

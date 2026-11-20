@@ -1,23 +1,14 @@
-# DimensionWorks Item Pickup Guard
+# DimensionWorks 拾取保护
 
-Forge 1.20.1 server-compatible fix for duplicate ground-item pickup races between Create belts and Sophisticated Backpacks pickup/magnet upgrades.
+Minecraft 1.21.1 NeoForge 模块，处理 Create 传送带与 Sophisticated Backpacks 拾取或磁铁升级同时读取同一掉落物时的重复拾取问题。
 
-When an ItemEntity has already been removed, subsequent calls to `ItemEntity#getItem()` return `ItemStack.EMPTY`. This prevents another pickup handler from transferring the same old stack after the first handler has consumed and discarded the entity.
+已经移除的 `ItemEntity#getItem()` 返回 `ItemStack.EMPTY`，阻止第二个拾取器再次获取旧物品栈。存活实体及部分转移的剩余物品仍然可用，不禁用第三方拾取功能。
 
-The mixin does not disable either mod's pickup feature and does not alter the stack of a live entity. Partial transfers remain available because the entity is not removed while a remainder exists.
-
-Build:
+在仓库根目录使用 Java 21：
 
 ```sh
-gradle build --no-daemon
+./gradlew :dimensionworks-item-pickup-guard:build --no-daemon
+./gradlew :dimensionworks-item-pickup-guard:runGameTestServer --no-daemon
 ```
 
-## 0.1.0
-
-- Add a Mixin guard that hides the stack of an already-removed ItemEntity.
-- Keep Create and Sophisticated Backpacks pickup behavior enabled.
-- Preserve the remainder of partially transferred stacks.
-
-Build verification: GitHub Actions successfully ran `gradle build --no-daemon` with Java 17 and Gradle 8.8. The resulting JAR contains the compiled Mixin, its refmap, the Mixin configuration, and the `MixinConfigs` manifest entry.
-
-Actual in-game acceptance is still required for the simultaneous Create/backpack scenario.
+Mixin 通过 `META-INF/neoforge.mods.toml` 声明，使用 NeoForge 官方映射，不生成 Forge SRG refmap。`src/gameTest/` 独立于正式 JAR。本地构建和两项真实 GameTest 已通过：已移除实体不能再次转移，部分转移仍保留余量。仍须在目标整合包中验证 Create 与背包升级同时工作的产线。
