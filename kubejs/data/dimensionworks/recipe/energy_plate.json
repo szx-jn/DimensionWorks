@@ -1,0 +1,97 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "create:copper_sheet"
+  },
+  "loops": 1,
+  "sequence": [
+    {
+      "type": "create:filling",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_energy_plate"
+        },
+        {
+          "fluid": "dimensionworks:molten_gold",
+          "amount": 250,
+          "type": "neoforge:single"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_energy_plate"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_energy_plate"
+        },
+        {
+          "item": "minecraft:redstone"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_energy_plate"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_energy_plate"
+        },
+        {
+          "item": "mekanism:alloy_infused"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_energy_plate"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_energy_plate"
+        },
+        {
+          "item": "ae2omnicells:complex_link_processor"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_energy_plate"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_energy_plate"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_energy_plate"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "count": 1,
+      "id": "mekanism:energy_tablet"
+    }
+  ],
+  "transitional_item": {
+    "id": "kubejs:incomplete_energy_plate"
+  }
+}

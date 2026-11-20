@@ -1,11 +1,8 @@
 // DimensionWorks：高中化学核心物质的 Mekanism 化学品扩展
-// Minecraft 1.20.1 Forge / Mekanism 10.4.16.80 / KubeJS 6
+// Minecraft 1.21.1 NeoForge / Mekanism 10.7 / KubeJS 7
 // 只注册 Mekanism 原版未提供的化学品，避免覆盖原版 ID。
 
-const $DWGas = Java.loadClass('mekanism.api.chemical.gas.Gas')
-const $DWGasBuilder = Java.loadClass('mekanism.api.chemical.gas.GasBuilder')
-
-StartupEvents.registry('mekanism:gas', event => {
+StartupEvents.registry('mekanism:chemical', event => {
   const gases = [
     // ID、颜色。颜色仅用于区分化学品，不代表真实颜色或物态。
     ['dimensionworks:carbon_dioxide', '#9AA5B1'],
@@ -23,8 +20,6 @@ StartupEvents.registry('mekanism:gas', event => {
   ]
 
   gases.forEach(([id, tint]) => {
-    event.createCustom(id, () =>
-      new $DWGas($DWGasBuilder.builder().tint(Color.of(tint).getRgbJS()))
-    )
+    event.create(id).tint(tint).gaseous()
   })
 })

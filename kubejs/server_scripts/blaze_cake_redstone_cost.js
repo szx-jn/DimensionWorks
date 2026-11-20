@@ -8,7 +8,7 @@ ServerEvents.recipes(event => {
   event.recipes.create.compacting(
     'create:blaze_cake_base',
     [
-      '#forge:eggs',
+      '#c:eggs',
       'minecraft:sugar',
       'create:cinder_flour',
       'minecraft:redstone'

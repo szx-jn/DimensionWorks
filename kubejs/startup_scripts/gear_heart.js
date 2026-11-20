@@ -5,18 +5,13 @@ StartupEvents.registry('item', event => {
     .maxStackSize(1)
     .rarity('epic')
     .glow(false)
-    .modelJson(JsonIO.of({
-      parent: 'minecraft:item/generated',
-      textures: {
-        layer0: 'kubejs:item/gear_heart_normal'
-      },
-      overrides: [
-        {
-          predicate: { custom_model_data: 1 },
-          model: 'kubejs:item/gear_heart_damaged'
-        }
-      ]
-    }))
+    .modelGenerator(model => {
+      model.parent('minecraft:item/generated')
+      model.texture('layer0', 'kubejs:item/gear_heart_normal')
+      model.override('kubejs:item/gear_heart_damaged', override => {
+        override.predicate('custom_model_data', 1)
+      })
+    })
 })
 
 StartupEvents.registry('item', event => {

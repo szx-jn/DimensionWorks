@@ -1,0 +1,49 @@
+{
+  "type": "create:compacting",
+  "ingredients": [
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    },
+    {
+      "item": "twilightforest:torchberries"
+    }
+  ],
+  "results": [
+    {
+      "amount": 1000,
+      "id": "kaleidoscope_dim_wine:torchberries_juice"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "twilightforest"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "twilightforest"
+    }
+  ]
+}

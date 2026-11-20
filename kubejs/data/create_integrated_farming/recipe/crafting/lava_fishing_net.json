@@ -1,0 +1,43 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:chain"
+    },
+    "/": {
+      "item": "minecraft:blaze_rod"
+    },
+    "a": {
+      "item": "create:andesite_alloy"
+    }
+  },
+  "pattern": [
+    "###",
+    "##/",
+    "#/a"
+  ],
+  "result": {
+    "count": 2,
+    "id": "create_integrated_farming:lava_fishing_net"
+  },
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:mod_loaded",
+          "modid": "netherdepthsupgrade"
+        },
+        {
+          "type": "neoforge:mod_loaded",
+          "modid": "tide"
+        }
+      ]
+    },
+    {
+      "type": "neoforge:item_exists",
+      "item": "create_integrated_farming:lava_fishing_net"
+    }
+  ]
+}

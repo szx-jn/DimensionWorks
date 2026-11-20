@@ -146,7 +146,7 @@ ServerEvents.recipes(event => {
   ]), 'toxic/radrock_recovery')
   supportRecipe(create.mixing('2x create:crushed_raw_uranium', [
     'alexscaves:acidic_radrock',
-    '#forge:dusts/sulfur'
+    '#c:dusts/sulfur'
   ]), 'toxic/uranium_concentrate')
 
   selfRecipe(create.mixing('2x alexscaves:sulfur_dust', [
@@ -168,7 +168,7 @@ ServerEvents.recipes(event => {
     'alexscaves:radrock'
   ]), 'toxic/acidic_radrock_recovery')
 
-  global.DimensionWorksGrinding.register(event, {
+  DimensionWorksGrinding.register(event, {
     id: SELF_PROPAGATION + 'toxic/uranium_shard_primary',
     machine: 'create:crushing',
     input: 'create:crushed_raw_uranium',
@@ -280,7 +280,7 @@ ServerEvents.recipes(event => {
     'minecraft:white_dye',
     Fluid.of('minecraft:water', 250)
   ]), 'candy/candy_cane')
-  global.DimensionWorksGrinding.register(event, {
+  DimensionWorksGrinding.register(event, {
     id: SELF_PROPAGATION + 'support/candy/peppermint_powder',
     machine: 'create:milling',
     input: 'alexscaves:candy_cane',

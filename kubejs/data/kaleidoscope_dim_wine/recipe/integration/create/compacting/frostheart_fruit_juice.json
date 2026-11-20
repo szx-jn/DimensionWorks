@@ -1,0 +1,49 @@
+{
+  "type": "create:compacting",
+  "ingredients": [
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    },
+    {
+      "item": "kaleidoscope_dim_wine:frostheart_fruit"
+    }
+  ],
+  "results": [
+    {
+      "amount": 1000,
+      "id": "kaleidoscope_dim_wine:frostheart_fruit_juice"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "twilightforest"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "twilightforest"
+    }
+  ]
+}

@@ -15,7 +15,7 @@ ServerEvents.recipes(event => {
     'create:cinder_flour'
   ]).heated().id('dimensionworks:sulfur_processing/thermal_separation')
 
-  global.DimensionWorksGrinding.register(event, {
+  DimensionWorksGrinding.register(event, {
     id: 'dimensionworks:sulfur_processing/dust_from_crude_sulfur',
     machine: 'create:milling',
     input: 'kubejs:crude_sulfur',

@@ -55,7 +55,7 @@ StartupEvents.registry('item', event => {
     .rarity('epic')
     .glow(true)
     .food(food => food
-      .hunger(20)
+      .nutrition(20)
       .saturation(20)
       .alwaysEdible()
     )

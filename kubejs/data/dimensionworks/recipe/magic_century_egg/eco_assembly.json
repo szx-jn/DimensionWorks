@@ -1,0 +1,129 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "kubejs:century_egg_ae_enriched"
+  },
+  "loops": 1,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:energized_crystal"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:energized_fluix_crystal"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:crystal_ingot"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:crystal_matrix"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:energized_superconductive_ingot"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:superconducting_processor"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        },
+        {
+          "item": "neoecoae:eco_cell_component_16m"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "id": "kubejs:century_egg_eco_enriched"
+    }
+  ],
+  "transitional_item": {
+    "id": "kubejs:incomplete_magic_century_egg"
+  }
+}

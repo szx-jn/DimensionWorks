@@ -2,7 +2,7 @@
 ServerEvents.recipes(event => {
   // Expected flour: 1 + 2*0.85 + 2*0.89 = 4.48; 4 flour returns the seed (12% net).
   event.remove({ id: 'create:crushing/netherrack' })
-  global.DimensionWorksGrinding.register(event, {
+  DimensionWorksGrinding.register(event, {
     id: 'dimensionworks:cinder_flour/netherrack_crushing',
     machine: 'create:crushing',
     input: 'minecraft:netherrack',

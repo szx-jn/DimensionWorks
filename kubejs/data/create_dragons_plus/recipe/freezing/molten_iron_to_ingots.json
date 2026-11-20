@@ -1,0 +1,17 @@
+{
+  "type": "create_dragons_plus:freezing",
+  "ingredients": [
+    {
+      "item": "dimensionworks:molten_iron_bucket"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:bucket"
+    },
+    {
+      "count": 1,
+      "id": "minecraft:iron_ingot"
+    }
+  ]
+}

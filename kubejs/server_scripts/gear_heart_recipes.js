@@ -10,13 +10,13 @@ const repairFragmentIds = [
 
 ServerEvents.recipes(event => {
   const register = (json, id) => {
-    event.custom(JsonIO.of(json)).id(id)
+    event.custom(json).id(id)
   }
 
   register({
     type: 'create:pressing',
     ingredients: [{ item: 'create:andesite_alloy' }],
-    results: [{ item: repairFragmentIds[0] }]
+    results: [{ id: repairFragmentIds[0] }]
   }, repairFragmentIds[0])
 
   register({
@@ -25,20 +25,18 @@ ServerEvents.recipes(event => {
       { item: 'create:iron_sheet' },
       { item: 'create:brass_sheet' }
     ],
-    results: [{ item: repairFragmentIds[1] }]
+    results: [{ id: repairFragmentIds[1] }]
   }, repairFragmentIds[1])
 
   register({
     type: 'mekanism:enriching',
-    input: {
-      ingredient: { item: 'create:precision_mechanism' }
-    },
-    output: { item: repairFragmentIds[2] }
+    input: { item: 'create:precision_mechanism', count: 1 },
+    output: { id: repairFragmentIds[2] }
   }, repairFragmentIds[2])
 
   register({
     type: 'create:mechanical_crafting',
-    acceptMirrored: false,
+    accept_mirrored: false,
     pattern: ['LCL', 'EPE', 'LCL'],
     key: {
       L: { item: 'ae2:logic_processor' },
@@ -46,12 +44,12 @@ ServerEvents.recipes(event => {
       E: { item: 'create:electron_tube' },
       P: { item: 'create:precision_mechanism' }
     },
-    result: { item: repairFragmentIds[3] }
+    result: { id: repairFragmentIds[3] }
   }, repairFragmentIds[3])
 
   register({
     type: 'create:mechanical_crafting',
-    acceptMirrored: false,
+    accept_mirrored: false,
     pattern: ['SAS', 'ADA', 'SCS'],
     key: {
       S: { item: 'mekanism:ingot_steel' },
@@ -59,12 +57,12 @@ ServerEvents.recipes(event => {
       D: { item: 'dimensionworks_mek_stress:memory_drive_ddr1' },
       C: { item: 'mekanism:basic_control_circuit' }
     },
-    result: { item: repairFragmentIds[4] }
+    result: { id: repairFragmentIds[4] }
   }, repairFragmentIds[4])
 
   register({
     type: 'create:mechanical_crafting',
-    acceptMirrored: false,
+    accept_mirrored: false,
     pattern: ['GUG', 'EAE', 'GUG'],
     key: {
       G: { item: 'mekanism:universal_cable' },
@@ -72,12 +70,12 @@ ServerEvents.recipes(event => {
       E: { item: 'create:electron_tube' },
       A: { item: 'appliedcreate:me_gearbox' }
     },
-    result: { item: repairFragmentIds[5] }
+    result: { id: repairFragmentIds[5] }
   }, repairFragmentIds[5])
 
   register({
     type: 'create:mechanical_crafting',
-    acceptMirrored: false,
+    accept_mirrored: false,
     pattern: ['APA', 'MCM', 'APA'],
     key: {
       A: { item: 'ae2:engineering_processor' },
@@ -85,6 +83,6 @@ ServerEvents.recipes(event => {
       M: { item: 'mekanism:alloy_atomic' },
       C: { item: 'create:precision_mechanism' }
     },
-    result: { item: repairFragmentIds[6] }
+    result: { id: repairFragmentIds[6] }
   }, repairFragmentIds[6])
 })

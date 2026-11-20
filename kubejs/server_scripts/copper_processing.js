@@ -7,23 +7,22 @@ ServerEvents.recipes(event => {
   // basin integration before any real item/gas consumption or output.
   event.recipes.create.mixing([
     'minecraft:copper_ingot',
-    Item.of('dimensionworks_mek_stress:gas_output', {
+    Item.of('dimensionworks_mek_stress:gas_output', 1, { 'minecraft:custom_data': {
       Gas: 'dimensionworks:carbon_dioxide',
       Amount: 250,
       InputGas: 'dimensionworks:carbon_monoxide',
       InputAmount: 250,
       ExcludeSuperheated: true,
-      display: {
-        Name: JSON.stringify({ text: '250 mB 二氧化碳', italic: false }),
-        Lore: [JSON.stringify({ text: '消耗：250 mB 一氧化碳', italic: false })]
-      }
+    },
+      'minecraft:custom_name': { text: '250 mB 二氧化碳', italic: false },
+      'minecraft:lore': [{ text: '消耗：250 mB 一氧化碳', italic: false }]
     })
   ], ['minecraft:raw_copper'])
     .heated()
     .id('dimensionworks:copper_processing/reduction_with_carbon_monoxide')
 
   // Chance outputs roll independently per dust: expected yield = 1 + 2*.8 + .6 = 3.2.
-  global.DimensionWorksGrinding.register(event, {
+  DimensionWorksGrinding.register(event, {
     id: 'dimensionworks:copper_processing/dust_from_ingot',
     machine: 'create:crushing',
     input: 'minecraft:copper_ingot',
@@ -47,8 +46,9 @@ ServerEvents.recipes(event => {
   // Oxygen uses Mekanism's native purification consumption semantics.
   event.custom({
     type: 'mekanism:purifying',
-    itemInput: { ingredient: { item: 'create:veridium' } },
-    chemicalInput: { gas: 'mekanism:oxygen', amount: 1 },
-    output: { item: 'minecraft:raw_copper', count: 2 }
+    item_input: { item: 'create:veridium', count: 1 },
+    chemical_input: { chemical: 'mekanism:oxygen', amount: 1 },
+    per_tick_usage: true,
+    output: { id: 'minecraft:raw_copper', count: 2 }
   }).id('dimensionworks:copper_processing/oxide_from_veridium')
 })

@@ -3,9 +3,7 @@ const SUPER_GLUE_ID = 'create:super_glue'
 
 function protectSuperGlue(stack) {
   if (!stack || stack.id !== SUPER_GLUE_ID) return false
-  const tag = stack.getOrCreateTag()
-  if (tag.getBoolean('Unbreakable')) return false
-  tag.putBoolean('Unbreakable', true)
+  stack.setUnbreakableWithTooltip()
   return true
 }
 
@@ -19,7 +17,7 @@ function protectCarriedSuperGlue(player) {
 
 ServerEvents.recipes(event => {
   // Applies to recipe outputs, including machine recipes supported by KubeJS.
-  event.replaceOutput({}, SUPER_GLUE_ID, Item.of(SUPER_GLUE_ID, '{Unbreakable:1b}'))
+  event.replaceOutput({}, SUPER_GLUE_ID, Item.of(SUPER_GLUE_ID, 1, { 'minecraft:unbreakable': { show_in_tooltip: true } }))
 })
 
 PlayerEvents.inventoryChanged(event => protectSuperGlue(event.item))

@@ -18,24 +18,24 @@ ServerEvents.recipes(event => {
 
   const netheriteTrait = { 'DimensionWorks': { 'Metal': 'netherite' } }
   const crystal = {
-    type: 'forge:partial_nbt',
-    item: 'dimensionworks_pressure_crystals:high_pressure_crystal',
-    nbt: netheriteTrait
+    type: 'neoforge:components',
+    items: 'dimensionworks_pressure_crystals:high_pressure_crystal',
+    components: { 'minecraft:custom_data': netheriteTrait }
   }
   const transitional = {
-    item: 'kubejs:incomplete_netherite_scrap',
-    nbt: netheriteTrait
+    id: 'kubejs:incomplete_netherite_scrap',
+    components: { 'minecraft:custom_data': netheriteTrait }
   }
   const incompleteIngredient = {
-    type: 'forge:partial_nbt',
-    item: 'kubejs:incomplete_netherite_scrap',
-    nbt: netheriteTrait
+    type: 'neoforge:components',
+    items: 'kubejs:incomplete_netherite_scrap',
+    components: { 'minecraft:custom_data': netheriteTrait }
   }
 
-  event.custom(JsonIO.of({
+  event.custom({
     type: 'create:sequenced_assembly',
     ingredient: { item: 'kubejs:mixed_metal' },
-    transitionalItem: transitional,
+    transitional_item: transitional,
     loops: 1,
     sequence: [
       {
@@ -49,8 +49,8 @@ ServerEvents.recipes(event => {
         results: [transitional]
       }
     ],
-    results: [{ item: 'minecraft:netherite_scrap', count: 2 }]
-  })).id('dimensionworks:netherite_scrap/from_mixed_metal')
+    results: [{ id: 'minecraft:netherite_scrap', count: 2 }]
+  }).id('dimensionworks:netherite_scrap/from_mixed_metal')
 
   console.info('[DimensionWorks] netherite scrap line: mixed metal + netherite high-pressure crystal -> 2 scraps')
 })

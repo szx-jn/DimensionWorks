@@ -1,0 +1,105 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "kubejs:century_egg_eco_components_enriched"
+  },
+  "loops": 8,
+  "sequence": [
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
+    },
+    {
+      "type": "create:cutting",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
+    },
+    {
+      "type": "create:filling",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        },
+        {
+          "amount": 1000,
+          "fluid": "dimensionworks:molten_netherite",
+          "nbt": {},
+          "type": "neoforge:single"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg_final"
+        },
+        {
+          "tag": "twilightforest:logs"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg_final"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "count": 1,
+      "id": "kubejs:magic_century_egg"
+    }
+  ],
+  "transitional_item": {
+    "id": "kubejs:incomplete_magic_century_egg_final"
+  }
+}

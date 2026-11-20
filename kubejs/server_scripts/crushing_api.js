@@ -1,7 +1,7 @@
 // DimensionWorks shared crushing/grinding API.
 // Supported semantics: material crushing and milling, plus CEI mechanical grinding.
 // Recipe IDs are explicit; unsupported machine capabilities fail loudly instead of being ignored.
-(function () {
+const DimensionWorksGrinding = (function () {
   const adapters = {}
   const registeredIds = {}
 
@@ -119,22 +119,23 @@
           : { item: recipe.input }
       ]
       if (recipe.fluidInput) {
-        // Create 6.0.8 processing recipes encode fluid ingredients as { fluid, amount }.
+        // NeoForge 1.21.1 processing recipes use native fluid ingredient codecs.
         ingredients.push({
+          type: 'neoforge:single',
           amount: recipe.fluidInput.amount,
           fluid: recipe.fluidInput.fluid
         })
       }
 
       const results = recipe.outputs.map(output => {
-        const result = { item: output.item }
+        const result = { id: output.item }
         if (output.count !== 1) result.count = output.count
         if (output.chance < 1) result.chance = output.chance
         return result
       })
       if (recipe.fluidOutput) {
         results.push({
-          fluid: recipe.fluidOutput.fluid,
+          id: recipe.fluidOutput.fluid,
           amount: recipe.fluidOutput.amount
         })
       }
@@ -176,6 +177,6 @@
     }
   }
 
-  global.DimensionWorksGrinding = api
   console.info('[DimensionWorks] Grinding API ready adapters=' + Object.keys(adapters).sort().join(','))
+  return api
 })()

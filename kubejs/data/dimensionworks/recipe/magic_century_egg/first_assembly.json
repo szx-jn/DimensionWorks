@@ -1,0 +1,108 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "kubejs:century_egg_washed"
+  },
+  "loops": 8,
+  "sequence": [
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "kubejs:incomplete_magic_century_egg"
+        }
+      ],
+      "results": [
+        {
+          "id": "kubejs:incomplete_magic_century_egg"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "id": "kubejs:century_egg_pressed"
+    }
+  ],
+  "transitional_item": {
+    "id": "kubejs:incomplete_magic_century_egg"
+  }
+}
