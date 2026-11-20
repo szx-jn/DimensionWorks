@@ -43,10 +43,6 @@
 	#Show Void Worm
 	VoidWormBossBar = true
 
-[crackerwitherstorm]
-	#Show Wither Storm
-	WitherStormBossBar = true
-
 [aether]
 	#Show Slider
 	SliderBossBar = true

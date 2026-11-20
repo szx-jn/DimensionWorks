@@ -6,6 +6,7 @@ import argparse
 from collections import Counter
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 
@@ -85,8 +86,7 @@ def main() -> None:
     report["source_audit_sha256"] = hashlib.sha256(source_bytes).hexdigest()
     report["target_registry_sha256"] = hashlib.sha256(target_bytes).hexdigest()
     # 不接受覆盖现有报告或源文件；报告可能包含玩家库存位置，创建时即为私有权限。
-    fd = args.output.open("x", opener=lambda path, flags: __import__("os").open(path, flags, 0o600))
-    with fd as stream:
+    with open(args.output, "x", encoding="utf-8", opener=lambda path, flags: os.open(path, flags, 0o600)) as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2)
         stream.write("\n")
     print(json.dumps({"registry_ids_present": report["registry_ids_present"],

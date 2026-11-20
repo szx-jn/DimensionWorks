@@ -55,6 +55,8 @@ python3 scripts/check_localization.py
 
 可选模组命名空间必须显式列入 `optional-namespaces.json`，避免拼写错误被当作有效覆盖；如果对应模组已安装，仍会完整检查源键、重复键和占位符。
 
+1.21.1 NeoForge 迁移按用户决定舍弃 Caves Delight、原 MekanismDelight、Sauce 与凋零风暴，已移除前三个有专属汉化文件的命名空间（caves_delight、mekanismdelight、witherstormmod）及 Sauce 可选声明，不继续分发对应语言覆盖。
+
 `scripts/pack_hook.py` 会在打包预检时运行同一套校验；`--skip-build` 不会跳过汉化校验。
 
 ## 基线更新

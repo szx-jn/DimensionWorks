@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 from pathlib import Path
+import subprocess
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -77,6 +80,22 @@ class RegistryPreflightTest(unittest.TestCase):
         self.target["registries"]["minecraft:item"] = []
         with self.assertRaisesRegex(ValueError, "完整注册表"):
             compare_registries(self.source, self.target)
+
+    def test_cli_creates_private_report_and_refuses_overwrite(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source, target, output = (root / name for name in ("source.json", "target.json", "report.json"))
+            source.write_text(json.dumps(self.source))
+            target.write_text(json.dumps(self.target))
+            command = [sys.executable, str(Path(__file__).resolve().parents[1] / "preflight_registries.py"),
+                       str(source), str(target), "--output", str(output)]
+            subprocess.run(command, check=True, capture_output=True, text=True)
+            self.assertEqual(output.stat().st_mode & 0o777, 0o600)
+            original = output.read_bytes()
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("FileExistsError", result.stderr)
+            self.assertEqual(output.read_bytes(), original)
 
 
 if __name__ == "__main__":

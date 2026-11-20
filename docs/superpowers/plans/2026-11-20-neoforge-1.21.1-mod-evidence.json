@@ -1083,13 +1083,15 @@
       "query_urls": [
         "https://api.modrinth.com/v2/project/FM6bfCfc/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D"
       ],
-      "action": "原Alex洞穴食物插件无目标候选；MIT但未找到源码，优先索取源码/授权端口，不能用同名caves-delight冒充",
+      "action": "用户明确决定舍弃；不接入自行移植或同名替代，清理分发引用；旧档只在新副本中定点处理并保全其他内容。",
       "status": "no_target_candidate",
       "evidence_urls": [
         "https://api.modrinth.com/v2/project/FM6bfCfc/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D",
         "https://modrinth.com/mod/caves_delight"
       ],
-      "original_source_result": "no-target-candidate-on-modrinth"
+      "original_source_result": "no-target-candidate-on-modrinth",
+      "migration_decision": "drop_user_approved",
+      "decision_date": "2026-11-20"
     },
     {
       "id": "chat_heads",
@@ -5746,13 +5748,15 @@
       "query_urls": [
         "https://api.modrinth.com/v2/project/NEUFDicS/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D"
       ],
-      "action": "原mochi-753插件无目标候选；优先MIT源码fork移植，不能用ProjectCount同名插件替代旧物品",
+      "action": "用户明确决定舍弃；不接入自行移植或同名替代，清理分发引用；旧档只在新副本中定点处理并保全其他内容。",
       "status": "no_target_candidate",
       "evidence_urls": [
         "https://api.modrinth.com/v2/project/NEUFDicS/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D",
         "https://modrinth.com/mod/mekanismdelight"
       ],
-      "original_source_result": "no-target-candidate-on-modrinth"
+      "original_source_result": "no-target-candidate-on-modrinth",
+      "migration_decision": "drop_user_approved",
+      "decision_date": "2026-11-20"
     },
     {
       "id": "melody",
@@ -7311,13 +7315,15 @@
       "query_urls": [
         "https://api.modrinth.com/v2/project/kWjNGDUH/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D"
       ],
-      "action": "原源无公开目标候选；All Rights Reserved，等待授权/正式目标端口，无法保数据则阻塞含其内容旧档迁移",
+      "action": "用户明确决定舍弃；不接入自行移植或同名替代，清理分发引用；旧档只在新副本中定点处理并保全其他内容。",
       "status": "no_target_candidate",
       "evidence_urls": [
         "https://api.modrinth.com/v2/project/kWjNGDUH/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D",
         "https://modrinth.com/mod/crackers-wither-storm-mod"
       ],
-      "original_source_result": "no-target-candidate-on-modrinth"
+      "original_source_result": "no-target-candidate-on-modrinth",
+      "migration_decision": "drop_user_approved",
+      "decision_date": "2026-11-20"
     },
     {
       "id": "xaerominimap",
@@ -7632,13 +7638,15 @@
       "query_urls": [
         "https://api.modrinth.com/v2/project/nyVCtCaV/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D"
       ],
-      "action": "原源仅1.20.1Forge；MIT但未提供源码链接，核对获取源码/授权端口；酱料流体、蘸料组件/效果不能静默删除",
+      "action": "用户明确决定舍弃；不接入自行移植或同名替代，清理分发引用；旧档只在新副本中定点处理并保全其他内容。",
       "status": "no_target_candidate",
       "evidence_urls": [
         "https://api.modrinth.com/v2/project/nyVCtCaV/version?game_versions=%5B%221.21.1%22%5D&loaders=%5B%22neoforge%22%5D",
         "https://modrinth.com/mod/kaleidoscope-sauce"
       ],
-      "original_source_result": "no-target-candidate-on-modrinth"
+      "original_source_result": "no-target-candidate-on-modrinth",
+      "migration_decision": "drop_user_approved",
+      "decision_date": "2026-11-20"
     },
     {
       "id": "kaleidoscope_sculk",

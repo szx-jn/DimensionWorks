@@ -38,6 +38,18 @@ python3 -m venv /absolute/private-lab/python
 
 所有已成功校验的原快照和原始解包目录应封存。Minecraft 只允许打开另建的工作副本；先运行原版 Forge 参考测试服，再验证目标 NeoForge 副本，保留进程日志、迁移台账与停止后的对账报告。仅有启动 `Done`、编译成功或无错误退出码均不代表存档迁移通过。
 
+## 注册表预检
+
+```sh
+python3 scripts/migration/preflight_registries.py /absolute/private-lab/source-audit.json /absolute/private-lab/target-registry.json --output /absolute/private-lab/registry-preflight.json
+```
+
+复用完整只读审计和目标整包运行时注册表，按方块、物品、实体、维度分别比较，不重新扫描或打开原世界。目标快照包含 `minecraft: "1.21.1"` 及 `registries`（注册表 ID 到注册项 ID 数组）。注册项缺失或存在无法判定类型的 Count 记录时，输出私有报告并以 1 退出，阻止把预检当作成功；完整输入、全部所列 ID 存在时返回 0，**仍不证明存档转换通过**。
+
+旧审计中的经验球根记录也有 Count 字段；工具依据源实体注册表及 Entities 根位置单独记账，嵌套 Item 仍按物品统计。物品记录数与 Count 字段合计不代替物流模板外的 Amount、AE2 Key 数量或 Mekanism 化学存储量。其余注册字符串保持未定类型，不按任意注册表中的同名项判定保留。报告保留两份输入 SHA-256，以私有权限创建，拒绝覆盖；不得提交真实报告。
+
+用户已明确舍弃 `caves_delight`、`mekanismdelight`、`kaleidoscope_sauce`、`witherstormmod`。原服务器未发现这四项的实际方块、实体或物品栈，但含 `witherstormmod:bowels` 维度定义。预检继续报告缺失项；后续一次性转换须在新副本中定点处理并记录，不删除同一容器/机器中的其他数据。用户已确认此服务器是唯一旧存档，只针对该封存快照完成转换和对账，不开发任意历史版本或其他单人旧档适配。
+
 ## 工具验证
 
 ```sh
