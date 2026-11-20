@@ -26,7 +26,7 @@ TRANSIENT_CAPABILITIES = {
 }
 UNCHANGED_CAPABILITIES = {
     "curios:inventory", "brewinandchewin:raging", "l2complements:soulbound",
-    "aether:dropped_item", "create:minecart_controller",
+    "aether:dropped_item",
 }
 ATTRIBUTE_NAMES = {
     "forge:entity_gravity": "minecraft:generic.gravity",
@@ -51,6 +51,11 @@ def rename_fields(value: n.Base, names: dict[str, str]) -> n.Compound:
 def convert_payload(id: str, value: n.Base) -> tuple[str, n.Base]:
     if id in UNCHANGED_CAPABILITIES:
         return id, deepcopy(value)
+    if id == "create:minecart_controller":
+        # 本服 1,034 个旧控制器均无耦合/停滞载荷；新版外层 serializer 必须有类型。
+        if not isinstance(value, n.Compound) or value:
+            raise ValueError("矿车控制器含未覆盖的耦合或停滞载荷")
+        return id, n.Compound({"Type": n.String("NORMAL")})
     if id == "aether:aether_player":
         return id, rename_fields(value, AETHER_PLAYER_FIELDS)
     if id == "aether:phoenix_arrow":
@@ -107,6 +112,35 @@ def convert_payload(id: str, value: n.Base) -> tuple[str, n.Base]:
 def convert_entity_data(source: n.Compound) -> EntityDataConversion:
     data = deepcopy(source)
     removed = {}
+    if "Leash" in data:
+        old, modern = data["Leash"], data.get("leash")
+        if not isinstance(old, n.Compound):
+            raise ValueError("原版 DFU 后旧拴绳记录不是复合标签")
+        if set(old) == {"UUID"} and isinstance(old["UUID"], n.IntArray) and len(old["UUID"]) == 4:
+            expected = old
+        elif set(old) == {"X", "Y", "Z"} and all(isinstance(old[k], n.Int) for k in old):
+            expected = n.IntArray([int(old[k]) for k in ("X", "Y", "Z")])
+        else:
+            raise ValueError("旧拴绳记录含未覆盖的身份或坐标")
+        if modern != expected:
+            raise ValueError("原版 DFU 后新旧拴绳记录冲突")
+        removed["Leash/source_duplicate"] = data.pop("Leash")
+    if "MaidSchedulePos" in data:
+        schedule = data["MaidSchedulePos"]
+        if (not isinstance(schedule, n.Compound) or set(schedule) != {"Work", "Idle", "Sleep", "Dimension", "Configured"} or
+            not isinstance(schedule["Dimension"], n.String) or not isinstance(schedule["Configured"], n.Byte) or
+            int(schedule["Configured"]) not in {0, 1}):
+            raise ValueError("女仆日程位置含未覆盖的字段或类型")
+        original = deepcopy(schedule)
+        for key in ("Work", "Idle", "Sleep"):
+            pos = schedule[key]
+            if isinstance(pos, n.IntArray) and len(pos) == 3:
+                continue
+            if not isinstance(pos, n.Compound) or set(pos) != {"X", "Y", "Z"} or any(not isinstance(pos[k], n.Int) for k in pos):
+                raise ValueError("女仆日程坐标不是完整 XYZ Int")
+            schedule[key] = n.IntArray([int(pos[k]) for k in ("X", "Y", "Z")])
+        if schedule != original:
+            removed["MaidSchedulePos/source_fields"] = original
     if "Attributes" in data:
         raise ValueError("实体旧 Attributes 尚未通过原版属性转换")
     # attributes 的字段结构由原版 DFU 处理；这里只映射实际旧 Forge ID。
@@ -145,6 +179,8 @@ def convert_entity_data(source: n.Compound) -> EntityDataConversion:
             removed[id] = value
             continue
         target, converted = convert_payload(id, value)
+        if id == "create:minecart_controller":
+            removed[id + "/source_fields"] = deepcopy(value)
         if id == "l2library:conditionals":
             removed[id + "/tickSinceDeath"] = deepcopy(value["tickSinceDeath"])
         if target in attachments:

@@ -64,6 +64,17 @@ class AEItemTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "重复"):
             convert_ae_item(old, target(old), nested)
 
+    def test_wireless_all_filter_becomes_all_registered_key_types_and_keeps_its_record(self):
+        old = n.parse_nbt('{id:"ae2:wireless_crafting_terminal",Count:1b,tag:{filter_type:"ALL",sort_by:"AMOUNT",craftingGrid:[{id:"minecraft:paper",Count:5b,Slot:4}]}}')
+        original = deepcopy(old)
+        result = convert_ae_item(old, target(old), nested, native_key_types={"ae2:i", "ae2:f", "appmek:chemical"})
+        components = result["components"]
+        self.assertEqual(components["ae2:exported_settings"], {"sort_by": n.String("AMOUNT")})
+        self.assertEqual(set(components["ae2:enabled_key_types"]), {"ae2:i", "ae2:f", "appmek:chemical"})
+        self.assertEqual(components["minecraft:custom_data"]["dimensionworks_migration"]["original_terminal_filter"], "ALL")
+        self.assertEqual(components["ae2:crafting_inv"][0]["item"]["count"], 5)
+        self.assertEqual(old, original)
+
 
 if __name__ == "__main__":
     unittest.main()

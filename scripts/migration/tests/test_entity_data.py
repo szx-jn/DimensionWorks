@@ -115,6 +115,44 @@ class EntityDataTest(unittest.TestCase):
         result = convert_entity_data(n.Compound({"attributes": n.List[n.Compound]([value])}))
         self.assertEqual(result.data["attributes"][0], value)
 
+    def test_empty_minecart_controller_keeps_normal_control_and_rejects_unknown_couplings(self):
+        result = self.convert({"create:minecart_controller": n.Compound()})
+        self.assertEqual(result.data["neoforge:attachments"]["create:minecart_controller"], {"Type": n.String("NORMAL")})
+        self.assertEqual(result.removed["create:minecart_controller/source_fields"], n.Compound())
+        with self.assertRaisesRegex(ValueError, "耦合或停滞"):
+            self.convert({"create:minecart_controller": n.parse_nbt('{MainCoupling:{UUID:[I;1,2,3,4]}}')})
+
+    def test_dfu_leash_duplicate_keeps_the_exact_modern_binding(self):
+        source = n.parse_nbt('{id:"minecraft:trader_llama",Leash:{UUID:[I;1,2,3,4]},leash:{UUID:[I;1,2,3,4]}}')
+        original = deepcopy(source)
+        result = convert_entity_data(source)
+        self.assertNotIn("Leash", result.data)
+        self.assertEqual(result.data["leash"], original["Leash"])
+        self.assertEqual(result.removed["Leash/source_duplicate"], original["Leash"])
+        self.assertEqual(source, original)
+        source["leash"]["UUID"] = n.IntArray([5, 6, 7, 8])
+        with self.assertRaisesRegex(ValueError, "拴绳记录冲突"):
+            convert_entity_data(source)
+
+    def test_maid_schedule_keeps_all_positions_dimension_and_configuration(self):
+        source = n.parse_nbt('{id:"touhou_little_maid:maid",UUID:[I;1,2,3,4],MaidScheduleMode:"DAY",MaidSchedulePos:{Work:{X:-621,Y:124,Z:2015},Idle:{X:-622,Y:123,Z:2016},Sleep:{X:-623,Y:122,Z:2017},Dimension:"minecraft:overworld",Configured:1b}}')
+        original = deepcopy(source)
+        result = convert_entity_data(source)
+        schedule = result.data["MaidSchedulePos"]
+        self.assertEqual(schedule["Work"], n.IntArray([-621, 124, 2015]))
+        self.assertEqual(schedule["Idle"], n.IntArray([-622, 123, 2016]))
+        self.assertEqual(schedule["Sleep"], n.IntArray([-623, 122, 2017]))
+        self.assertEqual(schedule["Dimension"], original["MaidSchedulePos"]["Dimension"])
+        self.assertEqual(schedule["Configured"], n.Byte(1))
+        self.assertEqual(result.data["UUID"], original["UUID"])
+        self.assertEqual(result.data["MaidScheduleMode"], "DAY")
+        self.assertEqual(result.removed["MaidSchedulePos/source_fields"], original["MaidSchedulePos"])
+        self.assertEqual(source, original)
+        self.assertEqual(convert_entity_data(result.data).data, result.data)
+        source["MaidSchedulePos"]["Work"].pop("Z")
+        with self.assertRaisesRegex(ValueError, "完整 XYZ"):
+            convert_entity_data(source)
+
     def test_unexpected_step_state_and_attribute_collisions_block_conversion(self):
         with self.assertRaisesRegex(ValueError, "零状态"):
             convert_entity_data(n.Compound({"attributes": n.List[n.Compound]([

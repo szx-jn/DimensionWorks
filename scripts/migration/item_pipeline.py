@@ -6,11 +6,13 @@ from typing import Callable
 
 import nbtlib as n
 
-from .ae_data import convert_key, convert_storage_cell, key_identity
+from .ae_data import convert_cable_bus_parts, convert_key, convert_storage_cell, key_identity
 from .ae_items import AE_STATE_IDS, convert_ae_item
 from .auxiliary_items import AUXILIARY_IDS, convert_auxiliary_item
 from .create_data import PACKAGE_IDS, convert_container_item, convert_mechanical_item
 from .entity_data import convert_entity_data
+from .fluid_data import convert_block_fluids
+from .hive_data import normalize_hive_fields
 from .item_components import authoritative_count, convert_item_components
 from .mod_item_data import convert_stored_item_data
 from .potion_data import convert_active_effects, convert_potion_contents
@@ -45,6 +47,7 @@ class ItemPipeline:
         self.potions = set(registries["minecraft:potion"])
         self.effects = set(registries["minecraft:mob_effect"])
         self.block_entities = set(registries["minecraft:block_entity_type"])
+        self.ae_key_types = set(registries.get("ae2:keytypes", []))
         self.potion_effects = potion_effects
         self.convert_contraption = convert_contraption
         self.ready: dict[bytes, n.Compound] = {}
@@ -79,29 +82,42 @@ class ItemPipeline:
             raise ValueError("流体背包包含未覆盖的注册名、字段或数量")
         return n.Compound({"id": deepcopy(source["FluidName"]), "amount": deepcopy(source["Amount"])})
 
-    @staticmethod
-    def _old_items(value) -> bool:
+    def _legacy_actor(self, value) -> bool:
+        return (isinstance(value, n.Compound) and str(value.get("id", "")) in self.entities and
+                "count" not in value and ("Count" not in value or "UUID" in value) and
+                any(key in value for key in ("ForgeCaps", "ForgeData", "Attributes", "ActiveEffects")))
+
+    def _needs_restore(self, value) -> bool:
         if isinstance(value, n.Compound):
+            if self._legacy_actor(value):
+                return True
             if "id" in value and "Count" in value and "UUID" not in value:
                 return True
-            return any(ItemPipeline._old_items(v) for v in value.values())
-        return isinstance(value, n.List) and any(ItemPipeline._old_items(v) for v in value)
+            return any(self._needs_restore(v) for v in value.values())
+        return isinstance(value, n.List) and any(self._needs_restore(v) for v in value)
 
-    def _restore_items(self, old, fixed, *, oversized_inventory: bool = False):
+    def _restore_payloads(self, old, fixed, *, oversized_inventory: bool = False, actor_root: bool = False):
         if isinstance(old, n.Compound):
+            if actor_root and self._legacy_actor(old):
+                return self.entity(old)
             if "id" in old and "Count" in old and "UUID" not in old:
                 return self.item(old, oversized_inventory=oversized_inventory)
             result = deepcopy(fixed)
             for key, child in old.items():
-                if self._old_items(child):
+                if self._needs_restore(child):
                     if key not in result:
-                        raise ValueError("原版 DFU 移除了原实体库存位置")
-                    result[key] = self._restore_items(child, result[key], oversized_inventory=oversized_inventory)
+                        if (key == "buyB" and "buy" in old and "sell" in old and isinstance(child, n.Compound)
+                            and str(child.get("id", "")) == "minecraft:air"):
+                            # 原版 1.21 报价不再保存空的第二项成本；air 即使带旧 Count/tag 也不是库存。
+                            self.changes.append({"kind": "empty_trade_second_cost", "removed": deepcopy(child)})
+                            continue
+                        raise ValueError("原版 DFU 移除了原实体库存位置：" + key)
+                    result[key] = self._restore_payloads(child, result[key], oversized_inventory=oversized_inventory, actor_root=True)
             return result
-        if isinstance(old, n.List) and self._old_items(old):
+        if isinstance(old, n.List) and self._needs_restore(old):
             if not isinstance(fixed, n.List) or len(old) != len(fixed):
                 raise ValueError("原版 DFU 改变了实体库存列表长度")
-            return type(fixed)(self._restore_items(a, b, oversized_inventory=oversized_inventory) if self._old_items(a) else deepcopy(b)
+            return type(fixed)(self._restore_payloads(a, b, oversized_inventory=oversized_inventory, actor_root=True) if self._needs_restore(a) else deepcopy(b)
                                for a, b in zip(old, fixed))
         return deepcopy(fixed)
 
@@ -109,14 +125,18 @@ class ItemPipeline:
         if str(source.get("id", "")) not in self.entities:
             raise ValueError("内嵌实体缺少已核对的目标注册名")
         old = deepcopy(source)
+        if "Contraption" in old:
+            if self.convert_contraption is None:
+                raise ValueError("机械实体须接入完整原生移动载荷")
+            old["Contraption"] = self.convert_contraption(old["Contraption"])
         old.pop("ActiveEffects", None)  # CurativeItems 是治愈描述，不能当库存或用旧数值效果 ID 转换。
-        data = self._restore_items(old, self.dfu.update_entity(old))
+        data = self._restore_payloads(old, self.dfu.update_entity(old))
         return self._actor(source, data)
 
     def player(self, source: n.Compound) -> n.Compound:
         old = deepcopy(source)
         old.pop("ActiveEffects", None)
-        data = self._restore_items(old, self.dfu.update(old, "player"))
+        data = self._restore_payloads(old, self.dfu.update(old, "player"))
         return self._actor(source, data)
 
     def _actor(self, source: n.Compound, data: n.Compound) -> n.Compound:
@@ -139,24 +159,41 @@ class ItemPipeline:
         id = str(source.get("id", ""))
         if id.startswith("mekanism"):
             raise ValueError("Mekanism 方块实体须使用专用机器转换")
+        fluids = convert_block_fluids(source, self.fluids)
+        if fluids.removed:
+            self.changes.append({"kind": "block_fluid_fields", "removed": fluids.removed})
+        source = fluids.data
+        if id == "create:basin":
+            for key in ("DimensionWorksBasinGas", "DimensionWorksBasinInputGas"):
+                if key in source:
+                    old = source[key]
+                    if old != n.Compound({"gasName": n.String("mekanism:empty"), "amount": n.Long(0)}):
+                        raise ValueError("搅拌盆化学缓存含未覆盖的非空旧状态")
+                    self.changes.append({"kind": "empty_basin_chemical", "field": key, "removed": deepcopy(old)})
+                    source[key] = n.Compound()
         if id:
-            target = mapped_id(id, self.block_entities, block=True)
-            data = self._restore_items(source, self.dfu.update(deepcopy(source), "block_entity"),
+            target = mapped_id(id, self.block_entities, block_entity=True)
+            data = self._restore_payloads(source, self.dfu.update(deepcopy(source), "block_entity"),
                                        oversized_inventory=id.startswith("sophisticatedstorage:"))
             data["id"] = n.String(target)
         else:
             # Create UpdateTag 无 id；只处理已明确存在的物品与平台持久字段，不编造实体类型。
             data = self.tree(source)
+        data, part_names = convert_cable_bus_parts(data, self.items, native_key_types=self.ae_key_types)
+        if part_names:
+            self.changes.append({"kind": "ae2_part_registry_names", "removed": part_names})
         converted = convert_entity_data(data)
         if converted.removed:
             self.changes.append({"kind": "block_entity_fields", "removed": converted.removed})
-        return self.tree(converted.data)
+        hive = normalize_hive_fields(self.tree(converted.data))
+        if hive.removed:
+            self.changes.append({"kind": "hive_duplicate_fields", "removed": hive.removed})
+        return hive.data
 
     def tree(self, value, *, oversized_inventory: bool = False):
         """只转换仍为旧格式的节点；现代组件栈不再次走 DFU。"""
         if isinstance(value, n.Compound):
-            if str(value.get("id", "")) in self.entities and "UUID" in value and any(
-                    key in value for key in ("ForgeCaps", "ForgeData", "Attributes", "ActiveEffects")):
+            if self._legacy_actor(value):
                 return self.entity(value)
             if "id" in value and "Count" in value and "UUID" not in value:
                 return self.item(value, oversized_inventory=oversized_inventory)
@@ -165,8 +202,9 @@ class ItemPipeline:
                 amount = old.pop("#", None)
                 result = convert_key(old, self.item)
                 if amount is not None:
-                    if not isinstance(amount, n.Long) or int(amount) <= 0:
-                        raise ValueError("旧 AE2 键数量不是正 Long")
+                    # 本服 AE2 总线 config[] 使用 #=0L 表示过滤模板；真实元件储量另有正数校验。
+                    if not isinstance(amount, n.Long) or int(amount) < 0:
+                        raise ValueError("旧 AE2 键数量不是非负 Long")
                     result["#"] = deepcopy(amount)
                 return result
             return n.Compound({key: self.tree(child, oversized_inventory=oversized_inventory)
@@ -204,7 +242,7 @@ class ItemPipeline:
                 self.changes.append({"kind": "item_caps", "removed": converted.removed})
             tag = source.get("tag", n.Compound())
             if id in AE_STATE_IDS:
-                result = convert_ae_item(source, result, self.item)
+                result = convert_ae_item(source, result, self.item, native_key_types=self.ae_key_types)
             if id in AUXILIARY_IDS:
                 def enchantments(old):
                     book = self.dfu.update(n.Compound({"id": n.String("minecraft:enchanted_book"), "Count": n.Byte(1),
@@ -240,7 +278,7 @@ class ItemPipeline:
             result = converted.data
             if converted.removed:
                 self.changes.append({"kind": "potion_preset", "changed": converted.removed})
-            converted = convert_enchantment_components(result, self.enchantments)
+            converted = convert_enchantment_components(result, self.enchantments, source=source)
             result = converted.data
             if converted.removed:
                 self.changes.append({"kind": "enchantment_id", "old_levels": converted.removed})

@@ -7,6 +7,56 @@ from typing import Callable
 
 import nbtlib as n
 
+from .registry_ids import mapped_id
+
+
+def terminal_key_types(value: n.Base, native_key_types: set[str] | None) -> n.List:
+    """本服旧终端均为 ALL；新版缺少列表会只启用一种类型，必须保留全类型选择。"""
+    if value != n.String("ALL") or not isinstance(value, n.String):
+        raise ValueError("AE2 终端类型筛选不是已审计的 ALL")
+    if not native_key_types or not {"ae2:i", "ae2:f"} <= native_key_types:
+        raise ValueError("AE2 终端筛选缺少完整目标键类型注册表")
+    return n.List[n.String](sorted(native_key_types))
+
+
+def convert_cable_bus_parts(source: n.Compound, native_item_ids: set[str], *,
+                            native_key_types: set[str] | None = None) -> tuple[n.Compound, dict]:
+    """AE2 电缆方块的挂载部件保存物品注册名；升级 namespace 时不得丢掉整个方向载荷。"""
+    result = deepcopy(source)
+    changes = {}
+    if str(source.get("id", "")) != "ae2:cable_bus":
+        return result, changes
+    for side in ("down", "up", "north", "south", "west", "east"):
+        part = source.get(side)
+        if part is None or part == n.Compound():
+            continue
+        if not isinstance(part, n.Compound) or not isinstance(part.get("id"), n.String):
+            raise ValueError("AE2 挂载部件缺少已审计的注册名字段：" + side)
+        old = str(part["id"])
+        if old == "expatternprovider:ex_crafting_terminal":
+            # 官方新版已取消独立扩展合成终端。本服只有无库存、普通合成模式这一份，
+            # 由已有 AE2 合成终端保留挂载位置和界面设置，不新增第三方移植。
+            fields = {"id", "sort_direction", "filter_type", "spin", "view_mode", "sort_by", "craftingMode"}
+            if set(part) != fields or part["craftingMode"] != n.Int(0):
+                raise ValueError("旧扩展合成终端含未覆盖的库存或扩展合成模式")
+            target = "ae2:crafting_terminal"
+            if target not in native_item_ids:
+                raise ValueError("现有 AE2 合成终端缺少目标注册名")
+        else:
+            names = {"expatternprovider:ex_pattern_access_part": "extendedae:ex_pattern_access_part"}
+            target = mapped_id(names.get(old, old), native_item_ids)
+        if target != old:
+            result[side]["id"] = n.String(target)
+            changes[side + "/id"] = deepcopy(part["id"])
+        if old == "expatternprovider:ex_crafting_terminal":
+            changes[side + "/craftingMode"] = result[side].pop("craftingMode")
+        if "filter_type" in part and target in {"ae2:crafting_terminal", "ae2:pattern_encoding_terminal"}:
+            if "enabledKeyTypes" in part:
+                raise ValueError("AE2 终端新旧类型筛选字段冲突")
+            result[side]["enabledKeyTypes"] = terminal_key_types(part["filter_type"], native_key_types)
+            changes[side + "/filter_type"] = result[side].pop("filter_type")
+    return result, changes
+
 
 def key_identity(value: n.Compound) -> bytes:
     """忽略 Compound 顺序，保留组件中的 NBT 类型和 List 顺序；value 不含储量。"""

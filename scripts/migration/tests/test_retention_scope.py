@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from migration.retention_scope import block_action, build_scope, inventory_owner, item_action
+from migration.retention_scope import block_action, build_scope, entity_action, inventory_owner, item_action
 
 
 class RetentionScopeTest(unittest.TestCase):
@@ -56,13 +56,13 @@ class RetentionScopeTest(unittest.TestCase):
         self.assertFalse(result["save_conversion_verified"])
         self.assertEqual(self.source, original)
 
-    def test_addon_machine_is_required_and_decor_is_only_a_candidate(self):
+    def test_addon_machine_is_required_and_other_world_blocks_are_retired(self):
         result = build_scope(self.source, self.target)
         self.assertEqual(result["required_missing_registries"]["minecraft:block"],
                          [{"id": "create_connected:parallel_gearbox", "count": 1}])
         self.assertEqual(result["other_block_candidates"], {"other:decorative_block": 3})
         self.assertEqual(block_action("other:support", supports_machine=True), "preserve")
-        self.assertEqual(block_action("other:container", holds_inventory=True), "preserve")
+        self.assertEqual(block_action("other:container", holds_inventory=True), "discard_after_archive")
 
     def test_discarded_outer_item_does_not_discard_nested_foreign_or_core_contents(self):
         parent = "playerdata/a.dat/Inventory[1]"
@@ -94,7 +94,55 @@ class RetentionScopeTest(unittest.TestCase):
         self.assertEqual(inventory_owner("dimensions/other/industry/region/r.0.0.mca#9/opaque/Items[0]"),
                          "dimensions/other/industry/region/r.0.0.mca#9")
         self.assertEqual(item_action("mekanismgenerators:wind_generator", in_inventory=False), "preserve")
-        self.assertEqual(item_action("create_other:decor", in_inventory=False), "candidate_for_omission")
+        self.assertEqual(item_action("create_other:decor", in_inventory=False), "discard_after_archive")
+
+    def test_limited_owner_scope_preserves_foreign_player_items_without_saving_unrelated_entities(self):
+        self.source["item_stacks"].extend([
+            {"id": "farmersdelight:beef_stew", "count": 12, "location": "playerdata/a.dat/Inventory[2]"},
+            {"id": "farmersdelight:beef_stew", "count": 64, "location": "entities/r.0.0.mca#1/Entities[0]/HandItems[0]"},
+        ])
+        result = build_scope(self.source, self.target, protected_owners={"playerdata/a.dat"})
+        self.assertTrue(result["inventory_owner_scope_verified"])
+        self.assertEqual(result["protected_item_records"], 2)
+        self.assertIn("farmersdelight:beef_stew", result["protected_item_ids"])
+        self.assertEqual(len(result["omitted_nonretained_owner_records"]), 3)
+        self.assertEqual(entity_action("create:stationary_contraption"), "preserve")
+        self.assertEqual(entity_action("minecraft:chest_minecart"), "preserve")
+        self.assertEqual(entity_action("minecraft:painting"), "discard_after_archive")
+        self.assertEqual(entity_action("touhou_little_maid:maid"), "discard_after_archive")
+
+    def test_all_vanilla_blocks_remain_required_including_terrain_and_containers(self):
+        for id in ("minecraft:stone", "minecraft:water", "minecraft:chest", "minecraft:beehive", "minecraft:redstone_wire"):
+            self.assertEqual(block_action(id), "preserve")
+        self.assertEqual(block_action("create_connected:parallel_gearbox"), "preserve")
+        self.assertEqual(block_action("sophisticatedstorage:gold_chest"), "preserve")
+        self.assertEqual(block_action("twilightforest:canopy_log"), "discard_after_archive")
+
+    def test_verified_official_rename_is_resolved_without_suppressing_missing_mods(self):
+        self.source["registries"]["minecraft:item"]["ids"].append({"K": "minecraft:grass"})
+        self.source["item_stacks"].append({"id": "minecraft:grass", "count": 1, "location": "playerdata/a.dat/Inventory[3]"})
+        self.source["block_counts"]["minecraft:grass"] = 16
+        self.target["registries"]["minecraft:item"].append("minecraft:short_grass")
+        self.target["registries"]["minecraft:block"].append("minecraft:short_grass")
+        result = build_scope(self.source, self.target)
+        self.assertEqual(result["resolved_registry_ids"]["minecraft:item"], [{"source": "minecraft:grass", "target": "minecraft:short_grass"}])
+        self.assertEqual(result["resolved_registry_ids"]["minecraft:block"], [{"source": "minecraft:grass", "target": "minecraft:short_grass"}])
+        self.assertEqual([row["id"] for row in result["required_missing_registries"]["minecraft:block"]], ["create_connected:parallel_gearbox"])
+
+    def test_conditional_infinity_cell_mapping_requires_each_exact_source_hash(self):
+        id = "expatternprovider:infinity_cell"
+        self.source["registries"]["minecraft:item"]["ids"].append({"K": id})
+        self.source["item_stacks"].append({"id": id, "count": 1, "location": "playerdata/a.dat/Inventory[4]", "snbt_sha256": "a" * 64})
+        self.target["registries"]["minecraft:item"].append("extendedae:infinity_cobblestone_cell")
+        proof = [{"source": id, "target": "extendedae:infinity_cobblestone_cell", "source_snbt_sha256": "a" * 64}]
+        result = build_scope(self.source, self.target, verified_item_mappings=proof)
+        self.assertEqual(result["required_missing_registries"]["minecraft:item"], [])
+        self.source["item_stacks"][-1]["snbt_sha256"] = "b" * 64
+        result = build_scope(self.source, self.target, verified_item_mappings=proof)
+        self.assertEqual([row["id"] for row in result["required_missing_registries"]["minecraft:item"]], [id])
+        proof[0]["target"] = "extendedae:infinity_water_cell"
+        with self.assertRaisesRegex(ValueError, "无限圆石"):
+            build_scope(self.source, self.target, verified_item_mappings=proof)
 
     def test_cli_reports_missing_protected_asset_and_refuses_report_overwrite(self):
         with tempfile.TemporaryDirectory() as folder:

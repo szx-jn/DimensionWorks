@@ -7,6 +7,9 @@ from scripts.migration.item_pipeline import ItemPipeline, NativeItemRequired, un
 
 
 class Dfu:
+    def update_entity(self, source):
+        return deepcopy(source)
+
     def update(self, source, kind):
         if kind in {"player", "block_entity"}:
             assert "ActiveEffects" not in source
@@ -98,6 +101,98 @@ class ItemPipelineTests(unittest.TestCase):
         result = converter.block_entity(source)
         item = result["storageWrapper"]["contents"]["inventory"]["Items"][0]
         self.assertEqual(item, n.parse_nbt('{id:"minecraft:stone",count:960,Slot:1}'))
+
+    def test_mechanical_entity_retains_outer_uuid_and_uses_complete_native_payload(self):
+        converter = pipeline(); converter.entities.add("create:stationary_contraption")
+        source = n.parse_nbt('{id:"create:stationary_contraption",UUID:[I;1,2,3,4],Contraption:{Type:"create:bearing",Blocks:{Palette:[{Name:"minecraft:stone"}],BlockList:[{Pos:7L,State:0}]}}}')
+        original = deepcopy(source); native = deepcopy(source["Contraption"])
+        native["Anchor"] = n.IntArray([1, 2, 3])
+        with self.assertRaisesRegex(ValueError, "完整原生"):
+            converter.entity(source)
+        converter.convert_contraption = lambda old: deepcopy(native)
+        result = converter.entity(source)
+        self.assertEqual(result["UUID"], original["UUID"])
+        self.assertEqual(result["Contraption"], native)
+        self.assertEqual(source, original)
+
+    def test_beehive_entities_with_and_without_uuid_are_restored_from_original(self):
+        class NestedDfu(Dfu):
+            def update(self, source, kind):
+                result = super().update(source, kind)
+                if kind == "block_entity":
+                    for bee in result["Bees"]:
+                        bee["EntityData"]["attributes"] = n.parse_nbt('[{id:"minecraft:generic.max_health",base:999.0d}]')
+                        bee["EntityData"]["Health"] = n.Float(1)
+                    result["bees"] = n.List[n.Compound]([n.Compound({"ticks_in_hive":v["TicksInHive"],
+                        "entity_data":deepcopy(v["EntityData"])}) for v in result["Bees"]])
+                return result
+
+            def update_entity(self, source):
+                result = deepcopy(source)
+                result["attributes"] = n.List[n.Compound]([n.Compound({"id":v["Name"], "base":v["Base"]}) for v in result.pop("Attributes")])
+                return result
+
+        converter = pipeline(); converter.dfu = NestedDfu()
+        converter.block_entities.add("minecraft:beehive"); converter.entities.add("minecraft:bee")
+        converter.attributes.add("minecraft:generic.max_health")
+        source = n.parse_nbt('{id:"minecraft:beehive",x:1,y:2,z:3,Bees:[{TicksInHive:100,EntityData:{id:"minecraft:bee",Health:10.0f,Attributes:[{Name:"minecraft:generic.max_health",Base:20.0d}]}},{TicksInHive:200,EntityData:{id:"minecraft:bee",UUID:[I;1,2,3,4],Health:8.0f,Attributes:[{Name:"minecraft:generic.max_health",Base:18.0d}]}}]}')
+        original = deepcopy(source); result = converter.block_entity(source)
+        for i, bee in enumerate(result["bees"]):
+            self.assertEqual(bee["entity_data"]["Health"], original["Bees"][i]["EntityData"]["Health"])
+            self.assertEqual(bee["entity_data"].get("UUID"), original["Bees"][i]["EntityData"].get("UUID"))
+            self.assertEqual(bee["entity_data"]["attributes"][0]["base"], original["Bees"][i]["EntityData"]["Attributes"][0]["Base"])
+            self.assertNotIn("Attributes", bee["entity_data"])
+        self.assertNotIn("Bees", result)
+        self.assertEqual(source, original)
+
+    def test_ae_bus_zero_quantity_filter_keeps_key_instead_of_erasing_configuration(self):
+        converter = pipeline()
+        source = n.parse_nbt('{south:{config:[{"#c":"ae2:i",id:"minecraft:stone","#":0L}]}}')
+        result = converter.tree(source)
+        self.assertEqual(result, n.parse_nbt('{south:{config:[{"#t":"ae2:i",id:"minecraft:stone","#":0L}]}}'))
+        source["south"]["config"][0]["#"] = n.Long(-1)
+        with self.assertRaisesRegex(ValueError, "非负 Long"):
+            converter.tree(source)
+
+    def test_twilight_chest_inventory_is_kept_under_native_chest_entity_type(self):
+        converter = pipeline(); converter.block_entities.add("minecraft:chest")
+        source = n.parse_nbt('{id:"twilightforest:tf_chest",x:1,y:2,z:3,Items:[{id:"minecraft:stone",Count:17b,Slot:7b}],ForgeCaps:{}}')
+        result = converter.block_entity(source)
+        self.assertEqual(result["id"], "minecraft:chest")
+        self.assertEqual(result["Items"][0], n.parse_nbt('{id:"minecraft:stone",count:17,Slot:7b}'))
+        self.assertEqual([int(result[k]) for k in ("x", "y", "z")], [1, 2, 3])
+
+    def test_removed_air_second_trade_cost_keeps_real_cost_output_and_stock(self):
+        class MerchantDfu(Dfu):
+            def update_entity(self, source):
+                result = deepcopy(source)
+                for recipe in result["Offers"]["Recipes"]:
+                    recipe.pop("buyB")
+                return result
+
+        converter = pipeline(); converter.dfu = MerchantDfu(); converter.entities.add("minecraft:villager")
+        source = n.parse_nbt('{id:"minecraft:villager",UUID:[I;1,2,3,4],Offers:{Recipes:[{buy:{id:"minecraft:stone",Count:8b},buyB:{id:"minecraft:air",Count:1b,tag:{Charged:0b}},sell:{id:"minecraft:stone",Count:12b},uses:4,maxUses:16}]},Inventory:[{id:"minecraft:stone",Count:3b,Slot:1b}]}')
+        result = converter.entity(source)
+        recipe = result["Offers"]["Recipes"][0]
+        self.assertNotIn("buyB", recipe)
+        self.assertEqual(recipe["buy"]["count"], 8)
+        self.assertEqual(recipe["sell"]["count"], 12)
+        self.assertEqual((recipe["uses"], recipe["maxUses"]), (4, 16))
+        self.assertEqual(result["Inventory"][0]["count"], 3)
+        self.assertEqual(converter.changes[0]["removed"], source["Offers"]["Recipes"][0]["buyB"])
+        source["Offers"]["Recipes"][0]["buyB"]["id"] = n.String("minecraft:stone")
+        with self.assertRaisesRegex(ValueError, "库存位置"):
+            converter.entity(source)
+
+    def test_only_audited_empty_basin_chemical_buffers_are_normalized(self):
+        converter = pipeline(); converter.block_entities.add("create:basin")
+        source = n.parse_nbt('{id:"create:basin",x:1,y:2,z:3,DimensionWorksBasinGas:{gasName:"mekanism:empty",amount:0L},Items:[{id:"minecraft:stone",Count:9b}]}')
+        result = converter.block_entity(source)
+        self.assertEqual(result["DimensionWorksBasinGas"], n.Compound())
+        self.assertEqual(result["Items"][0]["count"], 9)
+        source["DimensionWorksBasinGas"] = n.parse_nbt('{gasName:"mekanism:hydrogen",amount:7L}')
+        with self.assertRaisesRegex(ValueError, "非空旧状态"):
+            converter.block_entity(source)
 
 
 if __name__ == "__main__":

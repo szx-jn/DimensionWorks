@@ -182,7 +182,7 @@ class Audit:
                 self.archived_files.append({"path": relative.as_posix(), "bytes": path.stat().st_size})
             else:
                 active.append(path)
-        for path in sorted(p for p in active if p.suffix in (".dat", ".snbt", ".json")):
+        for path in sorted(p for p in active if p.suffix in (".dat", ".nbt", ".snbt", ".json")):
             relative = path.relative_to(world).as_posix()
             try:
                 if path.suffix in (".snbt", ".json"):

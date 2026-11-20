@@ -5,10 +5,54 @@ from copy import deepcopy
 import nbtlib as n
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from migration.ae_data import convert_key, convert_storage_cell
+from migration.ae_data import convert_cable_bus_parts, convert_key, convert_storage_cell
 
 
 class AeDataTest(unittest.TestCase):
+    def test_cable_bus_part_names_keep_complete_cards_filters_connections_and_source(self):
+        source = n.parse_nbt('{id:"ae2:cable_bus",down:{id:"expatternprovider:ex_export_bus_part",gn:{p:3,e:25.0d},upgrades:[{id:"ae2:speed_card",count:1,Slot:0}],config:[{"#t":"ae2:i",id:"minecraft:iron_ingot","#":0L}]},up:{id:"ae2:fluix_glass_cable"},owner:[I;1,2,3,4]}')
+        original = deepcopy(source)
+        data, changes = convert_cable_bus_parts(source, {"extendedae:ex_export_bus_part", "ae2:fluix_glass_cable"})
+        self.assertEqual(data["down"]["id"], n.String("extendedae:ex_export_bus_part"))
+        self.assertEqual(changes, {"down/id": n.String("expatternprovider:ex_export_bus_part")})
+        data["down"]["id"] = source["down"]["id"]
+        self.assertEqual(data, source)
+        self.assertEqual(source, original)
+        with self.assertRaisesRegex(ValueError, "目标注册名"):
+            convert_cable_bus_parts(source, {"ae2:fluix_glass_cable"})
+
+    def test_cable_bus_unknown_nonempty_part_cannot_be_silently_omitted(self):
+        with self.assertRaisesRegex(ValueError, "注册名字段"):
+            convert_cable_bus_parts(n.parse_nbt('{id:"ae2:cable_bus",north:{upgrades:[{id:"ae2:speed_card",count:1}]}}'), set())
+
+    def test_retired_extended_terminal_only_maps_the_audited_empty_normal_mode(self):
+        source = n.parse_nbt('{id:"ae2:cable_bus",west:{sort_direction:"ASCENDING",filter_type:"ALL",spin:0b,view_mode:"ALL",sort_by:"NAME",craftingMode:0,id:"expatternprovider:ex_crafting_terminal"}}')
+        data, changes = convert_cable_bus_parts(source, {"ae2:crafting_terminal"}, native_key_types={"ae2:i", "ae2:f", "appmek:chemical"})
+        self.assertEqual(data["west"]["id"], n.String("ae2:crafting_terminal"))
+        self.assertEqual(changes["west/id"], source["west"]["id"])
+        self.assertEqual(data["west"]["enabledKeyTypes"], n.List[n.String](["ae2:f", "ae2:i", "appmek:chemical"]))
+        self.assertNotIn("filter_type", data["west"])
+        self.assertNotIn("craftingMode", data["west"])
+        self.assertEqual(changes["west/filter_type"], "ALL")
+        self.assertEqual(changes["west/craftingMode"], n.Int(0))
+        source["west"]["craftingInv"] = n.parse_nbt('[{id:"minecraft:diamond",count:1,Slot:0}]')
+        with self.assertRaisesRegex(ValueError, "库存或扩展"):
+            convert_cable_bus_parts(source, {"ae2:crafting_terminal"})
+
+    def test_terminal_type_selection_requires_the_complete_target_registry(self):
+        source = n.parse_nbt('{id:"ae2:cable_bus",north:{id:"ae2:pattern_encoding_terminal",filter_type:"ALL",spin:1b,sort_by:"AMOUNT",encodedInv:[{Slot:0,id:"ae2:encoded_pattern",count:1}]}}')
+        original = deepcopy(source)
+        result, changes = convert_cable_bus_parts(source, {"ae2:pattern_encoding_terminal"}, native_key_types={"ae2:i", "ae2:f", "appliedcreate:stress"})
+        self.assertEqual(result["north"]["encodedInv"], source["north"]["encodedInv"])
+        self.assertEqual(result["north"]["sort_by"], "AMOUNT")
+        self.assertEqual(set(result["north"]["enabledKeyTypes"]), {"ae2:i", "ae2:f", "appliedcreate:stress"})
+        self.assertEqual(source, original)
+        with self.assertRaisesRegex(ValueError, "完整目标键类型"):
+            convert_cable_bus_parts(source, {"ae2:pattern_encoding_terminal"})
+        source["north"]["filter_type"] = n.String("UNREVIEWED")
+        with self.assertRaisesRegex(ValueError, "已审计的 ALL"):
+            convert_cable_bus_parts(source, {"ae2:pattern_encoding_terminal"}, native_key_types={"ae2:i", "ae2:f"})
+
     def item(self, source):
         self.received = deepcopy(source)
         return n.Compound({"id": source["id"], "count": n.Int(1),

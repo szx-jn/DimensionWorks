@@ -6,7 +6,7 @@ import math
 
 import nbtlib as n
 
-from .ae_data import convert_key
+from .ae_data import convert_key, terminal_key_types
 from .item_components import inventory_items
 
 
@@ -15,7 +15,8 @@ AE_STATE_IDS = {"ae2:quantum_entangled_singularity", "ae2:wireless_crafting_term
 
 
 def convert_ae_item(source: n.Compound, target: n.Compound,
-                    convert_item: Callable[[n.Compound], n.Compound]) -> n.Compound:
+                    convert_item: Callable[[n.Compound], n.Compound], *,
+                    native_key_types: set[str] | None = None) -> n.Compound:
     id = str(source["id"])
     tag = source.get("tag", n.Compound())
     result = deepcopy(target)
@@ -77,6 +78,17 @@ def convert_ae_item(source: n.Compound, target: n.Compound,
             if "ae2:exported_settings" in components:
                 raise ValueError("AE 终端界面设置组件冲突")
             components["ae2:exported_settings"] = settings
+        if "filter_type" in settings:
+            if "ae2:enabled_key_types" in components:
+                raise ValueError("AE 无线终端新旧类型筛选字段冲突")
+            old = settings.pop("filter_type")
+            components["ae2:enabled_key_types"] = terminal_key_types(old, native_key_types)
+            archive = components.setdefault("minecraft:custom_data", n.Compound()).setdefault("dimensionworks_migration", n.Compound())
+            if "original_terminal_filter" in archive:
+                raise ValueError("AE 无线终端筛选归档冲突")
+            archive["original_terminal_filter"] = deepcopy(old)
+            if not settings:
+                components.pop("ae2:exported_settings")
         for old, new in [("internalMaxPower", "ae2:energy_capacity"), ("internalCurrentPower", "ae2:stored_energy")]:
             if old in tag:
                 if not isinstance(tag[old], n.Double) or not math.isfinite(float(tag[old])) or float(tag[old]) < 0:

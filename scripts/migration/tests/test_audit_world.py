@@ -85,6 +85,21 @@ class WorldAuditTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             audit.saved_data(root, "data/dw_cloud_disk.dat")
 
+    def test_standalone_nbt_inventory_is_audited_without_writing_the_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            world = Path(folder)
+            path = world / "kubejs_persistent_data.nbt"
+            n.File({"Inventory": n.List[n.Compound]([
+                n.Compound({"id": n.String("minecraft:diamond"), "Count": n.Byte(48)})
+            ])}, gzipped=True).save(path)
+            original = path.read_bytes()
+            result = Audit().scan(world)
+            self.assertTrue(result["complete"])
+            self.assertEqual(result["nbt_files"], 1)
+            self.assertEqual(result["item_stacks"][0]["id"], "minecraft:diamond")
+            self.assertEqual(result["item_stacks"][0]["count"], 48)
+            self.assertEqual(path.read_bytes(), original)
+
     def test_region_reads_nested_stacks_and_rejects_corrupt_sectors(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "r.0.0.mca"
