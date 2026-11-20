@@ -93,3 +93,38 @@ def convert_storage_cell(source: n.Compound, target: n.Compound,
         del components["minecraft:custom_data"]
     components["ae2:storage_cell_inv"] = entries
     return data
+
+
+def convert_universal_cell_data(source: n.Compound,
+                                convert_item: Callable[[n.Compound], n.Compound]) -> tuple[n.Compound, list[dict]]:
+    """转换本服 UUID 文件的完整通用元件库存，显式对账合并后的 Long 数量。"""
+    if (not isinstance(source, n.Compound) or set(source) != {"inventory"} or
+        not isinstance(source["inventory"], n.Compound) or set(source["inventory"]) != {"entries", "error_entries"} or
+        not isinstance(source["inventory"]["entries"], n.List) or
+        not isinstance(source["inventory"]["error_entries"], n.List) or source["inventory"]["error_entries"]):
+        raise ValueError("通用元件含未覆盖结构或原有读取错误，不能跳过记录")
+    entries = n.List[n.Compound]()
+    positions = {}
+    merges = []
+    for index, old in enumerate(source["inventory"]["entries"]):
+        if (not isinstance(old, n.Compound) or set(old) != {"key", "amount"} or
+            not isinstance(old["key"], n.Compound) or not isinstance(old["amount"], n.Long) or
+            int(old["amount"]) <= 0 or "#" in old["key"]):
+            raise ValueError("通用元件键结构或 Long 储量不符")
+        key = convert_key(old["key"], convert_item)
+        identity = key_identity(key)
+        if identity in positions:
+            target = entries[positions[identity]]
+            amount = int(target["amount"]) + int(old["amount"])
+            if amount > 9223372036854775807:
+                raise ValueError("通用元件相同目标键合并后的储量超出 Long")
+            merges.append({"source_index": index, "key": deepcopy(key),
+                           "previous_amount": deepcopy(target["amount"]), "added_amount": deepcopy(old["amount"]),
+                           "merged_amount": n.Long(amount)})
+            target["amount"] = n.Long(amount)
+        else:
+            positions[identity] = len(entries)
+            entries.append(n.Compound({"key": key, "amount": deepcopy(old["amount"])}))
+    result = deepcopy(source)
+    result["inventory"]["entries"] = entries
+    return result, merges

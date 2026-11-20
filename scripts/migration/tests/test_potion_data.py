@@ -3,7 +3,7 @@ import unittest
 
 import nbtlib as n
 
-from scripts.migration.potion_data import convert_potion_contents
+from scripts.migration.potion_data import convert_active_effects, convert_potion_contents
 
 
 class PotionDataTests(unittest.TestCase):
@@ -48,6 +48,32 @@ class PotionDataTests(unittest.TestCase):
         source["components"]["minecraft:potion_contents"]["potion"] = n.String("l2complements:flame")
         with self.assertRaisesRegex(ValueError, "证据"):
             convert_potion_contents(source, {"l2complements:soul_burning"}, {"l2complements:soul_burning"}, None)
+
+    def test_active_effect_uses_named_mod_id_and_preserves_duration_amplifier_and_cures(self):
+        source = n.parse_nbt('{ActiveEffects:[{Id:214,"forge:id":"twilightforest:frosted",Amplifier:2b,Duration:35973,Ambient:0b,ShowParticles:1b,ShowIcon:1b,CurativeItems:[{id:"minecraft:milk_bucket",Count:1b}]}]}')
+        original = deepcopy(source)
+        target = n.parse_nbt('{UUID:[I;1,2,3,4]}')
+        result = convert_active_effects(source, target, {"twilightforest:frosted"})
+        self.assertEqual(result.data["active_effects"], n.parse_nbt('[{id:"twilightforest:frosted",amplifier:2b,duration:35973,ambient:0b,show_particles:1b,show_icon:1b,"neoforge:cures":["milk","protected_by_totem"]}]'))
+        self.assertEqual(result.data["UUID"], target["UUID"])
+        self.assertEqual(result.removed["original_active_effects"], source["ActiveEffects"])
+        self.assertEqual(source, original)
+
+    def test_unknown_effect_changed_curative_or_uncovered_field_prevents_conversion(self):
+        source = n.parse_nbt('{ActiveEffects:[{Id:214,"forge:id":"twilightforest:frosted",Amplifier:2b,Duration:37,Ambient:0b,ShowParticles:1b,ShowIcon:1b,CurativeItems:[{id:"minecraft:milk_bucket",Count:1b}]}]}')
+        with self.assertRaisesRegex(ValueError, "无法直接升级"):
+            convert_active_effects(source, n.Compound(), set())
+        source["ActiveEffects"][0]["CurativeItems"][0]["id"] = n.String("minecraft:honey_bottle")
+        with self.assertRaisesRegex(ValueError, "治愈物"):
+            convert_active_effects(source, n.Compound(), {"twilightforest:frosted"})
+        source["ActiveEffects"][0]["HiddenEffect"] = n.Compound()
+        with self.assertRaisesRegex(ValueError, "未覆盖"):
+            convert_active_effects(source, n.Compound(), {"twilightforest:frosted"})
+
+    def test_existing_target_effect_list_is_not_silently_overwritten(self):
+        source = n.parse_nbt('{ActiveEffects:[]}')
+        with self.assertRaisesRegex(ValueError, "不能覆盖"):
+            convert_active_effects(source, n.parse_nbt('{active_effects:[]}'), set())
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ from .create_data import PACKAGE_IDS, convert_container_item, convert_mechanical
 from .entity_data import convert_entity_data
 from .item_components import authoritative_count, convert_item_components
 from .mod_item_data import convert_stored_item_data
-from .potion_data import convert_potion_contents
+from .potion_data import convert_active_effects, convert_potion_contents
 from .registry_ids import convert_enchantment_components, convert_infinity_cell, mapped_id
 
 
@@ -87,28 +87,43 @@ class ItemPipeline:
             return any(ItemPipeline._old_items(v) for v in value.values())
         return isinstance(value, n.List) and any(ItemPipeline._old_items(v) for v in value)
 
-    def _restore_items(self, old, fixed):
+    def _restore_items(self, old, fixed, *, oversized_inventory: bool = False):
         if isinstance(old, n.Compound):
             if "id" in old and "Count" in old and "UUID" not in old:
-                return self.item(old)
+                return self.item(old, oversized_inventory=oversized_inventory)
             result = deepcopy(fixed)
             for key, child in old.items():
                 if self._old_items(child):
                     if key not in result:
                         raise ValueError("原版 DFU 移除了原实体库存位置")
-                    result[key] = self._restore_items(child, result[key])
+                    result[key] = self._restore_items(child, result[key], oversized_inventory=oversized_inventory)
             return result
         if isinstance(old, n.List) and self._old_items(old):
             if not isinstance(fixed, n.List) or len(old) != len(fixed):
                 raise ValueError("原版 DFU 改变了实体库存列表长度")
-            return type(fixed)(self._restore_items(a, b) if self._old_items(a) else deepcopy(b)
+            return type(fixed)(self._restore_items(a, b, oversized_inventory=oversized_inventory) if self._old_items(a) else deepcopy(b)
                                for a, b in zip(old, fixed))
         return deepcopy(fixed)
 
     def entity(self, source: n.Compound) -> n.Compound:
         if str(source.get("id", "")) not in self.entities:
             raise ValueError("内嵌实体缺少已核对的目标注册名")
-        data = self._restore_items(source, self.dfu.update_entity(deepcopy(source)))
+        old = deepcopy(source)
+        old.pop("ActiveEffects", None)  # CurativeItems 是治愈描述，不能当库存或用旧数值效果 ID 转换。
+        data = self._restore_items(old, self.dfu.update_entity(old))
+        return self._actor(source, data)
+
+    def player(self, source: n.Compound) -> n.Compound:
+        old = deepcopy(source)
+        old.pop("ActiveEffects", None)
+        data = self._restore_items(old, self.dfu.update(old, "player"))
+        return self._actor(source, data)
+
+    def _actor(self, source: n.Compound, data: n.Compound) -> n.Compound:
+        effects = convert_active_effects(source, data, self.effects)
+        if effects.removed:
+            self.changes.append({"kind": "active_effects", "changed": effects.removed})
+        data = effects.data
         converted = convert_entity_data(data)
         if source.get("UUID") != converted.data.get("UUID") or source.get("Owner") != converted.data.get("Owner"):
             raise ValueError("内嵌实体的 UUID 或所有者改变")
@@ -126,7 +141,8 @@ class ItemPipeline:
             raise ValueError("Mekanism 方块实体须使用专用机器转换")
         if id:
             target = mapped_id(id, self.block_entities, block=True)
-            data = self._restore_items(source, self.dfu.update(deepcopy(source), "block_entity"))
+            data = self._restore_items(source, self.dfu.update(deepcopy(source), "block_entity"),
+                                       oversized_inventory=id.startswith("sophisticatedstorage:"))
             data["id"] = n.String(target)
         else:
             # Create UpdateTag 无 id；只处理已明确存在的物品与平台持久字段，不编造实体类型。
@@ -140,7 +156,7 @@ class ItemPipeline:
         """只转换仍为旧格式的节点；现代组件栈不再次走 DFU。"""
         if isinstance(value, n.Compound):
             if str(value.get("id", "")) in self.entities and "UUID" in value and any(
-                    key in value for key in ("ForgeCaps", "ForgeData", "Attributes")):
+                    key in value for key in ("ForgeCaps", "ForgeData", "Attributes", "ActiveEffects")):
                 return self.entity(value)
             if "id" in value and "Count" in value and "UUID" not in value:
                 return self.item(value, oversized_inventory=oversized_inventory)

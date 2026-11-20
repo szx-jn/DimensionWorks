@@ -8,6 +8,9 @@ from scripts.migration.item_pipeline import ItemPipeline, NativeItemRequired, un
 
 class Dfu:
     def update(self, source, kind):
+        if kind in {"player", "block_entity"}:
+            assert "ActiveEffects" not in source
+            return deepcopy(source)
         assert kind == "item_stack"
         data = n.Compound({"id": deepcopy(source["id"]), "count": n.Int(int(source["Count"]))})
         if source.get("tag"):
@@ -79,6 +82,22 @@ class ItemPipelineTests(unittest.TestCase):
         self.assertEqual(len(converter.changes), 1)
         with self.assertRaisesRegex(ValueError, "注册名"):
             converter.fluid(n.parse_nbt('{FluidName:"missing:fluid",Amount:9000}'))
+
+    def test_player_inventory_uuid_and_named_effect_are_converted_together(self):
+        converter = pipeline(); converter.effects.add("twilightforest:frosted")
+        source = n.parse_nbt('{UUID:[I;1,2,3,4],Inventory:[{id:"minecraft:stone",Count:12b,Slot:7b}],ActiveEffects:[{Id:214,"forge:id":"twilightforest:frosted",Amplifier:1b,Duration:77,Ambient:0b,ShowParticles:1b,ShowIcon:1b,CurativeItems:[{id:"minecraft:milk_bucket",Count:1b}]}]}')
+        result = converter.player(source)
+        self.assertEqual(result["UUID"], source["UUID"])
+        self.assertEqual(result["Inventory"][0], n.parse_nbt('{id:"minecraft:stone",count:12,Slot:7b}'))
+        self.assertEqual(result["active_effects"][0]["id"], "twilightforest:frosted")
+        self.assertNotIn("ActiveEffects", result)
+
+    def test_sophisticated_block_inventory_preserves_real_count_and_slot(self):
+        converter = pipeline(); converter.block_entities.add("sophisticatedstorage:chest")
+        source = n.parse_nbt('{id:"sophisticatedstorage:chest",x:1,y:2,z:3,storageWrapper:{contents:{inventory:{Size:2,Items:[{id:"minecraft:stone",Count:-64b,realCount:960,Slot:1}]}}}}')
+        result = converter.block_entity(source)
+        item = result["storageWrapper"]["contents"]["inventory"]["Items"][0]
+        self.assertEqual(item, n.parse_nbt('{id:"minecraft:stone",count:960,Slot:1}'))
 
 
 if __name__ == "__main__":

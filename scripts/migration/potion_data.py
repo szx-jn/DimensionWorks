@@ -49,6 +49,36 @@ def convert_effect(source: n.Compound, native_ids: set[str]) -> n.Compound:
     return result
 
 
+def convert_active_effects(source: n.Compound, target: n.Compound,
+                          native_ids: set[str]) -> ItemComponentConversion:
+    """本服实体/玩家效果使用 Forge 保存的名称；不沿用旧模组数值 ID。"""
+    result = deepcopy(target)
+    if "ActiveEffects" not in source:
+        return ItemComponentConversion(result, {})
+    if not isinstance(source["ActiveEffects"], n.List) or "active_effects" in source:
+        raise ValueError("旧实体效果列表格式或字段冲突")
+    effects = n.List[n.Compound]()
+    for old in source["ActiveEffects"]:
+        fields = {"Id", "forge:id", "Amplifier", "Duration", "Ambient", "ShowParticles", "ShowIcon", "CurativeItems"}
+        if (not isinstance(old, n.Compound) or set(old) != fields or not isinstance(old["Id"], n.Int) or
+                not isinstance(old["forge:id"], n.String) or not isinstance(old["Amplifier"], n.Byte) or
+                not isinstance(old["Duration"], n.Int) or any(not isinstance(old[k], n.Byte) or int(old[k]) not in (0, 1)
+                    for k in ("Ambient", "ShowParticles", "ShowIcon"))):
+            raise ValueError("实体效果含未覆盖的状态字段或类型")
+        if old["CurativeItems"] != n.parse_nbt('[{id:"minecraft:milk_bucket",Count:1b}]'):
+            raise ValueError("实体效果治愈物不是唯一旧档已核对的牛奶")
+        value = n.Compound({"id": deepcopy(old["forge:id"]), "amplifier": deepcopy(old["Amplifier"]),
+                            "duration": deepcopy(old["Duration"]), "ambient": deepcopy(old["Ambient"]),
+                            "show_particles": deepcopy(old["ShowParticles"]), "show_icon": deepcopy(old["ShowIcon"]),
+                            # 旧牛奶治愈与原版图腾清除行为对应固定 NeoForge 原生 cures。
+                            "neoforge:cures": n.List[n.String](["milk", "protected_by_totem"])})
+        effects.append(convert_effect(value, native_ids))
+    if "ActiveEffects" in result or "active_effects" in result:
+        raise ValueError("实体效果须从剥离旧效果的独立 DFU 结果接入，不能覆盖未知列表")
+    result["active_effects"] = effects
+    return ItemComponentConversion(result, {"original_active_effects": deepcopy(source["ActiveEffects"])})
+
+
 def convert_potion_contents(target: n.Compound, native_potions: set[str], native_effects: set[str],
                             catalog: n.Compound | None) -> ItemComponentConversion:
     result = deepcopy(target)
