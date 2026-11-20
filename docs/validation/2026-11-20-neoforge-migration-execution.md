@@ -176,3 +176,26 @@ JEI Ticks 0.1.1 接入根工程，全部 16 个自研模组已编译。固定 JE
 ## 下一阶段准入
 
 私有快照验证及全档读取审计已完成；随后确定缺失注册 ID 的处理、锁定完整目标依赖闭包，移植其余模块和脚本，再实现一次性 NBT/组件转换器。完整客户端/服务端冷启动、重启、库存语义对账、玩家身份及真实生产链验收通过前，禁止给玩家开放跨版本更新。
+
+
+## TrueUUID 原生移植与玩家身份保护
+
+独立 fork 从原服固定 `v1.0.10` 提交 `7102fb449bfd5fcbfb383cc59d99ea01fc8294be` 移植，已推送 `szx-jn/TrueUUID-DimensionWorks` 的 `codex/dimensionworks-neoforge-migration` 分支，固定提交 `b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89`。源码归档 SHA-256 为 `e10d9bed03fc066141a3adc225d2c4a51905cfea7f27f9e1c3dd8d8bd67f719b`。本地验证 JAR `trueuuid-1.0.10-neoforge1.21.1.jar` 为 83,501 字节、37 个 Java 21 类，SHA-256 为 `06919ff0da0ebb53b6a507531b128ad9a12f965b5f9e50d235ea8650ac2da423`。固定源码构建仍须接入整包流水线；原服 Forge 清单尚未切换，不把这一步描述为整包已升级。源码 LGPL-3.0，与整合包原创 MIT 文件分开。
+
+LOGIN 认证改为原生查询/响应 payload，专用 decoder 保留 nullable 标志与全部字段；畸形响应拒绝解码，其他查询保留原版处理。服务端等待认证时暂停原版 VERIFYING 推进，独立 hasJoined 成功后设置 authenticatedProfile 再进入原版配置阶段。客户端使用原生 User UUID 调用 session service，不传输令牌。配置路径、命令/API、Mojang/Yggdrasil 来源及已有认证策略保留。
+
+原冷备存在同一玩家多次继承的历史记录，原实现未标记完成，可能让旧离线副本覆盖后续进度。移植改为已有验证 playerdata 优先、完整复制后记录 complete；pending 操作阻止继续登录，必须依据备份恢复后处理。身份注册表完整解析后才启用，解析或保存失败明确报错；写入使用同目录原子替换。此次改动保护账号档案继承，不能替代世界/物品组件/机器的一次性跨版本转换。
+
+实际检查：4 项 JUnit、13 项原生 GameTest 全通过，包括原生 packet codec、等待状态、已绑定身份拒绝离线回落、本地模拟 Yggdrasil HTTP 校验、既有档案保护、一次性继承与复制中断。隔离客户端检查通过原生登录响应、缺少令牌标志、无关查询和单人世界 UUID，随后正常保存三维度退出；这是开发会话，真实 Mojang/MSL 账号与完整整包连接仍待验证。最后用原服配置与身份表副本运行全部 GameTest，原有 **9 条现役身份绑定记录**语义保持一致；此前提到的 **94 个历史备份文件**是不同统计对象。
+
+证据日志：私有实验目录 `trueuuid-port/native-reference-v1.log` 与 `native-client-v1.log`，原始身份表仍只读。fork 工作流已改为手动验证且删除 Release 步骤，没有触发该工作流，也没有发布新发行版。生产 JAR 已检查不包含测试类或旧 Forge TOML。
+
+## 当前光影与候选整包验证
+
+按当前 `manifest/shaderpacks.json` 的四组来源，原 Complementary Unbound r5.9.3、Photon v1.3b、Sildur Vibrant Extreme VL 与 Chocapic13 V6 整包均已下载，并核对原固定文件的大小及官方校验值。Chocapic 整包展开为 Extreme、High、Lite、Low、Medium、Ultra 六份原始预设 ZIP。共九份独立光影文件均完成压缩包完整性检查，**还未完成实际渲染，不能宣称已兼容**。
+
+用户已明确允许替换光影加载器，候选使用原生 Iris 与 Sodium。实际依赖元数据证实 Iris 1.8.12 / Sodium 0.6.13 与当前 Supplementaries 不兼容；当前候选 Iris 1.8.14-beta.1 / Sodium 0.8.13 通过依赖检查，同时保留 Sodium Extras 并选择与其 Options API 相容的 Reese 版本。最终必须逐个加载上述九份光影验证实际画面，若需要适配升级版，明确记录来源与替换结果，不能仅凭依赖范围承诺保留。
+
+私有候选集合下载完成 150 个 Modrinth、15 个 CurseForge 固定资产，并检查实际 JAR/JarJar 依赖。此前候选 182 个顶层 JAR、73 个内嵌依赖、216 个 modId 的静态闭合检查为 0 错误，仍有一个相同版本内嵌库字节差异警告。候选服务端在隔离新世界实际 Done 并导出注册表，停止后全部维度保存，但日志仍含大量第三方数据错误，且尚未加载完整脚本与旧世界。
+
+真实目标注册表对照原档发现 ExtendedAE 设备、葡萄作物、矿工乐事等 ID 差异，必须逐项核对其状态/NBT并转换。审计中的 minecraft:experience_orb 来自实体 NBT，不能当成丢失的物品栈；原版 grass 应交由 DFU 改为 short_grass，禁止直接删除。目标注册表目前还未加载全部 KubeJS 注册项，相关缺口不能误判为可放弃内容。
