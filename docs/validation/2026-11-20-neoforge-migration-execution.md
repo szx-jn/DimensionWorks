@@ -233,3 +233,16 @@ JAR mekanismdelight-1.21.1-1.1.3-dimensionworks.1.jar 为 120370 字节、23 个
 官方安装器在隔离目录实际完成安装（16.61 秒），两个平台参数文件与服务端树检查通过。生成 start.sh 使用 1 GiB/2 CPU 在 loopback 新世界实际 Done (0.305s)，总进程 9.57 秒，stdin stop 正常保存三维度并以 0 退出（pack-closure/installer-server-v1.log）。测试超平坦配置缺 generator-settings 有一条 No key layers 数据错误，不能称为无错完整整包启动；此夹具无原存档、无生产模组。
 
 25 项相关 Python 检查通过（native-packaging-tests-v2.log），覆盖旧加载器清单拒绝、Java 17/错误路径拒绝、Windows 参数缺失和含空格目录的实际启动命令/退出码。跨平台 Go 更新器测试 go test ./... 通过（7.635 秒），受限下载差量 MRPack 保留 Minecraft 1.21.1 / NeoForge 依赖。YAML 和发行说明四类别样例换行检查通过；未执行任何发布命令。VERSION 仍为 0.3.52，目标清单及存档迁移仍继续推进。
+
+
+## 直接升级优先：用户新增执行约束
+
+用户要求找不到现成升级版、需要自行实现的内容先汇报，不得直接开始新增移植。执行方式改为直接升级优先，具体候选统计、已发生工作和待确认取舍见 docs/superpowers/plans/2026-11-20-neoforge-direct-upgrade-decisions.md。原 182 项中 160 项有现成目标候选；今日再次查询原项目，Caves Delight、原 MekanismDelight、Kaleidoscope Sauce、Wither Storm 的 1.21.1 NeoForge 列表仍均为空。前三项自行实现方案暂缓接入，Wither Storm 按用户先前明确允许舍弃；没有创建发行版。
+
+新增约束到达前，酱料独立 fork 已推送 d5401283c39e6c292b397b579cd18188a0d154a4。保留原 0.1.2 八种酱料、三种作物、15 物品、12 方块、四种药效和 32 配方；按原 MIT 发布 JAR 经 Vineflower 恢复，非作者原始源码。9 项 GameTest 通过（pack-closure/sauce-native-tests-v4.log），包括真实蘸酱、八次搅拌与中途保存、完整组件、破坏掉落、草帽种子和连续三份食用返还三个桶。普通原生客户端 8 种酱料/32 个覆盖食物模型实际绘制通过（sauce-native-client-v2.log），无光影加载器或光影专项，未进行截图视觉验收；第三方小依赖夹具数据警告仍在。
+
+最终酱料 JAR 213009 字节，SHA-256 65cdb1ba75b89614e0259b5f9e53809435b1352d7f7f4a6d0e754a5c2cea7dd1；固定源码 ZIP 280988 字节，SHA-256 04e21f1a818fdd1c9f5155c5e6148acb5587779142c5f30c88f598b4f1b12abf。资源编码/换行整理后 build、JSON/TOML、测试类排除与 git diff --check 通过；固定源码 helper 独立重建产物逐字节一致。未添加到最终清单，是否采用自做 fork 待用户确认。
+
+洞穴料理本地移植已保留 65 个原物品与五种砖、97 条原配方。8 项 GameTest 通过（caves-delight-native-tests-v2.log），覆盖实际配方输入/输出、物品组件、原辐射条件治疗而不删除辐射、连续三碗食用返还、装饰砖掉落、真实投蛋/实体 UUID 保存和原辐射云、11 种原肉食作为原生狼食物。第一次启动发现原空事件订阅类被 NeoForge 拒绝，移除该无监听注解后通过；未进行客户端专项。此工程尚未提交或推送，当前停止继续公开化/接入，按用户最新要求先汇报。原项目 MIT 与 JAR All Rights Reserved 元数据冲突一并记录，不能把本地验证当作公开分发许可已无争议。
+
+ExtendedAE 官方目标源码与原版本 tag 已比对，原 ex_charger/ex_drive/ex_inscriber/circuit_cutter/silicon_block 等在新 extendedae 命名空间仍注册，无需自行移植整个模组。只读定位原世界实际无限元件，record 为 ae2:i / minecraft:cobblestone，原记录 1 个；应映射到现成 extendedae:infinity_cobblestone_cell，不按原默认水行为猜测。完整库存及 AE2 Key 转换仍待实现与运行验收。
