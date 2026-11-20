@@ -1,10 +1,13 @@
 package dev.szx.dimensionworks.rpmlimit;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Shared item/state rules for the KubeJS Gear Heart items. */
 public final class GearHeartState {
@@ -24,17 +27,17 @@ public final class GearHeartState {
         | AE_CRAFTING_JOBS | CROSS_PROCESS | ACTIVE_MACHINES | FINAL_PRODUCTION;
 
     private static final ResourceLocation NORMAL_ID =
-        new ResourceLocation("kubejs", "gear_heart");
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart");
     private static final ResourceLocation ENCHANTED_ID =
-        new ResourceLocation("kubejs", "gear_heart_enchanted");
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_enchanted");
     private static final ResourceLocation[] REPAIR_FRAGMENT_IDS = {
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_1"),
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_2"),
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_3"),
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_4"),
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_5"),
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_6"),
-        new ResourceLocation("kubejs", "gear_heart_repair_fragment_7")
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_1"),
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_2"),
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_3"),
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_4"),
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_5"),
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_6"),
+        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_repair_fragment_7")
     };
     private static final int[] REPAIR_FRAGMENT_BITS = {
         ROTATION_SPEED,
@@ -53,7 +56,7 @@ public final class GearHeartState {
     }
 
     public static boolean isGearHeart(Item item) {
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
         return NORMAL_ID.equals(id) || ENCHANTED_ID.equals(id);
     }
 
@@ -78,13 +81,14 @@ public final class GearHeartState {
     }
 
     public static ItemStack createUnrepairedCursedHeart() {
-        Item item = ForgeRegistries.ITEMS.getValue(NORMAL_ID);
+        Item item = BuiltInRegistries.ITEM.getOptional(NORMAL_ID).orElse(null);
         return item == null ? ItemStack.EMPTY : createUnrepairedCursedHeart(item);
     }
 
     static ItemStack createUnrepairedCursedHeart(Item item) {
         ItemStack heart = new ItemStack(item);
-        heart.setTag(unrepairedCursedHeartTag());
+        heart.set(DataComponents.CUSTOM_DATA, CustomData.of(unrepairedCursedHeartTag()));
+        heart.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(1));
         return heart;
     }
 
@@ -98,7 +102,6 @@ public final class GearHeartState {
 
     static CompoundTag unrepairedCursedHeartTag() {
         CompoundTag tag = new CompoundTag();
-        tag.putInt("CustomModelData", 1);
         tag.putInt(REPAIRED_MASK_KEY, 0);
         return tag;
     }
@@ -107,7 +110,7 @@ public final class GearHeartState {
         if (stack == null || stack.isEmpty()) {
             return 0;
         }
-        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         for (int i = 0; i < REPAIR_FRAGMENT_IDS.length; i++) {
             if (REPAIR_FRAGMENT_IDS[i].equals(itemId)) {
                 return i + 1;
@@ -179,34 +182,26 @@ public final class GearHeartState {
             return ItemStack.EMPTY;
         }
 
-        Item normalItem = ForgeRegistries.ITEMS.getValue(NORMAL_ID);
+        Item normalItem = BuiltInRegistries.ITEM.getOptional(NORMAL_ID).orElse(null);
         if (normalItem == null) {
             return ItemStack.EMPTY;
         }
 
         int bit = REPAIR_FRAGMENT_BITS[curseIndex - 1];
-        ItemStack reopened = new ItemStack(normalItem);
-        CompoundTag tag = current.getTag();
-        if (tag != null) {
-            reopened.setTag(tag.copy());
-        }
+        ItemStack reopened = current.transmuteCopy(normalItem, 1);
         setRepairedMask(reopened, getRepairedMask(current) & ~bit);
-        reopened.getOrCreateTag().putInt("CustomModelData", 1);
+        reopened.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(1));
         return reopened;
     }
 
     public static ItemStack finalizeRepair(ItemStack repaired) {
-        Item item = ForgeRegistries.ITEMS.getValue(ENCHANTED_ID);
+        Item item = BuiltInRegistries.ITEM.getOptional(ENCHANTED_ID).orElse(null);
         if (item == null) {
             return repaired;
         }
 
-        ItemStack finalStack = new ItemStack(item);
-        CompoundTag tag = repaired.getTag();
-        if (tag != null) {
-            finalStack.setTag(tag.copy());
-        }
-        finalStack.getOrCreateTag().remove("CustomModelData");
+        ItemStack finalStack = repaired.transmuteCopy(item, 1);
+        finalStack.remove(DataComponents.CUSTOM_MODEL_DATA);
         setRepairedMask(finalStack, ALL_CURSES);
         return finalStack;
     }
@@ -216,7 +211,7 @@ public final class GearHeartState {
     }
 
     public static int getRepairedMask(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (tag == null || !tag.contains(REPAIRED_MASK_KEY)) {
             return 0;
         }
@@ -224,11 +219,11 @@ public final class GearHeartState {
     }
 
     public static void setRepairedMask(ItemStack stack, int mask) {
-        stack.getOrCreateTag().putInt(REPAIRED_MASK_KEY, normalizeMask(mask));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt(REPAIRED_MASK_KEY, normalizeMask(mask)));
     }
 
     private static boolean isItem(ItemStack stack, ResourceLocation expected) {
         return stack != null && !stack.isEmpty()
-            && expected.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()));
+            && expected.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 }

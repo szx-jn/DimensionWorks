@@ -7,19 +7,18 @@ import com.simibubi.create.content.kinetics.speedController.SpeedControllerRende
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.szx.dimensionworks.rpmlimit.DimensionWorksRpmLimit;
 import net.createmod.catnip.render.CachedBuffers;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
-@Mod.EventBusSubscriber(modid = DimensionWorksRpmLimit.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = DimensionWorksRpmLimit.MOD_ID, value = Dist.CLIENT)
 public final class ControllerClient {
-    @SubscribeEvent public static void setup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> MenuScreens.register(AdvancedController.MENU.get(), ControllerScreen::new));
+    @SubscribeEvent public static void setup(RegisterMenuScreensEvent event) {
+        event.register(AdvancedController.MENU.get(), ControllerScreen::new);
     }
     @SubscribeEvent public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(AdvancedController.ENTITY.get(), Renderer::new);

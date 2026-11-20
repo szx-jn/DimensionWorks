@@ -11,8 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(DimensionWorksRpmLimit.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -124,7 +124,7 @@ public final class KineticNetworkRestoreGameTests {
     }
 
     private static BlockState createBlock(String id) {
-        return net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(
-            new net.minecraft.resources.ResourceLocation("create", id)).defaultBlockState();
+        return net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("create", id)).defaultBlockState();
     }
 }

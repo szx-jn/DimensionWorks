@@ -43,7 +43,7 @@ public abstract class BasinOperatingBlockEntityMixin {
         }
 
         BasinOperatingBlockEntity self = (BasinOperatingBlockEntity) (Object) this;
-        List<ItemStack> outputs = currentRecipe instanceof ProcessingRecipe<?> processingRecipe
+        List<ItemStack> outputs = currentRecipe instanceof ProcessingRecipe<?, ?> processingRecipe
             ? processingRecipe.getRollableResultsAsItemStacks()
             : List.of(currentRecipe.getResultItem(self.getLevel().registryAccess()));
         long tick = self.getLevel() == null ? 0L : self.getLevel().getGameTime();

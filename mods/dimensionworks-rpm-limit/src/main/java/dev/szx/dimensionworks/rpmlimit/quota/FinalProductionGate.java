@@ -4,17 +4,13 @@ import dev.szx.dimensionworks.rpmlimit.GearHeartEffects;
 import dev.szx.dimensionworks.rpmlimit.GearHeartState;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitConfig;
 import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.ChemicalTags;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.infuse.InfuseType;
-import mekanism.api.chemical.pigment.Pigment;
-import mekanism.api.chemical.slurry.Slurry;
+import mekanism.api.MekanismAPI;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Set;
 import java.util.UUID;
@@ -38,29 +34,20 @@ public final class FinalProductionGate {
 
     public static boolean tryConsume(UUID owner, FluidStack output, long amount, long tick) {
         if (amount <= 0L || output == null || output.isEmpty()
-            || !output.getFluid().is(TagKey.create(
-                Registries.FLUID, new ResourceLocation("gear_heart", "final_production")))) {
+            || !output.is(TagKey.create(
+                Registries.FLUID, ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production")))) {
             return true;
         }
         return consume(owner, amount, tick);
     }
 
-    public static boolean tryConsume(UUID owner, ChemicalStack<?> output, long amount, long tick) {
+    public static boolean tryConsume(UUID owner, ChemicalStack output, long amount, long tick) {
         if (amount <= 0L || output == null || output.isEmpty()) {
             return amount <= 0L;
         }
 
-        ResourceLocation name = new ResourceLocation("gear_heart", "final_production");
-        boolean tagged = false;
-        if (output.getType() instanceof Gas gas) {
-            tagged = gas.is(ChemicalTags.GAS.tag(name));
-        } else if (output.getType() instanceof InfuseType infuseType) {
-            tagged = infuseType.is(ChemicalTags.INFUSE_TYPE.tag(name));
-        } else if (output.getType() instanceof Pigment pigment) {
-            tagged = pigment.is(ChemicalTags.PIGMENT.tag(name));
-        } else if (output.getType() instanceof Slurry slurry) {
-            tagged = slurry.is(ChemicalTags.SLURRY.tag(name));
-        }
+        ResourceLocation name = ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production");
+        boolean tagged = output.is(TagKey.create(MekanismAPI.CHEMICAL_REGISTRY_NAME, name));
         return !tagged || consume(owner, amount, tick);
     }
 
@@ -124,6 +111,6 @@ public final class FinalProductionGate {
 
     private static boolean isFinalProduction(ItemStack output) {
         return output.is(TagKey.create(Registries.ITEM,
-            new ResourceLocation("gear_heart", "final_production")));
+            ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production")));
     }
 }

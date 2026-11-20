@@ -51,7 +51,7 @@ public final class RpmLimitManager {
         java.io.File file = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(owner + ".dat").toFile();
         if (!file.isFile()) return;
         try {
-            CompoundTag nbt = NbtIo.readCompressed(file);
+            CompoundTag nbt = NbtIo.readCompressed(file.toPath(), net.minecraft.nbt.NbtAccounter.create(16L * 1024 * 1024));
             RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(nbt);
             CACHE.put(owner, profile.base());
             OFFLINE_EFFECTIVE.put(owner, profile.effective());
@@ -268,7 +268,7 @@ public final class RpmLimitManager {
         for (ServerLevel level : server.getAllLevels()) {
             for (ChunkHolder holder : ((ChunkMapAccessor) level.getChunkSource().chunkMap)
                 .dimensionworks$getChunks()) {
-                LevelChunk chunk = holder.getFullChunk();
+                LevelChunk chunk = holder.getFullChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).orElse(null);
                 if (chunk == null)
                     continue;
 

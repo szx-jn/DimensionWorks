@@ -8,7 +8,7 @@ import mekanism.api.recipes.ItemStackToItemStackRecipe;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.PressurizedReactionRecipe;
 import mekanism.api.recipes.SawmillRecipe;
-import mekanism.api.recipes.chemical.ItemStackChemicalToItemStackRecipe;
+import mekanism.api.recipes.ItemStackChemicalToItemStackRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -25,7 +25,7 @@ import java.util.WeakHashMap;
 public final class MekProcessingGate {
     private static TagKey<Item> crossProcessTag() {
         return TagKey.create(Registries.ITEM,
-            new ResourceLocation("gear_heart", "cross_process"));
+            ResourceLocation.fromNamespaceAndPath("gear_heart", "cross_process"));
     }
     private static final Map<Object, ActiveState> ACTIVES =
         Collections.synchronizedMap(new WeakHashMap<>());
@@ -219,7 +219,7 @@ public final class MekProcessingGate {
         if (recipe instanceof ItemStackToItemStackRecipe itemRecipe) {
             return containsTag(itemRecipe.getInput().getRepresentations());
         }
-        if (recipe instanceof ItemStackChemicalToItemStackRecipe<?, ?, ?> itemChemicalRecipe) {
+        if (recipe instanceof ItemStackChemicalToItemStackRecipe itemChemicalRecipe) {
             return containsTag(itemChemicalRecipe.getItemInput().getRepresentations());
         }
         if (recipe instanceof SawmillRecipe sawmillRecipe) {

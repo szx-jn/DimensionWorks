@@ -130,7 +130,7 @@ public final class TopologyScreen extends Screen {
     private static String number(float v) { return String.format(Locale.ROOT, "%.1f", v); }
     private static String pos(BlockPos p) { return p == null ? "无" : p.getX() + ", " + p.getY() + ", " + p.getZ(); }
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
-        renderBackground(g);
+        renderBackground(g, mx, my, partial);
         g.fill(5, 38, graphRight, height - 24, 0xee17242c);
         g.enableScissor(5, 38, graphRight, height - 24);
         Map<BlockPos, Integer> indices = TopologyEdges.indices(snapshot.nodes());
@@ -208,12 +208,12 @@ public final class TopologyScreen extends Screen {
         if (button == 0 && x < graphRight && y > 38) { panX += dx; panY += dy; return true; }
         return super.mouseDragged(x, y, button, dx, dy);
     }
-    @Override public boolean mouseScrolled(double x, double y, double delta) {
+    @Override public boolean mouseScrolled(double x, double y, double horizontal, double delta) {
         if (x >= graphRight && y >= 38) {
             detailsScroll = Math.max(0, Math.min(280, detailsScroll - (int) (delta * 18)));
             return true;
         }
-        if (y < 38) return super.mouseScrolled(x, y, delta);
+        if (y < 38) return super.mouseScrolled(x, y, horizontal, delta);
         double next = Math.max(.2, Math.min(3, zoom * Math.pow(1.15, delta)));
         panX = x - (x - panX) * next / zoom;
         panY = y - 40 - (y - 40 - panY) * next / zoom;

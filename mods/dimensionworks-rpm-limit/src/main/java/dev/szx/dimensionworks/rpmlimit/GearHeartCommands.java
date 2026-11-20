@@ -6,8 +6,8 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
@@ -68,7 +68,7 @@ public final class GearHeartCommands {
 
     private static int clearCurse(net.minecraft.commands.CommandSourceStack source,
                                   ServerPlayer target, int curseIndex) {
-        var maybeInventory = CuriosApi.getCuriosInventory(target).resolve();
+        var maybeInventory = CuriosApi.getCuriosInventory(target);
         if (maybeInventory.isEmpty()) {
             source.sendFailure(Component.literal("无法读取目标玩家的饰品栏。"));
             return 0;
@@ -109,7 +109,7 @@ public final class GearHeartCommands {
     }
 
     private static ItemStack findHeart(ServerPlayer player) {
-        var maybeInventory = CuriosApi.getCuriosInventory(player).resolve();
+        var maybeInventory = CuriosApi.getCuriosInventory(player);
         if (maybeInventory.isEmpty()) {
             return ItemStack.EMPTY;
         }

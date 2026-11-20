@@ -8,26 +8,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.event.CurioDropsEvent;
-import top.theillusivec4.curios.api.event.CurioUnequipEvent;
 import top.theillusivec4.curios.api.event.DropRulesEvent;
 import top.theillusivec4.curios.api.type.capability.ICurio;
-import top.theillusivec4.curios.common.capability.ItemizedCurioCapability;
 
-/** Forge and Curios event bridge for Gear Heart behaviour and tooltips. */
+/** NeoForge and Curios event bridge for Gear Heart behaviour and tooltips. */
 public final class GearHeartForgeEvents {
-
-    private static final ResourceLocation CAPABILITY_ID =
-        new ResourceLocation(DimensionWorksRpmLimit.MOD_ID, GearHeartState.SLOT_ID);
 
     private static final String[] CURSE_KEYS = {
         "tooltip.kubejs.gear_heart.curse.rotation_speed",
@@ -77,18 +71,9 @@ public final class GearHeartForgeEvents {
             GearHeartEffects.synchronizeAfterDimensionChange(player);
     }
 
-    @SubscribeEvent
-    public static void attachCurioCapability(AttachCapabilitiesEvent<ItemStack> event) {
-        ItemStack stack = event.getObject();
-        if (!GearHeartState.isGearHeart(stack)) {
-            return;
-        }
-        event.addCapability(
-            CAPABILITY_ID,
-            CuriosApi.createCurioProvider(
-                new ItemizedCurioCapability(GearHeartCurioItem.INSTANCE, stack)
-            )
-        );
+    public static void registerCuriosItems() {
+        BuiltInRegistries.ITEM.stream().filter(GearHeartState::isGearHeart)
+            .forEach(item -> CuriosApi.registerCurio(item, GearHeartCurioItem.INSTANCE));
     }
 
     @SubscribeEvent
@@ -184,14 +169,7 @@ public final class GearHeartForgeEvents {
     }
 
     @SubscribeEvent
-    public static void preventUnequip(CurioUnequipEvent event) {
-        if (GearHeartState.isGearHeart(event.getStack())) {
-            event.setResult(Event.Result.DENY);
-        }
-    }
-
-    @SubscribeEvent
-    public static void applyOutgoingDamageMultiplier(LivingHurtEvent event) {
+    public static void applyOutgoingDamageMultiplier(LivingIncomingDamageEvent event) {
         if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
             event.setAmount(event.getAmount() * GearHeartEffects.outgoingDamageMultiplier(attacker));
         }

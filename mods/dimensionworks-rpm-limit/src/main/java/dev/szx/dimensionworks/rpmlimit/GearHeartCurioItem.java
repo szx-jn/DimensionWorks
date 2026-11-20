@@ -26,7 +26,7 @@ public final class GearHeartCurioItem implements ICurioItem {
 
     @Override
     public ICurio.DropRule getDropRule(SlotContext context, DamageSource source,
-                                       int lootingLevel, boolean recentlyHit, ItemStack stack) {
+                                       boolean recentlyHit, ItemStack stack) {
         return ICurio.DropRule.ALWAYS_KEEP;
     }
 }

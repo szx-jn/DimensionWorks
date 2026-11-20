@@ -52,7 +52,6 @@ public final class ControllerScreen extends AbstractContainerScreen<AdvancedCont
         if (speed.isFocused()) return speed.keyPressed(key, scan, modifiers);
         return super.keyPressed(key, scan, modifiers);
     }
-    @Override protected void containerTick() { speed.tick(); }
     @Override protected void renderBg(GuiGraphics g, float partialTicks, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
         g.fill(x-2, y-2, x+250, y+imageHeight+2, 0xff342d25);
@@ -82,7 +81,7 @@ public final class ControllerScreen extends AbstractContainerScreen<AdvancedCont
                 124, 148, 0xff7b331c);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
-        renderBackground(g);
+        renderBackground(g, mouseX, mouseY, partialTicks);
         super.render(g, mouseX, mouseY, partialTicks);
     }
 }

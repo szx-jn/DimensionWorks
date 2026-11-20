@@ -6,8 +6,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(DimensionWorksRpmLimit.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -17,9 +17,10 @@ public final class RpmPersistenceGameTests {
     }
     private static CompoundTag offlinePlayerWithHeart(String itemId, int repairedMask) {
         CompoundTag heart = new CompoundTag(); heart.putString("id", itemId);
-        heart.putByte("Count", (byte) 1);
+        heart.putInt("count", 1);
         CompoundTag tag = new CompoundTag(); tag.putInt(GearHeartState.REPAIRED_MASK_KEY, repairedMask);
-        heart.put("tag", tag);
+        CompoundTag components = new CompoundTag(); components.put("minecraft:custom_data", tag);
+        heart.put("components", components);
         ListTag items = new ListTag(); items.add(heart);
         CompoundTag stacks = new CompoundTag(); stacks.put("Items", items);
         CompoundTag handler = new CompoundTag(); handler.put("Stacks", stacks);
@@ -27,11 +28,11 @@ public final class RpmPersistenceGameTests {
         ListTag slots = new ListTag(); slots.add(slot);
         CompoundTag inventory = new CompoundTag(); inventory.put("Curios", slots);
         CompoundTag caps = new CompoundTag(); caps.put("curios:inventory", inventory);
-        CompoundTag player = new CompoundTag(); player.put("ForgeCaps", caps);
+        CompoundTag player = new CompoundTag(); player.put(net.neoforged.neoforge.attachment.AttachmentHolder.ATTACHMENTS_NBT_KEY, caps);
         CompoundTag data = new CompoundTag();
         data.putInt(RpmPlayerState.LIMIT, RpmLimitConfig.gearHeartRotationLimit(repairedMask));
         data.putBoolean(RpmPlayerState.INITIALIZED, true);
-        RpmPlayerState.persist(data); player.put("ForgeData", data); return player;
+        RpmPlayerState.persist(data); player.put("NeoForgeData", data); return player;
     }
     @GameTest(template = "empty")
     public static void repairedOfflineOwnerRecoversFull10240Limit(GameTestHelper helper) {
@@ -59,7 +60,7 @@ public final class RpmPersistenceGameTests {
     public static void repairedHeartPreservesExplicitCommandLimit(GameTestHelper helper) {
         CompoundTag player = repairedOfflinePlayer(), data = new CompoundTag();
         data.putInt(RpmPlayerState.LIMIT, 64); data.putBoolean(RpmPlayerState.OVERRIDE, true);
-        RpmPlayerState.persist(data); player.put("ForgeData", data);
+        RpmPlayerState.persist(data); player.put("NeoForgeData", data);
         RpmPlayerState.Profile profile = RpmPlayerState.fromPlayerNbt(player);
         helper.assertTrue(profile.base() == 64 && profile.effective() == 64 && profile.commandOverride(),
             "Repaired heart overwrote an explicit command limit");
@@ -70,7 +71,7 @@ public final class RpmPersistenceGameTests {
         CompoundTag oldData = new CompoundTag(), newData = new CompoundTag();
         oldData.putInt(RpmPlayerState.LIMIT, 10240); oldData.putBoolean(RpmPlayerState.INITIALIZED, true);
         oldData.putBoolean(RpmPlayerState.OVERRIDE, true); RpmPlayerState.persist(oldData);
-        // Forge only guarantees PlayerPersisted data across a player replacement.
+        // NeoForge only guarantees PlayerPersisted data across a player replacement.
         CompoundTag persistedOnly = new CompoundTag();
         persistedOnly.put(Player.PERSISTED_NBT_TAG, oldData.getCompound(Player.PERSISTED_NBT_TAG).copy());
         RpmPlayerState.copy(persistedOnly, newData);
@@ -81,8 +82,8 @@ public final class RpmPersistenceGameTests {
     @GameTest(template = "empty", timeoutTicks = 100)
     public static void unownedRelayInheritsRealParticipantInsteadOfDefault32(GameTestHelper helper) {
         BlockPos a = new BlockPos(2, 1, 2), b = new BlockPos(5, 1, 2);
-        var motorBlock = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(new net.minecraft.resources.ResourceLocation("create", "creative_motor"));
-        var shaftBlock = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(new net.minecraft.resources.ResourceLocation("create", "shaft"));
+        var motorBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("create", "creative_motor"));
+        var shaftBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("create", "shaft"));
         helper.setBlock(a, motorBlock.defaultBlockState()); helper.setBlock(b, shaftBlock.defaultBlockState());
         helper.runAfterDelay(20, () -> {
             var motor = (com.simibubi.create.content.kinetics.base.KineticBlockEntity) helper.getBlockEntity(a);

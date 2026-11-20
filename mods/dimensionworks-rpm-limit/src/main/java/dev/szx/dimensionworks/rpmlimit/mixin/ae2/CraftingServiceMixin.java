@@ -29,7 +29,7 @@ public abstract class CraftingServiceMixin {
         AeCraftingRegistry.register(service);
     }
 
-    @Inject(method = "submitJob", at = @At("HEAD"), remap = false)
+    @Inject(method = "submitJob", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$gateSubmission(ICraftingPlan job,
                                                ICraftingRequester requestingMachine,
                                                ICraftingCPU target,

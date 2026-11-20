@@ -6,9 +6,7 @@ import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import dev.szx.dimensionworks.rpmlimit.DimensionWorksRpmLimit;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.WeakHashMap;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -18,18 +16,20 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.*;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class TopologyNetwork {
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(DimensionWorksRpmLimit.MOD_ID, "topology"), () -> "3", "3"::equals, "3"::equals);
-    private static final TagKey<Item> WRENCHES = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/wrenches"));
+    private static final TagKey<Item> WRENCHES = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"));
     private static final Map<ServerPlayer, Long> LAST_REQUEST = Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<ServerPlayer, Long> LAST_ACTION = Collections.synchronizedMap(new WeakHashMap<>());
     private static final java.util.List<Adapter> ADAPTERS = new java.util.ArrayList<>();
@@ -49,13 +49,20 @@ public final class TopologyNetwork {
     }
     private TopologyNetwork() {}
 
-    public static void register() {
-        CHANNEL.registerMessage(0, Request.class, Request::encode, Request::decode, Request::handle,
-            Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        CHANNEL.registerMessage(1, NetworkSnapshot.class, NetworkSnapshot::encode, NetworkSnapshot::decode,
-            TopologyNetwork::receive, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        CHANNEL.registerMessage(2, Action.class, Action::encode, Action::decode, Action::handle,
-            Optional.of(NetworkDirection.PLAY_TO_SERVER));
+    public static void register(IEventBus modBus, Dist dist) {
+        IPayloadHandler<NetworkSnapshot> receive = dist == Dist.CLIENT
+            ? (snapshot, context) -> TopologyScreen.show(snapshot)
+            : (snapshot, context) -> { throw new IllegalStateException("Client topology payload received on server"); };
+        modBus.addListener((RegisterPayloadHandlersEvent event) -> {
+            var registrar = event.registrar("4");
+            registrar.playToServer(Request.TYPE, Request.CODEC,
+                (packet, context) -> send((ServerPlayer) context.player(), packet.pos(), packet.page()));
+            registrar.playToClient(NetworkSnapshot.TYPE, NetworkSnapshot.CODEC, receive);
+            registrar.playToServer(Action.TYPE, Action.CODEC, (packet, context) -> {
+                if (packet.operation() == Action.DISMANTLE || packet.operation() == Action.TELEPORT)
+                    handleAction((ServerPlayer) context.player(), packet);
+            });
+        });
     }
     private static boolean wrench(ItemStack stack) { return stack.getItem() instanceof WrenchItem || stack.is(WRENCHES); }
 
@@ -87,14 +94,14 @@ public final class TopologyNetwork {
         }
         // The entry remains the reach-check anchor; focus may be its virtual member or input shaft.
         NetworkSnapshot data = NetworkSnapshot.capture(kinetic, page, pos);
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), data);
+        PacketDistributor.sendToPlayer(player, data);
     }
-    public static void request(BlockPos pos, int page) { CHANNEL.sendToServer(new Request(pos, page)); }
+    public static void request(BlockPos pos, int page) { PacketDistributor.sendToServer(new Request(pos, page)); }
     public static void dismantle(BlockPos origin, BlockPos target, long networkId) {
-        CHANNEL.sendToServer(new Action(origin, target, networkId, Action.DISMANTLE));
+        PacketDistributor.sendToServer(new Action(origin, target, networkId, Action.DISMANTLE));
     }
     public static void teleport(BlockPos origin, BlockPos target, long networkId) {
-        CHANNEL.sendToServer(new Action(origin, target, networkId, Action.TELEPORT));
+        PacketDistributor.sendToServer(new Action(origin, target, networkId, Action.TELEPORT));
     }
 
     private static void handleAction(ServerPlayer player, Action action) {
@@ -157,7 +164,10 @@ public final class TopologyNetwork {
         }
     }
 
-    private record Action(BlockPos origin, BlockPos target, long networkId, int operation) {
+    private record Action(BlockPos origin, BlockPos target, long networkId, int operation) implements CustomPacketPayload {
+        static final Type<Action> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksRpmLimit.MOD_ID, "topology_action"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Action> CODEC = StreamCodec.of((buffer, packet) -> packet.encode(buffer), Action::decode);
+        @Override public Type<Action> type() { return TYPE; }
         private static final int DISMANTLE = 0;
         private static final int TELEPORT = 1;
         void encode(FriendlyByteBuf buffer) {
@@ -167,27 +177,12 @@ public final class TopologyNetwork {
         static Action decode(FriendlyByteBuf buffer) {
             return new Action(buffer.readBlockPos(), buffer.readBlockPos(), buffer.readLong(), buffer.readVarInt());
         }
-        void handle(Supplier<NetworkEvent.Context> supplier) {
-            NetworkEvent.Context context = supplier.get();
-            context.enqueueWork(() -> {
-                if (operation == DISMANTLE || operation == TELEPORT)
-                    handleAction(context.getSender(), this);
-            });
-            context.setPacketHandled(true);
-        }
     }
-    private record Request(BlockPos pos, int page) {
+    private record Request(BlockPos pos, int page) implements CustomPacketPayload {
+        static final Type<Request> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksRpmLimit.MOD_ID, "topology_request"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Request> CODEC = StreamCodec.of((buffer, packet) -> packet.encode(buffer), Request::decode);
+        @Override public Type<Request> type() { return TYPE; }
         void encode(FriendlyByteBuf b) { b.writeBlockPos(pos); b.writeVarInt(page); }
         static Request decode(FriendlyByteBuf b) { return new Request(b.readBlockPos(), b.readVarInt()); }
-        void handle(Supplier<NetworkEvent.Context> supplier) {
-            NetworkEvent.Context context = supplier.get();
-            context.enqueueWork(() -> { if (context.getSender() != null) send(context.getSender(), pos, page); });
-            context.setPacketHandled(true);
-        }
-    }
-    private static void receive(NetworkSnapshot snapshot, Supplier<NetworkEvent.Context> supplier) {
-        NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> TopologyScreen.show(snapshot)));
-        context.setPacketHandled(true);
     }
 }

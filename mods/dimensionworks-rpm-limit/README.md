@@ -1,6 +1,10 @@
 # DimensionWorks RPM Limit API
 
-组合开发环境使用 `devJar` 任务生成官方映射开发 JAR；生产服使用普通构建 JAR，不安装 `-dev.jar`。ME 动力模组的 GameTest 会自动使用此开发变体。
+本分支使用 Minecraft 1.21.1、NeoForge 21.1.267 和 Java 21。构建由根工程统一管理，不再提供相邻工程引用的 `-dev.jar`。其余自研模块接入根工程时改用 Gradle 项目依赖。
+
+在仓库根目录运行 `./gradlew :dimensionworks-rpm-limit:build :dimensionworks-rpm-limit:runGameTestServer --no-daemon`。Create 6.0.10、Curios 9.6.0、Mekanism 10.7.19、AE2 19.2.20 均固定到已核对的发行 JAR；测试源集与夹具不进入生产 JAR。
+
+文中早期 Forge 验证记录属于 1.20.1 基线，不能作为本次迁移通过的依据；本次结果见文末和[迁移执行记录](../../docs/validation/2026-11-20-neoforge-migration-execution.md)。
 
 ## Default
 New players start at **32 RPM**. The hard maximum is **10240 RPM**.
@@ -315,3 +319,16 @@ GameTest 的 KubeJS 物品占位和 Curios 槽位数据仅在 `src/gameTest`，�
 Create 传送带的物品速度按 `RPM / 480` 换算为格/tick。带内的物品交互按区段检测；当单 tick 位移跨过多个区段时，黄铜隧道的过滤/分流和水平粉碎轮入口可能漏检，物品便会直接通过。
 
 RPM Limit 只将传送带的**有效转速**限制为 **240 RPM**（0.5 格/tick），不改动力网络的理论转速、齿轮传动、粉碎轮或其他加工机器的转速上限。该限制通过 Create 传送带实体的有效速度统一作用于物品运输、乘坐实体移动和带面动画，确保三者一致；其他设备仍可使用原有的 10,240 RPM 上限。
+
+
+## 2026-11-20：1.21.1 NeoForge 移植
+
+已替换 Forge 注册、生命周期、网络及客户端接口。高级控制器协议版本为 2，拓扑协议版本为 4；服务器继续校验菜单、距离、区块加载、网络归属与拆除权限。拓扑节点图标使用有注册表上下文的物品组件编解码，并限制单页 256 节点；扳手标签改用 `c:tools/wrench`。
+
+齿轮之心通过 Curios 9 的物品行为注册，继续禁止手动摘下。修复位保存在 `minecraft:custom_data`，损坏模型编号保存在 `minecraft:custom_model_data`。修复、完全修复转换和重开诅咒均复制整份物品组件，保留名称、附魔及其他自定义数据。离线 RPM 从 `NeoForgeData.PlayerPersisted` 与 `neoforge:attachments.curios:inventory` 读取，Curios 中的物品按 `count/components` 格式读取；保留原有 RPM、命令覆盖、机器归属及动力账目键名。旧 Forge 格式将由整包的一次性转换器处理，本模块不增加旧格式运行分支。
+
+删除 Create 转速配置的反射和吞错逻辑，改用固定版本公开 API。Create 方块实体的读写注入补充注册表上下文；配方缓存按目标 `RecipeHolder` API 解包，Mekanism 最终产物识别改为统一 `ChemicalStack`。AE2 提交拦截明确允许取消，避免配额拒绝时回调抛错。
+
+本地 Java 21 / 根 Wrapper 构建与 83 项 JUnit 通过；34 项真实 NeoForge GameTest 全部通过。覆盖原有动力账目往返、已卸载成员、超载即时发布、高级控制器正反转与输入连接、齿轮之心七次修复/重开/命令覆盖、跨维度效果包顺序及较强外部效果。新增实际物品组件落盘、实际玩家/Curios 附件落盘、真实 Mekanism `CachedRecipe.process` 配额拒绝/恢复/解除，以及两个供电 AE2 CPU 的提交限制、修复解除、最终输出模拟与拒绝时保留等待量。
+
+加工测试使用计数型 CachedRecipe、外部发射计划和接收端夹具隔离配方计算；调用实际 Mekanism 操作入口、AE2 网格/CPU/提交/输出入口，并验证输出与等待状态。不代表整包配方、真实玩家身份归属和完整自动化产线已经验收。完整客户端拓扑/控制器操作、KubeJS 组件交互、真实旧档转换、断电卸载及重启对账仍需后续整包测试。

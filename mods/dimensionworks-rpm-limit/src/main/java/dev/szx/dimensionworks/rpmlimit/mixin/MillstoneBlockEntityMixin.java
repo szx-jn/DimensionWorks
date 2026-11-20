@@ -7,9 +7,9 @@ import dev.szx.dimensionworks.rpmlimit.OverspeedBonus;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.RecipeWrapper;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -41,11 +41,11 @@ public abstract class MillstoneBlockEntityMixin {
         RecipeWrapper inventoryIn = new RecipeWrapper(self.inputInv);
         MillingRecipe recipe = lastRecipe;
         if (recipe == null || !recipe.matches(inventoryIn, self.getLevel())) {
-            Optional<MillingRecipe> found = AllRecipeTypes.MILLING.find(inventoryIn, self.getLevel());
+            Optional<net.minecraft.world.item.crafting.RecipeHolder<MillingRecipe>> found = AllRecipeTypes.MILLING.find(inventoryIn, self.getLevel());
             if (found.isEmpty()) {
                 return;
             }
-            recipe = found.get();
+            recipe = found.get().value();
         }
 
         List<ItemStack> outputs = new ArrayList<>(recipe.getRollableResultsAsItemStacks());

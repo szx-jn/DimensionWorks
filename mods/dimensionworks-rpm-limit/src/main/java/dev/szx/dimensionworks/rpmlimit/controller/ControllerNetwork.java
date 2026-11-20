@@ -3,38 +3,39 @@ package dev.szx.dimensionworks.rpmlimit.controller;
 import dev.szx.dimensionworks.rpmlimit.DimensionWorksRpmLimit;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.*;
-import net.minecraftforge.network.simple.SimpleChannel;
-import java.util.Optional;
-import java.util.function.Supplier;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 public final class ControllerNetwork {
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(DimensionWorksRpmLimit.MOD_ID, "controller"), () -> "1", "1"::equals, "1"::equals);
-    public static void register() {
-        CHANNEL.registerMessage(0, SetTarget.class, SetTarget::encode, SetTarget::decode, SetTarget::handle,
-            Optional.of(NetworkDirection.PLAY_TO_SERVER));
+    public static void register(RegisterPayloadHandlersEvent event) {
+        event.registrar("2").playToServer(SetTarget.TYPE, SetTarget.CODEC,
+            (packet, context) -> packet.apply((ServerPlayer) context.player()));
     }
-    public static void submit(BlockPos pos, int value) { CHANNEL.sendToServer(new SetTarget(pos, value)); }
-    private record SetTarget(BlockPos pos, int value) {
-        void encode(FriendlyByteBuf buffer) { buffer.writeBlockPos(pos); buffer.writeInt(value); }
-        static SetTarget decode(FriendlyByteBuf buffer) { return new SetTarget(buffer.readBlockPos(), buffer.readInt()); }
-        void handle(Supplier<NetworkEvent.Context> context) {
-            var ctx = context.get();
-            ctx.enqueueWork(() -> {
-                var player = ctx.getSender();
-                if (player == null || !player.mayBuild()
-                    || !(player.containerMenu instanceof AdvancedControllerMenu menu)
-                    || !menu.pos.equals(pos) || !player.level().hasChunkAt(pos) || !menu.stillValid(player)
-                    || value < -AdvancedControllerEntity.maximumTarget() || value > AdvancedControllerEntity.maximumTarget()) return;
-                if (player.level().getBlockEntity(pos) instanceof AdvancedControllerEntity entity) {
-                    if (RpmLimitManager.owner(entity) == null) RpmLimitManager.setOwner(entity, player.getUUID());
-                    entity.targetSpeed.setValue(value);
-                }
-            });
-            ctx.setPacketHandled(true);
+
+    public static void submit(BlockPos pos, int value) {
+        PacketDistributor.sendToServer(new SetTarget(pos, value));
+    }
+
+    private record SetTarget(BlockPos pos, int value) implements CustomPacketPayload {
+        static final Type<SetTarget> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksRpmLimit.MOD_ID, "controller_target"));
+        static final StreamCodec<RegistryFriendlyByteBuf, SetTarget> CODEC = StreamCodec.of(
+            (buffer, packet) -> { buffer.writeBlockPos(packet.pos()); buffer.writeInt(packet.value()); },
+            buffer -> new SetTarget(buffer.readBlockPos(), buffer.readInt()));
+        @Override public Type<SetTarget> type() { return TYPE; }
+
+        void apply(ServerPlayer player) {
+            if (!player.mayBuild() || !(player.containerMenu instanceof AdvancedControllerMenu menu)
+                || !menu.pos.equals(pos) || !player.level().hasChunkAt(pos) || !menu.stillValid(player)
+                || value < -AdvancedControllerEntity.maximumTarget() || value > AdvancedControllerEntity.maximumTarget()) return;
+            if (player.level().getBlockEntity(pos) instanceof AdvancedControllerEntity entity) {
+                if (RpmLimitManager.owner(entity) == null) RpmLimitManager.setOwner(entity, player.getUUID());
+                entity.targetSpeed.setValue(value);
+            }
         }
     }
     private ControllerNetwork() {}

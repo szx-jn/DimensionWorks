@@ -1,38 +1,38 @@
 package dev.szx.dimensionworks.rpmlimit;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 public final class RpmLimitConfig {
 
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.IntValue DEFAULT_RPM;
-    public static final ForgeConfigSpec.IntValue MAX_RPM;
-    public static final ForgeConfigSpec.IntValue CACHE_INTERVAL_TICKS;
+    public static final ModConfigSpec.IntValue DEFAULT_RPM;
+    public static final ModConfigSpec.IntValue MAX_RPM;
+    public static final ModConfigSpec.IntValue CACHE_INTERVAL_TICKS;
 
-    public static final ForgeConfigSpec.BooleanValue OVERSPEED_ENABLED;
-    public static final ForgeConfigSpec.IntValue OVERSPEED_CAP;
-    public static final ForgeConfigSpec.BooleanValue OVERSPEED_STRESS_SCALING;
-    public static final ForgeConfigSpec.ConfigValue<String> OVERSPEED_STEP_TABLE;
-    public static final ForgeConfigSpec.IntValue OVERSPEED_DEFAULT_SATURATION;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> OVERSPEED_CLASS_WHITELIST;
+    public static final ModConfigSpec.BooleanValue OVERSPEED_ENABLED;
+    public static final ModConfigSpec.IntValue OVERSPEED_CAP;
+    public static final ModConfigSpec.BooleanValue OVERSPEED_STRESS_SCALING;
+    public static final ModConfigSpec.ConfigValue<String> OVERSPEED_STEP_TABLE;
+    public static final ModConfigSpec.IntValue OVERSPEED_DEFAULT_SATURATION;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> OVERSPEED_CLASS_WHITELIST;
 
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_CURSED_RPM;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_ROTATION_RELEASED_RPM;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_CREATE_CAPACITY_CURSED_SU;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_AE_CRAFTING_JOBS_CURSED;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_CURSED_PER_SECOND;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_REPAIRED_PER_SECOND;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_CURSED;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_REPAIRED;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_FINAL_PRODUCTION_CURSED_PER_SECOND;
-    public static final ForgeConfigSpec.IntValue GEAR_HEART_FINAL_PRODUCTION_REPAIRED_PER_SECOND;
+    public static final ModConfigSpec.IntValue GEAR_HEART_ROTATION_CURSED_RPM;
+    public static final ModConfigSpec.IntValue GEAR_HEART_ROTATION_RELEASED_RPM;
+    public static final ModConfigSpec.IntValue GEAR_HEART_CREATE_CAPACITY_CURSED_SU;
+    public static final ModConfigSpec.IntValue GEAR_HEART_MEK_ORE_OPERATIONS_CURSED_PER_SECOND;
+    public static final ModConfigSpec.IntValue GEAR_HEART_AE_CRAFTING_JOBS_CURSED;
+    public static final ModConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_CURSED_PER_SECOND;
+    public static final ModConfigSpec.IntValue GEAR_HEART_CROSS_PROCESS_REPAIRED_PER_SECOND;
+    public static final ModConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_CURSED;
+    public static final ModConfigSpec.IntValue GEAR_HEART_ACTIVE_MACHINES_REPAIRED;
+    public static final ModConfigSpec.IntValue GEAR_HEART_FINAL_PRODUCTION_CURSED_PER_SECOND;
+    public static final ModConfigSpec.IntValue GEAR_HEART_FINAL_PRODUCTION_REPAIRED_PER_SECOND;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
         builder.push("rpm");
         DEFAULT_RPM = builder.defineInRange("defaultRpm", 32, 1, 10240);

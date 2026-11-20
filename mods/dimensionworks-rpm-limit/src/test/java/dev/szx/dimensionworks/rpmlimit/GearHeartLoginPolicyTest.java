@@ -19,7 +19,7 @@ class GearHeartLoginPolicyTest {
     void replacementHeartStartsWithEveryCurseUnrepaired() {
         CompoundTag heart = GearHeartState.unrepairedCursedHeartTag();
 
-        assertEquals(1, heart.getInt("CustomModelData"));
+        assertFalse(heart.contains("CustomModelData"), "模型编号应使用独立数据组件");
         assertEquals(0, heart.getInt(GearHeartState.REPAIRED_MASK_KEY));
     }
 }

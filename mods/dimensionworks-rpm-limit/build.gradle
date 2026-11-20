@@ -1,102 +1,23 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
+
 version = '0.4.22'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_rpm_limit'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            mods {
-                dimensionworks_rpm_limit {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {}
-        server {}
-    }
-}
-
-repositories {
-    maven { name = 'Create'; url = 'https://maven.createmod.net' }
-    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
-    maven { name = 'Curios'; url = 'https://maven.theillusivec4.top/' }
-    maven { name = 'ModMaven'; url = 'https://modmaven.dev' }
-    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
-    mavenCentral()
-}
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+apply from: rootProject.file('gradle/neoforge-create.gradle')
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
-    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
-    implementation fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
-    implementation fg.deobf('mekanism:Mekanism:1.20.1-10.4.16.80')
-    implementation fg.deobf('appeng:appliedenergistics2-forge:15.4.10')
-    // The slim Create artifact needs Ponder on both the compile and runtime classpaths.
-    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    // Flywheel is needed for the controller renderer at compile time and runtime.
-    implementation fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
-    runtimeOnly fg.deobf('maven.modrinth:guideme:20.1.15')
-    runtimeOnly 'io.github.llamalad7:mixinextras-forge:0.4.1'
-    runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation 'maven.modrinth:curios:KJsZIQrT'
+    implementation 'maven.modrinth:mekanism:5KzzycBT'
+    implementation 'maven.modrinth:ae2:7Ac6mXbf'
+    runtimeOnly 'maven.modrinth:guideme:QeYKsstN'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
-
-mixin {
-    add sourceSets.main, 'dimensionworks_rpm_limit.refmap.json'
-    config 'dimensionworks_rpm_limit.mixins.json'
-    debug.verbose = true
+test { useJUnitPlatform() }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-jar {
-    manifest.attributes([
-        'MixinConfigs': 'dimensionworks_rpm_limit.mixins.json'
-    ])
-    finalizedBy 'reobfJar'
-}
-
-// Composite-build consumers run in official mappings, so they must not load the SRG release jar.
-tasks.register('devJar', Jar) {
-    dependsOn tasks.named('classes')
-    archiveClassifier = 'dev'
-    from sourceSets.main.output
-    manifest.attributes(['MixinConfigs': 'dimensionworks_rpm_limit.mixins.json'])
-}
-
-// Headless integration checks live outside the published mod jar.
-sourceSets {
-    gameTest {
-        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-    }
-}
-minecraft.runs {
-    gameTestServer {
-        workingDirectory project.file('run-gametest')
-        property 'forge.enabledGameTestNamespaces', 'dimensionworks_rpm_limit'
-        mods {
-            dimensionworks_rpm_limit {
-                sources = [sourceSets.main, sourceSets.gameTest]
-            }
-        }
-    }
-}
+ext.gameTestCount = 34
+apply from: rootProject.file('gradle/neoforge-gametest.gradle')

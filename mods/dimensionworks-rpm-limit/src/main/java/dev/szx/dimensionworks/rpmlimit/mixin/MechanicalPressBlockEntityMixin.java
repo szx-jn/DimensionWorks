@@ -7,6 +7,7 @@ import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,12 +28,12 @@ public abstract class MechanicalPressBlockEntityMixin {
             return;
         }
         MechanicalPressBlockEntity self = (MechanicalPressBlockEntity) (Object) this;
-        Optional<PressingRecipe> recipe = self.getRecipe(itemEntity.getItem());
+        Optional<RecipeHolder<PressingRecipe>> recipe = self.getRecipe(itemEntity.getItem());
         if (recipe.isEmpty()) {
             return;
         }
         int rolls = self.canProcessInBulk() ? itemEntity.getItem().getCount() : 1;
-        List<ItemStack> outputs = possibleOutputs(recipe.get(), rolls);
+        List<ItemStack> outputs = possibleOutputs(recipe.get().value(), rolls);
         if (!FinalProductionGate.tryConsumeOutputs(
             RpmLimitManager.owner(self), outputs, self.getLevel().getGameTime())) {
             cir.setReturnValue(false);
@@ -49,12 +50,12 @@ public abstract class MechanicalPressBlockEntityMixin {
             return;
         }
         MechanicalPressBlockEntity self = (MechanicalPressBlockEntity) (Object) this;
-        Optional<PressingRecipe> recipe = self.getRecipe(input.stack);
+        Optional<RecipeHolder<PressingRecipe>> recipe = self.getRecipe(input.stack);
         if (recipe.isEmpty()) {
             return;
         }
         int rolls = self.canProcessInBulk() ? input.stack.getCount() : 1;
-        List<ItemStack> outputs = possibleOutputs(recipe.get(), rolls);
+        List<ItemStack> outputs = possibleOutputs(recipe.get().value(), rolls);
         if (!FinalProductionGate.tryConsumeOutputs(
             RpmLimitManager.owner(self), outputs, self.getLevel().getGameTime())) {
             cir.setReturnValue(false);

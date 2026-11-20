@@ -11,15 +11,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(DimensionWorksRpmLimit.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class KineticAccountingGameTests {
     private static KineticBlockEntity block(GameTestHelper helper, String id, BlockPos pos) {
-        helper.setBlock(pos, net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(
-            new net.minecraft.resources.ResourceLocation("create", id)).defaultBlockState());
+        helper.setBlock(pos, net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("create", id)).defaultBlockState());
         return (KineticBlockEntity) helper.getBlockEntity(pos);
     }
     private static void highLimit(KineticBlockEntity member) {
@@ -46,7 +46,7 @@ public final class KineticAccountingGameTests {
                 if (network.sources.containsKey(member)) expectedCapacity += network.getActualCapacityOf(member);
             }
             List<CompoundTag> saved = new ArrayList<>();
-            for (KineticBlockEntity member : members) saved.add(member.saveWithFullMetadata());
+            for (KineticBlockEntity member : members) saved.add(member.saveWithFullMetadata(helper.getLevel().registryAccess()));
             KineticNetwork restored = new KineticNetwork();
             // Decode the saved accounting into a fresh network, then load in reverse order.
             for (int i = members.size() - 1; i >= 0; i--) KineticPersistence.read(members.get(i), saved.get(i), false);
@@ -70,7 +70,7 @@ public final class KineticAccountingGameTests {
             RuntimeMember virtual = new RuntimeMember(motor);
             network.members.put(virtual, 256f);
             KineticNetworkOptimizer.invalidate(network);
-            CompoundTag saved = motor.saveWithFullMetadata().getCompound("DWKineticAccounting");
+            CompoundTag saved = motor.saveWithFullMetadata(helper.getLevel().registryAccess()).getCompound("DWKineticAccounting");
             helper.assertTrue(Math.abs(saved.getFloat("Stress") - physical) < .1f, "Virtual stress leaked into saved totals");
             helper.assertTrue(saved.getInt("Members") == count, "Virtual member leaked into saved count");
             network.members.remove(virtual); KineticNetworkOptimizer.invalidate(network);
@@ -181,7 +181,7 @@ public final class KineticAccountingGameTests {
                 var snapshot = dev.szx.dimensionworks.rpmlimit.diagnostics.NetworkSnapshot.capture(motor, -1, clickedMachine);
                 helper.assertTrue(snapshot.page() == 1, "Opening did not choose the page containing the clicked node");
                 helper.assertTrue(snapshot.focus().equals(clickedMachine), "Virtual machine focus was replaced by its input shaft");
-                net.minecraft.network.FriendlyByteBuf buffer = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+                var buffer = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
                 try {
                     snapshot.encode(buffer);
                     var decoded = dev.szx.dimensionworks.rpmlimit.diagnostics.NetworkSnapshot.decode(buffer);
@@ -189,7 +189,7 @@ public final class KineticAccountingGameTests {
                         "Entry/focus coordinates changed during packet serialization");
                     var node = decoded.nodes().stream().filter(n -> n.pos().equals(clickedMachine)).findFirst().orElseThrow();
                     helper.assertTrue(node.icon().is(motor.getBlockState().getBlock().asItem()), "Node lost its inventory item icon");
-                    helper.assertTrue(node.icon().getCount() == 1 && !node.icon().hasTag(), "Icon must not carry machine inventory NBT");
+                    helper.assertTrue(node.icon().getCount() == 1 && node.icon().getComponentsPatch().isEmpty(), "Icon must not carry machine inventory NBT");
                 } finally { buffer.release(); }
             } finally {
                 for (RuntimeMember member : virtuals) network.members.remove(member);

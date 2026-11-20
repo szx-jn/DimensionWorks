@@ -78,14 +78,14 @@ public abstract class KineticBlockEntityMixin {
     }
 
     @Inject(method = "write", at = @At("TAIL"), remap = false)
-    private void dimensionworks$writeLimitData(CompoundTag compound, boolean clientPacket, CallbackInfo ci) {
+    private void dimensionworks$writeLimitData(CompoundTag compound, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
         RpmLimitManager.writeSyncData((KineticBlockEntity) (Object) this, compound);
         compound.putInt("DWNetworkRpmLimit", dev.szx.dimensionworks.rpmlimit.optimizer.NetworkRpmLimit.limit((KineticBlockEntity) (Object) this));
         KineticPersistence.write((KineticBlockEntity) (Object) this, compound, clientPacket);
     }
 
     @Inject(method = "read", at = @At("TAIL"), remap = false)
-    private void dimensionworks$readLimitData(CompoundTag compound, boolean clientPacket, CallbackInfo ci) {
+    private void dimensionworks$readLimitData(CompoundTag compound, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
         RpmLimitManager.readSyncData((KineticBlockEntity) (Object) this, compound);
         ((KineticBlockEntity) (Object) this).getPersistentData().putInt("DWNetworkRpmLimit", compound.getInt("DWNetworkRpmLimit"));
         KineticPersistence.read((KineticBlockEntity) (Object) this, compound, clientPacket);

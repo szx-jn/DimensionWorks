@@ -8,7 +8,8 @@ import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
 import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -27,7 +28,7 @@ public abstract class SawBlockEntityMixin {
     private int recipeIndex;
 
     @Invoker("getRecipes")
-    protected abstract List<? extends Recipe<?>> dimensionworks$getRecipes();
+    protected abstract List<RecipeHolder<? extends Recipe<?>>> dimensionworks$getRecipes();
 
     @Inject(method = "applyRecipe", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$gateFinalOutput(CallbackInfo ci) {
@@ -51,13 +52,13 @@ public abstract class SawBlockEntityMixin {
                 }
             }
         } else {
-            List<? extends Recipe<?>> recipes = dimensionworks$getRecipes();
+            List<RecipeHolder<? extends Recipe<?>>> recipes = dimensionworks$getRecipes();
             if (recipes.isEmpty()) {
                 return;
             }
             int index = recipeIndex >= recipes.size() ? 0 : recipeIndex;
-            Recipe<?> recipe = recipes.get(index);
-            if (recipe instanceof ProcessingRecipe<?> processingRecipe) {
+            Recipe<?> recipe = recipes.get(index).value();
+            if (recipe instanceof ProcessingRecipe<?, ?> processingRecipe) {
                 for (ItemStack possible : processingRecipe.getRollableResultsAsItemStacks()) {
                     outputs.add(possible.copyWithCount(
                         saturatedMultiply(possible.getCount(), input.getCount())));

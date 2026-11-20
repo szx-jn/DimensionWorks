@@ -11,29 +11,30 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 
 public final class RpmForgeEvents {
     private static final int REQUIRED_CREATE_ROTATION_CAP = 10240;
 
     @SubscribeEvent
-    public static void starting(net.minecraftforge.event.server.ServerAboutToStartEvent event) {
+    public static void starting(net.neoforged.neoforge.event.server.ServerAboutToStartEvent event) {
         RpmLimitManager.beginServer(event.getServer());
     }
     @SubscribeEvent
-    public static void stopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
+    public static void stopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         KineticNetworkOptimizer.flushPendingPublications();
     }
 
     @SubscribeEvent
-    public static void stopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void stopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         RpmLimitManager.endServer();
     }
     @SubscribeEvent
@@ -73,62 +74,29 @@ public final class RpmForgeEvents {
     }
 
     private static void enforceCreateRotationCap() {
-        try {
-            var createCap = AllConfigs.server().kinetics.maxRotationSpeed;
-            if (createCap.get() >= REQUIRED_CREATE_ROTATION_CAP)
-                return;
-
-            int previous = createCap.get();
-            createCap.set(REQUIRED_CREATE_ROTATION_CAP);
-            DimensionWorksRpmLimit.LOGGER.info(
-                "Raised Create's maxRotationSpeed from {} to {} to match DimensionWorks.",
-                previous, REQUIRED_CREATE_ROTATION_CAP);
-        } catch (Throwable error) {
-            DimensionWorksRpmLimit.LOGGER.warn(
-                "Could not enforce Create's maxRotationSpeed; check the world's create-server.toml.",
-                error);
-        }
+        var createCap = AllConfigs.server().kinetics.maxRotationSpeed;
+        if (createCap.get() >= REQUIRED_CREATE_ROTATION_CAP) return;
+        int previous = createCap.get();
+        createCap.set(REQUIRED_CREATE_ROTATION_CAP);
+        DimensionWorksRpmLimit.LOGGER.info("Raised Create maxRotationSpeed from {} to {}.", previous, REQUIRED_CREATE_ROTATION_CAP);
     }
 
-    /**
-     * Create clamps every kinetic block to its own {@code kinetics.maxRotationSpeed}, which lives in
-     * the per-world {@code create-server.toml}. When that file is missing from the pack, a new world
-     * is created empty and every key falls back to Create's default of 256 RPM, which makes this
-     * mod's own ceiling unreachable. Reading the value back on server start is the cheapest way to
-     * notice that without digging through the world folder.
-     */
     @SubscribeEvent
-    public static void serverStarted(ServerStartedEvent e) {
+    public static void serverStarted(ServerStartedEvent event) {
         enforceCreateRotationCap();
-        int expected = RpmLimitConfig.MAX_RPM.get();
-        int createCap = -1;
-        try {
-            Object raw = AllConfigs.server().kinetics.maxRotationSpeed.get();
-            if (raw instanceof Number number)
-                createCap = number.intValue();
-        } catch (Throwable ignored) {
-            return;
-        }
-
-        if (createCap > 0 && createCap < expected)
-            DimensionWorksRpmLimit.LOGGER.warn(
-                "Create caps rotation at {} RPM but this pack is configured for {} RPM. Raise " +
-                    "kinetics.maxRotationSpeed in <world>/serverconfig/create-server.toml, or make sure " +
-                    "defaultconfigs/create-server.toml ships with the pack so new worlds start correct.",
-                createCap, expected);
     }
 
     @SubscribeEvent
-    public static void tick(TickEvent.PlayerTickEvent e) {
-        if (e.phase == TickEvent.Phase.END && e.player instanceof ServerPlayer p)
+    public static void tick(PlayerTickEvent.Post e) {
+        if (e.getEntity() instanceof ServerPlayer p)
             RpmLimitManager.refresh(p.server.getPlayerList().getPlayers(), p.server.getTickCount());
-        if (e.phase == TickEvent.Phase.END && e.player instanceof ServerPlayer p)
+        if (e.getEntity() instanceof ServerPlayer p)
             GearHeartEffects.tickPlayer(p);
     }
 
     @SubscribeEvent
-    public static void serverTick(TickEvent.ServerTickEvent e) {
-        if (e.phase == TickEvent.Phase.END) {
+    public static void serverTick(ServerTickEvent.Post e) {
+        {
             CreateCapacityRegistry.clearRemoved();
             KineticNetworkOptimizer.abortBatch();
             KineticNetworkOptimizer.flushPendingPublications();

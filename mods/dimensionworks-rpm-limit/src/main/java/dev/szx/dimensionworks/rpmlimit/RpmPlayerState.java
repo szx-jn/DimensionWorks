@@ -40,11 +40,11 @@ public final class RpmPlayerState {
         persist(replacement);
     }
     public static Profile fromPlayerNbt(CompoundTag player) {
-        CompoundTag data = player.getCompound("ForgeData").getCompound(Player.PERSISTED_NBT_TAG);
+        CompoundTag data = player.getCompound("NeoForgeData").getCompound(Player.PERSISTED_NBT_TAG);
         boolean override = data.getBoolean(OVERRIDE);
         int base = data.contains(LIMIT, Tag.TAG_ANY_NUMERIC) ? cap(data.getInt(LIMIT)) : RpmLimitConfig.DEFAULT_RPM.get();
         CompoundTag heart = equippedHeart(player);
-        CompoundTag heartTag = heart.getCompound("tag");
+        CompoundTag heartTag = heart.getCompound("components").getCompound("minecraft:custom_data");
         boolean enchanted = "kubejs:gear_heart_enchanted".equals(heart.getString("id"));
         int repairedMask = heartTag.getInt(GearHeartState.REPAIRED_MASK_KEY);
         boolean fullyRepaired = enchanted || GearHeartState.isFullyReleasedMask(repairedMask);
@@ -58,7 +58,7 @@ public final class RpmPlayerState {
         return new Profile(cap(base), cap(effective), override);
     }
     private static CompoundTag equippedHeart(CompoundTag player) {
-        ListTag slots = player.getCompound("ForgeCaps").getCompound("curios:inventory").getList("Curios", Tag.TAG_COMPOUND);
+        ListTag slots = player.getCompound(net.neoforged.neoforge.attachment.AttachmentHolder.ATTACHMENTS_NBT_KEY).getCompound("curios:inventory").getList("Curios", Tag.TAG_COMPOUND);
         for (int i = 0; i < slots.size(); i++) {
             CompoundTag slot = slots.getCompound(i);
             if (!GearHeartState.SLOT_ID.equals(slot.getString("Identifier"))) continue;
@@ -66,7 +66,7 @@ public final class RpmPlayerState {
             for (int j = 0; j < items.size(); j++) {
                 CompoundTag item = items.getCompound(j);
                 String id = item.getString("id");
-                if (item.getByte("Count") > 0 && ("kubejs:gear_heart".equals(id) || "kubejs:gear_heart_enchanted".equals(id))) return item;
+                if (item.getInt("count") > 0 && ("kubejs:gear_heart".equals(id) || "kubejs:gear_heart_enchanted".equals(id))) return item;
             }
         }
         return new CompoundTag();

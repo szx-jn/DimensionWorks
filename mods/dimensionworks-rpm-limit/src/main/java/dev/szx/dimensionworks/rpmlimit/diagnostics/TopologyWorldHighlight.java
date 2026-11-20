@@ -9,14 +9,14 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /** Renders a client-only outline for the last topology node selected for highlighting. */
-@Mod.EventBusSubscriber(modid = "dimensionworks_rpm_limit", bus = Mod.EventBusSubscriber.Bus.FORGE,
+@EventBusSubscriber(modid = "dimensionworks_rpm_limit",
     value = Dist.CLIENT)
 public final class TopologyWorldHighlight {
     private static BlockPos position;
@@ -47,8 +47,8 @@ public final class TopologyWorldHighlight {
     }
 
     @SubscribeEvent
-    public static void clearWhenLeavingLevel(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && position != null
+    public static void clearWhenLeavingLevel(ClientTickEvent.Post event) {
+        if (position != null
             && Minecraft.getInstance().level != selectedLevel) clear();
     }
 

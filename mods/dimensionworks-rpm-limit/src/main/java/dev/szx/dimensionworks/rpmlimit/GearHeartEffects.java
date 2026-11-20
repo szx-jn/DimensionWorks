@@ -8,7 +8,9 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeMod;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
@@ -36,10 +38,10 @@ public final class GearHeartEffects {
     private static final FixedIntervalTokenBucket TOKEN_BUCKET = new FixedIntervalTokenBucket();
     private static final Map<UUID, Integer> ACTIVE_QUOTA_MASKS = new ConcurrentHashMap<>();
 
-    private static final UUID BLOCK_REACH_ID =
-        UUID.fromString("61ee7d0c-7d95-4a6c-b50a-6ce2168df0a4");
-    private static final UUID ENTITY_REACH_ID =
-        UUID.fromString("ab7653cc-1c9d-4dbb-b58d-18f377e4ea25");
+    private static final ResourceLocation BLOCK_REACH_ID =
+        ResourceLocation.fromNamespaceAndPath(DimensionWorksRpmLimit.MOD_ID, "gear_heart_block_reach");
+    private static final ResourceLocation ENTITY_REACH_ID =
+        ResourceLocation.fromNamespaceAndPath(DimensionWorksRpmLimit.MOD_ID, "gear_heart_entity_reach");
 
     private GearHeartEffects() {}
 
@@ -127,7 +129,7 @@ public final class GearHeartEffects {
             return RepairResult.NO_TARGET;
         }
 
-        Optional<ICuriosItemHandler> maybeInventory = CuriosApi.getCuriosInventory(player).resolve();
+        Optional<ICuriosItemHandler> maybeInventory = CuriosApi.getCuriosInventory(player);
         if (maybeInventory.isEmpty()) {
             return RepairResult.NO_TARGET;
         }
@@ -166,7 +168,7 @@ public final class GearHeartEffects {
     }
 
     public static boolean ensureGearHeartSlots(ServerPlayer player) {
-        Optional<ICuriosItemHandler> maybeInventory = CuriosApi.getCuriosInventory(player).resolve();
+        Optional<ICuriosItemHandler> maybeInventory = CuriosApi.getCuriosInventory(player);
         if (maybeInventory.isEmpty()) {
             return false;
         }
@@ -196,7 +198,7 @@ public final class GearHeartEffects {
     }
 
     private static Optional<ItemStack> equippedHeart(ServerPlayer player) {
-        Optional<ICuriosItemHandler> maybeInventory = CuriosApi.getCuriosInventory(player).resolve();
+        Optional<ICuriosItemHandler> maybeInventory = CuriosApi.getCuriosInventory(player);
         if (maybeInventory.isEmpty()) {
             return Optional.empty();
         }
@@ -258,14 +260,14 @@ public final class GearHeartEffects {
         player.getPersistentData().putBoolean(BONUS_STATE_KEY, true);
         player.getPersistentData().putBoolean(BONUS_RELEASED_KEY, fullyReleased);
         double reach = fullyReleased ? 4.0D : 2.0D;
-        addModifier(player, ForgeMod.BLOCK_REACH.get(), BLOCK_REACH_ID, "Gear Heart Block Reach", reach);
-        addModifier(player, ForgeMod.ENTITY_REACH.get(), ENTITY_REACH_ID, "Gear Heart Entity Reach", reach);
+        addModifier(player, Attributes.BLOCK_INTERACTION_RANGE, BLOCK_REACH_ID, reach);
+        addModifier(player, Attributes.ENTITY_INTERACTION_RANGE, ENTITY_REACH_ID, reach);
 
         ensureHeartEffect(player, MobEffects.DIG_SPEED, fullyReleased ? 2 : 1);
         ensureHeartEffect(player, MobEffects.NIGHT_VISION, 0);
     }
 
-    private static void ensureHeartEffect(ServerPlayer player, net.minecraft.world.effect.MobEffect effect, int amplifier) {
+    private static void ensureHeartEffect(ServerPlayer player, Holder<net.minecraft.world.effect.MobEffect> effect, int amplifier) {
         MobEffectInstance current = player.getEffect(effect);
         // Stronger effects belong to another source; preserve their duration and display flags.
         if (current != null && current.getAmplifier() > amplifier) return;
@@ -282,10 +284,10 @@ public final class GearHeartEffects {
         for (var effect : java.util.List.of(MobEffects.DIG_SPEED, MobEffects.NIGHT_VISION)) {
             MobEffectInstance instance = player.getEffect(effect);
             if (instance != null) player.connection.send(
-                new net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket(player.getId(), instance));
+                new net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket(player.getId(), instance, false));
         }
         var attributes = new java.util.ArrayList<AttributeInstance>();
-        for (var attribute : java.util.List.of(ForgeMod.BLOCK_REACH.get(), ForgeMod.ENTITY_REACH.get())) {
+        for (var attribute : java.util.List.of(Attributes.BLOCK_INTERACTION_RANGE, Attributes.ENTITY_INTERACTION_RANGE)) {
             AttributeInstance instance = player.getAttribute(attribute);
             if (instance != null) attributes.add(instance);
         }
@@ -294,11 +296,11 @@ public final class GearHeartEffects {
     }
 
     private static void removeBaseBonuses(ServerPlayer player) {
-        AttributeInstance blockReach = player.getAttribute(ForgeMod.BLOCK_REACH.get());
+        AttributeInstance blockReach = player.getAttribute(Attributes.BLOCK_INTERACTION_RANGE);
         if (blockReach != null) {
             blockReach.removeModifier(BLOCK_REACH_ID);
         }
-        AttributeInstance entityReach = player.getAttribute(ForgeMod.ENTITY_REACH.get());
+        AttributeInstance entityReach = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
         if (entityReach != null) {
             entityReach.removeModifier(ENTITY_REACH_ID);
         }
@@ -312,7 +314,7 @@ public final class GearHeartEffects {
         }
     }
 
-    private static void removeHeartEffect(ServerPlayer player, net.minecraft.world.effect.MobEffect effect,
+    private static void removeHeartEffect(ServerPlayer player, Holder<net.minecraft.world.effect.MobEffect> effect,
                                           int amplifier) {
         MobEffectInstance instance = player.getEffect(effect);
         if (instance != null && instance.getAmplifier() == amplifier
@@ -322,21 +324,21 @@ public final class GearHeartEffects {
         }
     }
 
-    private static void addModifier(ServerPlayer player, net.minecraft.world.entity.ai.attributes.Attribute attribute,
-                                    UUID id, String name, double amount) {
+    private static void addModifier(ServerPlayer player, Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
+                                    ResourceLocation id, double amount) {
         AttributeInstance instance = player.getAttribute(attribute);
         if (instance == null) {
             return;
         }
         AttributeModifier previous = instance.getModifier(id);
         if (previous != null) {
-            if (previous.getAmount() == amount && previous.getOperation() == AttributeModifier.Operation.ADDITION) {
+            if (previous.amount() == amount && previous.operation() == AttributeModifier.Operation.ADD_VALUE) {
                 return;
             }
             instance.removeModifier(id);
         }
         instance.addTransientModifier(new AttributeModifier(
-            id, name, amount, AttributeModifier.Operation.ADDITION
+            id, amount, AttributeModifier.Operation.ADD_VALUE
         ));
     }
 

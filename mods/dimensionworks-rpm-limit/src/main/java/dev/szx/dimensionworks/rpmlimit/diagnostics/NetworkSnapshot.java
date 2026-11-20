@@ -8,13 +8,20 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import dev.szx.dimensionworks.rpmlimit.DimensionWorksRpmLimit;
 import net.minecraft.world.item.ItemStack;
 
 public record NetworkSnapshot(BlockPos origin, BlockPos focus, long id, long time, int page, int total,
                               int unloadedMembers, int rpmLimit, float capacity, float stress,
                               float unloadedCapacity, float unloadedStress,
-                              float loadedCapacity, float loadedStress, List<Node> nodes) {
+                              float loadedCapacity, float loadedStress, List<Node> nodes) implements CustomPacketPayload {
+    public static final Type<NetworkSnapshot> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksRpmLimit.MOD_ID, "topology_snapshot"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, NetworkSnapshot> CODEC = StreamCodec.of((buffer, packet) -> packet.encode(buffer), NetworkSnapshot::decode);
+    @Override public Type<NetworkSnapshot> type() { return TYPE; }
     public static final int PAGE_SIZE = 256;
     public record Node(BlockPos pos, BlockPos parent, String name, ItemStack icon, float rpm, float actualRpm,
                        int limit, float stress, float capacity, boolean overloaded, boolean virtual) {}
@@ -65,7 +72,7 @@ public record NetworkSnapshot(BlockPos origin, BlockPos focus, long id, long tim
             loadedCapacity, loadedStress, List.copyOf(nodes));
     }
 
-    public void encode(FriendlyByteBuf b) {
+    public void encode(RegistryFriendlyByteBuf b) {
         b.writeBlockPos(origin); b.writeBlockPos(focus); b.writeLong(id); b.writeLong(time); b.writeVarInt(page); b.writeVarInt(total);
         b.writeVarInt(unloadedMembers); b.writeVarInt(rpmLimit); b.writeFloat(capacity); b.writeFloat(stress);
         b.writeFloat(unloadedCapacity); b.writeFloat(unloadedStress); b.writeFloat(loadedCapacity); b.writeFloat(loadedStress);
@@ -73,12 +80,12 @@ public record NetworkSnapshot(BlockPos origin, BlockPos focus, long id, long tim
         for (Node n : nodes) {
             b.writeBlockPos(n.pos); b.writeBoolean(n.parent != null);
             if (n.parent != null) b.writeBlockPos(n.parent);
-            b.writeUtf(n.name, 512); b.writeItem(n.icon); b.writeFloat(n.rpm); b.writeFloat(n.actualRpm); b.writeVarInt(n.limit);
+            b.writeUtf(n.name, 512); ItemStack.OPTIONAL_STREAM_CODEC.encode(b, n.icon); b.writeFloat(n.rpm); b.writeFloat(n.actualRpm); b.writeVarInt(n.limit);
             b.writeFloat(n.stress); b.writeFloat(n.capacity); b.writeBoolean(n.overloaded); b.writeBoolean(n.virtual);
         }
     }
 
-    public static NetworkSnapshot decode(FriendlyByteBuf b) {
+    public static NetworkSnapshot decode(RegistryFriendlyByteBuf b) {
         BlockPos origin = b.readBlockPos(), focus = b.readBlockPos(); long id = b.readLong(), time = b.readLong();
         int page = b.readVarInt(), total = b.readVarInt(), unloaded = b.readVarInt(), limit = b.readVarInt();
         float capacity = b.readFloat(), stress = b.readFloat(), uc = b.readFloat(), us = b.readFloat();
@@ -87,7 +94,7 @@ public record NetworkSnapshot(BlockPos origin, BlockPos focus, long id, long tim
         List<Node> nodes = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             BlockPos pos = b.readBlockPos(), parent = b.readBoolean() ? b.readBlockPos() : null;
-            nodes.add(new Node(pos, parent, b.readUtf(512), b.readItem(), b.readFloat(), b.readFloat(), b.readVarInt(),
+            nodes.add(new Node(pos, parent, b.readUtf(512), ItemStack.OPTIONAL_STREAM_CODEC.decode(b), b.readFloat(), b.readFloat(), b.readVarInt(),
                 b.readFloat(), b.readFloat(), b.readBoolean(), b.readBoolean()));
         }
         return new NetworkSnapshot(origin, focus, id, time, page, total, unloaded, limit, capacity, stress, uc, us, lc, ls, List.copyOf(nodes));

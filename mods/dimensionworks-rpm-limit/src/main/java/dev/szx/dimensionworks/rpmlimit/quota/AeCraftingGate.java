@@ -142,7 +142,7 @@ public final class AeCraftingGate {
 
     private static boolean isFinalProduction(AEKey key) {
         return key.isTagged(TagKey.create(Registries.ITEM,
-            new ResourceLocation("gear_heart", "final_production")));
+            ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production")));
     }
 
     private static int repairBit(GearHeartQuotaType type) {
