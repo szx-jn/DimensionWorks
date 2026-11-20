@@ -24,7 +24,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraftforge.network.NetworkHooks;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import java.util.List;
 import org.jetbrains.annotations.Nullable;
@@ -70,20 +69,25 @@ public final class CrossDimensionTransportBlock extends HorizontalAxisKineticBlo
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
-                                 InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
-        ItemStack heldItem = player.getItemInHand(hand);
+    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack heldItem, BlockState state,
+        Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        boolean fluid = heldItem.is(DimensionWorksMekStress.FLUID_CAPACITY_UPGRADE.get());
+        if (!fluid && !heldItem.is(DimensionWorksMekStress.ITEM_CAPACITY_UPGRADE.get()))
+            return super.useItemOn(heldItem, state, level, pos, player, hand, hit);
+        if (level.isClientSide) return net.minecraft.world.ItemInteractionResult.SUCCESS;
         if (player instanceof ServerPlayer serverPlayer
-            && level.getBlockEntity(pos) instanceof CrossDimensionTransportBlockEntity endpoint) {
-            if (heldItem.is(DimensionWorksMekStress.ITEM_CAPACITY_UPGRADE.get())
-                || heldItem.is(DimensionWorksMekStress.FLUID_CAPACITY_UPGRADE.get())) {
-                endpoint.installCapacityUpgrade(serverPlayer, hand,
-                    heldItem.is(DimensionWorksMekStress.FLUID_CAPACITY_UPGRADE.get()));
-                return InteractionResult.CONSUME;
-            }
+            && level.getBlockEntity(pos) instanceof CrossDimensionTransportBlockEntity endpoint)
+            endpoint.installCapacityUpgrade(serverPlayer, hand, fluid);
+        return net.minecraft.world.ItemInteractionResult.CONSUME;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+                                               BlockHitResult hit) {
+        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (player instanceof ServerPlayer serverPlayer
+            && level.getBlockEntity(pos) instanceof CrossDimensionTransportBlockEntity endpoint)
             endpoint.openConfiguration(serverPlayer);
-        }
         return InteractionResult.CONSUME;
     }
 
@@ -93,7 +97,8 @@ public final class CrossDimensionTransportBlock extends HorizontalAxisKineticBlo
         BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         if (be instanceof CrossDimensionTransportBlockEntity endpoint) {
             for (ItemStack drop : drops) {
-                if (drop.is(asItem())) drop.addTagElement("BlockEntityTag", endpoint.saveWithoutMetadata());
+                if (drop.is(asItem())) net.minecraft.world.item.BlockItem.setBlockEntityData(drop, endpoint.getType(),
+                    endpoint.saveWithoutMetadata(params.getLevel().registryAccess()));
             }
         }
         return drops;

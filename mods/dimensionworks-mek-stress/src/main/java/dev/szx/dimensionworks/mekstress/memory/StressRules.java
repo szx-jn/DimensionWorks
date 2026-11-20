@@ -47,7 +47,7 @@ public final class StressRules {
     }
 
     public static MachineTier machineTier(TileEntityMekanism tile) {
-        BaseTier baseTier = Attribute.getBaseTier(tile.getBlockType());
+        BaseTier baseTier = Attribute.getBaseTier(tile.getBlockState().getBlock().builtInRegistryHolder());
         int ordinal = baseTier == null ? 0 : Math.min(baseTier.ordinal(), MachineTier.ULTIMATE.mekanismOrdinal());
         return MachineTier.fromMekanismOrdinal(ordinal);
     }

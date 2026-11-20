@@ -3,7 +3,6 @@ package dev.szx.dimensionworks.mekstress.mixin.mek;
 import dev.szx.dimensionworks.mekstress.core.DimensionTransportPolicy;
 import dev.szx.dimensionworks.mekstress.integration.QuantumEntangloporterFrequencyAccess;
 import java.util.Map;
-import mekanism.api.Coord4D;
 import mekanism.common.content.entangloporter.InventoryFrequency;
 import mekanism.common.tile.TileEntityQuantumEntangloporter;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +20,8 @@ public abstract class QuantumEntangloporterTileMixin {
         if (frequency == null || self.getLevel() == null
             || !(frequency instanceof QuantumEntangloporterFrequencyAccess access)) return;
         String dimension = self.getLevel().dimension().location().toString();
-        Map<Coord4D, TileEntityQuantumEntangloporter> active = access.dimensionworks$activeEntangloporters();
-        for (TileEntityQuantumEntangloporter other : active.values()) {
+        java.util.Collection<TileEntityQuantumEntangloporter> active = access.dimensionworks$activeEntangloporters();
+        for (TileEntityQuantumEntangloporter other : active) {
             if (other == self || other.getLevel() == null) continue;
             if (!DimensionTransportPolicy.standardTransportAllowed(
                 dimension, other.getLevel().dimension().location().toString())) {

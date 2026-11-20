@@ -46,7 +46,7 @@ public final class MemoryDriveLedRenderer implements BlockEntityRenderer<MemoryD
 
     private static void vertex(VertexConsumer out, PoseStack pose, float x, float y, float z,
                                float r, float g, float b) {
-        out.vertex(pose.last().pose(), x, y, z).color(r, g, b, 1.0f).endVertex();
+        out.addVertex(pose.last().pose(), x, y, z).setColor(r, g, b, 1.0f);
     }
 
     private static int color(MemoryCardType type) {

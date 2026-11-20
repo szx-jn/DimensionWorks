@@ -61,17 +61,15 @@ public final class CloudDiskMenu extends AbstractContainerMenu {
     }
 
     private static ItemStack preview(ItemStack original) {
-        if (original.isEmpty() || !original.hasTag() || !original.getTag().contains("MatterBall")) return original;
+        var data = original.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        if (original.isEmpty() || !data.contains("MatterBall", net.minecraft.nbt.Tag.TAG_COMPOUND)) return original;
         ItemStack icon = new ItemStack(original.getItem(), original.getCount());
-        var payload = original.getTag().getCompound("MatterBall");
-        var lore = new net.minecraft.nbt.ListTag();
-        lore.add(net.minecraft.nbt.StringTag.valueOf(Component.Serializer.toJson(Component.translatable(
-            "gui.dimensionworks_mek_stress.cloud_contents",
-            payload.getList("Items", net.minecraft.nbt.Tag.TAG_COMPOUND).size(),
-            payload.getList("Fluids", net.minecraft.nbt.Tag.TAG_COMPOUND).size()))));
-        var display = new net.minecraft.nbt.CompoundTag();
-        display.put("Lore", lore);
-        icon.getOrCreateTag().put("display", display);
+        var payload = data.getCompound("MatterBall");
+        icon.set(net.minecraft.core.component.DataComponents.LORE, new net.minecraft.world.item.component.ItemLore(
+            java.util.List.of(Component.translatable("gui.dimensionworks_mek_stress.cloud_contents",
+                payload.getList("Items", net.minecraft.nbt.Tag.TAG_COMPOUND).size(),
+                payload.getList("Fluids", net.minecraft.nbt.Tag.TAG_COMPOUND).size()))));
         return icon;
     }
 

@@ -95,7 +95,7 @@ class MemoryCardPackContractTest {
     @Test
     void keepsTheThreeVersionLocationsInSync() throws IOException {
         String build = Files.readString(Path.of("build.gradle"));
-        String modsToml = Files.readString(Path.of("src/main/resources/META-INF/mods.toml"));
+        String modsToml = Files.readString(Path.of("src/main/resources/META-INF/neoforge.mods.toml"));
         String manifest = Files.readString(Path.of("..", "..", "manifest", "mods.json"));
         Matcher buildVersion = Pattern.compile("version = '([0-9]+\\.[0-9]+\\.[0-9]+)'").matcher(build);
         assertTrue(buildVersion.find());

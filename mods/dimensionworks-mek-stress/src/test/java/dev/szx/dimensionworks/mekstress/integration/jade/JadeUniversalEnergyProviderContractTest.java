@@ -26,6 +26,6 @@ class JadeUniversalEnergyProviderContractTest {
         assertTrue(clientMixin.contains("appendTooltip"));
         assertTrue(clientMixin.contains("JadeEnergyVisibility.shouldHide"));
         assertTrue(visibility.contains("TileEntityBoundingBlock"));
-        assertTrue(visibility.contains("getMainTile()"));
+        assertTrue(visibility.contains("getMainTile(bounding.getMainPos())"));
     }
 }

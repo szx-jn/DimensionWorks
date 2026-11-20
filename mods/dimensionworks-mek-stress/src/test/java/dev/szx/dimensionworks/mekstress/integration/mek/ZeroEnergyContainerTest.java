@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
-import mekanism.api.math.FloatingLong;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +14,14 @@ class ZeroEnergyContainerTest {
     void neverStoresOrTransfersEnergy() {
         ZeroEnergyContainer container = new ZeroEnergyContainer();
 
-        container.setEnergy(FloatingLong.create(100));
-        container.deserializeNBT(new CompoundTag());
+        container.setEnergy(100L);
+        container.deserializeNBT(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), new CompoundTag());
 
-        assertEquals(FloatingLong.ZERO, container.getEnergy());
-        assertEquals(FloatingLong.ZERO, container.getMaxEnergy());
-        assertEquals(FloatingLong.ZERO, container.extract(FloatingLong.ONE, Action.EXECUTE, AutomationType.MANUAL));
-        assertEquals(FloatingLong.ONE, container.insert(FloatingLong.ONE, Action.EXECUTE, AutomationType.MANUAL));
+        assertEquals(0L, container.getEnergy());
+        assertEquals(0L, container.getMaxEnergy());
+        assertEquals(0L, container.extract(1L, Action.EXECUTE, AutomationType.MANUAL));
+        assertEquals(1L, container.insert(1L, Action.EXECUTE, AutomationType.MANUAL));
         assertTrue(container.isEmpty());
-        assertTrue(container.serializeNBT().isEmpty());
+        assertTrue(container.serializeNBT(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty())).isEmpty());
     }
 }

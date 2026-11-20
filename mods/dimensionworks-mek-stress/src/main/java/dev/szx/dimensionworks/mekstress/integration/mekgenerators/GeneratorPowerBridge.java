@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.generators.common.content.fusion.FusionReactorMultiblockData;
@@ -33,19 +32,20 @@ public final class GeneratorPowerBridge {
 
     private GeneratorPowerBridge() {}
 
-    public static void tick(TileEntityGenerator generator, Runnable original) {
+    public static boolean tick(TileEntityGenerator generator, java.util.function.BooleanSupplier original) {
         IEnergyContainer energy = generator.getEnergyContainer();
-        energy.setEnergy(FloatingLong.ZERO);
+        energy.setEnergy(0L);
         try {
-            original.run();
+            boolean changed = original.getAsBoolean();
             Level level = generator.getLevel();
             if (level != null && !level.isClientSide) {
                 Set<BlockPos> shafts = new LinkedHashSet<>();
                 collectPorts(level, generator, shafts);
                 record(generator, level, energy, shafts);
             }
+            return changed;
         } finally {
-            energy.setEnergy(FloatingLong.ZERO);
+            energy.setEnergy(0L);
         }
     }
 
@@ -56,7 +56,7 @@ public final class GeneratorPowerBridge {
     }
 
     public static void beforeMultiblock(MultiblockData data) {
-        energy(data).setEnergy(FloatingLong.ZERO);
+        energy(data).setEnergy(0L);
     }
 
     public static void afterMultiblock(MultiblockData data, Level level) {
@@ -78,7 +78,7 @@ public final class GeneratorPowerBridge {
             }
             record(data, level, energy, shafts);
         } finally {
-            energy.setEnergy(FloatingLong.ZERO);
+            energy.setEnergy(0L);
         }
     }
 

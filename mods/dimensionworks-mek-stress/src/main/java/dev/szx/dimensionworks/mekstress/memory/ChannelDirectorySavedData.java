@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiPredicate;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -21,7 +22,8 @@ public final class ChannelDirectorySavedData extends SavedData {
 
     public static ChannelDirectorySavedData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage()
-            .computeIfAbsent(ChannelDirectorySavedData::load, ChannelDirectorySavedData::new, NAME);
+            .computeIfAbsent(new SavedData.Factory<>(ChannelDirectorySavedData::new,
+                (tag, registries) -> load(tag), null), NAME);
     }
 
     public ChannelDirectory.Channel getChannel(int number) { return directory.get(number); }
@@ -101,7 +103,7 @@ public final class ChannelDirectorySavedData extends SavedData {
         return result;
     }
 
-    @Override public CompoundTag save(CompoundTag tag) {
+    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag channels = new ListTag();
         directory.snapshot().forEach((number, channel) -> {
             CompoundTag entry = new CompoundTag();

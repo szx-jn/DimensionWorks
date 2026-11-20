@@ -6,7 +6,6 @@ import dev.szx.dimensionworks.mekstress.integration.mek.MechanicalEnergy;
 import dev.szx.dimensionworks.mekstress.core.PowerBudget;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.nbt.CompoundTag;
@@ -20,38 +19,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MachineEnergyContainerMixin implements dev.szx.dimensionworks.mekstress.api.IMechanicalEnergyBudget {
     @Unique private final PowerBudget dimensionworks$budget = new PowerBudget();
     @Unique private long dimensionworks$rateTick = Long.MIN_VALUE;
-    @Unique private double dimensionworks$reservedRate;
+    @Unique private long dimensionworks$reservedRate;
 
-    @Override public void dimensionworks$prepareBudget(long tick, double joulesPerTick) {
+    @Override public void dimensionworks$prepareBudget(long tick, long joulesPerTick) {
         dimensionworks$rateTick = tick;
         dimensionworks$reservedRate = joulesPerTick;
     }
 
-    @Unique private FloatingLong dimensionworks$available(TileEntityMekanism tile) {
-        double rate = dimensionworks$rateTick == tile.getLevel().getGameTime() ? dimensionworks$reservedRate : 0;
-        return FloatingLong.create(dimensionworks$budget.available(tile.getLevel().getGameTime(), rate));
+    @Unique private long dimensionworks$available(TileEntityMekanism tile) {
+        long rate = dimensionworks$rateTick == tile.getLevel().getGameTime() ? dimensionworks$reservedRate : 0;
+        return dimensionworks$budget.available(tile.getLevel().getGameTime(), rate);
     }
     @Inject(method = "getEnergy", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$getMechanicalEnergy(CallbackInfoReturnable<FloatingLong> cir) {
+    private void dimensionworks$getMechanicalEnergy(CallbackInfoReturnable<Long> cir) {
         TileEntityMekanism tile = dimensionworks$serverMachineTile();
         if (tile == null || !StressRules.isEligible(tile)) {
             return;
         }
         cir.setReturnValue(MachinePowerManager.hasMechanicalPower(tile)
             ? dimensionworks$available(tile)
-            : FloatingLong.ZERO);
+            : 0L);
     }
 
     @Inject(method = "isEmpty", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$isMechanicallyEmpty(CallbackInfoReturnable<Boolean> cir) {
         TileEntityMekanism tile = dimensionworks$serverMachineTile();
         if (tile != null && StressRules.isEligible(tile)) {
-            cir.setReturnValue(!MachinePowerManager.hasMechanicalPower(tile) || dimensionworks$available(tile).isZero());
+            cir.setReturnValue(!MachinePowerManager.hasMechanicalPower(tile) || dimensionworks$available(tile) == 0L);
         }
     }
 
     @Inject(method = "serializeNBT", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$doNotPersistMechanicalEnergy(CallbackInfoReturnable<CompoundTag> cir) {
+    private void dimensionworks$doNotPersistMechanicalEnergy(net.minecraft.core.HolderLookup.Provider registries, CallbackInfoReturnable<CompoundTag> cir) {
         TileEntityMekanism tile = dimensionworks$serverMachineTile();
         if (tile != null && StressRules.isEligible(tile)) {
             // Mechanical power is derived from the live Create route and is never stored as FE.
@@ -60,8 +59,8 @@ public abstract class MachineEnergyContainerMixin implements dev.szx.dimensionwo
     }
 
     @Inject(method = "insert", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$rejectFe(FloatingLong amount, Action action, AutomationType automationType,
-                                         CallbackInfoReturnable<FloatingLong> cir) {
+    private void dimensionworks$rejectFe(long amount, Action action, AutomationType automationType,
+                                         CallbackInfoReturnable<Long> cir) {
         TileEntityMekanism tile = dimensionworks$serverMachineTile();
         if (tile != null && StressRules.isEligible(tile)) {
             cir.setReturnValue(amount);
@@ -69,20 +68,20 @@ public abstract class MachineEnergyContainerMixin implements dev.szx.dimensionwo
     }
 
     @Inject(method = "extract", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$extractMechanicalEnergy(FloatingLong amount, Action action, AutomationType automationType,
-                                                       CallbackInfoReturnable<FloatingLong> cir) {
+    private void dimensionworks$extractMechanicalEnergy(long amount, Action action, AutomationType automationType,
+                                                       CallbackInfoReturnable<Long> cir) {
         TileEntityMekanism tile = dimensionworks$serverMachineTile();
-        if (tile == null || !StressRules.isEligible(tile) || amount.isZero()) {
+        if (tile == null || !StressRules.isEligible(tile) || amount == 0L) {
             return;
         }
         if (automationType != AutomationType.INTERNAL || !MachinePowerManager.consumeForProcessing(tile)) {
-            cir.setReturnValue(FloatingLong.ZERO);
+            cir.setReturnValue(0L);
             return;
         }
-        double accepted = dimensionworks$budget.extract(tile.getLevel().getGameTime(),
+        long accepted = dimensionworks$budget.extract(tile.getLevel().getGameTime(),
             dimensionworks$rateTick == tile.getLevel().getGameTime() ? dimensionworks$reservedRate : 0,
-            amount.doubleValue(), action == Action.EXECUTE);
-        cir.setReturnValue(FloatingLong.create(accepted));
+            amount, action == Action.EXECUTE);
+        cir.setReturnValue(accepted);
     }
 
     private TileEntityMekanism dimensionworks$machineTile() {

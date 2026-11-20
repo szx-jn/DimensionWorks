@@ -14,7 +14,7 @@ class JadeEnergySanitizerTest {
         CompoundTag data = dataWithTextAndEnergy();
 
         assertTrue(JadeEnergySanitizer.removeEnergyElements(data));
-        ListTag remaining = data.getList("mekData", CompoundTag.TAG_COMPOUND);
+        ListTag remaining = data.getList("mek_data", CompoundTag.TAG_COMPOUND);
         assertEquals(1, remaining.size());
         assertTrue(remaining.getCompound(0).contains("text"));
         assertFalse(remaining.getCompound(0).contains("energy"));
@@ -25,7 +25,7 @@ class JadeEnergySanitizerTest {
         CompoundTag data = dataWithTextAndEnergy();
 
         assertTrue(JadeEnergySanitizer.removeEnergyElements(data));
-        assertEquals(1, data.getList("mekData", CompoundTag.TAG_COMPOUND).size());
+        assertEquals(1, data.getList("mek_data", CompoundTag.TAG_COMPOUND).size());
     }
 
     @Test
@@ -36,10 +36,10 @@ class JadeEnergySanitizerTest {
         ListTag list = new ListTag();
         list.add(energy);
         CompoundTag data = new CompoundTag();
-        data.put("mekData", list);
+        data.put("mek_data", list);
 
         assertTrue(JadeEnergySanitizer.removeEnergyElements(data));
-        assertFalse(data.contains("mekData"));
+        assertFalse(data.contains("mek_data"));
     }
 
     private static CompoundTag dataWithTextAndEnergy() {
@@ -52,7 +52,7 @@ class JadeEnergySanitizerTest {
         list.add(text);
         list.add(energy);
         CompoundTag data = new CompoundTag();
-        data.put("mekData", list);
+        data.put("mek_data", list);
         return data;
     }
 }

@@ -195,7 +195,7 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
             player.displayClientMessage(Component.literal("只有频道所有者及其当前 FTB 队伍成员可以管理此端点"), true);
             return;
         }
-        net.minecraftforge.network.NetworkHooks.openScreen(player, new net.minecraft.world.SimpleMenuProvider(
+        player.openMenu( new net.minecraft.world.SimpleMenuProvider(
             (id, inventory, ignored) -> new dev.szx.dimensionworks.mekstress.memory.CrossDimensionTransportMenu(id, inventory, this),
             Component.translatable("gui.dimensionworks_mek_stress.transport.title")), buffer -> buffer.writeBlockPos(worldPosition));
     }
@@ -287,7 +287,7 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
         if (channel == null || !channel.endpoints().isEmpty()) return;
         ChannelStockSavedData stock = ChannelStockSavedData.get(level);
         var payload = stock.snapshot(channelNumber);
-        var balls = MatterBallPacking.pack(payload);
+        var balls = MatterBallPacking.pack(payload, level.registryAccess());
         if (balls == null) {
             dev.szx.dimensionworks.mekstress.DimensionWorksMekStress.LOGGER.error(
                 "Unable to package channel {} within the configured Matter Ball NBT limit; its stock remains recoverable.",
@@ -307,8 +307,8 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
     }
 
     @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
+    protected void write(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
         tag.putInt("TransportChannel", channel);
         tag.putString("PowerMode", powerMode.name());
         tag.putFloat("StressPerRpm", stressPerRpm);
@@ -318,8 +318,8 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
     }
 
     @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
+    protected void read(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
         channel = Math.max(0, Math.min(1024, tag.getInt("TransportChannel")));
         try { powerMode = PowerMode.valueOf(tag.getString("PowerMode")); }
         catch (IllegalArgumentException exception) { powerMode = PowerMode.INPUT; }

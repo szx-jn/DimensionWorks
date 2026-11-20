@@ -72,8 +72,6 @@ public final class CrossDimensionTransportScreen extends AbstractContainerScreen
 
     @Override protected void containerTick() {
         super.containerTick();
-        channelInput.tick();
-        coefficientInput.tick();
         if (!coefficientInitialized && menu.tier() > 0 && !coefficientInput.isFocused()) {
             coefficientInput.setValue(Float.toString(menu.coefficient()));
             if (!channelInput.isFocused()) channelInput.setValue(Integer.toString(Math.max(1, menu.channel())));
@@ -98,7 +96,7 @@ public final class CrossDimensionTransportScreen extends AbstractContainerScreen
     }
 
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
+        renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
     }

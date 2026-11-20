@@ -57,7 +57,8 @@ public abstract class BasinGasIntegrationMixin implements dev.szx.dimensionworks
         }
 
         ItemStack marker = markers.get(0);
-        CompoundTag tag = marker.getTag();
+        CompoundTag tag = marker.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         if (tag == null) {
             cir.setReturnValue(false);
             return;
@@ -81,7 +82,7 @@ public abstract class BasinGasIntegrationMixin implements dev.szx.dimensionworks
                 return;
             }
             ResourceLocation gasId = ResourceLocation.tryParse(tag.getString("Gas"));
-            gas = gasId == null ? null : MekanismAPI.CHEMICAL_REGISTRY.getValue(gasId);
+            gas = gasId == null ? null : MekanismAPI.CHEMICAL_REGISTRY.get(gasId);
             amount = dimensionworks$scaledAmount(tag, "Amount", marker.getCount());
             if (gas == null || gas.isEmptyType() || amount <= 0) {
                 cir.setReturnValue(false);
@@ -93,7 +94,7 @@ public abstract class BasinGasIntegrationMixin implements dev.szx.dimensionworks
         long inputAmount = 0L;
         if (inputOnly || tag.contains("InputGas") || tag.contains("InputAmount")) {
             ResourceLocation inputId = ResourceLocation.tryParse(tag.getString("InputGas"));
-            inputGas = inputId == null ? null : MekanismAPI.CHEMICAL_REGISTRY.getValue(inputId);
+            inputGas = inputId == null ? null : MekanismAPI.CHEMICAL_REGISTRY.get(inputId);
             inputAmount = dimensionworks$scaledAmount(tag, "InputAmount", marker.getCount());
             if (inputGas == null || inputGas.isEmptyType() || inputAmount <= 0) {
                 cir.setReturnValue(false);

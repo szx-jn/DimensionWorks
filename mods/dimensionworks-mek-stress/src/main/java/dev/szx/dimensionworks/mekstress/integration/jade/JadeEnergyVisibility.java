@@ -17,6 +17,6 @@ public final class JadeEnergyVisibility {
             return true;
         }
         return blockEntity instanceof TileEntityBoundingBlock bounding
-            && bounding.getMainTile() instanceof TileEntityMekanism;
+            && bounding.getMainTile(bounding.getMainPos()) instanceof TileEntityMekanism;
     }
 }

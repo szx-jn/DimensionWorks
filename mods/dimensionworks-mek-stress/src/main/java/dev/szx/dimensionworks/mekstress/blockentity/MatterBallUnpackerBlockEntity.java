@@ -6,6 +6,9 @@ import dev.szx.dimensionworks.mekstress.memory.MatterBallPacking;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -38,11 +41,13 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
     }
 
     public boolean unpack(ItemStack ball) {
-        if (!ball.is(DimensionWorksMekStress.MATTER_BALL.get()) || !ball.hasTag()
-            || !ball.getTag().contains("MatterBall", Tag.TAG_COMPOUND)
-            || ChannelStockSavedData.encodedSize(ball.save(new CompoundTag()))
+        HolderLookup.Provider registries = level.registryAccess();
+        CompoundTag data = ball.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        if (!ball.is(DimensionWorksMekStress.MATTER_BALL.get())
+            || !data.contains("MatterBall", Tag.TAG_COMPOUND)
+            || ChannelStockSavedData.encodedSize((CompoundTag) ball.save(registries))
                 > dev.szx.dimensionworks.mekstress.MekStressConfig.maximumMatterBallNbtBytes()) return false;
-        CompoundTag payload = ball.getTag().getCompound("MatterBall");
+        CompoundTag payload = data.getCompound("MatterBall");
         if (payload.getInt("Version") != 1) return false;
         ListTag itemTags = payload.getList("Items", Tag.TAG_COMPOUND);
         ListTag fluidTags = payload.getList("Fluids", Tag.TAG_COMPOUND);
@@ -52,7 +57,7 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
         for (int i = 0; i < itemTags.size(); i++) {
             CompoundTag entry = itemTags.getCompound(i);
             if (!entry.contains("Stack", Tag.TAG_COMPOUND)) return false;
-            ItemStack prototype = ItemStack.of(entry.getCompound("Stack"));
+            ItemStack prototype = ItemStack.parseOptional(registries, entry.getCompound("Stack"));
             int amount = entry.getInt("Amount");
             int maximum = entry.getInt("Maximum");
             if (prototype.isEmpty() || amount <= 0 || maximum <= 0 || amount > maximum
@@ -62,7 +67,7 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
         for (int i = 0; i < fluidTags.size(); i++) {
             CompoundTag entry = fluidTags.getCompound(i);
             if (!entry.contains("Stack", Tag.TAG_COMPOUND)) return false;
-            FluidStack fluid = FluidStack.loadFluidStackFromNBT(entry.getCompound("Stack"));
+            FluidStack fluid = FluidStack.parseOptional(registries, entry.getCompound("Stack"));
             if (fluid.isEmpty() || fluid.getAmount() <= 0 || parsedFluids.size() >= 27) return false;
             if (fluid.getAmount() > FLUID_LIMIT - parsedFluidAmount) return false;
             parsedFluidAmount += fluid.getAmount();
@@ -86,44 +91,52 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
                 stack.getCount(), stack.getMaxStackSize())).toList();
         List<ChannelStockSavedData.FluidSnapshot> fluidSnapshot = fluids.stream()
             .map(stack -> new ChannelStockSavedData.FluidSnapshot(stack.copy(), "dimensionworks:unpacker")).toList();
-        return MatterBallPacking.pack(new ChannelStockSavedData.StockSnapshot(itemSnapshot, fluidSnapshot, fluidAmount, 0, 0));
+        return MatterBallPacking.pack(new ChannelStockSavedData.StockSnapshot(itemSnapshot, fluidSnapshot, fluidAmount, 0, 0), level.registryAccess());
     }
 
-    @Override public void load(CompoundTag tag) {
-        super.load(tag);
+    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         for (int i = 0; i < ITEM_OUTPUTS; i++) items.set(i, ItemStack.EMPTY);
         fluids.clear();
         fluidAmount = 0;
-        ListTag itemTags = tag.getList("OutputItems", Tag.TAG_COMPOUND);
-        for (int i = 0; i < Math.min(itemTags.size(), ITEM_OUTPUTS); i++) {
+        ListTag itemTags = dev.szx.dimensionworks.mekstress.memory.SavedInventoryNbt.compoundList(tag, "OutputItems");
+        if (itemTags.size() > ITEM_OUTPUTS) throw new IllegalArgumentException("Too many unpacker output items");
+        boolean[] occupied = new boolean[ITEM_OUTPUTS];
+        for (int i = 0; i < itemTags.size(); i++) {
             CompoundTag node = itemTags.getCompound(i);
             int slot = node.getInt("Slot");
-            if (slot >= 0 && slot < ITEM_OUTPUTS) items.set(slot, ItemStack.of(node.getCompound("Stack")));
+            if (slot < 0 || slot >= ITEM_OUTPUTS || occupied[slot])
+                throw new IllegalArgumentException("Invalid unpacker output slot");
+            occupied[slot] = true;
+            items.set(slot, ItemStack.parse(registries, node.getCompound("Stack"))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid unpacker output item")));
         }
-        ListTag fluidTags = tag.getList("OutputFluids", Tag.TAG_COMPOUND);
-        for (int i = 0; i < Math.min(fluidTags.size(), 27); i++) {
-            FluidStack fluid = FluidStack.loadFluidStackFromNBT(fluidTags.getCompound(i));
-            if (!fluid.isEmpty() && fluid.getAmount() > 0 && fluidAmount <= FLUID_LIMIT - fluid.getAmount()) {
-                fluids.add(fluid);
-                fluidAmount += fluid.getAmount();
-            }
+        ListTag fluidTags = dev.szx.dimensionworks.mekstress.memory.SavedInventoryNbt.compoundList(tag, "OutputFluids");
+        if (fluidTags.size() > 27) throw new IllegalArgumentException("Too many unpacker output fluids");
+        for (int i = 0; i < fluidTags.size(); i++) {
+            FluidStack fluid = FluidStack.parse(registries, fluidTags.getCompound(i))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid unpacker output fluid"));
+            if (fluid.isEmpty() || fluid.getAmount() <= 0 || fluidAmount > FLUID_LIMIT - fluid.getAmount())
+                throw new IllegalArgumentException("Invalid unpacker output fluid amount");
+            fluids.add(fluid);
+            fluidAmount += fluid.getAmount();
         }
     }
 
-    @Override protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         ListTag itemTags = new ListTag();
         for (int i = 0; i < ITEM_OUTPUTS; i++) {
             ItemStack stack = items.get(i);
             if (stack.isEmpty()) continue;
             CompoundTag entry = new CompoundTag();
             entry.putInt("Slot", i);
-            entry.put("Stack", stack.save(new CompoundTag()));
+            entry.put("Stack", stack.save(registries));
             itemTags.add(entry);
         }
         tag.put("OutputItems", itemTags);
         ListTag fluidTags = new ListTag();
-        for (FluidStack stack : fluids) fluidTags.add(stack.writeToNBT(new CompoundTag()));
+        for (FluidStack stack : fluids) fluidTags.add(stack.save(registries));
         tag.put("OutputFluids", fluidTags);
     }
 
@@ -175,7 +188,7 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
             if (resource.isEmpty()) return FluidStack.EMPTY;
             for (int i = 0; i < fluids.size(); i++) {
                 FluidStack current = fluids.get(i);
-                if (!current.isFluidEqual(resource) || !FluidStack.areFluidStackTagsEqual(current, resource)) continue;
+                if (!FluidStack.isSameFluidSameComponents(current, resource)) continue;
                 return drainAt(i, resource.getAmount(), action.simulate());
             }
             return FluidStack.EMPTY;
@@ -186,7 +199,7 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
         private FluidStack drainAt(int index, int requested, boolean simulate) {
             FluidStack current = fluids.get(index);
             int drained = Math.min(requested, current.getAmount());
-            FluidStack result = new FluidStack(current, drained);
+            FluidStack result = current.copyWithAmount(drained);
             if (!simulate) {
                 current.shrink(drained);
                 fluidAmount -= drained;

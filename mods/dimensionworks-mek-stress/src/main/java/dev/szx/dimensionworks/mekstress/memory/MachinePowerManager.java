@@ -148,10 +148,11 @@ public final class MachinePowerManager {
         if (assign) {
             for (var container : tile.getEnergyContainers(null)) {
                 if (container instanceof dev.szx.dimensionworks.mekstress.api.IMechanicalEnergyBudget budget) {
-                    budget.dimensionworks$prepareBudget(level.getGameTime(),
-                        dev.szx.dimensionworks.mekstress.integration.mek.MechanicalEnergy.rate(container, tile).doubleValue()
-                        * (tile instanceof mekanism.common.tile.multiblock.TileEntitySPSPort
-                            ? MachinePowerMath.throughputMultiplier(route.networkRpm(), StressRules.targetRpm(tile)) : 1));
+                    long rate = dev.szx.dimensionworks.mekstress.integration.mek.MechanicalEnergy.rate(container, tile);
+                    if (tile instanceof mekanism.common.tile.multiblock.TileEntitySPSPort)
+                        rate = mekanism.api.math.MathUtils.clampToLong(rate
+                            * MachinePowerMath.throughputMultiplier(route.networkRpm(), StressRules.targetRpm(tile)));
+                    budget.dimensionworks$prepareBudget(level.getGameTime(), rate);
                 }
             }
             MachineKineticRegistry.sync(tile, route.network(), memberRpm(route), route.source().getBlockPos());
@@ -184,9 +185,11 @@ public final class MachinePowerManager {
 
     private static List<BlockPos> boundingPositions(TileEntityMekanism tile) {
         AttributeHasBounding bounding = Attribute.get(tile.getBlockState(), AttributeHasBounding.class);
-        return bounding == null
-            ? List.of()
-            : bounding.getPositions(tile.getBlockPos(), tile.getBlockState()).toList();
+        if (bounding == null) return List.of();
+        List<BlockPos> positions = new java.util.ArrayList<>();
+        bounding.handle(tile.getLevel(), tile.getBlockPos(), tile.getBlockState(), positions,
+            (world, position, result) -> { result.add(position.immutable()); return true; });
+        return List.copyOf(positions);
     }
 
     private static boolean facesMachine(Level level, KineticBlockEntity kinetic, List<Direction> machineToKinetic) {

@@ -102,7 +102,7 @@ public abstract class MEGearboxBlockEntityMixin implements IMEGearboxExportState
     }
 
     @Inject(method = "write", at = @At("TAIL"), remap = false)
-    private void dimensionworks$writeLiveState(CompoundTag tag, boolean packet, CallbackInfo ci) {
+    private void dimensionworks$writeLiveState(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean packet, CallbackInfo ci) {
         // Display state only. Server reads never restore an allocation from NBT.
         tag.putBoolean("DWExportRunning", dimensionworks$exportRunning);
         tag.putBoolean("DWStressOverloaded", dimensionworks$overloaded);
@@ -111,7 +111,7 @@ public abstract class MEGearboxBlockEntityMixin implements IMEGearboxExportState
     }
 
     @Inject(method = "read", at = @At("TAIL"), remap = false)
-    private void dimensionworks$readDisplayState(CompoundTag tag, boolean packet, CallbackInfo ci) {
+    private void dimensionworks$readDisplayState(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean packet, CallbackInfo ci) {
         MEGearboxBlockEntity self = (MEGearboxBlockEntity) (Object) this;
         if (!packet) return;
         dimensionworks$exportRunning = tag.getBoolean("DWExportRunning");

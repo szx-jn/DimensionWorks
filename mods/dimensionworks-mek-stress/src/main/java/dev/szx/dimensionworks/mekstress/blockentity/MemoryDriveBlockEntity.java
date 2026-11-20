@@ -72,7 +72,14 @@ public final class MemoryDriveBlockEntity extends AENetworkedInvBlockEntity {
     }
 
     @Override
-    public void onChangeInventory(InternalInventory inventory, int slot) {
+    public void addAdditionalDrops(net.minecraft.world.level.Level level, BlockPos pos,
+                                   java.util.List<ItemStack> drops) {
+        // The drive item already contains its complete inventory as BLOCK_ENTITY_DATA.
+        // AE2's default inventory drops would produce a second copy of every installed card.
+    }
+
+    @Override
+    public void onChangeInventory(AppEngInternalInventory inventory, int slot) {
         refreshCards();
         invalidateNetworkSnapshot();
         markForUpdate();
@@ -97,8 +104,8 @@ public final class MemoryDriveBlockEntity extends AENetworkedInvBlockEntity {
     }
 
     @Override
-    public void loadTag(CompoundTag tag) {
-        super.loadTag(tag);
+    public void loadTag(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadTag(tag, registries);
         refreshCards();
     }
 

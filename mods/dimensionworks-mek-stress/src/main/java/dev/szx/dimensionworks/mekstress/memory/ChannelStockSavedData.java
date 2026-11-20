@@ -11,6 +11,9 @@ import java.util.Map;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -29,6 +32,12 @@ public final class ChannelStockSavedData extends SavedData {
     private static final int FLUID_SLOTS = 27;
     private static final int FLUID_CAPACITY = 16_000;
     private static final int MAX_UPGRADES = 20;
+    private final HolderLookup.Provider registries;
+
+    public ChannelStockSavedData(HolderLookup.Provider registries) {
+        this.registries = registries;
+    }
+
     private final Map<Integer, Stock> stocks = new HashMap<>();
     private final Map<Integer, ChannelRateLimit> itemRates = new HashMap<>();
     private final Map<Integer, ChannelRateLimit> fluidRates = new HashMap<>();
@@ -51,7 +60,7 @@ public final class ChannelStockSavedData extends SavedData {
         final String origin;
         int amount;
         FluidRecord(FluidStack stack, String origin, int amount) {
-            this.prototype = new FluidStack(stack, 1);
+            this.prototype = stack.copyWithAmount(1);
             this.origin = origin;
             this.amount = amount;
         }
@@ -67,7 +76,8 @@ public final class ChannelStockSavedData extends SavedData {
 
     public static ChannelStockSavedData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage()
-            .computeIfAbsent(ChannelStockSavedData::load, ChannelStockSavedData::new, NAME);
+            .computeIfAbsent(new SavedData.Factory<>(
+                () -> new ChannelStockSavedData(level.registryAccess()), ChannelStockSavedData::load, null), NAME);
     }
 
     public void tickChannel(int channel, long tick, int tier) {
@@ -113,7 +123,7 @@ public final class ChannelStockSavedData extends SavedData {
     public int insertItems(int channel, String origin, ItemStack input, boolean simulate) {
         if (input.isEmpty()) return 0;
         ItemStack storedInput = prepareAmpoule(input);
-        if (storedInput == null || encodedSize(storedInput.save(new CompoundTag()))
+        if (storedInput == null || encodedSize((CompoundTag) storedInput.save(registries))
             > MekStressConfig.maximumTransportItemNbtBytes()) return 0;
         Stock stock = stock(channel);
         int slots = ChannelCapacity.of(stock.itemUpgrades, stock.fluidUpgrades).itemSlots();
@@ -126,14 +136,14 @@ public final class ChannelStockSavedData extends SavedData {
         int maximum = storedInput.getMaxStackSize();
         boolean ampoule = isFilledAmpoule(storedInput);
         boolean hasMatch = stock.items.stream().anyMatch(record -> record.origin.equals(origin)
-            && record.maximum == maximum && ItemStack.isSameItemSameTags(record.prototype, storedInput));
+            && record.maximum == maximum && ItemStack.isSameItemSameComponents(record.prototype, storedInput));
         int reservedAmpouleSlots = (int) stock.items.stream().filter(record -> isFilledAmpoule(record.prototype)).count();
         int insertionLimit = slots - reservedAmpouleSlots - (ampoule && !hasMatch ? 1 : 0);
         if (stock.items.size() > insertionLimit) return 0;
         int possibleFreeSlots = Math.max(0, insertionLimit - stock.items.size());
         for (ItemRecord record : stock.items) {
             if (!record.origin.equals(origin) || record.maximum != maximum
-                || !ItemStack.isSameItemSameTags(record.prototype, storedInput)) continue;
+                || !ItemStack.isSameItemSameComponents(record.prototype, storedInput)) continue;
             remaining -= Math.min(remaining, maximum - record.amount);
             if (remaining == 0) break;
         }
@@ -145,7 +155,7 @@ public final class ChannelStockSavedData extends SavedData {
         int toStore = accepted;
         for (ItemRecord record : stock.items) {
             if (!record.origin.equals(origin) || record.maximum != maximum
-                || !ItemStack.isSameItemSameTags(record.prototype, storedInput)) continue;
+                || !ItemStack.isSameItemSameComponents(record.prototype, storedInput)) continue;
             int added = Math.min(toStore, maximum - record.amount);
             record.amount += added;
             toStore -= added;
@@ -186,7 +196,7 @@ public final class ChannelStockSavedData extends SavedData {
         List<FluidStack> result = new ArrayList<>();
         for (FluidRecord record : stock(channel).fluids) {
             if (DimensionTransportPolicy.channelExtractionAllowed(record.origin, destination))
-                result.add(new FluidStack(record.prototype, record.amount));
+                result.add(record.prototype.copyWithAmount(record.amount));
         }
         return result;
     }
@@ -194,7 +204,7 @@ public final class ChannelStockSavedData extends SavedData {
     public int fill(int channel, String origin, FluidStack input, boolean simulate) {
         if (input.isEmpty()) return 0;
         if (requiresAmpoule(input)) return 0;
-        if (encodedSize(input.writeToNBT(new CompoundTag())) > MekStressConfig.maximumMatterBallNbtBytes()) return 0;
+        if (encodedSize((CompoundTag) input.save(registries)) > MekStressConfig.maximumMatterBallNbtBytes()) return 0;
         Stock stock = stock(channel);
         ChannelRateLimit budget = fluidRates.get(channel);
         if (budget == null) return 0;
@@ -202,8 +212,7 @@ public final class ChannelStockSavedData extends SavedData {
         int accepted = (int) Math.min(Math.min(input.getAmount(), room), budget.available());
         if (accepted <= 0 || simulate) return accepted;
         for (FluidRecord record : stock.fluids) {
-            if (record.origin.equals(origin) && record.prototype.isFluidEqual(input)
-                && FluidStack.areFluidStackTagsEqual(record.prototype, input)) {
+            if (record.origin.equals(origin) && FluidStack.isSameFluidSameComponents(record.prototype, input)) {
                 record.amount += accepted;
                 stock.fluidAmount += accepted;
                 budget.commit(accepted);
@@ -221,7 +230,7 @@ public final class ChannelStockSavedData extends SavedData {
 
     public FluidStack fluidAt(int channel, String destination, int visibleTank) {
         FluidRecord record = remoteFluid(channel, destination, visibleTank);
-        return record == null ? FluidStack.EMPTY : new FluidStack(record.prototype, record.amount);
+        return record == null ? FluidStack.EMPTY : record.prototype.copyWithAmount(record.amount);
     }
 
     public FluidStack drain(int channel, String destination, int visibleTank, int requested, boolean simulate) {
@@ -234,8 +243,7 @@ public final class ChannelStockSavedData extends SavedData {
         if (requested.isEmpty()) return FluidStack.EMPTY;
         for (FluidRecord record : stock(channel).fluids) {
             if (DimensionTransportPolicy.channelExtractionAllowed(record.origin, destination)
-                && record.prototype.isFluidEqual(requested)
-                && FluidStack.areFluidStackTagsEqual(record.prototype, requested)) {
+                && FluidStack.isSameFluidSameComponents(record.prototype, requested)) {
                 return drainRecord(channel, record, requested.getAmount(), simulate);
             }
         }
@@ -245,7 +253,7 @@ public final class ChannelStockSavedData extends SavedData {
     private FluidStack drainRecord(int channel, FluidRecord record, int requested, boolean simulate) {
         if (record == null) return FluidStack.EMPTY;
         int amount = Math.min(requested, record.amount);
-        FluidStack result = new FluidStack(record.prototype, amount);
+        FluidStack result = record.prototype.copyWithAmount(amount);
         if (!simulate) {
             record.amount -= amount;
             stock(channel).fluidAmount -= amount;
@@ -261,7 +269,7 @@ public final class ChannelStockSavedData extends SavedData {
             .map(record -> new ItemSnapshot(record.prototype.copyWithCount(1), record.origin, record.amount, record.maximum))
             .toList();
         List<FluidSnapshot> fluids = stock.fluids.stream()
-            .map(record -> new FluidSnapshot(new FluidStack(record.prototype, record.amount), record.origin))
+            .map(record -> new FluidSnapshot(record.prototype.copyWithAmount(record.amount), record.origin))
             .toList();
         return new StockSnapshot(items, fluids, stock.fluidAmount, stock.itemUpgrades, stock.fluidUpgrades);
     }
@@ -315,17 +323,18 @@ public final class ChannelStockSavedData extends SavedData {
     private static ItemStack prepareAmpoule(ItemStack input) {
         if (!isFilledAmpoule(input)) return input.copy();
         long now = System.currentTimeMillis();
-        CompoundTag tag = input.getTag();
+        CompoundTag tag = input.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         long oldExpiry = tag.getLong("ExpiresAtEpochMs");
         if (oldExpiry > 0 && now >= oldExpiry) return null;
         ItemStack result = input.copy();
-        CompoundTag resultTag = result.getOrCreateTag();
+        CompoundTag resultTag = result.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         resultTag.putLong("ExpiresAtEpochMs", now + (long) ampouleStabilitySeconds() * 1_000L);
+        result.set(DataComponents.CUSTOM_DATA, CustomData.of(resultTag));
         return result;
     }
 
     private static boolean isFilledAmpoule(ItemStack stack) {
-        if (stack.isEmpty() || !stack.hasTag() || !stack.getTag().contains("Fluid", Tag.TAG_COMPOUND)) return false;
+        if (stack.isEmpty() || !stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains("Fluid")) return false;
         var itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return itemId != null && itemId.toString().equals("dimensionworks_cave_factory:fluid_ampoule");
     }
@@ -348,18 +357,19 @@ public final class ChannelStockSavedData extends SavedData {
         boolean changed = false;
         for (ItemRecord record : List.copyOf(stock.items)) {
             if (!isFilledAmpoule(record.prototype)) continue;
-            CompoundTag ampouleTag = record.prototype.getTag();
+            CompoundTag ampouleTag = record.prototype.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
             long expiry = ampouleTag.getLong("ExpiresAtEpochMs");
             if (expiry <= 0 || now < expiry) continue;
             String residueId = ampouleResidueId(ampouleTag.getString("OriginDimension"));
             if (residueId == null) continue;
             net.minecraft.world.item.Item residueItem = BuiltInRegistries.ITEM.get(
                 net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("dimensionworks_cave_factory", residueId));
-            if (residueItem == null) continue;
+            if (residueItem == net.minecraft.world.item.Items.AIR)
+                throw new IllegalStateException("Missing ampoule residue item: " + residueId);
             ItemStack residue = new ItemStack(residueItem);
             ItemRecord residueRecord = stock.items.stream().filter(candidate -> candidate != record
                 && candidate.origin.equals(record.origin) && candidate.maximum == residue.getMaxStackSize()
-                && ItemStack.isSameItemSameTags(candidate.prototype, residue)).findFirst().orElse(null);
+                && ItemStack.isSameItemSameComponents(candidate.prototype, residue)).findFirst().orElse(null);
             int mergeRoom = residueRecord == null ? 0 : residueRecord.maximum - residueRecord.amount;
             int remainder = Math.max(0, record.amount - mergeRoom);
             int newRecords = remainder == 0 ? 0 : (remainder + residue.getMaxStackSize() - 1) / residue.getMaxStackSize();
@@ -415,11 +425,11 @@ public final class ChannelStockSavedData extends SavedData {
     public record StockSnapshot(List<ItemSnapshot> items, List<FluidSnapshot> fluids, int fluidAmount,
                                 int itemUpgrades, int fluidUpgrades) {}
 
-    public static ChannelStockSavedData load(CompoundTag tag) {
-        ChannelStockSavedData result = new ChannelStockSavedData();
+    public static ChannelStockSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
+        ChannelStockSavedData result = new ChannelStockSavedData(registries);
         if (tag.contains("Channels") && !tag.contains("Channels", Tag.TAG_LIST))
             throw new IllegalArgumentException("Invalid logistics stock list");
-        ListTag channels = tag.getList("Channels", Tag.TAG_COMPOUND);
+        ListTag channels = SavedInventoryNbt.compoundList(tag, "Channels");
         for (int i = 0; i < channels.size(); i++) {
             CompoundTag entry = channels.getCompound(i);
             int channel = entry.getInt("Number");
@@ -431,24 +441,26 @@ public final class ChannelStockSavedData extends SavedData {
             if (stock.itemUpgrades < 0 || stock.fluidUpgrades < 0
                 || stock.itemUpgrades + stock.fluidUpgrades > MAX_UPGRADES)
                 throw new IllegalArgumentException("Invalid logistics capacity upgrades");
-            ListTag items = entry.getList("Items", Tag.TAG_COMPOUND);
+            ListTag items = SavedInventoryNbt.compoundList(entry, "Items");
             for (int j = 0; j < items.size(); j++) {
                 CompoundTag node = items.getCompound(j);
                 if (!node.contains("Stack", Tag.TAG_COMPOUND) || !node.contains("Origin", Tag.TAG_STRING))
                     throw new IllegalArgumentException("Invalid saved logistics item");
-                ItemStack stack = ItemStack.of(node.getCompound("Stack"));
+                ItemStack stack = ItemStack.parse(registries, node.getCompound("Stack"))
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid saved logistics item stack"));
                 int count = node.getInt("Amount");
                 int maximum = node.getInt("Maximum");
                 if (stack.isEmpty() || count <= 0 || maximum <= 0 || count > maximum)
                     throw new IllegalArgumentException("Invalid saved logistics item count");
                 stock.items.add(new ItemRecord(stack, node.getString("Origin"), count, maximum));
             }
-            ListTag fluids = entry.getList("Fluids", Tag.TAG_COMPOUND);
+            ListTag fluids = SavedInventoryNbt.compoundList(entry, "Fluids");
             for (int j = 0; j < fluids.size(); j++) {
                 CompoundTag node = fluids.getCompound(j);
                 if (!node.contains("Stack", Tag.TAG_COMPOUND) || !node.contains("Origin", Tag.TAG_STRING))
                     throw new IllegalArgumentException("Invalid saved logistics fluid");
-                FluidStack fluid = FluidStack.loadFluidStackFromNBT(node.getCompound("Stack"));
+                FluidStack fluid = FluidStack.parse(registries, node.getCompound("Stack"))
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid saved logistics fluid stack"));
                 if (fluid.isEmpty() || fluid.getAmount() <= 0)
                     throw new IllegalArgumentException("Invalid saved logistics fluid amount");
                 stock.fluids.add(new FluidRecord(fluid, node.getString("Origin"), fluid.getAmount()));
@@ -465,7 +477,7 @@ public final class ChannelStockSavedData extends SavedData {
         return result;
     }
 
-    @Override public CompoundTag save(CompoundTag tag) {
+    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag channels = new ListTag();
         stocks.forEach((number, stock) -> {
             CompoundTag entry = new CompoundTag();
@@ -475,7 +487,7 @@ public final class ChannelStockSavedData extends SavedData {
             ListTag items = new ListTag();
             for (ItemRecord record : stock.items) {
                 CompoundTag node = new CompoundTag();
-                node.put("Stack", record.prototype.save(new CompoundTag()));
+                node.put("Stack", record.prototype.save(registries));
                 node.putString("Origin", record.origin);
                 node.putInt("Amount", record.amount);
                 node.putInt("Maximum", record.maximum);
@@ -485,7 +497,7 @@ public final class ChannelStockSavedData extends SavedData {
             ListTag fluids = new ListTag();
             for (FluidRecord record : stock.fluids) {
                 CompoundTag node = new CompoundTag();
-                node.put("Stack", new FluidStack(record.prototype, record.amount).writeToNBT(new CompoundTag()));
+                node.put("Stack", record.prototype.copyWithAmount(record.amount).save(registries));
                 node.putString("Origin", record.origin);
                 fluids.add(node);
             }

@@ -36,18 +36,17 @@ public final class MatterBallUnpackerBlock extends Block implements EntityBlock 
         return new MatterBallUnpackerBlockEntity(type.get(), pos, state);
     }
 
-    @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
-                                            InteractionHand hand, BlockHitResult hit) {
-        ItemStack held = player.getItemInHand(hand);
-        if (!held.is(DimensionWorksMekStress.MATTER_BALL.get())) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+    @Override protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level,
+        BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!held.is(DimensionWorksMekStress.MATTER_BALL.get())) return super.useItemOn(held, state, level, pos, player, hand, hit);
+        if (level.isClientSide) return net.minecraft.world.ItemInteractionResult.SUCCESS;
         if (level.getBlockEntity(pos) instanceof MatterBallUnpackerBlockEntity unpacker && unpacker.unpack(held)) {
             if (!player.getAbilities().instabuild) held.shrink(1);
-            return InteractionResult.CONSUME;
+            return net.minecraft.world.ItemInteractionResult.CONSUME;
         }
         if (player instanceof ServerPlayer serverPlayer)
             serverPlayer.displayClientMessage(Component.translatable("block.dimensionworks_mek_stress.matter_ball_unpacker.full"), true);
-        return InteractionResult.CONSUME;
+        return net.minecraft.world.ItemInteractionResult.CONSUME;
     }
 
     @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
@@ -57,7 +56,8 @@ public final class MatterBallUnpackerBlock extends Block implements EntityBlock 
             List<ItemStack> packed = unpacker.packContents();
             if (packed != null) drops.addAll(packed);
             else for (ItemStack drop : drops)
-                if (drop.is(asItem())) drop.addTagElement("BlockEntityTag", unpacker.saveWithoutMetadata());
+                if (drop.is(asItem())) net.minecraft.world.item.BlockItem.setBlockEntityData(drop, unpacker.getType(),
+                    unpacker.saveWithoutMetadata(params.getLevel().registryAccess()));
         }
         return drops;
     }

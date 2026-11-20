@@ -1,6 +1,24 @@
 # DimensionWorks ME Mechanical Power
 
-Minecraft 1.20.1 / Forge / Java 17。通过自研 Mixin 接入 Create、AE2、Applied Create 与 Mekanism，不修改第三方模组源码。
+Minecraft 1.21.1 / NeoForge 21.1.267 / Java 21。通过自研 Mixin 接入 Create、AE2、Applied Create 与 Mekanism，不修改第三方模组源码。
+
+## 1.21.1 NeoForge 迁移状态
+
+当前分支使用根 Gradle Wrapper 9.2.1 与 ModDevGradle 2.0.148。固定编译/测试依赖为 Create 6.0.10、Mekanism 10.7.19.85、AE2 19.2.20、Applied Create 1.1.8、Jade 15.10.6，以及清单核定的目标龙之进化与依赖。模块仍为 `0.3.30`，整合包 `VERSION` 未递增，没有创建发行版。
+
+- 方块能力采用 NeoForge 显式注册。内存驱动器注册 AE2 网络节点宿主和物品能力，真实相邻 AE 网络可建立连接；Create 管道使用新版能力缓存与 `ICapabilityProvider`，只查询已加载区块。
+- Mekanism 化学品统一为 `ChemicalStack`，保留配方标记字段 `Gas`、`InputGas` 及两个工作盆缓存职责。配方标记、物质球和安瓿元数据放在 `minecraft:custom_data`；物品、流体的嵌套序列化必须传入所属世界的注册表上下文。
+- 频道的 `Number`、`Stack`、`Origin`、`Amount`、`Maximum`、容量升级以及云盘所有者 UUID/通知均保留。数量独立于计数为一的物品原型。非法 UUID、无法解析的物品/流体及错误列表类型会阻止读取，避免库存静默消失。这里仅处理目标格式；源存档转换由独立迁移器执行，不能直接用目标加载器打开原档。
+- 内存驱动器的掉落包含完整 `BLOCK_ENTITY_DATA`，补齐五级原生掉落表，关闭 AE2 默认额外库存掉落，防止同时掉落已内嵌的内存卡。物质球无法按大小上限打包时仍保留原有可恢复库存路径。
+- Mekanism 能量预算采用原生 `long`，删除旧 `FloatingLong` 配方除法修正。每 tick 的模拟不扣款、执行扣款和余量采用整数记账；普通机器保持原生额定能耗，SPS 转速缩放只在冻结预算时转换一次。服务端更新合并新版原生布尔同步结果，低速与多次加工不丢失客户端状态同步。
+- 能量板通过实际 Mekanism 组件工厂保持不能充电的制造材料行为，已有带电组件被清除；Mekanism 与 NeoForge 能量接口均拒绝充电、导出。发电机与多方块原生导出注入重定位到新版实际能力缓存调用，保持应力计量后清空临时电能。
+- 菜单采用 NeoForge 载荷与玩家当前菜单验证，云盘仅同步预览图标/数量说明，完整内容在服务端保存。客户端屏幕、内存卡提示和 LED 渲染代码已迁移编译接口。
+
+本地验证：111 项 JUnit、17 项必需服务器 GameTest 与根项目构建。GameTest 覆盖工作盆泵气/过滤/排放、云盘权限与部分领取、物质球拆分、真实内存网络分配/过载/恢复、整数能量限制、数量/组件往返、错误数据拒绝及内存驱动器实际拆除。测试资源与类不会进入主 JAR。
+
+验证边界：图形客户端、龙堆/多方块发电长期运行、真实配方产线、安瓿与洞穴工厂目标接口、真实旧存档转换仍待后续阶段。独立 `energyProbe` / `clientCheck` 原 Forge 夹具尚未接入当前构建，后文相关命令属于历史记录。当前精简测试依赖缺少 Create Factory Logistics，Package Couriers 的 `jar_plane` 配方报缺失物品；完整目标依赖闭包阶段必须解决，不能将测试通过描述为整包日志无错误。非法物品拒绝测试另有预期的单条解析错误。
+
+下列 `0.3.x` 段落保留历史设计与验证背景；当前数据组件和构建接口以本节为准。
 
 ## 0.3.25：跨维物流与 SU 传输
 

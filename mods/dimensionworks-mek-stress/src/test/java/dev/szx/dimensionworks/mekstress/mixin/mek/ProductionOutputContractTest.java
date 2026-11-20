@@ -19,7 +19,7 @@ class ProductionOutputContractTest {
 
         assertTrue(source.contains("handleOutput(Lmekanism/api/inventory/IInventorySlot;Lnet/minecraft/world/item/ItemStack;I)V"));
         assertTrue(source.contains("handleOutput(Lmekanism/api/chemical/IChemicalTank;Lmekanism/api/chemical/ChemicalStack;I)V"));
-        assertTrue(source.contains("handleOutput(Lmekanism/api/fluid/IExtendedFluidTank;Lnet/minecraftforge/fluids/FluidStack;I)V"));
+        assertTrue(source.contains("handleOutput(Lmekanism/api/fluid/IExtendedFluidTank;Lnet/neoforged/neoforge/fluids/FluidStack;I)V"));
         assertTrue(source.contains("scaleOutput("));
         assertTrue(source.contains("wrapChanceOutputHandler"));
         assertTrue(source.contains("wrapReactionOutputHandler"));

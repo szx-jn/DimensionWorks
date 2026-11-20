@@ -18,15 +18,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 @GameTestHolder(DimensionWorksMekStress.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class LiveStressGameTests {
     private static BlockState block(String id) {
-        return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)).defaultBlockState();
+        return BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse(id)).defaultBlockState();
     }
 
     @GameTest(template = "empty", timeoutTicks = 300)
@@ -38,7 +38,8 @@ public class LiveStressGameTests {
         BlockPos inputPos = drivePos.west();
         BlockPos outputPos = drivePos.east();
         helper.setBlock(drivePos, block("dimensionworks_mek_stress:memory_drive_ddr1"));
-        helper.setBlock(drivePos.south(), block("ae2:creative_energy_cell"));
+        helper.setBlock(drivePos.south(), block("ae2:energy_acceptor"));
+        helper.setBlock(drivePos.south(2), block("ae2:creative_energy_cell"));
         helper.setBlock(inputPos, block("appliedcreate:me_gearbox"));
         helper.setBlock(outputPos, block("appliedcreate:me_gearbox"));
         helper.setBlock(drivePos.above(), block("appliedcreate:me_gearbox"));
@@ -65,7 +66,11 @@ public class LiveStressGameTests {
         helper.runAfterDelay(60, () -> {
             // Applied Create coerces zero RPM to one; zero stress explicitly disables this port.
             secondOutput.setConfiguredStress(0);
-            helper.assertTrue(drive.getMainNode().isActive(), "Drive must be online");
+            helper.assertTrue(drive.getMainNode().isActive(), "Drive must be online: node=" + drive.getMainNode().getNode()
+                + " grid=" + drive.getMainNode().getGrid()
+                + " powerCell=" + ((appeng.blockentity.networking.CreativeEnergyCellBlockEntity) helper.getBlockEntity(drivePos.south(2))).getMainNode().getGrid()
+                + " acceptor=" + ((appeng.blockentity.networking.EnergyAcceptorBlockEntity) helper.getBlockEntity(drivePos.south())).getMainNode().getGrid()
+                + " powered=" + (drive.getMainNode().getGrid() != null && drive.getMainNode().getGrid().getEnergyService().isNetworkPowered()));
             IMemoryGridService service = drive.getMainNode().getGrid().getService(IMemoryGridService.class);
             var first = service.snapshot(0);
             helper.assertTrue(first.capacitySu() == 128 && first.allocatedSu() == 64,
@@ -91,8 +96,8 @@ public class LiveStressGameTests {
                     + " port2active=" + secondOutput.getMainNode().isActive());
             helper.assertTrue(output.getGeneratedSpeed() == 0 && secondOutput.getGeneratedSpeed() == 0,
                 "RPM overload must stop every output");
-            drive.getInternalInventory().setItemDirect(0, new ItemStack(ForgeRegistries.ITEMS.getValue(
-                new ResourceLocation("dimensionworks_mek_stress:memory_card_ddr1_balanced"))));
+            drive.getInternalInventory().setItemDirect(0, new ItemStack(BuiltInRegistries.ITEM.get(
+                net.minecraft.resources.ResourceLocation.parse("dimensionworks_mek_stress:memory_card_ddr1_balanced"))));
             helper.assertTrue(service.snapshot(0).capacitySu() == 16000, "Cards must never add stress capacity");
             helper.assertTrue(service.snapshot(0).effectiveCapacitySu() == 15760,
                 "Card must deduct 1.5 percent of live input stress");

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -23,7 +24,7 @@ public final class CloudDiskSavedData extends SavedData {
 
     public static CloudDiskSavedData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-            CloudDiskSavedData::load, CloudDiskSavedData::new, "dw_cloud_disk");
+            new SavedData.Factory<>(CloudDiskSavedData::new, CloudDiskSavedData::load, null), "dw_cloud_disk");
     }
 
     public void deposit(UUID owner, List<ItemStack> entries) {
@@ -67,35 +68,44 @@ public final class CloudDiskSavedData extends SavedData {
         return count == null ? 0 : count;
     }
 
-    public static CloudDiskSavedData load(CompoundTag root) {
+    public static CloudDiskSavedData load(CompoundTag root, HolderLookup.Provider registries) {
         CloudDiskSavedData data = new CloudDiskSavedData();
+        if (root.contains("Owners") && !root.contains("Owners", Tag.TAG_COMPOUND))
+            throw new IllegalArgumentException("Invalid cloud disk owner records");
         CompoundTag owners = root.getCompound("Owners");
         for (String key : owners.getAllKeys()) {
-            try {
-                UUID owner = UUID.fromString(key);
-                CompoundTag record = owners.getCompound(key);
-                List<ItemStack> entries = new ArrayList<>();
-                ListTag items = record.getList("Items", Tag.TAG_COMPOUND);
-                for (int i = 0; i < items.size(); i++) {
-                    ItemStack stack = ItemStack.of(items.getCompound(i));
-                    if (!stack.isEmpty()) entries.add(stack);
-                }
-                if (!entries.isEmpty()) data.stock.put(owner, entries);
-                int notices = Math.max(0, record.getInt("Notices"));
-                if (notices > 0) data.notices.put(owner, notices);
-            } catch (IllegalArgumentException ignored) { }
+            UUID owner = UUID.fromString(key);
+            if (!owners.contains(key, Tag.TAG_COMPOUND))
+                throw new IllegalArgumentException("Invalid cloud disk owner record: " + key);
+            CompoundTag record = owners.getCompound(key);
+            if (record.contains("Items") && !record.contains("Items", Tag.TAG_LIST))
+                throw new IllegalArgumentException("Invalid cloud disk item list: " + key);
+            List<ItemStack> entries = new ArrayList<>();
+            ListTag items = SavedInventoryNbt.compoundList(record, "Items");
+            if (!items.isEmpty() && items.getElementType() != Tag.TAG_COMPOUND)
+                throw new IllegalArgumentException("Invalid cloud disk item entries: " + key);
+            for (int i = 0; i < items.size(); i++) {
+                ItemStack stack = ItemStack.parse(registries, items.getCompound(i))
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid cloud disk item stack: " + key));
+                if (stack.isEmpty()) throw new IllegalArgumentException("Empty cloud disk item stack: " + key);
+                entries.add(stack);
+            }
+            if (!entries.isEmpty()) data.stock.put(owner, entries);
+            int notices = record.getInt("Notices");
+            if (notices < 0) throw new IllegalArgumentException("Invalid cloud disk notice count: " + key);
+            if (notices > 0) data.notices.put(owner, notices);
         }
         return data;
     }
 
-    @Override public CompoundTag save(CompoundTag root) {
+    @Override public CompoundTag save(CompoundTag root, HolderLookup.Provider registries) {
         CompoundTag owners = new CompoundTag();
         java.util.Set<UUID> ids = new java.util.HashSet<>(stock.keySet());
         ids.addAll(notices.keySet());
         for (UUID owner : ids) {
             CompoundTag record = new CompoundTag();
             ListTag items = new ListTag();
-            stock.getOrDefault(owner, List.of()).forEach(stack -> items.add(stack.save(new CompoundTag())));
+            stock.getOrDefault(owner, List.of()).forEach(stack -> items.add(stack.save(registries)));
             record.put("Items", items);
             record.putInt("Notices", notices.getOrDefault(owner, 0));
             owners.put(owner.toString(), record);

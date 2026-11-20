@@ -5,10 +5,10 @@ import dev.szx.dimensionworks.mekstress.memory.MatterBallPacking;
 import java.util.List;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(DimensionWorksMekStress.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -17,10 +17,10 @@ public class CrossDimensionTransportGameTests {
     public static void inputAloneReadsRealMotorAndConsumesStress(GameTestHelper helper) {
         var pos = new net.minecraft.core.BlockPos(1, 1, 1);
         var motorPos = pos.west();
-        var block = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(
-            new net.minecraft.resources.ResourceLocation(DimensionWorksMekStress.MOD_ID, "cross_dimension_transmitter_tier1"));
-        helper.setBlock(motorPos, net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(
-            new net.minecraft.resources.ResourceLocation("create", "creative_motor")).defaultBlockState()
+        var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(DimensionWorksMekStress.MOD_ID, "cross_dimension_transmitter_tier1"));
+        helper.setBlock(motorPos, net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("create", "creative_motor")).defaultBlockState()
             .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING, net.minecraft.core.Direction.EAST));
         helper.setBlock(pos, block.defaultBlockState()
             .setValue(com.simibubi.create.content.kinetics.base.HorizontalAxisKineticBlock.HORIZONTAL_AXIS, net.minecraft.core.Direction.Axis.X));
@@ -46,8 +46,8 @@ public class CrossDimensionTransportGameTests {
         var gson = new com.google.gson.Gson();
         for (String path : java.util.List.of("cross_dimension_transmitter_tier1", "cross_dimension_transmitter_tier2",
             "cross_dimension_transmitter_tier3", "matter_ball_unpacker")) {
-            var id = new net.minecraft.resources.ResourceLocation(DimensionWorksMekStress.MOD_ID, path);
-            var block = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(id);
+            var id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(DimensionWorksMekStress.MOD_ID, path);
+            var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(id);
             try (var input = CrossDimensionTransportGameTests.class.getResourceAsStream(
                 "/assets/" + id.getNamespace() + "/blockstates/" + path + ".json")) {
                 var variants = gson.fromJson(new java.io.InputStreamReader(input, java.nio.charset.StandardCharsets.UTF_8),
@@ -81,14 +81,14 @@ public class CrossDimensionTransportGameTests {
             List.of(), List.of(new ChannelStockSavedData.FluidSnapshot(
                 new FluidStack(Fluids.WATER, originalAmount), "minecraft:overworld")),
             originalAmount, 0, 0);
-        List<net.minecraft.world.item.ItemStack> balls = MatterBallPacking.pack(stock);
+        List<net.minecraft.world.item.ItemStack> balls = MatterBallPacking.pack(stock, helper.getLevel().registryAccess());
         helper.assertTrue(balls != null && balls.size() == 4,
             "50 B of one fluid must fit into four Matter Balls");
         int packedAmount = 0;
         for (var ball : balls) {
-            var entries = ball.getTag().getCompound("MatterBall").getList("Fluids", net.minecraft.nbt.Tag.TAG_COMPOUND);
+            var entries = ball.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag().getCompound("MatterBall").getList("Fluids", net.minecraft.nbt.Tag.TAG_COMPOUND);
             helper.assertTrue(entries.size() == 1, "Each ball contains one split fluid stack");
-            FluidStack fluid = FluidStack.loadFluidStackFromNBT(entries.getCompound(0).getCompound("Stack"));
+            FluidStack fluid = FluidStack.parse(helper.getLevel().registryAccess(), entries.getCompound(0).getCompound("Stack")).orElseThrow();
             helper.assertTrue(fluid.getAmount() <= 16_000, "No Matter Ball may exceed 16 B of fluid");
             packedAmount += fluid.getAmount();
         }

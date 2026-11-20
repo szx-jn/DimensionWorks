@@ -22,7 +22,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public final class MemoryDriveBlock extends AEBaseEntityBlock<MemoryDriveBlockEntity> {
@@ -59,14 +58,14 @@ public final class MemoryDriveBlock extends AEBaseEntityBlock<MemoryDriveBlockEn
     }
 
     @Override
-    public InteractionResult onActivated(Level level, BlockPos pos, Player player, InteractionHand hand,
-                                         ItemStack heldItem, BlockHitResult hitResult) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+                                               BlockHitResult hitResult) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
         if (player instanceof ServerPlayer serverPlayer
             && level.getBlockEntity(pos) instanceof MemoryDriveBlockEntity drive) {
-            NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
+            serverPlayer.openMenu( new SimpleMenuProvider(
                 (id, inventory, ignored) -> new MemoryDriveMenu(id, inventory, drive),
                 Component.translatable("block.dimensionworks_mek_stress.memory_drive_ddr" + tier.index())
             ), buffer -> buffer.writeBlockPos(pos));
@@ -81,7 +80,8 @@ public final class MemoryDriveBlock extends AEBaseEntityBlock<MemoryDriveBlockEn
         if (blockEntity instanceof MemoryDriveBlockEntity drive) {
             for (ItemStack drop : drops) {
                 if (drop.is(asItem())) {
-                    drop.addTagElement("BlockEntityTag", drive.saveWithoutMetadata());
+                    net.minecraft.world.item.BlockItem.setBlockEntityData(drop, drive.getType(),
+                        drive.saveWithoutMetadata(params.getLevel().registryAccess()));
                 }
             }
         }

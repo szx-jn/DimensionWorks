@@ -3,7 +3,6 @@ package dev.szx.dimensionworks.mekstress.mixin.mek;
 import dev.szx.dimensionworks.mekstress.core.DimensionTransportPolicy;
 import dev.szx.dimensionworks.mekstress.integration.QuantumEntangloporterFrequencyAccess;
 import java.util.Map;
-import mekanism.api.Coord4D;
 import mekanism.common.content.entangloporter.InventoryFrequency;
 import mekanism.common.tile.TileEntityQuantumEntangloporter;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,12 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Only permits a Mekanism entangloporter frequency to activate across the three vanilla dimensions. */
 @Mixin(value = InventoryFrequency.class, remap = false)
 public abstract class QuantumEntangloporterFrequencyMixin implements QuantumEntangloporterFrequencyAccess {
-    @Shadow @Final private Map<Coord4D, TileEntityQuantumEntangloporter> activeQEs;
+    @Shadow @Final private com.google.common.collect.Table<net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, net.minecraft.core.BlockPos, TileEntityQuantumEntangloporter> activeQEs;
 
     @Unique
     @Override
-    public Map<Coord4D, TileEntityQuantumEntangloporter> dimensionworks$activeEntangloporters() {
-        return activeQEs;
+    public java.util.Collection<TileEntityQuantumEntangloporter> dimensionworks$activeEntangloporters() {
+        return activeQEs.values();
     }
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true, remap = false)

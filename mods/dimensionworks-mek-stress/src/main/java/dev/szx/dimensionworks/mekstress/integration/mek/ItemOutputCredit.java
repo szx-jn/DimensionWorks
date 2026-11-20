@@ -14,7 +14,8 @@ public final class ItemOutputCredit {
     private ItemOutputCredit() {}
 
     private static Product product(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         return new Product(stack.getItem(), tag == null ? null : tag.copy());
     }
 

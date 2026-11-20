@@ -97,12 +97,12 @@ public final class ScaledOutputHandler<T> implements IOutputHandler<T> {
         return new ScaledOutputHandler<>(delegate,
             (output, operations) -> {
                 MachineOutputDelivery.insertItem(slot, output.item(), operations);
-                MachineOutputDelivery.insertChemical(rawTank, output.gas(), operations);
+                MachineOutputDelivery.insertChemical(rawTank, output.chemical(), operations);
             },
             (tracker, output) -> {
                 MachineOutputDelivery.capItem(tracker, slotError, slot, output.item());
                 if (tracker.shouldContinueChecking()) {
-                    MachineOutputDelivery.capChemical(tracker, tankError, rawTank, output.gas());
+                    MachineOutputDelivery.capChemical(tracker, tankError, rawTank, output.chemical());
                 }
             });
     }
@@ -148,7 +148,7 @@ public final class ScaledOutputHandler<T> implements IOutputHandler<T> {
             return;
         }
         for (AccumulatedItem output : outputs) {
-            if (ItemStack.isSameItemSameTags(output.stack, stack)) {
+            if (ItemStack.isSameItemSameComponents(output.stack, stack)) {
                 output.count += stack.getCount();
                 return;
             }

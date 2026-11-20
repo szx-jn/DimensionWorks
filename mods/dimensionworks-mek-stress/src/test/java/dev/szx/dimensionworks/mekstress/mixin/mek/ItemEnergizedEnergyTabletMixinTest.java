@@ -21,7 +21,13 @@ class ItemEnergizedEnergyTabletMixinTest {
             }
         }
 
-        assertTrue(injectedTargets.contains("gatherCapabilities"));
+        Set<String> containerTargets = new HashSet<>();
+        for (Method method : EnergyTabletContainerMixin.class.getDeclaredMethods()) {
+            Inject inject = method.getAnnotation(Inject.class);
+            if (inject != null) containerTargets.addAll(Arrays.asList(inject.method()));
+        }
+        assertTrue(containerTargets.contains("createHandler"));
+        assertTrue(containerTargets.contains("createHandlerIfData"));
         assertTrue(injectedTargets.contains("addItems"));
     }
 }

@@ -33,7 +33,7 @@ public final class MemoryCardItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         long bandwidthRpm = MemoryDriveMath.scaleByPowerOfTwo(
             MekStressConfig.cardBandwidthRpm(tier), MekStressConfig.speedExponent(type));
         tooltip.add(Component.translatable(typeTranslationKey()).withStyle(typeColor()));

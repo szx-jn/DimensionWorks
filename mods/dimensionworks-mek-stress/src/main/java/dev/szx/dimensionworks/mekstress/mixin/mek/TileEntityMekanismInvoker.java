@@ -7,5 +7,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(value = TileEntityMekanism.class, remap = false)
 public interface TileEntityMekanismInvoker {
     @Invoker("onUpdateServer")
-    void dimensionworks$onUpdateServer();
+    boolean dimensionworks$onUpdateServer();
 }

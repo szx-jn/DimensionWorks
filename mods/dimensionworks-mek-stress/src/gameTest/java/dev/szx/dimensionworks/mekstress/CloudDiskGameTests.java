@@ -8,8 +8,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(DimensionWorksMekStress.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -22,12 +22,14 @@ public final class CloudDiskGameTests {
         CompoundTag payload = new CompoundTag();
         payload.putString("Origin", "twilightforest:twilight_forest");
         payload.putInt("Amount", 16000);
-        ball.getOrCreateTag().put("MatterBall", payload);
+        var customData = new CompoundTag();
+        customData.put("MatterBall", payload);
+        ball.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(customData));
         data.deposit(owner, List.of(ball));
         ball.setCount(0);
-        CloudDiskSavedData loaded = CloudDiskSavedData.load(data.save(new CompoundTag()));
+        CloudDiskSavedData loaded = CloudDiskSavedData.load(data.save(new CompoundTag(), helper.getLevel().registryAccess()), helper.getLevel().registryAccess());
         helper.assertTrue(loaded.size(owner) == 1, "Stored ball survives save/load and caller mutation");
-        helper.assertTrue(payload.equals(loaded.view(owner, 0).getTag().getCompound("MatterBall")), "Complete NBT survives save/load");
+        helper.assertTrue(payload.equals(loaded.view(owner, 0).getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag().getCompound("MatterBall")), "Complete NBT survives save/load");
         helper.assertTrue(loaded.size(UUID.randomUUID()) == 0, "Other players cannot see this stock");
         loaded.view(owner, 0).setCount(0);
         helper.assertTrue(loaded.view(owner, 0).getCount() == 1, "Previews cannot mutate cloud stock");
@@ -44,7 +46,7 @@ public final class CloudDiskGameTests {
         helper.assertTrue(data.view(owner, 0).getCount() == 12, "Full inventory keeps all stock");
         helper.assertTrue(data.claim(owner, 0, stack -> stack.shrink(5)), "Partial insertion claims only space available");
         helper.assertTrue(data.view(owner, 0).getCount() == 7, "Partial insertion preserves remainder");
-        CloudDiskSavedData loaded = CloudDiskSavedData.load(data.save(new CompoundTag()));
+        CloudDiskSavedData loaded = CloudDiskSavedData.load(data.save(new CompoundTag(), helper.getLevel().registryAccess()), helper.getLevel().registryAccess());
         helper.assertTrue(loaded.claim(owner, 0, stack -> stack.setCount(0)) && loaded.size(owner) == 0, "Last claim removes stock");
         helper.assertTrue(!loaded.claim(owner, 0, stack -> { throw new AssertionError("Duplicate claim"); }), "Duplicate claims fail");
         helper.assertTrue(!loaded.claim(owner, -1, stack -> { throw new AssertionError("Invalid index"); }), "Invalid indices fail");

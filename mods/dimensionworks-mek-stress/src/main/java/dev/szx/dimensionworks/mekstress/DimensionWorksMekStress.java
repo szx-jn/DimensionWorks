@@ -180,6 +180,10 @@ public final class DimensionWorksMekStress {
     }
 
     private static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(appeng.api.AECapabilities.IN_WORLD_GRID_NODE_HOST,
+            MEMORY_DRIVE_BLOCK_ENTITY.get(), (be, context) -> be);
+        event.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,
+            MEMORY_DRIVE_BLOCK_ENTITY.get(), (be, side) -> be.getExposedItemHandler(side));
         event.registerBlockEntity(mekanism.common.capabilities.Capabilities.CHEMICAL.block(),
             com.simibubi.create.AllBlockEntityTypes.BASIN.get(),
             (be, side) -> ((dev.szx.dimensionworks.mekstress.integration.BasinGasAccess) be).dimensionworks$chemicalHandler());

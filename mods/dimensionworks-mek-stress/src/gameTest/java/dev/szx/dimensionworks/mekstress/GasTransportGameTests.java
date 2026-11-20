@@ -17,10 +17,10 @@ import com.simibubi.create.content.kinetics.simpleRelays.CogWheelBlock;
 import dev.szx.dimensionworks.mekstress.integration.BasinGasHandler;
 import dev.szx.dimensionworks.mekstress.integration.gas.GasFluid;
 import dev.szx.dimensionworks.mekstress.integration.gas.GasFluidHandler;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
+import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.IChemicalHandler;
 import mekanism.common.capabilities.Capabilities;
-import mekanism.common.registries.MekanismGases;
+import mekanism.common.registries.MekanismChemicals;
 import net.createmod.catnip.math.BlockFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,40 +28,39 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 @GameTestHolder(DimensionWorksMekStress.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class GasTransportGameTests {
     @GameTest(template = "empty", timeoutTicks = 250)
     public static void poweredPumpTransportsGas(GameTestHelper helper) {
-        var basinBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:basin"));
+        var basinBlock = BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:basin"));
         helper.setBlock(new BlockPos(1, 2, 2), basinBlock.defaultBlockState());
         helper.setBlock(new BlockPos(4, 2, 2), basinBlock.defaultBlockState());
-        helper.setBlock(new BlockPos(3, 2, 2), ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:fluid_pipe"))
+        helper.setBlock(new BlockPos(3, 2, 2), BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:fluid_pipe"))
             .defaultBlockState().setValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(Direction.WEST), true)
             .setValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(Direction.EAST), true));
-        helper.setBlock(new BlockPos(2, 2, 2), ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:mechanical_pump"))
+        helper.setBlock(new BlockPos(2, 2, 2), BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:mechanical_pump"))
             .defaultBlockState().setValue(PumpBlock.FACING, Direction.EAST));
-        helper.setBlock(new BlockPos(2, 2, 1), ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:cogwheel"))
+        helper.setBlock(new BlockPos(2, 2, 1), BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:cogwheel"))
             .defaultBlockState().setValue(CogWheelBlock.AXIS, Direction.Axis.X));
-        helper.setBlock(new BlockPos(1, 2, 1), ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:creative_motor"))
+        helper.setBlock(new BlockPos(1, 2, 1), BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:creative_motor"))
             .defaultBlockState().setValue(CreativeMotorBlock.FACING, Direction.EAST));
-        IGasHandler source = helper.getBlockEntity(new BlockPos(1, 2, 2))
-            .getCapability(Capabilities.GAS_HANDLER, Direction.EAST).orElseThrow(IllegalStateException::new);
-        IGasHandler destination = helper.getBlockEntity(new BlockPos(4, 2, 2))
-            .getCapability(Capabilities.GAS_HANDLER, Direction.WEST).orElseThrow(IllegalStateException::new);
-        source.setChemicalInTank(0, new GasStack(MekanismGases.HYDROGEN, 10000));
+        IChemicalHandler source = helper.getLevel().getCapability(Capabilities.CHEMICAL.block(),
+            helper.absolutePos(new BlockPos(1, 2, 2)), Direction.EAST);
+        IChemicalHandler destination = helper.getLevel().getCapability(Capabilities.CHEMICAL.block(),
+            helper.absolutePos(new BlockPos(4, 2, 2)), Direction.WEST);
+        source.setChemicalInTank(0, new ChemicalStack(MekanismChemicals.HYDROGEN, 10000));
         helper.runAfterDelay(1, () -> ((com.simibubi.create.content.kinetics.motor.CreativeMotorBlockEntity)
             helper.getBlockEntity(new BlockPos(1, 2, 1))).generatedSpeed.setValue(256));
         helper.runAfterDelay(100, () -> {
             helper.assertTrue(destination.getChemicalInTank(1).getAmount() > 0, "Powered pump must deliver gas to basin input");
-            helper.assertTrue(destination.getChemicalInTank(1).getType() == MekanismGases.HYDROGEN.get(), "Pump must preserve gas identity");
+            helper.assertTrue(destination.getChemicalInTank(1).getChemical() == MekanismChemicals.HYDROGEN.get(), "Pump must preserve gas identity");
             helper.succeed();
         });
     }
@@ -69,22 +68,22 @@ public class GasTransportGameTests {
     @GameTest(template = "empty")
     public static void basinAdapterAndOpenPipe(GameTestHelper helper) {
         BlockPos relative = new BlockPos(2, 2, 2);
-        helper.setBlock(relative, ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:basin")).defaultBlockState());
+        helper.setBlock(relative, BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:basin")).defaultBlockState());
         BlockEntity basin = helper.getBlockEntity(relative);
-        IGasHandler gas = basin.getCapability(Capabilities.GAS_HANDLER, Direction.EAST).orElseThrow(IllegalStateException::new);
-        gas.setChemicalInTank(0, new GasStack(MekanismGases.HYDROGEN, 1000));
-        var bridgeCapability = GasFluidHandler.capability(basin, ForgeCapabilities.FLUID_HANDLER, Direction.EAST);
-        IFluidHandler bridge = bridgeCapability.orElseThrow(IllegalStateException::new);
-        helper.assertTrue(bridgeCapability == GasFluidHandler.capability(basin, ForgeCapabilities.FLUID_HANDLER, Direction.EAST),
+        IChemicalHandler gas = helper.getLevel().getCapability(Capabilities.CHEMICAL.block(), basin.getBlockPos(), Direction.EAST);
+        gas.setChemicalInTank(0, new ChemicalStack(MekanismChemicals.HYDROGEN, 1000));
+        var bridgeCapability = GasFluidHandler.capability(helper.getLevel(), basin.getBlockPos(), Direction.EAST);
+        IFluidHandler bridge = bridgeCapability;
+        helper.assertTrue(bridgeCapability == GasFluidHandler.capability(helper.getLevel(), basin.getBlockPos(), Direction.EAST),
             "Repeated endpoint lookup must reuse its capability");
-        helper.assertTrue(bridgeCapability == GasFluidHandler.capability(basin, ForgeCapabilities.FLUID_HANDLER, Direction.WEST),
-            "Shared capabilities on multiple sides must retain handler identity");
-        FluidStack hydrogen = GasFluid.encode(new GasStack(MekanismGases.HYDROGEN, 250));
-        FluidStack oxygen = GasFluid.encode(new GasStack(MekanismGases.OXYGEN, 250));
-        helper.assertTrue(!hydrogen.isFluidEqual(oxygen), "Gas identities must remain distinct");
+        helper.assertTrue(GasFluidHandler.capability(helper.getLevel(), basin.getBlockPos(), Direction.WEST) != null,
+            "The opposite side must expose an independent valid cached endpoint");
+        FluidStack hydrogen = GasFluid.encode(new ChemicalStack(MekanismChemicals.HYDROGEN, 250));
+        FluidStack oxygen = GasFluid.encode(new ChemicalStack(MekanismChemicals.OXYGEN, 250));
+        helper.assertTrue(!FluidStack.isSameFluidSameComponents(hydrogen, oxygen), "Gas identities must remain distinct");
         ItemStack gasContainer = new ItemStack(MekanismBlocks.BASIC_CHEMICAL_TANK.asItem());
-        IGasHandler container = gasContainer.getCapability(Capabilities.GAS_HANDLER).orElseThrow(IllegalStateException::new);
-        helper.assertTrue(container.insertChemical(new GasStack(MekanismGases.HYDROGEN, 250), Action.EXECUTE).isEmpty(), "Fill gas filter container");
+        IChemicalHandler container = gasContainer.getCapability(Capabilities.CHEMICAL.item());
+        helper.assertTrue(container.insertChemical(new ChemicalStack(MekanismChemicals.HYDROGEN, 250), Action.EXECUTE).isEmpty(), "Fill gas filter container");
         FilterItemStack filter = FilterItemStack.of(gasContainer);
         helper.assertTrue(filter.test(helper.getLevel(), hydrogen, false), "Gas container filter must match its gas");
         helper.assertTrue(!filter.test(helper.getLevel(), oxygen, false), "Gas filter must distinguish gas types even without NBT matching");
@@ -99,8 +98,8 @@ public class GasTransportGameTests {
         helper.assertTrue(bridge.fill(extracted, IFluidHandler.FluidAction.EXECUTE) == 250 && gas.getChemicalInTank(1).getAmount() == 250, "Gas insertion into basin input");
         BlockPos pipePos = helper.absolutePos(new BlockPos(4, 2, 2));
         OpenEndedPipe pipe = new OpenEndedPipe(new BlockFace(pipePos, Direction.EAST));
-        pipe.manageSource(helper.getLevel());
-        IFluidHandler outlet = pipe.provideHandler().orElseThrow(IllegalStateException::new);
+        pipe.manageSource(helper.getLevel(), basin);
+        IFluidHandler outlet = pipe.provideHandler().getCapability();
         helper.assertTrue(outlet.fill(hydrogen, IFluidHandler.FluidAction.SIMULATE) == 250, "Open outlet accepts simulated gas");
         helper.assertTrue(outlet.fill(hydrogen, IFluidHandler.FluidAction.EXECUTE) == 250, "Open outlet vents gas");
         helper.assertTrue(helper.getLevel().getBlockState(pipePos.east()).isAir(), "Vented gas must not place a block");
@@ -113,25 +112,25 @@ public class GasTransportGameTests {
         helper.assertTrue(!hose.tryDeposit(GasFluid.SOURCE.get(), pipePos.east(), false), "Blocked hose must not vent");
         helper.assertTrue(helper.getLevel().getBlockState(pipePos.east()).is(Blocks.STONE), "Gas must not replace a solid block");
         basin.setRemoved();
-        helper.assertTrue(!bridgeCapability.isPresent(), "Bridge must invalidate with its endpoint");
+        helper.assertTrue(bridge.getTanks() == 0 && bridge.drain(hydrogen, IFluidHandler.FluidAction.EXECUTE).isEmpty(), "Bridge must invalidate with its endpoint");
         helper.succeed();
     }
 
     @GameTest(template = "empty")
     public static void inputOnlyGasRecipeConsumesGasWithoutOutput(GameTestHelper helper) {
         BlockPos relative = new BlockPos(2, 2, 2);
-        helper.setBlock(relative, ForgeRegistries.BLOCKS.getValue(new ResourceLocation("create:basin")).defaultBlockState());
+        helper.setBlock(relative, BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse("create:basin")).defaultBlockState());
         BasinGasHandler handler = new BasinGasHandler((BasinBlockEntity) helper.getBlockEntity(relative));
-        GasStack spentWaste = new GasStack(MekanismGases.SPENT_NUCLEAR_WASTE, 100);
+        ChemicalStack spentWaste = new ChemicalStack(MekanismChemicals.SPENT_NUCLEAR_WASTE, 100);
         handler.setChemicalInTank(1, spentWaste);
 
-        helper.assertTrue(handler.processRecipeGas(spentWaste.getType(), 100, null, 0, true),
+        helper.assertTrue(handler.processRecipeGas(spentWaste.getChemical(), 100, null, 0, true),
             "Input-only simulation must accept sufficient spent nuclear waste");
-        helper.assertTrue(handler.processRecipeGas(spentWaste.getType(), 101, null, 0, true) == false,
+        helper.assertTrue(handler.processRecipeGas(spentWaste.getChemical(), 101, null, 0, true) == false,
             "Input-only recipe must reject a shortage");
-        helper.assertTrue(handler.processRecipeGas(MekanismGases.NUCLEAR_WASTE.get(), 100, null, 0, true) == false,
+        helper.assertTrue(handler.processRecipeGas(MekanismChemicals.NUCLEAR_WASTE.get(), 100, null, 0, true) == false,
             "Input-only recipe must reject the wrong gas");
-        helper.assertTrue(handler.processRecipeGas(spentWaste.getType(), 100, null, 0, false),
+        helper.assertTrue(handler.processRecipeGas(spentWaste.getChemical(), 100, null, 0, false),
             "Input-only execution must accept the exact input");
         helper.assertTrue(handler.getChemicalInTank(1).isEmpty(), "Input-only execution must consume all required gas");
         helper.assertTrue(handler.getChemicalInTank(0).isEmpty(), "Input-only execution must not occupy the output buffer");

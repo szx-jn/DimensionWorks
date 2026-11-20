@@ -20,7 +20,6 @@
     "create.GasHoseMixin",
     "create.GasFilterMixin",
     "mek.MachineEnergyContainerMixin",
-    "mek.CachedRecipeEnergyMixin",
     "mek.LaserEnergyContainerMixin",
     "mek.TeleporterPowerMixin",
     "mek.OutputHelperMixin",
@@ -41,7 +40,8 @@
     "draconic.ReactorStabilizerMixin",
     "draconic.ReactorInjectorEnergyMixin",
     "draconic.ReactorStabilizerEnergyMixin",
-    "create.FlowSourceLocationAccessor"
+    "create.FlowSourceLocationAccessor",
+    "mek.EnergyTabletContainerMixin"
   ],
   "client": [
     "mek.JadeUniversalEnergyProviderClientMixin"

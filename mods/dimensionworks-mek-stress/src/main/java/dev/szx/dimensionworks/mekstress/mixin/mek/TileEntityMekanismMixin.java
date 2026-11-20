@@ -30,25 +30,22 @@ public abstract class TileEntityMekanismMixin {
         method = "tickServer",
         at = @At(
             value = "INVOKE",
-            target = "Lmekanism/common/tile/base/TileEntityMekanism;onUpdateServer()V"
+            target = "Lmekanism/common/tile/base/TileEntityMekanism;onUpdateServer()Z"
         ),
         remap = false
     )
-    private static void dimensionworks$scheduleAndWrapUpdate(TileEntityMekanism tile) {
+    private static boolean dimensionworks$scheduleAndWrapUpdate(TileEntityMekanism tile) {
         TileEntityMekanismInvoker invoker = (TileEntityMekanismInvoker) tile;
         if (tile instanceof TileEntityGenerator generator) {
-            GeneratorPowerBridge.tick(generator, invoker::dimensionworks$onUpdateServer);
-            return;
+            return GeneratorPowerBridge.tick(generator, invoker::dimensionworks$onUpdateServer);
         }
         if (!StressRules.isEligible(tile)) {
-            invoker.dimensionworks$onUpdateServer();
-            return;
+            return invoker.dimensionworks$onUpdateServer();
         }
 
         Level level = tile.getLevel();
         if (level == null || level.isClientSide) {
-            invoker.dimensionworks$onUpdateServer();
-            return;
+            return invoker.dimensionworks$onUpdateServer();
         }
 
         long tick = level.getGameTime();
@@ -62,14 +59,16 @@ public abstract class TileEntityMekanismMixin {
                 workRate, tick, dimensionworks$workAdvances.get(tile));
             dimensionworks$workAdvances.put(tile, advance);
             if (advance.calls() <= 0) {
-                return;
+                return false;
             }
 
             try (MachineWorkContext.Scope ignoredWork = MachineWorkContext.push(
                 MachinePowerManager.productionMultiplier(tile, route))) {
+                boolean changed = false;
                 for (int i = 0; i < advance.calls(); i++) {
-                    invoker.dimensionworks$onUpdateServer();
+                    changed |= invoker.dimensionworks$onUpdateServer();
                 }
+                return changed;
             }
         }
     }

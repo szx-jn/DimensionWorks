@@ -42,7 +42,7 @@ class TileEntityMekanismMixinTest {
 
             found = true;
             assertTrue(Modifier.isStatic(handler.getModifiers()));
-            assertTrue(redirect.at().target().contains("TileEntityMekanism;onUpdateServer()V"));
+            assertTrue(redirect.at().target().contains("TileEntityMekanism;onUpdateServer()Z"));
         }
         assertTrue(found, "Mechanical scheduling must wrap tickServer's virtual onUpdateServer call");
 

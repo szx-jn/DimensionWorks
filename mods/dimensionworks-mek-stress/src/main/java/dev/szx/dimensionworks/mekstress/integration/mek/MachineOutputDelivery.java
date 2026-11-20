@@ -64,7 +64,7 @@ public final class MachineOutputDelivery {
         }
         long amount = MachineWorkContext.scaleOutput(toOutput.getAmount(), operations);
         if (amount > 0L) {
-            tank.insert(tank.createStack(toOutput, amount), Action.EXECUTE, AutomationType.INTERNAL);
+            tank.insert(toOutput.copyWithAmount(amount), Action.EXECUTE, AutomationType.INTERNAL);
         }
     }
 
@@ -74,7 +74,7 @@ public final class MachineOutputDelivery {
         }
         long amount = MachineWorkContext.scaleOutput(toOutput.getAmount(), operations);
         if (amount > 0L) {
-            tank.insert(new FluidStack(toOutput, (int) Math.min(Integer.MAX_VALUE, amount)),
+            tank.insert(toOutput.copyWithAmount((int) Math.min(Integer.MAX_VALUE, amount)),
                 Action.EXECUTE, AutomationType.INTERNAL);
         }
     }
@@ -108,7 +108,7 @@ public final class MachineOutputDelivery {
         if (toOutput.isEmpty()) {
             return;
         }
-        ChemicalStack maxOutput = tank.createStack(toOutput, Long.MAX_VALUE);
+        ChemicalStack maxOutput = toOutput.copyWithAmount(Long.MAX_VALUE);
         ChemicalStack remainder = tank.insert(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
         long availableRoom = maxOutput.getAmount() - remainder.getAmount();
         int operations = MachineWorkContext.maxOutputOperations(toOutput.getAmount(), availableRoom);
@@ -131,7 +131,7 @@ public final class MachineOutputDelivery {
         if (toOutput.isEmpty()) {
             return;
         }
-        FluidStack maxOutput = new FluidStack(toOutput, Integer.MAX_VALUE);
+        FluidStack maxOutput = toOutput.copyWithAmount(Integer.MAX_VALUE);
         FluidStack remainder = tank.insert(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
         long availableRoom = maxOutput.getAmount() - remainder.getAmount();
         int operations = MachineWorkContext.maxOutputOperations(toOutput.getAmount(), availableRoom);

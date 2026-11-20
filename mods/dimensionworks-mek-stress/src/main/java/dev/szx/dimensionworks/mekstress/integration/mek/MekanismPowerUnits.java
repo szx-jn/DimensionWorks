@@ -1,6 +1,5 @@
 package dev.szx.dimensionworks.mekstress.integration.mek;
 
-import mekanism.api.math.FloatingLong;
 import mekanism.common.util.UnitDisplayUtils.EnergyUnit;
 
 /** Read the forward conversion, avoiding Mekanism's four-decimal cached inverse. */
@@ -8,7 +7,7 @@ public final class MekanismPowerUnits {
     private MekanismPowerUnits() {}
 
     public static double joulesPerFe() {
-        return EnergyUnit.FORGE_ENERGY.convertFrom(FloatingLong.ONE).doubleValue();
+        return EnergyUnit.FORGE_ENERGY.getConversion();
     }
 
     public static boolean valid() {
@@ -16,8 +15,8 @@ public final class MekanismPowerUnits {
         return Double.isFinite(ratio) && ratio > 0;
     }
 
-    public static double fePerTick(FloatingLong joules) {
+    public static double fePerTick(long joules) {
         double ratio = joulesPerFe();
-        return Double.isFinite(ratio) && ratio > 0 ? joules.doubleValue() / ratio : 0;
+        return Double.isFinite(ratio) && ratio > 0 ? (double) joules / ratio : 0;
     }
 }

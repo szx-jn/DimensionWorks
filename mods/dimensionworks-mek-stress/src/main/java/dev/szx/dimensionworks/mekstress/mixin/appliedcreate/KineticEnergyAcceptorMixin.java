@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.mekstress.mixin.appliedcreate;
 
-import appeng.api.config.PowerUnits;
+import appeng.api.config.PowerUnit;
 import com.loliball.appliedcreate.energy.KineticEnergyAcceptorBlockEntity;
 import dev.szx.dimensionworks.mekstress.core.EnergyPowerMath;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +15,6 @@ public abstract class KineticEnergyAcceptorMixin {
         KineticEnergyAcceptorBlockEntity acceptor = (KineticEnergyAcceptorBlockEntity) (Object) this;
         if (acceptor.getLevel() == null || acceptor.getLevel().isClientSide || acceptor.isOverStressed()) return 0;
         double su = acceptor.calculateStressApplied() * (double) Math.abs(acceptor.getSpeed());
-        return PowerUnits.FE.convertTo(PowerUnits.AE, su / EnergyPowerMath.SU_PER_FE);
+        return PowerUnit.FE.convertTo(PowerUnit.AE, su / EnergyPowerMath.SU_PER_FE);
     }
 }

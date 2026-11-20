@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.mekstress.integration.jade;
 
-import mekanism.api.NBTConstants;
+import mekanism.api.SerializationConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -11,20 +11,20 @@ public final class JadeEnergySanitizer {
     }
 
     public static boolean removeEnergyElements(CompoundTag data) {
-        if (data == null || !data.contains("mekData", Tag.TAG_LIST)) {
+        if (data == null || !data.contains("mek_data", Tag.TAG_LIST)) {
             return false;
         }
-        ListTag entries = data.getList("mekData", Tag.TAG_COMPOUND);
+        ListTag entries = data.getList("mek_data", Tag.TAG_COMPOUND);
         boolean removed = false;
         for (int index = entries.size() - 1; index >= 0; index--) {
             CompoundTag entry = entries.getCompound(index);
-            if (entry.contains(NBTConstants.ENERGY_STORED)) {
+            if (entry.contains(SerializationConstants.ENERGY)) {
                 entries.remove(index);
                 removed = true;
             }
         }
         if (entries.isEmpty()) {
-            data.remove("mekData");
+            data.remove("mek_data");
         }
         return removed;
     }

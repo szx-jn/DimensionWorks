@@ -14,12 +14,22 @@ class PowerBudgetTest {
         assertEquals(1000, budget.available(4000, 1000));
     }
 
+    @Test void retainsEveryUnitBeyondDoublePrecision() {
+        PowerBudget budget = new PowerBudget();
+        assertEquals(Long.MAX_VALUE - 1, budget.extract(10, Long.MAX_VALUE, Long.MAX_VALUE - 1, true));
+        assertEquals(1L, budget.available(10, Long.MAX_VALUE));
+        assertEquals(1L, budget.extract(10, Long.MAX_VALUE, 1, false));
+        assertEquals(1L, budget.extract(10, Long.MAX_VALUE, 1, true));
+        assertEquals(0L, budget.extract(10, Long.MAX_VALUE, 1, true));
+        assertEquals(Long.MAX_VALUE, budget.available(11, Long.MAX_VALUE));
+    }
+
     @Test void repricingWithinOneTickRetainsAlreadySpentPower() {
         PowerBudget budget = new PowerBudget();
         assertEquals(600, budget.extract(10, 1000, 600, true));
         assertEquals(1400, budget.available(10, 2000));
         assertEquals(0, budget.available(10, 100));
-        assertEquals(0, budget.extract(10, 2000, Double.NaN, true));
-        assertEquals(0, budget.extract(10, 2000, Double.POSITIVE_INFINITY, true));
+        assertEquals(0, budget.extract(10, 2000, 0, true));
+        assertEquals(0, budget.extract(10, 2000, -1, true));
     }
 }
