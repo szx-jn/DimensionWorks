@@ -18,7 +18,8 @@ class Dfu:
 def pipeline():
     return ItemPipeline(Dfu(), {"minecraft:item": ["minecraft:stone", "create:filter", "sophisticatedbackpacks:diamond_backpack"],
                                 "minecraft:entity_type": [], "minecraft:attribute": [], "minecraft:fluid": ["minecraft:lava"],
-                                "minecraft:enchantment": [], "minecraft:potion": [], "minecraft:mob_effect": []})
+                                "minecraft:enchantment": [], "minecraft:potion": [], "minecraft:mob_effect": [],
+                                "minecraft:block_entity_type": []})
 
 
 class ItemPipelineTests(unittest.TestCase):

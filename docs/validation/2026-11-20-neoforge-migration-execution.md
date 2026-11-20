@@ -384,3 +384,13 @@ manifest/mods.json 已切换为 Minecraft 1.21.1 / NeoForge：共 183 项固定�
 原生失败批次 `storage-items-native-batch-v3.log` 记录 55 条错误，保存逐行完整诊断，未将部分结果当成功。五条作者聚合组件的 Java 对象 equals 不等，但其完整原生持久编码及有效组件编码一致，改用完整编码对账。后续 `storage-items-native-batch-v4.log` 正常保存停服，Gradle 退出码 0：**rows=2,712，complete=true，errors=0**；所有 ID、单位数量与完整原生编码重读一致。45 条背包、25 条升级使用作者既有迁移接口，背包 contentsUuid 均与目标 storage_uuid 相等。`storage-items-native-roundtrip-v4.json` 记录输入/输出指纹与验证边界。
 
 `python3 -m unittest discover -s scripts/migration/tests -q` 实际执行 **91 项通过**；原生 Java 桥接编译及上述批次通过。仍有移动机械、无线终端、通用元件、生命攫取共 9 条单位元数据被明确阻止，10 条空 air 模板另记。仍未完成 50 份精妙背包 SavedData、9 个精妙存储方块、其它网络库存、真实玩家、完整机械与整档保存重启验收。封存原档未打开，VERSION 0.3.52 未变，未发布发行版。
+
+### 无线终端、辅助物品与完整移动装置的后续对账
+
+新增 `ae_items.py` 和 `auxiliary_items.py`，将无线终端能源、链接、槽位、界面设置、量子频率、通用元件 UUID/用量、古卷附魔、地图与羽毛笔状态接入固定目标原生组件。古卷附魔的旧 sweeping 已被原版 DFU 更名，修正为比较完整原生等级表。`storage-items-native-batch-v6.log` 实际为 **rows=2,715，complete=true，errors=0**，正常保存停服、Gradle 退出码 0；六条未生成记录仍为两个机械物品与四条生命攫取相关记录。没有依据“codec 接受 custom_data”声称旧功能仍有效。
+
+新增完整装置转换和隔离 `NativeContraptionBatch`。`actual-contraptions-native-batch-v1.log` 正常保存停服、退出码 0；8 个实际装置、694 个方块全部完成原生载荷读取/保存/重新读取。`actual-contraptions-semantic-v1.json` 进一步证明每个相对位置的方块状态、完整持久方块实体数据、锚点、执行器、挂载库存及其余根状态一致；旧 BlockPos 的 Compound 转 IntArray 后坐标值不变，没有原点偏移。两个矿车物品的独立朝向保留，后续仍须装回物品组件。
+
+固定作者保存结果省略 24 份旧执行器 Inventory：19 份为空列表，5 份只含 slot 0，且与同位置原始及目标 Actor 的 HeldItem 完全相同。仅在逐项证明后允许比较时省略这些副本，原列表保存在私有 `actual-contraptions-semantic-ledger-v1.nbt`，不计为第二份实物库存。非手持槽、不同持物、丢失所有者或改变挂载库存的回归均会失败。
+
+迁移 Python 规则实际执行 **106 项通过**，固定原生 Java 装置桥接已编译并完成上述真实数据批次。这里只确认这些元数据和移动载荷，**50 份背包 SavedData、9 个精妙存储、其它网络实际库存、真实玩家、整档生成及保存重启仍未验收**。生命攫取没有官方等价目标，相关物品和元件维持阻止状态等待用户取舍；没有自行删除效果或自做第三方移植。封存世界未打开，VERSION 保持 0.3.52，未发布。

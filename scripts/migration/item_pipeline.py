@@ -7,6 +7,8 @@ from typing import Callable
 import nbtlib as n
 
 from .ae_data import convert_key, convert_storage_cell, key_identity
+from .ae_items import AE_STATE_IDS, convert_ae_item
+from .auxiliary_items import AUXILIARY_IDS, convert_auxiliary_item
 from .create_data import PACKAGE_IDS, convert_container_item, convert_mechanical_item
 from .entity_data import convert_entity_data
 from .item_components import authoritative_count, convert_item_components
@@ -42,6 +44,7 @@ class ItemPipeline:
         self.enchantments = set(registries["minecraft:enchantment"])
         self.potions = set(registries["minecraft:potion"])
         self.effects = set(registries["minecraft:mob_effect"])
+        self.block_entities = set(registries["minecraft:block_entity_type"])
         self.potion_effects = potion_effects
         self.convert_contraption = convert_contraption
         self.ready: dict[bytes, n.Compound] = {}
@@ -116,6 +119,23 @@ class ItemPipeline:
             self.changes.append({"kind": "entity_fields", "removed": converted.removed})
         return self.tree(converted.data)
 
+    def block_entity(self, source: n.Compound) -> n.Compound:
+        """普通方块实体及 Create 更新标签；Mekanism 必须接入已验证的专用机器转换。"""
+        id = str(source.get("id", ""))
+        if id.startswith("mekanism"):
+            raise ValueError("Mekanism 方块实体须使用专用机器转换")
+        if id:
+            target = mapped_id(id, self.block_entities, block=True)
+            data = self._restore_items(source, self.dfu.update(deepcopy(source), "block_entity"))
+            data["id"] = n.String(target)
+        else:
+            # Create UpdateTag 无 id；只处理已明确存在的物品与平台持久字段，不编造实体类型。
+            data = self.tree(source)
+        converted = convert_entity_data(data)
+        if converted.removed:
+            self.changes.append({"kind": "block_entity_fields", "removed": converted.removed})
+        return self.tree(converted.data)
+
     def tree(self, value, *, oversized_inventory: bool = False):
         """只转换仍为旧格式的节点；现代组件栈不再次走 DFU。"""
         if isinstance(value, n.Compound):
@@ -167,6 +187,15 @@ class ItemPipeline:
             if converted.removed:
                 self.changes.append({"kind": "item_caps", "removed": converted.removed})
             tag = source.get("tag", n.Compound())
+            if id in AE_STATE_IDS:
+                result = convert_ae_item(source, result, self.item)
+            if id in AUXILIARY_IDS:
+                def enchantments(old):
+                    book = self.dfu.update(n.Compound({"id": n.String("minecraft:enchanted_book"), "Count": n.Byte(1),
+                                                       "tag": n.Compound({"StoredEnchantments": deepcopy(old)})}), "item_stack")
+                    converted = convert_enchantment_components(book, self.enchantments)
+                    return converted.data["components"]["minecraft:stored_enchantments"]
+                result = convert_auxiliary_item(source, result, enchantments)
             if id in PACKAGE_IDS | {"create:filter"}:
                 result = convert_container_item(source, result, self.item).data
             if id.startswith("create:") and ("SequencedAssembly" in tag or "Contraption" in tag):
@@ -210,9 +239,6 @@ class ItemPipeline:
                 needed = NativeItemRequired(source, result, "mekanism")
                 self.pending[identity] = needed
                 raise needed
-            if id in {"ae2:wireless_crafting_terminal", "ae2wtlib:wireless_universal_terminal",
-                      "ae2omnicells:complex_omni_cell_1m"} and tag:
-                raise ValueError("无线终端或通用元件尚需完整状态转换")
             result["count"] = n.Int(1)
             self.ready[identity] = deepcopy(result)
         result = deepcopy(self.ready[identity])
