@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-RECIPE_ROOT = ROOT / "kubejs" / "data" / "minecraft" / "recipes"
+RECIPE_ROOT = ROOT / "kubejs" / "data" / "minecraft" / "recipe"
 
 
 class CulturalDelightsRecipeOverridesTest(unittest.TestCase):
@@ -24,7 +24,7 @@ class CulturalDelightsRecipeOverridesTest(unittest.TestCase):
                 self.assertGreater(path.stat().st_size, 0)
                 recipe = json.loads(path.read_text(encoding="utf-8"))
                 self.assertEqual(recipe["type"], "minecraft:crafting_shapeless")
-                self.assertEqual(recipe["result"]["item"], result)
+                self.assertEqual(recipe["result"]["id"], result)
                 self.assertTrue(recipe["ingredients"])
 
 

@@ -5,7 +5,7 @@
       "conditions": {
         "recipe_id": "maid_storage_manager:storage_define_bauble"
       },
-      "trigger": "touhou_little_maid:altar/altar_craft"
+      "trigger": "touhou_little_maid:altar_craft"
     }
   },
   "display": {
@@ -17,7 +17,7 @@
     "frame": "task",
     "hidden": false,
     "icon": {
-      "item": "maid_storage_manager:storage_define_bauble"
+      "id": "maid_storage_manager:storage_define_bauble"
     },
     "show_toast": true,
     "title": {

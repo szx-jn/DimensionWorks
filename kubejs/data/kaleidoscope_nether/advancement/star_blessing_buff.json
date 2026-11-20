@@ -19,7 +19,7 @@
     "frame": "goal",
     "hidden": false,
     "icon": {
-      "item": "kaleidoscope_nether:star_stew"
+      "id": "kaleidoscope_nether:star_stew"
     },
     "show_toast": true,
     "title": {

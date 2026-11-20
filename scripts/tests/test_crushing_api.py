@@ -25,11 +25,11 @@ class CrushingApiTest(unittest.TestCase):
         self.assertIn("adapters['create:crushing']", self.api)
         self.assertIn("adapters['create:milling']", self.api)
         self.assertIn("adapters['mekanism:crushing']", self.api)
-        self.assertIn("global.DimensionWorksGrinding = api", self.api)
+        self.assertIn("const DimensionWorksGrinding = (function", self.api)
         self.assertIn("registerAdapter: registerAdapter", self.api)
 
     def test_create_supports_independent_chance_outputs(self) -> None:
-        self.assertIn("stack.withChance(output.chance)", self.api)
+        self.assertIn("CreateItem.of(stack, output.chance)", self.api)
         self.assertIn("event.recipes.create.crushing(outputs, recipe.input)", self.api)
         self.assertIn("event.recipes.create.milling(outputs, recipe.input)", self.api)
 
@@ -60,7 +60,7 @@ class CrushingApiTest(unittest.TestCase):
     def test_existing_create_crushing_and_milling_calls_use_the_shared_api(self) -> None:
         self.assertIn("machine: 'create:crushing'", self.cave)
         self.assertIn("machine: 'create:milling'", self.cave)
-        self.assertIn("global.DimensionWorksGrinding.register(event", self.cave)
+        self.assertIn("DimensionWorksGrinding.register(event", self.cave)
         self.assertNotIn("namespace.crushing(", self.cave)
         self.assertNotIn("namespace.milling(", self.cave)
 

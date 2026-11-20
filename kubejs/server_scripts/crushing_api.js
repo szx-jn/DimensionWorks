@@ -72,7 +72,7 @@ const DimensionWorksGrinding = (function () {
 
   function createOutputStack(output) {
     const stack = Item.of(output.item, output.count)
-    return output.chance < 1 ? stack.withChance(output.chance) : stack
+    return output.chance < 1 ? CreateItem.of(stack, output.chance) : stack
   }
 
   function createAdapter(recipeType) {

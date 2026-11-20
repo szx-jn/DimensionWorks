@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-RECIPE_DIR = ROOT / "kubejs" / "data" / "dimensionworks" / "recipes" / "magic_century_egg"
+RECIPE_DIR = ROOT / "kubejs" / "data" / "dimensionworks" / "recipe" / "magic_century_egg"
 
 
 class MagicCenturyEggContractTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
                 self.assertLessEqual(len(recipe["sequence"]), 7)
 
         by_result = {
-            recipe["results"][0]["item"]: recipe
+            recipe["results"][0]["id"]: recipe
             for recipe in recipes
             if "results" in recipe
         }
@@ -36,7 +36,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertEqual(by_result["kubejs:century_egg_eco_components_enriched"]["loops"], 1)
         self.assertEqual(by_result["kubejs:magic_century_egg"]["loops"], 8)
         self.assertEqual(by_result["kubejs:century_egg_washed"]["type"], "create:splashing")
-        self.assertEqual(smelting["result"], "kubejs:century_egg_smelted")
+        self.assertEqual(smelting["result"], {"id": "kubejs:century_egg_smelted"})
         self.assertEqual(by_result["kubejs:century_egg_mixture"]["type"], "create:mixing")
 
         vanilla = by_result["kubejs:century_egg_vanilla_enriched"]
@@ -122,7 +122,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertNotIn(".name(", startup)
         self.assertNotIn(".hunger(99999)", startup)
         self.assertIn(".rarity('epic')", startup)
-        self.assertIn(".hunger(20)", startup)
+        self.assertIn(".nutrition(20)", startup)
         self.assertNotIn(".effect(", startup)
         self.assertNotIn(".eaten(", startup)
         gui = (ROOT / "mods/dimensionworks-magic-egg/src/main/java/dev/szx/dimensionworks/magicegg/MagicEggSelection.java").read_text(encoding="utf-8")

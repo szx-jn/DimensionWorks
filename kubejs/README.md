@@ -2,7 +2,7 @@
 
 ## 当前固定模组的数据修正
 
-`server_scripts/pack_resource_corrections.js` 移除导致现有食物标签加载失败的未注册项。`data/culturaldelights/loot_tables` 用当前 `minecraft:any_of` 条件恢复两种牛油果叶的剪刀、精准采集和自然掉落。`data/farmersrespite` 恢复茶壶掉落及流体 NBT，并用原版动作条件实现修剪进度；女仆存储和下界万象进度使用当前注册的物品、效果名称。对应整包运行结果见[本次验证记录](../docs/validation/2026-11-14-compat-cleanup-and-dispatch.md)。
+`server_scripts/pack_resource_corrections.js` 移除导致现有食物标签加载失败的未注册项。`data/culturaldelights/loot_table` 用当前 `minecraft:any_of` 条件恢复两种牛油果叶的剪刀、精准采集和自然掉落。`data/farmersrespite` 恢复茶壶掉落及流体 NBT，并用原版动作条件实现修剪进度；女仆存储和下界万象进度使用当前注册的物品、效果名称。对应整包运行结果见[本次验证记录](../docs/validation/2026-11-14-compat-cleanup-and-dispatch.md)。
 
 存放 DimensionWorks 的 KubeJS 脚本、配方、标签和数据。
 
@@ -16,15 +16,15 @@
 
 ## ME 动力路线配方
 
-`server_scripts/me_memory.js` 提供 20 种正常卡配方、16 种四卡逐级升级配方和五代驱动器配方。DDR1 使用工程处理器与强化合金；后续驱动器用一台前代驱动器、四个对应电路和四个合金升级。升级回调保留原驱动器的内存卡 NBT；保留的前代卡须另行升级至同代才生效。普通 DDR5 卡不再使用反物质。
+`server_scripts/me_memory.js` 提供 20 种正常卡配方、16 种四卡逐级升级配方和五代驱动器配方。DDR1 使用工程处理器与强化合金；后续驱动器用一台前代驱动器、四个对应电路和四个合金升级。升级使用具名 `ServerEvents.modifyRecipeResult` 回调，复制原驱动器的完整 `minecraft:block_entity_data` 组件，保留内存卡及设置；保留的前代卡须另行升级至同代才生效。普通 DDR5 卡不再使用反物质。
 
-`data/dimensionworks/recipes/advanced_speed_controller.json` 保留 5×5 动力合成图案，将原四个粉碎轮和四个电子管分别换为四个工程处理器、四个强化合金，使两条路线共用中后期工业材料。实时 SU/RPM 规则见 [`../docs/design/me-live-stress-network.md`](../docs/design/me-live-stress-network.md)。
+`data/dimensionworks/recipe/advanced_speed_controller.json` 保留 5×5 动力合成图案，将原四个粉碎轮和四个电子管分别换为四个工程处理器、四个强化合金，使两条路线共用中后期工业材料。实时 SU/RPM 规则见 [`../docs/design/me-live-stress-network.md`](../docs/design/me-live-stress-network.md)。
 
 ## 能量板工业制造
 
 `startup_scripts/energy_plate.js` 保留顺序装配中间物 `kubejs:incomplete_energy_plate`，新增物品需完整重启。成品直接使用 Mekanism 的 `mekanism:energy_tablet`，不再注册重复的自定义能量板。
 
-`data/dimensionworks/recipes/energy_plate.json` 提供一次循环、固定产出 1 个 `mekanism:energy_tablet` 的 Create 顺序装配：1 块铜板经注液器消耗 250 mB 熔融金，再由机械手依次消耗 1 红石粉、1 灌注合金和 1 个 AE2 OMNI Cells 复杂链路处理器（`ae2omnicells:complex_link_processor`），最后机械压力机定型。处理器接入下界合金碎片电路板与印制硅的 AE 压印加工链。`server_scripts/me_memory.js` 只删除 Mekanism 原生能量板配方，保留这条新配方；能量立方和感应储能元件继续退役。
+`data/dimensionworks/recipe/energy_plate.json` 提供一次循环、固定产出 1 个 `mekanism:energy_tablet` 的 Create 顺序装配：1 块铜板经注液器消耗 250 mB 熔融金，再由机械手依次消耗 1 红石粉、1 灌注合金和 1 个 AE2 OMNI Cells 复杂链路处理器（`ae2omnicells:complex_link_processor`），最后机械压力机定型。处理器接入下界合金碎片电路板与印制硅的 AE 压印加工链。`server_scripts/me_memory.js` 只删除 Mekanism 原生能量板配方，保留这条新配方；能量立方和感应储能元件继续退役。
 
 工艺成本、物流、绕过边界与验证要求见 [能量板工业制造](../docs/design/energy-plate-production.md)。
 
@@ -67,7 +67,7 @@
 ## 洞穴维度工厂数据
 
 `data/dimensionworks_cave_factory/recipe/survival/` 提供渊海端生存获得链；`recipe/cave_processing/`、`recipe/fluid_stabilization/` 和 `recipe/module_recipe_rule/` 分别承载签名机加工、稳定化与机制模块映射。
-`data/ae2/recipes/network/cells/` 把渊压基质接入 128³ 空间存储元件配方。
+`data/ae2/recipe/network/cells/` 把渊压基质接入 128³ 空间存储元件配方。
 
 ## 洞穴基础产物自增殖
 
@@ -124,7 +124,7 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 `startup_scripts/molten_metals.js` 通过可复用的 `MoltenMetalFluidDefinition` 注册 21 种熔融金属、合金与特殊材料流体，使用 `dimensionworks:` 命名空间并提供中英文名称。该脚本只注册流体，不自动添加熔炼、浇注或材料加工配方；这些配方应在后续服务端脚本中按各机器的实际能力分别实现。
 
-`server_scripts/molten_metal_recipes.js` 将对应锭熔成 1,000 mB（1 B）流体，并定义黄铜、青铜熔融混合配方。21 种熔融流体的冷却配方位于 `data/create_dragons_plus/recipes/freezing/`：使用 Create: Connected 冷冻触媒和 Create: Dragons Plus 鼓风冷冻类型处理 1,000 mB 熔融流体桶，输出空桶与 1 个对应锭，保持 1 个锭与 1 B 流体一一对应。
+`server_scripts/molten_metal_recipes.js` 将对应锭熔成 1,000 mB（1 B）流体，并定义黄铜、青铜熔融混合配方。21 种熔融流体的冷却配方位于 `data/create_dragons_plus/recipe/freezing/`：使用 Create: Connected 冷冻触媒和 Create: Dragons Plus 鼓风冷冻类型处理 1,000 mB 熔融流体桶，输出空桶与 1 个对应锭，保持 1 个锭与 1 B 流体一一对应。
 
 ## Create 染色触媒兼容
 

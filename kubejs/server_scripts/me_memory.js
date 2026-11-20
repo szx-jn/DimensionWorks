@@ -49,6 +49,7 @@ const retiredMekanismStorageItems = [
 ]
 
 const retiredMekanismStorageItemSet = new Set(retiredMekanismStorageItems)
+const memoryDriveUpgradeTiers = [2, 3, 4, 5]
 
 ServerEvents.recipes(event => {
   memoryTiers.forEach(definition => {
@@ -120,21 +121,30 @@ ServerEvents.recipes(event => {
       P: memoryTiers[tier - 1].circuit,
       A: memoryTiers[tier - 1].alloy,
       D: `dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`
-    }).modifyResult((grid, result) => {
-      // Drive drops contain installed cards; preserve them before consuming the old drive.
-      const previous = grid.find(`dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`)
-      const saved = previous.getTagElement('BlockEntityTag')
-      if (saved != null) {
-        result.addTagElement('BlockEntityTag', saved.copy())
-      }
-      return result
-    }).id(`dimensionworks_mek_stress:upgrade_memory_drive_ddr${tier}`)
+    }).modifyResult(`dimensionworks:upgrade_memory_drive_ddr${tier}`)
+      .id(`dimensionworks_mek_stress:upgrade_memory_drive_ddr${tier}`)
   }
 
   retiredAppliedCreateItems.forEach(id => event.remove({ output: id }))
   retiredMekanismStorageItems.forEach(id => event.remove({ output: id }))
   event.remove({ id: 'mekanism:energy_tablet' })
   event.remove({ id: 'appliedcreate:creative_motor_from_stress_cell' })
+})
+
+// Native block-entity components contain the installed cards and drive settings.
+memoryDriveUpgradeTiers.forEach(tier => {
+  ServerEvents.modifyRecipeResult(`dimensionworks:upgrade_memory_drive_ddr${tier}`, event => {
+    const components = Java.loadClass('net.minecraft.core.component.DataComponents')
+    for (let slot = 0; slot < event.grid.size(); slot++) {
+      var previous = event.grid.getItem(slot)
+      if (previous.id !== `dimensionworks_mek_stress:memory_drive_ddr${tier - 1}`) continue
+      var saved = previous.getComponents().get(components.BLOCK_ENTITY_DATA)
+      if (saved != null) event.item.setBlockEntityData(saved.copyTag())
+      event.exit(event.item)
+      return
+    }
+    throw new Error('内存驱动器升级配方缺少上一级驱动器输入')
+  })
 })
 
 ItemEvents.canPickUp(event => {

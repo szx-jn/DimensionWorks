@@ -246,3 +246,22 @@ JAR mekanismdelight-1.21.1-1.1.3-dimensionworks.1.jar 为 120370 字节、23 个
 洞穴料理本地移植已保留 65 个原物品与五种砖、97 条原配方。8 项 GameTest 通过（caves-delight-native-tests-v2.log），覆盖实际配方输入/输出、物品组件、原辐射条件治疗而不删除辐射、连续三碗食用返还、装饰砖掉落、真实投蛋/实体 UUID 保存和原辐射云、11 种原肉食作为原生狼食物。第一次启动发现原空事件订阅类被 NeoForge 拒绝，移除该无监听注解后通过；未进行客户端专项。此工程尚未提交或推送，当前停止继续公开化/接入，按用户最新要求先汇报。原项目 MIT 与 JAR All Rights Reserved 元数据冲突一并记录，不能把本地验证当作公开分发许可已无争议。
 
 ExtendedAE 官方目标源码与原版本 tag 已比对，原 ex_charger/ex_drive/ex_inscriber/circuit_cutter/silicon_block 等在新 extendedae 命名空间仍注册，无需自行移植整个模组。只读定位原世界实际无限元件，record 为 ae2:i / minecraft:cobblestone，原记录 1 个；应映射到现成 extendedae:infinity_cobblestone_cell，不按原默认水行为猜测。完整库存及 AE2 Key 转换仍待实现与运行验收。
+
+
+## 原生整包脚本与内存驱动器合成专项
+
+按直接升级优先继续适配现成 KubeJS 2101 / Create 6 / Mekanism 10.7，不新增第三方源码移植。当前测试服使用隔离新世界、127.0.0.1:25573、Java 21、2 GiB 堆和 2 CPU；未打开封存旧世界或修改生产原档。
+
+修复实际日志中的三处故障：Create 概率产物由失效的 ItemStack.withChance 改为 CreateItem.of；齿轮之心第六碎片使用实际注册的 mekanism:basic_universal_cable；暮色拆解台区块检查使用原生 KubeJS 方块 id，避免 BlockState.is 重载歧义及不暴露的 equals 方法导致区块晋升崩溃。共享加工 API 保留配方输入、数量和独立概率，采用服务端共享顶层作用域。
+
+内存驱动器升级改为具名 ServerEvents.modifyRecipeResult，读取原生 CraftingInput 第五格驱动器，复制完整 minecraft:block_entity_data；使用实际事件字段 item。回调逐级绑定，避开 Rhino 循环内块级变量重复声明。强力胶保留其他组件，已存在 unbreakable 时不再触发重复库存更新。进度图标转为 id，女仆存储触发器改为目标注册表的 maid_event / altar_craft，保留当前实际物品与祭坛配方 ID。
+
+最终 full-kubejs-server-v9.log：13/13 启动脚本、27/27 服务端脚本加载，均为 0 errors / 0 warnings；服务端数包含 25 个分发脚本和 2 个私有验证脚本。新增 230、移除 381、修改 6 条配方，失败 0 条；Done (0.679s)，40 tick 后正常保存全部维度。进度解析不再出现前轮女仆存储的两条错误。Gradle 本轮实际以退出码 0 完成；该结果仍不能证明完整整包无错误。
+
+私有专项使用真实 AE2 驱动器库存填入带名称/自定义数据的前代内存卡，保存完整方块实体数据，另写入 long 9000000000000000。实际 3×3 CraftingInput 匹配和 recipe.assemble 对 DDR2、DDR3、DDR4、DDR5 四个升级逐项通过：产物 ID/数量正确，方块实体数据逐字相同，输入数据不变。强力胶首次保护成功、再次保护不重复更新、名称与保护组件均保留。上述是实际原生运行检查，不称为 JUnit 或 GameTest；验证脚本仅位于 migration-lab，未随包提交。
+
+运行配方表共 15,947 条；66 个静态整包配方资源中 63 个在运行表中，另外 3 个被自身条件关闭：Cookery 驴肉存在性条件、ComputerCraft 模组条件、Tide/Nether Depths Upgrade 模组条件。需要继续核对原包这些可选内容的保留情况，不把条件关闭当作已保留其玩法。
+
+36 项相关 Python/Node 配方及契约检查通过（kubejs-python-tests-v2.log）；全部 KubeJS 数据 JSON、启动/服务端 JavaScript 语法和 git diff --check 通过。文档已同步加工 API、原生配方目录和驱动器升级组件。失败的 v4/v6/v7 日志保留，未隐藏错误后报成功。
+
+整包仍未验收：现成第三方资产仍有掉落表、配方、标签、数据映射、Curios 槽位及客户端类反射错误；本轮仅验证上述整包自有脚本与指定合成。目标清单、所有旧档及真实认证/生产升级继续待完成。三个自做料理/酱料方案继续待用户决定，VERSION 为 0.3.52，未创建 Release、未跑光影专项。

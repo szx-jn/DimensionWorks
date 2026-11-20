@@ -2,7 +2,7 @@
   "parent": "farmersrespite:main/get_tea_seeds",
   "display": {
     "icon": {
-      "item": "minecraft:stone_axe"
+      "id": "minecraft:stone_axe"
     },
     "title": {
       "translate": "farmersrespite.advancement.stunt_tea_bush"

@@ -16,12 +16,7 @@ class CopperProcessingTest(unittest.TestCase):
         harness = r"""
 const fs = require('fs'), vm = require('vm');
 const recipes = [], removed = [];
-const stack = (item, count = 1) => {
-  if (typeof count === 'object') return {item, nbt: count};
-  const result = {item, count};
-  Object.defineProperty(result, 'withChance', {value(chance) { result.chance = chance; return result; }});
-  return result;
-};
+const stack = (item, count = 1, components = {}) => ({item, count, components});
 function add(json) {
   recipes.push(json);
   const builder = {
@@ -37,7 +32,8 @@ const event = {
   custom: add,
   recipes: {create: new Proxy({}, {get: (_, type) => (output, input) => add({type: 'create:' + type, output, input})})}
 };
-const context = vm.createContext({global: {}, console: {info() {}}, Item: {of: stack},
+const context = vm.createContext({console: {info() {}}, Item: {of: stack},
+  CreateItem: {of(item, chance) { return {...item, chance}; }},
   ServerEvents: {recipes(fn) { fn(event); }}});
 for (const file of ['crushing_api.js', 'copper_processing.js'])
   vm.runInContext(fs.readFileSync('kubejs/server_scripts/' + file, 'utf8'), context);
@@ -55,7 +51,7 @@ process.stdout.write(JSON.stringify({recipes, removed}));
         self.assertEqual(recipe["input"], ["minecraft:raw_copper"])
         self.assertEqual(recipe["heat"], "heated")
         self.assertIn("minecraft:copper_ingot", recipe["output"])
-        marker = next(x for x in recipe["output"] if isinstance(x, dict))["nbt"]
+        marker = next(x for x in recipe["output"] if isinstance(x, dict))["components"]["minecraft:custom_data"]
         self.assertEqual((marker["InputGas"], marker["InputAmount"]), ("dimensionworks:carbon_monoxide", 250))
         self.assertEqual((marker["Gas"], marker["Amount"]), ("dimensionworks:carbon_dioxide", 250))
         self.assertTrue(marker["ExcludeSuperheated"])
@@ -82,9 +78,10 @@ process.stdout.write(JSON.stringify({recipes, removed}));
         self.assertIn({"type": "mekanism:purifying", "output": "mekanism:clump_copper"}, self.data["removed"])
         recipe = self.recipes["oxide_from_veridium"]
         self.assertEqual(recipe["type"], "mekanism:purifying")
-        self.assertEqual(recipe["itemInput"], {"ingredient": {"item": "create:veridium"}})
-        self.assertEqual(recipe["output"], {"item": "minecraft:raw_copper", "count": 2})
-        self.assertEqual(recipe["chemicalInput"], {"gas": "mekanism:oxygen", "amount": 1})
+        self.assertEqual(recipe["item_input"], {"item": "create:veridium", "count": 1})
+        self.assertEqual(recipe["output"], {"id": "minecraft:raw_copper", "count": 2})
+        self.assertEqual(recipe["chemical_input"], {"chemical": "mekanism:oxygen", "amount": 1})
+        self.assertTrue(recipe["per_tick_usage"])
 
 
 if __name__ == "__main__":

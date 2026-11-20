@@ -65,7 +65,7 @@ ServerEvents.recipes(event => {
     accept_mirrored: false,
     pattern: ['GUG', 'EAE', 'GUG'],
     key: {
-      G: { item: 'mekanism:universal_cable' },
+      G: { item: 'mekanism:basic_universal_cable' },
       U: { item: 'ae2:fluix_crystal' },
       E: { item: 'create:electron_tube' },
       A: { item: 'appliedcreate:me_gearbox' }

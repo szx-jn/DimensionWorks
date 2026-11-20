@@ -1,8 +1,10 @@
-// Create's glue uses vanilla durability. Preserve every other tag on existing stacks.
+// Create's glue uses vanilla durability. Preserve other components on existing stacks.
 const SUPER_GLUE_ID = 'create:super_glue'
+const $DWGlueComponents = Java.loadClass('net.minecraft.core.component.DataComponents')
 
 function protectSuperGlue(stack) {
   if (!stack || stack.id !== SUPER_GLUE_ID) return false
+  if (stack.getComponents().has($DWGlueComponents.UNBREAKABLE)) return false
   stack.setUnbreakableWithTooltip()
   return true
 }
