@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public final class MemoryDriveScreen extends AbstractContainerScreen<MemoryDriveMenu> {
     private static final ResourceLocation DRIVE_TEXTURE =
-        new ResourceLocation("dimensionworks_mek_stress", "textures/gui/memory_drive.png");
+        ResourceLocation.fromNamespaceAndPath("dimensionworks_mek_stress", "textures/gui/memory_drive.png");
     private static final int STORAGE_X = 8;
     private static final int STORAGE_Y = 26;
     private int localPage;

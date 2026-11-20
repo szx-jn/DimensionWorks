@@ -1,158 +1,29 @@
-plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-    id 'eclipse'
-    id 'idea'
-}
+plugins { id 'java-library' }
 
 version = '0.3.30'
-group = 'dev.szx.dimensionworks'
 base.archivesName = 'dimensionworks_mek_stress'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-def rpmLimitBuild = file('../dimensionworks-rpm-limit/build.gradle').getText('UTF-8')
-def rpmLimitVersionMatch = rpmLimitBuild =~ /(?m)^version = '([^']+)'$/
-if (!rpmLimitVersionMatch.find()) {
-    throw new GradleException('Could not determine the RPM limit project version')
-}
-def rpmLimitVersion = rpmLimitVersionMatch.group(1)
-def rpmLimitJar = files("../dimensionworks-rpm-limit/build/libs/dimensionworks_rpm_limit-${rpmLimitVersion}-dev.jar")
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', ''
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                dimensionworks_mek_stress {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {}
-        server { args '--nogui' }
-    }
-}
-
-repositories {
-    maven { name = 'Create'; url = 'https://maven.createmod.net' }
-    maven { name = 'Tterrag'; url = 'https://maven.tterrag.com/' }
-    maven { name = 'ModMaven'; url = 'https://modmaven.dev' }
-    maven { name = 'BlameJared'; url = 'https://maven.blamejared.com' }
-    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
-    maven { name = 'Curios'; url = 'https://maven.theillusivec4.top/' }
-    mavenCentral()
-}
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+apply from: rootProject.file('gradle/neoforge-create.gradle')
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
-
-    implementation fg.deobf('com.simibubi.create:create-1.20.1:6.0.8-291:slim')
-    implementation fg.deobf('net.createmod.ponder:Ponder-Forge-1.20.1:1.0.91')
-    implementation fg.deobf('mekanism:Mekanism:1.20.1-10.4.16.80')
-    implementation fg.deobf('maven.modrinth:OFVYKsAk:Th4Czz4N')
-    implementation fg.deobf('appeng:appliedenergistics2-forge:15.4.10')
-    implementation fg.deobf('maven.modrinth:applied-create:1.1.5')
-    implementation fg.deobf('maven.modrinth:kotlin-for-forge:4.12.0')
-    compileOnly fg.deobf('maven.modrinth:jade:11.13.2+forge')
-    implementation fg.deobf('maven.modrinth:nBqivi8H:YR33MHbk')
-    implementation fg.deobf('maven.modrinth:iFDWVIFV:qFTHdrDH')
-    implementation fg.deobf('maven.modrinth:2gq0ALnz:lalKl0oa')
-    compileOnly fg.deobf(rpmLimitJar)
-    runtimeOnly fg.deobf('maven.modrinth:jade:11.13.2+forge')
-    runtimeOnly fg.deobf(rpmLimitJar)
-    runtimeOnly fg.deobf('dev.engine-room.flywheel:flywheel-forge-1.20.1:1.0.5')
-    runtimeOnly fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
-    runtimeOnly fg.deobf('maven.modrinth:guideme:20.1.15')
-    runtimeOnly fg.deobf('maven.modrinth:GRqrodjM:YbhHI55E')
-    runtimeOnly fg.deobf('com.tterrag.registrate:Registrate:MC1.20-1.3.3')
-    runtimeOnly 'io.github.llamalad7:mixinextras-forge:0.4.1'
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    testImplementation fg.deobf(rpmLimitJar)
+    implementation project(':dimensionworks-rpm-limit')
+    implementation 'maven.modrinth:mekanism:5KzzycBT'
+    implementation 'maven.modrinth:mekanism-generators:a6gl7srE'
+    implementation 'maven.modrinth:ae2:7Ac6mXbf'
+    implementation 'maven.modrinth:applied-create:rqrW3P8C'
+    implementation 'maven.modrinth:kotlin-for-forge:9ZlVvei8'
+    implementation 'maven.modrinth:draconic-evolution:84xwXpNh'
+    implementation 'maven.modrinth:brandons-core:56nwe5IX'
+    implementation 'maven.modrinth:codechicken-lib:vLDGhjNJ'
+    implementation 'maven.modrinth:jade:eYz2YBGT'
+    runtimeOnly 'maven.modrinth:curios:KJsZIQrT'
+    runtimeOnly 'maven.modrinth:guideme:QeYKsstN'
+    runtimeOnly 'maven.modrinth:create-more-package-couriers:aG9jHA8l'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
-
-mixin {
-    add sourceSets.main, 'dimensionworks_mek_stress.refmap.json'
-    config 'dimensionworks_mek_stress.mixins.json'
-    debug.verbose = true
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':devJar')
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    dependsOn gradle.includedBuild('dimensionworks-rpm-limit').task(':devJar')
-}
-
-jar {
-    manifest.attributes([
-        'MixinConfigs': 'dimensionworks_mek_stress.mixins.json'
-    ])
-    finalizedBy 'reobfJar'
-}
-
-sourceSets {
-    energyProbe {
-        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-    }
-    gameTest {
-        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-    }
-}
-
-// Explicit opt-in production-client probe. Never included in the main or release jar.
-tasks.register('energyProbeJar', Jar) {
-    dependsOn tasks.named('energyProbeClasses')
-    archiveBaseName = 'dimensionworks_energy_probe'
-    from sourceSets.energyProbe.output
-}
-reobf { energyProbeJar {} }
-minecraft.runs {
-    gameTestServer {
-        workingDirectory project.file('run-gametest')
-        property 'forge.enabledGameTestNamespaces', 'dimensionworks_mek_stress'
-        mods {
-            dimensionworks_mek_stress {
-                sources = [sourceSets.main, sourceSets.gameTest]
-            }
-        }
-    }
-}
-
-// Optional local verification of the baked world models; excluded from production JARs.
-sourceSets {
-    clientCheck {
-        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-    }
-}
-minecraft.runs.client.mods.dimensionworks_mek_stress {
-    sources = [sourceSets.main, sourceSets.clientCheck]
-}
-
-// Targeted cloud recovery checks in a new disposable world; no client or release dependency.
-if (project.hasProperty('cloudRuntimeChecks')) {
-    sourceSets {
-        cloudCheck {
-            java.srcDir 'src/gameTest/java'
-            java.include '**/CloudDiskGameTests.java'
-            resources.srcDir 'src/gameTest/resources'
-            compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-        }
-    }
-    minecraft.runs.gameTestServer {
-        workingDirectory project.file('run-gametest-cloud')
-        mods.dimensionworks_mek_stress.sources = [sourceSets.main, sourceSets.cloudCheck]
-    }
+test { useJUnitPlatform() }
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
 }

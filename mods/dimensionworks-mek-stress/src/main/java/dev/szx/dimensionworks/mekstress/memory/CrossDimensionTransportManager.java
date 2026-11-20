@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 /** Updates only loaded endpoint block entities registered by their own load/tick lifecycle. */
 public final class CrossDimensionTransportManager {
@@ -34,8 +34,7 @@ public final class CrossDimensionTransportManager {
         endpoint.applyPowerOutput(0, 0);
     }
 
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
         List<CrossDimensionTransportBlockEntity> snapshot;
         synchronized (CrossDimensionTransportManager.class) { snapshot = List.copyOf(ENDPOINTS); }
         Map<Integer, List<CrossDimensionTransportBlockEntity>> byChannel = new java.util.HashMap<>();

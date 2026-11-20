@@ -7,7 +7,7 @@ import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /** Encodes channel contents into bounded, unpacker-compatible Matter Balls without dropping payload. */
 public final class MatterBallPacking {

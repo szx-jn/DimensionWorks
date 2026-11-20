@@ -2,9 +2,9 @@ package dev.szx.dimensionworks.mekstress.integration;
 
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import mekanism.api.Action;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
+import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.IChemicalHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -12,41 +12,31 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.common.util.LazyOptional;
 
-public final class BasinGasHandler implements IGasHandler {
+public final class BasinGasHandler implements IChemicalHandler {
     private static final long CAPACITY = 10_000L;
     private static final long LEAK_AMOUNT = 200L;
     private static final ResourceLocation BASIN_LID =
-        new ResourceLocation("createdieselgenerators", "basin_lid");
+        ResourceLocation.fromNamespaceAndPath("createdieselgenerators", "basin_lid");
     private static final String NBT_KEY = "DimensionWorksBasinGas";
     private static final String INPUT_NBT_KEY = "DimensionWorksBasinInputGas";
 
     private final BasinBlockEntity owner;
-    private GasStack gas = GasStack.EMPTY;
-    private GasStack inputGas = GasStack.EMPTY;
+    private ChemicalStack gas = ChemicalStack.EMPTY;
+    private ChemicalStack inputGas = ChemicalStack.EMPTY;
     private long lastLeakTick;
-    private final LazyOptional<IGasHandler> capability = LazyOptional.of(() -> this);
 
     public BasinGasHandler(BasinBlockEntity owner) {
         this.owner = owner;
     }
 
-    public LazyOptional<IGasHandler> capability() {
-        return capability;
-    }
-
-    public void invalidate() {
-        capability.invalidate();
-    }
-
-    public boolean acceptProducedGas(Gas producedGas, long amount, boolean simulate) {
+    public boolean acceptProducedGas(Chemical producedGas, long amount, boolean simulate) {
         return processRecipeGas(null, 0L, producedGas, amount, simulate);
     }
 
     /** Validates both buffers before consuming input or storing an optional recipe output. */
-    public boolean processRecipeGas(Gas requiredGas, long requiredAmount,
-                                   Gas producedGas, long amount, boolean simulate) {
+    public boolean processRecipeGas(Chemical requiredGas, long requiredAmount,
+                                   Chemical producedGas, long amount, boolean simulate) {
         boolean hasOutput = producedGas != null && amount > 0;
         if (!hasOutput && (producedGas != null || amount != 0)) {
             return false;
@@ -56,11 +46,11 @@ public final class BasinGasHandler implements IGasHandler {
         }
         if (requiredAmount < 0 || (requiredGas == null && requiredAmount != 0)
             || (requiredGas != null && (requiredAmount <= 0 || inputGas.isEmpty()
-                || !inputGas.getType().equals(requiredGas) || inputGas.getAmount() < requiredAmount))) {
+                || !inputGas.getChemical().equals(requiredGas) || inputGas.getAmount() < requiredAmount))) {
             return false;
         }
         if (hasOutput) {
-            if (amount > CAPACITY || (!gas.isEmpty() && !gas.getType().equals(producedGas))
+            if (amount > CAPACITY || (!gas.isEmpty() && !gas.getChemical().equals(producedGas))
                 || amount > CAPACITY - gas.getAmount()) {
                 return false;
             }
@@ -71,10 +61,10 @@ public final class BasinGasHandler implements IGasHandler {
 
         if (requiredAmount > 0) {
             long remainingInput = inputGas.getAmount() - requiredAmount;
-            inputGas = remainingInput == 0 ? GasStack.EMPTY : new GasStack(inputGas, remainingInput);
+            inputGas = remainingInput == 0 ? ChemicalStack.EMPTY : inputGas.copyWithAmount(remainingInput);
         }
         if (hasOutput) {
-            gas = new GasStack(producedGas, gas.getAmount() + amount);
+            gas = new ChemicalStack(producedGas, gas.getAmount() + amount);
         }
         owner.setChanged();
         owner.notifyChangeOfContents();
@@ -106,9 +96,9 @@ public final class BasinGasHandler implements IGasHandler {
         long loss = Math.min(LEAK_AMOUNT, totalGas);
         long inputLoss = loss * inputGas.getAmount() / totalGas;
         long remainingInput = inputGas.getAmount() - inputLoss;
-        inputGas = remainingInput == 0 ? GasStack.EMPTY : new GasStack(inputGas, remainingInput);
+        inputGas = remainingInput == 0 ? ChemicalStack.EMPTY : inputGas.copyWithAmount(remainingInput);
         long remaining = gas.getAmount() - (loss - inputLoss);
-        gas = remaining == 0 ? GasStack.EMPTY : new GasStack(gas, remaining);
+        gas = remaining == 0 ? ChemicalStack.EMPTY : gas.copyWithAmount(remaining);
         owner.setChanged();
         owner.notifyChangeOfContents();
         owner.notifyUpdate();
@@ -121,32 +111,32 @@ public final class BasinGasHandler implements IGasHandler {
             && !cover.getValue(BlockStateProperties.OPEN);
     }
 
-    public void readFromNbt(CompoundTag tag) {
+    public void readFromNbt(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         gas = tag.contains(NBT_KEY, Tag.TAG_COMPOUND)
-            ? GasStack.readFromNBT(tag.getCompound(NBT_KEY))
-            : GasStack.EMPTY;
+            ? ChemicalStack.parseOptional(registries, tag.getCompound(NBT_KEY))
+            : ChemicalStack.EMPTY;
         inputGas = tag.contains(INPUT_NBT_KEY, Tag.TAG_COMPOUND)
-            ? GasStack.readFromNBT(tag.getCompound(INPUT_NBT_KEY))
-            : GasStack.EMPTY;
+            ? ChemicalStack.parseOptional(registries, tag.getCompound(INPUT_NBT_KEY))
+            : ChemicalStack.EMPTY;
     }
 
-    public void writeToNbt(CompoundTag tag) {
-        tag.put(NBT_KEY, gas.write(new CompoundTag()));
-        tag.put(INPUT_NBT_KEY, inputGas.write(new CompoundTag()));
+    public void writeToNbt(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        tag.put(NBT_KEY, gas.saveOptional(registries));
+        tag.put(INPUT_NBT_KEY, inputGas.saveOptional(registries));
     }
 
     @Override
-    public int getTanks() {
+    public int getChemicalTanks() {
         return 2;
     }
 
     @Override
-    public GasStack getChemicalInTank(int tank) {
-        return tank == 0 ? gas.copy() : tank == 1 ? inputGas.copy() : GasStack.EMPTY;
+    public ChemicalStack getChemicalInTank(int tank) {
+        return tank == 0 ? gas.copy() : tank == 1 ? inputGas.copy() : ChemicalStack.EMPTY;
     }
 
     @Override
-    public void setChemicalInTank(int tank, GasStack stack) {
+    public void setChemicalInTank(int tank, ChemicalStack stack) {
         if ((tank == 0 || tank == 1) && stack.getAmount() <= CAPACITY) {
             if (tank == 0) gas = stack.copy();
             else inputGas = stack.copy();
@@ -157,43 +147,43 @@ public final class BasinGasHandler implements IGasHandler {
     }
 
     @Override
-    public long getTankCapacity(int tank) {
+    public long getChemicalTankCapacity(int tank) {
         return tank == 0 || tank == 1 ? CAPACITY : 0;
     }
 
     @Override
-    public boolean isValid(int tank, GasStack stack) {
+    public boolean isValid(int tank, ChemicalStack stack) {
         return tank == 1 && !stack.isEmpty();
     }
 
     @Override
-    public GasStack insertChemical(int tank, GasStack stack, Action action) {
+    public ChemicalStack insertChemical(int tank, ChemicalStack stack, Action action) {
         if (!isValid(tank, stack)
-            || (!inputGas.isEmpty() && !inputGas.getType().equals(stack.getType()))) {
+            || (!inputGas.isEmpty() && !inputGas.getChemical().equals(stack.getChemical()))) {
             return stack;
         }
         long accepted = Math.min(stack.getAmount(), CAPACITY - inputGas.getAmount());
         if (accepted <= 0) return stack;
         if (action.execute()) {
-            inputGas = new GasStack(stack.getType(), inputGas.getAmount() + accepted);
+            inputGas = new ChemicalStack(stack.getChemical(), inputGas.getAmount() + accepted);
             owner.setChanged();
             owner.notifyChangeOfContents();
             owner.notifyUpdate();
         }
         long remainder = stack.getAmount() - accepted;
-        return remainder == 0 ? GasStack.EMPTY : new GasStack(stack, remainder);
+        return remainder == 0 ? ChemicalStack.EMPTY : stack.copyWithAmount(remainder);
     }
 
     @Override
-    public GasStack extractChemical(int tank, long amount, Action action) {
+    public ChemicalStack extractChemical(int tank, long amount, Action action) {
         if (tank != 0 || amount <= 0 || gas.isEmpty()) {
-            return GasStack.EMPTY;
+            return ChemicalStack.EMPTY;
         }
         long extracted = Math.min(amount, gas.getAmount());
-        GasStack result = new GasStack(gas, extracted);
+        ChemicalStack result = gas.copyWithAmount(extracted);
         if (action.execute()) {
             long remaining = gas.getAmount() - extracted;
-            gas = remaining == 0 ? GasStack.EMPTY : new GasStack(gas, remaining);
+            gas = remaining == 0 ? ChemicalStack.EMPTY : gas.copyWithAmount(remaining);
             owner.setChanged();
             owner.notifyChangeOfContents();
             owner.notifyUpdate();

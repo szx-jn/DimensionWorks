@@ -5,25 +5,25 @@ import dev.szx.dimensionworks.mekstress.core.InputStressMath;
 import dev.szx.dimensionworks.mekstress.core.MemoryCardType;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
 import java.util.EnumMap;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** RPM scheduling and bounded transmission loss; no card-provided stress capacity. */
 public final class MekStressConfig {
-    public static final ForgeConfigSpec SPEC;
-    private static final EnumMap<MemoryTier, ForgeConfigSpec.LongValue> DRIVE_RPM = new EnumMap<>(MemoryTier.class);
-    private static final EnumMap<MemoryTier, ForgeConfigSpec.LongValue> CARD_RPM = new EnumMap<>(MemoryTier.class);
-    private static final EnumMap<MemoryCardType, ForgeConfigSpec.IntValue> SPEED = new EnumMap<>(MemoryCardType.class);
-    private static final EnumMap<MachineTier, ForgeConfigSpec.IntValue> MACHINE_RPM = new EnumMap<>(MachineTier.class);
-    private static final EnumMap<MachineTier, ForgeConfigSpec.DoubleValue> MACHINE_MAX_OUTPUT = new EnumMap<>(MachineTier.class);
-    public static final ForgeConfigSpec.DoubleValue DEFECTIVE_CHANCE;
-    public static final ForgeConfigSpec.IntValue MAXIMUM_INPUT_LOSS_BP;
-    public static final ForgeConfigSpec.IntValue DIRECT_MAX_RPM;
-    public static final ForgeConfigSpec.IntValue GENERATOR_RPM;
-    public static final ForgeConfigSpec.IntValue MAX_TRANSPORT_ITEM_NBT_BYTES;
-    public static final ForgeConfigSpec.IntValue MAX_MATTER_BALL_NBT_BYTES;
+    public static final ModConfigSpec SPEC;
+    private static final EnumMap<MemoryTier, ModConfigSpec.LongValue> DRIVE_RPM = new EnumMap<>(MemoryTier.class);
+    private static final EnumMap<MemoryTier, ModConfigSpec.LongValue> CARD_RPM = new EnumMap<>(MemoryTier.class);
+    private static final EnumMap<MemoryCardType, ModConfigSpec.IntValue> SPEED = new EnumMap<>(MemoryCardType.class);
+    private static final EnumMap<MachineTier, ModConfigSpec.IntValue> MACHINE_RPM = new EnumMap<>(MachineTier.class);
+    private static final EnumMap<MachineTier, ModConfigSpec.DoubleValue> MACHINE_MAX_OUTPUT = new EnumMap<>(MachineTier.class);
+    public static final ModConfigSpec.DoubleValue DEFECTIVE_CHANCE;
+    public static final ModConfigSpec.IntValue MAXIMUM_INPUT_LOSS_BP;
+    public static final ModConfigSpec.IntValue DIRECT_MAX_RPM;
+    public static final ModConfigSpec.IntValue GENERATOR_RPM;
+    public static final ModConfigSpec.IntValue MAX_TRANSPORT_ITEM_NBT_BYTES;
+    public static final ModConfigSpec.IntValue MAX_MATTER_BALL_NBT_BYTES;
 
     static {
-        var builder = new ForgeConfigSpec.Builder();
+        var builder = new ModConfigSpec.Builder();
         builder.push("memory_drive_bandwidth");
         for (MemoryTier tier : MemoryTier.values())
             DRIVE_RPM.put(tier, builder.defineInRange("ddr" + tier.index() + "BandwidthRpm",

@@ -21,11 +21,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 /** Create stress input/source endpoint. The live power link is always recomputed from loaded devices. */
@@ -45,8 +42,9 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
     private boolean registered;
     private final CrossDimensionItemHandler itemHandler = new CrossDimensionItemHandler(this);
     private final CrossDimensionFluidHandler fluidHandler = new CrossDimensionFluidHandler(this);
-    private LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> itemHandler);
-    private LazyOptional<IFluidHandler> fluidCapability = LazyOptional.of(() -> fluidHandler);
+
+    public IItemHandler itemHandler() { return itemHandler; }
+    public IFluidHandler fluidHandler() { return fluidHandler; }
 
     public CrossDimensionTransportBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -97,26 +95,8 @@ public final class CrossDimensionTransportBlockEntity extends GeneratingKineticB
         super.onChunkUnloaded();
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable net.minecraft.core.Direction side) {
-        if (capability == ForgeCapabilities.ITEM_HANDLER) return itemCapability.cast();
-        if (capability == ForgeCapabilities.FLUID_HANDLER) return fluidCapability.cast();
-        return super.getCapability(capability, side);
-    }
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemCapability.invalidate();
-        fluidCapability.invalidate();
-    }
 
-    @Override
-    public void reviveCaps() {
-        super.reviveCaps();
-        itemCapability = LazyOptional.of(() -> itemHandler);
-        fluidCapability = LazyOptional.of(() -> fluidHandler);
-    }
 
     @Override
     public void remove() {

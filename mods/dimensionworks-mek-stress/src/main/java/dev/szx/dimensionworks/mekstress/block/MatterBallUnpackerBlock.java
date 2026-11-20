@@ -20,14 +20,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Nullable;
 
 public final class MatterBallUnpackerBlock extends Block implements EntityBlock {
-    private final RegistryObject<BlockEntityType<MatterBallUnpackerBlockEntity>> type;
+    private final DeferredHolder<BlockEntityType<?>, BlockEntityType<MatterBallUnpackerBlockEntity>> type;
 
     public MatterBallUnpackerBlock(Properties properties,
-        RegistryObject<BlockEntityType<MatterBallUnpackerBlockEntity>> type) {
+        DeferredHolder<BlockEntityType<?>, BlockEntityType<MatterBallUnpackerBlockEntity>> type) {
         super(properties);
         this.type = type;
     }

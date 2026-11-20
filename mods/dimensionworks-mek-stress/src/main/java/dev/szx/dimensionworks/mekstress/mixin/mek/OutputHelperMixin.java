@@ -11,7 +11,6 @@ import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
-import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
@@ -20,7 +19,7 @@ import mekanism.api.recipes.outputs.IOutputHandler;
 import mekanism.api.recipes.outputs.OutputHelper;
 import net.minecraft.world.item.ItemStack;
 import java.util.UUID;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -94,7 +93,7 @@ public abstract class OutputHelperMixin {
     }
 
     @Inject(
-        method = "handleOutput(Lmekanism/api/fluid/IExtendedFluidTank;Lnet/minecraftforge/fluids/FluidStack;I)V",
+        method = "handleOutput(Lmekanism/api/fluid/IExtendedFluidTank;Lnet/neoforged/neoforge/fluids/FluidStack;I)V",
         at = @At("HEAD"),
         cancellable = true,
         remap = false
@@ -184,7 +183,7 @@ public abstract class OutputHelperMixin {
     }
 
     @Inject(
-        method = "calculateOperationsCanSupport(Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;Lmekanism/api/fluid/IExtendedFluidTank;Lnet/minecraftforge/fluids/FluidStack;)V",
+        method = "calculateOperationsCanSupport(Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;Lmekanism/api/fluid/IExtendedFluidTank;Lnet/neoforged/neoforge/fluids/FluidStack;)V",
         at = @At("HEAD"),
         cancellable = true,
         remap = false
@@ -262,7 +261,7 @@ public abstract class OutputHelperMixin {
         remap = false
     )
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void dimensionworks$wrapChemicalOutputHandler(IChemicalTank<?, ?> tank, RecipeError error,
+    private static void dimensionworks$wrapChemicalOutputHandler(IChemicalTank tank, RecipeError error,
                                                                   CallbackInfoReturnable<IOutputHandler<?>> cir) {
         cir.setReturnValue(ScaledOutputHandler.wrapChemical((IOutputHandler) cir.getReturnValue(),
             (IChemicalTank) tank, error));
@@ -307,28 +306,28 @@ public abstract class OutputHelperMixin {
     }
 
     @Inject(
-        method = "getOutputHandler(Lmekanism/api/inventory/IInventorySlot;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;Lmekanism/api/chemical/gas/IGasTank;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;)Lmekanism/api/recipes/outputs/IOutputHandler;",
+        method = "getOutputHandler(Lmekanism/api/inventory/IInventorySlot;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;Lmekanism/api/chemical/IChemicalTank;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;)Lmekanism/api/recipes/outputs/IOutputHandler;",
         at = @At("RETURN"),
         cancellable = true,
         remap = false
     )
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void dimensionworks$wrapReactionOutputHandler(IInventorySlot slot, RecipeError slotError,
-                                                                 IGasTank tank, RecipeError tankError,
+                                                                 IChemicalTank tank, RecipeError tankError,
                                                                  CallbackInfoReturnable<IOutputHandler<?>> cir) {
         cir.setReturnValue(ScaledOutputHandler.wrapReaction(slot, slotError, tank, tankError,
             (IOutputHandler) cir.getReturnValue()));
     }
 
     @Inject(
-        method = "getOutputHandler(Lmekanism/api/chemical/gas/IGasTank;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;Lmekanism/api/chemical/gas/IGasTank;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;)Lmekanism/api/recipes/outputs/IOutputHandler;",
+        method = "getOutputHandler(Lmekanism/api/chemical/IChemicalTank;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;Lmekanism/api/chemical/IChemicalTank;Lmekanism/api/recipes/cache/CachedRecipe$OperationTracker$RecipeError;)Lmekanism/api/recipes/outputs/IOutputHandler;",
         at = @At("RETURN"),
         cancellable = true,
         remap = false
     )
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void dimensionworks$wrapElectrolysisOutputHandler(IGasTank leftTank, RecipeError leftError,
-                                                                     IGasTank rightTank, RecipeError rightError,
+    private static void dimensionworks$wrapElectrolysisOutputHandler(IChemicalTank leftTank, RecipeError leftError,
+                                                                     IChemicalTank rightTank, RecipeError rightError,
                                                                      CallbackInfoReturnable<IOutputHandler<?>> cir) {
         cir.setReturnValue(ScaledOutputHandler.wrapElectrolysis(leftTank, leftError, rightTank, rightError,
             (IOutputHandler) cir.getReturnValue()));

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
-import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.recipes.ElectrolysisRecipe;
@@ -15,7 +14,7 @@ import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * Applies the mechanical production multiplier at the logical output boundary.
@@ -54,8 +53,8 @@ public final class ScaledOutputHandler<T> implements IOutputHandler<T> {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <STACK extends ChemicalStack<?>> IOutputHandler<STACK> wrapChemical(
-        IOutputHandler<STACK> delegate, IChemicalTank<?, STACK> tank, RecipeError error) {
+    public static <STACK extends ChemicalStack> IOutputHandler<STACK> wrapChemical(
+        IOutputHandler<STACK> delegate, IChemicalTank tank, RecipeError error) {
         IChemicalTank rawTank = tank;
         return new ScaledOutputHandler<>(delegate,
             (output, operations) -> MachineOutputDelivery.insertChemical(rawTank, output, operations),
@@ -92,9 +91,9 @@ public final class ScaledOutputHandler<T> implements IOutputHandler<T> {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static IOutputHandler<PressurizedReactionRecipe.PressurizedReactionRecipeOutput> wrapReaction(
-        IInventorySlot slot, RecipeError slotError, IGasTank tank, RecipeError tankError,
+        IInventorySlot slot, RecipeError slotError, IChemicalTank tank, RecipeError tankError,
         IOutputHandler<PressurizedReactionRecipe.PressurizedReactionRecipeOutput> delegate) {
-        IGasTank rawTank = tank;
+        IChemicalTank rawTank = tank;
         return new ScaledOutputHandler<>(delegate,
             (output, operations) -> {
                 MachineOutputDelivery.insertItem(slot, output.item(), operations);
@@ -110,10 +109,10 @@ public final class ScaledOutputHandler<T> implements IOutputHandler<T> {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static IOutputHandler<ElectrolysisRecipe.ElectrolysisRecipeOutput> wrapElectrolysis(
-        IGasTank leftTank, RecipeError leftError, IGasTank rightTank, RecipeError rightError,
+        IChemicalTank leftTank, RecipeError leftError, IChemicalTank rightTank, RecipeError rightError,
         IOutputHandler<ElectrolysisRecipe.ElectrolysisRecipeOutput> delegate) {
-        IGasTank rawLeftTank = leftTank;
-        IGasTank rawRightTank = rightTank;
+        IChemicalTank rawLeftTank = leftTank;
+        IChemicalTank rawRightTank = rightTank;
         return new ScaledOutputHandler<>(delegate,
             (output, operations) -> {
                 MachineOutputDelivery.insertChemical(rawLeftTank, output.left(), operations);

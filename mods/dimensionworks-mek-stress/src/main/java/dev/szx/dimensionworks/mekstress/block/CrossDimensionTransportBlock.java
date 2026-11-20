@@ -25,17 +25,17 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 /** One-block Create power endpoint. Its shaft axis is shown by Create's horizontal-axis block state. */
 public final class CrossDimensionTransportBlock extends HorizontalAxisKineticBlock implements EntityBlock {
     private final int tier;
-    private final RegistryObject<BlockEntityType<CrossDimensionTransportBlockEntity>> type;
+    private final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrossDimensionTransportBlockEntity>> type;
 
     public CrossDimensionTransportBlock(int tier, Properties properties,
-        RegistryObject<BlockEntityType<CrossDimensionTransportBlockEntity>> type) {
+        DeferredHolder<BlockEntityType<?>, BlockEntityType<CrossDimensionTransportBlockEntity>> type) {
         super(properties);
         if (tier < 1 || tier > 3) throw new IllegalArgumentException("tier");
         this.tier = tier;

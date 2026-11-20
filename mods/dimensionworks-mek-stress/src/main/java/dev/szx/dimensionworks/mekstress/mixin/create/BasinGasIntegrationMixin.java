@@ -6,16 +6,13 @@ import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
 import dev.szx.dimensionworks.mekstress.integration.BasinGasHandler;
 import java.util.List;
 import mekanism.api.MekanismAPI;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.common.capabilities.Capabilities;
+import mekanism.api.chemical.Chemical;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -25,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BasinBlockEntity.class, remap = false)
-public abstract class BasinGasIntegrationMixin {
+public abstract class BasinGasIntegrationMixin implements dev.szx.dimensionworks.mekstress.integration.BasinGasAccess {
     @Invoker(value = "getHeatLevel", remap = false)
     public abstract HeatLevel dimensionworks$getHeatLevel();
 
@@ -36,6 +33,8 @@ public abstract class BasinGasIntegrationMixin {
     @Unique
     private BasinGasHandler dimensionworks$gasHandler =
         new BasinGasHandler((BasinBlockEntity) (Object) this);
+
+    @Override public BasinGasHandler dimensionworks$chemicalHandler() { return dimensionworks$gasHandler; }
 
     @Inject(method = "acceptOutputs", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$acceptGasRecipeOutput(
@@ -74,7 +73,7 @@ public abstract class BasinGasIntegrationMixin {
         }
 
         boolean inputOnly = tag.getBoolean("InputOnly");
-        Gas gas = null;
+        Chemical gas = null;
         long amount = 0L;
         if (!inputOnly) {
             if (!tag.contains("Gas", Tag.TAG_STRING) || !tag.contains("Amount", Tag.TAG_ANY_NUMERIC)) {
@@ -82,7 +81,7 @@ public abstract class BasinGasIntegrationMixin {
                 return;
             }
             ResourceLocation gasId = ResourceLocation.tryParse(tag.getString("Gas"));
-            gas = gasId == null ? null : MekanismAPI.gasRegistry().getValue(gasId);
+            gas = gasId == null ? null : MekanismAPI.CHEMICAL_REGISTRY.getValue(gasId);
             amount = dimensionworks$scaledAmount(tag, "Amount", marker.getCount());
             if (gas == null || gas.isEmptyType() || amount <= 0) {
                 cir.setReturnValue(false);
@@ -90,11 +89,11 @@ public abstract class BasinGasIntegrationMixin {
             }
         }
 
-        Gas inputGas = null;
+        Chemical inputGas = null;
         long inputAmount = 0L;
         if (inputOnly || tag.contains("InputGas") || tag.contains("InputAmount")) {
             ResourceLocation inputId = ResourceLocation.tryParse(tag.getString("InputGas"));
-            inputGas = inputId == null ? null : MekanismAPI.gasRegistry().getValue(inputId);
+            inputGas = inputId == null ? null : MekanismAPI.CHEMICAL_REGISTRY.getValue(inputId);
             inputAmount = dimensionworks$scaledAmount(tag, "InputAmount", marker.getCount());
             if (inputGas == null || inputGas.isEmptyType() || inputAmount <= 0) {
                 cir.setReturnValue(false);
@@ -135,28 +134,13 @@ public abstract class BasinGasIntegrationMixin {
     }
 
     @Inject(method = "read", at = @At("RETURN"), remap = false)
-    private void dimensionworks$readGas(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
-        dimensionworks$gasHandler.readFromNbt(tag);
+    private void dimensionworks$readGas(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
+        dimensionworks$gasHandler.readFromNbt(tag, registries);
     }
 
     @Inject(method = "write", at = @At("RETURN"), remap = false)
-    private void dimensionworks$writeGas(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
-        dimensionworks$gasHandler.writeToNbt(tag);
+    private void dimensionworks$writeGas(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
+        dimensionworks$gasHandler.writeToNbt(tag, registries);
     }
 
-    @Inject(method = "getCapability", at = @At("HEAD"), cancellable = true, remap = false)
-    private void dimensionworks$exposeGasCapability(
-        Capability<?> capability,
-        Direction side,
-        CallbackInfoReturnable<LazyOptional<?>> cir
-    ) {
-        if (capability == Capabilities.GAS_HANDLER) {
-            cir.setReturnValue(dimensionworks$gasHandler.capability().cast());
-        }
-    }
-
-    @Inject(method = "invalidate", at = @At("HEAD"), remap = false)
-    private void dimensionworks$invalidateGasCapability(CallbackInfo ci) {
-        dimensionworks$gasHandler.invalidate();
-    }
 }

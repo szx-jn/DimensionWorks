@@ -3,8 +3,8 @@ package dev.szx.dimensionworks.mekstress.blockentity;
 import dev.szx.dimensionworks.mekstress.memory.ChannelStockSavedData;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 /** Shared channel fluid view in mB. 1 B is represented as 1000 mB. */
 final class CrossDimensionFluidHandler implements IFluidHandler {

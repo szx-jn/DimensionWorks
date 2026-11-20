@@ -3,7 +3,7 @@ package dev.szx.dimensionworks.mekstress.blockentity;
 import dev.szx.dimensionworks.mekstress.memory.ChannelStockSavedData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /** Shared channel inventory view. A remote endpoint can extract; local-origin stock stays local. */
 final class CrossDimensionItemHandler implements IItemHandler {

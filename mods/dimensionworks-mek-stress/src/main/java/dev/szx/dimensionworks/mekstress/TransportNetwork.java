@@ -1,62 +1,56 @@
 package dev.szx.dimensionworks.mekstress;
 
 import dev.szx.dimensionworks.mekstress.memory.CrossDimensionTransportMenu;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 /** Menu-scoped settings: the server checks distance, identity and channel ownership. */
 public final class TransportNetwork {
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(DimensionWorksMekStress.MOD_ID, "transport"), () -> "2", "2"::equals, "2"::equals);
-    private record Coefficient(int menuId, float value) {}
-    private record Channel(int menuId, int value) {}
-    private record OpenCloudDisk() {}
+    public static void register(RegisterPayloadHandlersEvent event) {
+        var registrar = event.registrar("3");
+        registrar.playToServer(OpenCloudDisk.TYPE, OpenCloudDisk.CODEC, (packet, context) -> {
+            var player = (ServerPlayer) context.player();
+            if (player.isAlive() && !player.isSpectator() && player.containerMenu == player.inventoryMenu) {
+                player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (id, inventory, owner) -> new dev.szx.dimensionworks.mekstress.memory.CloudDiskMenu(id, inventory),
+                    net.minecraft.network.chat.Component.translatable("gui.dimensionworks_mek_stress.cloud_title")));
+            }
+        });
+        registrar.playToServer(Coefficient.TYPE, Coefficient.CODEC, (packet, context) -> {
+            var player = (ServerPlayer) context.player();
+            if (player.containerMenu instanceof CrossDimensionTransportMenu menu && menu.containerId == packet.menuId())
+                menu.setCoefficient(player, packet.value());
+        });
+        registrar.playToServer(Channel.TYPE, Channel.CODEC, (packet, context) -> {
+            var player = (ServerPlayer) context.player();
+            if (player.containerMenu instanceof CrossDimensionTransportMenu menu && menu.containerId == packet.menuId())
+                menu.setChannel(player, packet.value());
+        });
+    }
+    private record Coefficient(int menuId, float value) implements CustomPacketPayload {
+        static final Type<Coefficient> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksMekStress.MOD_ID, "transport_coefficient"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Coefficient> CODEC = StreamCodec.of(
+            (b, p) -> { b.writeInt(p.menuId()); b.writeFloat(p.value()); }, b -> new Coefficient(b.readInt(), b.readFloat()));
+        @Override public Type<Coefficient> type() { return TYPE; }
+    }
+    private record Channel(int menuId, int value) implements CustomPacketPayload {
+        static final Type<Channel> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksMekStress.MOD_ID, "transport_channel"));
+        static final StreamCodec<RegistryFriendlyByteBuf, Channel> CODEC = StreamCodec.of(
+            (b, p) -> { b.writeInt(p.menuId()); b.writeInt(p.value()); }, b -> new Channel(b.readInt(), b.readInt()));
+        @Override public Type<Channel> type() { return TYPE; }
+    }
+    private record OpenCloudDisk() implements CustomPacketPayload {
+        static final Type<OpenCloudDisk> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(DimensionWorksMekStress.MOD_ID, "open_cloud_disk"));
+        static final StreamCodec<RegistryFriendlyByteBuf, OpenCloudDisk> CODEC = StreamCodec.unit(new OpenCloudDisk());
+        @Override public Type<OpenCloudDisk> type() { return TYPE; }
+    }
+    public static void setChannel(int menuId, int value) { PacketDistributor.sendToServer(new Channel(menuId, value)); }
+    public static void setCoefficient(int menuId, float value) { PacketDistributor.sendToServer(new Coefficient(menuId, value)); }
+    public static void openCloudDisk() { PacketDistributor.sendToServer(new OpenCloudDisk()); }
     private TransportNetwork() {}
-
-    public static void register() {
-        CHANNEL.messageBuilder(OpenCloudDisk.class, 2, NetworkDirection.PLAY_TO_SERVER)
-            .encoder((message, buffer) -> {})
-            .decoder(buffer -> new OpenCloudDisk())
-            .consumerMainThread((message, context) -> {
-                var player = context.get().getSender();
-                if (player != null && player.isAlive() && !player.isSpectator()
-                    && player.containerMenu == player.inventoryMenu) {
-                    net.minecraftforge.network.NetworkHooks.openScreen(player,
-                        new net.minecraft.world.SimpleMenuProvider(
-                            (id, inventory, owner) -> new dev.szx.dimensionworks.mekstress.memory.CloudDiskMenu(id, inventory),
-                            net.minecraft.network.chat.Component.translatable("gui.dimensionworks_mek_stress.cloud_title")));
-                }
-                context.get().setPacketHandled(true);
-            }).add();
-        CHANNEL.messageBuilder(Coefficient.class, 0, NetworkDirection.PLAY_TO_SERVER)
-            .encoder((message, buffer) -> { buffer.writeInt(message.menuId()); buffer.writeFloat(message.value()); })
-            .decoder(buffer -> new Coefficient(buffer.readInt(), buffer.readFloat()))
-            .consumerMainThread((message, context) -> {
-                var player = context.get().getSender();
-                if (player != null && player.containerMenu instanceof CrossDimensionTransportMenu menu
-                    && menu.containerId == message.menuId()) menu.setCoefficient(player, message.value());
-                context.get().setPacketHandled(true);
-            }).add();
-        CHANNEL.messageBuilder(Channel.class, 1, NetworkDirection.PLAY_TO_SERVER)
-            .encoder((message, buffer) -> { buffer.writeInt(message.menuId()); buffer.writeInt(message.value()); })
-            .decoder(buffer -> new Channel(buffer.readInt(), buffer.readInt()))
-            .consumerMainThread((message, context) -> {
-                var player = context.get().getSender();
-                if (player != null && player.containerMenu instanceof CrossDimensionTransportMenu menu
-                    && menu.containerId == message.menuId()) menu.setChannel(player, message.value());
-                context.get().setPacketHandled(true);
-            }).add();
-    }
-
-    public static void setChannel(int menuId, int value) {
-        CHANNEL.sendToServer(new Channel(menuId, value));
-    }
-
-    public static void setCoefficient(int menuId, float value) {
-        CHANNEL.sendToServer(new Coefficient(menuId, value));
-    }
-
-    public static void openCloudDisk() { CHANNEL.sendToServer(new OpenCloudDisk()); }
 }

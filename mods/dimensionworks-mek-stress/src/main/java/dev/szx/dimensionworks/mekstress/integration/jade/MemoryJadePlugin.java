@@ -50,7 +50,7 @@ public final class MemoryJadePlugin implements IWailaPlugin {
     }
 
     private static ResourceLocation id(String path) {
-        return new ResourceLocation(DimensionWorksMekStress.MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(DimensionWorksMekStress.MOD_ID, path);
     }
 
     private static final class GearboxDataProvider implements IServerDataProvider<BlockAccessor> {

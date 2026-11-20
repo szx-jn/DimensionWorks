@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import mekanism.common.tile.base.TileEntityMekanism;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 /** Maintains one virtual Create kinetic member for each powered Mekanism machine. */
 public final class MachineKineticRegistry {
@@ -113,10 +113,8 @@ public final class MachineKineticRegistry {
         }
     }
 
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            flushDirtyNetworks();
-        }
+    public static void onServerTick(ServerTickEvent.Post event) {
+        flushDirtyNetworks();
     }
 
     public static void onServerStopping(ServerStoppingEvent event) {

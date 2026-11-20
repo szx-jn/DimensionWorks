@@ -18,9 +18,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.fml.ModList;
 
 /** Shared inventory for transport channels. Runtime credits are deliberately never saved. */
 public final class ChannelStockSavedData extends SavedData {
@@ -308,7 +308,7 @@ public final class ChannelStockSavedData extends SavedData {
     }
 
     public static boolean requiresAmpoule(FluidStack stack) {
-        var key = stack.isEmpty() ? null : ForgeRegistries.FLUIDS.getKey(stack.getFluid());
+        var key = stack.isEmpty() ? null : BuiltInRegistries.FLUID.getKey(stack.getFluid());
         return key != null && key.getNamespace().equals("dimensionworks_cave_factory");
     }
 
@@ -326,7 +326,7 @@ public final class ChannelStockSavedData extends SavedData {
 
     private static boolean isFilledAmpoule(ItemStack stack) {
         if (stack.isEmpty() || !stack.hasTag() || !stack.getTag().contains("Fluid", Tag.TAG_COMPOUND)) return false;
-        var itemId = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        var itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return itemId != null && itemId.toString().equals("dimensionworks_cave_factory:fluid_ampoule");
     }
 
@@ -353,8 +353,8 @@ public final class ChannelStockSavedData extends SavedData {
             if (expiry <= 0 || now < expiry) continue;
             String residueId = ampouleResidueId(ampouleTag.getString("OriginDimension"));
             if (residueId == null) continue;
-            net.minecraft.world.item.Item residueItem = ForgeRegistries.ITEMS.getValue(
-                new net.minecraft.resources.ResourceLocation("dimensionworks_cave_factory", residueId));
+            net.minecraft.world.item.Item residueItem = BuiltInRegistries.ITEM.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("dimensionworks_cave_factory", residueId));
             if (residueItem == null) continue;
             ItemStack residue = new ItemStack(residueItem);
             ItemRecord residueRecord = stock.items.stream().filter(candidate -> candidate != record

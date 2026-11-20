@@ -5,9 +5,9 @@ import dev.szx.dimensionworks.mekstress.integration.gas.GasFluid;
 import dev.szx.dimensionworks.mekstress.integration.gas.GasVent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import com.simibubi.create.foundation.ICapabilityProvider;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,11 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = OpenEndedPipe.class, remap = false)
 public abstract class GasOpenPipeMixin {
     @Inject(method = "provideHandler", at = @At("RETURN"), cancellable = true, remap = false)
-    private void dimensionworks$ventGas(CallbackInfoReturnable<LazyOptional<IFluidHandler>> cir) {
+    private void dimensionworks$ventGas(CallbackInfoReturnable<ICapabilityProvider<IFluidHandler>> cir) {
         OpenEndedPipe pipe = (OpenEndedPipe) (Object) this;
-        IFluidHandler delegate = cir.getReturnValue().orElse(null);
+        IFluidHandler delegate = cir.getReturnValue().getCapability();
         if (delegate == null) return;
-        cir.setReturnValue(LazyOptional.of(() -> new IFluidHandler() {
+        cir.setReturnValue(ICapabilityProvider.of(() -> new IFluidHandler() {
             public int getTanks() { return delegate.getTanks(); }
             public FluidStack getFluidInTank(int tank) { return delegate.getFluidInTank(tank); }
             public int getTankCapacity(int tank) { return delegate.getTankCapacity(tank); }

@@ -15,12 +15,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 /** Accepts a Matter Ball and exposes its contents to ordinary item and fluid automation. */
@@ -32,8 +29,9 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
     private int fluidAmount;
     private final IItemHandler itemHandler = new ItemHandler();
     private final IFluidHandler fluidHandler = new FluidHandler();
-    private LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> itemHandler);
-    private LazyOptional<IFluidHandler> fluidCapability = LazyOptional.of(() -> fluidHandler);
+
+    public IItemHandler itemHandler() { return itemHandler; }
+    public IFluidHandler fluidHandler() { return fluidHandler; }
 
     public MatterBallUnpackerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -129,23 +127,8 @@ public final class MatterBallUnpackerBlockEntity extends BlockEntity {
         tag.put("OutputFluids", fluidTags);
     }
 
-    @Override public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) return itemCapability.cast();
-        if (cap == ForgeCapabilities.FLUID_HANDLER) return fluidCapability.cast();
-        return super.getCapability(cap, side);
-    }
 
-    @Override public void invalidateCaps() {
-        super.invalidateCaps();
-        itemCapability.invalidate();
-        fluidCapability.invalidate();
-    }
 
-    @Override public void reviveCaps() {
-        super.reviveCaps();
-        itemCapability = LazyOptional.of(() -> itemHandler);
-        fluidCapability = LazyOptional.of(() -> fluidHandler);
-    }
 
     private final class ItemHandler implements IItemHandler {
         @Override public int getSlots() { return ITEM_OUTPUTS + 1; }

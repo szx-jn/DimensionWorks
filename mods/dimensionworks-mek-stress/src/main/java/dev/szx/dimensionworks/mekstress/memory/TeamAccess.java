@@ -2,7 +2,7 @@ package dev.szx.dimensionworks.mekstress.memory;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 /** FTB Teams is a pack dependency; reflection keeps the standalone mod's API linkage optional. */
 public final class TeamAccess {
