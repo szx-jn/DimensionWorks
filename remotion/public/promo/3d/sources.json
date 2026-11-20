@@ -1,0 +1,2867 @@
+[
+  {
+    "resource": "assets/minecraft/models/block/stone_bricks.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "5200aa1494af49c0bba0f96a1a01569d6b792cf7168e0a06c21ad0db94f0a101"
+  },
+  {
+    "resource": "assets/minecraft/models/block/cube_all.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "be3205d629ffb9e03834c3d1d083f8a2c62e9f9ae80820755129408634e9144a"
+  },
+  {
+    "resource": "assets/minecraft/models/block/cube.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "3e4aacd02e816aeba38f83076596e18ded4cf49c01e17c62d1fce79850ffb84e"
+  },
+  {
+    "resource": "assets/minecraft/models/block/block.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "3ef6c442f1ab55d2a57fa58e28bb831268159052659f12b453b637b31ded1da8"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/stone_bricks.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "3509bac331d1079a08a60082502f0cc9ccce1953dcea8dfc404501d31f9f0be2"
+  },
+  {
+    "resource": "assets/minecraft/models/block/cobblestone.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "dee026b80b7b77c5d540d75b91cfaec770245a2e7affb53555e9e4ad3ddb551f"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/cobblestone.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "2431a28eaaf9a728a6bf6bfad515a2db74932d5091604c8c66c500734e21883a"
+  },
+  {
+    "resource": "assets/minecraft/models/block/grass_block.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "fdea6afda5fa7d47241f181b56879e6807efc2b18a119133e3a871c411bf661a"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/dirt.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "fb0450253248276e0b8d653d5a4d21c59763cbf775c0e048469ff500afaaef68"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/grass_block_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b2aa2204118c7323c0f8d263eb30dee99b6b69cb1f6df3115272a69fd188e507"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/grass_block_side.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "dedaa0171af63df63a6cf7e3e6c7078d4d5830fd93923f3005302ed0f02104c5"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/grass_block_side_overlay.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "43d98318407d9d122b83468cf183d18722e548c2144f9c2ffe2021b5c3e770e0"
+  },
+  {
+    "resource": "assets/minecraft/models/block/dirt.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "c7a496ef02d69788d589fac7d2d2465e36eeb8a187cb8b23612310f3945c4868"
+  },
+  {
+    "resource": "assets/minecraft/models/block/oak_log.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "e029dda3262e41fab2ffa265c36ab4db51ab79e726e6d31bd2518d74c0ef9d7e"
+  },
+  {
+    "resource": "assets/minecraft/models/block/cube_column.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "4cc89841e64bfb9be33aef096675291b585d05bae81cbbd14bf977f89aa81a6b"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/oak_log_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "be736a49b725746cb7dd2dc3497407d388e0533da4c7a522bc4f71c9547f117a"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/oak_log.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b143bba2c6d1d69183a2114e016f428fd64429dc2d446e3913883918fd87af27"
+  },
+  {
+    "resource": "assets/minecraft/models/block/oak_leaves.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "204bc27cdfedd3922394c3ed42d7e9ec8cb3091aaa72f9f141920b98f35e9e42"
+  },
+  {
+    "resource": "assets/minecraft/models/block/leaves.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "fc181ca88dee45f7f3c606f2cc5158466538fe26f3a9fe40554b3c83093d1d42"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/oak_leaves.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "940300243c1efd72fcaad15c022039f1b31764758608c72777e5039becd4e8cc"
+  },
+  {
+    "resource": "assets/minecraft/models/block/netherrack.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "7866fd20aadf3bb344630d7bae743cda43c52402d6b1f96e424ee3d0033122e5"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/netherrack.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "049ad49afec08357297f4248609d83e9bdfa973ec34a8c1fc25b7d8ed54698a8"
+  },
+  {
+    "resource": "assets/minecraft/models/block/end_stone.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "ce546037d62c977c5ca9d8a19541fbb31304c284a085c36cd175b0056111b6e6"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/end_stone.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "fd22923c76db371031fc5d1163f3be1f477487adb13f575bec7055da7df2713c"
+  },
+  {
+    "resource": "assets/minecraft/models/block/glass.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "7ed800415aa94222ad48aabe11c0effe5874414b724f7ceea06a3fb7fbad6f7e"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/glass.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "cb89c706dce86eac3123cef087d359b5f23098b658a468fb91662b4a9922bcd0"
+  },
+  {
+    "resource": "assets/minecraft/models/block/barrel.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "e4c191bd192361dcdb36c8f98af43a1ee1435f676409a6d0465641e4a5830cc5"
+  },
+  {
+    "resource": "assets/minecraft/models/block/cube_bottom_top.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "14f8400761cfc0c5664d165a3602bd2bb25953ade361c77c43511147bfdd2a15"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/barrel_bottom.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "8ccdd7e1a4d80667bd1822adce69297cc7749a95e15c585906921820df57d650"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/barrel_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "2a3f0b53fb90f30a7d3481deff7bfd787880a37f0b0f8174e2bad0edbd64be12"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/barrel_side.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "ae51d8f37e224b82a578a52c63c37fd854383ed56882494d18f978b716f9fc30"
+  },
+  {
+    "resource": "assets/minecraft/models/block/farmland.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "80f80627231950bc4f70a7b8298143486c36d7e33cce3eb2ea955ff5d69cd86b"
+  },
+  {
+    "resource": "assets/minecraft/models/block/template_farmland.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "c22a5fd68ca86e44e594f40d2836e132e88c389309951d0309c509d06e51b606"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/farmland.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "ed094bddfac0f6def533096acfcf836fd667b6f14c90b571bc676a3bf58b54d8"
+  },
+  {
+    "resource": "assets/minecraft/models/block/wheat_stage7.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "06f1a84cc9bfd1505ea2fc2c96090f46279c3c79845bbd0e0e41245109cae8b9"
+  },
+  {
+    "resource": "assets/minecraft/models/block/crop.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "d078de149252e74ddbfa19c80300f9e627a44913266664a1b08dd25d3f558f18"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/wheat_stage7.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "eb29d71dd841f19c305871dd5810c38e37b496ce07a7f2d0917dfdf637ac2525"
+  },
+  {
+    "resource": "assets/minecraft/models/block/crafting_table.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "98e1ff48fd72ed2a820ae4237e6d5193e0cd5ab6abd2338493c7bbbff130dea1"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/oak_planks.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "3b00412fec87bd07b83825b86de49bcb6c186ca7799f41721a36b04e5d8ed161"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/crafting_table_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "989c4e768fa5f145e5eea1027c1fe4c6adcf5eaf5234dc4140bb6404b4c1b532"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/crafting_table_front.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "ff53d9803d469fec24d2bc0d547f5e2155b080788f3cd701ca3e39973985665d"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/crafting_table_side.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "414736f6eab354a21063908a71e0372a6c52191d808113f1c8bfbbdf4c39ffc3"
+  },
+  {
+    "resource": "assets/create/models/block/creative_motor/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "826e86df053dae48af107c881eaeab6a73a1e08f6539e05c244b6afd7dae8d62"
+  },
+  {
+    "resource": "assets/create/textures/block/creative_motor.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "3ddc146f07931888526559423e35bca2cb8209afe4e1f12a85eb8243a7430cdd"
+  },
+  {
+    "resource": "assets/create/textures/block/creative_casing.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "86abeef551800a257b1d82b98dce449ecc4d228f5dde34973356b483cbaf2d96"
+  },
+  {
+    "resource": "assets/create/textures/block/axis.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "0ae58aa6fcc369fee5a49270827bfa572631078f57163b8344f97ea5fcde2441"
+  },
+  {
+    "resource": "assets/create/textures/block/flap_display_front.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "0dfa107928fb63141aed787c77a99637550ec9d1a332b2dd6d2bfd21057456fc"
+  },
+  {
+    "resource": "assets/create/models/block/shaft.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "ac0dde5366052600cb94b3414a4d5283706c0a6dd4c76196b2aa35c3cc75a997"
+  },
+  {
+    "resource": "assets/create/textures/block/axis_top.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "d96400565f72e7270eeb9daaab2b1cf2a450e9491bbd488d217ed5f7e49c4bc3"
+  },
+  {
+    "resource": "assets/create/models/block/cogwheel.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f215f3cf555e508274bb9189ff12e8c9b0f8e6cadd997fd4dce4434feab89a31"
+  },
+  {
+    "resource": "assets/create/models/block/large_wheels.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "c86f60b2439a1dec8dab640c22117bddbcb98b2cda643d928e9e03a4175feb9c"
+  },
+  {
+    "resource": "assets/create/textures/block/cogwheel_axis.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "27d59520c851c213363335aed1d110bf27b84305b69c5a858fb4fc053c19aaa8"
+  },
+  {
+    "resource": "assets/create/textures/block/cogwheel.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "011591a34282037145fa38a5970b5b38e1c31d6b9f8a823b4598daa7e79c5b08"
+  },
+  {
+    "resource": "assets/create/models/block/large_cogwheel.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "31241704d7cd86a6060fac0a50231fa6dba92645a7a6b84f7e46612fc7646356"
+  },
+  {
+    "resource": "assets/create/textures/block/large_cogwheel.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "fdea9c2c9cb758ad27170dce94ca4adb73b187dbe89098ec81264b4c0cdd48ac"
+  },
+  {
+    "resource": "assets/create/models/block/gearbox/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "256ec4a9536f7e6432456385c321edcee70aa16809a7ebe8d824894b5fb14376"
+  },
+  {
+    "resource": "assets/create/textures/block/andesite_casing.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "c7da24aacfb6170ebd570e5a302a6c9d3f3c0b324314e3df79236209667f192a"
+  },
+  {
+    "resource": "assets/create/textures/block/gearbox.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "7d33b15de024daa08ecec5d90c365114bea7c81370c99a0c566053e699800181"
+  },
+  {
+    "resource": "assets/create/models/block/rotation_speed_controller/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f9210bd2c1c380965b1f94aed39ce477f19b68effa3042984907fc0873b21d89"
+  },
+  {
+    "resource": "assets/create/textures/block/rotation_speed_controller.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "7e00eb035ba302d7cc49e0cc72885796378cbeaec2c24fab9373abe21044f3d1"
+  },
+  {
+    "resource": "assets/create/textures/block/brass_gearbox.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "a457d17c0804049024fc0f5d01304390102bf25ae91ad25bf97eaa8b10d37682"
+  },
+  {
+    "resource": "assets/create/textures/block/brass_block.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "30d391f476ad250bfb15158eb6d566eefc603f54648886fc148ea04094b6c0e2"
+  },
+  {
+    "resource": "assets/create/textures/block/funnel/brass_funnel_neutral.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f13c54e49c67ee573005e044e3da1c37d9f945c81d055286f5204042d6d5eaa0"
+  },
+  {
+    "resource": "assets/create/textures/block/rotation_speed_controller_top.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "099ba92f9f03618b04c275b1636abd699ed3c1e93fa1fd9a0595b8aaa0a03049"
+  },
+  {
+    "resource": "assets/create/models/block/mechanical_press/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "db99b10a1167a23789401ed7b740304e852888731376af889ca8f3d18662a191"
+  },
+  {
+    "resource": "assets/create/textures/block/mechanical_press_side.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "7732bcd7b6f521455ba8c450b8c29bb26132141411dc63447ec785daac64b2d7"
+  },
+  {
+    "resource": "assets/create/textures/block/mechanical_press_top.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "109064608e49082e3dddaac0bf8afd8f1b50bdf09a1b93ae5a7de2f9a3f65b0c"
+  },
+  {
+    "resource": "assets/create/textures/block/mechanical_press_bottom.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "82847ff80ab27460e365335b0ec681f90281e84fb88f63ca0d6e2176fd4aee01"
+  },
+  {
+    "resource": "assets/create/textures/block/gearbox_top.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "1d0c52eec04580c3074b01291ee94b040e2877607176bffe7bbe4f7f4c45a683"
+  },
+  {
+    "resource": "assets/create/models/block/mechanical_press/head.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "4c788e09a0e7356986480b238fbee93ef3c615bb09e737e3bb3d2c000c1fd5ad"
+  },
+  {
+    "resource": "assets/create/textures/block/mechanical_press_pole.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "a5521f3058eab3f5c8f2cffc2eed5052dc8311630e419c7332e3f992172dd54d"
+  },
+  {
+    "resource": "assets/create/textures/block/mechanical_press_head.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "db2b6ac43020b068d3192a49d05b2425c1ac79b0caea74f40d182868a2cde343"
+  },
+  {
+    "resource": "assets/create/models/block/mechanical_mixer/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "43472885d193f56ec01124aeac51f5e43cb328c7712517427d848e1285bc817f"
+  },
+  {
+    "resource": "assets/create/textures/block/mixer_base_side.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f1aa55e0e87f79ee3b3a3c5c05ff8e0aad70d34ff9d5ed75690070ac6f28c8b0"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/spruce_log_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "57fc91af2d831d5041ff40de8c507a571fb201596d7dda37e519c653e85b3620"
+  },
+  {
+    "resource": "assets/create/models/block/mechanical_mixer/head.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f44d5111c9072785a1562e4622f69a3392d7c23bcce21fb5bed7da8a437225f7"
+  },
+  {
+    "resource": "assets/create/textures/block/mixer_head.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "e97a9d1cef9e56a04c39c7349973ff980d1f1c6cef0e87f47ff9ce7965c36531"
+  },
+  {
+    "resource": "assets/create/models/block/mechanical_mixer/pole.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "5ed20a0de8daca7bb55bbd9cc3ff68209598385f1cf5507ec8bc04e2aa1643ea"
+  },
+  {
+    "resource": "assets/create/textures/block/waterwheel_metal.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "a055c31d000967f698c8ceb2c2a1f8cc1bf078ac7dea72b11af277964b2aa67b"
+  },
+  {
+    "resource": "assets/create/models/block/spout/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "a34f2ef3895f27f6ff0308baef57c3196de128bd8888cf87aad6c0f91b86a2ec"
+  },
+  {
+    "resource": "assets/create/textures/block/spout.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "362ba6e8c4f07751a5c00e2b1665475396502e7de201e79a61b356c23d09fc64"
+  },
+  {
+    "resource": "assets/create/textures/block/encased_pipe.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f71b008f94857c4f952fc6965b294bc9ab5ac02f9e1c8c3b8fb2fcb77953fe9d"
+  },
+  {
+    "resource": "assets/create/models/block/encased_fan/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "8657a092c486d6107dad549b87e5b40f297542d78d508049b279272ad5f76f7e"
+  },
+  {
+    "resource": "assets/create/textures/block/fan_side.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "984a636edc1f48b0430d51303f09a614d5599510dbba0f0be06503e599465d43"
+  },
+  {
+    "resource": "assets/create/textures/block/funnel/andesite_funnel_frame.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "3cf45819c0f4ef2eba478b60f37bb251b4d9a030f74a18714c5c33df35340000"
+  },
+  {
+    "resource": "assets/create/textures/block/fan_casing.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "38e321dce16555db87ff5fddd94ef82be28cd58477888d530ed0db6d4e370386"
+  },
+  {
+    "resource": "assets/create/models/block/deployer/vertical.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "a17900f06aabc4b00fb87629523c8091ff74f51f7e5d596653036fbbaeed4cff"
+  },
+  {
+    "resource": "assets/create/textures/block/piston_bottom.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "38f086f90438902cf4534c58278a24ce9a539b6295ed50dd686d10b50ad73c8b"
+  },
+  {
+    "resource": "assets/create/textures/block/andesite_casing_short.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "c85001943ce9e29184919bf6ffd22e9768acf406325814763245f89248a7e574"
+  },
+  {
+    "resource": "assets/create/textures/block/piston_inner.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "d2452b4bbb2fda6dad3a469aa91ec8817d14ada630b3b9b101a607075b93ae2c"
+  },
+  {
+    "resource": "assets/create/textures/block/andesite_casing_piston.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "61d3f88221a898d4926fb5b92463527c020aec26861ef2e42bf9298f7739a91e"
+  },
+  {
+    "resource": "assets/create/models/block/deployer/hand_pointing.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "3577de677db58ac88d7e4178dabd265d67eee027e1702fac2497c3a7d1b7a963"
+  },
+  {
+    "resource": "assets/create/textures/block/deployer.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "51ef0a07780ef7a637f806e5d02921d54a8c7ad3e50de50c11afb206af0c4f5f"
+  },
+  {
+    "resource": "assets/create/models/block/deployer/pole.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "5ec97bd19f5a539e2e9d6817d7226c51324c300bceeaf91e00b95095b1de5365"
+  },
+  {
+    "resource": "assets/create/models/block/basin/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "e4d1c0a9b9f04a078c4cfc71da85c48ab1094c294cbc01ae3220800cb2eb6b54"
+  },
+  {
+    "resource": "assets/create/textures/block/basin.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "e3636aaec950074032d2a62ae5323088d5ec03bea367887fa5bbfc2809db840d"
+  },
+  {
+    "resource": "assets/create/models/block/millstone/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "3f89721be47d1c11825074b8a36baf80acc1bf7737b3bf55e1978370558a411c"
+  },
+  {
+    "resource": "assets/create/textures/block/millstone.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "ffe5d934c4749f628a22dd8e3f57ac705a02a250dd5b48388eabf16cc4a194a3"
+  },
+  {
+    "resource": "assets/create/models/block/millstone/inner.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "faae7bcffe0501757fbf55344f4575d77a3fecd60e4d0313f8fc168a7629c5ee"
+  },
+  {
+    "resource": "assets/create/models/block/crushing_wheel/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f8470cd87465888e45c93366c8787415dddecb0dfaa0bcb7f2b57e014c0d150d"
+  },
+  {
+    "resource": "assets/create/models/block/crushing_wheel/textures.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "54d00aee1df16ed17b6c836a93810e75c9a07c2b1be65026a04b576be2ef05f0"
+  },
+  {
+    "resource": "assets/create/models/block/crushing_wheel/crushing_wheel.obj",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "83a2d3aaaf7dbc7c0810ae779a0b09989a8210fec3c62f9202fafb5206d3284f"
+  },
+  {
+    "resource": "assets/create/models/block/crushing_wheel/crushing_wheel.mtl",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "00c50b0c924a0d99253dab75c0cebc0d1392a826000e0f158af8cad7593e2901"
+  },
+  {
+    "resource": "assets/create/textures/block/crushing_wheel_insert.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "e342ee5ad932028d41ef9d79c3329d49f1221f48ce3c94881cb3d22db8f325d2"
+  },
+  {
+    "resource": "assets/create/textures/block/crushing_wheel_plates.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "07fb31b72b963a4b04806604e330c63afcb9ca39f4c473b6825a1b9a42071174"
+  },
+  {
+    "resource": "assets/create/models/block/belt/start.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "344e5fc29da67560127c956b2a506801ea87766866fe1b50cb1d473ef554ca22"
+  },
+  {
+    "resource": "assets/create/textures/block/belt.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "cdd7c1f9ab00e19ef56e9531538759b79e9f54f4fbabf2f5eb3c818a25cd11c4"
+  },
+  {
+    "resource": "assets/create/models/block/belt/middle.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "afcc5b7c4d980a30e3bacfe579640106af87ae4f29fe60654f02870b69ce28ba"
+  },
+  {
+    "resource": "assets/create/models/block/belt/end.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "585c44d9ee53e349040fc22916a017b80aab6a1bc3b0e5c152040eeff53b5e4b"
+  },
+  {
+    "resource": "assets/create/models/block/belt/middle_bottom.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "31dddc4d6de022455b7894754729bb54c7d43491d2642d78b8675394596a29e7"
+  },
+  {
+    "resource": "assets/create/textures/block/belt_offset.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "fb3126c0085d289704a276c880000c1d69b7d4a0b477ab7159006db73ff3d1bb"
+  },
+  {
+    "resource": "assets/create/models/block/belt_pulley.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "a021aacb6119822efb479caaeabad9d8531a3e3d9df0f46faa930b0e5379f831"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/dark_oak_log.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "4c2e7ac1a451f43e65bb7c3c0e18669c8f69835182b1918e061e02896604d598"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/dark_oak_log_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "53eaa6b6f592699eff3995d4bf1e342021e1bf1728036e241c1f15bd3d4b2fae"
+  },
+  {
+    "resource": "assets/create/models/block/fluid_pipe/core_z.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "785b92365d88ddf424b8bbbae923114d78cd53eb1c76d9ba8fe1c1d3de365854"
+  },
+  {
+    "resource": "assets/create/textures/block/pipes_connected.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "eae54f1610d0a80cbc094cc846142d980977208a382e749cbb08373be9895feb"
+  },
+  {
+    "resource": "assets/create/models/block/fluid_pipe/connection/north.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "b3923c6ff4079108278f21606a41b0a01ff9aea843dc0716ba91198434097c2e"
+  },
+  {
+    "resource": "assets/create/textures/block/pipes.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "156af1248f7d364a1389015ad33be458c7e4b98afe9c32b0a311acf6385c650a"
+  },
+  {
+    "resource": "assets/create/models/block/mechanical_pump/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "b321c517e963939c9aab82884b070113a00b8db9f4505c01fd3df54043ab0493"
+  },
+  {
+    "resource": "assets/create/models/block/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "9a42bbd1bd4a4e8b23ab471657ad8612a20e444faba86f059ae022c8c7e43ad5"
+  },
+  {
+    "resource": "assets/create/textures/block/pump.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "55588768db4f0f6d53cd0b3b1ec786af8ba2645dc9fc1fe8adb3e685a805a613"
+  },
+  {
+    "resource": "assets/create/models/block/fluid_tank/block_single_window.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "e9ac1e0accb3881077949a847b49df53dc8d414e9db23ce783efd2e48ec7b4ea"
+  },
+  {
+    "resource": "assets/create/textures/block/fluid_tank.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "aadf5cf033690859c2105cb735acfe736f9c568abb5e220395931c5fbd163e67"
+  },
+  {
+    "resource": "assets/create/textures/block/fluid_tank_top.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "bec09ddca58171c3c360ec00800c8c2c1c4f189c8e433b7dc7ab00b39e75d8e2"
+  },
+  {
+    "resource": "assets/create/textures/block/fluid_tank_inner.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "3c909e553a146acb72ac157e8107ad9af38bc5281f2f24ae8439707c5e6c554e"
+  },
+  {
+    "resource": "assets/create/textures/block/fluid_tank_window_single.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "2d35ab6322fb34080c86097fa7a048003c0a1333e94de9f05deea0f899a17025"
+  },
+  {
+    "resource": "assets/create/models/block/fluid_tank/block_bottom_window.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "99e70ca75fe205a12d225e8566ca6acb7888d2e5205dbc2fe43395f8426cb96a"
+  },
+  {
+    "resource": "assets/create/textures/block/fluid_tank_window.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "fd1f99e2a0558682eb8a76ddb78a790dcacc60dcec9b724277b298750de5ef02"
+  },
+  {
+    "resource": "assets/create/models/block/fluid_tank/block_middle_window.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "14d7134990d028d898e65b544bcf1866766744cc105fb58f0a0711d562029d42"
+  },
+  {
+    "resource": "assets/create/models/block/fluid_tank/block_top_window.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "5172cf8861cfa3f386c9f69701952c1147bea508c5f1943a93ae830db7157b53"
+  },
+  {
+    "resource": "assets/create/models/block/blaze_burner/block_with_blaze.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "8dff752887d314215133b7b0d9d1a61ac873f0a21a677d39976f36ba7e0c6129"
+  },
+  {
+    "resource": "assets/create/models/block/blaze_burner/item.obj",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f2950b64e11733c4facbde2a7415453c00927e0a559287a7eb312cabe6d447da"
+  },
+  {
+    "resource": "assets/create/models/block/blaze_burner/item.mtl",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "2d31c57d5955f2adedb8c97daaa54ff741fd7366be8b775a2d5e6d820a369d6d"
+  },
+  {
+    "resource": "assets/create/textures/block/blaze_heater_brazier.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "fbd7e40ee2fedcb4687c99ec243f4057db99513f3fbe690413075b6fa42416c9"
+  },
+  {
+    "resource": "assets/create/textures/block/blaze_idle.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "8e18191a2a28a7b3ff1a61db09a3c0bdb409fc3bc4764ddf23f3a0b09655ac72"
+  },
+  {
+    "resource": "assets/create/models/block/blaze_burner/blaze/active.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "bd800fb8ce13737c66440c8688ef4b12395edae7b887d5f9858b02ae8f44fd8e"
+  },
+  {
+    "resource": "assets/create/textures/block/blaze_active.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "3606160e0ac720095509fb5e4e941030c90a478d09986b776ec9c736a5033fd4"
+  },
+  {
+    "resource": "assets/create/models/block/blaze_burner/blaze/super_active.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "4ccda90844b114e0e0609e8f0c7fbad1ed538cb257b8705efa3bb40c8b25a156"
+  },
+  {
+    "resource": "assets/create/textures/block/blaze_super_active.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "6844508fbb57da2b32a85df55bccc6146c47fb98336b215805ead0d1d1666701"
+  },
+  {
+    "resource": "assets/create/models/block/packager/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "89ef62caa1460e860ce850a1759ad738d6fe3097ef55a27eccc1b5ad18717044"
+  },
+  {
+    "resource": "assets/create/textures/block/packager_horizontal_unpowered.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "cf93b4557861ef1574d8d299b9842fe8929f60b28ad41c5f8ec61e0ed539399b"
+  },
+  {
+    "resource": "assets/create/textures/block/packager_frame.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "5bb7c6e20b48fcdd004253e0f11e0b1f06d5811ba31b3384250847d936f06b77"
+  },
+  {
+    "resource": "assets/create/textures/block/packager_details.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "d21f34b918166863655a889013e034b8f80fbb9e94062a0b332fc1f9a4c21819"
+  },
+  {
+    "resource": "assets/create/models/block/packager/hatch_open.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "d4072cd431b2c38047fdbd37ade0533b9f8110935cff5dcb5d4ed3aa1365d91b"
+  },
+  {
+    "resource": "assets/create/models/block/packager/hatch_closed.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "d6ac876996cdf41e60d31a0dafa87b94a5eb0e4942e29afaa45ddf09d19c56bb"
+  },
+  {
+    "resource": "assets/create/textures/block/packager_iris_open.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "733297adc9fc9841d2182314eaaf7a554f828a390cc5f017c84c177df03349f2"
+  },
+  {
+    "resource": "assets/create/models/block/packager/tray.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "b99571ef5680da7345a9325d43bd4c946ae8d3a19ab231e5e03fa335ba37fc10"
+  },
+  {
+    "resource": "assets/create/models/item/package/cardboard_12x12.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "ee50de347200bd93958674dd8021cba2341e9aa80b0192bb5bfd77d1da8ed103"
+  },
+  {
+    "resource": "assets/create/models/item/package_transforms.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "0db3e4e6bf916c2822b5414687e1a3ce729aba73811910151516cb1170a9416d"
+  },
+  {
+    "resource": "assets/create/textures/item/package/cardboard.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "d2ceed65e83d78579f5d162e704b4c0c8551bb32f906101623c0cac556c04891"
+  },
+  {
+    "resource": "assets/create/models/item/package/rigging_12x12.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "798e75f77c0cd268424d48c8290bd103131b2f8f23cb1cc16019df28911a146a"
+  },
+  {
+    "resource": "assets/create/models/block/package_frogport/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "930299772074fbb8faa6bc50f1a553d3c4c96fc0aa5e60dac8434c0cb490c5c7"
+  },
+  {
+    "resource": "assets/create/textures/block/port2.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "77dea1529b7ed50cecfa417b8f577e2aba542ad26d724ba45998b59ff4e6c225"
+  },
+  {
+    "resource": "assets/create/models/block/package_frogport/body.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "cbe49725024e6fff1b8167a17b5b38b1eec9ffb2a4aadcf5129a42bbb0fdde28"
+  },
+  {
+    "resource": "assets/create/textures/block/port.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "146d33940ad6eec3c30a5a086d39a5f3b77286f640ac396d5a5f12a73cbdc88d"
+  },
+  {
+    "resource": "assets/create/models/block/package_frogport/head.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "21ad80f73c25b1b4adb541fd5817068a09b81216e9e69ce16bd114282b1d3980"
+  },
+  {
+    "resource": "assets/create/models/block/package_frogport/tongue.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "db7ccd2469bc48a3320e844bafd33749fbb9a9d9eb6aee7ac53d33df5204ea18"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/block.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "65f0e789a6942c8973212d18dc345adb5f044fd49201d9353860f2cdd73af0cf"
+  },
+  {
+    "resource": "assets/create/textures/block/conveyor_casing.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "5d7a99b72a7e894097cfe8cb70e34f0e88eea180b425e523eae1604fe2e871ea"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/wheel.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "59ba2ced30b158a08324d62613e1613f4f37ae806159e57499819f73aae4c3de"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/textures.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "db42b3c1586ae34d9ef395afa67ceb267adc55b37d4a46c312618940f952e876"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/conveyor_wheel.obj",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "cad368de465653187947247d46b051c339a6714783a165601b5c3081759900c3"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/conveyor_wheel.mtl",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "4230ab64a3d3e6dfd408033fbb0ac14f5ab0c1b0239bc9fd08d05f8b1c0f1070"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/shaft.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "4aa52ef60ec4477c02f40fce66a575e41874aa2b273e650909e14d2f6f84d984"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/conveyor_shaft.obj",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "303042a4e511ad642a39bce95ce5d1d0de1b03643b99942551907165ed419707"
+  },
+  {
+    "resource": "assets/create/models/block/chain_conveyor/conveyor_shaft.mtl",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "7721cf33655ccb9cc4383e801de9dcef343ae7817af845eb5a1bf25eec20029c"
+  },
+  {
+    "resource": "assets/create/textures/block/bullwheel.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "337cddc22eed8e624f9905e7baf74eb2267c577b509a3e8c51e766fb737f7e20"
+  },
+  {
+    "resource": "assets/create/textures/block/conveyor_port.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "1ebff3c58627c100c0bf962926873523e079ae74e3528f775021fc0bdd6e510f"
+  },
+  {
+    "resource": "assets/appliedcreate/models/block/me_gearbox.json",
+    "source": "appliedcreate-1.20.1-1.1.5.jar",
+    "sha256": "de8e972f51d495ededfe5af3848a4e1751c870e1142322679713d78e25b2ca57"
+  },
+  {
+    "resource": "assets/appliedcreate/textures/block/me_gearbox_side.png",
+    "source": "appliedcreate-1.20.1-1.1.5.jar",
+    "sha256": "3fbbf6a832e54fbc568b646b59dc54ce803a9430be74c5a1b7092d77abf3f38a"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/stripped_spruce_log_top.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "577a7c88df685ae0de3a579115a8cf49b715032a8d2bcb974031fced41cb3571"
+  },
+  {
+    "resource": "assets/appliedcreate/textures/block/me_gearbox_casing.png",
+    "source": "appliedcreate-1.20.1-1.1.5.jar",
+    "sha256": "2e2f531c0aa95c3f09003f310c2e4a3f310a20f1aba5917ba0e1186a730376d7"
+  },
+  {
+    "resource": "assets/appliedcreate/models/block/kinetic_energy_acceptor.json",
+    "source": "appliedcreate-1.20.1-1.1.5.jar",
+    "sha256": "206fbd792e3036350e2526e51389857a59d78ec0df1aaa014fdce276ac6b4d31"
+  },
+  {
+    "resource": "assets/appliedcreate/textures/block/kinetic_energy_acceptor.png",
+    "source": "appliedcreate-1.20.1-1.1.5.jar",
+    "sha256": "876db794402a47fcccc2f5e56d268bac18ea2b0e9cde3a2e2a1d174fdd56e441"
+  },
+  {
+    "resource": "assets/ae2/models/block/controller/controller_block_online.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "22d3334030309c0a4557106fa7b98f06ef32d68bfc9f40c3f7ecd4fae3aa1145"
+  },
+  {
+    "resource": "assets/ae2/models/block/controller/controller_block_lights.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "e4a1a8ce8240229a6cd79ad500837731fc8f8650e57b030b368b73cc2e7f7eeb"
+  },
+  {
+    "resource": "assets/ae2/textures/block/controller_lights.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "a50d8b76639f7af7665de760eadee61b9758f32c3e815163445444785d7d8b0d"
+  },
+  {
+    "resource": "assets/ae2/textures/block/controller_lights.png.mcmeta",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "7171b555ad54991cada73ac45d238e9712573f3aa0de2830688284e131f1a341"
+  },
+  {
+    "resource": "assets/ae2/textures/block/controller_powered.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "52c38efb249ef7367f7f8392e625b7a7dfb765d9de010d18eb02d74160cbe6df"
+  },
+  {
+    "resource": "assets/ae2/models/block/controller/controller_block_offline.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "fc727b80e862236cf24bca114e7791b2949b5df1d84728ba1122715d9a3d5567"
+  },
+  {
+    "resource": "assets/ae2/textures/block/controller.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "a323edde584d7957edbc65b757d1860e619dc72aa7ccab55fb6b8731da3df420"
+  },
+  {
+    "resource": "assets/ae2/models/item/fluix_glass_cable.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "8a1a796d914516adc3cc694f73436da879e25171458c6ddce26a86de214f7e17"
+  },
+  {
+    "resource": "assets/ae2/models/item/glass_cable_base.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "c7e5796376377c7e22e9b99aae9ed56e88dc52899a728b0e8249c97709fa045c"
+  },
+  {
+    "resource": "assets/ae2/models/item/part_base.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "9d4339a2d865b5e754d7d8abccd5b87ca6bc9e929a9280df406dce65699ce74e"
+  },
+  {
+    "resource": "assets/ae2/textures/part/cable/glass/transparent.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "511bf018f0e16346797b93d5a1ea8d4c09bb9cd158c0beffb48192e70747e953"
+  },
+  {
+    "resource": "assets/ae2/models/block/vibration_chamber.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "ea49f87e4851043960b9a05cb3b4faf3a0e4791e91e06bc9fab5846770b5523d"
+  },
+  {
+    "resource": "assets/ae2/textures/block/vibration_chamber_bottom.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "6db6f4d54c415aaec0971ee7629dae517952982b18e8e9d56f3c5c7bddd6046a"
+  },
+  {
+    "resource": "assets/ae2/textures/block/vibration_chamber_top.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "588de47b190ab6c2080840d90aaf5e1886e3b901199e961bebde70270f8bb250"
+  },
+  {
+    "resource": "assets/ae2/textures/block/vibration_chamber_front.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "6bb3725110bb544870e1dce76e284034db9a2c90cbb7611e586647dbeeac5803"
+  },
+  {
+    "resource": "assets/ae2/textures/block/vibration_chamber_back.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "3f5b43399c5798bf2985a162d943482d480150ab47c146b236858716f18f6c08"
+  },
+  {
+    "resource": "assets/ae2/textures/block/vibration_chamber.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "4b202586bf5e89f191b15d886f255b5467a015e6585311594d54ec7d0a03ef2b"
+  },
+  {
+    "resource": "assets/ae2/models/block/crank.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "97a6624560dc2e8315d356b77ec58b4e12647330e071b7acef056b763fd58d17"
+  },
+  {
+    "resource": "assets/ae2/textures/block/crank.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "af8a3421bc797366a4287cec2cf1652497a6ee3e5db29cd85f56bbafda7140b6"
+  },
+  {
+    "resource": "assets/ae2/models/block/molecular_assembler.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "d41d1eb176f64b8c614beb8d989ad5d96b5e268a2223d91b0ea78c8a3b1c51f5"
+  },
+  {
+    "resource": "assets/ae2/textures/block/molecular_assembler.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "4c743c92f0ac9cbd8d071cd77bccbb003744ff64bc50b33676d369edd6ff831b"
+  },
+  {
+    "resource": "assets/ae2/models/item/quantum_ring.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "37f0af9cfcb7a4183e921dd01a39b92406dbfaac3901c0c4f0d80e0714d3cc3c"
+  },
+  {
+    "resource": "assets/ae2/models/block/qnb/ring.json",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "a0fefcc102c1c016f92e22b971ee3db2321e0d0c53f7ac3fabfc219fe5e8b8be"
+  },
+  {
+    "resource": "assets/ae2/textures/block/quantum_ring.png",
+    "source": "appliedenergistics2-forge-15.4.10.jar",
+    "sha256": "9b98f9f4ce577e9a308674717fa29ba405d62331010af021e7c0c7cce6e9fd72"
+  },
+  {
+    "resource": "assets/mekanism/models/block/quantum_entangloporter.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "15481ccbc6d2b72c1ade5b37b36fe82d65295ea3761616d4c602de978700b753"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/quantum_entangloporter.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6f1e17828ac39a0a06d940a69f24e03e25a90469f1a5a520d98d484655d291a7"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/ports.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "a5073ab8582759f2008cadedd9cf26823b7f97889ee07b21c0c175540af051b4"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/ports_led.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "ae50149c45f0c6ce83ade02c36d92ceb641a80e6cda8250b81580783045331f0"
+  },
+  {
+    "resource": "assets/mekanism/models/block/combiner.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "a66bd35c68063a51e7fd99fb58ccc704db80a91c8c7d4d4fdc57dac18ad7f296"
+  },
+  {
+    "resource": "assets/mekanism/models/block/machine.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "dfc2214acc670341c307c37fc86ff8bcd75ab86c30385bcc9274ff60a651d6cc"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/combiner/bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4ad2e1312a5c9a2570398ff3fe9bbb1ff0a8775831d0a4ec4f41deba1d54c010"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/combiner/top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "63d26e1cbaf65cf838fbb08b7ad4dd3db3929a2011b26aafdcd4e637d3318d55"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/combiner/front.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "0c114839a7b35fe7cf1ea651e74efcec42b98f2a1dce3f3467e9624d0fb4dd47"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/combiner/back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "e551086dbaf289d9b135c6555a14c46671568fb4fbf42afe36811c260174b2e1"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/combiner/right.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "f21dc6184a6d84466aa3f77960170967c14b1b4a3d0df7bbf7ced7e9566de826"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/combiner/left.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "f21dc6184a6d84466aa3f77960170967c14b1b4a3d0df7bbf7ced7e9566de826"
+  },
+  {
+    "resource": "assets/mekanism/models/block/purification_chamber.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "2ae952c056ffcdcd5af48b2b4638c8efa9c50f92ea14f255c3b8120d917b7390"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/purification_chamber/bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4ad2e1312a5c9a2570398ff3fe9bbb1ff0a8775831d0a4ec4f41deba1d54c010"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/purification_chamber/top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "ad61d9bef9b79564d6e61dabbc03ffc6c6d5a5b53eec5604fa9e34816f9940e9"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/purification_chamber/front.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "0bc58d06140d6d08b55adf46bed728e8f6c9e8ca096c403bf83b382ef33c5731"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/purification_chamber/back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "a59f69e2570c245f8c240791204063c26ce39fcf1b09a614dd4041dd91ade868"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/purification_chamber/right.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "f6dcbebe0344fab08e18118f0f6e6afeb5acf9e7f6229d0aed792ee73edaaf74"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/purification_chamber/left.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "545e8630a0037cbd3bd1eab45ecbf542221beeac56db90ef1129164522014356"
+  },
+  {
+    "resource": "assets/mekanism/models/block/crusher.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "db4e751dcbc936779c874ea4e4f6e536c916eba758b11041b85a5285acd080a1"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/crusher/bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4ad2e1312a5c9a2570398ff3fe9bbb1ff0a8775831d0a4ec4f41deba1d54c010"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/crusher/top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "90620ba7cd039a611bf16f3310dc8e09dfe7fe9e4df7a41c49df348675cbe716"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/crusher/front.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "a1cdc6052763f820eabece8b798c077b640b77940d9f27a12306f52982aa2fa9"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/crusher/back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "c280b9ce976284853ee1e6b170b4f6bcbb05df3fd2d07fe4d93cbe6bd823bdb6"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/crusher/side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "309732f3d753c5403eff2a13760a1935b46d26403f339e632023852b026aa018"
+  },
+  {
+    "resource": "assets/mekanism/models/block/chemical_oxidizer.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "74a775ccebbc9d5a8e16ed368a70716538c8703ece8bce2244e2b276f2de5f30"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/chemical_oxidizer.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "e10a28f2892e374e4481faa4b9e37607e202e1e3efa462b6d59525a3f7ca5904"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/chemical_oxidizer_elements.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "5e54d3aed38d6a7458ef6a05ccbabad74b4f2e1645a51dfaca6bb6be98ffaaef"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/ports_large_led.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "8f321a920dfcd3dd86fbb54b404132ec7948dbbf2446a3533433e370a814cd05"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/ports_large.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "87070a01d78367d6fe28a76562df05d50c828d8f795c35ab5b33b0ab06267eea"
+  },
+  {
+    "resource": "assets/mekanism/models/block/metallurgic_infuser.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "ff9e757417a4595435cca18856a4b61327df9c0ff7622e806937c3cccb97065d"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/metallurgic_infuser.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "c3087605c7cd2b97974742de3401e280577d7ff4a129d0c6dd3da810a0f7c0a4"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/models/metallurgic_infuser_elements.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "50fa2f6094fd7a36209545e63e8578c06ee26d9ff6ac7ad1bcc3bdbcba9f4bb1"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/heat_generator.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "9e1e5c9ad589f521c4d010897ce8dd9149fb2bc2fede02c731112e78c83aabee"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/model/heat_generator.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "7b7a1393ec309efdc7f83ac3dd684adf168b1f9d13d7a4ee52e3db5c1d788bb5"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "d4722b4327a35e99d5d35db2f8297ca82b704cce15db61090b0e2c09c41bde09"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/solar_generator.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "b71eaedba5b17c36164fec6c5cb00e5ea52621f287c6b600f5da62613a2acfc6"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/model/solar_generator.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "6d2b4f8a954adf275ae254b9a1e7218cd26fb40269eb791ddf42081e87802d99"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/gas_burning_generator.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "e383037599cb320c6d9b472f25c59ecb23b1efb5949afa089fe19a570efe0955"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/model/gas_burning_generator.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "3f053a845be1ffd391425a837b6745f4b6e48311f5f5b81b63cdd59f551f3a49"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/turbine/casing.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "23983178cb13e2d35cc7cd46d794c3d193003da63f455386efd7d1031fa9cf60"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/turbine_casing.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "979e5e2e2380e71fb0685e3e3f6f28098efeb3c3a8e2118e881b4ee48388e4a8"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/turbine_casing.png.mcmeta",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "33b229c25afb0b064371676c67f14ca1796dd358321e2427dbca195db086ed54"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/turbine/rotor.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "54c08d289e0350117eca67d40ab093cfa48a169c46d563c988d5c5a4a2c48e5f"
+  },
+  {
+    "resource": "assets/minecraft/models/block/fence_post.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "f445d1cf4f8d81dffc8cddc6e237031d6e064e80a916b396e3d16aab73e7fe6b"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/turbine_rotor.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "5d97f14b387cbb8683dd600f4c0bd55faea57b072aa8fdd6a755031847373188"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/turbine/vent.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "712c70c460c11eb5bda19665e0521171ab42e6996384faae3a3c7ac540dae237"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/turbine_vent.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "f15222e8939f054abebd81f3f27a91d2aa83525a79a652374155ffc204e0e9ee"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/turbine_vent.png.mcmeta",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "4471a408010562a1745c33e5680fff93e8e88045b1dabfa84e1a6105b585c6db"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/fusion/frame.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "1a617d9318fb48141aac39b7a7df14511fc87d5c9282ab11eb90da236cf3bf0b"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/reactor_frame.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "79f5e4b4c72a80da0cb12184eb8ef496c6fd38777df271f37195635d437bc4ce"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/reactor_frame.png.mcmeta",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "40b9424526bc92a2a7e0dd35e412852a3ce790779b34d33c077faa220f806611"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/fusion/port.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "2d64481929f4e315193c8ca7832e3e1bc836ac7aff100847da0df4c874528b71"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/reactor_port.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "62a46d91497912284440cb1655ab45999f9872d765ac4ccfed0635d2e9ed039d"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/reactor_port.png.mcmeta",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "cd956900b3c510789b2af4fc90aab90cbf646784880e8ce14c52ddec381c6096"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/fusion/controller_on.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "8598816936d78c12cb328ab55423c9c764414fcadb1ed0a6ff1759105226d0ed"
+  },
+  {
+    "resource": "assets/mekanismgenerators/models/block/fusion/controller.json",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "3869f8ae4c7b18a3b82c3ed3d55cd55bf81e616077585f5757e1bdc347a660a1"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/reactor_controller_on.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "191d7ed442dd6370f62312a77f8b3ad17c5b5e1c6aa3e1f82683885e9da9bcbb"
+  },
+  {
+    "resource": "assets/mekanismgenerators/textures/block/reactor_controller_on.png.mcmeta",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "0bbf33f3ac65b7fbf25cf6021c9ef1c9f48563ebd7c506f18c3b4b684a350162"
+  },
+  {
+    "resource": "assets/vintageimprovements/models/block/vacuum_chamber/block.json",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "105d9b4e5731dee2da9de88b8a47e9ef9434a62d4301c0e5a834154f0e3db6cc"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/block/pipes.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "4af45adcf5efa85d839a1e7467c64b0692355f7cec640144cf68be1de0ca23ec"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/block/vacuum_base.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "5168346199ded0d768a150a7bbe72217cdaca26e674a525e2491095f1f84776b"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/block/andesite_frame_2.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "bd8abdaef632543afec57810db57e8fe1c1b3e93623f6c375fc298480a920eae"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/block/andesite_frame.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "51ccb40d04c98764d7b3715e1c3cd2be382bc1383df49f8dec655860d6f2d745"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/block/pump.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "25a830ff203d6b7fcdb9aa13e5acaa3fa858bbdd8089f1b198d34638dad1e7a1"
+  },
+  {
+    "resource": "assets/vintageimprovements/models/block/vacuum_chamber/head.json",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "98d1307d0cbbcee3517153a2aba5f0066a9b9fce54c5117fdc82312eff3b3a1c"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/block/vacuum_head.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "862c408fd63e91b864eee21f1e21036443dac0c7c7dcdeca0565553fc1d5d7e1"
+  },
+  {
+    "resource": "assets/vintageimprovements/models/block/vacuum_chamber/cog.json",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "f704e139d6cac316974cdc1262c85b534f8be67a28982a4c483c34fdea71e6a8"
+  },
+  {
+    "resource": "assets/createdieselgenerators/models/block/basin_lid/block.json",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "1b69628d4ec9cb3fae8569f2fa9462d0214e096f8cec4dacfdac4f96d9b3b434"
+  },
+  {
+    "resource": "assets/createdieselgenerators/textures/block/basin_lid_top.png",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "ab1a23c1b8b09eb55d0130024edde13e59da7beeba6a6819b1932f028e40afdc"
+  },
+  {
+    "resource": "assets/createdieselgenerators/textures/block/basin_lid.png",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "e08f2aaf3d183dca3266549c8ead284550be6ab8d36e43c90a86a93a6ea40005"
+  },
+  {
+    "resource": "assets/createdieselgenerators/models/block/basin_lid/block_on_a_basin.json",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "f624e548f6a9109d887fd968f507197d91911ac88d2e66d536d8808517a0b51f"
+  },
+  {
+    "resource": "assets/createdieselgenerators/textures/block/gauge.png",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "fbbc85034fa5b350104a99a3f1d52d0a2dcee4a7c74ff9ae1b16c7299c2c36de"
+  },
+  {
+    "resource": "assets/createdieselgenerators/textures/block/basin_fermenting_station.png",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "d3d3002bdfc17e33e33ddef58127f46d231180f46ea59ff16c605ac1b3fbc583"
+  },
+  {
+    "resource": "assets/createdieselgenerators/models/block/basin_lid/block_on_a_basin_open.json",
+    "source": "createdieselgenerators-1.20.1-1.3.12.jar",
+    "sha256": "55c6521377a917268ba1cbef03985e61597ad0f0eb68c60a1a7b6ce8fc770e2c"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/models/block/dispatch_terminal.json",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/models/block/dispatch_terminal.json",
+    "sha256": "6469da6b5f50bc4d41f375a0d92d9f820b47008afbdf4fee002e5d75ee5e8fc6"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/textures/block/dispatch_terminal.png",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/textures/block/dispatch_terminal.png",
+    "sha256": "dda0de51815f190f1455d23c0878ab1fba471b9c8d69223a5ec19cea468e9f64"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/textures/block/dispatch_terminal_side.png",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/textures/block/dispatch_terminal_side.png",
+    "sha256": "2fc280c1b12c036f974c72f8cc396429bd7de98d10adf08c40b8e2fea7e14d2c"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/textures/block/dispatch_terminal_top.png",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/textures/block/dispatch_terminal_top.png",
+    "sha256": "bd60572e60db729840b655bb19154ea6af777706aab5589ea8dd98ae034bbb7e"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/textures/block/dispatch_terminal_bottom.png",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/textures/block/dispatch_terminal_bottom.png",
+    "sha256": "63b97e11e01144a270bcdf3183de7dcac0d7514cdc8c6482d4844bbf23150c54"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/models/item/elastic_packager.json",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/models/item/elastic_packager.json",
+    "sha256": "2c2fc23be85f556b0106ddcad69ff789685bf0ec47c78e9ac6368fed6a2cba78"
+  },
+  {
+    "resource": "assets/create_mobile_packages/models/item/mobile_packager.json",
+    "source": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.15.jar",
+    "sha256": "bb00da155d3353cc751f0de7e3f32e137703bc9c5e54ea199e9302bfcbf928eb"
+  },
+  {
+    "resource": "assets/create_mobile_packages/textures/item/mobile_packager.png",
+    "source": "create_mobile_packages-1.20.1-0.6.1-dimensionworks.15.jar",
+    "sha256": "61cc3168687d209f10c27bdfc729aed85c1dff0f932fc552c35f242ba6468d02"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/models/item/twilight_dispatch_upgrade.json",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/models/item/twilight_dispatch_upgrade.json",
+    "sha256": "ad918a75172c24fb7763b6585cbdd73804a9915dbf71689d534877bc50f75385"
+  },
+  {
+    "resource": "assets/minecraft/models/item/generated.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "63190611202e75ad7b812bc9a4b31bd53f3e186895d7b53e5e280b0d1e30a67a"
+  },
+  {
+    "resource": "assets/dimensionworks_transfer/textures/item/twilight_dispatch_upgrade.png",
+    "source": "mods/dimensionworks-transfer/src/main/resources/assets/dimensionworks_transfer/textures/item/twilight_dispatch_upgrade.png",
+    "sha256": "ffce4d0ffff49406357f16ec2f30bd5b4a97cde222ff35f9752a9980766f4eec"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/matter_ball.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/matter_ball.json",
+    "sha256": "46c3c6a64c26c784def913b47e7073615725e2e1a05af05da31f1da5f564ef81"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/matter_ball.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/matter_ball.png",
+    "sha256": "6613eec3180feeb2af41ada6be68f8a94b107ff354a4209eeb936315a8b0e31a"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/matter_ball_unpacker.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/matter_ball_unpacker.json",
+    "sha256": "3a7cdf58c0cecba3aa10e53f734de6fe5390fe5cf9114c533da9c333a319d7dd"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/matter_ball_unpacker.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/matter_ball_unpacker.png",
+    "sha256": "5e8ea6735babbcbe3ef2d9c57ed23367cc491387e64bfb675605e48a36e09c72"
+  },
+  {
+    "resource": "assets/dimensionworks_cave_factory/models/block/factory_casing.json",
+    "source": "mods/dimensionworks-cave-factory/src/main/resources/assets/dimensionworks_cave_factory/models/block/factory_casing.json",
+    "sha256": "1c1921802dff22e92de1e738974cb33c6eb1a8711a3a8758cccb0b628f060a90"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/iron_block.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b13979f2c26a9d55be8910e76e2d65d52505e3947be59c1115df0afe758e55be"
+  },
+  {
+    "resource": "assets/dimensionworks_cave_factory/models/block/factory_port.json",
+    "source": "mods/dimensionworks-cave-factory/src/main/resources/assets/dimensionworks_cave_factory/models/block/factory_port.json",
+    "sha256": "cd818d2362a328eed35d9b227471ca92ce0b123cd43b8abf80fa541204a8d191"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/polished_deepslate.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "7a7515d7b48d9a7088ceffc64b8d988088b2d8b1e24285be260687c9702fa576"
+  },
+  {
+    "resource": "assets/dimensionworks_cave_factory/models/block/abyssal_pressure_tower.json",
+    "source": "mods/dimensionworks-cave-factory/src/main/resources/assets/dimensionworks_cave_factory/models/block/abyssal_pressure_tower.json",
+    "sha256": "f727732e8ac8faef251e0c450b099df4bb245b2cd7f86c1fcd4db94a810155c2"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/dark_prismarine.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "7eb691c96611d2d1d272f732288dadb22177aa9f21e6c6ac2b949bcc1879fac5"
+  },
+  {
+    "resource": "assets/dimensionworks_cave_factory/models/block/fluid_stabilizer.json",
+    "source": "mods/dimensionworks-cave-factory/src/main/resources/assets/dimensionworks_cave_factory/models/block/fluid_stabilizer.json",
+    "sha256": "9e190db991579670f9b6b740d65a1d35c62af6443516f8f1fc46ef0d392a5429"
+  },
+  {
+    "resource": "assets/minecraft/textures/block/copper_block.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "f2a4e847dbf7ffee41cda7a1695661e637fc11e53b0d7a28d7cdee76fb41981d"
+  },
+  {
+    "resource": "assets/kubejs/models/item/gear_heart_damaged.json",
+    "source": "kubejs/assets/kubejs/models/item/gear_heart_damaged.json",
+    "sha256": "603fa40badcf603e701e19f9b8730ff1c5dc76ca213914c6aaa097d631bd2731"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_damaged.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_damaged.png",
+    "sha256": "53132b312897dcaae99917c346c811076ad37f8f65747b900f545733be68a6f7"
+  },
+  {
+    "resource": "assets/kubejs/models/item/gear_heart_normal.json",
+    "source": "kubejs/assets/kubejs/models/item/gear_heart_normal.json",
+    "sha256": "fc69e3ebaf1cc56d2217025aadd87d0fbe28e58985e6cf0b2bc5f70462aad5db"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_normal.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_normal.png",
+    "sha256": "bd9c163c8aed4ff00520d3d37326cc13ad11df7165e317f19443f1d71d009da8"
+  },
+  {
+    "resource": "assets/kubejs/models/item/gear_heart_blessed.json",
+    "source": "kubejs/assets/kubejs/models/item/gear_heart_blessed.json",
+    "sha256": "e57e8bc26bdddce1115cbe921d5eec3a5ba9a52304cb2c4898ca16cf9d2f911b"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_blessed.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_blessed.png",
+    "sha256": "4a6de31c6cf64bbfc5df85757da115d12da4aa5eedb31c97637d0e12e03613ab"
+  },
+  {
+    "resource": "assets/kubejs/models/item/bounce_tape.json",
+    "source": "kubejs/assets/kubejs/models/item/bounce_tape.json",
+    "sha256": "974beb779681025774a3779777282d72a26ec708bf0cfe0cba785192e286224f"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/bounce_tape.png",
+    "source": "kubejs/assets/kubejs/textures/item/bounce_tape.png",
+    "sha256": "a099498e813c0728f70a6dffbacb948031cb5feed188d948f5b16a1ac1bdf81c"
+  },
+  {
+    "resource": "assets/kubejs/models/item/elastic_compound.json",
+    "source": "kubejs/assets/kubejs/models/item/elastic_compound.json",
+    "sha256": "fa6c1f7d9ad9936abfe09fc1770c751c90f40b473afa86eb541b77607bce02c4"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/elastic_compound.png",
+    "source": "kubejs/assets/kubejs/textures/item/elastic_compound.png",
+    "sha256": "beb72cce505cba0257cb4deef54441388972fb505006ab81356af13345c1fe4b"
+  },
+  {
+    "resource": "assets/minecraft/models/item/iron_ingot.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "00b946d9760fac11ebd5a7a03fff5ee681fe37cda924e63cef90a5372f374323"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/iron_ingot.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "4625aa2c32c74bd6796c7ba8e7ee6300db8d2f24fb38c9d9324a63b262a44391"
+  },
+  {
+    "resource": "assets/minecraft/models/item/raw_iron.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "06d12e0482ab2140c91badbd9f09b9fd4896083f1e2f895ca4edf3415faa199c"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/raw_iron.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "c87c56318de676c29150b2f7db1071b0cbc5df1e3418a0729f169b0f05587324"
+  },
+  {
+    "resource": "assets/minecraft/models/item/copper_ingot.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "2929e26184aaddb7b619397e7cc34bc9b8684837d221ee64414f90ef332b2155"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/copper_ingot.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "85835decf03f3cfbf67ad628d528fa22b05857059533952fcc69cb8f3f4fbe80"
+  },
+  {
+    "resource": "assets/minecraft/models/item/gold_ingot.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "662eaf9388a6cd90033c0c5a561abf9bcae9805b9a51fd31bd4f2d9090683958"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/gold_ingot.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b7e597e3153cb1157c68cfdb9d6067d3bbb0ef2f4c43ff791442b63bd575616e"
+  },
+  {
+    "resource": "assets/minecraft/models/item/redstone.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "30aa18d8d269407b92c378f0a32985ff3de0f695a19988f5f53b1f10d29e477b"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/redstone.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b8e3f44e86514f1b215db01cbb560ebb51afa003b7b376c7cde58e08ff4845cd"
+  },
+  {
+    "resource": "assets/minecraft/models/item/charcoal.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "585896537a7cb8ec887cc8bcc208fe10bad1e37708eda1ffbfbba178e0c1f2b8"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/charcoal.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "ae6e9af86fab77bd2911788a53eb136ad6fc717479f810d8d6847f2623245452"
+  },
+  {
+    "resource": "assets/minecraft/models/item/bucket.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "c272baa09bc3322c22ef459d2338e8663836cb660ae9491f048f6d043b5ed693"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/bucket.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "3f14980d6d2dea8d547e44104a55a51d62bee71bd45f16068113b279b3d2d042"
+  },
+  {
+    "resource": "assets/minecraft/models/item/netherite_scrap.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b611cc62538f8e400dab427a7c71db114d7a44c6d5793304e96dc549e92c742b"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/netherite_scrap.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "84a6c7f0eed4effa80e424d9cbc7d7a6560681a576e96ef5a14473314da099e9"
+  },
+  {
+    "resource": "assets/mekanism/models/item/dust_iron.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "b01471e449ca62adc56feb5bcc990377da0a42c4b46f8c538fe0df81d015fac8"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/dust_iron.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "92ab71f67111b6f15191769db1b3745b6775ae1d79c2c8c28946a8bb861e2473"
+  },
+  {
+    "resource": "assets/mekanism/models/item/dust_copper.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "905bca31d10f1a3896076a0f509ffa91311d7c07cc13f0cc9253fba1a91f3974"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/dust_copper.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "bca5fe198eaf9f35c11f2543965e00a8d1d653048aa6aa3c1fc63f9345e25a88"
+  },
+  {
+    "resource": "assets/mekanism/models/item/dust_sulfur.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "a130f7b42b2b40621009551d57bd062b02a5a65b2fc61ae647b3b65682434784"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/dust_sulfur.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "b9babf3eb36fbdc2c30406079b9372728f01645d3d66efa070f69ecd29ea1b1e"
+  },
+  {
+    "resource": "assets/mekanism/models/item/alloy_infused.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "09c95cbf9129499127740559cb232aaef127e9ebc8b071af964a79eba98353f9"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/alloy_infused.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "929e4d1f29241da92344ef97cc5060e48bb563dbe007fb29a8ea78abd198041b"
+  },
+  {
+    "resource": "assets/ae2omnicells/models/item/complex_link_processor.json",
+    "source": "ae2omnicells-1.20.1-forge-1.1.6.jar",
+    "sha256": "340d2b1e12d514a005588e0a9f9b7b25d809883b26bf77d638ae46210c342548"
+  },
+  {
+    "resource": "assets/ae2omnicells/textures/item/complex_link_processor.png",
+    "source": "ae2omnicells-1.20.1-forge-1.1.6.jar",
+    "sha256": "c2246f03f7e375647b6ea0a4f992934c6c92634537a312fcadfb46652928dd34"
+  },
+  {
+    "resource": "assets/mekanism/models/item/energy_tablet.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6c3e31562d082a4de2ce7b80fc661c7b1ee9e36b2b942415e8cec824063f9e8c"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/energy_tablet.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "3acc221c4e3c49c821f875b60c67bcabc8daa97a50b75b8ad4c0b6ee9a13b706"
+  },
+  {
+    "resource": "assets/create/models/item/copper_sheet.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "b3177921332dac22d6c4c68a253f7447254ca6424d341d74504007a9ec07282a"
+  },
+  {
+    "resource": "assets/create/textures/item/copper_sheet.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "4552dc50ccde2ca5852c482045a875050225c8853c31b5d12f1f7fd7426007fd"
+  },
+  {
+    "resource": "assets/create/models/item/zinc_ingot.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "b3360a4a2195c2208b7cc68b18b72488dff5b13e1837304de044bcae0b4b7857"
+  },
+  {
+    "resource": "assets/create/textures/item/zinc_ingot.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "05440af4ed879f2546e9b93139f3b31ff0eb787fbd22ba3be886e0e414135790"
+  },
+  {
+    "resource": "assets/minecraft/models/item/lapis_lazuli.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "04653cdad37f8e2e4fb53979a95bea12901c57e9849f76b3cf854d95a768e117"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/lapis_lazuli.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "f83390ea90ad5d61f2851ded21320a0cf671eafc00bae2615b5b3e11d30efa82"
+  },
+  {
+    "resource": "assets/minecraft/models/item/quartz.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "b4843e086c4900d6f32b6e1c23a4526ea064b0496a3e501149c5597d35a00e43"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/quartz.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "014b64fe82d8ec07fa63a5e1711cae5abb574511baf0113a39ef2e922a023658"
+  },
+  {
+    "resource": "assets/minecraft/models/item/amethyst_shard.json",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "8d3a1aeef2b1de1c9be2d69cff89c1c848ad87e4a57e2e91ab8625f1327960d7"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/amethyst_shard.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "452feb403a636242661a39316a9b9f1dd4fa83563cc8b5f492f2d327b1015052"
+  },
+  {
+    "resource": "assets/mekanism/models/item/ingot_tin.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "c15f72af3b1117abc622ea46bf7e376a7b7a8fbda0187261d93e649fc3f8cee0"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/ingot_tin.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "fe43fb48ae2e6a7f0d8c66ac7a4c86579dfb730cdfa471f19b00ce8b7f569cf3"
+  },
+  {
+    "resource": "assets/mekanism/models/item/ingot_lead.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "1292df9f099e2e47f2570800dbba07f709d2dd1111248190df517b46ef8ebd70"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/ingot_lead.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "954a5acf1755c2574360b77ba9d09fa3f96e79e2a53405d8a56b93b7b21089f4"
+  },
+  {
+    "resource": "assets/mekanism/models/item/ingot_osmium.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "be8593d5e8b0c4bbdb9364cc988cef56c1936153639d663eaf63b48c748c8ee5"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/ingot_osmium.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "92a1f13d2462c1690899ca4ffc4d070cd496e866b3ff2b812e7ebc467a562334"
+  },
+  {
+    "resource": "assets/mekanism/models/item/fluorite_gem.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "b24661df223b06f8ed6b47010ca4755a9de9d0da6b16d13011102ebbd3366aa4"
+  },
+  {
+    "resource": "assets/mekanism/textures/item/fluorite_gem.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "b064c1fb485bb07f6275013ea257999993b307bc5f72d012e012687268747df1"
+  },
+  {
+    "resource": "assets/vintageimprovements/models/item/ironwood_spring.json",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "25bb3042c7e829bb37e519afe850b711ade38757792a4ddb8b3dc50be221675d"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/item/ironwood_spring.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "b66e5bb803850d8e6b4185b6a506323be8f1bac2dbdb4f8fd9df475a9d09f982"
+  },
+  {
+    "resource": "assets/vintageimprovements/models/item/small_ironwood_spring.json",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "f21dfeee5b48ecdcf5c3fec77ccb7dd3d9a9317686031cee636f9d7e2400d595"
+  },
+  {
+    "resource": "assets/vintageimprovements/textures/item/small_ironwood_spring.png",
+    "source": "vintageimprovements-1.20.1-0.3.7.9.jar",
+    "sha256": "7f6d398ea187c7e099dcbcee83dfaaaeb303b7af35392e6f354eb8c5861069fd"
+  },
+  {
+    "resource": "assets/twilightforest/models/item/steeleaf_ingot.json",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "68bf9f1aaab0dfb13c5538a67d4fbfe199bf7532ac2a0e32815f3667f20ae5b6"
+  },
+  {
+    "resource": "assets/twilightforest/textures/item/steeleaf_ingot.png",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "71a68096178d1e37b3586127f709ed43d6be78affe1971f29ecc45314bcfb4ed"
+  },
+  {
+    "resource": "assets/twilightforest/models/item/arctic_fur.json",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "0214189ab3f2055ac8782a62aa27b38722ce23d7e4fd5051353ecafe63be39a8"
+  },
+  {
+    "resource": "assets/twilightforest/textures/item/arctic_fur.png",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "200c66eda992949107f49eee2024099845fa57fa08155b2fb1fa659605f95765"
+  },
+  {
+    "resource": "assets/alexscaves/models/block/galena.json",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "ee83b815adb1e859f4f50891d04e4783cafa41ddb8fcf67158b39de400d1e2da"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/galena_top.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "7bd8c99ef2375318e3c63dffd034750a74080794ca2059c49df5439f04ad4a71"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/galena.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "d0d11489a4aab05e7066e6b67c3298d6bc862f28e9f234963977dd10f40b8e51"
+  },
+  {
+    "resource": "assets/alexscaves/models/block/limestone.json",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "8e7909ce17775c400ae3fdac8cb7b035e249484c5145f3c7bc541a7b65cb2cfd"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/limestone.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "25c8dcf72a52c73f2724daf5136f6408b14055d4eec480964a54ea9978916cdb"
+  },
+  {
+    "resource": "assets/alexscaves/models/block/radrock.json",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "435bee604ee945d960910f4a069912ffee364fe6fb9667af462a3881da87c18d"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/radrock_top.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "194634a5e10a5d5a56f63dfe763cd2fc3a1e37569c8b42880a133a22ae2dbc92"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/radrock.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "6614105c00b8f4cba9b939ed3dea60f43ef1503771314d1681342f3074cb03ae"
+  },
+  {
+    "resource": "assets/alexscaves/models/block/abyssmarine.json",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "dd74890bcbb053c685dbb3de4340e707b47e0dcc1b1ba9066ea460cb7932ada8"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/abyssmarine.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "71cad99eb6ed933db4ea3d67c70296e5ba3a9603264072a68b487e89d8f7c31d"
+  },
+  {
+    "resource": "assets/alexscaves/models/block/coprolith.json",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "4204f89c0eff9b8fae637b9e206f7b00f9f560809104fe21173266cfffbcf087"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/coprolith.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "0516aeb14ec95178e7b0cd0a61493598e35518c5a3b7242f91fca713175106bf"
+  },
+  {
+    "resource": "assets/alexscaves/models/block/block_of_chocolate.json",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "e1b2c1dc558956b3bd4341da6849d36e81777167e925fbc5960a1edc26f05b6d"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/block_of_chocolate_top.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "9b36659b77e1183b1aad732fc79cdf357697345e23bb1159b770e19755b44d3c"
+  },
+  {
+    "resource": "assets/alexscaves/textures/block/block_of_chocolate.png",
+    "source": "alexscaves-2.0.2.jar",
+    "sha256": "382a37ba9059088f2331637124269fdf669ad34651922abd30f509af8ce82532"
+  },
+  {
+    "resource": "assets/create/models/item/cinder_flour.json",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "f0b705719ba7798455544f9d813a126e1c4ac5bb7c5ac157bc69b702624f8bb2"
+  },
+  {
+    "resource": "assets/create/textures/item/cinder_flour.png",
+    "source": "create-1.20.1-6.0.8.jar",
+    "sha256": "26bf9a2427dd3374a13f3466404f64d20c6334b4f6c4d237c68488746ea01013"
+  },
+  {
+    "resource": "assets/twilightforest/models/block/twilight_oak_log.json",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "e27d60ce1cf67720a6d6cd484319a77b35d9bb2ba41fc60fb8103b28e573018c"
+  },
+  {
+    "resource": "assets/twilightforest/textures/block/twilight_oak_log_top.png",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "f9768b8a59acf38c226b6115df9c4e7160af5488ac2a146342d5c64971aaff07"
+  },
+  {
+    "resource": "assets/twilightforest/textures/block/twilight_oak_log.png",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "a049036b4cc67cdcf63fb8a7f690734d7f69574c287d46349c2c06378dc4cba1"
+  },
+  {
+    "resource": "assets/dimensionworks_cave_factory/models/item/fluid_ampoule.json",
+    "source": "mods/dimensionworks-cave-factory/src/main/resources/assets/dimensionworks_cave_factory/models/item/fluid_ampoule.json",
+    "sha256": "70063e3815ed9f5986b23fe72212e3ddd88939c9e50625219ecf54db15a18621"
+  },
+  {
+    "resource": "assets/minecraft/textures/item/glass_bottle.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "6a09a39bb6c41bc92bd5eca1f51caf5b582a85f68206b164476c8e14a4669416"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/memory_drive_ddr1.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/memory_drive_ddr1.json",
+    "sha256": "5f1fe55067e52f6a5c9deb3ab812fb1ee1597d8205e9ff493824354551398164"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_front.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_front.png",
+    "sha256": "be703aabc62c212ac5401f619a5404a1c261cbf25ae1f45a55b11ce7e68b6fec"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_side.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_side.png",
+    "sha256": "c126b7f2a873691866206268ae8c1d8361c4919ec8b5bca1576cdeb6c4d5a292"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_top.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_top.png",
+    "sha256": "9a6c2b7b325ec6107708fa263189696750adcd47acbba78df31faa8ad3f2ff08"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_bottom.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr1_bottom.png",
+    "sha256": "a05ebb153ba03e9a49421b2fe852be913f42a60b7969c9edb7141cd70fa2010f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_economy.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_economy.json",
+    "sha256": "15bfdd269d5405b990d2718b43e9b5b06f0da0181b853fbea3c0dfefa2bc0551"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_economy.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_economy.png",
+    "sha256": "d66fac3aa96d6e81cb78e73d9de60f2e8091ff4c59f63e108731f58d9233030c"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_balanced.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_balanced.json",
+    "sha256": "3573a1ecb3835a3872c26541fd36c222d6b6f125b8f64c46b543227e9fcd0928"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_balanced.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_balanced.png",
+    "sha256": "79cf9921de0a6d73ce0c9d4b87c97023f9c61ef64ac226a3b392fb9efea42ba0"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_high_speed.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_high_speed.json",
+    "sha256": "78495d2b84ae93de76b4300e9b0d4c4628c8b5a72083b87ed8f8505aa098df42"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_high_speed.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_high_speed.png",
+    "sha256": "be452d0024929f7bb537b8bec0a83693e141675bcc1281ecf5895a7298d2ad11"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_low_loss.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_low_loss.json",
+    "sha256": "0e3cac200418c3923cf7e3a4ed52f5d43d38df44ba5364ce266797fb1fd4f99d"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_low_loss.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_low_loss.png",
+    "sha256": "f4cc4284bf966047724c9986918af6a8b1061b113ffa12e376ffcc9b1e92ef27"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_defective.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_defective.json",
+    "sha256": "dcb16d8abcb7209b38668c8493509d5a719ab4fd30acfbf87ff9c2329b8787f2"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_defective.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_defective.png",
+    "sha256": "83ed68ecd563015370260861967af3ccd7c425be4eec6f968f7467a98126ff22"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_final.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr1_final.json",
+    "sha256": "d46d574e86676b1ce998ed9be7bd93a479ea0bf6d4c6585c5041fd0296c6c9f8"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_final.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr1_final.png",
+    "sha256": "cae56fe34a851faa83c80c0bdc6dc2f88c2210f1ff37874d16f6f8acc8fa7d77"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/memory_drive_ddr2.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/memory_drive_ddr2.json",
+    "sha256": "572d542009f791eb0808ff390dd8a1e710dd428b358931ab769e194adc464b34"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_front.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_front.png",
+    "sha256": "63236a58512f818bfe0fa67fc4364611230510d0928197b9877e38a2949d9641"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_side.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_side.png",
+    "sha256": "824dd8f1d8c69c28f906d683d78fded7311af43c663d2b68e0a456171ca924d8"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_top.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_top.png",
+    "sha256": "159f02c6afa5abef7a891ce10e7814af231e40e7cdbd8d7fcac962a8795b2789"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_bottom.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr2_bottom.png",
+    "sha256": "a05ebb153ba03e9a49421b2fe852be913f42a60b7969c9edb7141cd70fa2010f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_economy.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_economy.json",
+    "sha256": "4278aad5ab5389828d73b7ad132d288b53a3a38ca6d6884d211af4b8e80de711"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_economy.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_economy.png",
+    "sha256": "08f2ac5534f1079d44cda039783094aca12c8de9ce6257007ec65058f79b0061"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_balanced.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_balanced.json",
+    "sha256": "eba32fdd9de65662b7d2938304172665759197c00f36b2985b60e8eae7d98c26"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_balanced.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_balanced.png",
+    "sha256": "5b1545b1d4653b92edb44c3851165d095914b9f2ec3aca19839bc78fefd6e229"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_high_speed.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_high_speed.json",
+    "sha256": "9266db141e5a103299717d9a23ec888c343e54eef1ed597f3a457b3079785bd4"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_high_speed.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_high_speed.png",
+    "sha256": "6dfab43bf73937edf89e2455c7660b02ed65d7bbe87f032812fc3ac44962b2c9"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_low_loss.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_low_loss.json",
+    "sha256": "73b78cd04efe645a590e480c9085d68e2a4b99a47e9a958ec1733e7604b1f414"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_low_loss.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_low_loss.png",
+    "sha256": "048f38dd29138bc2237082e5b917d471f93c542916ff8ed86a5795cf88edf63d"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_defective.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_defective.json",
+    "sha256": "dc130db1eb1db10f843627040bb0bd0324ae37fd2a98e4d097c075a55605883d"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_defective.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_defective.png",
+    "sha256": "f90ccee28763e973a85f8346aba9935b01abcfe60d6b5d50ef17c25c6d6be4e6"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_final.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr2_final.json",
+    "sha256": "2f7dab2048104b0604e9b99e07d3946bed2326ab584e31c8126836ac0027b311"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_final.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr2_final.png",
+    "sha256": "16cbf6e6ef5684f9728427a2e7e88886240f9c3bc018f06bb6095f08f4002364"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/memory_drive_ddr3.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/memory_drive_ddr3.json",
+    "sha256": "9eb7ca1fae290cf6eb84ea9e52bd7ddeb042fb0c283b14a2706cf7ea3537336c"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_front.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_front.png",
+    "sha256": "49e1613edab21ca477d8db51fcb0b9d327c54a832487556d00a828823f0c5bba"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_side.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_side.png",
+    "sha256": "e785dc363bc8ebaa800f71bc3a7359f6ac0904f6b773adad6bf784f4e609a304"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_top.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_top.png",
+    "sha256": "959ca6cdb4da6bf46d02a3c00a779e7add1fd036dbb8a301881703ccf05ffecc"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_bottom.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr3_bottom.png",
+    "sha256": "a05ebb153ba03e9a49421b2fe852be913f42a60b7969c9edb7141cd70fa2010f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_economy.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_economy.json",
+    "sha256": "a9ff739e95d4cb3a7d7203fb3cc6067804c36923b013ab6ec655f3ac64e826e6"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_economy.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_economy.png",
+    "sha256": "5d135d40fca9c8cd99a16923ecc1cea851eb319ad4bf4653757a1c8390fa6531"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_balanced.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_balanced.json",
+    "sha256": "e8cd59e94c92c5078808515924ac200f1fad05bf248764b25e9ffbfb286ea01d"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_balanced.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_balanced.png",
+    "sha256": "58a88275a53a0cde6a8a07917138f03061cff0bb8c9e9c69a9e02cccd166d786"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_high_speed.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_high_speed.json",
+    "sha256": "732551d71f55db1c793b134294a4c1059f7662519bc8fc499fe1a65e98df1802"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_high_speed.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_high_speed.png",
+    "sha256": "468335e5072d186cea2abde739c1e1d8362e1cbfad4afe96da4f1a1e99f8f148"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_low_loss.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_low_loss.json",
+    "sha256": "c39fd95935f884f5f8afd440994a0c12d86985f220662adcc680d9ec9017d626"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_low_loss.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_low_loss.png",
+    "sha256": "2c4b725ffc9248558aac1669b9223b7fa1ac038224578bf5f56b66b8068230b8"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_defective.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_defective.json",
+    "sha256": "77bba896340fc38ad770a7f990c7d59fa6f0493dd932d87d45968930c9eaa05a"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_defective.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_defective.png",
+    "sha256": "65f150d019d710d2a37f03869ebf7bfbac99a74521cc4396c91fe26ed3e4bfc8"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_final.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr3_final.json",
+    "sha256": "c7f4b5a0bbde55d001a91b1cbca9ec6740a15850fa67489dc639c81ff6a044a8"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_final.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr3_final.png",
+    "sha256": "3f908095215f5d30605b817908b8a35ec6b98b59c137c2c3704b72c7b5a84256"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/memory_drive_ddr4.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/memory_drive_ddr4.json",
+    "sha256": "07919ca389f029e59a5a58a13f378e282f4d63a08650d434c7e8b5dce1d7224f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_front.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_front.png",
+    "sha256": "5bfba81691ebb01945a5eb8bcfd8b684c4de68eeafc3205cccb70381216892ee"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_side.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_side.png",
+    "sha256": "61aca3e2cb5b80e84d4e93b500581ae959e0ead2f7e808a2d45ad8cd5449bab4"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_top.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_top.png",
+    "sha256": "417bf5ae0402127776aad032cce4f054d83d639dbb74d6a6a1ba483c6f2bcc3c"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_bottom.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr4_bottom.png",
+    "sha256": "a05ebb153ba03e9a49421b2fe852be913f42a60b7969c9edb7141cd70fa2010f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_economy.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_economy.json",
+    "sha256": "29c24e780671438d3f32bd4fd8cebbf9f5920fc6bb7ff412e080743b8351a146"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_economy.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_economy.png",
+    "sha256": "f23443b5edf96d4f84d39a3e7f1061a0266fa0e4ed1b123770d17d3c81919e5f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_balanced.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_balanced.json",
+    "sha256": "6b715e38659ca8c1e984211b6832dd4165d27bbbe8929635bae2ffbb87baf8a6"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_balanced.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_balanced.png",
+    "sha256": "08572f06e6b6450a677acb1b48b6590706aa194651fc07e9c4f03720dea28e30"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_high_speed.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_high_speed.json",
+    "sha256": "b6fe4187acb174f21134f7122ea223d98718852010058fd7fb4db50784bb284e"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_high_speed.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_high_speed.png",
+    "sha256": "6103a32e89f7937450d10318d71b8537b299fd6b373d7be92826ac92930f2565"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_low_loss.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_low_loss.json",
+    "sha256": "bd48d771c09579a68d6c93a8deca71d1e5eb9bc729612829a439d40c89f0378d"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_low_loss.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_low_loss.png",
+    "sha256": "aa5d58d0503e8b1224e6ebfa3da62df1e35093e6a38c8451b80e9b1a41ade96e"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_defective.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_defective.json",
+    "sha256": "832bb28e54ebd77a0a79d8a95603966920115c0f5865443c35f8d5ca67b2a3e7"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_defective.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_defective.png",
+    "sha256": "dc4f09ac8ccbf3557c859dbe0b52b8d1fab6f9895db7510a9eaa9d47ca40e1b3"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_final.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr4_final.json",
+    "sha256": "7029dbb02b880b4eef1ae41e30861afb48c61228794885b7f4234978b9b0149e"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_final.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr4_final.png",
+    "sha256": "5f7f7fe11cc5ea7cdbd16dab00d70961bea9d54045eafb65c9042ea4524f6f49"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/memory_drive_ddr5.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/memory_drive_ddr5.json",
+    "sha256": "4c5b364d85bd5cc37dc3788f0e58add727a2973a7d3dc158c2ee936b0ac31212"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_front.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_front.png",
+    "sha256": "2cc20a2b8f3cf5a06e601d33afa8e83522e82e4d776ae3eae613b71b9e25e9a0"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_side.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_side.png",
+    "sha256": "8913eaa69f8bfedbb00a8efc6b36fc94090c904ba488ce071fc720ce64b29cd4"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_top.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_top.png",
+    "sha256": "91de8c4d68a0b5cc3303024b7943f74f20fec07cf36aecf24e19f59f5e9034f6"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_bottom.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/memory_drive_ddr5_bottom.png",
+    "sha256": "a05ebb153ba03e9a49421b2fe852be913f42a60b7969c9edb7141cd70fa2010f"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_economy.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_economy.json",
+    "sha256": "7cf7c9149e100eb38f7f4dde2c4adb28346febaa233b840c064df7738cf757f5"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_economy.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_economy.png",
+    "sha256": "d129566eacc518469604930772723eb9e749e0a4ca4ac5769f64fcd2273575d1"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_balanced.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_balanced.json",
+    "sha256": "1581c77cf02ec5e4534cec894a3db74acdb0cf3b993ca29a87b2b75018dcd745"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_balanced.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_balanced.png",
+    "sha256": "7c0a9c4ef981469b0cbd8efd9444e451815ec8f6f2a04d8bedce103beeb45f7e"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_high_speed.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_high_speed.json",
+    "sha256": "e6ded426775730939074a2db75d0ffa91136cfb741e00cb3edd2d3154b692531"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_high_speed.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_high_speed.png",
+    "sha256": "b31fd6af026b0b43791d57b1d0db078ad5e6b19f1a22fc4487cf2e094f54c2e9"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_low_loss.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_low_loss.json",
+    "sha256": "677e17c95a51a7fa9c3c1351b78446dc02f5f53a46e6ee0ee099019c732cb9a2"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_low_loss.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_low_loss.png",
+    "sha256": "f208914764c30344094badcead4b950d779b1a797ffe429daa10797284acfa25"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_defective.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_defective.json",
+    "sha256": "45f707e5ec5d7e336c8f0b91113b68223756087e02303fcb907b4bb22e9dcf17"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_defective.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_defective.png",
+    "sha256": "222a960f996895a0f4e6b1d1b34455ae0b35d1d8ebda6d168162d98fc5a41991"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_final.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/item/memory_card_ddr5_final.json",
+    "sha256": "d5ab2dbe46f9708560d160d5b81fbafc1e6c8565c50ca68b7211893e92943697"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_final.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/item/memory_card_ddr5_final.png",
+    "sha256": "a4d306660fe0480f2d18fdf26a8a195e6fcb3d108a8d273fc822f8122a6ceea5"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/cross_dimension_transmitter_tier1.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/cross_dimension_transmitter_tier1.json",
+    "sha256": "4bf90a85aa7abda72f0d05cac39f295803cbe277dd3cda9631eebaaec8799247"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/cross_dimension_transmitter_tier1.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/cross_dimension_transmitter_tier1.png",
+    "sha256": "9520c78ff296451adf29f31c6b0bb18c88777affa38e576b9d57b470eb27539d"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/cross_dimension_transmitter_tier2.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/cross_dimension_transmitter_tier2.json",
+    "sha256": "f7ee6c06ee7b2915de1d912900bf45123bb932f1ae3c67a584f3a818f9f4d483"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/cross_dimension_transmitter_tier2.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/cross_dimension_transmitter_tier2.png",
+    "sha256": "061419abd54e7e431352685c2b484b497f77e76378de7af01b2f6d6e8f09e7fc"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/models/block/cross_dimension_transmitter_tier3.json",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/models/block/cross_dimension_transmitter_tier3.json",
+    "sha256": "06cac467e280d39b48efb3c23559d315481d54dfe049d29382728f8c343c0348"
+  },
+  {
+    "resource": "assets/dimensionworks_mek_stress/textures/block/cross_dimension_transmitter_tier3.png",
+    "source": "mods/dimensionworks-mek-stress/src/main/resources/assets/dimensionworks_mek_stress/textures/block/cross_dimension_transmitter_tier3.png",
+    "sha256": "04fea41f4a3e8aaf310ab9bcff4b66cc728004e518fecabd108168a4634b74d7"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/enriching/active/basic.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6fe2e402554210d9999286b670892597a6560507349aded5e20bae1566c6f1e1"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/enriching/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "602a6f0d560d156f120e3c3af72712df0d46071c626f11e7f49c20aa8bfeb81b"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/enriching/enriching_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "64837c40c6405faddb6419380235e9b427e55467aa3c3c9e4e4dd6f5df76b3ad"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/enriching/enriching_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "5c70355c92ce19afc80c152589e86f1ca9eeb756b00eb78c0d1d04bb4c7ba9b6"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/factory_front_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "fe78f5f22450ad636889745b08e989811ecc3df4ec5be9815aef9eed7813bdc8"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/enriching/enriching_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "7351c46e6cd7384dbda34d925ade65e89ffdc1c8a4b3b171be95d4b62fa0b656"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/enriching/enriching_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "173104d9e5325719c4ecb0220ebef9268f9d3d52bfae606a8bc48f3e206cf884"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/enriching/enriching_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "1fe511f32cc6a22902eb3f202357c8e909950d8491bed76e164c4fb95b415b5e"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/enriching/enriching_factory_elements.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "c26339bec9c44915fd0bba876c3719995320412ea8d92c138c1a78c28efb2e7a"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/front_led/active/basic.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "7934fdbe43f347ca7e230135767c8fff5bd57dcb507e30dc1733a48c3eb6d623"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/led.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "1d858b3280b2ffd3061b74ef98120a9f87b6abf0bb5eee492055be3d402c0178"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/enriching/active/advanced.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "3e31612bf598f3b0e5918825c17f0b3985a3aa06f7fd57953031eaa3241fba71"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/front_led/active/advanced.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "02fff404e819997af69599c5360027a0a4c2bcd4d0000cd02f42a3e705bf02db"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/enriching/active/elite.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "e60f983eccc618ec0c28dbdd75edb38b9a68eabfcea33322071688ec20da8083"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/front_led/active/elite.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "1f2a34ea4eb8b293c44363b0d3d276b7c885cfd285afbf4e263bed61fdf4d85f"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/enriching/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6292762274a0e776448489fabb27b85e225190990c5a90d4f6f771aee814af74"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/front_led/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "0473e2f9d130a0c10dc57bc49fc28287946e6a20083bac89c8e6778923859551"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/smelting/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "26a23b51eaa1d0b72285b85aef07db297963f87e06995b90eed0121eee29f5f5"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/smelting/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "8089467277717fe666dfcac4f9bfffefd5c9ec892e8fafa935a7c0c77195c5e1"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/smelting/smelting_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "51760241edf66a6d78a13061ad0623bd266a45622a4eebe8a2f04c05e2a136cc"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/smelting/smelting_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "2eb7e619ac6702edd04edfccdfa393cc6651a99aa699d244fa12bf1ffe72d58e"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/smelting/smelting_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6ba1df2be00e4f0b721eb99ed46ad775d0ae80f776fbf80c51750c18fa72ebb1"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/smelting/smelting_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "44e89a94a2479cea654722b67c80bb0e36685c5c5ff3a7b3f77a869a685e9958"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/crushing/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "f09b6f1cf128371fba4e0786337322fb17240fdfa10d88289bceeef3dfbd78ca"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/crushing/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6dae3ea6f87f966871942677df934cf91b8df780437185347741b1f22dc4f620"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/crushing/crushing_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "11522244faf7be1968a273a01b449e641453fabfb3316651db20eb91886174bf"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/crushing/crushing_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "1502f5f95ff96d90b3a58d145ddf3807a7002ae70ef97c26e7a2221438392376"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/crushing/crushing_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "8765363deefc545eec4d2581b3a3faf61564d58c0e51370bfbd7e5c89cff894d"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/crushing/crushing_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "e49a080d02b32762096bb8d617cc9a3393d10b2f12a9a2b47cdae0d56af88409"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/crushing/crushing_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "03035acec2a9797755a596b9eeb7d2c74d3f5d835c841bbf4d77d259d91f95f3"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/compressing/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "5863801230b55f20bb37a9a269ed6764add62a25eab907030d9a442d3ec04c62"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/compressing/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "d0ee396b4a36cd1e6b39c619e30ae2c8f18f3a7215b6bd4d099533f2dc6fbbef"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/compressing/compressing_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "88bb94b327258533e394e54fd8946090ee6457876bf506ad49210fe62ebf8d00"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/compressing/compressing_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4c4de4327de5afdd7ccf20c471c2d8a7c7fac66c7b3fe98fa09c968919407692"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/compressing/compressing_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "58bb135915823336d57e4250f2eed5050974321890c68307c472dfdf26f63061"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/compressing/compressing_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "543bfc93bf0e0919f86dbb166cb3f154d5ba4be69f5f59866c412682d8883696"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/compressing/compressing_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "e95b623c1aed04a330fa86e65fd575dea04f254943a1d2573007478b7ab5b513"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/combining/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "87f7d8fd5574e62628b8d4e542e348ea0a4ccc00e1d69e77c3e82df12ed83863"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/combining/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "dbdb2ff21acea83c56d767bfc8369a43a6be9c0cb791208404c2b30b546105ba"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/combining/combining_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "adb1232aea2682a26d61e4f65de7fedcc94e0e7f9f435fc0f95a28c1a8097659"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/combining/combining_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "ab7fcc4e5a6eedb0d37b19ec6c0ff66ea96fec5ea7ee3cd5a7db87d44e602726"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/combining/combining_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "210e91de7d02cc68102d6e9fd8e103ec50775d52d225229c3e18e8874ed834d7"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/combining/combining_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "234fabf56d158e88586c2c7ded0450be026224634ac44891cb1dea32f27018c5"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/combining/combining_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "bf0de95c644432563291b1f0ce8c8e6c5cec0608a11ac5e3562d86175385a051"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/purifying/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "fc88afdc3a2b815453628656a9b26f3baac34755015e7ed2af480e6f2c67db45"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/purifying/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "3e4de99eee4e7135e4d50f7fe2b4186dab7dcb86a479ac3a27290ce792ad445d"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/purifying/purifying_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "aebf8014d27adbaad39a248e8647d1dae722c96f83b08c0dbad81957c7f0b3c6"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/purifying/purifying_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4b8acdc14ecb2bbe65f0e3f69d28512eb4cc4e96fce726c0c0bf45d77d4191fb"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/purifying/purifying_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "2f44e60f537463558b90f63f11f33fffc0dfccd7f0550cb1c20e4c3283798d21"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/purifying/purifying_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "39c9c473cb701b35bfa58c9dfce58d72125c18b6afdee2099fbaf64e0b6b95c7"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/purifying/purifying_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "0327cf608069cbfc9d0c8b992e337d0b52a2b919f22310d4f1fb066a9d961af7"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/injecting/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "5072267d6de99dfb52ec79159e90275a413249f9f54d846648103c2d9298cf71"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/injecting/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "3fd3c924250be31483119308d945a3280b1b9c3d7874f3a1d7ae68063776f65a"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/injecting/injecting_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "ed244112f5f30f7640c66e2b7835a62eb8fd99dd26b99584b80dfe15ec5929fe"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/injecting/injecting_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "f439198472b6b7472b502166118da1e5728b2623f323faa16ac37d0d2dcaf17f"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/injecting/injecting_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "c82203052c0f71233482f16b626b9086a0f46ffa0cdb19fbbd469f64db88c514"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/injecting/injecting_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "184da08a6eca5e9834dc4fde77518c0f1c5d6ff8d9750dc2912e4eae3a391806"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/injecting/injecting_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "f154f4f00f76e316b2c70af219485545a9c424e1f93966c07643574d2e695a4d"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/infusing/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4e70cd80d62a8f9d8a815a3d33aa82c6d9de693c08879353abb4870ec080d44f"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/infusing/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "6c438aa9a48b73613d425bc44f494b29f139cc7bdd97df37d7c098d2634325d5"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/infusing/infusing_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "426afaec8eb99c5eff276e59b7f6a0c2e7c6c4e47d710e4c3a1eb9e839e692bc"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/infusing/infusing_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "75dc4a68b8f3698d642e3d471a7d71f639ba816d88ca4e2c9863b006327f71d3"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/infusing/infusing_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "2d74e0c7c857a4533be223fc99c956d3cc2e5d78fda48f06f6ab55ce882008b8"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/infusing/infusing_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "b1fb4aaa00ce3d5576918a28b2a5aa62921077adf60e94824b7825a3b7e8e59e"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/infusing/infusing_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "d504bd948b6b92d60f06678cfb799cc27f1812194a33965ea6a1fb5dd44f08b0"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/sawing/active/ultimate.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "9cda93a60c39ab302bf63854f8b6b332f780035fca6bf092dd915bb6132b7d43"
+  },
+  {
+    "resource": "assets/mekanism/models/block/factory/sawing/base.json",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "4036d05e48d95385f1d878bb4c0dbdae8e2f2475a3d231ab7ba8c3f3813f6c79"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/sawing/sawing_factory_front_active.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "34cdd092d0f475cb4077285a01d42ce6636002cf0d2167107c0279f61563f2fe"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/sawing/sawing_factory_side.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "db524cd083d210a5a282e48046dbfc8c9063afe5ad2a24ce29ff5597dda898b8"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/sawing/sawing_factory_bottom.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "08ba32e433857625047b1349149ed4e5bbb2b30dbdded17a331769ec4d5f47ab"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/sawing/sawing_factory_top.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "edbf5aa92816e975f9c43492de1187caf7fd01a540ef9b231539e0755153c573"
+  },
+  {
+    "resource": "assets/mekanism/textures/block/factory/sawing/sawing_factory_back.png",
+    "source": "Mekanism-1.20.1-10.4.16.80.jar",
+    "sha256": "c3a98430503781dc64f6d9b3aa426632ebac89cb82a203a61f0d9123aa12325e"
+  },
+  {
+    "resource": "assets/dimensionworks_pressure_crystals/models/item/low_pressure_crystal.json",
+    "source": "mods/dimensionworks-pressure-crystals/src/main/resources/assets/dimensionworks_pressure_crystals/models/item/low_pressure_crystal.json",
+    "sha256": "5441f88f012709e7a8597cc204a0a96bbfe285c27b5359fc3638a414f2f4110c"
+  },
+  {
+    "resource": "assets/dimensionworks_pressure_crystals/textures/item/low_pressure_crystal.png",
+    "source": "mods/dimensionworks-pressure-crystals/src/main/resources/assets/dimensionworks_pressure_crystals/textures/item/low_pressure_crystal.png",
+    "sha256": "4ffd32a9f3a3b63607b6aaaab5b80170bb3b5d02e456ee623050f8d6f509cca0"
+  },
+  {
+    "resource": "assets/dimensionworks_pressure_crystals/models/item/medium_pressure_crystal.json",
+    "source": "mods/dimensionworks-pressure-crystals/src/main/resources/assets/dimensionworks_pressure_crystals/models/item/medium_pressure_crystal.json",
+    "sha256": "1a300abf5d15cc856a11d2adb2273d3860003e72597f574ee5d96b528dc90122"
+  },
+  {
+    "resource": "assets/dimensionworks_pressure_crystals/textures/item/medium_pressure_crystal.png",
+    "source": "mods/dimensionworks-pressure-crystals/src/main/resources/assets/dimensionworks_pressure_crystals/textures/item/medium_pressure_crystal.png",
+    "sha256": "03e2377305a4db136fe7daf2236492a11e3103d9bda2c7fbc81f78699d18b65d"
+  },
+  {
+    "resource": "assets/dimensionworks_pressure_crystals/models/item/high_pressure_crystal.json",
+    "source": "mods/dimensionworks-pressure-crystals/src/main/resources/assets/dimensionworks_pressure_crystals/models/item/high_pressure_crystal.json",
+    "sha256": "07725bd54ee56ef60a7b06084b437f731caa6a9161f9db2e5b1e21f8c03265a9"
+  },
+  {
+    "resource": "assets/dimensionworks_pressure_crystals/textures/item/high_pressure_crystal.png",
+    "source": "mods/dimensionworks-pressure-crystals/src/main/resources/assets/dimensionworks_pressure_crystals/textures/item/high_pressure_crystal.png",
+    "sha256": "b5b671c048a1b3d4432a50871059b812279965c2a4ada14fe4acedbebbe75fc4"
+  },
+  {
+    "resource": "assets/draconicevolution/models/block/reactor/reactor_core_model.obj",
+    "source": "Draconic-Evolution-1.20.1-3.1.2.621-universal.jar",
+    "sha256": "21590cdde6f17ea3c1bd9797eb118d7bdb601ef41a1b97b9267f060987876fd4"
+  },
+  {
+    "resource": "assets/draconicevolution/textures/block/reactor/reactor_core_texture.png",
+    "source": "Draconic-Evolution-1.20.1-3.1.2.621-universal.jar",
+    "sha256": "257c6928db0a18b3cbd65249d9a3eaf0a1cc751ca02cf96bd0da56941e7e6bbb"
+  },
+  {
+    "resource": "assets/draconicevolution/models/block/reactor/reactor_injector.obj",
+    "source": "Draconic-Evolution-1.20.1-3.1.2.621-universal.jar",
+    "sha256": "7075010d3adc823979acb0342b723841ba182a488d486faa3e718784728a7859"
+  },
+  {
+    "resource": "assets/draconicevolution/textures/block/reactor/reactor_injector.png",
+    "source": "Draconic-Evolution-1.20.1-3.1.2.621-universal.jar",
+    "sha256": "ac6e3ac18c5d2c7edf37dc6b3306113f9c432a4d3766991e11146ce35feffbb5"
+  },
+  {
+    "resource": "assets/draconicevolution/models/block/reactor/reactor_stabilizer.obj",
+    "source": "Draconic-Evolution-1.20.1-3.1.2.621-universal.jar",
+    "sha256": "2eaf2b2db90f836855a1de1d2970bef756503f3739f43d3e909c065d36c591a7"
+  },
+  {
+    "resource": "assets/draconicevolution/textures/block/reactor/reactor_stabilizer.png",
+    "source": "Draconic-Evolution-1.20.1-3.1.2.621-universal.jar",
+    "sha256": "b80b92904777c93addabc36e2da1c102f686702ca0108111c2f4da4b267272da"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/dimension_key.png",
+    "source": "kubejs/assets/kubejs/textures/item/dimension_key.png",
+    "sha256": "12fe31d26a337d72a28e02c38cba78f8149654cdd75b98670f4def9f1d7f73cf"
+  },
+  {
+    "resource": "assets/kaleidoscope_chinesefood/textures/item/century_egg.png",
+    "source": "kaleidoscope_chinesefood-1.1.16-1.20.1-all.jar",
+    "sha256": "18fd3fb41fcf09582741c2e4f1ef190ee55b0d1ee1eba5c8cc6a93daedf4c984"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/steeleaf_seal_strip.png",
+    "source": "kubejs/assets/kubejs/textures/item/steeleaf_seal_strip.png",
+    "sha256": "9b465d7ce24438ee0d667b569e957dfdc7cff705a1d20a9bdfc7bf2218e490eb"
+  },
+  {
+    "resource": "assets/twilightforest/textures/item/naga_trophy.png",
+    "source": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "sha256": "077e8142c4facc5782f9ba4ac8875e5a1487690605036b2353a2ad860ba2bf46"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_1.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_1.png",
+    "sha256": "af34087f3502c148acc89f27c65391f7452b710d6d83c49edc09ee048fd92b0c"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_2.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_2.png",
+    "sha256": "e23c61cb6500ff4f1d8f3df9012cd40c1ead2d4ed30f4b2dd37f60e4387a1a30"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_3.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_3.png",
+    "sha256": "090502c8ce4eee47ffbaf371122770ced374d306ca1ede01cc009dfacb1743a2"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_4.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_4.png",
+    "sha256": "df32b906df42013090f2b6a462d8cdf0ae661eb28493a303ee27ecb8dc6c1366"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_5.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_5.png",
+    "sha256": "1f1bb88cf61b256f2c839b510c18c1b3de4ebda09665d5e6afefb06511939c02"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_6.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_6.png",
+    "sha256": "1744afe043d5e457a868c96ef3b1022303afbd09b164a2fcedff4b30d3ff160e"
+  },
+  {
+    "resource": "assets/kubejs/textures/item/gear_heart_repair_fragment_7.png",
+    "source": "kubejs/assets/kubejs/textures/item/gear_heart_repair_fragment_7.png",
+    "sha256": "32122077ed6b3307a77fecefe95610742ac270563e5d461c01094fd02dbe8c53"
+  },
+  {
+    "resource": "assets/touhou_little_maid/tlm_custom_pack/touhou_little_maid-1.0.0/assets/touhou_little_maid/models/entity/hakurei_reimu.json",
+    "source": "touhoulittlemaid-1.5.3-forge+mc1.20.1.jar",
+    "sha256": "b096965e3db4c334d112d9762ea5d689bdcba55b00bad20ec7e352f3c05963b3"
+  },
+  {
+    "resource": "assets/touhou_little_maid/tlm_custom_pack/touhou_little_maid-1.0.0/assets/touhou_little_maid/textures/entity/hakurei_reimu.png",
+    "source": "touhoulittlemaid-1.5.3-forge+mc1.20.1.jar",
+    "sha256": "6bbdbdee758fca4150fc77d4b214147cb5ffc669a3ad946885c5ce12b7e894ef"
+  },
+  {
+    "resource": "https://raw.githubusercontent.com/mekanism/Mekanism/v1.20.1-10.4.16.80/src/generators/java/mekanism/generators/client/model/ModelWindGenerator.java",
+    "source": "Mekanism 10.4.16.80 model source",
+    "sha256": "e523880906c35356caf02344df29f9a651410f7789f345a9572a8d9b2a899c50"
+  },
+  {
+    "resource": "assets/mekanismgenerators/render/wind_generator.png",
+    "source": "MekanismGenerators-1.20.1-10.4.16.80.jar",
+    "sha256": "06a833af0c337a0195df52a87e8eefc59150524d5ba1ce60f572c587c9a66992"
+  },
+  {
+    "resource": "assets/minecraft/textures/entity/player/wide/steve.png",
+    "source": "client-1.20.1-20230612.114412-extra.jar",
+    "sha256": "090da8d92c9f54fcbea87e6a2fb94125604a5a92a9ed6a52c10ee61c3b84bb79"
+  }
+]

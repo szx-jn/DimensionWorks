@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {"layer0": "dimensionworks_pressure_crystals:item/low_pressure_crystal"}
+}
