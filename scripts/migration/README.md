@@ -54,6 +54,8 @@ python3 scripts/migration/preflight_registries.py /absolute/private-lab/source-a
 
 `entity_data.py` 根据唯一服务器的实际旧能力结构及固定目标 JAR 的持久化格式，将实体 `ForgeData` 转为 `NeoForgeData`、`ForgeCaps` 转为 `neoforge:attachments`。处理 Aether 字段/槽位、女仆数值、Mekanism 辐射、暮色护盾、酿酒状态及 L2 附件；Curios 库存和嵌套数据保留，仍须接入物品组件转换。舍弃的凋零风暴能力、新暮色不持久化的两个瞬时控制状态及新版 L2 不保存的死亡计时器通过 `removed` 返回给私有台账，不静默删除。未知能力、目标字段冲突或结构不符阻止转换。
 
+原版 DFU 将属性改为 `attributes` / `id` / `base` 后，该模块继续映射旧 Forge 重力、游泳速度和两种触及距离，保留数值与修饰器。全档 16,567 条 `forge:step_height_addition` 均是零增量且无永久修饰器，移入台账，让新版实体使用自己的原生台阶基值；非零、未知修饰状态或属性 ID 冲突阻止转换。不把旧“增量为零”写成新版“台阶高度为零”。
+
 该模块只返回新 NBT，不写世界、不更新 DataVersion，也不代表物品、机器或所有玩家已经迁移。箭袋的 `ForgeCaps/Parent` 是物品库存，必须先走独立物品组件转换，不能当作实体附件处理。
 
 `vanilla_dfu.py` / `java/VanillaDfuBridge.java` 编译临时类并复用一个 Java 21 进程执行原版 DFU，固定为本服的 3465 → 3955。类路径不为 1.21.1 时阻止启动；按指定的原生类型转换 NBT，不打开世界。私有日志拒绝覆盖。原版 DFU 不处理所有模组的自定义物品/机器数据，不能只改 DataVersion 就交付存档。

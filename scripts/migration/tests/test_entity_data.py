@@ -91,6 +91,40 @@ class EntityDataTest(unittest.TestCase):
         self.assertEqual(result.data["neoforge:attachments"]["l2core:conditionals"], {"data": conditions})
         self.assertEqual(result.removed["l2library:conditionals/tickSinceDeath"], 3177)
 
+    def test_forge_attributes_keep_base_values_and_zero_step_uses_native_default(self):
+        values = {"forge:entity_gravity": 0.08, "forge:swim_speed": 1.0,
+                  "forge:entity_reach": 3.0, "forge:block_reach": 4.5, "forge:step_height_addition": 0.0}
+        source = n.Compound({"attributes": n.List[n.Compound]([
+            n.Compound({"id": n.String(key), "base": n.Double(value)}) for key, value in values.items()
+        ])})
+        original = deepcopy(source)
+        result = convert_entity_data(source)
+        self.assertEqual({str(a["id"]): float(a["base"]) for a in result.data["attributes"]}, {
+            "minecraft:generic.gravity": 0.08, "neoforge:swim_speed": 1.0,
+            "minecraft:player.entity_interaction_range": 3.0, "minecraft:player.block_interaction_range": 4.5,
+        })
+        self.assertEqual(result.removed["forge:step_height_addition"]["base"], 0)
+        self.assertEqual(source, original)
+
+    def test_unmapped_attribute_modifiers_are_preserved(self):
+        value = n.Compound({"id": n.String("l2damagetracker:crit_rate"), "base": n.Double(0.15),
+                            "modifiers": n.List[n.Compound]([n.Compound({
+                                "id": n.String("dimensionworks:crit_bonus"), "amount": n.Double(0.2),
+                                "operation": n.String("add_value"),
+                            })])})
+        result = convert_entity_data(n.Compound({"attributes": n.List[n.Compound]([value])}))
+        self.assertEqual(result.data["attributes"][0], value)
+
+    def test_unexpected_step_state_and_attribute_collisions_block_conversion(self):
+        with self.assertRaisesRegex(ValueError, "零状态"):
+            convert_entity_data(n.Compound({"attributes": n.List[n.Compound]([
+                n.Compound({"id": n.String("forge:step_height_addition"), "base": n.Double(1)})])}))
+        with self.assertRaisesRegex(ValueError, "映射冲突"):
+            convert_entity_data(n.Compound({"attributes": n.List[n.Compound]([
+                n.Compound({"id": n.String("forge:entity_gravity"), "base": n.Double(0.08)}),
+                n.Compound({"id": n.String("minecraft:generic.gravity"), "base": n.Double(0.08)}),
+            ])}))
+
 
 if __name__ == "__main__":
     unittest.main()

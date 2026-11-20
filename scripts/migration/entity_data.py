@@ -28,6 +28,12 @@ UNCHANGED_CAPABILITIES = {
     "curios:inventory", "brewinandchewin:raging", "l2complements:soulbound",
     "aether:dropped_item", "create:minecart_controller",
 }
+ATTRIBUTE_NAMES = {
+    "forge:entity_gravity": "minecraft:generic.gravity",
+    "forge:swim_speed": "neoforge:swim_speed",
+    "forge:entity_reach": "minecraft:player.entity_interaction_range",
+    "forge:block_reach": "minecraft:player.block_interaction_range",
+}
 
 
 @dataclass
@@ -101,6 +107,28 @@ def convert_payload(id: str, value: n.Base) -> tuple[str, n.Base]:
 def convert_entity_data(source: n.Compound) -> EntityDataConversion:
     data = deepcopy(source)
     removed = {}
+    # attributes 的字段结构由原版 DFU 处理；这里只映射实际旧 Forge ID。
+    if "attributes" in data:
+        attributes = n.List[n.Compound]()
+        seen = set()
+        for value in data["attributes"]:
+            if not isinstance(value, n.Compound) or "id" not in value:
+                raise ValueError("原版 DFU 后的属性条目结构错误")
+            id = str(value["id"])
+            if id == "forge:step_height_addition":
+                # 全档 16,567 条均为此结构。旧增量为零，新实体使用原生基值。
+                if set(value) != {"id", "base"} or not isinstance(value["base"], n.Double) or float(value["base"]) != 0:
+                    raise ValueError("台阶增量属性与唯一旧档已审计的零状态不符")
+                removed[id] = deepcopy(value)
+                continue
+            target = ATTRIBUTE_NAMES.get(id, id)
+            if target in seen:
+                raise ValueError(f"属性 ID 映射冲突：{target}")
+            seen.add(target)
+            converted = deepcopy(value)
+            converted["id"] = n.String(target)
+            attributes.append(converted)
+        data["attributes"] = attributes
     if "ForgeData" in data:
         if "NeoForgeData" in data or not isinstance(data["ForgeData"], n.Compound):
             raise ValueError("持久化数据字段冲突或 ForgeData 类型错误")

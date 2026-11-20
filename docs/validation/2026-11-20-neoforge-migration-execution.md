@@ -329,3 +329,11 @@ manifest/mods.json 已切换为 Minecraft 1.21.1 / NeoForge：共 183 项固定�
 只读定点提取实际 `region/r.-1.0.mca` 内全部 7 个现役 AE2 物品元件，439 个键，原始缓存总量合计 **3,281,878**；其中 76 个键带旧 tag、1 个键带旧 caps。caps 为酒瓶的 `creategearsandtavern:drink_fluid={}`，仍须按实际原生物品格式处理。私有 source-ae-storage-cells-v1.nbt 保留完整键、储量、损耗、附魔、Mekanism/背包数据、蜂巢内嵌实体等；没有拿物品模板 Count 代替库存数。**实际 7 个元件尚未完成整体转换和对账**，其所携物品、嵌套实体和机器状态继续处理。
 
 玩家的实际原版 DFU 输出还显示：`Attributes` 已转为 `attributes`，条目字段变为 `id` / `base`，但 5 种 Forge 属性 ID 未改名。11 份玩家文件的旧 gravity / swim / step / reach 基值已只读核对，均无这 5 项的永久修饰器；全档属性结构补充审计继续进行，不能仅依据玩家样本判断所有嵌套实体。完整旧档转换、真实身份登录及保存重启验收仍未完成，VERSION 为 0.3.52，未发布。
+
+## 实际全档属性结构与玩家属性转换
+
+补充只读扫描已完成，`source-attribute-shapes-v1.json` 为 319,192 文档、27 种属性；全档 16,567 条旧台阶增量均为 Double Base=0、没有 Modifiers，5 种 Forge 属性的结构均只有 Name / Base。没有假设其他实体与玩家相同。
+
+`entity_data.py` 在原版 DFU 后将旧重力映射为 `minecraft:generic.gravity`、游泳速度映射为 `neoforge:swim_speed`，两种触及距离映射为对应 `minecraft:player.*_interaction_range`；旧零台阶增量返回台账，让目标实体使用自己的原生基值，避免写成零台阶高度。其他属性与永久修饰器保持原值，非零/未知台阶状态或属性 ID 冲突阻止转换。新增 3 项回归，迁移工具 **36 项通过**（entity-attribute-tests-v1.log）。
+
+单个 Java 21 原版 DFU 进程转换实际 11 份玩家的 NBT，再执行附件/属性规则：123 条输出属性 ID 均存在于目标运行注册表，全部玩家 UUID 保持一致，11 条零台阶状态都进入返回台账，进程正常结束（actual-player-attribute-conversion-v1.log）。这些结果只在内存核对，没有写出或启动旧世界，也未将仍待处理的玩家库存、饰品/背包及机器状态认定为已完成迁移。
