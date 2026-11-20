@@ -4500,6 +4500,28 @@
       "save_migration_verified": false,
       "candidates": [
         {
+          "id": "9YaUuGdr",
+          "version_number": "1.5.10-mc1.21.1-neoforge",
+          "version_type": "release",
+          "date_published": "2026-11-20T08:50:28.564445Z",
+          "loaders": [
+            "neoforge"
+          ],
+          "game_versions": [
+            "1.21.1"
+          ],
+          "dependencies": [
+            {
+              "version_id": null,
+              "project_id": "r9RZvhiJ",
+              "file_name": null,
+              "dependency_type": "required"
+            }
+          ],
+          "project_id": "BrGJp2pm",
+          "project_url": "https://modrinth.com/mod/kaleidoscopedimensions-wine"
+        },
+        {
           "id": "zC2Ul3ww",
           "version_number": "1.5.9-mc1.21.1-neoforge",
           "version_type": "release",
@@ -4528,6 +4550,7 @@
       "action": "保留；核对注册内容、组件/NBT、配方/标签与存档转换",
       "status": "target_candidate",
       "evidence_urls": [
+        "https://modrinth.com/mod/kaleidoscopedimensions-wine/version/9YaUuGdr",
         "https://modrinth.com/mod/kaleidoscopedimensions-wine/version/zC2Ul3ww"
       ]
     },

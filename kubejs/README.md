@@ -4,6 +4,10 @@
 
 `server_scripts/pack_resource_corrections.js` 移除导致现有食物标签加载失败的未注册项。`data/culturaldelights/loot_table` 用当前 `minecraft:any_of` 条件恢复两种牛油果叶的剪刀、精准采集和自然掉落。`data/farmersrespite` 恢复茶壶掉落及流体 NBT，并用原版动作条件实现修剪进度；女仆存储和下界万象进度使用当前注册的物品、效果名称。对应整包运行结果见[本次验证记录](../docs/validation/2026-11-14-compat-cleanup-and-dispatch.md)。
 
+## 原生 Create 饮料配方
+
+`server_scripts/cocktail_create_recipes.js` 在 `after_mods` 数据阶段修正 Cocktails Delight 1.1.12 的 24 对注液/排液配方，保持原配方 ID 和 250 mB 数量。Kraken Rum、Nut Brown Ale、Rum 使用并返还 Brewin and Chewin 啤酒杯，其余 21 种保持玻璃瓶。脚本使用原生 `neoforge:single` 流体输入及 `id` 产物字段，不改第三方 JAR 或源码；不复制第三方资源到仓库。更新此表时须核对固定资产的材料、数量、容器和条件，并验证实际原生配方。
+
 存放 DimensionWorks 的 KubeJS 脚本、配方、标签和数据。
 
 建议结构：
