@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.pack_hook import check_update_assets, has_dependency_cycle, in_repo_mods
+from scripts.pack_hook import check_builds, check_update_assets, has_dependency_cycle, in_repo_mods
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -92,6 +92,30 @@ class InRepoModResourceContractTest(unittest.TestCase):
         )
         model = json.loads(model_path.read_text(encoding="utf-8"))
         self.assertEqual(model["textures"]["layer0"], "minecraft:block/redstone_torch")
+
+    def test_in_repo_mods_build_from_shared_root_gradle_project(self) -> None:
+        import scripts.pack_hook as pack_hook
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "mods" / "dimensionworks-rpm-limit"
+            jar = project / "build" / "libs" / "dimensionworks_rpm_limit-0.4.22.jar"
+            jar.parent.mkdir(parents=True)
+            jar.touch()
+            with (
+                patch.object(pack_hook, "ROOT", root),
+                patch.object(pack_hook, "in_repo_mods", return_value=[{
+                    "id": "dimensionworks_rpm_limit",
+                    "project_path": "mods/dimensionworks-rpm-limit",
+                    "version": "0.4.22",
+                }]),
+                patch.object(pack_hook.shutil, "which", return_value="/usr/bin/gradle"),
+                patch.object(pack_hook, "run", return_value=(0, ["BUILD SUCCESSFUL"])) as run,
+            ):
+                result = check_builds()
+
+            self.assertTrue(result.ok, result.log)
+            run.assert_called_once_with(["gradle", "build", "--no-daemon"], root)
 
 
 class GearHeartRecipeContractTest(unittest.TestCase):

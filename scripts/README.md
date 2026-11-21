@@ -104,7 +104,7 @@ python3 scripts/pack_hook.py --skip-build
 - `self-propagation`：运行 `scripts/check_cave_self_propagation.js`，校验配方 ID 唯一、主链不消耗自身产物、备链恰好吃 2 个本维残渣。
 - `quest-graph`：FTB 任务 ID 唯一、依赖存在、无循环、括号平衡。
 - `recipe-ids`：脚本中的配方 ID 不与数据包文件路径冲突。
-- `in-repo-build`：逐个执行 `gradle build --no-daemon`，并确认产物 jar 名与清单版本一致。
+- `in-repo-build`：从仓库根目录执行一次 `gradle build --no-daemon`，使所有自研模组共享根工程的构建脚本，再逐项确认产物 jar 名与清单版本一致。
 - `update-assets`：确认 `update-Windows/` 的 Go 源码完整、版本提示界面调用本地启动器，以及 `LocalUpdaterLauncher` 选择的客户端更新器文件名与发布工作流一致；GitHub Actions 会测试并交叉编译 Windows amd64、Linux amd64、macOS arm64 更新器。
 
 输出约定：失败时打印 `PACK-HOOK FAIL` 加失败步骤与截断后的错误日志；成功时只打印一行 `PACK-HOOK OK: ...`。打包脚本会把钩子结果附在同一行成功信息里。

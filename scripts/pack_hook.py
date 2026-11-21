@@ -456,20 +456,21 @@ def check_builds() -> CheckResult:
         return CheckResult("in-repo-build", True, "no in-repo mods")
     if shutil.which("gradle") is None:
         return CheckResult("in-repo-build", False, "gradle not found on PATH", [])
-    log: list[str] = []
+
+    command = ["gradle", "build", "--no-daemon"]
+    if os.environ.get("DIMENSIONWORKS_SKIP_TESTS", "").lower() == "true":
+        command.extend(["-x", "test"])
+    code, output = run(command, ROOT)
+    log = [f"$ {' '.join(command)}  (.)", *output]
+    if code != 0:
+        return CheckResult("in-repo-build", False, f"root Gradle build exited {code}", log)
+
     built: list[str] = []
     for mod in mods:
         project = ROOT / str(mod["project_path"])
-        command = ["gradle", "build", "--no-daemon"]
-        if os.environ.get("DIMENSIONWORKS_SKIP_TESTS", "").lower() == "true":
-            command.extend(["-x", "test"])
-        code, output = run(command, project)
-        log.extend([f"$ {' '.join(command)}  ({project.relative_to(ROOT)})", *output])
         jar = project / "build" / "libs" / f"{mod['id']}-{mod['version']}.jar"
-        if code != 0:
-            return CheckResult("in-repo-build", False, f"{mod['id']}: gradle exited {code}", log)
         if not jar.is_file():
-            log.append(f"missing {jar}")
+            log.append(f"missing expected jar: {jar.relative_to(ROOT)}")
             return CheckResult("in-repo-build", False, f"{mod['id']}: jar not produced", log)
         built.append(jar.name)
     return CheckResult("in-repo-build", True, ", ".join(built), log)
