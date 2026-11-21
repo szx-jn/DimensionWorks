@@ -69,6 +69,24 @@ class LevelDataTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "未注册"):
             convert_forced_chunks(source, set())
 
+    def test_incompatible_ticket_controller_can_be_retired_with_a_complete_ledger(self):
+        source = n.parse_nbt('{Forced:[L;4L],ForgeForced:[{Mod:"create_power_loader",ModForced:[{Chunk:8L,TickingBlocks:[{X:1,Y:2,Z:3}]}]},{Mod:"mekanism",ModForced:[{Chunk:9L,TickingBlocks:[{X:4,Y:5,Z:6}]}]}]}')
+        result = convert_forced_chunks(
+            source,
+            {"create_power_loader:chunk_load_manager", "mekanism:chunk_loader"},
+            {"mekanism:chunk_loader"},
+        )
+        self.assertEqual([str(row["Controller"]) for row in result.data["ModForced"]],
+                         ["create_power_loader:chunk_load_manager"])
+        self.assertEqual(result.removed["ForgeForced/mekanism:chunk_loader"],
+                         source["ForgeForced"][1])
+        with self.assertRaisesRegex(ValueError, "不存在"):
+            convert_forced_chunks(
+                source,
+                {"create_power_loader:chunk_load_manager", "mekanism:chunk_loader"},
+                {"missing:controller"},
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

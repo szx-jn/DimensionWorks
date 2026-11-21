@@ -34,6 +34,40 @@ class NativeItemRequired(Exception):
         self.source, self.prepared, self.kind = deepcopy(source), deepcopy(prepared), kind
 
 
+def convert_render_info_fluids(value: n.Compound, fluid_ids: set[str],
+                               legacy_fluid: Callable[[n.Compound], n.Compound]) -> n.Compound:
+    """转换精妙核心展示组件中的旧 FluidStack，不能把它当实际槽位库存。"""
+    result = deepcopy(value)
+    tanks = result.get("tanks")
+    if tanks is None:
+        return result
+    if not isinstance(tanks, n.List):
+        raise ValueError("精妙展示组件 tanks 不是列表")
+    for tank in tanks:
+        if not isinstance(tank, n.Compound):
+            raise ValueError("精妙展示组件 tank 不是 compound")
+        info = tank.get("info")
+        if info is None:
+            continue
+        if not isinstance(info, n.Compound):
+            raise ValueError("精妙展示组件 info 不是 compound")
+        fluid = info.get("fluid")
+        if fluid is None:
+            continue
+        if not isinstance(fluid, n.Compound) or not fluid:
+            raise ValueError("精妙展示组件 fluid 不是 compound")
+        if set(fluid) == {"FluidName", "Amount"}:
+            info["fluid"] = legacy_fluid(fluid)
+            continue
+        allowed = {"id", "amount", "components"}
+        if (not set(fluid) <= allowed or not isinstance(fluid.get("id"), n.String) or
+                not isinstance(fluid.get("amount"), n.Int) or int(fluid["amount"]) <= 0 or
+                str(fluid["id"]) not in fluid_ids or
+                ("components" in fluid and not isinstance(fluid["components"], n.Compound))):
+            raise ValueError("精妙展示组件 fluid 含未覆盖的注册名、字段或数量")
+    return result
+
+
 class ItemPipeline:
     def __init__(self, dfu, registries: dict[str, list[str]], *,
                  convert_contraption: Callable[[n.Compound], n.Compound] | None = None,
@@ -207,8 +241,15 @@ class ItemPipeline:
                         raise ValueError("旧 AE2 键数量不是非负 Long")
                     result["#"] = deepcopy(amount)
                 return result
-            return n.Compound({key: self.tree(child, oversized_inventory=oversized_inventory)
-                               for key, child in value.items()})
+            result = n.Compound()
+            for key, child in value.items():
+                converted = self.tree(child, oversized_inventory=oversized_inventory)
+                if key == "sophisticatedcore:render_info_tag":
+                    if not isinstance(converted, n.Compound):
+                        raise ValueError("精妙展示组件不是 compound")
+                    converted = convert_render_info_fluids(converted, self.fluids, self.fluid)
+                result[key] = converted
+            return result
         if isinstance(value, n.List):
             return type(value)(self.tree(child, oversized_inventory=oversized_inventory) for child in value)
         return deepcopy(value)

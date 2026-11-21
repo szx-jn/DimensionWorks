@@ -114,12 +114,15 @@ def convert_level_attachments(source: n.Compound, native_ids: set[str]) -> Level
     return LevelDataConversion(data, removed)
 
 
-def convert_forced_chunks(source: n.Compound, controllers: set[str]) -> LevelDataConversion:
+def convert_forced_chunks(source: n.Compound, controllers: set[str],
+                          retired_controllers: set[str] | None = None) -> LevelDataConversion:
     if (set(source) != {"Forced", "ForgeForced"} or not isinstance(source["Forced"], n.LongArray) or
         not isinstance(source["ForgeForced"], n.List)):
         raise ValueError("强制区块记录与本服已审计结构不同")
+    retired_controllers = retired_controllers or set()
     rows = n.List[n.Compound]()
     seen = set()
+    removed = {"ForgeForced": deepcopy(source["ForgeForced"])}
     for row in source["ForgeForced"]:
         if set(row) != {"Mod", "ModForced"} or not isinstance(row["Mod"], n.String) or not isinstance(row["ModForced"], n.List):
             raise ValueError("模组区块票据含未知字段")
@@ -137,7 +140,11 @@ def convert_forced_chunks(source: n.Compound, controllers: set[str]) -> LevelDat
             for pos in ticket["TickingBlocks"]:
                 if set(pos) != {"X", "Y", "Z"} or any(not isinstance(pos[k], n.Int) for k in pos):
                     raise ValueError("强制区块机器坐标不是已审计的 XYZ Int")
+        if id in retired_controllers:
+            removed["ForgeForced/" + id] = deepcopy(row)
+            continue
         # NeoForge 的票据坐标仍是 XYZ 复合标签，不能套用 Create 的 IntArray 格式。
         rows.append(n.Compound({"Controller": n.String(id), "ModForced": deepcopy(row["ModForced"])}))
-    return LevelDataConversion(n.Compound({"Forced": deepcopy(source["Forced"]), "ModForced": rows}),
-                               {"ForgeForced": deepcopy(source["ForgeForced"])})
+    if retired_controllers - seen:
+        raise ValueError("请求停用的票据控制器不存在：" + ", ".join(sorted(retired_controllers - seen)))
+    return LevelDataConversion(n.Compound({"Forced": deepcopy(source["Forced"]), "ModForced": rows}), removed)

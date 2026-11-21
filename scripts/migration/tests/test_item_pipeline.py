@@ -86,6 +86,16 @@ class ItemPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "注册名"):
             converter.fluid(n.parse_nbt('{FluidName:"missing:fluid",Amount:9000}'))
 
+    def test_sophisticated_render_fluid_uses_current_fluid_stack_shape(self):
+        converter = pipeline()
+        source = n.parse_nbt('{"sophisticatedcore:render_info_tag":{tanks:[{position:"left",info:{fillRatio:0.25f,fluid:{FluidName:"minecraft:lava",Amount:9000}}},{position:"right",info:{}}]}}')
+        result = converter.tree(source)
+        component = result["sophisticatedcore:render_info_tag"]
+        self.assertEqual(component["tanks"][0]["info"]["fluid"], n.parse_nbt('{id:"minecraft:lava",amount:9000}'))
+        self.assertEqual(component["tanks"][0]["info"]["fillRatio"], n.Float(0.25))
+        self.assertEqual(component["tanks"][1]["info"], n.Compound())
+        self.assertEqual(converter.tree(result), result)
+
     def test_player_inventory_uuid_and_named_effect_are_converted_together(self):
         converter = pipeline(); converter.effects.add("twilightforest:frosted")
         source = n.parse_nbt('{UUID:[I;1,2,3,4],Inventory:[{id:"minecraft:stone",Count:12b,Slot:7b}],ActiveEffects:[{Id:214,"forge:id":"twilightforest:frosted",Amplifier:1b,Duration:77,Ambient:0b,ShowParticles:1b,ShowIcon:1b,CurativeItems:[{id:"minecraft:milk_bucket",Count:1b}]}]}')
