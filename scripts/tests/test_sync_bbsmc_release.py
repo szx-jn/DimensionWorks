@@ -49,6 +49,19 @@ class BbsmcSyncTest(unittest.TestCase):
             self.filename: mrpack(),
             "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
             "update-dimensionworks-server-windows-amd64.exe": b"windows-server-updater",
+            "update-dimensionworks-server-linux-amd64.zip": sync.zip_updater(
+                "update-dimensionworks-server-linux-amd64.update", b"linux-server-updater",
+            ),
+            "update-dimensionworks-server-macos-arm64.zip": sync.zip_updater(
+                "update-dimensionworks-server-macos-arm64.update", b"macos-server-updater",
+            ),
+        }
+        self.release_files = {
+            self.filename: self.files[self.filename],
+            "DimensionWorks-Server-0.3.41-delta.zip": self.files["DimensionWorks-Server-0.3.41-delta.zip"],
+            "update-dimensionworks-server-windows-amd64.exe": self.files[
+                "update-dimensionworks-server-windows-amd64.exe"
+            ],
             "update-dimensionworks-server-linux-amd64.update": b"linux-server-updater",
             "update-dimensionworks-server-macos-arm64.update": b"macos-server-updater",
         }
@@ -82,7 +95,7 @@ class BbsmcSyncTest(unittest.TestCase):
         return sync.sync_release("szx-jn/DimensionWorks", "v0.3.41", "doVGSZq0", "token", **kwargs)
 
     def release_file(self, asset_name: str) -> bytes:
-        return self.files[asset_name]
+        return self.release_files[asset_name]
 
     def downloads(self):
         return mock.patch.object(
@@ -123,6 +136,16 @@ class BbsmcSyncTest(unittest.TestCase):
             mock.call("szx-jn/DimensionWorks", "v0.3.41", asset)
             for asset in self.release["assets"][:5]
         ])
+        for archive_name, entry_name, payload in (
+            ("update-dimensionworks-server-linux-amd64.zip",
+             "update-dimensionworks-server-linux-amd64.update", b"linux-server-updater"),
+            ("update-dimensionworks-server-macos-arm64.zip",
+             "update-dimensionworks-server-macos-arm64.update", b"macos-server-updater"),
+        ):
+            with zipfile.ZipFile(io.BytesIO(self.files[archive_name])) as archive:
+                self.assertEqual(archive.namelist(), [entry_name])
+                self.assertEqual(archive.read(entry_name), payload)
+                self.assertEqual((archive.getinfo(entry_name).external_attr >> 16) & 0o777, 0o755)
         self.assertEqual(bbsmc.call_args_list, [
             mock.call("project/doVGSZq0/version", "token"),
             mock.call("version/new-version", "token"),
@@ -294,6 +317,7 @@ class BbsmcSyncTest(unittest.TestCase):
                 release["body"] = " \n"
             elif case == "version":
                 self.files[self.filename] = mrpack("0.3.40")
+                self.release_files[self.filename] = self.files[self.filename]
             with (
                 self.subTest(case=case),
                 mock.patch.object(sync, "github_json", return_value=release),

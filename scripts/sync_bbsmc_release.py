@@ -55,6 +55,17 @@ def download_asset(repository: str, tag: str, asset: dict) -> bytes:
     return data
 
 
+def zip_updater(filename: str, data: bytes) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        entry = zipfile.ZipInfo(filename)
+        entry.create_system = 3
+        entry.compress_type = zipfile.ZIP_DEFLATED
+        entry.external_attr = (0o100755 & 0xFFFF) << 16
+        archive.writestr(entry, data)
+    return buffer.getvalue()
+
+
 def version_metadata(release: dict, project_id: str, files: dict[str, bytes]) -> dict:
     version = release["tag_name"][1:]
     filename = f"DimensionWorks-{version}.mrpack"
@@ -198,18 +209,19 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     version = tag[1:]
     files = {}
     assets_to_sync = (
-        (f"DimensionWorks-{version}.mrpack", f"DimensionWorks-{version}.mrpack"),
-        (f"DimensionWorks-Server-{version}-delta.zip", f"DimensionWorks-Server-{version}-delta.zip"),
-        ("update-dimensionworks-server-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.exe"),
-        ("update-dimensionworks-server-linux-amd64.update", "update-dimensionworks-server-linux-amd64.update"),
-        ("update-dimensionworks-server-macos-arm64.update", "update-dimensionworks-server-macos-arm64.update"),
+        (f"DimensionWorks-{version}.mrpack", f"DimensionWorks-{version}.mrpack", False),
+        (f"DimensionWorks-Server-{version}-delta.zip", f"DimensionWorks-Server-{version}-delta.zip", False),
+        ("update-dimensionworks-server-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.exe", False),
+        ("update-dimensionworks-server-linux-amd64.update", "update-dimensionworks-server-linux-amd64.zip", True),
+        ("update-dimensionworks-server-macos-arm64.update", "update-dimensionworks-server-macos-arm64.zip", True),
     )
-    for asset_name, upload_name in assets_to_sync:
+    for asset_name, upload_name, wrap_updater in assets_to_sync:
         assets = [asset for asset in release["assets"] if asset["name"] == asset_name]
         if len(assets) != 1 or assets[0]["state"] != "uploaded":
             raise ValueError(f"GitHub 发行版缺少唯一且已上传的 {asset_name}")
         print(f"BBSMC download: {asset_name} -> {upload_name}", flush=True)
-        files[upload_name] = download_asset(repository, tag, assets[0])
+        data = download_asset(repository, tag, assets[0])
+        files[upload_name] = zip_updater(asset_name, data) if wrap_updater else data
     metadata = version_metadata(release, project_id, files)
     versions = bbsmc_json(f"project/{project_id}/version", token)
     existing = matching_version(versions, metadata, files)
