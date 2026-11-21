@@ -1,0 +1,17 @@
+{
+  "advancements.quark.tatami_gaeshi.description": "用竹席击中某个东西",
+  "advancements.quark.tatami_gaeshi.title": "榻榻米返！",
+  "config.jade.plugin_quark.oretoise_eating_cooldown": "矿龟进食冷却时间",
+  "entity.quark.torch_arrow": "火把箭",
+  "item.quark.backpack.warning.line_1": "警告",
+  "item.quark.backpack.warning.line_2": "此背包内有物品；若在生存模式下未装备背包，其中的物品将会消失。",
+  "item.quark.smithing_template_rune": "锻造模板",
+  "quark.jade.eating_cooldown": "进食冷却时间：%ds",
+  "quark.misc.equip_armor.invert": "左键装备",
+  "quark.misc.insert_shulker_box.invert": "左键放入物品",
+  "quark.misc.merge_shulker_box.invert": "左键倒出内容物",
+  "quark.misc.open_shulker.invert": "左键打开",
+  "quark.misc.totem_darksouls": "你感到一阵不祥，因为先前的收纳图腾已碎裂",
+  "quark.misc.trash_item.invert": "左键销毁物品",
+  "quark.pack.emote_icon_pack": "Quark 表情图标包"
+}

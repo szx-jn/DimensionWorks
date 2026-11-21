@@ -3,5 +3,7 @@
   "commands.curios.dropAll.success": "已丢弃 %s 的所有饰品槽中的物品",
   "commands.curios.replace.success": "已将 %s 的 %s 饰品槽替换为 %s",
   "gui.curios.toggle.cosmetics": "切换外观饰品",
-  "gui.curios.page": "页面 %d / %d"
+  "gui.curios.page": "页面 %d / %d",
+  "curios.networking.failed": "Curios 网络通信失败",
+  "curios.tooltip.inactive": "未启用的饰品槽"
 }

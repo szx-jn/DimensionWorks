@@ -1,3 +1,8 @@
 {
-  "createdieselgenerators.ponder.burner.text_4": "还可以通过红石信号加速燃烧器，提高燃料消耗速度。"
+  "block.createdieselgenerators.andesite_girder_strut": "安山岩梁支柱",
+  "createdieselgenerators.actionbar.distillation_controller.too_short": "蒸馏塔过矮！最小高度：%s",
+  "createdieselgenerators.hint.distiller_full": "蒸馏塔的输出罐似乎已满。请确保每个储罐都有足够空间容纳产物。",
+  "createdieselgenerators.hint.distiller_full.title": "输出储罐已满",
+  "item.createdieselgenerators.lighter.tooltip.behaviour3": "更改打火机的外观。",
+  "item.createdieselgenerators.lighter.tooltip.condition3": "重命名时。"
 }

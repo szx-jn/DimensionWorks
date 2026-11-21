@@ -8,6 +8,17 @@
   "create.schematic.tool.print.description.3": "",
   "create.schematic.tool.rotate.description.2": "",
   "create.schematic.tool.rotate.description.3": "",
-  "create.track_signal.mode_controlled_by_computer": "信号模式由计算机控制",
-  "tag.item.create.casing": "机壳"
+  "create.gui.stock_keeper.click_to_cycle": "点击切换",
+  "create.gui.stock_keeper.jei_sync.none": "不同步",
+  "create.gui.stock_keeper.jei_sync.none.description": "库存管理器与配方查看器的搜索内容相互独立",
+  "create.gui.stock_keeper.jei_sync.sync_both": "双向同步配方查看器",
+  "create.gui.stock_keeper.jei_sync.sync_both.description": "库存管理器与配方查看器的搜索内容将相互同步",
+  "create.gui.stock_keeper.jei_sync.sync_from_jei": "从配方查看器同步",
+  "create.gui.stock_keeper.jei_sync.sync_from_jei.description": "在配方查看器中的搜索内容也会显示在库存管理器中",
+  "create.gui.stock_keeper.jei_sync.sync_from_stock_keeper": "从库存管理器同步",
+  "create.gui.stock_keeper.jei_sync.sync_from_stock_keeper.description": "在库存管理器中的搜索内容也会显示在配方查看器中",
+  "create.keyinfo.alt_modifier": "Alt 修饰键",
+  "create.keyinfo.ctrl_modifier": "Ctrl 修饰键",
+  "create.keyinfo.shift_modifier": "Shift 修饰键",
+  "tag.item.c.foods.dough.wheat": "小麦面团"
 }

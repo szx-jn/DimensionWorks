@@ -37,5 +37,11 @@
   "advancements.kaleidoscope_nether.eat_lava_roasted_chicken.title": "熔岩风味",
   "advancements.kaleidoscope_nether.eat_lava_roasted_chicken.description": "品尝一份美味的熔岩烤鸡。",
   "advancements.kaleidoscope_nether.get_soul_return_rice.title": "暂别死亡",
-  "advancements.kaleidoscope_nether.get_soul_return_rice.description": "获得还魂米饭。"
+  "advancements.kaleidoscope_nether.get_soul_return_rice.description": "获得还魂米饭。",
+  "item.kaleidoscope_nether.ghast_pendant.tooltip.line2": "§7可佩戴在胸甲槽或饰品槽中",
+  "item.kaleidoscope_nether.giant_beast_croissant": "巨兽羊角面包",
+  "item.kaleidoscope_nether.giant_beast_croissant.tooltip.line1": "§9灾变 IV（04:00）",
+  "item.kaleidoscope_nether.magma_sweet_and_sour_pork": "岩浆糖醋肉",
+  "item.kaleidoscope_nether.magma_sweet_and_sour_pork.tooltip.line1": "§7食用时会在周围召唤烈焰爆炸",
+  "item.kaleidoscope_nether.nether_caterpillar.tooltip.line1": "§7收获下界疣时掉落"
 }

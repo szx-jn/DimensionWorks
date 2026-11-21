@@ -1,3 +1,0 @@
-{
-  "constants.mekanism.recipe_warning": "检测到部分 Mekanism 配方的物品标签已失效。请检查服务器配置；部分配方可能丢失，机器也可能无法接受原定原料。"
-}

@@ -1,0 +1,9 @@
+{
+  "createultimine.config.apply.tooltip": "应用：",
+  "createultimine.config.more.tooltip": "以及更多……",
+  "createultimine.config.onto.tooltip": "作用于：",
+  "createultimine.config.produce.tooltip": "产出：",
+  "createultimine.server_settings.features": "功能",
+  "createultimine.server_settings.features.copycat_application": "应用拟像材料：右键可将材料应用到多个拟像方块",
+  "createultimine.server_settings.features.manual_applications": "手动应用"
+}

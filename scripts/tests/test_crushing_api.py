@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -70,6 +71,16 @@ class CrushingApiTest(unittest.TestCase):
             source = path.read_text(encoding="utf-8")
             self.assertNotIn("event.recipes.create.crushing(", source, path.name)
             self.assertNotIn("event.recipes.create.milling(", source, path.name)
+
+    def test_self_propagation_preflight_models_shared_grinding_api(self) -> None:
+        result = subprocess.run(
+            ["node", str(ROOT / "scripts/check_cave_self_propagation.js")],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("SELF-PROPAGATION OK: 53 recipes", result.stdout)
 
     def test_intermediate_item_is_registered_and_localized(self) -> None:
         lang = json.loads(

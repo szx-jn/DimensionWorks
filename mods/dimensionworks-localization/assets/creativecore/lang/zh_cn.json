@@ -1,10 +1,9 @@
 {
   "gui.config.reset": "r",
-  "gui.day": "d",
-  "gui.hour": "h",
-  "gui.minute": "m",
-  "gui.second": "s",
   "gui.ingredient.latest": "最近使用的材料：",
   "minecraft.blocks": "方块",
-  "minecraft.blocks.counting": "%s 个方块"
+  "minecraft.blocks.counting": "%s 个方块",
+  "gui.false": "否",
+  "gui.play": "播放",
+  "gui.true": "是"
 }

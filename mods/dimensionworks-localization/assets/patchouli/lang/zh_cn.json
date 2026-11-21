@@ -1,4 +1,6 @@
 {
   "item.patchouli.guide_book": "指南书",
-  "patchouli.gui.lexicon.button.toggle_mock_header": "切换示例页眉"
+  "patchouli.gui.lexicon.button.toggle_mock_header": "切换示例页眉",
+  "patchouli.networking.open_book.failed": "打开书籍 %s 失败",
+  "patchouli.networking.reload_contents.failed": "重新加载内容 %S 失败"
 }

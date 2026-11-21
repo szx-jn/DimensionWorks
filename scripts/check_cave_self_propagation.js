@@ -57,14 +57,12 @@ for (const type of RECIPE_TYPES) {
 const event = { recipes: { create: namespace } }
 const sandbox = {
   console,
-  // KubeJS exposes this integration in-game. The checker must model it too,
-  // and record its recipes rather than silently ignoring grinding recipes.
-  global: {
-    DimensionWorksGrinding: {
-      register(_event, recipe) {
-        const entry = record(recipe.machine, recipe.outputs, [recipe.input])
-        entry.id = recipe.id
-      }
+  // KubeJS scripts share this top-level API binding across server scripts.
+  // Record its recipes rather than silently ignoring grinding recipes.
+  DimensionWorksGrinding: {
+    register(_event, recipe) {
+      const entry = record(recipe.machine, recipe.outputs, [recipe.input])
+      entry.id = recipe.id
     }
   },
   ServerEvents: { recipes: (callback) => callback(event) },

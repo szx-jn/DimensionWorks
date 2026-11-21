@@ -1,0 +1,11 @@
+{
+  "zeta.gui.config.default": "恢复默认值",
+  "zeta.gui.config.defaultvalue": "默认值：%s",
+  "zeta.gui.config.discard": "放弃更改",
+  "zeta.gui.config.header": "%s 配置",
+  "zeta.gui.config.missingaddon": "此分类需要安装相应的附属模组",
+  "zeta.gui.config.nchildren": "%d 个子项",
+  "zeta.gui.config.onechild": "1 个子项",
+  "zeta.gui.config.save": "保存更改",
+  "zeta.gui.config.subcategories": "------- 子分类 -------"
+}

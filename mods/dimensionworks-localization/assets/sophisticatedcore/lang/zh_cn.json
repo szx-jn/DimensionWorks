@@ -1,3 +1,5 @@
 {
-  "itemGroup.sophisticatedcore": "精妙核心"
+  "item.sophisticatedcore.storage.tooltip.fluid_with_capacity": "%s / %s mB %s",
+  "item.sophisticatedcore.storage.tooltip.fluid_xp": "%s 经验等级 %s",
+  "item.sophisticatedcore.storage.tooltip.fluid_xp_with_capacity": "%s / %s 经验等级 %s"
 }

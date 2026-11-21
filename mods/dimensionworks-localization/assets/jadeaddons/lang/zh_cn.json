@@ -34,5 +34,10 @@
   "entity.tconstruct.glow_ball": "荧光球",
   "entity.tconstruct.efln_ball": "EFLN",
   "entity.tconstruct.flint_shuriken": "燧石手里剑",
-  "entity.tconstruct.quartz_shuriken": "石英手里剑"
+  "entity.tconstruct.quartz_shuriken": "石英手里剑",
+  "config.jade.plugin_jadeaddons.computercraft.computer_id": "计算机 ID",
+  "config.jade.plugin_jadeaddons.tconstruct.casting_table": "铸造台",
+  "config.jade.plugin_jadeaddons.tconstruct.drain": "排液槽与管道",
+  "jade.modName.jadeaddons.computercraft": "CC: Tweaked",
+  "jadeaddons.computercraft.computer_id": "计算机 ID：%s"
 }
