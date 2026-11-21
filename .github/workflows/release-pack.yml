@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: "指定发布版本，例如 0.2.0；留空则自动计算；1.21.1-neoforge 迁移分支禁止发行"
+        description: "留空则自动递增；Forge → NeoForge 首次发行在 main 显式指定 0.4.0"
         required: false
         type: string
       dimension_complete:
@@ -120,7 +120,11 @@ jobs:
             echo "Release $tag already exists; refusing to overwrite it." >&2
             exit 1
           fi
-          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          base_tag="$latest_tag"
+          if [[ "$version" == '0.4.0' ]]; then
+            base_tag=''
+          fi
+          echo "base_tag=$base_tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
@@ -141,7 +145,7 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           PACK_VERSION: ${{ steps.version.outputs.version }}
-          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
+          LATEST_TAG: ${{ steps.version.outputs.base_tag }}
           DIMENSION_COMPLETE: ${{ inputs.dimension_complete }}
           DIMENSIONWORKS_SKIP_TESTS: ${{ inputs.skip_tests }}
         run: |
@@ -164,7 +168,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PACK_VERSION: ${{ steps.version.outputs.version }}
-          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
+          LATEST_TAG: ${{ steps.version.outputs.base_tag }}
         run: |
           set -euo pipefail
           delta="dist/DimensionWorks-Server-${PACK_VERSION}-delta.zip"
@@ -191,7 +195,7 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           PACK_VERSION: ${{ steps.version.outputs.version }}
-          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
+          LATEST_TAG: ${{ steps.version.outputs.base_tag }}
           DIMENSION_COMPLETE: ${{ inputs.dimension_complete }}
         run: |
           set -euo pipefail

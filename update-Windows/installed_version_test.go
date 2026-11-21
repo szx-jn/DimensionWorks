@@ -12,6 +12,33 @@ import (
 	"testing"
 )
 
+func TestUpdatePlatformBoundary(t *testing.T) {
+	for _, tc := range []struct {
+		installed, target string
+		allowed           bool
+	}{
+		{"0.3.51", "0.3.52", true},
+		{"0.3.52", "0.4.0", false},
+		{"0.4.0", "0.3.52", false},
+		{"0.4.0", "0.4.1", true},
+	} {
+		if err := checkUpdatePlatform(tc.installed, tc.target); (err == nil) != tc.allowed {
+			t.Errorf("checkUpdatePlatform(%q, %q) = %v", tc.installed, tc.target, err)
+		}
+	}
+	data := renderManifest(&Manifest{Kind: "server", Version: "0.4.0", Release: "v0.4.0", Base: "none"})
+	if !strings.HasPrefix(string(data), nativeManifestHeader+"\n") {
+		t.Fatal("NeoForge manifest can still be parsed by a legacy updater")
+	}
+	if _, err := parseManifest(data, "server"); err != nil {
+		t.Fatal(err)
+	}
+	wrongHeader := strings.Replace(string(data), nativeManifestHeader, legacyManifestHeader, 1)
+	if _, err := parseManifest([]byte(wrongHeader), "server"); err == nil {
+		t.Fatal("accepted Forge header for NeoForge release")
+	}
+}
+
 func TestReadInstalledVersionFileFormats(t *testing.T) {
 	for _, tc := range []struct {
 		name, contents, want string

@@ -528,6 +528,9 @@ func updateInstance(root, kind string, opts Options) error {
 	if target.Kind != kind {
 		return fmt.Errorf("更新清单类型错误：需要 %s，实际为 %s", kind, target.Kind)
 	}
+	if err := checkUpdatePlatform(installedVersion, target.Version); err != nil {
+		return err
+	}
 	if localPackagePath != "" {
 		pkgManifest, err := packageManifest(localPackagePath, kind)
 		if err != nil {
@@ -2104,6 +2107,25 @@ func downloadArchiveWithManualFallback(source, destination string) error {
 	}
 }
 
+const (
+	legacyManifestHeader = "# DimensionWorks update manifest 1"
+	nativeManifestHeader = "# DimensionWorks update manifest 2"
+)
+
+func manifestHeader(version string) string {
+	if order, err := compareVersions(version, "0.4.0"); err == nil && order >= 0 {
+		return nativeManifestHeader
+	}
+	return legacyManifestHeader
+}
+
+func checkUpdatePlatform(installed, target string) error {
+	if manifestHeader(installed) != manifestHeader(target) {
+		return fmt.Errorf("Forge 和 NeoForge 之间不能原地更新 (%s → %s)，请使用完整整合包建立新实例", installed, target)
+	}
+	return nil
+}
+
 func parseManifest(data []byte, expectedKind string) (*Manifest, error) {
 	if len(data) == 0 {
 		return nil, errors.New("更新清单为空")
@@ -2122,7 +2144,7 @@ func parseManifest(data []byte, expectedKind string) (*Manifest, error) {
 	}
 	text := string(data)
 	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
-	if len(lines) < 6 || lines[0] != "# DimensionWorks update manifest 1" {
+	if len(lines) < 6 || (lines[0] != legacyManifestHeader && lines[0] != nativeManifestHeader) {
 		return nil, errors.New("更新清单头部无效")
 	}
 	headers := map[string]string{}
@@ -2160,6 +2182,9 @@ func parseManifest(data []byte, expectedKind string) (*Manifest, error) {
 	}
 	if !versionRE.MatchString(manifest.Version) || manifest.Release != "v"+manifest.Version || !validReleaseTagOrNone(manifest.Base) {
 		return nil, errors.New("更新清单版本号或发行标签无效")
+	}
+	if lines[0] != manifestHeader(manifest.Version) {
+		return nil, errors.New("更新清单头部与发行版平台不符")
 	}
 	if len(lines)-6 > maxManifestEntries {
 		return nil, fmt.Errorf("更新清单条目超过上限：%d", maxManifestEntries)
@@ -2792,7 +2817,7 @@ func scanInstalledFiles(root, kind string) (*Manifest, error) {
 
 func renderManifest(manifest *Manifest) []byte {
 	lines := []string{
-		"# DimensionWorks update manifest 1",
+		manifestHeader(manifest.Version),
 		"# kind " + manifest.Kind,
 		"# version " + manifest.Version,
 		"# release " + manifest.Release,

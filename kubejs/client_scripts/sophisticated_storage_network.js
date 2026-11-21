@@ -10,6 +10,6 @@ const dwRetiredSophisticatedStorageNetworkItems = [
   'sophisticatedcore:ender_linker'
 ]
 
-JEIEvents.hideItems(event => {
-  dwRetiredSophisticatedStorageNetworkItems.forEach(id => event.hide(id))
+RecipeViewerEvents.removeEntries('item', event => {
+  dwRetiredSophisticatedStorageNetworkItems.forEach(id => event.remove(id))
 })

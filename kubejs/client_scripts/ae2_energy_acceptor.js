@@ -1,4 +1,4 @@
-JEIEvents.hideItems(event => {
-  event.hide('ae2:energy_acceptor')
-  event.hide('ae2:cable_energy_acceptor')
+RecipeViewerEvents.removeEntries('item', event => {
+  event.remove('ae2:energy_acceptor')
+  event.remove('ae2:cable_energy_acceptor')
 })

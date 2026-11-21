@@ -19,6 +19,12 @@ python3 scripts/package_server.py
 
 服务端包不提交世界存档、日志、密钥、玩家名单或其他运行时私有数据。
 
+## 从 Forge 首次升级
+
+`0.4.0` 使用完整客户端与服务端包新建独立实例。停止旧服后，封存整个旧实例，包括世界、配置、登录身份与权限。先按[离线迁移与审计流程](../scripts/migration/README.md)转换已校验的快照副本，再启动 NeoForge 实例。上线前由管理员用原认证方式登录，核对 UUID、背包、机械与存储，并验证保存重启。
+
+回退时关闭新版，恢复整套 Forge 旧实例与同一冷快照，并恢复旧服务启动入口。新版产生的进度不会随旧快照回退。管理员切换步骤和实际验证见[迁移执行记录](../docs/validation/2026-11-20-neoforge-migration-execution.md)。
+
 ## MSL 与正版双重认证
 
 整合包迁移候选使用 [TrueUUID 原生 fork 固定提交](https://github.com/szx-jn/TrueUUID-DimensionWorks/tree/b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89)，保留原 1.0.10 认证策略和身份注册表。源码与产物均固定校验值，不发布中间发行版。客户端与服务端必须使用同一版本，且各自 `mods/` 中只保留一份 TrueUUID。

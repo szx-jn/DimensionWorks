@@ -11,6 +11,13 @@ import pack_version  # noqa: E402
 
 
 class ResolveReleaseVersionTest(unittest.TestCase):
+    def test_explicit_loader_migration_is_a_one_time_exception(self) -> None:
+        forge = pack_version.PackVersion.parse("0.3.52")
+        self.assertEqual(str(pack_version.resolve_version("0.4.0", current=forge)), "0.4.0")
+        self.assertEqual(str(pack_version.resolve_version(None, current=forge)), "0.3.53")
+        with self.assertRaises(pack_version.VersionRuleError):
+            pack_version.resolve_version("0.4.0", current=pack_version.PackVersion.parse("0.3.51"))
+
     def test_uses_local_version_when_no_release_exists(self) -> None:
         self.assertEqual(
             pack_version.resolve_release_version("0.1.14", None),

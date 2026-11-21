@@ -40,7 +40,7 @@ const retiredMekanismStorageItems = [
   'mekanism:ultimate_induction_provider'
 ]
 
-JEIEvents.hideItems(event => {
-  retiredAppliedCreateItems.forEach(id => event.hide(id))
-  retiredMekanismStorageItems.forEach(id => event.hide(id))
+RecipeViewerEvents.removeEntries('item', event => {
+  retiredAppliedCreateItems.forEach(id => event.remove(id))
+  retiredMekanismStorageItems.forEach(id => event.remove(id))
 })

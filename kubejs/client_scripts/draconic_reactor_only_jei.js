@@ -18,10 +18,10 @@ const DW_REACTOR_VISIBLE = new Set([
   'draconicevolution:end_draconium_ore'
 ])
 
-JEIEvents.hideItems(event => {
+RecipeViewerEvents.removeEntries('item', event => {
   Ingredient.of('@draconicevolution').itemIds.forEach(id => {
     if (!DW_REACTOR_VISIBLE.has(String(id))) {
-      event.hide(id)
+      event.remove(id)
     }
   })
 })

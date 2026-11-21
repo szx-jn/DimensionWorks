@@ -113,7 +113,7 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertIn("kaleidoscope_chinesefood:century_egg_congee", server)
         self.assertIn("dwPurgeOriginalCenturyEgg", server)
         self.assertIn("event.remove('kaleidoscope_chinesefood:century_egg')", startup)
-        self.assertIn("event.hide('kaleidoscope_chinesefood:century_egg')", client)
+        self.assertIn("event.remove('kaleidoscope_chinesefood:century_egg')", client)
 
     def test_magic_egg_uses_stable_food_definition(self) -> None:
         startup = (ROOT / "kubejs" / "startup_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")

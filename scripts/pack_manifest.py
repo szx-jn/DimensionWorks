@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - exercised by direct sibling imports
 
 MANIFEST_NAME = "dimensionworks-update-manifest.tsv"
 MANIFEST_HEADER = "# DimensionWorks update manifest 1"
+NEOFORGE_MANIFEST_HEADER = "# DimensionWorks update manifest 2"
 COLUMN_HEADER = "action\tpath\talgorithm\tvalue\tsource"
 KINDS = frozenset({"client", "server"})
 ACTIONS = frozenset({"remote", "archive"})
@@ -166,8 +167,8 @@ def _decode_manifest(data: bytes) -> str:
 
 
 def _parse_header(lines: list[str]) -> tuple[str, str, str, str]:
-    if not lines or lines[0] != MANIFEST_HEADER:
-        raise ManifestError(f"missing manifest header: {MANIFEST_HEADER!r}")
+    if lines[0] not in (MANIFEST_HEADER, NEOFORGE_MANIFEST_HEADER):
+        raise ManifestError("invalid manifest header version")
     headers: dict[str, str] = {}
     for line in lines[1:5]:
         if not line.startswith("# "):
@@ -182,7 +183,16 @@ def _parse_header(lines: list[str]) -> tuple[str, str, str, str]:
         headers[key] = value
     if set(headers) != {"kind", "version", "release", "base"}:
         raise ManifestError("manifest headers must be kind, version, release and base")
+    if lines[0] != _manifest_header(headers["version"]):
+        raise ManifestError("manifest header does not match the release platform")
     return headers["kind"], headers["version"], headers["release"], headers["base"]
+
+
+def _manifest_header(version: str) -> str:
+    _validate_version(version, "version")
+    if pack_version.PackVersion.parse(version) >= pack_version.PackVersion(0, 4, 0):
+        return NEOFORGE_MANIFEST_HEADER
+    return MANIFEST_HEADER
 
 
 def parse_manifest(data: bytes, expected_kind: str | None = None) -> UpdateManifest:
@@ -222,7 +232,7 @@ def parse_manifest(data: bytes, expected_kind: str | None = None) -> UpdateManif
 def render_manifest(manifest: UpdateManifest) -> bytes:
     _validate_manifest(manifest)
     lines = [
-        MANIFEST_HEADER,
+        _manifest_header(manifest.version),
         f"# kind {manifest.kind}",
         f"# version {manifest.version}",
         f"# release {manifest.release}",

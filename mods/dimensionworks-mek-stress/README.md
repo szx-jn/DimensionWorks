@@ -4,7 +4,7 @@ Minecraft 1.21.1 / NeoForge 21.1.267 / Java 21。通过自研 Mixin 接入 Creat
 
 ## 1.21.1 NeoForge 迁移状态
 
-当前分支使用根 Gradle Wrapper 9.2.1 与 ModDevGradle 2.0.148。固定编译/测试依赖为 Create 6.0.10、Mekanism 10.7.19.85、AE2 19.2.20、Applied Create 1.1.8、Jade 15.10.6，以及清单核定的目标龙之进化与依赖。模块仍为 `0.3.30`，整合包 `VERSION` 未递增，没有创建发行版。
+当前分支使用根 Gradle Wrapper 9.2.1 与 ModDevGradle 2.0.148。固定编译/测试依赖为 Create 6.0.10、Mekanism 10.7.19.85、AE2 19.2.20、Applied Create 1.1.8、Jade 15.10.6，以及清单核定的目标龙之进化与依赖。Jade 客户端能量提示通过通用 `Accessor` 接口进入，隐藏规则仅应用于方块。
 
 - 方块能力采用 NeoForge 显式注册。内存驱动器注册 AE2 网络节点宿主和物品能力，真实相邻 AE 网络可建立连接；Create 管道使用新版能力缓存与 `ICapabilityProvider`，只查询已加载区块。
 - Mekanism 化学品统一为 `ChemicalStack`，保留配方标记字段 `Gas`、`InputGas` 及两个工作盆缓存职责。配方标记、物质球和安瓿元数据放在 `minecraft:custom_data`；物品、流体的嵌套序列化必须传入所属世界的注册表上下文。

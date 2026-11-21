@@ -13,6 +13,15 @@ import pack_manifest  # noqa: E402
 
 
 class ManifestRoundTripTest(unittest.TestCase):
+    def test_neoforge_manifests_require_a_header_rejected_by_legacy_updaters(self) -> None:
+        for version in ("0.4.0", "0.4.1"):
+            manifest = pack_manifest.UpdateManifest("server", version, f"v{version}", "none", ())
+            data = pack_manifest.render_manifest(manifest)
+            self.assertEqual(pack_manifest.parse_manifest(data), manifest)
+            self.assertTrue(data.startswith(b"# DimensionWorks update manifest 2\n"))
+            with self.assertRaisesRegex(pack_manifest.ManifestError, "platform"):
+                pack_manifest.parse_manifest(data.replace(b"manifest 2", b"manifest 1", 1))
+
     def test_round_trip_is_canonical_utf8_lf(self) -> None:
         manifest = pack_manifest.UpdateManifest(
             kind="client",
@@ -47,7 +56,7 @@ class ManifestRoundTripTest(unittest.TestCase):
         self.assertEqual(
             rendered.splitlines()[:6],
             [
-                b"# DimensionWorks update manifest 1",
+                b"# DimensionWorks update manifest 2",
                 b"# kind client",
                 b"# version 1.2.3",
                 b"# release v1.2.3",
@@ -186,7 +195,7 @@ class ManifestValidationTest(unittest.TestCase):
             )
         )
         malformed = (
-            valid.replace(b"# DimensionWorks update manifest 1", b"# wrong header"),
+            valid.replace(b"# DimensionWorks update manifest 2", b"# wrong header"),
             valid.replace(b"# version 1.2.3", b"# version 1.2"),
             valid.replace(
                 b"action\tpath\talgorithm\tvalue\tsource\n",

@@ -1,3 +1,3 @@
-JEIEvents.hideItems(event => {
-  event.hide('twilightforest:uncrafting_table')
+RecipeViewerEvents.removeEntries('item', event => {
+  event.remove('twilightforest:uncrafting_table')
 })

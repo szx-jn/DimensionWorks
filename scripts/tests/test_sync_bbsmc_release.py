@@ -21,17 +21,28 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import sync_bbsmc_release as sync  # noqa: E402
 
 
-def mrpack(version: str = "0.3.41") -> bytes:
+def mrpack(version: str = "0.3.41", dependencies: dict | None = None) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
         archive.writestr("modrinth.index.json", json.dumps({
             "game": "minecraft", "versionId": version,
-            "dependencies": {"minecraft": "1.20.1", "forge": "47.4.23"},
+            "dependencies": {"minecraft": "1.20.1", "forge": "47.4.23"} if dependencies is None else dependencies,
         }))
     return buffer.getvalue()
 
 
 class BbsmcSyncTest(unittest.TestCase):
+    def test_native_release_uses_mrpack_loader_and_game_version(self) -> None:
+        tag = "0.4.0"
+        filename = f"DimensionWorks-{tag}.mrpack"
+        release = dict(self.release, tag_name=f"v{tag}")
+        dependencies = {"minecraft": "1.21.1", "neoforge": "21.1.267"}
+        metadata = sync.version_metadata(release, "doVGSZq0", {filename: mrpack(tag, dependencies)})
+        self.assertEqual(metadata["loaders"], ["neoforge"])
+        self.assertEqual(metadata["game_versions"], ["1.21.1"])
+        with self.assertRaisesRegex(ValueError, "唯一"):
+            sync.version_metadata(release, "doVGSZq0", {filename: mrpack(tag, dict(dependencies, forge="47.4.23"))})
+
     def setUp(self) -> None:
         self.filename = "DimensionWorks-0.3.41.mrpack"
         self.files = {

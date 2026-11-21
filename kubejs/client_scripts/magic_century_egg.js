@@ -1,3 +1,3 @@
-JEIEvents.hideItems(event => {
-  event.hide('kaleidoscope_chinesefood:century_egg')
+RecipeViewerEvents.removeEntries('item', event => {
+  event.remove('kaleidoscope_chinesefood:century_egg')
 })

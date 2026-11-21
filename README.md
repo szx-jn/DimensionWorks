@@ -2,7 +2,7 @@
 
 **Minecraft 1.21.1 · NeoForge 21.1.267 · Java 21**
 
-> `1.21.1-neoforge` 分支正在完整迁移至 Minecraft 1.21.1 / NeoForge / Java 21，目标 Mod 清单已切换，期间禁止发行，唯一服务器旧存档尚未通过目标版验收。实际完成情况见[迁移执行记录](docs/validation/2026-11-20-neoforge-migration-execution.md)。下述下载与正式版说明仍对应现有 Forge 版本。
+> `1.21.1-neoforge` 分支的目标为 Minecraft 1.21.1 / NeoForge / Java 21。唯一旧服的隔离副本已完成离线审计和保存重启，真实账号登录仍待验收。当前正式版 `0.3.52` 使用 Forge。计划中的 `0.4.0` 是不兼容升级，须使用完整包创建独立实例。详见[迁移执行记录](docs/validation/2026-11-20-neoforge-migration-execution.md)。
 
 维度工序（DimensionWorks）是一款以多维度探索、工业化生产、自动化资源获取和跨维度物流为核心的 Minecraft 工业整合包。
 
@@ -69,10 +69,10 @@
 
 ## 技术环境
 
-- Minecraft：1.20.1
-- Mod Loader：Minecraft Forge
-- Java：17
-- 构建环境：GitHub Actions、Gradle 8.8 与 Python 辅助打包脚本
+- Minecraft：1.21.1
+- Mod Loader：NeoForge 21.1.267
+- Java：21
+- 构建环境：GitHub Actions、Gradle 9.2.1 与 Python 辅助打包脚本
 
 ## 仓库结构
 

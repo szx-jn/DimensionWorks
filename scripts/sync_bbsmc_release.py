@@ -62,8 +62,10 @@ def version_metadata(release: dict, project_id: str, files: dict[str, bytes]) ->
         index = json.loads(archive.read("modrinth.index.json"))
     if index["game"] != "minecraft" or index["versionId"] != version:
         raise ValueError("MRPack 游戏或版本号与 GitHub 发行版不一致")
-    if "forge" not in index["dependencies"]:
-        raise ValueError("DimensionWorks MRPack 缺少 Forge 依赖")
+    dependencies = index["dependencies"]
+    loaders = [loader for loader in ("forge", "neoforge") if loader in dependencies]
+    if len(loaders) != 1:
+        raise ValueError("DimensionWorks MRPack 必须声明唯一的 Forge 或 NeoForge 依赖")
     if not isinstance(release["body"], str) or not release["body"].strip():
         raise ValueError("GitHub 发行版更新日志为空，停止同步")
     return {
@@ -71,8 +73,8 @@ def version_metadata(release: dict, project_id: str, files: dict[str, bytes]) ->
         "version_number": version,
         "name": release["name"],
         "changelog": release["body"],
-        "game_versions": [index["dependencies"]["minecraft"]],
-        "loaders": ["forge"],
+        "game_versions": [dependencies["minecraft"]],
+        "loaders": loaders,
         "version_type": "release",
         "featured": False,
         "status": "listed",

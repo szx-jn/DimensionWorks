@@ -1,5 +1,6 @@
 {
   "itemGroup.dimensionworks_cave_factory": "维度工坊",
+  "config.jade.plugin_dimensionworks_cave_factory.factory_status": "洞穴工厂状态",
   "block.dimensionworks_cave_factory.factory_casing": "工厂机壳",
   "block.dimensionworks_cave_factory.factory_port": "工厂端口",
   "block.dimensionworks_cave_factory.fluid_stabilizer": "流体稳定器",

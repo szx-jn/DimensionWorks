@@ -79,6 +79,9 @@ def resolve_version(
         return expected
 
     target = PackVersion.parse(requested)
+    # The approved Forge -> NeoForge release is a one-time version boundary.
+    if baseline == PackVersion(0, 3, 52) and target == PackVersion(0, 4, 0) and not (dimension_complete or major_bump):
+        return target
     if target != expected:
         if major_bump:
             rule = f"主版本提升必须写成 {expected}"
