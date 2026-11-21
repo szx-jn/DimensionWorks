@@ -10,6 +10,8 @@
   "message.dimensionworks_transfer.terminal_hint": "变成包裹后钻入发运终端，选择目的地。",
   "message.dimensionworks_transfer.destination_locked": "此目的地尚未解锁。",
   "message.dimensionworks_transfer.destination_unavailable": "找不到可用的安全落点或目的地生成失败，请检查服务端日志。",
+  "message.dimensionworks_transfer.dispatch_conditions_invalid": "当前不满足发运条件，请确认处于打包状态、位于本人终端旁且引导已完成。",
+  "message.dimensionworks_transfer.dispatch_session_expired": "发运界面已失效，请离开终端方块后重新进入，再选择目的地。",
   "message.dimensionworks_transfer.unpack_failed": "拆包失败，已将你送回中转领地。",
   "message.dimensionworks_transfer.tutorial_title": "右键使用维度钥匙进入中转维度以解锁操作",
   "dimensionworks_transfer.destination.overworld": "主世界",

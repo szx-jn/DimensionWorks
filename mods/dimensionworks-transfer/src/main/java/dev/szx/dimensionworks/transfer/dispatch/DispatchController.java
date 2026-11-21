@@ -58,6 +58,10 @@ public final class DispatchController {
     }
 
     public static boolean eligible(ServerPlayer player, BlockPos pos) {
+        return eligibility(player, pos) == DispatchPolicy.Decision.ALLOWED;
+    }
+
+    private static DispatchPolicy.Decision eligibility(ServerPlayer player, BlockPos pos) {
         Territory territory = TerritoryManager.getTerritory(player);
         return DispatchPolicy.decide(
             player.level().dimension().equals(WDKeys.TRANSFER_LEVEL),
@@ -65,7 +69,7 @@ public final class DispatchController {
             player.distanceToSqr(Vec3.atCenterOf(pos)) < 9,
             PlayerParcel.isPacked(player),
             TutorialManager.locked(player),
-            true) == DispatchPolicy.Decision.ALLOWED;
+            true);
     }
 
     public static void touch(ServerPlayer player, BlockPos pos) {
@@ -143,12 +147,23 @@ public final class DispatchController {
         }
     }
 
-    /**
-     * Consumes the current terminal session, then dispatches the packed player. A malformed,
-     * stale, out-of-range or locked request never reaches the destination transfer code.
-     */
+    /** Consumes the active terminal session, then dispatches the packed player. */
     public static boolean send(ServerPlayer player, BlockPos terminal, String route) {
-        if (!eligible(player, terminal) || !OPEN.containsKey(player.getUUID())) {
+        DispatchPolicy.Decision decision = eligibility(player, terminal);
+        if (decision != DispatchPolicy.Decision.ALLOWED) {
+            WDTransfer.LOGGER.warn(
+                "Rejected dispatch for player {} to route {}: eligibility={}, dimension={}, terminal={}",
+                player.getGameProfile().getName(), route, decision, player.level().dimension().location(), terminal);
+            player.displayClientMessage(
+                Component.translatable("message.dimensionworks_transfer.dispatch_conditions_invalid"), true);
+            return false;
+        }
+        if (!OPEN.containsKey(player.getUUID())) {
+            WDTransfer.LOGGER.warn(
+                "Rejected dispatch for player {} to route {}: terminal selection session expired",
+                player.getGameProfile().getName(), route);
+            player.displayClientMessage(
+                Component.translatable("message.dimensionworks_transfer.dispatch_session_expired"), true);
             return false;
         }
 
