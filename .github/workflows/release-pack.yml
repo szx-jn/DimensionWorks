@@ -107,6 +107,9 @@ jobs:
           Path("VERSION").write_text(f"{baseline}\n", encoding="utf-8")
           requested = os.environ.get("REQUESTED_VERSION", "").strip() or None
           dimension_complete = os.environ.get("DIMENSION_COMPLETE", "").lower() == "true"
+          migration_version = pack_version.PackVersion(0, 4, 0)
+          if baseline < migration_version and requested != str(migration_version):
+              raise SystemExit("NeoForge 首次发行必须在 main 显式指定 0.4.0。")
           target = pack_version.resolve_version(
               requested,
               dimension_complete=dimension_complete,
