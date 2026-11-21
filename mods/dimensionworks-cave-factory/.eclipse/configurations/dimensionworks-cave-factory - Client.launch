@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="dimensionworks-cave-factory"></stringAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.neoforged.devlaunch.Main"></stringAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value=" @/Users/szx/Desktop/project/DimensionWorks/mods/dimensionworks-cave-factory/build/moddev/clientRunProgramArgs.txt"></stringAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value=" @/Users/szx/Desktop/project/DimensionWorks/mods/dimensionworks-cave-factory/build/moddev/clientRunVmArgs.txt -Dfml.modFolders=dimensionworks_cave_factory%%/Users/szx/Desktop/project/DimensionWorks/mods/dimensionworks-cave-factory/bin/main:dimensionworks_cave_factory%%/Users/szx/Desktop/project/DimensionWorks/mods/dimensionworks-cave-factory/bin/gameTest"></stringAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="/Users/szx/Desktop/project/DimensionWorks/mods/dimensionworks-cave-factory/run"></stringAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.STOP_IN_MAIN" value="false"></booleanAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"></booleanAttribute>
+</launchConfiguration>
