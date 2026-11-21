@@ -162,7 +162,6 @@
 | `laowu` · Create: Meowchanics | 2.2.1 | curseforge | 双端 |
 | `libipn` · libIPN | forge-1.20-4.0.2 | modrinth | 客户端 |
 | `luckperms` · LuckPerms | 5.4.102-forge | modrinth | 服务端 |
-| `maid_storage_manager` · Maid Storage Manager | 1.15.6 | modrinth | 双端 |
 | `maidtavern` · Maid Tavern | 1.2.0-forge+mc1.20.1 | modrinth | 双端 |
 | `maidusehandcrank` · MaidUseHandCrank | 1.6.1 | modrinth | 双端 |
 | `megacells` · MEGA Cells | forge-2.4.6 | modrinth | 双端 |

@@ -1,21 +1,12 @@
 plugins { id 'java-library' }
 
-version = '0.1.1'
+version = '0.1.0'
 base.archivesName = 'dimensionworks_maid_ae_crank'
 apply from: rootProject.file('gradle/neoforge-module.gradle')
-apply from: rootProject.file('gradle/neoforge-create.gradle')
 repositories { maven { url = 'https://api.modrinth.com/maven' } }
-repositories {
-    maven {
-        url = 'https://www.cursemaven.com'
-        content { includeGroup 'curse.maven' }
-    }
-}
 dependencies {
     implementation 'maven.modrinth:ae2:7Ac6mXbf'
     implementation 'maven.modrinth:touhou-little-maid:tXG1TkGx'
-    implementation 'maven.modrinth:maid-storage-manager:RgLYYPvs'
-    runtimeOnly 'curse.maven:create-crafted-beginning-1802168:9658463'
     runtimeOnly 'maven.modrinth:guideme:QeYKsstN'
 }
 ext.gameTestCount = 8

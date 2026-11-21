@@ -607,7 +607,7 @@
       "name": "DimensionWorks Maid AE2 Crank",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-maid-ae-crank",
-      "version": "0.1.1",
+      "version": "0.1.0",
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/1.21.1-neoforge/mods/dimensionworks-maid-ae-crank"
@@ -1240,17 +1240,6 @@
       "version": "v5.4.140-neoforge",
       "version_id": "rnvg05YO",
       "url": "https://modrinth.com/mod/luckperms"
-    },
-    {
-      "id": "maid_storage_manager",
-      "name": "Maid Storage Manager",
-      "required": true,
-      "environment": "both",
-      "source": "modrinth",
-      "project_id": "5sIJPqAj",
-      "version": "1.15.6",
-      "version_id": "RgLYYPvs",
-      "url": "https://modrinth.com/mod/maid-storage-manager"
     },
     {
       "id": "maidtavern",
