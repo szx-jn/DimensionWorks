@@ -23,6 +23,7 @@ else:
 CORE_NAMESPACES = frozenset({"minecraft", "create", "ae2", "mekanism", "mekanismgenerators"})
 DISCARDED_NAMESPACES = frozenset({"caves_delight", "mekanismdelight", "kaleidoscope_sauce", "witherstormmod"})
 RETENTION_POLICY = "industrial_storage_players_v1"
+RETIRED_BLOCK_IDS = frozenset({"mekanism:dimensional_stabilizer"})
 
 # 唯一旧档中实际使用的附属机械、物流和存储部件，不按模糊名称前缀扩大保留范围。
 MACHINE_BLOCKS = frozenset({
@@ -82,6 +83,8 @@ def item_action(id: str, *, in_inventory: bool) -> str:
 
 def block_action(id: str, *, holds_inventory: bool = False, supports_machine: bool = False) -> str:
     ns = namespace(id)
+    if id in RETIRED_BLOCK_IDS:
+        return "discard_after_archive"
     if ns in DISCARDED_NAMESPACES:
         if holds_inventory or supports_machine:
             return "requires_asset_recovery"
@@ -168,6 +171,7 @@ def build_scope(source: dict, target: dict, *, protected_owners: set[str] | None
         "inventory_owner_scope_verified": protected_owners is not None,
         "automatic_block_removal_allowed": False,
         "core_namespaces": sorted(CORE_NAMESPACES), "discarded_namespaces": sorted(DISCARDED_NAMESPACES),
+        "retired_block_ids": sorted(RETIRED_BLOCK_IDS),
         "protected_item_ids": sorted(protected_item_ids), "protected_item_records": len(protected_records),
         "discarded_item_records": discarded_records,
         "omitted_nonretained_owner_records": omitted_records,

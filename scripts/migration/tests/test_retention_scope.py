@@ -118,6 +118,9 @@ class RetentionScopeTest(unittest.TestCase):
         self.assertEqual(block_action("sophisticatedstorage:gold_chest"), "preserve")
         self.assertEqual(block_action("twilightforest:canopy_log"), "discard_after_archive")
 
+    def test_migrated_dimensional_stabilizer_is_retired(self):
+        self.assertEqual(block_action("mekanism:dimensional_stabilizer"), "discard_after_archive")
+
     def test_verified_official_rename_is_resolved_without_suppressing_missing_mods(self):
         self.source["registries"]["minecraft:item"]["ids"].append({"K": "minecraft:grass"})
         self.source["item_stacks"].append({"id": "minecraft:grass", "count": 1, "location": "playerdata/a.dat/Inventory[3]"})
