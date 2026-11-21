@@ -4,6 +4,7 @@
 
 已建立：
 
+- [`validation/2026-11-21-create-addon-candidates.md`](validation/2026-11-21-create-addon-candidates.md)：Create Aeronautics、Sable 与 Create: Crafted Beginning 的固定版本、依赖闭包、许可边界及尚未进行的运行时验证。
 - [`validation/2026-11-20-neoforge-migration-execution.md`](validation/2026-11-20-neoforge-migration-execution.md)：迁移实际执行与验证台账，包括冷备份、已移植模块、真实 GameTest 和尚未完成的旧档验收。
 - [`superpowers/plans/2026-11-20-neoforge-1.21.1-migration.md`](superpowers/plans/2026-11-20-neoforge-1.21.1-migration.md)：1.21.1 NeoForge 全仓迁移与自研重构规划，含旧存档保护、玩家/服务器首次更新、阶段准入与内容取舍；配套 [182项Mod矩阵](superpowers/plans/2026-11-20-neoforge-1.21.1-mod-matrix.md)、[45个KubeJS脚本实施表](superpowers/plans/2026-11-20-neoforge-1.21.1-kubejs-plan.md)及[结构化调查证据](superpowers/plans/2026-11-20-neoforge-1.21.1-mod-evidence.json)。16 个自研模块已接入原生工程并完成各自专项验证；完整目标整包及真实旧档迁移仍未完成，实际进度见执行台账。
 - [`design/six-minute-promo-content-plan.md`](design/six-minute-promo-content-plan.md)：已确认的 6 分钟宣传片内容规划，含 60 组逐秒分镜、旁白工作稿、机制与预告边界；已据此制作 Remotion 宣传片。

@@ -328,6 +328,17 @@
       "url": "https://modrinth.com/mod/create"
     },
     {
+      "id": "aeronautics_bundled",
+      "name": "Create Aeronautics",
+      "required": true,
+      "environment": "both",
+      "source": "modrinth",
+      "project_id": "oWaK0Q19",
+      "version": "1.3.3+mc1.21.1",
+      "version_id": "demX2roU",
+      "url": "https://modrinth.com/mod/create-aeronautics"
+    },
+    {
       "id": "nowheel",
       "name": "Create: Nowheel",
       "required": true,
@@ -436,6 +447,19 @@
       "version": "2.0.5-mc1.21.1",
       "version_id": "3Y4r0ItR",
       "url": "https://modrinth.com/mod/create-power-loader"
+    },
+    {
+      "id": "create_crafted_beginning",
+      "name": "Create: Crafted Beginning",
+      "required": true,
+      "environment": "both",
+      "source": "curseforge",
+      "project_id": 1802168,
+      "project_slug": "create-crafted-beginning",
+      "file_id": 9658463,
+      "file_name": "createcraftedbeginning-0.1.1.jar",
+      "version": "0.1.1",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/create-crafted-beginning"
     },
     {
       "id": "create-mobile-packages-dimensionworks",
@@ -2030,6 +2054,17 @@
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/reeses-sodium-options"
+    },
+    {
+      "id": "sable",
+      "name": "Sable",
+      "required": true,
+      "environment": "both",
+      "source": "modrinth",
+      "project_id": "T9PomCSv",
+      "version": "2.0.6+mc1.21.1",
+      "version_id": "fg9dTRz9",
+      "url": "https://modrinth.com/mod/sable"
     }
   ]
 }
