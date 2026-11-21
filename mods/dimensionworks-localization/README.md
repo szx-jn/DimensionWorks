@@ -36,7 +36,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 ./gradlew :dimensionworks-localization:build --no-daemon
 ```
 
-当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.5.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
+当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.6.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
 
 ## 校验
 
@@ -70,6 +70,10 @@ python3 scripts/check_localization.py
 ## Create 包裹飞机与暮色森林（0.1.4）
 
 补齐 Create More: Package Couriers 2.2.1 的 14 条地址示例与特殊合成说明，以及暮色森林 4.3.2508 的 30 条缺失中文键；不覆盖第三方 Jar 已提供的中文文本。
+
+## Create: Crafted Beginning（0.1.6）
+
+补齐 Create: Crafted Beginning 0.1.1 缺失的 109 条配置界面中文键；保留模组 Jar 已提供的其他中文文本。
 
 ## Sophisticated Core 创造页签（0.1.5）
 
