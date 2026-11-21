@@ -49,8 +49,8 @@ class BbsmcSyncTest(unittest.TestCase):
             self.filename: mrpack(),
             "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
             "update-dimensionworks-server-windows-amd64.exe": b"windows-server-updater",
-            "update-dimensionworks-server-linux-amd64.update": b"linux-server-updater",
-            "update-dimensionworks-server-macos-arm64.update": b"macos-server-updater",
+            "update-dimensionworks-server-linux-amd64": b"linux-server-updater",
+            "update-dimensionworks-server-macos-arm64": b"macos-server-updater",
         }
         self.release = {
             "id": 41, "tag_name": "v0.3.41", "draft": False, "prerelease": False,
@@ -62,8 +62,8 @@ class BbsmcSyncTest(unittest.TestCase):
                     (self.filename, self.files[self.filename]),
                     ("DimensionWorks-Server-0.3.41-delta.zip", self.files["DimensionWorks-Server-0.3.41-delta.zip"]),
                     ("update-dimensionworks-server-windows-amd64.exe", self.files["update-dimensionworks-server-windows-amd64.exe"]),
-                    ("update-dimensionworks-server-linux-amd64.update", self.files["update-dimensionworks-server-linux-amd64.update"]),
-                    ("update-dimensionworks-server-macos-arm64.update", self.files["update-dimensionworks-server-macos-arm64.update"]),
+                    ("update-dimensionworks-server-linux-amd64", self.files["update-dimensionworks-server-linux-amd64"]),
+                    ("update-dimensionworks-server-macos-arm64", self.files["update-dimensionworks-server-macos-arm64"]),
                 )
             ] + [{"name": "SHA256SUMS", "state": "uploaded"}],
         }

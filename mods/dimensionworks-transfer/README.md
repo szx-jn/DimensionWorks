@@ -43,6 +43,7 @@
 `dw:transfer` 禁止新放置 AE2 及其附属提供的方块，包括创造模式、自动放置、直接区块写入与线缆/面板部件。覆盖清单中的 `ae2`、`ae2ct`、`ae2omnicells`、`ae2wtlib`、`appliedcreate`、`appmek`、`expatternprovider`、`megacells`、`meplacementtool`、`neoecoae`，并在启动时识别第三方对 AE2 附属的必需依赖。通用模组的可选兼容依赖与整合包自研模块不会被整体禁止。
 
 - Mekanism 纸箱与 CMP 打包工具封装的方块同样检查内层内容。封装纸箱可携带/放置，解开 AE2 内容时返回失败并显示红色提示，保留纸箱、完整 NBT 和 CMP 来源标记，不掉落空箱。
+- Mekanism 纸箱打包 Sophisticated Storage 箱/桶前先启用其原生 packed 状态，避免替换方块时把库存掉落；成功拆箱后恢复为可用状态。其它纸箱解包行为不变。
 - 普通方块、普通纸箱解包、其他维度的 AE2 网络和随身无线终端照常使用。存档已有方块不扫描删除，状态更新、拆除及 NeoForge 快照恢复仍可用。
 - 当前 CMP NeoForge fork 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。
 
@@ -81,6 +82,7 @@
 
 ```sh
 ./gradlew :dimensionworks-transfer:test :dimensionworks-transfer:build :dimensionworks-transfer:runGameTestServer
+./gradlew :dimensionworks-transfer:runGameTestServer -PcardboardStorageCheck
 ./gradlew -PelasticRecipeCheck :dimensionworks-transfer:runGameTestServer
 ./gradlew -PalexDispatchCheck :dimensionworks-transfer:runGameTestServer
 ./gradlew -PtransferClientCheck=dispatch :dimensionworks-transfer:runClient
@@ -88,6 +90,8 @@
 ./gradlew -PtransferClientCheck=vertical :dimensionworks-transfer:runClient
 ./gradlew -PtransferClientCheck=transfer :dimensionworks-transfer:runClient
 ```
+
+`-PcardboardStorageCheck` 使用清单固定的 Sophisticated Storage/Core JAR，额外验证纸箱打包与拆箱后的物品、库存能力和 packed 状态；此依赖只用于该 opt-in GameTest，不进入模组发行 JAR。
 
 默认 40 项 GameTest 覆盖玩家运输、落点、暮色、AE2 禁放、真实纸箱搬运、弹性包裹与竖直带；配方专项增加三项（共 43 项），使用实际 KubeJS 2101、KubeJS Create 与 Vintage Improvements 固定 JAR，验证全部十步组装、原料解析和保留组件的升级回调。新版回调先 `.modifyResult(固定名称)`，再在 `ServerEvents.modifyRecipeResult` 中 `event.exit(ElasticPackager.upgrade(stack))` 提交完整结果。
 

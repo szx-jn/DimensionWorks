@@ -23,10 +23,19 @@ sourceSets.test {
     runtimeClasspath += sourceSets.main.runtimeClasspath
 }
 ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 52 : project.hasProperty('elasticRecipeCheck') ? 43 : 40
+def gameTestNamespaces = ['dimensionworks_transfer', 'dimensionworks_elastic', 'dimensionworks_cardboard']
+if (project.hasProperty('cardboardStorageCheck')) {
+    dependencies {
+        runtimeOnly 'maven.modrinth:sophisticated-storage:t9QwDIi8'
+        runtimeOnly 'maven.modrinth:sophisticated-core:9e7VbbdS'
+    }
+    gameTestNamespaces << 'dimensionworks_cardboard_storage'
+    ext.gameTestCount += 1
+}
 apply from: rootProject.file('gradle/neoforge-gametest.gradle')
 
 neoForge.runs.gameTestServer {
-    systemProperty 'neoforge.enabledGameTestNamespaces', 'dimensionworks_transfer,dimensionworks_elastic,dimensionworks_cardboard'
+    systemProperty 'neoforge.enabledGameTestNamespaces', gameTestNamespaces.join(',')
     jvmArgument '-XX:ActiveProcessorCount=2'
 }
 
@@ -98,7 +107,7 @@ if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispat
         runtimeOnly 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941692'
     }
     neoForge.runs.gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', 'dimensionworks_transfer,dimensionworks_elastic,dimensionworks_cardboard,dimensionworks_elastic_recipe'
+        systemProperty 'neoforge.enabledGameTestNamespaces', (gameTestNamespaces + ['dimensionworks_elastic_recipe']).join(',')
     }
     tasks.register('prepareElasticRecipeCheck', Copy) {
         from(rootProject.file('kubejs/startup_scripts/elastic_packager.js')) { into 'startup_scripts' }
@@ -113,6 +122,6 @@ if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispat
 if (project.hasProperty('alexDispatchCheck')) {
     dependencies { runtimeOnly project(':dimensionworks-cave-factory') }
     neoForge.runs.gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', 'dimensionworks_transfer,dimensionworks_elastic,dimensionworks_cardboard,dimensionworks_elastic_recipe,dimensionworks_alex_dispatch'
+        systemProperty 'neoforge.enabledGameTestNamespaces', (gameTestNamespaces + ['dimensionworks_elastic_recipe', 'dimensionworks_alex_dispatch']).join(',')
     }
 }

@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -38,7 +39,6 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Exercises actual CMP and Mekanism JARs in an isolated world. */
 @GameTestHolder("dimensionworks_cardboard")
