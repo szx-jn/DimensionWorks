@@ -229,7 +229,7 @@ public final class MagicEggScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, 0xB0081019);
         graphics.fill(left, top, left + panelWidth, top + panelHeight, 0xFA172130);
         graphics.fill(left, top, left + panelWidth, top + 2, 0xFF75D9AC);
@@ -257,7 +257,6 @@ public final class MagicEggScreen extends Screen {
             graphics.drawString(font, text("disclaimer_1"), left + 14, top + panelHeight - 57, 0xFFE4C477, false);
             graphics.drawString(font, text("disclaimer_2"), left + 14, top + panelHeight - 45, 0xFFE4C477, false);
         }
-        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     private String fit(Component label, int maxWidth) {

@@ -2,6 +2,8 @@
 
 本分支使用 Minecraft 1.21.1、NeoForge 21.1.267 和 Java 21。构建由根工程统一管理，不再提供相邻工程引用的 `-dev.jar`。其余自研模块接入根工程时改用 Gradle 项目依赖。
 
+拓扑页的图形与文字在 1.21.1 原生背景模糊之后绘制；高级转速控制器由容器基类绘制一次背景，避免重复覆盖面板。跨模块图形回归入口见 Transfer 的 `-PtransferClientCheck=gui`。
+
 在仓库根目录运行 `./gradlew :dimensionworks-rpm-limit:build :dimensionworks-rpm-limit:runGameTestServer --no-daemon`。Create 6.0.10、Curios 9.6.0、Mekanism 10.7.19、AE2 19.2.20 均固定到已核对的发行 JAR；测试源集与夹具不进入生产 JAR。
 
 文中早期 Forge 验证记录属于 1.20.1 基线，不能作为本次迁移通过的依据；本次结果见文末和[迁移执行记录](../../docs/validation/2026-11-20-neoforge-migration-execution.md)。

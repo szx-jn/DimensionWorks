@@ -21,5 +21,8 @@ final class TransferClientPayloads {
     static void chainRide(TransferNetwork.ChainRide packet) {
         ChainConveyorRidingHandler.embark(packet.pos(), packet.position(), packet.connection());
     }
-    static void close() { Minecraft.getInstance().setScreen(null); }
+    static void close() {
+        Minecraft client = Minecraft.getInstance();
+        if (client.screen instanceof DispatchScreen) client.setScreen(null);
+    }
 }

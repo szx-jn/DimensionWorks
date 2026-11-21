@@ -81,7 +81,6 @@ public final class ControllerScreen extends AbstractContainerScreen<AdvancedCont
                 124, 148, 0xff7b331c);
     }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
-        renderBackground(g, mouseX, mouseY, partialTicks);
         super.render(g, mouseX, mouseY, partialTicks);
     }
 }

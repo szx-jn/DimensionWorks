@@ -2,6 +2,8 @@
 
 Minecraft 1.21.1 / NeoForge 21.1.267 / Java 21，自研模组 `dimensionworks_magic_egg`，客户端和服务端均需安装。仅负责界面、确认效果与保存选择，不新增物品、配方、创造页签或第三方依赖。
 
+面板、标题与说明在 1.21.1 的 `renderBackground` 阶段绘制，随后由原生 `Screen.render` 绘制控件，避免背景模糊覆盖自定义内容。跨模块图形回归入口见 Transfer 的 `-PtransferClientCheck=gui`。
+
 ## 行为与界面
 
 - 保留 `kubejs:magic_century_egg`、原皮蛋禁用规则及现有制作链。KubeJS 在成功食用且没有死亡倒计时时调用界面；倒计时内再次食用仍立即死亡。

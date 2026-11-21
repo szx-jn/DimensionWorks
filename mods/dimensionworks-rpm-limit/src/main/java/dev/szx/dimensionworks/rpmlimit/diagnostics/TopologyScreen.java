@@ -129,8 +129,8 @@ public final class TopologyScreen extends Screen {
     private int sy(double y) { return (int) ((y - 40) * zoom + 40 + panY); }
     private static String number(float v) { return String.format(Locale.ROOT, "%.1f", v); }
     private static String pos(BlockPos p) { return p == null ? "无" : p.getX() + ", " + p.getY() + ", " + p.getZ(); }
-    @Override public void render(GuiGraphics g, int mx, int my, float partial) {
-        renderBackground(g, mx, my, partial);
+    @Override public void renderBackground(GuiGraphics g, int mx, int my, float partial) {
+        super.renderBackground(g, mx, my, partial);
         g.fill(5, 38, graphRight, height - 24, 0xee17242c);
         g.enableScissor(5, 38, graphRight, height - 24);
         Map<BlockPos, Integer> indices = TopologyEdges.indices(snapshot.nodes());
@@ -185,7 +185,6 @@ public final class TopologyScreen extends Screen {
         }
         g.disableScissor();
         g.drawString(font, "拖动平移 · 滚轮缩放 · 点击节点查看 · 绿色来源 · 紫色虚拟 · 右栏可滚动", 8, height - 19, 0xffc1d6df, false);
-        super.render(g, mx, my, partial);
     }
     @Override public boolean mouseClicked(double x, double y, int button) {
         if (super.mouseClicked(x, y, button)) return true;

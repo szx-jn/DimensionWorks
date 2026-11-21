@@ -39,12 +39,27 @@ if (project.hasProperty('transferClientCheck')) {
     def checks = [elastic: ['dimensionworks.elasticClientCheck', 'ELASTIC_CLIENT_CHECK_PASS:'],
                   vertical: ['dimensionworks.elasticVerticalBeltClientCheck', 'ELASTIC_VERTICAL_BELT_CLIENT_CHECK_PASS:'],
                   dispatch: ['dimensionworks.dispatchClientCheck', 'ALEX_DISPATCH_GUI_PASS:'],
-                  transfer: ['dimensionworks.transferTravelClientCheck', 'TRANSFER TRAVEL CLIENT CHECK PASSED:']]
-    if (!checks.containsKey(mode)) throw new GradleException('transferClientCheck must be elastic, vertical, dispatch or transfer')
+                  transfer: ['dimensionworks.transferTravelClientCheck', 'TRANSFER TRAVEL CLIENT CHECK PASSED:'],
+                  gui: ['dimensionworks.guiClientCheck', 'CUSTOM_GUI_CLIENT_CHECK_PASS:']]
+    if (!checks.containsKey(mode)) throw new GradleException('transferClientCheck must be elastic, vertical, dispatch, transfer or gui')
+    if (mode == 'gui') {
+        dependencies {
+            implementation project(':dimensionworks-rpm-limit')
+            implementation project(':dimensionworks-mek-stress')
+            implementation project(':dimensionworks-cave-factory')
+            implementation project(':dimensionworks-magic-egg')
+            implementation project(':dimensionworks-version-gate')
+            runtimeOnly 'maven.modrinth:kubejs:GDXCpKlp'
+            runtimeOnly 'maven.modrinth:rhino:SqkDvOLG'
+        }
+    }
     sourceSets.create('clientCheck') {
         java.srcDirs = ['src/clientCheck/java', 'src/elasticClientTest/java', 'src/dispatchClientCheck/java']
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    if (mode == 'gui') {
+        sourceSets.clientCheck.java.srcDir('src/guiClientCheck/java')
     }
     neoForge {
         mods { dimensionworks_transfer { sourceSet sourceSets.clientCheck } }
@@ -58,7 +73,14 @@ if (project.hasProperty('transferClientCheck')) {
     }
     tasks.named('runClient') {
         def resultLog = project.file('run-client-' + mode + '/logs/latest.log')
-        doFirst { resultLog.delete() }
+        doFirst {
+            resultLog.delete()
+            if (mode == 'gui') {
+                def gameDir = project.file('run-client-gui')
+                gameDir.mkdirs()
+                new File(gameDir, 'VERSION').text = rootProject.file('VERSION').text
+            }
+        }
         doLast {
             if (!resultLog.exists() || !resultLog.getText('UTF-8').contains(checks[mode][1])) {
                 throw new GradleException('Transfer client check incomplete: ' + mode)

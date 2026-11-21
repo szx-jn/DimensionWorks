@@ -2,6 +2,8 @@
 
 Minecraft 1.21.1 / NeoForge 21.1.267 / Java 21。通过自研 Mixin 接入 Create、AE2、Applied Create 与 Mekanism，不修改第三方模组源码。
 
+内存驱动器、云盘与跨维度传输器的界面由 1.21.1 原生容器渲染流程绘制一次背景，避免再次叠加暗色遮罩或覆盖面板。跨模块图形回归入口见 Transfer 的 `-PtransferClientCheck=gui`。
+
 ## 1.21.1 NeoForge 迁移状态
 
 当前分支使用根 Gradle Wrapper 9.2.1 与 ModDevGradle 2.0.148。固定编译/测试依赖为 Create 6.0.10、Mekanism 10.7.19.85、AE2 19.2.20、Applied Create 1.1.8、Jade 15.10.6，以及清单核定的目标龙之进化与依赖。Jade 客户端能量提示通过通用 `Accessor` 接口进入，隐藏规则仅应用于方块。

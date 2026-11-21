@@ -33,6 +33,7 @@ import net.minecraft.world.phys.Vec3;
 /** Validates parcel dispatch requests and performs the selected dimension transfer. */
 public final class DispatchController {
     private static final Map<UUID, Long> OPEN = new HashMap<>();
+    private static final Set<UUID> TERMINAL_CONTACT = new HashSet<>();
     private static final Set<UUID> AUTHORIZED_TWILIGHT_TRAVEL = new HashSet<>();
 
     private DispatchController() {}
@@ -85,7 +86,7 @@ public final class DispatchController {
         persisted.putBoolean("dw_terminal_seen", true);
         player.getPersistentData().put(Player.PERSISTED_NBT_TAG, persisted);
 
-        if (OPEN.containsKey(player.getUUID())) {
+        if (!TERMINAL_CONTACT.add(player.getUUID()) || OPEN.containsKey(player.getUUID())) {
             return;
         }
         OPEN.put(player.getUUID(), player.server.overworld().getGameTime());
@@ -103,14 +104,21 @@ public final class DispatchController {
 
     public static void forget(ServerPlayer player) {
         close(player);
+        TERMINAL_CONTACT.remove(player.getUUID());
     }
 
     public static void tick(ServerPlayer player) {
         if (!player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {
+            TERMINAL_CONTACT.remove(player.getUUID());
             return;
         }
 
         Territory territory = TerritoryManager.getTerritory(player);
+        // Closing a picker must not reopen it every tick while still inside the terminal.
+        if (territory == null || !player.getBoundingBox().intersects(
+                new net.minecraft.world.phys.AABB(terminal(territory)))) {
+            TERMINAL_CONTACT.remove(player.getUUID());
+        }
         long now = player.server.overworld().getGameTime();
         Long openedAt = OPEN.get(player.getUUID());
         if (openedAt != null && (territory == null

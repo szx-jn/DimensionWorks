@@ -105,8 +105,8 @@ public final class DispatchScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         graphics.drawCenteredString(font, title, width / 2, 13, 0xFFFFFFFF);
 
         int gridWidth = COLUMNS * CELL_WIDTH + (COLUMNS - 1) * GAP;
@@ -129,7 +129,10 @@ public final class DispatchScreen extends Screen {
                 ? "message.dimensionworks_transfer.alex_caves_unlocked"
                 : "message.dimensionworks_transfer.alex_caves_upgrade_hint"), width / 2, height - 14, 0xFFE1CFA6);
         }
+    }
 
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         if (tutorialLocked) {
             graphics.fill(0, 0, width, height, 0xAA000000);

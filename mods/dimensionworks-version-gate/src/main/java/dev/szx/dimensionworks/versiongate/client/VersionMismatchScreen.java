@@ -40,8 +40,8 @@ public final class VersionMismatchScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         int boxWidth = Math.min(330, width - 24);
         int boxHeight = 116;
         int left = (width - boxWidth) / 2;
@@ -63,7 +63,6 @@ public final class VersionMismatchScreen extends Screen {
         if (!status.isEmpty()) {
             graphics.drawCenteredString(font, Component.literal(status), width / 2, top + boxHeight + 3, 0xFFFFAA00);
         }
-        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     private void launchUpdater() {
