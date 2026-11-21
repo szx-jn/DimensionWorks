@@ -211,7 +211,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     assets_to_sync = (
         (f"DimensionWorks-{version}.mrpack", f"DimensionWorks-{version}.mrpack", False),
         (f"DimensionWorks-Server-{version}-delta.zip", f"DimensionWorks-Server-{version}-delta.zip", False),
-        ("update-dimensionworks-server-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.exe", False),
+        ("update-dimensionworks-server-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.zip", True),
         ("update-dimensionworks-server-linux-amd64.update", "update-dimensionworks-server-linux-amd64.zip", True),
         ("update-dimensionworks-server-macos-arm64.update", "update-dimensionworks-server-macos-arm64.zip", True),
     )

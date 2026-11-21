@@ -157,7 +157,7 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command"
 
 正式发布工作流中的 `sync-bbsmc` 任务只在 GitHub 发布任务成功、且成功创建了本次发行标签后运行。脚本再次查询 GitHub Latest Release，确认本次发行仍是最新的非草稿、非预发布版本；上传前再检查一次，避免下载期间已有更新版本发布。普通提交、推送、PR、独立构建和旧发行版不会触发同步。
 
-发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。同步同一正式发行中的五项内容：`DimensionWorks-<版本>.mrpack`、`DimensionWorks-Server-<版本>-delta.zip`，以及 Windows、Linux、macOS 三个平台的服务端更新器。Windows `.exe` 和 GitHub 上的 Linux/macOS `.update` 原资产均先校验大小及 SHA-256；由于 BBSMC 拒绝 `.update` 文件类型且不接受无扩展名附件，Linux/macOS 更新器在同步时分别封装为 `.zip`，压缩包内保留原始更新器文件名与可执行权限。GitHub Release 资产不变。不向 BBSMC 上传服务端完整 ZIP；服务端增量 ZIP 保留同步。逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge/NeoForge 加载器类型从 MRPack 索引确定，MRPack 始终为主文件，服务端增量 ZIP 与三个平台服务端更新器为附加下载。上传后核对五个文件的 SHA-512、主文件和更新日志。同步不上传更新清单、客户端更新器、服务端完整 ZIP 或其他发行资产，也不修改 BBSMC 项目设置。
+发行说明的四个输入栏至少填写一条本次变更，否则工作流在构建前失败；不再用历史更新器通用说明替代本次日志。同步同一正式发行中的五项内容：`DimensionWorks-<版本>.mrpack`、`DimensionWorks-Server-<版本>-delta.zip`，以及 Windows、Linux、macOS 三个平台的服务端更新器。三种更新器原资产均先校验大小及 SHA-256；由于 BBSMC 只接受受支持的文件类型，更新器均在同步时分别封装为 `.zip`，压缩包内保留原始 Windows `.exe` 或 Linux/macOS `.update` 文件名与可执行权限。GitHub Release 资产不变。不向 BBSMC 上传服务端完整 ZIP；服务端增量 ZIP 保留同步。逐字使用 GitHub Release 正文作为 BBSMC 版本更新日志，保留中文及换行。游戏版本和 Forge/NeoForge 加载器类型从 MRPack 索引确定，MRPack 始终为主文件，服务端增量 ZIP 与三个平台服务端更新器为附加下载。上传后核对五个文件的 SHA-512、主文件和更新日志。同步不上传更新清单、客户端更新器、服务端完整 ZIP 或其他发行资产，也不修改 BBSMC 项目设置。
 
 目标为已有的 [维度工序 BBSMC 项目](https://bbsmc.net/modpack/dimensionworks)，项目 ID `doVGSZq0`。首次启用前，登录后直接打开 [BBSMC 个人访问令牌页面](https://bbsmc.net/settings/pats)（当前设置侧栏隐藏了此入口），创建拥有「创建版本、读取版本、修改版本」权限的令牌，其所属账号还须具备项目上传权限；补齐已有版本附件需要 `VERSION_WRITE`。将令牌保存在 GitHub 仓库 Actions Secret `BBSMC_TOKEN` 中，不写入代码、日志或聊天。缺少令牌时同步任务明确失败，已成功发布的 GitHub Release 与版本号回写保留。
 
