@@ -71,9 +71,9 @@ python3 scripts/check_localization.py
 
 补齐 Create More: Package Couriers 2.2.1 的 14 条地址示例与特殊合成说明，以及暮色森林 4.3.2508 的 30 条缺失中文键；不覆盖第三方 Jar 已提供的中文文本。
 
-## Create: Crafted Beginning（0.1.6）
+## Create: Crafted Beginning 与 Sable（0.1.6）
 
-补齐 Create: Crafted Beginning 0.1.1 缺失的 109 条配置界面中文键；保留模组 Jar 已提供的其他中文文本。
+补齐 Create: Crafted Beginning 0.1.1 缺失的 109 条配置界面中文键，以及 Sable 2.0.6 缺失的 128 条命令、提示与设置中文键；保留 Crafted Beginning Jar 已提供的其他中文文本。
 
 ## Sophisticated Core 创造页签（0.1.5）
 
