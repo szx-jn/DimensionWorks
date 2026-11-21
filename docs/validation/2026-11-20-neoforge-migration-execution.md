@@ -194,7 +194,7 @@ LOGIN 认证改为原生查询/响应 payload，专用 decoder 保留 nullable �
 
 按当前 `manifest/shaderpacks.json` 的四组来源，原 Complementary Unbound r5.9.3、Photon v1.3b、Sildur Vibrant Extreme VL 与 Chocapic13 V6 整包均已下载，并核对原固定文件的大小及官方校验值。Chocapic 整包展开为 Extreme、High、Lite、Low、Medium、Ultra 六份原始预设 ZIP。共九份独立光影文件均完成压缩包完整性检查，**还未完成实际渲染，不能宣称已兼容**。
 
-用户已明确允许替换光影加载器，候选使用原生 Iris 与 Sodium。实际依赖元数据证实 Iris 1.8.12 / Sodium 0.6.13 与当前 Supplementaries 不兼容；当前候选 Iris 1.8.14-beta.1 / Sodium 0.8.13 通过依赖检查，同时保留 Sodium Extras 并选择与其 Options API 相容的 Reese 版本。最终必须逐个加载上述九份光影验证实际画面，若需要适配升级版，明确记录来源与替换结果，不能仅凭依赖范围承诺保留。
+用户已明确允许替换光影加载器，候选使用原生 Iris 与 Sodium。实际依赖元数据证实 Iris 1.8.12 / Sodium 0.6.13 与当前 Supplementaries 不兼容；当前候选 Iris 1.8.14-beta.1 / Sodium 0.8.13 通过依赖检查。2026-11-21 HMCL 实例的视频设置崩溃报告显示 Sodium Options API 1.0.10 对 Sodium 0.8.13 注入已不存在的 `FlatButtonWidget.dim` 字段。保留原 Sodium Extras 1.0.8 及其配置/功能，移除不声明为必需依赖的 Sodium Options API，并将 Reese's Sodium Options 升级至 2.2.4（该版本针对 Sodium 0.8.13，且明确不兼容 Options API）。Modrinth 上游该版本没有新的 Options API 兼容修复，故不尝试升级它。静态检查通过；Sodium Extras 旧 mixin 是否兼容 Sodium 0.8.13、实际菜单及九份光影仍须运行验证，不能仅凭依赖范围承诺保留。
 
 私有候选集合下载完成 150 个 Modrinth、15 个 CurseForge 固定资产，并检查实际 JAR/JarJar 依赖。此前候选 182 个顶层 JAR、73 个内嵌依赖、216 个 modId 的静态闭合检查为 0 错误，仍有一个相同版本内嵌库字节差异警告。候选服务端在隔离新世界实际 Done 并导出注册表，停止后全部维度保存，但日志仍含大量第三方数据错误，且尚未加载完整脚本与旧世界。
 

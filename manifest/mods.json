@@ -1988,17 +1988,6 @@
       "url": "https://modrinth.com/mod/owo-lib"
     },
     {
-      "id": "sodium_options_api",
-      "name": "Sodium Options API",
-      "required": true,
-      "environment": "client",
-      "source": "modrinth",
-      "project_id": "Es5v4eyq",
-      "version": "neoforge-1.21.1-1.0.10",
-      "version_id": "lrsX3TMS",
-      "url": "https://modrinth.com/mod/sodium-options-api"
-    },
-    {
       "id": "sodium",
       "name": "Sodium",
       "required": true,
@@ -2036,8 +2025,8 @@
       "name": "Reese's Sodium Options",
       "source": "modrinth",
       "project_id": "Bh37bMuy",
-      "version": "mc1.21.1-2.0.5+neoforge",
-      "version_id": "Pv76GJbN",
+      "version": "mc1.21.1-2.2.4+neoforge",
+      "version_id": "XjF2IkL8",
       "required": true,
       "environment": "client",
       "url": "https://modrinth.com/mod/reeses-sodium-options"
