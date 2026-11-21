@@ -159,3 +159,14 @@ NBT 审计测试单独运行，以免给现有无关脚本检查引入不必要�
 覆盖成功仍保留 `.migration-incomplete` 和 ready_for_minecraft=false；全档离线对账通过后才创建游戏测试副本。实际六记录格式夹具与五个错误计划反例通过，基础副本不变；它们证明文件转换/保护边界，不是整档运行验收。
 
 完整基础副本还包含原版待初始化 DUMMY 标记，不属于已有机器的库存记录。仅允许 id=DUMMY 且字段严格为 id/x/y/z 的无库存标记，按实际方块状态原样保留或范围外归档，并单独报告数量；其他未索引的真实方块实体仍阻止转换。已核对目标 LevelChunk 的原生初始化逻辑，并在格式夹具验证各一个保留和舍弃标记，未把未知库存当成空数据。
+
+全档覆盖完成后使用 `audit_scoped_world.py` 只读核对目标文件集合、SHA-256、每个区块的 DataVersion、批准方块状态、所有保留/归档方块实体、全部实体区块、完整 NBT 文件及计划声明数量。它还会拒绝目录外方块、残留被归档方块实体、计划外或重复覆盖，不修改世界或 `.migration-incomplete`：
+
+```bash
+python3 scripts/migration/audit_scoped_world.py /absolute/target-world.partial \
+  /absolute/scoped-world-overlay-plan.nbt \
+  --overlay-report /absolute/scoped-world-overlay.jsonl \
+  --output /absolute/private-semantic-audit.json
+```
+
+该命令成功只证明目标副本逐项符合已批准的离线计划和源文件指纹，`ready_for_minecraft` 仍为 false；必须另建副本、移除不可启动标志，再完成实际 NeoForge 启动、保存、停服和重启对账。
