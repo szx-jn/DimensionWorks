@@ -19,5 +19,5 @@ Sable 是 Aeronautics 的必需依赖，因此作为第三个清单条目加入�
 - CurseForge 官方文件 API 确认 Crafted Beginning 文件 `9658463` 为 `createcraftedbeginning-0.1.1.jar`，支持客户端、服务端、Minecraft 1.21.1 与 NeoForge；JAR 压缩完整性检查通过。上游将 0.1.1 标记为 Beta。
 - Crafted Beginning JAR 元数据仅强制要求已存在的 Create 6.0.10；其 JEI、KubeJS、Curios、Sable、Aeronautics 项均为可选依赖。
 - Aeronautics 上游源码许可将代码标为 MIT、素材标为 All Rights Reserved；Sable 使用 PolyForm Shield 1.0.0。原始 JAR 带有许可文件，但正式分发含 Aeronautics 素材的整包前，仍须确认上游许可允许该分发方式。此次不发布。
-- Aeronautics 1.3.3 更新说明专门处理 Iris 激活时的热气渲染与部分光束/绳索显示问题；本整包使用 Iris，仍需在正式发布前做客户端启动与现有光影实测。
+- Aeronautics 1.3.3 会在 Iris 光影激活时关闭热气渲染，并修复创意物理法杖/柱塞发射器的光束与绳索显示；Crafted Beginning 0.1.1 也修复紫水晶镜的 Iris 光束渲染。本整包使用 Iris，仍需在正式发布前做客户端启动与现有光影实测。
 - Sable 上游警告其 mixin 覆盖较深、容易与其他模组出现兼容问题。未验证 Aeronautics 物理载具与其他机械模组的运行时冲突、性能或旧存档表现。
