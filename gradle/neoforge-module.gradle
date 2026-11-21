@@ -27,6 +27,8 @@ neoForge {
         }
         configureEach {
             gameDirectory = project.file('run')
+            // 与正式启动器一致，避免 owo 的开发握手产生不同的必需信道集合。
+            systemProperty 'owo.handshake.enabled', 'false'
         }
     }
 }
