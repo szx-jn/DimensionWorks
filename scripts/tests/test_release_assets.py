@@ -72,6 +72,21 @@ class ReleaseWorkflowTest(unittest.TestCase):
         self.assertIn("go build -tags bundled_aria2", text)
         self.assertIn("python3 scripts/prepare_aria2.py", text)
 
+    def test_bbsmc_maps_extensionless_upload_names_from_update_release_assets(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        publish = workflow.split("assets=(", 1)[1].split(")", 1)[0]
+        sync = (ROOT / "scripts" / "sync_bbsmc_release.py").read_text(encoding="utf-8")
+        self.assertIn('"dist/update-dimensionworks-server-linux-amd64.update"', publish)
+        self.assertIn('"dist/update-dimensionworks-server-macos-arm64.update"', publish)
+        self.assertIn(
+            '("update-dimensionworks-server-linux-amd64.update", "update-dimensionworks-server-linux-amd64")',
+            sync,
+        )
+        self.assertIn(
+            '("update-dimensionworks-server-macos-arm64.update", "update-dimensionworks-server-macos-arm64")',
+            sync,
+        )
+
     def test_workflow_does_not_watch_removed_shell_updater_directory(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertNotIn("release-updaters/**", text)

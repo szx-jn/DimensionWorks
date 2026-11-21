@@ -52,19 +52,20 @@ class BbsmcSyncTest(unittest.TestCase):
             "update-dimensionworks-server-linux-amd64": b"linux-server-updater",
             "update-dimensionworks-server-macos-arm64": b"macos-server-updater",
         }
+        release_asset_names = (
+            self.filename,
+            "DimensionWorks-Server-0.3.41-delta.zip",
+            "update-dimensionworks-server-windows-amd64.exe",
+            "update-dimensionworks-server-linux-amd64.update",
+            "update-dimensionworks-server-macos-arm64.update",
+        )
         self.release = {
             "id": 41, "tag_name": "v0.3.41", "draft": False, "prerelease": False,
             "name": "DimensionWorks 0.3.41",
             "body": "第一行更新日志\n\nfix(release): 保留换行与中文\n",
             "assets": [
-                {"name": filename, "state": "uploaded", "size": len(data)}
-                for filename, data in (
-                    (self.filename, self.files[self.filename]),
-                    ("DimensionWorks-Server-0.3.41-delta.zip", self.files["DimensionWorks-Server-0.3.41-delta.zip"]),
-                    ("update-dimensionworks-server-windows-amd64.exe", self.files["update-dimensionworks-server-windows-amd64.exe"]),
-                    ("update-dimensionworks-server-linux-amd64", self.files["update-dimensionworks-server-linux-amd64"]),
-                    ("update-dimensionworks-server-macos-arm64", self.files["update-dimensionworks-server-macos-arm64"]),
-                )
+                {"name": asset_name, "state": "uploaded", "size": len(self.release_file(asset_name))}
+                for asset_name in release_asset_names
             ] + [{"name": "SHA256SUMS", "state": "uploaded"}],
         }
         self.metadata = sync.version_metadata(self.release, "doVGSZq0", self.files)
@@ -80,10 +81,13 @@ class BbsmcSyncTest(unittest.TestCase):
     def run_sync(self, **kwargs: object) -> str:
         return sync.sync_release("szx-jn/DimensionWorks", "v0.3.41", "doVGSZq0", "token", **kwargs)
 
+    def release_file(self, asset_name: str) -> bytes:
+        return self.files[asset_name.removesuffix(".update")]
+
     def downloads(self):
         return mock.patch.object(
             sync, "download_asset",
-            side_effect=lambda repo, tag, asset: self.files[asset["name"]],
+            side_effect=lambda repo, tag, asset: self.release_file(asset["name"]),
         )
 
     def test_only_latest_non_draft_non_prerelease_can_reach_bbsmc(self) -> None:
