@@ -49,8 +49,8 @@ class BbsmcSyncTest(unittest.TestCase):
             self.filename: mrpack(),
             "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
             "update-dimensionworks-server-windows-amd64.exe": b"windows-server-updater",
-            "update-dimensionworks-server-linux-amd64": b"linux-server-updater",
-            "update-dimensionworks-server-macos-arm64": b"macos-server-updater",
+            "update-dimensionworks-server-linux-amd64.update": b"linux-server-updater",
+            "update-dimensionworks-server-macos-arm64.update": b"macos-server-updater",
         }
         release_asset_names = (
             self.filename,
@@ -82,7 +82,7 @@ class BbsmcSyncTest(unittest.TestCase):
         return sync.sync_release("szx-jn/DimensionWorks", "v0.3.41", "doVGSZq0", "token", **kwargs)
 
     def release_file(self, asset_name: str) -> bytes:
-        return self.files[asset_name.removesuffix(".update")]
+        return self.files[asset_name]
 
     def downloads(self):
         return mock.patch.object(
