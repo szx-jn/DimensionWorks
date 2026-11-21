@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="dimensionworks_maid_ae_crank"
-version="0.1.0"
+version="0.1.1"
 displayName="DimensionWorks Maid AE2 Crank"
 authors="szx-jn"
 description='''Adds a Touhou Little Maid work task that safely operates Applied Energistics 2 wooden cranks.'''
@@ -36,3 +36,20 @@ type="required"
 versionRange="[1.5.3,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.dimensionworks_maid_ae_crank]]
+modId="maid_storage_manager"
+type="required"
+versionRange="[1.15.6,1.16)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.dimensionworks_maid_ae_crank]]
+modId="create"
+type="required"
+versionRange="[6.0.10,6.1)"
+ordering="AFTER"
+side="BOTH"
+
+[[mixins]]
+config="dimensionworks_maid_ae_crank.mixins.json"
