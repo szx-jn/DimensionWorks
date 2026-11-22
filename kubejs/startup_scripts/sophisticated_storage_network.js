@@ -1,7 +1,6 @@
 // DimensionWorks：精妙存储只保留独立存储容器，禁用网络控制与连接组件。
 const dwRetiredSophisticatedStorageNetworkItems = [
   'sophisticatedstorage:controller',
-  'sophisticatedstorage:storage_connector',
   'sophisticatedstorage:storage_input',
   'sophisticatedstorage:storage_io',
   'sophisticatedstorage:storage_link',

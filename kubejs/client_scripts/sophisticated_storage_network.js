@@ -1,7 +1,6 @@
 // DimensionWorks：JEI 中不展示精妙存储的网络控制、连接与物流组件。
 const dwRetiredSophisticatedStorageNetworkItems = [
   'sophisticatedstorage:controller',
-  'sophisticatedstorage:storage_connector',
   'sophisticatedstorage:storage_input',
   'sophisticatedstorage:storage_io',
   'sophisticatedstorage:storage_link',
