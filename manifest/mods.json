@@ -229,17 +229,6 @@
       "url": "https://modrinth.com/mod/carry-on"
     },
     {
-      "id": "chat_heads",
-      "name": "Chat Heads",
-      "required": true,
-      "environment": "client",
-      "source": "modrinth",
-      "project_id": "Wb5oqrBJ",
-      "version": "0.15.7",
-      "version_id": "ZPylso9i",
-      "url": "https://modrinth.com/mod/chat-heads"
-    },
-    {
       "id": "citadel",
       "name": "Citadel",
       "required": true,
