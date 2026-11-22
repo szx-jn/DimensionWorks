@@ -1,10 +1,13 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
 const $DWMagicEggSelection = Java.loadClass('dev.szx.dimensionworks.magicegg.MagicEggSelection')
+const $DWMagicEggUUID = Java.loadClass('java.util.UUID')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
 const DW_MAGIC_EGG_PENDING = 'dw_magic_century_egg_pending'
 const DW_MAGIC_EGG_DEADLINE = 'dw_magic_century_egg_deadline'
+const DW_MAGIC_EGG_SERVER_SESSION_KEY = 'dw_magic_century_egg_server_session'
+const DW_MAGIC_EGG_SERVER_SESSION = $DWMagicEggUUID.randomUUID().toString()
 
 let dwMagicEggFireworkShows = []
 
@@ -20,6 +23,19 @@ function dwPurgeOriginalCenturyEgg(player) {
       stack.setCount(0)
     }
   }
+}
+
+function dwClearMagicEggCountdown(player) {
+  const data = player.persistentData
+  data.putBoolean(DW_MAGIC_EGG_PENDING, false)
+  data.putLong(DW_MAGIC_EGG_DEADLINE, 0)
+}
+
+function dwResetMagicEggCountdownForServerSession(player) {
+  const data = player.persistentData
+  if (data.getString(DW_MAGIC_EGG_SERVER_SESSION_KEY) === DW_MAGIC_EGG_SERVER_SESSION) return
+  dwClearMagicEggCountdown(player)
+  data.putString(DW_MAGIC_EGG_SERVER_SESSION_KEY, DW_MAGIC_EGG_SERVER_SESSION)
 }
 
 function dwStartMagicEggFireworks(level, x, y, z) {
@@ -87,19 +103,18 @@ function dwTickMagicEggFireworks(event) {
 }
 
 function dwFinishMagicEggDeath(player) {
+  dwClearMagicEggCountdown(player)
   // 先移除增益，防止免伤、复活和持续治疗效果阻止死亡。
   player.potionEffects.clear()
   player.setHealth(0)
   player.die(player.damageSources().genericKill())
   if (!player.isDeadOrDying()) return
-  const data = player.persistentData
-  data.putBoolean(DW_MAGIC_EGG_PENDING, false)
-  data.putLong(DW_MAGIC_EGG_DEADLINE, 0)
   dwStartMagicEggFireworks(player.level(), player.x, player.y, player.z)
 }
 
 ItemEvents.foodEaten(DW_MAGIC_EGG_ID, event => {
   const player = event.player
+  dwResetMagicEggCountdownForServerSession(player)
   const data = player.persistentData
   if (data.getBoolean(DW_MAGIC_EGG_PENDING)) {
     data.putLong(DW_MAGIC_EGG_DEADLINE, player.age)
@@ -116,7 +131,17 @@ PlayerEvents.inventoryChanged(event => {
   }
 })
 
-PlayerEvents.loggedIn(event => dwPurgeOriginalCenturyEgg(event.player))
+PlayerEvents.loggedIn(event => {
+  dwResetMagicEggCountdownForServerSession(event.player)
+  dwPurgeOriginalCenturyEgg(event.player)
+})
+
+PlayerEvents.cloned(event => {
+  if (event.getKeepData()) return
+  dwClearMagicEggCountdown(event.getOldPlayer())
+  dwClearMagicEggCountdown(event.getPlayer())
+  dwResetMagicEggCountdownForServerSession(event.getPlayer())
+})
 
 PlayerEvents.tick(event => {
   const player = event.player

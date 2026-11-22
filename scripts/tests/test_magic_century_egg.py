@@ -142,6 +142,20 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertIn("player.setHealth(0)", server)
         self.assertIn("player.die(player.damageSources().genericKill())", server)
         self.assertNotIn("DW_MAGIC_EGG_DAMAGE", server)
+        finish = server.split("function dwFinishMagicEggDeath(player) {", 1)[1].split("\n}", 1)[0]
+        self.assertLess(finish.index("dwClearMagicEggCountdown(player)"), finish.index("player.setHealth(0)"))
+
+    def test_magic_egg_countdown_resets_on_server_restart_and_death(self) -> None:
+        server = (ROOT / "kubejs" / "server_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")
+
+        self.assertIn("const DW_MAGIC_EGG_SERVER_SESSION = $DWMagicEggUUID.randomUUID().toString()", server)
+        self.assertIn("function dwResetMagicEggCountdownForServerSession(player)", server)
+        self.assertIn("PlayerEvents.loggedIn(event => {", server)
+        self.assertIn("dwResetMagicEggCountdownForServerSession(event.player)", server)
+        self.assertIn("PlayerEvents.cloned(event => {", server)
+        self.assertIn("if (event.getKeepData()) return", server)
+        self.assertIn("dwClearMagicEggCountdown(event.getOldPlayer())", server)
+        self.assertIn("dwClearMagicEggCountdown(event.getPlayer())", server)
 
 
 if __name__ == "__main__":
