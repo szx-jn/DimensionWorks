@@ -468,12 +468,12 @@
       "environment": "both",
       "source": "github-source",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "commit": "223ce7a32ff3551653331eaddb80b97ef5dc6cb1",
-      "source_sha256": "41bcaa5ec692a9f8aef62f486f14720aabf84b7fe2113b1317c5cf5d23449c3b",
-      "sha256": "a50fdd77c320cb9053b21ff9fd5ca95ff4eb9e903440da883ebfec0b32083b7f",
-      "file_name": "create_mobile_packages-1.21.1-0.7.8-dimensionworks.2.jar",
-      "version": "0.7.8-dimensionworks.2",
-      "url": "https://github.com/szx-jn/Create-Mobile-Packages/tree/223ce7a32ff3551653331eaddb80b97ef5dc6cb1"
+      "commit": "723aef4af591784c050d4edfe7130a573e55ae51",
+      "source_sha256": "00bb239bb2b87f1d1ad39ccfd4c0b349e0f772bd480c46aa00b0d8acfcae290a",
+      "sha256": "eb1f9f35dc6c5705d26720f0ae45a4ff7bc85a8b264d9a6d5e6fbcef54f2628c",
+      "file_name": "create_mobile_packages-1.21.1-0.7.8-dimensionworks.4.jar",
+      "version": "0.7.8-dimensionworks.4",
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/tree/723aef4af591784c050d4edfe7130a573e55ae51"
     },
     {
       "id": "create-ultimine",
@@ -587,7 +587,7 @@
       "name": "DimensionWorks JEI & Jade Details",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-jei-ticks",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "required": true,
       "environment": "client",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/1.21.1-neoforge/mods/dimensionworks-jei-ticks"

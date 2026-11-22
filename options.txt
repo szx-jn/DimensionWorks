@@ -97,6 +97,7 @@ key_key.drop:key.keyboard.q
 key_key.inventory:key.keyboard.e
 key_key.chat:key.keyboard.t
 key_key.playerlist:key.keyboard.tab
+key_create_cyber_goggles.key.showStress:key.keyboard.tab
 key_key.pickItem:key.keyboard.equal
 key_key.command:key.keyboard.slash
 key_key.socialInteractions:key.keyboard.f8
@@ -213,7 +214,7 @@ key_key.jade.toggle_liquid:key.keyboard.keypad.2
 key_key.jade.show_recipes:key.keyboard.keypad.3
 key_key.jade.show_uses:key.keyboard.keypad.4
 key_key.jade.narrate:key.keyboard.keypad.5
-key_key.jade.show_details:key.keyboard.tab
+key_key.jade.show_details:key.keyboard.left.shift
 key_key.ae2.wireless_pattern_access_terminal:key.keyboard.unknown
 key_key.ae2.ae2wtlib_restock:key.keyboard.unknown
 key_key.ae2.ae2wtlib_magnet:key.keyboard.unknown

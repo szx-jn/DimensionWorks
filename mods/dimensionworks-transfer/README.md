@@ -15,7 +15,7 @@
 - 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
 - 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
-- 工具依赖定制 CMP NeoForge 固定源码提交 `62db6a8c2a6737eff659cc4f840a97f9e640a754`。根共享脚本核对源码归档 SHA-256 后，在忽略的构建目录执行 fork 的 `jar` 任务；没有中途发行版，也不内嵌第三方类。
+- 工具依赖定制 CMP NeoForge 固定源码提交 `723aef4af591784c050d4edfe7130a573e55ae51`。根共享脚本核对源码归档 SHA-256 后，在忽略的构建目录执行 fork 的 `jar` 任务；没有中途发行版，也不内嵌第三方类。
 - 直接交互 Mixin 只绑定目标版本的原生 `interactLivingEntity`。网络改用有明确方向的 NeoForge 载荷，中转协议为 `4`、弹力协议为 `3`；服务端保留权限与状态验证。
 
 详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)、[两秒蓄力增强验证](../../docs/validation/2026-11-14-elastic-charge.md)、[竖直带运输验证](../../docs/validation/2026-11-14-elastic-vertical-belt.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
@@ -45,8 +45,8 @@
 - Mekanism 纸箱与 CMP 打包工具封装的方块同样检查内层内容。封装纸箱可携带/放置，解开 AE2 内容时返回失败并显示红色提示，保留纸箱、完整 NBT 和 CMP 来源标记，不掉落空箱。
 - Mekanism 纸箱打包 Sophisticated Storage 箱/桶前先启用其原生 packed 状态，避免替换方块时把库存掉落；成功拆箱后恢复为可用状态。其它纸箱解包行为不变。
 - 普通方块、普通纸箱解包、其他维度的 AE2 网络和随身无线终端照常使用。存档已有方块不扫描删除，状态更新、拆除及 NeoForge 快照恢复仍可用。
-- 当前 CMP NeoForge fork 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。
-- 下一固定 CMP fork 构建将使实体封装按准星目标选择，不再优先打包点击位置附近的任意实体；打包器捕获的 Sable 瓶中船在 Create 包裹开启或实体破损时释放完整物理船体，成功后瓶子不会残留为掉落物或背包物品。
+- 当前 CMP NeoForge fork 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。实体封装按准星目标选择，不会优先打包点击位置附近的任意实体。
+- 固定 CMP 源码提交 `723aef4af591784c050d4edfe7130a573e55ae51` 修复瓶中船释放：Create 包裹打开或实体破损时，在包裹位置释放其中的完整物理船体；旧包裹中无来源标记的载船瓶也能释放。释放成功后瓶子从包裹内容移除；工具生成的瓶子单独成功放船后也消耗自身，普通瓶中船仍使用原生行为。
 
 根 `:dimensionworks-transfer:runGameTestServer` 默认执行包含纸箱检查在内的 40 项测试：真实打包/拆包、黑名单覆盖、分体方块、搬运后的物品与来源保留，以及禁包和破坏权限拦截。测试用黑名单标签仅位于 `src/gameTest/resources`，不会进入发行 JAR。
 - 数据包可用 `dimensionworks_transfer:forbidden_transfer_blocks` 追加受限方块。检查不轮询、不新增区块加载票据。

@@ -1,9 +1,9 @@
 // 固定源码及校验和构建定制 CMP；无需中间发行版或开发者机器上的 JAR。
-def commit = '223ce7a32ff3551653331eaddb80b97ef5dc6cb1'
-def checksum = '41bcaa5ec692a9f8aef62f486f14720aabf84b7fe2113b1317c5cf5d23449c3b'
+def commit = '723aef4af591784c050d4edfe7130a573e55ae51'
+def checksum = '00bb239bb2b87f1d1ad39ccfd4c0b349e0f772bd480c46aa00b0d8acfcae290a'
 def sourceDirectory = layout.buildDirectory.dir("cmp-source/${commit}")
 def sourceArchive = layout.buildDirectory.file("cmp-source/${commit}.zip")
-def jarName = 'create_mobile_packages-1.21.1-0.7.8-dimensionworks.2.jar'
+def jarName = 'create_mobile_packages-1.21.1-0.7.8-dimensionworks.4.jar'
 
 if (project.hasProperty('cmpTestJar')) {
     def developmentJar = file(project.property('cmpTestJar'))
