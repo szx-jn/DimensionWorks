@@ -468,12 +468,12 @@
       "environment": "both",
       "source": "github-source",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "commit": "62db6a8c2a6737eff659cc4f840a97f9e640a754",
-      "source_sha256": "af6dade670680565467b552954d8a652ca945b57c40183738c62618c772ec9c9",
-      "sha256": "eadd0adaf57f37d0aa87168ab9d3e8e08dfa6d370a5e408869174135a7ff5b06",
-      "file_name": "create_mobile_packages-1.21.1-0.7.8-dimensionworks.1.jar",
-      "version": "0.7.8-dimensionworks.1",
-      "url": "https://github.com/szx-jn/Create-Mobile-Packages/tree/62db6a8c2a6737eff659cc4f840a97f9e640a754"
+      "commit": "223ce7a32ff3551653331eaddb80b97ef5dc6cb1",
+      "source_sha256": "41bcaa5ec692a9f8aef62f486f14720aabf84b7fe2113b1317c5cf5d23449c3b",
+      "sha256": "a50fdd77c320cb9053b21ff9fd5ca95ff4eb9e903440da883ebfec0b32083b7f",
+      "file_name": "create_mobile_packages-1.21.1-0.7.8-dimensionworks.2.jar",
+      "version": "0.7.8-dimensionworks.2",
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/tree/223ce7a32ff3551653331eaddb80b97ef5dc6cb1"
     },
     {
       "id": "create-ultimine",
