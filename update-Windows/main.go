@@ -481,8 +481,7 @@ func updateInstance(root, kind string, opts Options) error {
 			return fmt.Errorf("发行标签格式无效：%s", releaseTag)
 		}
 		version := strings.TrimPrefix(releaseTag, "v")
-		manifestURL := assetURL(releaseTag, manifestAssetName(kind, version))
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"))
+		manifestBytes, err := releaseManifestBytes(kind, releaseTag, version, filepath.Join(work, "manifest.tsv"))
 		if err != nil {
 			return fmt.Errorf("下载更新清单失败：%w", err)
 		}
@@ -493,6 +492,10 @@ func updateInstance(root, kind string, opts Options) error {
 		if target.Release != releaseTag {
 			return fmt.Errorf("清单发行标签 %s 与请求的 %s 不一致", target.Release, releaseTag)
 		}
+		if kind == "client" {
+			fullPackageURL = preferredReleaseAssetURL(version, fullPackageName(kind, version),
+				assetURL(releaseTag, fullPackageName(kind, version)))
+		}
 	default:
 		release, err := latestRelease()
 		if err != nil {
@@ -501,18 +504,7 @@ func updateInstance(root, kind string, opts Options) error {
 		releaseTag = release.TagName
 		releaseInfo = &release
 		version := strings.TrimPrefix(releaseTag, "v")
-		manifestAsset := manifestAssetName(kind, version)
-		var manifestURL string
-		for _, asset := range release.Assets {
-			if asset.Name == manifestAsset {
-				manifestURL = asset.BrowserDownloadURL
-				break
-			}
-		}
-		if manifestURL == "" {
-			manifestURL = assetURL(releaseTag, manifestAsset)
-		}
-		manifestBytes, err := downloadBytes(manifestURL, filepath.Join(work, "manifest.tsv"))
+		manifestBytes, err := releaseManifestBytes(kind, releaseTag, version, filepath.Join(work, "manifest.tsv"))
 		if err != nil {
 			return fmt.Errorf("下载最新版本清单失败：%w", err)
 		}
@@ -522,6 +514,10 @@ func updateInstance(root, kind string, opts Options) error {
 		}
 		if target.Release != releaseTag {
 			return fmt.Errorf("最新发行标签 %s 与清单 %s 不一致", releaseTag, target.Release)
+		}
+		if kind == "client" {
+			fullPackageURL = preferredReleaseAssetURL(version, fullPackageName(kind, version),
+				assetURL(releaseTag, fullPackageName(kind, version)))
 		}
 	}
 
@@ -579,8 +575,15 @@ func updateInstance(root, kind string, opts Options) error {
 			}
 		}
 		fmt.Println("[下载] 获取完整 MRPack 文件索引与配置覆盖包：", filepath.Base(fullPackageURL))
-		if err := downloadArchiveWithManualFallback(fullPackageURL, packagePath); err != nil {
-			return err
+		var downloadErr error
+		if opts.URL != "" {
+			downloadErr = downloadArchiveWithManualFallback(fullPackageURL, packagePath)
+		} else {
+			downloadErr = downloadReleaseAssetPreferred(target.Version, fullPackageName(kind, target.Version),
+				assetURL(target.Release, fullPackageName(kind, target.Version)), packagePath, maxDownloadBytes)
+		}
+		if downloadErr != nil {
+			return downloadErr
 		}
 		fullPackage, err = openArchive(packagePath)
 		if err != nil {

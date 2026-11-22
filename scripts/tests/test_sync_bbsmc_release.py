@@ -47,19 +47,30 @@ class BbsmcSyncTest(unittest.TestCase):
         self.filename = "DimensionWorks-0.3.41.mrpack"
         self.files = {
             self.filename: mrpack(),
+            "DimensionWorks-0.3.41-update-manifest.zip": sync.zip_attachment(
+                "DimensionWorks-0.3.41-update-manifest.tsv", b"# client manifest",
+            ),
+            "DimensionWorks-Server-0.3.41-update-manifest.zip": sync.zip_attachment(
+                "DimensionWorks-Server-0.3.41-update-manifest.tsv", b"# server manifest",
+            ),
             "DimensionWorks-Server-0.3.41-delta.zip": b"server-delta",
-            "update-dimensionworks-server-windows-amd64.zip": sync.zip_updater(
+            "update-dimensionworks-server-windows-amd64.zip": sync.zip_attachment(
                 "update-dimensionworks-server-windows-amd64.exe", b"windows-server-updater",
+                executable=True,
             ),
-            "update-dimensionworks-server-linux-amd64.zip": sync.zip_updater(
+            "update-dimensionworks-server-linux-amd64.zip": sync.zip_attachment(
                 "update-dimensionworks-server-linux-amd64.update", b"linux-server-updater",
+                executable=True,
             ),
-            "update-dimensionworks-server-macos-arm64.zip": sync.zip_updater(
+            "update-dimensionworks-server-macos-arm64.zip": sync.zip_attachment(
                 "update-dimensionworks-server-macos-arm64.update", b"macos-server-updater",
+                executable=True,
             ),
         }
         self.release_files = {
             self.filename: self.files[self.filename],
+            "DimensionWorks-0.3.41-update-manifest.tsv": b"# client manifest",
+            "DimensionWorks-Server-0.3.41-update-manifest.tsv": b"# server manifest",
             "DimensionWorks-Server-0.3.41-delta.zip": self.files["DimensionWorks-Server-0.3.41-delta.zip"],
             "update-dimensionworks-server-windows-amd64.exe": b"windows-server-updater",
             "update-dimensionworks-server-linux-amd64.update": b"linux-server-updater",
@@ -67,6 +78,8 @@ class BbsmcSyncTest(unittest.TestCase):
         }
         release_asset_names = (
             self.filename,
+            "DimensionWorks-0.3.41-update-manifest.tsv",
+            "DimensionWorks-Server-0.3.41-update-manifest.tsv",
             "DimensionWorks-Server-0.3.41-delta.zip",
             "update-dimensionworks-server-windows-amd64.exe",
             "update-dimensionworks-server-linux-amd64.update",
@@ -134,7 +147,7 @@ class BbsmcSyncTest(unittest.TestCase):
             self.assertIn("BBSMC OK", self.run_sync())
         self.assertEqual(download.call_args_list, [
             mock.call("szx-jn/DimensionWorks", "v0.3.41", asset)
-            for asset in self.release["assets"][:5]
+            for asset in self.release["assets"][:7]
         ])
         for archive_name, entry_name, payload in (
             ("update-dimensionworks-server-windows-amd64.zip",

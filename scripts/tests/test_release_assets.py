@@ -72,17 +72,19 @@ class ReleaseWorkflowTest(unittest.TestCase):
         self.assertIn("go build -tags bundled_aria2", text)
         self.assertIn("python3 scripts/prepare_aria2.py", text)
 
-    def test_bbsmc_wraps_updaters_in_extensioned_zip_attachments(self) -> None:
+    def test_bbsmc_wraps_manifests_and_updaters_in_zip_attachments(self) -> None:
         sync = (ROOT / "scripts" / "sync_bbsmc_release.py").read_text(encoding="utf-8")
         self.assertIn(
-            '("update-dimensionworks-server-linux-amd64.update", "update-dimensionworks-server-linux-amd64.zip", True)',
+            '(f"DimensionWorks-{version}-update-manifest.tsv",\n'
+            '         f"DimensionWorks-{version}-update-manifest.zip", "manifest")',
             sync,
         )
         self.assertIn(
-            '("update-dimensionworks-server-macos-arm64.update", "update-dimensionworks-server-macos-arm64.zip", True)',
+            '(f"DimensionWorks-Server-{version}-update-manifest.tsv",\n'
+            '         f"DimensionWorks-Server-{version}-update-manifest.zip", "manifest")',
             sync,
         )
-        self.assertIn("files[upload_name] = zip_updater(asset_name, data) if wrap_updater else data", sync)
+        self.assertIn('zip_attachment(asset_name, data, executable=wrapper == "updater")', sync)
 
     def test_workflow_does_not_watch_removed_shell_updater_directory(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")

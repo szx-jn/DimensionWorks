@@ -15,6 +15,7 @@ const maxIncrementalChainLength = 128
 type IncrementalPackage struct {
 	Release string
 	Version string
+	Name    string
 	URL     string
 	Size    uint64
 }
@@ -108,7 +109,7 @@ func releaseManifestForTag(kind, tag, work string) (*Manifest, error) {
 	}
 	version := strings.TrimPrefix(tag, "v")
 	path := filepath.Join(work, "manifest-"+version+".tsv")
-	data, err := downloadBytes(assetURL(tag, manifestAssetName(kind, version)), path)
+	data, err := releaseManifestBytes(kind, tag, version, path)
 	if err != nil {
 		return nil, fmt.Errorf("读取增量链清单 %s 失败：%w", tag, err)
 	}
@@ -237,21 +238,35 @@ func planTransfer(kind, installedVersion string, target *Manifest, targetInfo *R
 	}
 	for _, step := range chain {
 		name := deltaAssetName(kind, step.manifest.Version)
-		url := assetURL(step.manifest.Release, name)
-		size, sizeErr := releaseAssetSize(step.info, name, url)
-		if sizeErr != nil {
+		githubURL := assetURL(step.manifest.Release, name)
+		url, size, _, hasBBSMC := bbsmcAsset(step.manifest.Version, name)
+		if !hasBBSMC {
+			url = githubURL
+		}
+		var packageSize uint64
+		var sizeErr error
+		if hasBBSMC {
+			packageSize = uint64(size)
+		} else {
+			packageSize, sizeErr = releaseAssetSize(step.info, name, url)
+		}
+		if sizeErr != nil || packageSize == 0 {
 			plan.Incrementals = nil
 			plan.IncrementalSize = 0
+			if sizeErr == nil {
+				sizeErr = errors.New("服务器未提供有效的文件大小")
+			}
 			plan.Reason = sizeErr.Error()
 			return plan
 		}
 		plan.Incrementals = append(plan.Incrementals, IncrementalPackage{
 			Release: step.manifest.Release,
 			Version: step.manifest.Version,
+			Name:    name,
 			URL:     url,
-			Size:    size,
+			Size:    packageSize,
 		})
-		plan.IncrementalSize = saturatingAdd(plan.IncrementalSize, size)
+		plan.IncrementalSize = saturatingAdd(plan.IncrementalSize, packageSize)
 	}
 	if len(plan.Incrementals) > 0 && plan.FullPackageSize > 0 && plan.IncrementalSize < plan.FullPackageSize {
 		plan.UseIncrementals = true
@@ -264,7 +279,11 @@ func stageIncrementalPackages(root, work, stageRoot string, packages []Increment
 	for index, pkg := range packages {
 		packagePath := filepath.Join(work, fmt.Sprintf("incremental-%03d.zip", index+1))
 		defer os.Remove(packagePath)
-		if err := downloadFile(pkg.URL, packagePath); err != nil {
+		githubURL := pkg.URL
+		if pkg.Name != "" {
+			githubURL = assetURL(pkg.Release, pkg.Name)
+		}
+		if err := downloadReleaseAssetPreferred(pkg.Version, pkg.Name, githubURL, packagePath, maxDownloadBytes); err != nil {
 			return fmt.Errorf("下载增量包 %s 失败：%w", pkg.Release, err)
 		}
 		info, err := os.Lstat(packagePath)

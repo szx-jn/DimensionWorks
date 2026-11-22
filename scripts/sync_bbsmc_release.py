@@ -55,13 +55,14 @@ def download_asset(repository: str, tag: str, asset: dict) -> bytes:
     return data
 
 
-def zip_updater(filename: str, data: bytes) -> bytes:
+def zip_attachment(filename: str, data: bytes, *, executable: bool = False) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         entry = zipfile.ZipInfo(filename)
         entry.create_system = 3
         entry.compress_type = zipfile.ZIP_DEFLATED
-        entry.external_attr = (0o100755 & 0xFFFF) << 16
+        mode = 0o100755 if executable else 0o100644
+        entry.external_attr = (mode & 0xFFFF) << 16
         archive.writestr(entry, data)
     return buffer.getvalue()
 
@@ -209,26 +210,36 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     version = tag[1:]
     files = {}
     assets_to_sync = (
-        (f"DimensionWorks-{version}.mrpack", f"DimensionWorks-{version}.mrpack", False),
-        (f"DimensionWorks-Server-{version}-delta.zip", f"DimensionWorks-Server-{version}-delta.zip", False),
-        ("update-dimensionworks-server-windows-amd64.exe", "update-dimensionworks-server-windows-amd64.zip", True),
-        ("update-dimensionworks-server-linux-amd64.update", "update-dimensionworks-server-linux-amd64.zip", True),
-        ("update-dimensionworks-server-macos-arm64.update", "update-dimensionworks-server-macos-arm64.zip", True),
+        (f"DimensionWorks-{version}.mrpack", f"DimensionWorks-{version}.mrpack", ""),
+        (f"DimensionWorks-{version}-update-manifest.tsv",
+         f"DimensionWorks-{version}-update-manifest.zip", "manifest"),
+        (f"DimensionWorks-Server-{version}-update-manifest.tsv",
+         f"DimensionWorks-Server-{version}-update-manifest.zip", "manifest"),
+        (f"DimensionWorks-Server-{version}-delta.zip",
+         f"DimensionWorks-Server-{version}-delta.zip", ""),
+        ("update-dimensionworks-server-windows-amd64.exe",
+         "update-dimensionworks-server-windows-amd64.zip", "updater"),
+        ("update-dimensionworks-server-linux-amd64.update",
+         "update-dimensionworks-server-linux-amd64.zip", "updater"),
+        ("update-dimensionworks-server-macos-arm64.update",
+         "update-dimensionworks-server-macos-arm64.zip", "updater"),
     )
-    for asset_name, upload_name, wrap_updater in assets_to_sync:
+    for asset_name, upload_name, wrapper in assets_to_sync:
         assets = [asset for asset in release["assets"] if asset["name"] == asset_name]
         if len(assets) != 1 or assets[0]["state"] != "uploaded":
             raise ValueError(f"GitHub 发行版缺少唯一且已上传的 {asset_name}")
         print(f"BBSMC download: {asset_name} -> {upload_name}", flush=True)
         data = download_asset(repository, tag, assets[0])
-        files[upload_name] = zip_updater(asset_name, data) if wrap_updater else data
+        if wrapper:
+            data = zip_attachment(asset_name, data, executable=wrapper == "updater")
+        files[upload_name] = data
     metadata = version_metadata(release, project_id, files)
     versions = bbsmc_json(f"project/{project_id}/version", token)
     existing = matching_version(versions, metadata, files)
     if existing is not None and len(existing["files"]) == len(files):
         return f"BBSMC OK: {tag} 文件与更新日志已同步，无需重复上传"
     if dry_run:
-        return f"BBSMC DRY-RUN OK: {tag} 已核对客户端、服务端增量 ZIP、三个平台服务端更新器与发行日志，未上传"
+        return f"BBSMC DRY-RUN OK: {tag} 已核对 MRPack、两个清单、服务端增量 ZIP、三个平台更新器与发行日志，未上传"
     # 下载期间可能已有更晚版本完成发布；写入前再次确认最新正式版身份。
     if not is_latest_release(repository, release):
         return f"BBSMC SKIP: {tag} 已被更新的 GitHub 正式版替代"
@@ -241,7 +252,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
             raise ValueError("BBSMC 返回的版本或客户端文件与本次上传不一致")
     names = {file["filename"] for file in existing["files"]}
     missing = {filename: data for filename, data in files.items() if filename not in names}
-    # 建版请求只含客户端；服务端增量 ZIP 与三个平台更新器逐个追加，避免合并为大请求。
+    # 建版请求只含客户端；其余附件逐个追加，避免合并为大请求。
     for filename in sorted(missing, key=lambda name: len(missing[name])):
         if not is_latest_release(repository, release):
             return f"BBSMC SKIP: {tag} 已被更新的 GitHub 正式版替代"
@@ -249,7 +260,7 @@ def sync_release(repository: str, tag: str, project_id: str, token: str,
     uploaded = bbsmc_json(f"version/{existing['id']}", token)
     if not already_synced([uploaded], metadata, files):
         raise ValueError("BBSMC 返回的版本、文件或更新日志与本次上传不一致")
-    return f"BBSMC OK: {tag} 客户端、服务端增量 ZIP 与三个平台服务端更新器及发行日志已同步（{uploaded['id']}）"
+    return f"BBSMC OK: {tag} MRPack、两个清单、服务端增量 ZIP、三个平台更新器及发行日志已同步（{uploaded['id']}）"
 
 
 def main() -> int:
