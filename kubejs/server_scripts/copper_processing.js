@@ -17,21 +17,19 @@ ServerEvents.recipes(event => {
     temperature_matching: 'exact'
   }).id('dimensionworks:copper_processing/reduction_with_carbon_monoxide')
 
-  // Chance outputs roll independently per dust: expected yield = 1 + 2*.8 + .6 = 3.2.
+  // Chance outputs roll independently per ingot: expected yield is 1.5 dust.
   DimensionWorksGrinding.register(event, {
     id: 'dimensionworks:copper_processing/dust_from_ingot',
     machine: 'create:crushing',
     input: 'minecraft:copper_ingot',
     outputs: [
       { item: 'mekanism:dust_copper', count: 1 },
-      { item: 'mekanism:dust_copper', count: 2, chance: 0.8 },
-      { item: 'mekanism:dust_copper', count: 1, chance: 0.6 }
+      { item: 'mekanism:dust_copper', count: 1, chance: 0.5 }
     ]
   })
 
-  // Repeated entries make the basin really consume four dust, rather than
-  // relying on ingredient-stack counts unsupported by Create processing.
-  event.recipes.create.mixing('2x create:veridium', [
+  // Four dust now yields one Veridium, preventing the copper loop from multiplying dust.
+  event.recipes.create.mixing('create:veridium', [
     'mekanism:dust_copper',
     'mekanism:dust_copper',
     'mekanism:dust_copper',
@@ -43,8 +41,9 @@ ServerEvents.recipes(event => {
   event.custom({
     type: 'createcraftedbeginning:gas_injection',
     gas_ingredients: [{
-      amount: 1,
-      ingredient: { gas: 'dimensionworks:oxygen' }
+      amount: 8000,
+      ingredient: { gas: 'dimensionworks:oxygen' },
+      minimum_pressure: 200000
     }],
     ingredients: [{ item: 'create:veridium', count: 1 }],
     results: [{ id: 'minecraft:raw_copper', count: 2 }]

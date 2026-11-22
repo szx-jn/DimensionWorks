@@ -1,0 +1,34 @@
+# DimensionWorks balance defaults for Create: Crafted Beginning.
+# Existing worlds need the matching values in serverconfig/createcraftedbeginning-server.toml.
+
+[kinetics.stress_impact]
+airtight_regulator_pump = 32.0
+airtight_valve = 8.0
+airtight_reactor_kettle_structural_cog = 32.0
+shaft_driven_airtight_pump = 24.0
+airtight_pump = 24.0
+airtight_forging_press_structural_shaft = 32.0
+
+[kinetics.stress_capacity]
+airtight_engine = 256.0
+tesla_turbine = 1024.0
+
+[machines.airtight_forging_press]
+enable_automatic_pressing_recipes = false
+enable_automatic_crushing_recipes = false
+enable_automatic_smithing_recipes = false
+
+[machines.airtight_reactor_kettle]
+enable_automatic_mixing_recipes = false
+enable_automatic_brewing_recipes = false
+enable_automatic_shapeless_recipes = false
+
+[machines.airtight_pump]
+max_pressure_boost = 4.0
+
+[machines.airtight_regulator_pump]
+# It may regulate and exhaust gas, but cannot bypass the RPM-based pressure progression.
+max_pressure_rise = 0.0
+
+[machines.gas_injection_chamber]
+fan_processing_gas_per_item = 4000

@@ -24,6 +24,8 @@
     "MechanicalPressBlockEntityMixin",
     "PressingBehaviourMixin",
     "BeltPressingCallbacksMixin",
+    "ccb.GasInjectionChamberBasinPlannerMixin",
+    "ccb.GasInjectionChamberOperationPlannerMixin",
     "minecraft.KineticBlockEntityLifecycleMixin",
     "RotationPropagatorMixin"
   ],

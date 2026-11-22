@@ -95,7 +95,7 @@ Create 的 Mixer、Press、Crushing Wheels、Saw、Deployer、Spout、Fan 等加
 
 server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create 固体压制与 Mekanism 合成路线。压制线要求对应目标的有限样本作为输入。
 
-铜改用 `server_scripts/copper_processing.js`：氧化铜 + 250 GU 一氧化碳在 CCB 反应釜中普通加热得到 1 铜锭 + 250 GU 二氧化碳；铜锭经 Create 粉碎轮产出 1 个保底铜粉、2 个各 80% 概率铜粉、1 个 60% 概率铜粉（期望 3.2 个）；4 铜粉 + 1 圆石加热搅拌得到 2 辉绿岩；每个辉绿岩经 CCB 气体注入消耗 1 GU 氧气得到 2 氧化铜。旧的铜双路线增殖和原生铜碎块提纯配方移除。默认烧制、高炉烧制及其他未指定铜加工保留。
+铜改用 `server_scripts/copper_processing.js`：氧化铜 + 250 GU 一氧化碳在 CCB 反应釜中普通加热得到 1 铜锭 + 250 GU 二氧化碳；铜锭经 Create 粉碎轮产出 1 个保底铜粉和 1 个 50% 概率铜粉（期望 1.5 个）；4 铜粉 + 1 圆石加热搅拌得到 1 辉绿岩；每个辉绿岩经 CCB 气体注入消耗 8,000 GU 氧气、最低 200,000 Pa（2 atm）得到 2 个氧化铜。这样铜粉回路期望为每轮 4 粉投入、3 粉产出，不再自增。旧的铜双路线增殖和原生铜碎块提纯配方移除。默认烧制、高炉烧制及其他未指定铜加工保留。
 
 煤炭自增殖配方已移除，仅规划木炭化学合成来源；现已实现木炭制气，后续制煤工序待定。
 
@@ -143,8 +143,10 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 - `startup_scripts/chemistry_gases.js` 以 Create: Crafted Beginning 的 `createcraftedbeginning:gas` 注册表作为整合包化学气体定义来源。当前注册 14 种：二氧化碳、一氧化碳、氮气、氨气、一氧化氮、二氧化氮、一氧化二氮、硫化氢、甲烷、乙炔、臭氧、硝酸、氢气和氧气。
 - 同一脚本还将原有 12 个 `dimensionworks:` Mekanism Chemical ID 保留为旧存档 ChemicalStack 读取兼容项；活动配方统一改用 CCB 气体。Mekanism 自带气体（例如核废料）仍归 Mekanism 管理，不复制到 CCB。
 - `server_scripts/chemistry_gas_recipes.js` 使用 CCB `reactor_kettle` 配方，以 `GasStack` 合成气体；原有化学配方 ID、物品/流体原料、气体比例和产物数量保持不变，木炭制 CO/CO2 的原数值分别为 125/250。水电解制氢/氧是新增上游配方。
-- 铜还原与辉绿岩提纯也使用 CCB 气体，保留原流程的物品产物和气体数值（还原为 250 CO → 250 CO2；提纯为 1 氧气 → 2 氧化铜）。旧的工作盆 Mekanism 气体桥接仍供原生 Mekanism 化学品流程使用。
+- 铜还原与辉绿岩提纯也使用 CCB 气体：还原保持 250 CO → 250 CO2；辉绿岩提纯调整为 8,000 GU 氧气、最低 200,000 Pa（2 atm）→ 2 氧化铜。旧的工作盆 Mekanism 气体桥接仍供原生 Mekanism 化学品流程使用。
 - CCB 气体数值单位为 GU；迁移时保留原数值，但 GU 不等同于 Mekanism 的 mB ChemicalStack。获取方式是整合包工业生产线的简化模型，并非逐原子复刻实验室制备。新增气体的 CCB 翻译与颜色分开管理；颜色仅用于区分，不表示真实颜色或物态。
+- `server_scripts/ccb_balance.js` 只将 CCB 自带气体注入室配方的耗气量提高为原来的 8 倍，并把最低绝对压力提高到 200,000 Pa（2 atm；保留配方原有更高压力要求）；RPM Limit 另按环境压差强制至少 40,000 Pa 泵增压（1024 RPM 等效），不足时禁止处理。反应釜等其他配方类别不受这条规则改写。自定义铜提纯配方在 `copper_processing.js` 中单独平衡。
+- 气体注入室的盆式与传送带批次按气密泵压力增幅收口：等效 256/512/1024/2048/4096/6144/8192 RPM 分别最多 8/12/16/24/32/48/64 件。气密压力调节泵仍可排气/调压，但不再增加压力；否则低速升压会绕过并行档位。
 
 
 ## Create 工作盆 Mekanism 气体输入与输出
