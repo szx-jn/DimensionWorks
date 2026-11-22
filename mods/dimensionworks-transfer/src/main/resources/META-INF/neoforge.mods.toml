@@ -42,7 +42,7 @@ side="BOTH"
 [[dependencies.dimensionworks_transfer]]
 modId="create_mobile_packages"
 type="required"
-versionRange="[0.7.8-dimensionworks.1]"
+versionRange="[0.7.8-dimensionworks.2]"
 ordering="AFTER"
 side="BOTH"
 
