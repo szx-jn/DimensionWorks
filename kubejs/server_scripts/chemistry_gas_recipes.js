@@ -7,7 +7,8 @@ ServerEvents.recipes(event => {
   const gasOutput = (id, amount) => ({ id: id, amount: amount })
   const fluid = (id, amount) => ({ type: 'neoforge:single', fluid: id, amount: amount })
   const kettle = (id, data) => event.custom(Object.assign({
-    type: 'createcraftedbeginning:reactor_kettle'
+    type: 'createcraftedbeginning:reactor_kettle',
+    ingredients: []
   }, data)).id('dimensionworks:chemistry/' + id)
   const heatedKettle = (id, data, temperature) => kettle(id, Object.assign(data, {
     temperature: temperature,

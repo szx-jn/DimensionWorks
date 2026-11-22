@@ -87,6 +87,7 @@ process.stdout.write(JSON.stringify({registries, recipes}));
         references = set()
         for recipe in self.recipes.values():
             self.assertEqual(recipe["type"], "createcraftedbeginning:reactor_kettle")
+            self.assertIn("ingredients", recipe)
             for entry in recipe.get("gas_ingredients", []):
                 references.add(entry["ingredient"]["gas"])
             references.update(entry["id"] for entry in recipe.get("gas_results", []))
