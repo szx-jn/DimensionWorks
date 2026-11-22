@@ -92,7 +92,7 @@
     "part_name": true
   },
   "create_mobile_packages": {
-    "bee_port": true
+    "bee_port": false
   },
   "jadeaddons": {
     "equipment_requirement": ""
