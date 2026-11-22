@@ -46,15 +46,17 @@ process.stdout.write(JSON.stringify({recipes, removed}));
         cls.data = json.loads(result.stdout)
         cls.recipes = {r["id"].rsplit("/", 1)[-1]: r for r in cls.data["recipes"]}
 
-    def test_reduction_consumes_exact_gas_and_excludes_superheat(self) -> None:
+    def test_reduction_preserves_original_inputs_and_outputs(self) -> None:
         recipe = self.recipes["reduction_with_carbon_monoxide"]
-        self.assertEqual(recipe["input"], ["minecraft:raw_copper"])
-        self.assertEqual(recipe["heat"], "heated")
-        self.assertIn("minecraft:copper_ingot", recipe["output"])
-        marker = next(x for x in recipe["output"] if isinstance(x, dict))["components"]["minecraft:custom_data"]
-        self.assertEqual((marker["InputGas"], marker["InputAmount"]), ("dimensionworks:carbon_monoxide", 250))
-        self.assertEqual((marker["Gas"], marker["Amount"]), ("dimensionworks:carbon_dioxide", 250))
-        self.assertTrue(marker["ExcludeSuperheated"])
+        self.assertEqual(recipe["type"], "createcraftedbeginning:reactor_kettle")
+        self.assertEqual(recipe["ingredients"], [{"item": "minecraft:raw_copper", "count": 1}])
+        self.assertEqual(recipe["gas_ingredients"], [{
+            "amount": 250,
+            "ingredient": {"gas": "dimensionworks:carbon_monoxide"}
+        }])
+        self.assertEqual(recipe["results"], [{"id": "minecraft:copper_ingot", "count": 1}])
+        self.assertEqual(recipe["gas_results"], [{"id": "dimensionworks:carbon_dioxide", "amount": 250}])
+        self.assertEqual((recipe["temperature"], recipe["temperature_matching"]), ("heated", "exact"))
 
     def test_grinding_has_fixed_and_independent_chance_outputs(self) -> None:
         recipe = self.recipes["dust_from_ingot"]
@@ -77,11 +79,13 @@ process.stdout.write(JSON.stringify({recipes, removed}));
     def test_purification_replaces_the_native_copper_clump_routes(self) -> None:
         self.assertIn({"type": "mekanism:purifying", "output": "mekanism:clump_copper"}, self.data["removed"])
         recipe = self.recipes["oxide_from_veridium"]
-        self.assertEqual(recipe["type"], "mekanism:purifying")
-        self.assertEqual(recipe["item_input"], {"item": "create:veridium", "count": 1})
-        self.assertEqual(recipe["output"], {"id": "minecraft:raw_copper", "count": 2})
-        self.assertEqual(recipe["chemical_input"], {"chemical": "mekanism:oxygen", "amount": 1})
-        self.assertTrue(recipe["per_tick_usage"])
+        self.assertEqual(recipe["type"], "createcraftedbeginning:gas_injection")
+        self.assertEqual(recipe["ingredients"], [{"item": "create:veridium", "count": 1}])
+        self.assertEqual(recipe["results"], [{"id": "minecraft:raw_copper", "count": 2}])
+        self.assertEqual(recipe["gas_ingredients"], [{
+            "amount": 1,
+            "ingredient": {"gas": "dimensionworks:oxygen"}
+        }])
 
 
 if __name__ == "__main__":

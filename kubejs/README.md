@@ -95,7 +95,7 @@ Create 的 Mixer、Press、Crushing Wheels、Saw、Deployer、Spout、Fan 等加
 
 server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create 固体压制与 Mekanism 合成路线。压制线要求对应目标的有限样本作为输入。
 
-铜改用 `server_scripts/copper_processing.js`：氧化铜 + 250 mB 一氧化碳在普通加热工作盆中搅拌得到 1 铜锭 + 250 mB 二氧化碳；铜锭经 Create 粉碎轮产出 1 个保底铜粉、2 个各 80% 概率铜粉、1 个 60% 概率铜粉（期望 3.2 个）；4 铜粉 + 1 圆石加热搅拌得到 2 辉绿岩；每个辉绿岩经 Mekanism 提纯室耗氧得到 2 氧化铜。旧的铜双路线增殖和原生铜碎块提纯配方移除。默认烧制、高炉烧制及其他未指定铜加工保留。
+铜改用 `server_scripts/copper_processing.js`：氧化铜 + 250 GU 一氧化碳在 CCB 反应釜中普通加热得到 1 铜锭 + 250 GU 二氧化碳；铜锭经 Create 粉碎轮产出 1 个保底铜粉、2 个各 80% 概率铜粉、1 个 60% 概率铜粉（期望 3.2 个）；4 铜粉 + 1 圆石加热搅拌得到 2 辉绿岩；每个辉绿岩经 CCB 气体注入消耗 1 GU 氧气得到 2 氧化铜。旧的铜双路线增殖和原生铜碎块提纯配方移除。默认烧制、高炉烧制及其他未指定铜加工保留。
 
 煤炭自增殖配方已移除，仅规划木炭化学合成来源；现已实现木炭制气，后续制煤工序待定。
 
@@ -140,18 +140,18 @@ server_scripts/basic_mineral_propagation.js 为基础矿物目标配置 Create �
 
 ## 高中化学核心气体
 
-- `startup_scripts/chemistry_gases.js` 注册 Mekanism 原版未提供的核心化学品气体，使用独立的 `dimensionworks:` 命名空间，避免覆盖 Mekanism 原版气体。
-- `server_scripts/chemistry_gas_recipes.js` 添加对应的 Mekanism 化学氧化室、化学灌注器、加压反应室与太阳中子活化器配方。
-- 当前新增：二氧化碳、一氧化碳、氮气、氨气、一氧化氮、二氧化氮、一氧化二氮、硫化氢、甲烷、乙炔、臭氧、硝酸；氢气、氧气、氯气、二氧化硫、三氧化硫、氯化氢、乙烯等复用 Mekanism 原生化学品。
-- 这些 Mekanism 气体是游戏内化学品储罐类型；注册为 gas 不代表该物质在常温常压下必然是气态。颜色用于区分，不代表真实颜色。
-- 获取方式为整合包生产线的简化模型，并非每条配方都逐原子复刻实验室制备；继续扩充时应优先保持化学反应方向、元素守恒和工业流程合理性。
+- `startup_scripts/chemistry_gases.js` 以 Create: Crafted Beginning 的 `createcraftedbeginning:gas` 注册表作为整合包化学气体定义来源。当前注册 14 种：二氧化碳、一氧化碳、氮气、氨气、一氧化氮、二氧化氮、一氧化二氮、硫化氢、甲烷、乙炔、臭氧、硝酸、氢气和氧气。
+- 同一脚本还将原有 12 个 `dimensionworks:` Mekanism Chemical ID 保留为旧存档 ChemicalStack 读取兼容项；活动配方统一改用 CCB 气体。Mekanism 自带气体（例如核废料）仍归 Mekanism 管理，不复制到 CCB。
+- `server_scripts/chemistry_gas_recipes.js` 使用 CCB `reactor_kettle` 配方，以 `GasStack` 合成气体；原有化学配方 ID、物品/流体原料、气体比例和产物数量保持不变，木炭制 CO/CO2 的原数值分别为 125/250。水电解制氢/氧是新增上游配方。
+- 铜还原与辉绿岩提纯也使用 CCB 气体，保留原流程的物品产物和气体数值（还原为 250 CO → 250 CO2；提纯为 1 氧气 → 2 氧化铜）。旧的工作盆 Mekanism 气体桥接仍供原生 Mekanism 化学品流程使用。
+- CCB 气体数值单位为 GU；迁移时保留原数值，但 GU 不等同于 Mekanism 的 mB ChemicalStack。获取方式是整合包工业生产线的简化模型，并非逐原子复刻实验室制备。新增气体的 CCB 翻译与颜色分开管理；颜色仅用于区分，不表示真实颜色或物态。
 
 
 ## Create 工作盆 Mekanism 气体输入与输出
 
-- 工作盆拥有独立的进气、出气缓冲，各 10,000 mB、每个缓冲只存一种气体。管道灌入进气缓冲、抽取出气缓冲；制气盆的 CO 需要通过管道送入反应盆。
+- 该 Mekanism ChemicalStack 桥接仍服务于 Mekanism 原生气体专用流程（如皮蛋配方中的 `mekanism:spent_nuclear_waste`）及旧存档兼容；维度工坊新增化学链和铜反应使用 CCB 气体，不再依赖此工作盆缓冲。
+- 工作盆拥有独立的进气、出气缓冲，各 10,000 mB、每个缓冲只存一种气体。管道灌入进气缓冲、抽取出气缓冲。
 - Create 配方以内部物品 `dimensionworks_mek_stress:gas_output` 的 NBT `Gas`（注册 ID）和 `Amount`（mB）指定气体产出，可与普通物品同时产出，标记不会掉落。可选的 `InputGas` 与 `InputAmount` 指定进气消耗；`InputOnly: true` 表示只消耗进气、不占用出气缓冲。气体不足、气体类型不匹配或产物无空间时不能加工。可选 `ExcludeSuperheated: true` 限制配方不能在超级加热时执行，匹配与实际执行都检查。
-- `server_scripts/chemistry_gas_recipes.js` 提供木炭熔炼配方：工作盆普通加热每消耗 1 个木炭产出 125 mB 一氧化碳，超级加热每消耗 1 个木炭产出 250 mB 二氧化碳，由 Mekanism 气体管道抽取。木炭化学氧化室产一氧化碳入口已移除。煤炭增殖及煤炭制二氧化碳入口已移除；后续制煤工序待定。
 - 工作盆无盖或开盖时，每 20 游戏刻合计流失 200 mB，按进气、出气缓冲存量比例分摊；总量不足时清空。只有盆正上方关闭的柴油动力工作盆盖（`createdieselgenerators:basin_lid`）能阻止流失；屋顶、普通方块和搅拌器不视作密封盖。所有盆内 Mekanism 气体均遵循此规则，与气体种类无关，液体不受影响。
 
 其他气体配方可复用同一输出标记，并按需设置进气要求；进气缓冲只通过配方消耗，出气缓冲可由管道抽空。切换产出气体前需抽空出气缓冲。

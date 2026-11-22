@@ -63,14 +63,14 @@
 | `create_dragons_plus:freezing/molten_bronze_to_ingots` | `create_dragons_plus:freezing` | dimensionworks:molten_bronze_bucket → 铁桶 (minecraft:bucket) + 青铜锭 (mekanism:ingot_bronze) |  |
 | `create_dragons_plus:freezing/molten_copper_to_ingots` | `create_dragons_plus:freezing` | dimensionworks:molten_copper_bucket → 铁桶 (minecraft:bucket) + 铜锭 (minecraft:copper_ingot) |  |
 | `dimensionworks:copper_processing/dust_from_ingot` | `create:crushing` | 铜锭 (minecraft:copper_ingot) → 铜粉 (mekanism:dust_copper) + 2 × 铜粉 (mekanism:dust_copper) [80.0%] + 铜粉 (mekanism:dust_copper) [60.0%] |  |
-| `dimensionworks:copper_processing/reduction_with_carbon_monoxide` | `create:mixing` | 氧化铜 (minecraft:raw_copper) + 250 mB dimensionworks:carbon_monoxide → 铜锭 (minecraft:copper_ingot) + 250 mB dimensionworks:carbon_dioxide | {"heatRequirement":"heated","excludeSuperheated":true} |
+| `dimensionworks:copper_processing/reduction_with_carbon_monoxide` | `createcraftedbeginning:reactor_kettle` | 氧化铜 (minecraft:raw_copper) + 250 GU dimensionworks:carbon_monoxide → 铜锭 (minecraft:copper_ingot) + 250 GU dimensionworks:carbon_dioxide | {"temperature":"heated","temperature_matching":"exact"} |
 | `dimensionworks:copper_processing/veridium_from_dust` | `create:mixing` | 铜粉 (mekanism:dust_copper) + 铜粉 (mekanism:dust_copper) + 铜粉 (mekanism:dust_copper) + 铜粉 (mekanism:dust_copper) + 圆石 (minecraft:cobblestone) → 2 × 辉绿岩 (create:veridium) | {"heatRequirement":"heated"} |
 | `dimensionworks:molten_metals/brass_from_molten_metals` | `create:mixing` | 1000 mB dimensionworks:molten_copper + 1000 mB dimensionworks:molten_zinc → 2000 mB dimensionworks:molten_brass | {"heatRequirement":"heated"} |
 | `dimensionworks:molten_metals/bronze_from_molten_metals` | `create:mixing` | 3000 mB dimensionworks:molten_copper + 1000 mB dimensionworks:molten_tin → 4000 mB dimensionworks:molten_bronze | {"heatRequirement":"heated"} |
 | `dimensionworks:molten_metals/molten_brass_from_ingot` | `create:mixing` | 黄铜锭 (create:brass_ingot) → 1000 mB dimensionworks:molten_brass | {"heatRequirement":"heated"} |
 | `dimensionworks:molten_metals/molten_bronze_from_ingot` | `create:mixing` | 青铜锭 (mekanism:ingot_bronze) → 1000 mB dimensionworks:molten_bronze | {"heatRequirement":"heated"} |
 | `dimensionworks:molten_metals/molten_copper_from_ingot` | `create:mixing` | 铜锭 (minecraft:copper_ingot) → 1000 mB dimensionworks:molten_copper | {"heatRequirement":"heated"} |
-| `dimensionworks:copper_processing/oxide_from_veridium` | `mekanism:purifying` | 辉绿岩 (create:veridium) + 1 mB 液态氧 (mekanism:oxygen) → 2 × 氧化铜 (minecraft:raw_copper) |  |
+| `dimensionworks:copper_processing/oxide_from_veridium` | `createcraftedbeginning:gas_injection` | 辉绿岩 (create:veridium) + 1 GU dimensionworks:oxygen → 2 × 氧化铜 (minecraft:raw_copper) |  |
 | `mekanism:processing/copper/ore/deepslate_from_raw` | `mekanism:combining` | #forge:cobblestone/deepslate + 20 × #forge:raw_materials/copper → 深层铜矿石 (minecraft:deepslate_copper_ore) |  |
 | `mekanism:processing/copper/ore/from_raw` | `mekanism:combining` | #forge:cobblestone/normal + 20 × #forge:raw_materials/copper → 铜矿石 (minecraft:copper_ore) |  |
 | `mekanism:processing/copper/dirty_dust/from_clump` | `mekanism:crushing` | #mekanism:clumps/copper → 污浊铜粉 (mekanism:dirty_dust_copper) |  |
@@ -563,14 +563,14 @@
 |---|---|---|---|
 | `dimensionworks:copper_processing/dust_from_ingot` | `create:crushing` | 铜锭 (minecraft:copper_ingot) → 铜粉 (mekanism:dust_copper) + 2 × 铜粉 (mekanism:dust_copper) [80.0%] + 铜粉 (mekanism:dust_copper) [60.0%] | ；KubeJS脚本定义 |
 | `dimensionworks:advanced_speed_controller` | `create:mechanical_crafting` | 4 × 黄铜机壳 (create:brass_casing) + 8 × 精密构件 (create:precision_mechanism) + 4 × 坚固板 (create:sturdy_sheet) + 4 × 工程处理器 (ae2:engineering_processor) + 4 × 强化合金 (mekanism:alloy_reinforced) + 转速控制器 (create:rotation_speed_controller) → 高级转速控制器 (dimensionworks_rpm_limit:advanced_speed_controller) | ；静态启用 |
-| `dimensionworks:copper_processing/reduction_with_carbon_monoxide` | `create:mixing` | 氧化铜 (minecraft:raw_copper) + 250 mB dimensionworks:carbon_monoxide → 铜锭 (minecraft:copper_ingot) + 250 mB dimensionworks:carbon_dioxide | {"heatRequirement":"heated","excludeSuperheated":true}；KubeJS脚本定义 |
+| `dimensionworks:copper_processing/reduction_with_carbon_monoxide` | `createcraftedbeginning:reactor_kettle` | 氧化铜 (minecraft:raw_copper) + 250 GU dimensionworks:carbon_monoxide → 铜锭 (minecraft:copper_ingot) + 250 GU dimensionworks:carbon_dioxide | {"temperature":"heated","temperature_matching":"exact"}；KubeJS脚本定义 |
 | `dimensionworks:copper_processing/veridium_from_dust` | `create:mixing` | 铜粉 (mekanism:dust_copper) + 铜粉 (mekanism:dust_copper) + 铜粉 (mekanism:dust_copper) + 铜粉 (mekanism:dust_copper) + 圆石 (minecraft:cobblestone) → 2 × 辉绿岩 (create:veridium) | {"heatRequirement":"heated"}；KubeJS脚本定义 |
 | `dimensionworks:molten_metals/brass_from_molten_metals` | `create:mixing` | 1000 mB dimensionworks:molten_copper + 1000 mB dimensionworks:molten_zinc → 2000 mB dimensionworks:molten_brass | {"heatRequirement":"heated"}；KubeJS脚本定义 |
 | `dimensionworks:molten_metals/bronze_from_molten_metals` | `create:mixing` | 3000 mB dimensionworks:molten_copper + 1000 mB dimensionworks:molten_tin → 4000 mB dimensionworks:molten_bronze | {"heatRequirement":"heated"}；KubeJS脚本定义 |
 | `dimensionworks:molten_metals/molten_brass_from_ingot` | `create:mixing` | 黄铜锭 (create:brass_ingot) → 1000 mB dimensionworks:molten_brass | {"heatRequirement":"heated"}；KubeJS脚本定义 |
 | `dimensionworks:molten_metals/molten_bronze_from_ingot` | `create:mixing` | 青铜锭 (mekanism:ingot_bronze) → 1000 mB dimensionworks:molten_bronze | {"heatRequirement":"heated"}；KubeJS脚本定义 |
 | `dimensionworks:molten_metals/molten_copper_from_ingot` | `create:mixing` | 铜锭 (minecraft:copper_ingot) → 1000 mB dimensionworks:molten_copper | {"heatRequirement":"heated"}；KubeJS脚本定义 |
-| `dimensionworks:copper_processing/oxide_from_veridium` | `mekanism:purifying` | 辉绿岩 (create:veridium) + 1 mB 液态氧 (mekanism:oxygen) → 2 × 氧化铜 (minecraft:raw_copper) | ；KubeJS脚本定义 |
+| `dimensionworks:copper_processing/oxide_from_veridium` | `createcraftedbeginning:gas_injection` | 辉绿岩 (create:veridium) + 1 GU dimensionworks:oxygen → 2 × 氧化铜 (minecraft:raw_copper) | ；KubeJS脚本定义 |
 
 ### dimensionworks_cave_factory
 
