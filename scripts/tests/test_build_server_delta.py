@@ -59,9 +59,36 @@ class ServerDeltaTest(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 self.assertEqual(
                     sorted(archive.namelist()),
-                    ["config/changed.cfg", "mods/new.jar"],
+                    ["config/changed.cfg", "config/same.cfg", "mods/new.jar"],
                 )
                 self.assertEqual(archive.read("config/changed.cfg"), b"changed")
+
+    def test_server_delta_keeps_recovery_copies_of_override_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            base = root / "base.zip"
+            new = root / "new.zip"
+            output = root / "delta.zip"
+            files = {
+                "config/ftbquests/quests/chapters/07DDD0CAE18A7217.snbt": b"quest",
+                "defaultconfigs/create-server.toml": b"default",
+                "kubejs/server_scripts/main.js": b"server script",
+                "mods/unchanged.jar": b"mod",
+            }
+            write_zip(base, files, "0.0.1")
+            manifest = write_zip(new, files, "0.0.2")
+
+            build_server_delta.build_server_delta(base, new, output, manifest)
+
+            with zipfile.ZipFile(output) as archive:
+                self.assertEqual(
+                    sorted(archive.namelist()),
+                    [
+                        "config/ftbquests/quests/chapters/07DDD0CAE18A7217.snbt",
+                        "defaultconfigs/create-server.toml",
+                        "kubejs/server_scripts/main.js",
+                    ],
+                )
 
     def test_empty_delta_is_valid_archive(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

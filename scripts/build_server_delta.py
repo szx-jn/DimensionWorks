@@ -82,7 +82,14 @@ def build_delta(
             if _digest(new, new_info, algorithm) != entry.value:
                 raise DeltaError(f"new package digest mismatch: {entry.path}")
             old_info = base_members.get(source_name)
-            if old_info is None or _digest(base, old_info, algorithm) != entry.value:
+            repairable_server_config = kind == "server" and source_name.startswith(
+                ("config/", "defaultconfigs/", "kubejs/")
+            )
+            if (
+                repairable_server_config
+                or old_info is None
+                or _digest(base, old_info, algorithm) != entry.value
+            ):
                 changed.append(source_name)
 
         with tempfile.TemporaryDirectory(prefix="dimensionworks-delta-") as temp:
