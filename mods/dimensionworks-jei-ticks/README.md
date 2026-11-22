@@ -1,6 +1,6 @@
 # DimensionWorks JEI & Jade Details
 
-客户端 Minecraft 1.21.1 / NeoForge 模组，为 JEI 的加工箭头添加游戏刻数，例如 `200t`（20 游戏刻 = 1 秒，按正常 TPS 计算）。不改配方、机器速度或服务器逻辑。
+客户端 Minecraft 1.21.1 / NeoForge 模组，为 JEI 的加工箭头添加游戏刻数，例如 `200t`（20 游戏刻 = 1 秒，按正常 TPS 计算）；机械动力物品的详细说明改由 Tab 展开。不改配方、机器速度或服务器逻辑。
 
 ## 设计与范围
 

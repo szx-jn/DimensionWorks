@@ -587,7 +587,7 @@
       "name": "DimensionWorks JEI & Jade Details",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-jei-ticks",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "required": true,
       "environment": "client",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/1.21.1-neoforge/mods/dimensionworks-jei-ticks"
@@ -993,6 +993,17 @@
       "version": "6.1.2+neoforge",
       "version_id": "O3F6Dkle",
       "url": "https://modrinth.com/mod/jade-addons-forge"
+    },
+    {
+      "id": "jade_sable_compat",
+      "name": "Jade Sable Compat",
+      "required": true,
+      "environment": "client",
+      "source": "modrinth",
+      "project_id": "jCrJ4iGH",
+      "version": "1.3.0",
+      "version_id": "cxUohR7A",
+      "url": "https://modrinth.com/mod/jade-sable-compat"
     },
     {
       "id": "jecharacters",
@@ -2054,6 +2065,17 @@
       "version": "2.0.6+mc1.21.1",
       "version_id": "fg9dTRz9",
       "url": "https://modrinth.com/mod/sable"
+    },
+    {
+      "id": "sable_in_bottle",
+      "name": "Sable In Bottle",
+      "required": true,
+      "environment": "both",
+      "source": "modrinth",
+      "project_id": "66AXwFbS",
+      "version": "1.2.0",
+      "version_id": "13Br8jlo",
+      "url": "https://modrinth.com/mod/sable-in-bottle"
     }
   ]
 }

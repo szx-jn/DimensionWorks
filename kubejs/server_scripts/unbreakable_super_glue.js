@@ -19,13 +19,14 @@ function protectCarriedSuperGlue(player) {
 
 ServerEvents.recipes(event => {
   // Applies to recipe outputs, including machine recipes supported by KubeJS.
-  event.replaceOutput({}, SUPER_GLUE_ID, Item.of(SUPER_GLUE_ID, 1, { 'minecraft:unbreakable': { show_in_tooltip: true } }))
+  const unbreakableGlue = Item.of(SUPER_GLUE_ID)
+  unbreakableGlue.setUnbreakableWithTooltip()
+  event.replaceOutput({}, SUPER_GLUE_ID, unbreakableGlue)
 })
 
 PlayerEvents.inventoryChanged(event => protectSuperGlue(event.item))
 PlayerEvents.loggedIn(event => protectCarriedSuperGlue(event.player))
 PlayerEvents.tick(event => {
-  // Restore the flag if another operation removes it while the stack is carried.
   if (event.player.age % 20 === 0) protectCarriedSuperGlue(event.player)
 })
 ItemEvents.rightClicked(SUPER_GLUE_ID, event => protectSuperGlue(event.item))

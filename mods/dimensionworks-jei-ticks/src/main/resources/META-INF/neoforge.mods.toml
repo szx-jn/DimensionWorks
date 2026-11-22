@@ -5,11 +5,11 @@ clientSideOnly=true
 
 [[mods]]
 modId="dimensionworks_jei_ticks"
-version="0.1.1"
+version="0.1.2"
 displayName="DimensionWorks JEI & Jade Details"
 authors="szx-jn"
 displayTest="IGNORE_ALL_VERSION"
-description='''在 JEI 加工箭头内显示游戏刻数，并在背包提示和 Jade 中显示机械动力及附属、龙之进化的燃料消耗。'''
+description='''在 JEI 加工箭头内显示游戏刻数，并在背包提示和 Jade 中显示加工信息；机械动力物品详细说明使用 Tab 展开。'''
 
 [[dependencies.dimensionworks_jei_ticks]]
 modId="neoforge"

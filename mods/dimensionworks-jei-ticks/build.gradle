@@ -1,6 +1,6 @@
 plugins { id 'java-library' }
 
-version = '0.1.1'
+version = '0.1.2'
 base.archivesName = 'dimensionworks_jei_ticks'
 apply from: rootProject.file('gradle/neoforge-module.gradle')
 apply from: rootProject.file('gradle/neoforge-create.gradle')
