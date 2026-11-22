@@ -3,7 +3,7 @@
 	#General Settings
 	#Maximum distance from where Blocks and Entities can be picked up
 	#Range: 0.0 ~ 1.7976931348623157E308
-	maxDistance = 4.0
+	maxDistance = 2.0
 	#Max width of entities that can be picked up in survival mode
 	#Range: 0.0 ~ 10.0
 	maxEntityWidth = 1.5
@@ -53,6 +53,8 @@
 	pickupPlayers = true
 	#Whether players in Survival Mode can pick up unbreakable blocks. Creative players always can.
 	pickupUnbreakableBlocks = false
+	#Disable reach scaling so blocks and entities cannot be picked up beyond maxDistance.
+	scaleDistance = false
 
 [whitelist]
 	#Whitelist. Read about the format here: https://github.com/Tschipp/CarryOn/wiki/Black---and-Whitelist-Config

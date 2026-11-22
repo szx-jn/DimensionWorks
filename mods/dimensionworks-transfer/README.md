@@ -46,6 +46,7 @@
 - Mekanism 纸箱打包 Sophisticated Storage 箱/桶前先启用其原生 packed 状态，避免替换方块时把库存掉落；成功拆箱后恢复为可用状态。其它纸箱解包行为不变。
 - 普通方块、普通纸箱解包、其他维度的 AE2 网络和随身无线终端照常使用。存档已有方块不扫描删除，状态更新、拆除及 NeoForge 快照恢复仍可用。
 - 当前 CMP NeoForge fork 将普通 Mekanism 纸箱与打包工具的方块范围统一扩展为所有非空气方块，仅禁止屏障和发运终端。每次保存一个方块的状态与方块实体 NBT；门、床、高植物可逐块搬运和重新组装。领地破坏权限与上述中转维度 AE2 解包限制仍生效。
+- 下一固定 CMP fork 构建将使实体封装按准星目标选择，不再优先打包点击位置附近的任意实体；打包器捕获的 Sable 瓶中船在 Create 包裹开启或实体破损时释放完整物理船体，成功后瓶子不会残留为掉落物或背包物品。
 
 根 `:dimensionworks-transfer:runGameTestServer` 默认执行包含纸箱检查在内的 40 项测试：真实打包/拆包、黑名单覆盖、分体方块、搬运后的物品与来源保留，以及禁包和破坏权限拦截。测试用黑名单标签仅位于 `src/gameTest/resources`，不会进入发行 JAR。
 - 数据包可用 `dimensionworks_transfer:forbidden_transfer_blocks` 追加受限方块。检查不轮询、不新增区块加载票据。
