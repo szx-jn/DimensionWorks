@@ -1160,14 +1160,31 @@ func downloadCandidates(source string) []string {
 	if err != nil || parsed.Scheme != "https" {
 		return candidates
 	}
-	if strings.EqualFold(parsed.Host, "edge.forgecdn.net") {
-		// MCIM mirrors ForgeCDN paths. Try the mirror first, then the unchanged
-		// official URL as fallback.
-		mirror := *parsed
+	mirror := *parsed
+	switch {
+	case strings.EqualFold(parsed.Host, "cdn.modrinth.com"),
+		strings.EqualFold(parsed.Host, "edge.forgecdn.net"):
+		// MCIM mirrors both Modrinth and ForgeCDN file paths at the root.
 		mirror.Host = "mod.mcimirror.top"
 		return []string{mirror.String(), source}
-	}
-	if parsed.Host == "github.com" && strings.Contains(parsed.Path, "/releases/download/") {
+	case strings.EqualFold(parsed.Host, "api.modrinth.com"):
+		mirror.Host = "mod.mcimirror.top"
+		mirror.Path = "/modrinth" + parsed.Path
+		if parsed.RawPath != "" {
+			mirror.RawPath = "/modrinth" + parsed.RawPath
+		}
+		return []string{mirror.String(), source}
+	case strings.EqualFold(parsed.Host, "api.curseforge.com"):
+		mirror.Host = "mod.mcimirror.top"
+		mirror.Path = "/curseforge" + parsed.Path
+		if parsed.RawPath != "" {
+			mirror.RawPath = "/curseforge" + parsed.RawPath
+		}
+		return []string{mirror.String(), source}
+	case strings.EqualFold(parsed.Host, "mediafilez.forgecdn.net"):
+		// MCIM explicitly says not to rewrite mediafilez.forgecdn.net.
+		return candidates
+	case strings.EqualFold(parsed.Host, "github.com") && strings.Contains(parsed.Path, "/releases/download/"):
 		return append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
 	}
 	return candidates
