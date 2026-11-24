@@ -56,12 +56,34 @@ func TestEntryDownloadCandidatesTryAllMCIMMirrorsBeforeOfficialSources(t *testin
 	}}
 	got := entryDownloadCandidates(entry)
 	want := []string{
+		"https://mod.mcimirror.top/data/example/mod.jar",
 		"https://mod.mcimirror.top/files/1/2/mod.jar",
 		"https://cdn.modrinth.com/data/example/mod.jar",
 		"https://edge.forgecdn.net/files/1/2/mod.jar",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("download candidate order = %v, want %v", got, want)
+	}
+}
+
+func TestDownloadCandidatesUseOfficialMCIMMappings(t *testing.T) {
+	cases := []struct {
+		source string
+		want   string
+	}{
+		{"https://cdn.modrinth.com/data/id/version/file.jar?x=1", "https://mod.mcimirror.top/data/id/version/file.jar?x=1"},
+		{"https://edge.forgecdn.net/files/1/2/file.jar?x=1", "https://mod.mcimirror.top/files/1/2/file.jar?x=1"},
+		{"https://api.modrinth.com/v2/project/id", "https://mod.mcimirror.top/modrinth/v2/project/id"},
+		{"https://api.curseforge.com/v1/mods/123", "https://mod.mcimirror.top/curseforge/v1/mods/123"},
+	}
+	for _, test := range cases {
+		got := downloadCandidates(test.source)
+		if len(got) != 2 || got[0] != test.want || got[1] != test.source {
+			t.Errorf("downloadCandidates(%q) = %v, want mirror %q then official source", test.source, got, test.want)
+		}
+	}
+	if got := downloadCandidates("https://mediafilez.forgecdn.net/files/1/2/file.jar"); !reflect.DeepEqual(got, []string{"https://mediafilez.forgecdn.net/files/1/2/file.jar"}) {
+		t.Errorf("mediafilez URL must remain unchanged: %v", got)
 	}
 }
 
