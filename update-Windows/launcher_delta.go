@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Keep this as an explicit allowlist: ordinary HTTP failures must not trigger launcher import.
+// This marks CurseForge candidates eligible for launcher fallback after all direct sources fail.
 func requiresLauncherDownload(entry Entry) bool {
 	sources := entry.Sources
 	if len(sources) == 0 {
