@@ -68,7 +68,7 @@ Linux/macOS 下载后如更新器没有可执行权限，先赋予更新器执�
 
 应用文件前重新核对根目录 `VERSION`，期间版本变化则中止并要求重新运行。新 `VERSION` 在与更新文件、签名状态相同的可回滚事务中最后写入，完成后从根目录重新读取并报告版本；下载、校验或应用失败不会提前标记为目标版本。完整约束见 [`root-version-authority.md`](../docs/design/root-version-authority.md)。
 
-客户端更新先获取完整 `.mrpack`，解析 `modrinth.index.json`，逐项核对客户端文件路径、SHA-512 与独立更新清单中的首选下载地址，并保留索引中的下载候选。仅处理现有实例缺少或需要更新的文件。对 ForgeCDN 文件，更新器先将原 URL 的主机替换为 `mod.mcimirror.top`，保留路径和查询参数并优先从 MCIM 下载；镜像失败后再尝试原始官方 URL。其他来源按 MRPack 候选顺序直接下载。只有所有直接下载候选均失败、文件候选中确实包含 CurseForge 官方来源，且失败不是本机引擎/磁盘故障时，才把这些失败文件组成差量 MRPack 交给启动器；普通 HTTP 失败不会提前触发启动器导入。
+客户端更新先获取完整 `.mrpack`，解析 `modrinth.index.json`，逐项核对客户端文件路径、SHA-512 与独立更新清单中的首选下载地址，并保留索引中的下载候选。仅处理现有实例缺少或需要更新的文件。对 ForgeCDN 文件，更新器先将原 URL 的主机替换为 `mod.mcimirror.top`，保留路径和查询参数并优先从 MCIM 下载；镜像失败后再尝试原始官方 URL。其他来源按 MRPack 候选顺序直接下载。只有所有直接下载候选均失败、该文件的全部候选来源都属于 CurseForge，且失败不是本机引擎/磁盘故障时，才把这些失败文件组成差量 MRPack 交给启动器；存在 Modrinth、GitHub 等其他来源候选的文件不会被提前交给启动器。
 
 需要启动器时，更新器仅把本次需更新的受限来源文件写入差量 MRPack，保留目标包的 Minecraft/加载器依赖，不包含配置 overrides。Windows 从注册表、macOS 从 LaunchServices 发现 HMCL、Prism Launcher，以及仅 Windows 支持的 PCL。菜单始终在已发现启动器后追加“自定义启动器”（序号为结果数量 + 1），没有结果时自定义为 1，0 取消。自定义时拖入一个启动器文件并按回车；Windows 支持 `.lnk`、`.exe`、`.jar`，解析快捷方式的目标、参数及工作目录；macOS 支持 `.app`、`.jar` 和可执行文件，兼容拖入路径的引号、空格转义及本机 file URI。`.jar` 使用系统 Java 启动，需安装 Java。Prism 通过 `--import` 请求导入；HMCL/PCL 启动后提示从界面选择差量包。Windows 启动启动器后，通过 OLE IDataObject/IDropSource 与 DoDragDrop 将本次差量 MRPack 作为 CF_HDROP 文件直接投递到启动器主窗口；启动器窗口通过进程 PID 定位并将投递点放在窗口中心，不依赖注册表发现结果，也不区分 HMCL、PCL、Prism 或自定义启动器。macOS 仍通过 Finder 选中差量 MRPack，由用户拖入启动器。启动器导入完成后，用户输入或拖入本次新建临时实例的游戏目录，支持终端添加的单/双引号及空格转义，更新器仅复制所需文件并核对 SHA-512，再交给原有事务流程应用。临时实例可以仅包含 shaderpacks、resourcepacks 或 datapacks。
 
