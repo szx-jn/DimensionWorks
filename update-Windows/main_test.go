@@ -163,8 +163,8 @@ func TestDownloadCandidatesUseMirrorsForGitHubReleaseAssets(t *testing.T) {
 func TestDownloadCandidatesUseHMCLStyleCurseForgeMirror(t *testing.T) {
 	source := "https://edge.forgecdn.net/files/8941/689/vintageimprovements-1.20.1-0.3.7.9.jar"
 	want := []string{
-		source,
 		"https://mod.mcimirror.top/files/8941/689/vintageimprovements-1.20.1-0.3.7.9.jar",
+		source,
 	}
 	if got := downloadCandidates(source); !reflect.DeepEqual(got, want) {
 		t.Fatalf("CurseForge candidates = %v, want %v", got, want)
@@ -191,8 +191,8 @@ func TestCurseForgeMirrorPreservesURLPathAndQuery(t *testing.T) {
 	source := "https://edge.forgecdn.net/files/8941/689/mod.jar?download=1"
 	got := downloadCandidates(source)
 	want := "https://mod.mcimirror.top/files/8941/689/mod.jar?download=1"
-	if len(got) != 2 || got[1] != want {
-		t.Fatalf("mirror URL = %v, want second candidate %q", got, want)
+	if len(got) != 2 || got[0] != want || got[1] != source {
+		t.Fatalf("mirror URL = %v, want first candidate %q then official source", got, want)
 	}
 }
 
