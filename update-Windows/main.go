@@ -716,7 +716,7 @@ func updateInstance(root, kind string, opts Options) error {
 		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
 	}
 	if len(launcherEntries) > 0 {
-		fmt.Printf("\n[回退] %d 个文件的 MCIM 镜像与官方直连均失败，且存在 CurseForge 官方候选，改由启动器获取。\n", len(launcherEntries))
+		fmt.Printf("\n[回退] %d 个文件的所有 MCIM/官方直连候选均失败，且全部候选均为 CurseForge 来源，改由启动器获取。\n", len(launcherEntries))
 		deltaPackagePath := filepath.Join(work, "launcher-delta.mrpack")
 		if err := createLauncherDeltaMRPack(fullPackage, launcherEntries, deltaPackagePath); err != nil {
 			return fmt.Errorf("生成启动器差量 MRPack 失败：%w", err)
