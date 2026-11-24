@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// This marks CurseForge candidates eligible for launcher fallback after all direct sources fail.
+// Only files whose every official candidate is from CurseForge are eligible for launcher fallback.
 func requiresLauncherDownload(entry Entry) bool {
 	sources := entry.Sources
 	if len(sources) == 0 {
