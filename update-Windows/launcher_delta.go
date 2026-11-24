@@ -17,18 +17,21 @@ func requiresLauncherDownload(entry Entry) bool {
 	if len(sources) == 0 {
 		sources = []string{entry.Source}
 	}
+	if len(sources) == 0 {
+		return false
+	}
 	for _, source := range sources {
 		parsed, err := url.Parse(source)
 		if err != nil {
-			continue
+			return false
 		}
 		host := strings.ToLower(parsed.Hostname())
-		if host == "curseforge.com" || strings.HasSuffix(host, ".curseforge.com") ||
-			host == "forgecdn.net" || strings.HasSuffix(host, ".forgecdn.net") {
-			return true
+		if host != "curseforge.com" && !strings.HasSuffix(host, ".curseforge.com") &&
+			host != "forgecdn.net" && !strings.HasSuffix(host, ".forgecdn.net") {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func createLauncherDeltaMRPack(archive *Archive, entries []Entry, destination string) error {
