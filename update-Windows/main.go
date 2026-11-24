@@ -617,27 +617,13 @@ func updateInstance(root, kind string, opts Options) error {
 	for _, entry := range selected {
 		switch entry.Action {
 		case "remote":
-			if kind == "client" && requiresLauncherDownload(entry) {
-				launcherEntries = append(launcherEntries, entry)
-			} else {
-				remoteEntries = append(remoteEntries, entry)
-			}
+			remoteEntries = append(remoteEntries, entry)
 		case "archive":
 			archiveEntries = append(archiveEntries, entry)
 		}
 	}
 
 	launcherInstanceRoot := ""
-	if len(launcherEntries) > 0 {
-		deltaPackagePath := filepath.Join(work, "launcher-delta.mrpack")
-		if err := createLauncherDeltaMRPack(fullPackage, launcherEntries, deltaPackagePath); err != nil {
-			return fmt.Errorf("生成启动器差量 MRPack 失败：%w", err)
-		}
-		launcherInstanceRoot, err = promptLauncherInstance(updateRoot, root, deltaPackagePath)
-		if err != nil {
-			return err
-		}
-	}
 	backupBytes, err := estimateExistingBytes(root, selected)
 	if err != nil { return fmt.Errorf("估算本地备份空间失败：%w", err) }
 	deletionBackupBytes, err := estimateDeletionBytes(root, deletions)
@@ -648,15 +634,7 @@ func updateInstance(root, kind string, opts Options) error {
 		if entry.Action != "remote" {
 			continue
 		}
-		if kind == "client" && requiresLauncherDownload(entry) {
-			_, size, sourceErr := launcherEntrySource(launcherInstanceRoot, entry)
-			if sourceErr != nil {
-				return sourceErr
-			}
-			if size > 0 {
-				remoteBytes = saturatingAdd(remoteBytes, uint64(size))
-			}
-		} else if size, sizeErr := remoteContentLength(entry.Source); sizeErr == nil && size > 0 {
+		if size, sizeErr := remoteContentLength(entry.Source); sizeErr == nil && size > 0 {
 			remoteBytes = saturatingAdd(remoteBytes, uint64(size))
 		}
 	}
@@ -684,15 +662,14 @@ func updateInstance(root, kind string, opts Options) error {
 		fmt.Println("[保护] 已备份被更新覆盖的本地修改：", userBackup)
 	}
 	if kind == "client" {
-		selectedRemote := len(launcherEntries) + len(remoteEntries)
 		totalRemote := 0
 		for _, entry := range target.Entries {
 			if entry.Action == "remote" {
 				totalRemote++
 			}
 		}
-		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件：启动器接管 %d 个，更新器直接下载 %d 个，%d 个无需更新。\n",
-			totalRemote, len(launcherEntries), len(remoteEntries), totalRemote-selectedRemote)
+		fmt.Printf("[定点更新] MRPack 中 %d 个模组/资源文件：%d 个需要更新；优先尝试 MCIM 镜像，失败后回退官方源。\n",
+			totalRemote, len(remoteEntries))
 	}
 	fmt.Printf("待更新文件：%d；待清理旧文件：%d\n", len(selected), len(deletions))
 	stageRoot := filepath.Join(work, "stage")
@@ -700,24 +677,13 @@ func updateInstance(root, kind string, opts Options) error {
 		return err
 	}
 
-	if kind == "client" {
-		for _, entry := range launcherEntries {
-			stage, stageErr := stagePath(stageRoot, entry.Path)
-			if stageErr != nil {
-				return stageErr
-			}
-			fmt.Printf("[接管] 启动器文件：%s\n", entry.Path)
-			if copyErr := copyVerifiedLauncherEntry(launcherInstanceRoot, entry, stage); copyErr != nil {
-				return copyErr
-			}
-		}
-	}
 	if len(remoteEntries) > 0 {
 		const maxConcurrentDownloads = 4
 		workers := maxConcurrentDownloads
 		if len(remoteEntries) < workers { workers = len(remoteEntries) }
 		jobs := make(chan Entry)
 		errs := make(chan error, len(remoteEntries))
+		var launcherFallbackMu sync.Mutex
 		var wg sync.WaitGroup
 		for i := 0; i < workers; i++ {
 			wg.Add(1)
@@ -730,7 +696,15 @@ func updateInstance(root, kind string, opts Options) error {
 					fmt.Printf("[下载] 远程文件：%s\n", entry.Path)
 					progressMu.Unlock()
 					if downloadErr := downloadVerifiedEntry(entry, stage); downloadErr != nil {
-						errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
+						var engineErr *aria2Error
+						if kind == "client" && requiresLauncherDownload(entry) &&
+							(!errors.As(downloadErr, &engineErr) || !engineErr.localFailure()) {
+							launcherFallbackMu.Lock()
+							launcherEntries = append(launcherEntries, entry)
+							launcherFallbackMu.Unlock()
+						} else {
+							errs <- fmt.Errorf("%s 下载或摘要校验失败：%w", entry.Path, downloadErr)
+						}
 					}
 				}
 			}()
@@ -740,6 +714,27 @@ func updateInstance(root, kind string, opts Options) error {
 		wg.Wait()
 		close(errs)
 		for downloadErr := range errs { if downloadErr != nil { return downloadErr } }
+	}
+	if len(launcherEntries) > 0 {
+		fmt.Printf("\n[回退] %d 个文件的 MCIM 镜像与官方直连均失败，且存在 CurseForge 官方候选，改由启动器获取。\n", len(launcherEntries))
+		deltaPackagePath := filepath.Join(work, "launcher-delta.mrpack")
+		if err := createLauncherDeltaMRPack(fullPackage, launcherEntries, deltaPackagePath); err != nil {
+			return fmt.Errorf("生成启动器差量 MRPack 失败：%w", err)
+		}
+		launcherInstanceRoot, err = promptLauncherInstance(updateRoot, root, deltaPackagePath)
+		if err != nil {
+			return err
+		}
+		for _, entry := range launcherEntries {
+			stage, stageErr := stagePath(stageRoot, entry.Path)
+			if stageErr != nil {
+				return stageErr
+			}
+			fmt.Printf("[接管] 启动器文件：%s\n", entry.Path)
+			if copyErr := copyVerifiedLauncherEntry(launcherInstanceRoot, entry, stage); copyErr != nil {
+				return copyErr
+			}
+		}
 	}
 
 	deltaUsed := false
@@ -1166,12 +1161,11 @@ func downloadCandidates(source string) []string {
 		return candidates
 	}
 	if strings.EqualFold(parsed.Host, "edge.forgecdn.net") {
-		// Follow HMCL's MirrorRule pattern: preserve the official URL and add
-		// the MCIM equivalent as a fallback, keeping path and query unchanged.
+		// MCIM mirrors ForgeCDN paths. Try the mirror first, then the unchanged
+		// official URL as fallback.
 		mirror := *parsed
 		mirror.Host = "mod.mcimirror.top"
-		candidates = append(candidates, mirror.String())
-		return candidates
+		return []string{mirror.String(), source}
 	}
 	if parsed.Host == "github.com" && strings.Contains(parsed.Path, "/releases/download/") {
 		return append(candidates, "https://ghproxy.net/"+source, "https://gh-proxy.com/"+source)
@@ -2064,6 +2058,10 @@ func downloadVerifiedEntry(entry Entry, destination string) error {
 		if err := downloadVerified(source, destination, entry.Algorithm, entry.Value); err == nil {
 			return nil
 		} else {
+			var engineErr *aria2Error
+			if errors.As(err, &engineErr) && engineErr.localFailure() {
+				return err
+			}
 			failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(source), safeErrorForLog(err)))
 			_ = os.Remove(destination)
 		}
