@@ -40,6 +40,31 @@ func TestSourcePreferenceReusesWorkingMirrorAcrossReleaseAssets(t *testing.T) {
 	}
 }
 
+func TestEntryDownloadCandidatesTryAllMCIMMirrorsBeforeOfficialSources(t *testing.T) {
+	downloadSourceOrder.mu.Lock()
+	previous := downloadSourceOrder.origin
+	downloadSourceOrder.origin = ""
+	downloadSourceOrder.mu.Unlock()
+	t.Cleanup(func() {
+		downloadSourceOrder.mu.Lock()
+		downloadSourceOrder.origin = previous
+		downloadSourceOrder.mu.Unlock()
+	})
+	entry := Entry{Sources: []string{
+		"https://cdn.modrinth.com/data/example/mod.jar",
+		"https://edge.forgecdn.net/files/1/2/mod.jar",
+	}}
+	got := entryDownloadCandidates(entry)
+	want := []string{
+		"https://mod.mcimirror.top/files/1/2/mod.jar",
+		"https://cdn.modrinth.com/data/example/mod.jar",
+		"https://edge.forgecdn.net/files/1/2/mod.jar",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("download candidate order = %v, want %v", got, want)
+	}
+}
+
 func TestMCIMRemainsFirstAfterOfficialSourceSucceeded(t *testing.T) {
 	var preference sourcePreference
 	candidates := downloadCandidates("https://edge.forgecdn.net/files/1/2/mod.jar")
