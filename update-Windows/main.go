@@ -2049,14 +2049,43 @@ func humanSize(size int64) string {
 	return fmt.Sprintf("%d B", size)
 }
 
-func downloadVerifiedEntry(entry Entry, destination string) error {
-	if len(entry.Sources) == 0 {
-		return downloadVerified(entry.Source, destination, entry.Algorithm, entry.Value)
+func entryDownloadCandidates(entry Entry) []string {
+	sources := entry.Sources
+	if len(sources) == 0 {
+		sources = []string{entry.Source}
 	}
+	var mirrors, fallbacks []string
+	seen := make(map[string]bool)
+	for _, source := range sources {
+		candidates := downloadSourceOrder.order(downloadCandidates(source))
+		if len(candidates) > 1 && downloadOrigin(candidates[0]) == "https://mod.mcimirror.top" {
+			if !seen[candidates[0]] {
+				mirrors = append(mirrors, candidates[0])
+				seen[candidates[0]] = true
+			}
+			candidates = candidates[1:]
+		}
+		for _, candidate := range candidates {
+			if !seen[candidate] {
+				fallbacks = append(fallbacks, candidate)
+				seen[candidate] = true
+			}
+		}
+	}
+	return append(mirrors, fallbacks...)
+}
+
+func downloadVerifiedEntry(entry Entry, destination string) error {
+	candidates := entryDownloadCandidates(entry)
 	var failures []string
-	for _, source := range entry.Sources {
-		if err := downloadVerified(source, destination, entry.Algorithm, entry.Value); err == nil {
-			return nil
+	for _, source := range candidates {
+		if err := downloadFromCandidates([]string{source}, destination, maxDownloadBytes); err == nil {
+			if digestErr := verifyDigest(destination, entry.Algorithm, entry.Value); digestErr == nil {
+				return nil
+			} else {
+				failures = append(failures, fmt.Sprintf("%s: %s", safeURLForLog(source), safeErrorForLog(digestErr)))
+				_ = os.Remove(destination)
+			}
 		} else {
 			var engineErr *aria2Error
 			if errors.As(err, &engineErr) && engineErr.localFailure() {
@@ -2066,7 +2095,7 @@ func downloadVerifiedEntry(entry Entry, destination string) error {
 			_ = os.Remove(destination)
 		}
 	}
-	return fmt.Errorf("MRPack 的 %d 个下载候选均失败：%s", len(entry.Sources), strings.Join(failures, "；"))
+	return fmt.Errorf("MRPack 的 %d 个下载候选均失败：%s", len(candidates), strings.Join(failures, "；"))
 }
 
 func downloadVerified(source, destination, algorithm, expected string) error {
