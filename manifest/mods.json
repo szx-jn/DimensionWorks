@@ -27,6 +27,18 @@
       "url": "https://modrinth.com/mod/ae2"
     },
     {
+      "id": "ae2_jei_integration",
+      "name": "AE2 JEI Integration",
+      "required": true,
+      "environment": "both",
+      "source": "curseforge",
+      "project_id": 1074338,
+      "file_id": 7727898,
+      "file_name": "ae2jeiintegration-1.2.1.jar",
+      "version": "1.2.1",
+      "url": "https://www.curseforge.com/minecraft/mc-mods/ae2-jei-integration"
+    },
+    {
       "id": "ae2ct",
       "name": "AE2: Crafting Tree",
       "required": true,
