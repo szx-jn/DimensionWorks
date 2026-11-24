@@ -40,6 +40,16 @@ func TestSourcePreferenceReusesWorkingMirrorAcrossReleaseAssets(t *testing.T) {
 	}
 }
 
+func TestMCIMRemainsFirstAfterOfficialSourceSucceeded(t *testing.T) {
+	var preference sourcePreference
+	candidates := downloadCandidates("https://edge.forgecdn.net/files/1/2/mod.jar")
+	preference.remember(candidates[1])
+	got := preference.order(candidates)
+	if !reflect.DeepEqual(got, candidates) {
+		t.Fatalf("official source preference bypassed MCIM: got %v, want %v", got, candidates)
+	}
+}
+
 func TestAria2ReusesWorkingSourceAndFallsBackIfItFails(t *testing.T) {
 	requireBundledAria2(t)
 	downloadSourceOrder.mu.Lock()
