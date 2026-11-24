@@ -23,7 +23,7 @@ func downloadOrigin(source string) string {
 }
 
 func (p *sourcePreference) order(candidates []string) []string {
-	// Never let a previously successful official ForgeCDN URL bypass MCIM.
+	// Never let a previously successful official source bypass an available MCIM mirror.
 	if len(candidates) > 1 && downloadOrigin(candidates[0]) == "https://mod.mcimirror.top" {
 		return candidates
 	}
