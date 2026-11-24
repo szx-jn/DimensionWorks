@@ -15,7 +15,8 @@ func TestRequiresLauncherDownload(t *testing.T) {
 		want  bool
 	}{
 		{"CurseForge CDN", Entry{Source: "https://edge.forgecdn.net/files/1/2/mod.jar"}, true},
-		{"CurseForge fallback candidate", Entry{Source: "https://cdn.modrinth.com/mod.jar", Sources: []string{"https://cdn.modrinth.com/mod.jar", "https://edge.forgecdn.net/files/1/2/mod.jar"}}, true},
+		{"CurseForge-only candidates", Entry{Source: "https://edge.forgecdn.net/files/1/2/mod.jar", Sources: []string{"https://edge.forgecdn.net/files/1/2/mod.jar", "https://www.curseforge.com/files/1/2/mod.jar"}}, true},
+		{"mixed providers do not require launcher", Entry{Source: "https://cdn.modrinth.com/mod.jar", Sources: []string{"https://cdn.modrinth.com/mod.jar", "https://edge.forgecdn.net/files/1/2/mod.jar"}}, false},
 		{"Modrinth", Entry{Source: "https://cdn.modrinth.com/data/id/version/mod.jar"}, false},
 		{"GitHub", Entry{Source: "https://github.com/example/mod/releases/download/v1/mod.jar"}, false},
 	}
