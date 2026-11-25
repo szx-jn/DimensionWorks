@@ -115,5 +115,9 @@ jobs:
           MODULE: ${{ matrix.module }}
         run: |
           if [[ -d "mods/$MODULE/src/gameTest" ]]; then
-            ./gradlew ":$MODULE:runGameTestServer" --no-daemon --console=plain
+            if [[ "$MODULE" == "dimensionworks-transfer" ]]; then
+              ./gradlew ":$MODULE:runGameTestServer" -PelasticRecipeCheck --no-daemon --console=plain
+            else
+              ./gradlew ":$MODULE:runGameTestServer" --no-daemon --console=plain
+            fi
           fi
