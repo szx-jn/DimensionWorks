@@ -142,6 +142,16 @@ public final class CardboardPackingGameTests {
             h.assertTrue(blue.getCount() == 1 && emptyBoxes(level, pos) == 0, "Blue tool is reusable and returns no empty box");
             clear(level, pos);
 
+            set.invoke(blacklist, List.of("mekanism", "ae2"));
+            var ordinaryModded = block("create:andesite_casing");
+            level.setBlock(pos, ordinaryModded.defaultBlockState(), FLAGS);
+            var blueModded = tool(PACKERS.get(0));
+            h.assertTrue(pack(p, pos, blueModded).consumesAction(), "Blue must pack ordinary modded blocks");
+            unpack(p, pos);
+            h.assertTrue(level.getBlockState(pos).is(ordinaryModded), "Blue must restore ordinary modded blocks");
+            clear(level, pos);
+
+            set.invoke(blacklist, List.of("mekanism", "ae2", "create"));
             h.assertTrue(Blocks.STONE.defaultBlockState().is(TagKey.create(Registries.BLOCK,
                 ResourceLocation.parse("c:relocation_not_supported"))), "Stone must exercise the block blacklist");
             for (String id : List.of("minecraft:stone", "minecraft:bedrock", "ae2:controller",
