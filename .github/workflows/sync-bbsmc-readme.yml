@@ -19,6 +19,50 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Convert repository-relative links for BBSMC
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import PurePosixPath
+          from urllib.parse import quote, urlsplit, urlunsplit
+          import re
+
+          source = open("README.md", encoding="utf-8").read()
+          base = "https://github.com/szx-jn/DimensionWorks"
+          ref = "main"
+
+          # Rewrite inline Markdown links and images, leaving external URLs and
+          # in-page anchors untouched. GitHub's README remains unchanged.
+          pattern = re.compile(r'(!?\\[[^\\]]*\\]\\()([^\\s)]+)([^)]*\\))')
+
+          def rewrite(match):
+              prefix, target, suffix = match.groups()
+              parts = urlsplit(target)
+
+              if parts.scheme or parts.netloc or target.startswith("#"):
+                  return match.group(0)
+
+              path = parts.path
+              if not path:
+                  return match.group(0)
+
+              normalized = str(PurePosixPath(path))
+              if normalized.startswith("../") or normalized == "..":
+                  return match.group(0)
+
+              kind = "tree" if path.endswith("/") else "blob"
+              encoded = quote(normalized, safe="/:@-._~!$&'()*+,;=%")
+              absolute = urlunsplit(("", "", f"{base}/{kind}/{ref}/{encoded}", parts.query, parts.fragment))
+              return prefix + absolute + suffix
+
+          converted = pattern.sub(rewrite, source)
+          open("/tmp/bbsmc-readme.md", "w", encoding="utf-8").write(converted)
+
+          print("Converted repository-relative Markdown links for BBSMC.")
+          print(f"README source bytes: {len(source.encode('utf-8'))}")
+          print(f"BBSMC body bytes: {len(converted.encode('utf-8'))}")
+          PY
+
       - name: Update and verify BBSMC project description
         env:
           BBSMC_TOKEN: ${{ secrets.BBSMC_TOKEN }}
@@ -30,7 +74,7 @@ jobs:
             exit 1
           fi
 
-          payload="$(jq -n --rawfile body README.md '{body: $body}')"
+          payload="$(jq -n --rawfile body /tmp/bbsmc-readme.md '{body: $body}')"
 
           status="$(curl --silent --show-error \
             --output /tmp/bbsmc-patch-response.json \
@@ -54,6 +98,6 @@ jobs:
             --header "User-Agent: szx-jn/DimensionWorks-readme-sync" \
             --output /tmp/bbsmc-project.json
 
-          jq -e --rawfile expected README.md '.body == $expected' /tmp/bbsmc-project.json >/dev/null
+          jq -e --rawfile expected /tmp/bbsmc-readme.md '.body == $expected' /tmp/bbsmc-project.json >/dev/null
 
           echo "BBSMC project body updated and verified successfully."
