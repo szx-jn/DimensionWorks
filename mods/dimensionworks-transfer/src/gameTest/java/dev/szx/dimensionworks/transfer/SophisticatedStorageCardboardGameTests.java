@@ -39,7 +39,7 @@ public final class SophisticatedStorageCardboardGameTests {
     }
 
     private static InteractionResult pack(FakePlayer player, BlockPos pos) {
-        ItemStack box = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse("mekanism:cardboard_box")));
+        ItemStack box = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse("dimensionworks_transfer:advanced_packager")));
         player.setShiftKeyDown(false);
         player.setItemInHand(InteractionHand.MAIN_HAND, box);
         return box.getItem().onItemUseFirst(box, new UseOnContext(player, InteractionHand.MAIN_HAND, hit(pos)));
