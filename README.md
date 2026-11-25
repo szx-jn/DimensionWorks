@@ -1,105 +1,82 @@
 # 维度工序 · DimensionWorks
 
-**Minecraft 1.21.1 · NeoForge 21.1.267 · Java 21**
+**一个以多维度工业生产与跨维度物流为核心的 Minecraft 整合包。**
 
-> `1.21.1-neoforge` 分支的目标为 Minecraft 1.21.1 / NeoForge / Java 21。唯一旧服的隔离副本已完成离线审计和保存重启，真实账号登录仍待验收。当前正式版 `0.3.52` 使用 Forge。计划中的 `0.4.0` 是不兼容升级，须使用完整包创建独立实例。详见[迁移执行记录](docs/validation/2026-11-20-neoforge-migration-execution.md)。
+[![最新正式版](https://img.shields.io/github/v/release/szx-jn/DimensionWorks?label=%E6%9C%80%E6%96%B0%E6%AD%A3%E5%BC%8F%E7%89%88)](https://github.com/szx-jn/DimensionWorks/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-维度工序（DimensionWorks）是一款以多维度探索、工业化生产、自动化资源获取和跨维度物流为核心的 Minecraft 工业整合包。
+维度工序希望把资源获取、加工、运输、存储和自动化组织成一套相互依赖的工业体系。玩家需要理解工艺、设计生产线、解决产能与物流约束，并逐步建立跨维度协作网络。
 
-> **当前正式版：** [![最新正式版](https://img.shields.io/github/v/release/szx-jn/DimensionWorks?label=%E6%9C%80%E6%96%B0%E6%AD%A3%E5%BC%8F%E7%89%88)](https://github.com/szx-jn/DimensionWorks/releases/latest) · [查看全部发行版](https://github.com/szx-jn/DimensionWorks/releases)
+## 项目状态
 
-## 下载
+**项目仍在持续开发，开发分支与当前正式版不是同一个可直接升级的版本线。**
 
-请前往 **[GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases/latest)** 获取最新版本。正式发布包含客户端整合包、服务端整合包、增量更新文件、更新清单、跨平台更新器与 aria2 下载引擎，以及第三方许可证、源码包和 SHA-256 校验文件。
-
-| 文件 | 用途 |
+| 项目 | 状态 |
 | --- | --- |
-| `DimensionWorks-版本号.mrpack` | 客户端整合包，供兼容的整合包启动器导入 |
-| `DimensionWorks-Server-版本号.zip` | 服务端整合包 |
-| `*-delta.zip` | 相对上一正式版本生成的增量更新包 |
-| `*-update-manifest.tsv` | 更新清单 |
-| `update-dimensionworks-client-windows-amd64.exe` | Windows 客户端更新器 |
-| `update-dimensionworks-server-windows-amd64.exe` | Windows 服务端更新器 |
-| `update-dimensionworks-{client,server}-linux-amd64` | Linux x86-64 更新器 |
-| `update-dimensionworks-{client,server}-macos-arm64` | macOS Apple 芯片更新器 |
-| `aria2c-windows-amd64.exe`、`aria2c-linux-amd64`、`aria2c-macos-arm64` | 更新器的并发下载引擎；需与对应更新器放在同一目录 |
-| `aria2-third-party-source.tar.gz` | aria2 第三方源码、构建来源与许可证材料 |
-| `SHA256SUMS` | 发布文件 SHA-256 校验值 |
+| 当前正式版 | `0.3.52`，Minecraft 1.20.1 Forge |
+| 目标开发环境 | Minecraft 1.21.1、NeoForge 21.1.267、Java 21 |
+| 迁移状态 | 迁移与整包验收仍在进行，真实账号登录和完整旧档验收尚未完成 |
+| 计划中的版本变化 | `0.4.0` 为不兼容升级，必须使用完整包建立独立实例 |
 
-运行更新器时请同时下载对应系统的 `aria2c` 文件，并与更新器放在同一目录。aria2 以独立 GPL sidecar 进程运行；该文件缺失或校验失败时，更新器会回退到内置 Go 下载器。第三方版权与源码信息见更新器目录的 `third_party/aria2/NOTICE.md` 及每次 Release 附带的源码包。
+**不要将 1.20.1 Forge 的旧实例直接替换为 1.21.1 NeoForge 文件，也不要把开发分支视为可供日常游玩的正式发行版。** 迁移进度和实际验证范围以[迁移执行记录](docs/validation/2026-11-20-neoforge-migration-execution.md)为准。
 
-增量包用于版本更新，不是完整整合包；首次安装请下载对应的完整客户端或服务端包。具体文件以每个 Release 实际提供的资产为准。
+## 下载与安装
 
-## 项目方向
+前往 **[GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases/latest)** 下载正式发行版。
 
-- **Create 6**：机械加工、物流与生产自动化
-- **Mekanism**：高级工业、能源与资源处理
-- **Applied Energistics 2**：数字化存储、物品物流与自动化
-- **多维度资源生态**：让不同维度在长期生产链中发挥作用
-- **跨维度物流**：逐步构建统一的多维度工业网络
+- 首次安装：下载完整客户端包 `DimensionWorks-版本号.mrpack`，使用兼容的整合包启动器导入。
+- 部署服务器：下载 `DimensionWorks-Server-版本号.zip`，按服务端包内说明启动。
+- 更新已有实例：只有在对应版本说明明确支持时，才使用增量更新包或更新器；增量包不是完整安装包。
 
-核心目标不是简单堆叠机器，而是让资源获取、加工、运输、存储和自动化形成相互关联的生产体系。玩家应当通过理解工艺、构建产线、处理系统约束来推进科技，而不是只靠记配方或堆叠材料。
+每次 Release 实际提供的文件可能不同，请以该版本的资产列表和发行说明为准。更新器使用独立的 aria2 下载引擎时，需同时下载对应平台的 `aria2c` 文件并与更新器放在同一目录；缺失或校验失败时会回退到内置下载器。第三方源码与许可信息随 Release 提供。
 
-## 设计原则
+## 核心体验
 
-1. **资源获取多样化**：采矿、农业、生物、流体、化学与工业副产物回收都可以成为资源链的一部分。
-2. **维度具有长期价值**：不同维度应融入持续运行的生产体系，而不只是一次性探索地点。
-3. **自动化是核心进阶路径**：关键进度应鼓励玩家构建可持续、可扩展的生产线，而不是把机器当作孤立的合成工具。
-4. **跨维度物流是核心系统**：逐步形成多维度协同的工业网络。
-5. **重视长期运行性能**：设计时考虑区块加载、机器数量和服务器运行成本。
-6. **发布产物可验证**：对客户端、服务端及更新文件进行打包检查，并提供 SHA-256 校验值。
+- **Create**：机械动力、物品物流与生产自动化。
+- **Mekanism**：复杂工业加工与资源处理。
+- **Applied Energistics 2**：数字化存储、物流和自动化。
+- **多维度资源生态**：让不同维度承担长期生产职责，而不是一次性探索后被废弃。
+- **跨维度工业网络**：把分散在不同维度的资源与生产环节连接起来。
 
-### 工业能力考核与反绕过原则
+整合包的进阶重点不是单纯增加配方材料或延长等待时间，而是让玩家逐步掌握工艺组织、跨模组协作、产能规划、物流设计与系统诊断。关键进度会从整个生产体系审查替代路线，避免单台机器或低成本捷径绕过预期的工业挑战。
 
-这是整合包的核心设计约束，尤其适用于修复碎片、阶段性关键物品与终局进度。
+## 设计与开发原则
 
-- **禁止低成本替代路线**：不同获取方式可以存在，但不能以近似成本获得同等成果。手工合成允许存在，也可以最终成功；但若它绕过了预期工业流程，就必须付出极高的材料、时间、操作量或其他可衡量代价，使其成为可行但明显不划算的备用方案，而不是最优解。
-- **不能用单台机器刷穿科技**：关键材料不能仅凭一台机器重复运行，就轻易、稳定且廉价地大量产出。设计必须让关键产出受到真实工艺条件、前后工序、输入供给、动力与吞吐能力、物流组织或副产物循环等约束。
-- **难度必须来自理解与工程，而非单纯堆料**：不能只把配方改成更多材料、更长等待时间，就声称玩家掌握了工业技术。阶段性目标应要求玩家理解工艺原理、组织多工序协作、解决产能瓶颈，并在新情境中运用已学会的机制。
-- **让自动化成为有意义的选择**：手工路线可以作为昂贵的兜底路径，但自动化应当在持续产出、资源效率、操作负担和扩展能力上具有显著优势。玩家应当因为理解并搭建工业体系而获得切实回报。
-- **按系统整体审查绕过漏洞**：评估配方时不能只看单个配方。还要检查其他 Mod 的机器、替代合成、重复加工、循环配方、副产物回收和跨系统转换，避免某条低成本捷径破坏阶段目标。
+1. **资源来源多样化**：采矿、农业、生物、流体、化学和工业副产物回收都可以成为资源链的一部分。
+2. **维度具有长期工业价值**：每个维度都应融入持续运行的生产体系。
+3. **自动化带来实际收益**：自动化应在持续产出、资源效率、操作负担和扩展能力上优于长期手工操作。
+4. **系统约束必须真实存在**：工艺、动力、吞吐、物流和副产物循环共同决定生产能力。
+5. **重视服务器长期性能**：设计时考虑区块加载、机器与实体数量以及持续运行成本。
+6. **验证结果如实记录**：构建成功不等于游戏内验证通过；未实际测试的行为不会标记为已验证。
 
-因此，关键物品的验收标准不只是“玩家能不能合成出来”，而是“玩家是否需要理解并运用这一阶段的工业系统”。目标是让玩家通过学习和工程设计获得进展，而不是被迫进行没有技术含量的重复劳动。
+更完整的设计规则见[工业能力考核说明](docs/gameplay/industrial-assessment.md)及[文档索引](docs/README.md)。
 
-## 当前开发状态
+## 文档与项目入口
 
-项目已建立可重复的客户端与服务端打包发布流程。发布工作流会生成完整包、增量包、更新清单、校验文件，以及 Windows amd64/macOS arm64 客户端与 Windows amd64/Linux amd64/macOS arm64 服务端的五个内嵌 aria2 的 Go 更新器，并在发布前验证二进制格式、归档结构及清单一致性。aria2 的 GPL 许可证和源码包会随 Release 一并提供。
+| 内容 | 入口 |
+| --- | --- |
+| 设计资料、技术规格与验证记录 | [docs/README.md](docs/README.md) |
+| 服务端打包与部署说明 | [server/README.md](server/README.md) |
+| 项目开发约束与 AI 助手指引 | [AGENTS.md](AGENTS.md) |
+| 版本变更与下载 | [GitHub Releases](https://github.com/szx-jn/DimensionWorks/releases) |
+| 问题反馈与功能建议 | [GitHub Issues](https://github.com/szx-jn/DimensionWorks/issues) |
+| 自动化构建记录 | [GitHub Actions](https://github.com/szx-jn/DimensionWorks/actions) |
 
-**当前仍处于持续开发阶段。** Mod 组合、配方、科技进度、维度规划和配置可能随版本变化；版本号代表发布版本，不意味着所有设计目标均已完成。
+## 参与项目
 
-## 技术环境
+欢迎提交 Bug 报告、兼容性测试结果、游戏体验反馈、设计建议和文档改进，也欢迎提交代码 Pull Request。
 
-- Minecraft：1.21.1
-- Mod Loader：NeoForge 21.1.267
-- Java：21
-- 构建环境：GitHub Actions、Gradle 9.2.1 与 Python 辅助打包脚本
+提交问题时，请尽量提供：
 
-## 仓库结构
+- 整合包版本，以及客户端或服务端环境；
+- 清晰的复现步骤和预期结果；
+- 相关日志、崩溃报告或截图；
+- 如果是迁移问题，请说明旧版本、更新方式和是否使用了备份副本。
 
-```text
-DimensionWorks/
-├── config/             # 整合包配置
-├── defaultconfigs/     # 默认配置
-├── kubejs/             # KubeJS 配方、脚本与数据
-├── resourcepacks/      # 自定义资源包
-├── scripts/            # 版本管理、打包及验证脚本
-├── update-Windows/     # 跨平台 Go 更新器与测试（目录名沿用历史命名）
-├── server/             # 服务端相关配置与说明
-├── docs/               # 设计文档与规划
-├── VERSION             # 当前整合包版本
-└── README.md
-```
+代码贡献会经过项目维护者审查，并需要符合仓库中的设计约束、实现规范和验证要求。
 
-## 参与开发
+## 许可
 
-欢迎通过 GitHub Issues 反馈问题、提出建议，或通过 Pull Request 贡献改进。提交问题时，请尽量附上整合包版本、复现步骤、相关日志以及客户端或服务端环境信息。
-
-- [提交 Issue](https://github.com/szx-jn/DimensionWorks/issues)
-- [查看发布记录与下载](https://github.com/szx-jn/DimensionWorks/releases)
-- [查看 GitHub Actions 构建记录](https://github.com/szx-jn/DimensionWorks/actions)
-
-## License
-
-本仓库中由 DimensionWorks 项目原创的代码、配置、脚本和文档默认采用 MIT License。
+本仓库中由 DimensionWorks 项目原创的代码、配置、脚本和文档默认采用 [MIT License](LICENSE)。
 
 第三方 Mod、资源、数据包及其他外部组件不适用本仓库的 MIT License，应遵循各自的许可证和授权条款。
