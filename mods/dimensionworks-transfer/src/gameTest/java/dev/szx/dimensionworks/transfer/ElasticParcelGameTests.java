@@ -37,7 +37,7 @@ public final class ElasticParcelGameTests {
     private static ServerPlayer player(GameTestHelper h) {
         var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "ElasticTest"), net.minecraft.server.level.ClientInformation.createDefault());
         p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new dev.szx.dimensionworks.transfer.FixtureConnection(), p, net.minecraft.server.network.CommonListenerCookie.createInitial(p.getGameProfile(), false));
-        p.setItemInHand(InteractionHand.MAIN_HAND, ElasticItems.PACKAGER.get().getDefaultInstance());
+        p.setItemInHand(InteractionHand.MAIN_HAND, PackagerItems.PACKAGER.get().getDefaultInstance());
         return p;
     }
     private static void close(ServerPlayer p) { ElasticParcelState.resetCharge(p); p.discard(); }
@@ -57,7 +57,7 @@ public final class ElasticParcelGameTests {
             h.assertTrue(a.width()==b.width() && a.height()==b.height(), "Package dimensions must match");
             h.assertTrue(elastic.getAttributeValue(Attributes.MOVEMENT_SPEED) == normal.getAttributeValue(Attributes.MOVEMENT_SPEED), "Movement modifier must match");
             h.assertTrue(elastic.getPersistentData().getInt(PackedPlayerState.ESCAPES) == normal.getPersistentData().getInt(PackedPlayerState.ESCAPES), "Escape state must match");
-            var style = ElasticItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
+            var style = PackagerItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
             h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Tool rarity must actually be green");
             h.assertTrue(PlayerParcel.unpack(elastic) && !elastic.getPersistentData().contains(ElasticParcelState.ELASTIC), "Unpack must clear elastic state");
             h.succeed();
@@ -74,7 +74,7 @@ public final class ElasticParcelGameTests {
             target.removeEffect(CMPPlayerPack.IMMUNITY);
             source.setShiftKeyDown(true);
             source.setItemInHand(InteractionHand.MAIN_HAND, CMPItems.MOBILE_PACKAGER.asStack());
-            ItemStack tool = ElasticItems.PACKAGER.get().getDefaultInstance();
+            ItemStack tool = PackagerItems.PACKAGER.get().getDefaultInstance();
             source.setItemInHand(InteractionHand.OFF_HAND, tool);
             tool.interactLivingEntity(source, target, InteractionHand.OFF_HAND);
             h.assertTrue(ElasticParcelState.isElastic(target), "The actual offhand interaction must select elastic");
@@ -194,7 +194,7 @@ public final class ElasticParcelGameTests {
         net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, original, tag -> tag.putString("packager_payload","address and saved settings"));
         var before=original.save(h.getLevel().registryAccess());
         ItemStack upgraded=ElasticPackager.upgrade(original);
-        h.assertTrue(upgraded.is(ElasticItems.PACKAGER.get()),"Upgrade must change the registered item");
+        h.assertTrue(upgraded.is(PackagerItems.PACKAGER.get()),"Upgrade must change the registered item");
         h.assertTrue(upgraded.getComponentsPatch().equals(original.getComponentsPatch()),"All original item NBT must survive");
         h.assertTrue(original.save(h.getLevel().registryAccess()).equals(before),"Crafting preview must not mutate the input");
         h.succeed();
