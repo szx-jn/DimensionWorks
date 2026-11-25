@@ -57,6 +57,7 @@
 | 内容 | 入口 |
 | --- | --- |
 | 设计资料、技术规格与验证记录 | [docs/README.md](docs/README.md) |
+| 玩家指南 | [客户端](wiki/guides/client/guide.md) · [服务端](wiki/guides/server/guide.md) |
 | 玩家与服主使用指南 | [wiki/README.md](wiki/README.md) |
 | 服务端打包与部署说明 | [server/README.md](server/README.md) |
 | 项目开发约束与 AI 助手指引 | [AGENTS.md](AGENTS.md) |
