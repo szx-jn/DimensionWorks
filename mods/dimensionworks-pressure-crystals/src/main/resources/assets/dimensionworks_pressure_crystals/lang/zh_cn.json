@@ -3,5 +3,12 @@
   "item.dimensionworks_pressure_crystals.useless_crystal": "看起来一点用也没有的结晶",
   "item.dimensionworks_pressure_crystals.low_pressure_crystal": "低压奇妙结晶",
   "item.dimensionworks_pressure_crystals.medium_pressure_crystal": "中压奇妙结晶",
-  "item.dimensionworks_pressure_crystals.high_pressure_crystal": "高压奇妙结晶"
+  "item.dimensionworks_pressure_crystals.high_pressure_crystal": "高压奇妙结晶",
+  "tooltip.dimensionworks_pressure_crystals.trait.iron": "特质：铁",
+  "tooltip.dimensionworks_pressure_crystals.trait.copper": "特质：铜",
+  "tooltip.dimensionworks_pressure_crystals.trait.zinc": "特质：锌",
+  "tooltip.dimensionworks_pressure_crystals.trait.gold": "特质：金",
+  "tooltip.dimensionworks_pressure_crystals.trait.tin": "特质：锡",
+  "tooltip.dimensionworks_pressure_crystals.trait.osmium": "特质：锇",
+  "config.jade.plugin_dimensionworks_pressure_crystals.crystal_traits": "奇妙结晶的金属特质"
 }
