@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import de.theidler.create_mobile_packages.index.CMPItems;
 import de.theidler.create_mobile_packages.items.mobile_packager.PackPlayerPacket;
+import de.theidler.create_mobile_packages.items.mobile_packager.PackagerCapabilities;
+import de.theidler.create_mobile_packages.items.mobile_packager.ability.PackagerCapability;
 import de.theidler.create_mobile_packages.items.mobile_packager.PackedPlayerState;
 import de.theidler.create_mobile_packages.items.mobile_packager.CMPPlayerPack;
 import dev.szx.dimensionworks.transfer.compat.PlayerParcel;
