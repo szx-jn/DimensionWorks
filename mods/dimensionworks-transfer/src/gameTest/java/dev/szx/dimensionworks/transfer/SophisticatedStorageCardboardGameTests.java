@@ -24,6 +24,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.fml.ModList;
 
 @GameTestHolder("dimensionworks_cardboard_storage")
 @PrefixGameTestTemplate(false)
@@ -52,6 +53,10 @@ public final class SophisticatedStorageCardboardGameTests {
 
     @GameTest(template = "empty", templateNamespace = "dimensionworks_cardboard")
     public static void sophisticatedStorageInventorySurvivesPacking(GameTestHelper helper) {
+        if (!ModList.get().isLoaded("sophisticatedstorage")) {
+            helper.succeed();
+            return;
+        }
         var level = helper.getLevel();
         var pos = helper.absolutePos(new BlockPos(3, 2, 3));
         var player = player(helper);
