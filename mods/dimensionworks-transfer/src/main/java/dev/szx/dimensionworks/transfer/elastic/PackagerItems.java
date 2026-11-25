@@ -6,7 +6,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
+@EventBusSubscriber(modid = WDTransfer.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class PackagerItems {
     public static final DeferredRegister<Item> ITEMS =
         DeferredRegister.create(BuiltInRegistries.ITEM, WDTransfer.MOD_ID);
@@ -21,6 +26,15 @@ public final class PackagerItems {
         () -> new TieredPackager(new Item.Properties().rarity(BLUE), PackagerProfiles.BLUE));
     public static final DeferredHolder<Item, TieredPackager> ADVANCED_PACKAGER = ITEMS.register("advanced_packager",
         () -> new TieredPackager(new Item.Properties().rarity(PURPLE), PackagerProfiles.PURPLE));
+
+    @SubscribeEvent
+    public static void addToOriginalPackagerTab(BuildCreativeModeTabContentsEvent event) {
+        if (!event.getTabKey().location().equals(
+                ResourceLocation.fromNamespaceAndPath("create_mobile_packages", "create_mobile_packages_tab"))) return;
+        event.accept(PACKAGER);
+        event.accept(BLOCK_PACKAGER);
+        event.accept(ADVANCED_PACKAGER);
+    }
 
     private PackagerItems() {}
 }
