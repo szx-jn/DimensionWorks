@@ -1,6 +1,5 @@
 package dev.szx.dimensionworks.pressurecrystals;
 
-import dev.szx.dimensionworks.pressurecrystals.CrystalTraitData;
 import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
