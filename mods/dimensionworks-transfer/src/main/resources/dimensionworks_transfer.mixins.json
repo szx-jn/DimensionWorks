@@ -6,7 +6,6 @@
   "mixins": [
     "ElasticPlayerPackingMixin",
     "ElasticToolInteractionMixin",
-    "ElasticPackagerRecognitionMixin",
     "ElasticLandingMixin",
     "ElasticVerticalBeltMovementMixin",
     "TutorialConnectionMixin",
