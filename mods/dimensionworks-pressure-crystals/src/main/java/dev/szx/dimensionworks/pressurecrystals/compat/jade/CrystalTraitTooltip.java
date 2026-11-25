@@ -8,10 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import snownee.jade.api.EntityAccessor;
 import snownee.jade.api.IEntityComponentProvider;
 import snownee.jade.api.IWailaClientRegistration;
@@ -22,7 +18,6 @@ import snownee.jade.api.config.IPluginConfig;
 
 /** Displays metal traits on crystal item tooltips and dropped-item Jade tooltips. */
 @WailaPlugin(DimensionWorksPressureCrystals.MOD_ID)
-@EventBusSubscriber(modid = DimensionWorksPressureCrystals.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class CrystalTraitTooltip implements IWailaPlugin {
     private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(
         DimensionWorksPressureCrystals.MOD_ID, "crystal_traits"
@@ -33,15 +28,7 @@ public final class CrystalTraitTooltip implements IWailaPlugin {
         registration.registerEntityComponent(new DroppedCrystalProvider(), ItemEntity.class);
     }
 
-    @SubscribeEvent
-    public static void appendItemTooltip(ItemTooltipEvent event) {
-        Component trait = getTraitLine(event.getItemStack());
-        if (trait != null) {
-            event.getToolTip().add(trait);
-        }
-    }
-
-    private static Component getTraitLine(ItemStack stack) {
+    public static Component getTraitLine(ItemStack stack) {
         if (!stack.is(DimensionWorksPressureCrystals.LOW_PRESSURE_CRYSTAL.get())
             && !stack.is(DimensionWorksPressureCrystals.MEDIUM_PRESSURE_CRYSTAL.get())
             && !stack.is(DimensionWorksPressureCrystals.HIGH_PRESSURE_CRYSTAL.get())) {
