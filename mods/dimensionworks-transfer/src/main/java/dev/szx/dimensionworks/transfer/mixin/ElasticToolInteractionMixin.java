@@ -2,7 +2,8 @@ package dev.szx.dimensionworks.transfer.mixin;
 
 import de.theidler.create_mobile_packages.items.mobile_packager.PackPlayerPacket;
 import dev.szx.dimensionworks.transfer.compat.PlayerParcel;
-import dev.szx.dimensionworks.transfer.elastic.ElasticPackager;
+import de.theidler.create_mobile_packages.items.mobile_packager.PackagerCapabilities;
+import de.theidler.create_mobile_packages.items.mobile_packager.ability.PackagerCapability;
 import dev.szx.dimensionworks.transfer.elastic.ElasticParcelState;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -17,7 +18,7 @@ public abstract class ElasticToolInteractionMixin {
     private void dimensionworks$useActualInteractionTool(ServerPlayer source, Player target, boolean self) {
         boolean wasPacked = PlayerParcel.isPacked(target);
         PackPlayerPacket.pack(source, target, self);
-        boolean elastic = (Object) this instanceof ElasticPackager;
+        boolean elastic = PackagerCapabilities.has((net.minecraft.world.item.Item) (Object) this, PackagerCapability.ELASTIC_PARCEL);
         if (!wasPacked && target instanceof ServerPlayer player && PlayerParcel.isPacked(player)
             && ElasticParcelState.isElastic(player) != elastic) {
             ElasticParcelState.setElastic(player, elastic);
