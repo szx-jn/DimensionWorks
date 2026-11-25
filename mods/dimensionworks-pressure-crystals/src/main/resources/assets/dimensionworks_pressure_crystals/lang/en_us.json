@@ -3,5 +3,12 @@
   "item.dimensionworks_pressure_crystals.useless_crystal": "A Crystal That Looks Completely Useless",
   "item.dimensionworks_pressure_crystals.low_pressure_crystal": "Low-pressure Wonder Crystal",
   "item.dimensionworks_pressure_crystals.medium_pressure_crystal": "Medium-pressure Wonder Crystal",
-  "item.dimensionworks_pressure_crystals.high_pressure_crystal": "High-pressure Wonder Crystal"
+  "item.dimensionworks_pressure_crystals.high_pressure_crystal": "High-pressure Wonder Crystal",
+  "tooltip.dimensionworks_pressure_crystals.trait.iron": "Trait: Iron",
+  "tooltip.dimensionworks_pressure_crystals.trait.copper": "Trait: Copper",
+  "tooltip.dimensionworks_pressure_crystals.trait.zinc": "Trait: Zinc",
+  "tooltip.dimensionworks_pressure_crystals.trait.gold": "Trait: Gold",
+  "tooltip.dimensionworks_pressure_crystals.trait.tin": "Trait: Tin",
+  "tooltip.dimensionworks_pressure_crystals.trait.osmium": "Trait: Osmium",
+  "config.jade.plugin_dimensionworks_pressure_crystals.crystal_traits": "Wonder Crystal Metal Traits"
 }
