@@ -1,4 +1,5 @@
 // 固定 CMP 源码归档及 SHA-256；不依赖开发者机器上的 JAR。
+// 此 fork 仅提供通用能力 API 与按工具品质启用的兼容性上下文。
 def commit = 'af08d5c49a5b84c0a303b88cf9b35d7605f156e2'
 def checksum = 'PENDING_SOURCE_SHA256'
 def sourceDirectory = layout.buildDirectory.dir("cmp-source/${commit}")
