@@ -1,5 +1,6 @@
 package dev.szx.dimensionworks.transfer.mixin;
 
+import de.theidler.create_mobile_packages.items.mobile_packager.MobilePackagerBlockContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.fml.ModList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +17,7 @@ public abstract class SophisticatedStorageCardboardPackingMixin {
             remap = false), index = 2, remap = false)
     private BlockEntity dimensionworks$markStoragePacked(BlockEntity blockEntity) {
         if (ModList.get().isLoaded("sophisticatedstorage")
+                && MobilePackagerBlockContext.isExtendedCompatibility()
                 && blockEntity instanceof SophisticatedStoragePackedAccessor accessor) {
             accessor.dimensionworks$setPacked(true);
         }
