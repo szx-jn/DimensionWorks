@@ -66,7 +66,8 @@ public final class ElasticParcelGameTests {
         }
         h.assertTrue(!PackagerCapabilities.has(green, PackagerCapability.BLOCK_PACKING), "Green cannot pack blocks");
         h.assertTrue(PackagerCapabilities.has(blue, PackagerCapability.BLOCK_PACKING)
-            && !PackagerCapabilities.has(blue, PackagerCapability.SPECIAL_BLOCK_PACKING), "Blue only adds ordinary block packing");
+            && !PackagerCapabilities.has(blue, PackagerCapability.SPECIAL_BLOCK_PACKING)
+            && !PackagerCapabilities.has(blue, PackagerCapability.MOD_COMPATIBILITY), "Blue only adds ordinary block packing");
         h.assertTrue(PackagerCapabilities.has(purple, PackagerCapability.BLOCK_PACKING)
             && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
             && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
