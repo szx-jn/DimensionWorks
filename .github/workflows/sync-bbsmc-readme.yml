@@ -52,7 +52,7 @@ jobs:
 
               kind = "tree" if path.endswith("/") else "blob"
               encoded = quote(normalized, safe="/:@-._~!$&'()*+,;=%")
-              absolute = urlunsplit(("", "", f"{base}/{kind}/{ref}/{encoded}", parts.query, parts.fragment))
+              absolute = f"{base}/{kind}/{ref}/{encoded}"\n              if parts.query:\n                  absolute += "?" + parts.query\n              if parts.fragment:\n                  absolute += "#" + parts.fragment
               return prefix + absolute + suffix
 
           converted = pattern.sub(rewrite, source)
