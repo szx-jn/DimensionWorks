@@ -36,5 +36,7 @@
   "message.dimensionworks_transfer.upgrade_already_installed": "此终端已经开放 Alex 洞穴航路。",
   "message.dimensionworks_transfer.upgrade_installed": "终端升级完成，Alex 六个洞穴已开放！",
   "message.dimensionworks_transfer.alex_caves_unlocked": "Alex 洞穴航路已开放",
-  "message.dimensionworks_transfer.alex_caves_upgrade_hint": "暮色木头 ×1 + 任意 Boss 奖杯 ×3 → 终端升级卡"
+  "message.dimensionworks_transfer.alex_caves_upgrade_hint": "暮色木头 ×1 + 任意 Boss 奖杯 ×3 → 终端升级卡",
+  "item.dimensionworks_transfer.block_packager": "方块打包工具",
+  "item.dimensionworks_transfer.advanced_packager": "全能打包工具"
 }
