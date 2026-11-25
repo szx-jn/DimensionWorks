@@ -209,6 +209,10 @@ public final class ElasticParcelGameTests {
         try {
             mob.setCustomName(Component.literal("Elastic mob regression"));
             mob.setPos(p.position());
+            ItemStack nativeTool = CMPItems.MOBILE_PACKAGER.asStack();
+            var nativeResult = nativeTool.interactLivingEntity(p, mob, InteractionHand.MAIN_HAND);
+            h.assertTrue(!nativeResult.consumesAction() && !mob.isRemoved(),
+                "White native tool must not pack entities");
             ItemStack tool=p.getMainHandItem();
             var result=tool.interactLivingEntity(p,mob,InteractionHand.MAIN_HAND);
             h.assertTrue(result.consumesAction() && mob.isRemoved(),"Existing mob packing must still consume the interaction");
