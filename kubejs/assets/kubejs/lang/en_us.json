@@ -114,5 +114,7 @@
   "item.kubejs.bounce_tape": "Bounce Tape",
   "item.kubejs.incomplete_bounce_tape": "Incomplete Bounce Tape",
   "item.kubejs.elastic_compound": "Elastic Compound",
-  "item.kubejs.steeleaf_seal_strip": "Steeleaf Tape Blank"
+  "item.kubejs.steeleaf_seal_strip": "Steeleaf Tape Blank",
+  "item.kubejs.incomplete_gear_heart_repair_fragment_1": "Incomplete Andesite Calibration Shard",
+  "item.kubejs.incomplete_gear_heart_repair_fragment_1.tooltip": "Assemble low-pressure wonder crystals of iron, copper, zinc, gold, tin, and osmium in sequence, then press to finish."
 }
