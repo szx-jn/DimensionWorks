@@ -31,9 +31,9 @@ public final class PackagerItems {
     public static void addToOriginalPackagerTab(BuildCreativeModeTabContentsEvent event) {
         if (!event.getTabKey().location().equals(
                 ResourceLocation.fromNamespaceAndPath("create_mobile_packages", "create_mobile_packages_tab"))) return;
-        event.accept(PACKAGER);
-        event.accept(BLOCK_PACKAGER);
-        event.accept(ADVANCED_PACKAGER);
+        event.accept(PACKAGER.get());
+        event.accept(BLOCK_PACKAGER.get());
+        event.accept(ADVANCED_PACKAGER.get());
     }
 
     private PackagerItems() {}
