@@ -5,6 +5,7 @@ import dev.szx.dimensionworks.transfer.elastic.ability.PackagerAbility;
 import java.util.EnumSet;
 import java.util.Set;
 
+/** Immutable capability composition shared by all packager item tiers. */
 public record PackagerProfile(Set<PackagerCapability> capabilities) {
     public PackagerProfile {
         capabilities = Set.copyOf(capabilities);
