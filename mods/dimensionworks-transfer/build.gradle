@@ -1,6 +1,6 @@
 plugins { id 'java-library' }
 
-version = '0.3.15'
+version = '0.3.16'
 base.archivesName = 'dimensionworks_transfer'
 apply from: rootProject.file('gradle/neoforge-module.gradle')
 apply from: rootProject.file('gradle/neoforge-create.gradle')
@@ -22,7 +22,7 @@ sourceSets.test {
     compileClasspath += sourceSets.main.compileClasspath
     runtimeClasspath += sourceSets.main.runtimeClasspath
 }
-ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 54 : project.hasProperty('elasticRecipeCheck') ? 45 : 42
+ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 55 : project.hasProperty('elasticRecipeCheck') ? 46 : 42
 def gameTestNamespaces = ['dimensionworks_transfer', 'dimensionworks_elastic', 'dimensionworks_cardboard']
 if (project.hasProperty('cardboardStorageCheck')) {
     dependencies {
@@ -104,6 +104,8 @@ if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispat
         runtimeOnly 'maven.modrinth:rhino:SqkDvOLG'
         runtimeOnly 'maven.modrinth:kubejs-create:1qmcLagN'
         runtimeOnly 'maven.modrinth:better-advanced-tooltips:uPFbnD32'
+        runtimeOnly 'maven.modrinth:alex-s-caves-unofficial-port:pC1MYhqR'
+        runtimeOnly 'maven.modrinth:citadel-1.21.1-port:mIylVpkN'
         runtimeOnly 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941692'
     }
     neoForge.runs.gameTestServer {
