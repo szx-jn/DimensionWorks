@@ -19,7 +19,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Update BBSMC project description
+      - name: Update and verify BBSMC project description
         env:
           BBSMC_TOKEN: ${{ secrets.BBSMC_TOKEN }}
         run: |
@@ -32,7 +32,9 @@ jobs:
 
           payload="$(jq -n --rawfile body README.md '{body: $body}')"
 
-          response="$(curl --silent --show-error --fail-with-body \
+          status="$(curl --silent --show-error \
+            --output /tmp/bbsmc-patch-response.json \
+            --write-out '%{http_code}' \
             --request PATCH \
             --url "https://api.bbsmc.net/v2/project/dimensionworks" \
             --header "Authorization: ${BBSMC_TOKEN}" \
@@ -40,6 +42,18 @@ jobs:
             --header "User-Agent: szx-jn/DimensionWorks-readme-sync" \
             --data-binary "${payload}")"
 
-          printf '%s' "${response}" | jq -e --arg expected "$(cat README.md)" '.body == $expected' >/dev/null
+          if [[ "${status}" != "204" ]]; then
+            echo "::error::BBSMC PATCH returned HTTP ${status}."
+            cat /tmp/bbsmc-patch-response.json
+            exit 1
+          fi
+
+          curl --silent --show-error --fail-with-body \
+            --url "https://api.bbsmc.net/v2/project/dimensionworks" \
+            --header "Authorization: ${BBSMC_TOKEN}" \
+            --header "User-Agent: szx-jn/DimensionWorks-readme-sync" \
+            --output /tmp/bbsmc-project.json
+
+          jq -e --rawfile expected README.md '.body == $expected' /tmp/bbsmc-project.json >/dev/null
 
           echo "BBSMC project body updated and verified successfully."
