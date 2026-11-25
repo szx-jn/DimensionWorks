@@ -47,6 +47,31 @@ public final class ElasticParcelGameTests {
     }
 
     @GameTest(template="empty")
+    public static void packagerTiersComposeCapabilitiesWithoutInheritance(GameTestHelper h) {
+        var white = CMPItems.MOBILE_PACKAGER.asStack();
+        var green = PackagerItems.PACKAGER.get().getDefaultInstance();
+        var blue = PackagerItems.BLOCK_PACKAGER.get().getDefaultInstance();
+        var purple = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance();
+
+        h.assertTrue(PackagerCapabilities.has(white, PackagerCapability.PLAYER_PACKING), "Native tool keeps player packing");
+        h.assertTrue(!PackagerCapabilities.has(white, PackagerCapability.ENTITY_PACKING)
+            && !PackagerCapabilities.has(white, PackagerCapability.BLOCK_PACKING), "Native tool has no entity or block ability");
+
+        for (var tool : java.util.List.of(green, blue, purple)) {
+            h.assertTrue(PackagerCapabilities.has(tool, PackagerCapability.PLAYER_PACKING), "Every tier keeps player packing");
+            h.assertTrue(PackagerCapabilities.has(tool, PackagerCapability.ELASTIC_PARCEL), "Every custom tier keeps elastic parcels");
+            h.assertTrue(PackagerCapabilities.has(tool, PackagerCapability.ENTITY_PACKING), "Every custom tier keeps entity packing");
+        }
+        h.assertTrue(!PackagerCapabilities.has(green, PackagerCapability.BLOCK_PACKING), "Green cannot pack blocks");
+        h.assertTrue(PackagerCapabilities.has(blue, PackagerCapability.BLOCK_PACKING)
+            && !PackagerCapabilities.has(blue, PackagerCapability.EXTENDED_BLOCK_COMPATIBILITY), "Blue only adds ordinary block packing");
+        h.assertTrue(PackagerCapabilities.has(purple, PackagerCapability.BLOCK_PACKING)
+            && PackagerCapabilities.has(purple, PackagerCapability.EXTENDED_BLOCK_COMPATIBILITY)
+            && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
+        h.succeed();
+    }
+
+    @GameTest(template="empty")
     public static void normalAndElasticToolsRetainSameBaseProperties(GameTestHelper h) {
         var elastic = player(h); var normal = player(h);
         try {
