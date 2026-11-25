@@ -3,7 +3,7 @@ package dev.szx.dimensionworks.transfer.elastic;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** KubeJS upgrade adapter for the green-tier tool. */
+/** KubeJS adapter for data-preserving packager tier upgrades. */
 public final class ElasticPackager {
     private ElasticPackager() {}
 
