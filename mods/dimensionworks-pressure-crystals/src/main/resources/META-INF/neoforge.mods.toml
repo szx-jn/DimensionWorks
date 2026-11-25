@@ -40,3 +40,10 @@ side="BOTH"
 
 [[mixins]]
 config="dimensionworks_pressure_crystals.mixins.json"
+
+[[dependencies.dimensionworks_pressure_crystals]]
+modId="jade"
+type="optional"
+versionRange="[15.0.0,)"
+ordering="AFTER"
+side="CLIENT"
