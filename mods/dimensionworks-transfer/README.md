@@ -16,7 +16,7 @@
 - 弹力玩家包裹贴住运行中的 Create 竖直传送带侧面时可随带面上行或下行，同一条带两面方向相反，反转立即改变方向；速度使用 Create 的带速 `RPM / 480`。自行横向走离或按 Shift 可以脱离。普通玩家、普通 CMP 包裹、生物和物品不能进入这条新运输路径。停机、越过上下末端、解包或离开接触面后恢复普通运动；飞行、骑乘、锁链悬挂与引导锁定优先。运输保留方块碰撞，不新增实体或贴图。
 - 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
-- 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
+- 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。三个升级回调分别调用 `ElasticPackager.upgrade`、`upgradeToBlue`、`upgradeToPurple`，复制完整保存数据并替换物品 ID，不修改传入栈。
 - 工具依赖定制 CMP NeoForge 源码提交 `af08d5c49a5b84c0a303b88cf9b35d7605f156e2`，该提交提供可复用能力 API，并将特殊方块限制绕过绑定到紫色工具上下文。根共享脚本固定源码提交并校验源码归档 SHA-256，再在忽略的构建目录执行 fork 的 `jar` 任务；最终 JAR 校验值与发布清单待最终构建后更新，不发布中间 Release。
 - 直接交互 Mixin 只绑定目标版本的原生 `interactLivingEntity`。网络改用有明确方向的 NeoForge 载荷，中转协议为 `4`、弹力协议为 `3`；服务端保留权限与状态验证。
 
@@ -96,7 +96,7 @@
 
 `-PcardboardStorageCheck` 使用清单固定的 Sophisticated Storage/Core JAR，额外验证纸箱打包与拆箱后的物品、库存能力和 packed 状态；此依赖只用于该 opt-in GameTest，不进入模组发行 JAR。
 
-默认 40 项 GameTest 覆盖玩家运输、落点、暮色、AE2 禁放、真实纸箱搬运、弹性包裹与竖直带；配方专项增加三项（共 43 项），使用实际 KubeJS 2101、KubeJS Create 与 Vintage Improvements 固定 JAR，验证全部十步组装、原料解析和保留组件的升级回调。新版回调先 `.modifyResult(固定名称)`，再在 `ServerEvents.modifyRecipeResult` 中 `event.exit(ElasticPackager.upgrade(stack))` 提交完整结果。
+默认 40 项 GameTest 覆盖玩家运输、落点、暮色、AE2 禁放、真实纸箱搬运、弹性包裹与竖直带；配方专项增加四项（共 46 项），使用实际 KubeJS 2101、KubeJS Create 与 Vintage Improvements 固定 JAR，验证全部十步组装、原料解析、白转绿及绿转蓝/蓝转紫升级回调和完整组件保留。新版回调先 `.modifyResult(固定名称)`，再在 `ServerEvents.modifyRecipeResult` 中 `event.exit(ElasticPackager.upgrade(stack))` 提交完整结果。
 
 客户端检查只在本模块忽略的 `run-client-*` 目录创建新平坦世界，限制 2 GiB/2 CPU/30 FPS，完成后正常保存退出。不会指向玩家安装目录。已实际通过界面导航、弹力外观/蓄力/发射/解包、真实马达带动的上下输送与客户端/服务端位置，以及中转钥匙权限、固定 25 区块覆盖和原位置/物品往返。六洞穴专项共 52 项 GameTest，实际到达六维并拆包；渊海平台测试证明仅改变九格空气、保留水体，建筑/库存占位时不写入。模拟连接使用 NeoForge 的 mock 通道，只用于玩法测试；真实载荷另外由客户端验证。
 
