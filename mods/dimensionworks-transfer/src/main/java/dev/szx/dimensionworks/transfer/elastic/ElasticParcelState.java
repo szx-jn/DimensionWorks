@@ -1,6 +1,8 @@
 package dev.szx.dimensionworks.transfer.elastic;
 
 import de.theidler.create_mobile_packages.items.mobile_packager.MobilePackager;
+import de.theidler.create_mobile_packages.items.mobile_packager.PackagerCapabilities;
+import de.theidler.create_mobile_packages.items.mobile_packager.ability.PackagerCapability;
 import dev.szx.dimensionworks.transfer.compat.PlayerParcel;
 import dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport;
 import java.util.HashMap;
@@ -30,7 +32,7 @@ public final class ElasticParcelState {
     public static void selectTool(ServerPlayer source, Player target) {
         ItemStack tool = source.getMainHandItem();
         if (!(tool.getItem() instanceof MobilePackager)) tool = source.getOffhandItem();
-        setElastic(target, tool.getItem() instanceof ElasticPackager);
+        setElastic(target, PackagerCapabilities.has(tool, PackagerCapability.ELASTIC_PARCEL));
     }
 
     public static void clear(ServerPlayer player) {
