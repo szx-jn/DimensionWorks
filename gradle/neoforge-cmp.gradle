@@ -1,5 +1,5 @@
 // 固定 CMP 源码归档及 SHA-256；不依赖开发者机器上的 JAR。
-def commit = '48fde43ca008e94a6a36f3c80b719c124e440008'
+def commit = '2b553ed0c69a6d8f2b55871dce2967262bf4ebef'
 def checksum = 'PENDING_SOURCE_SHA256'
 def sourceDirectory = layout.buildDirectory.dir("cmp-source/${commit}")
 def sourceArchive = layout.buildDirectory.file("cmp-source/${commit}.zip")
