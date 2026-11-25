@@ -68,7 +68,8 @@ public final class ElasticParcelGameTests {
         h.assertTrue(PackagerCapabilities.has(blue, PackagerCapability.BLOCK_PACKING)
             && !PackagerCapabilities.has(blue, PackagerCapability.SPECIAL_BLOCK_PACKING), "Blue only adds ordinary block packing");
         h.assertTrue(PackagerCapabilities.has(purple, PackagerCapability.BLOCK_PACKING)
-            && PackagerCapabilities.has(purple, PackagerCapability.EXTENDED_BLOCK_COMPATIBILITY)
+            && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
+            && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
             && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
         var blueColor = PackagerItems.BLOCK_PACKAGER.get().getRarity().getStyleModifier()
             .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
