@@ -1,7 +1,7 @@
 // 固定 CMP 源码归档及 SHA-256；不依赖开发者机器上的 JAR。
 // 此 fork 仅提供通用能力 API 与按工具品质启用的兼容性上下文。
 def commit = 'af08d5c49a5b84c0a303b88cf9b35d7605f156e2'
-def checksum = 'PENDING_SOURCE_SHA256'
+def checksum = '54afb6126aacc23f4b80d03b5324641e0fbaf4ebd576c7c539b09212657832ee'
 def sourceDirectory = layout.buildDirectory.dir("cmp-source/${commit}")
 def sourceArchive = layout.buildDirectory.file("cmp-source/${commit}.zip")
 def jarName = 'create_mobile_packages-1.21.1-0.7.8-dimensionworks.4.jar'
