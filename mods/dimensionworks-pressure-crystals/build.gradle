@@ -7,6 +7,7 @@ apply from: rootProject.file('gradle/neoforge-create.gradle')
 
 repositories { maven { url = 'https://www.cursemaven.com'; content { includeGroup 'curse.maven' } } }
 dependencies {
+    compileOnly 'maven.modrinth:jade:eYz2YBGT'
     implementation project(':dimensionworks-cave-factory')
     implementation 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941692'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
