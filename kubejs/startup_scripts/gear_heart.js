@@ -25,6 +25,13 @@ StartupEvents.registry('item', event => {
 })
 
 StartupEvents.registry('item', event => {
+  event.create('incomplete_gear_heart_repair_fragment_1', 'create:sequenced_assembly')
+    .displayName(Text.translate('item.kubejs.incomplete_gear_heart_repair_fragment_1'))
+    .tooltip(Text.translate('item.kubejs.incomplete_gear_heart_repair_fragment_1.tooltip'))
+    .texture('kubejs:item/gear_heart_repair_fragment_1')
+})
+
+StartupEvents.registry('item', event => {
   for (let index = 1; index <= 7; index++) {
     event.create(`gear_heart_repair_fragment_${index}`)
       .displayName(Text.translate(`item.kubejs.gear_heart_repair_fragment_${index}`))
