@@ -33,7 +33,7 @@ jobs:
 
           # Rewrite inline Markdown links and images, leaving external URLs and
           # in-page anchors untouched. GitHub's README remains unchanged.
-          pattern = re.compile(r'(!?\\[[^\\]]*\\]\\()([^\\s)]+)([^)]*\\))')
+          pattern = re.compile(r'(!?\[[^\]]*\]\()([^\s)]+)([^)]*\))')
 
           def rewrite(match):
               prefix, target, suffix = match.groups()
