@@ -17,7 +17,7 @@
 - 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
 - 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
-- 工具依赖定制 CMP NeoForge 源码提交 `48fde43ca008e94a6a36f3c80b719c124e440008`，该提交提供可复用能力 API，并将特殊方块限制绕过绑定到紫色工具上下文。根共享脚本固定源码提交并校验源码归档 SHA-256，再在忽略的构建目录执行 fork 的 `jar` 任务；最终 JAR 校验值与发布清单待最终构建后更新，不发布中间 Release。
+- 工具依赖定制 CMP NeoForge 源码提交 `2b553ed0c69a6d8f2b55871dce2967262bf4ebef`，该提交提供可复用能力 API，并将特殊方块限制绕过绑定到紫色工具上下文。根共享脚本固定源码提交并校验源码归档 SHA-256，再在忽略的构建目录执行 fork 的 `jar` 任务；最终 JAR 校验值与发布清单待最终构建后更新，不发布中间 Release。
 - 直接交互 Mixin 只绑定目标版本的原生 `interactLivingEntity`。网络改用有明确方向的 NeoForge 载荷，中转协议为 `4`、弹力协议为 `3`；服务端保留权限与状态验证。
 
 详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)、[两秒蓄力增强验证](../../docs/validation/2026-11-14-elastic-charge.md)、[竖直带运输验证](../../docs/validation/2026-11-14-elastic-vertical-belt.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。
