@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import de.theidler.create_mobile_packages.index.CMPItems;
 import de.theidler.create_mobile_packages.items.mobile_packager.PackPlayerPacket;
+import de.theidler.create_mobile_packages.items.mobile_packager.PackagerCapabilities;
+import de.theidler.create_mobile_packages.items.mobile_packager.ability.PackagerCapability;
 import de.theidler.create_mobile_packages.items.mobile_packager.PackedPlayerState;
 import de.theidler.create_mobile_packages.items.mobile_packager.CMPPlayerPack;
 import dev.szx.dimensionworks.transfer.compat.PlayerParcel;
@@ -37,13 +39,46 @@ public final class ElasticParcelGameTests {
     private static ServerPlayer player(GameTestHelper h) {
         var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), new GameProfile(UUID.randomUUID(), "ElasticTest"), net.minecraft.server.level.ClientInformation.createDefault());
         p.connection = new ServerGamePacketListenerImpl(h.getLevel().getServer(), new dev.szx.dimensionworks.transfer.FixtureConnection(), p, net.minecraft.server.network.CommonListenerCookie.createInitial(p.getGameProfile(), false));
-        p.setItemInHand(InteractionHand.MAIN_HAND, ElasticItems.PACKAGER.get().getDefaultInstance());
+        p.setItemInHand(InteractionHand.MAIN_HAND, PackagerItems.PACKAGER.get().getDefaultInstance());
         return p;
     }
     private static void close(ServerPlayer p) { ElasticParcelState.resetCharge(p); p.discard(); }
     private static void pack(ServerPlayer p) { PackPlayerPacket.pack(p, p, true); }
     private static void checkVec(GameTestHelper h, Vec3 actual, Vec3 expected, String message) {
         h.assertTrue(actual.distanceTo(expected) < 1e-6, message + ": " + actual + " != " + expected);
+    }
+
+    @GameTest(template="empty")
+    public static void packagerTiersComposeCapabilitiesWithoutInheritance(GameTestHelper h) {
+        var white = CMPItems.MOBILE_PACKAGER.asStack();
+        var green = PackagerItems.PACKAGER.get().getDefaultInstance();
+        var blue = PackagerItems.BLOCK_PACKAGER.get().getDefaultInstance();
+        var purple = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance();
+
+        h.assertTrue(PackagerCapabilities.has(white, PackagerCapability.PLAYER_PACKING), "Native tool keeps player packing");
+        h.assertTrue(!PackagerCapabilities.has(white, PackagerCapability.ENTITY_PACKING)
+            && !PackagerCapabilities.has(white, PackagerCapability.BLOCK_PACKING), "Native tool has no entity or block ability");
+
+        for (var tool : java.util.List.of(green, blue, purple)) {
+            h.assertTrue(PackagerCapabilities.has(tool, PackagerCapability.PLAYER_PACKING), "Every tier keeps player packing");
+            h.assertTrue(PackagerCapabilities.has(tool, PackagerCapability.ELASTIC_PARCEL), "Every custom tier keeps elastic parcels");
+            h.assertTrue(PackagerCapabilities.has(tool, PackagerCapability.ENTITY_PACKING), "Every custom tier keeps entity packing");
+        }
+        h.assertTrue(!PackagerCapabilities.has(green, PackagerCapability.BLOCK_PACKING), "Green cannot pack blocks");
+        h.assertTrue(PackagerCapabilities.has(blue, PackagerCapability.BLOCK_PACKING)
+            && !PackagerCapabilities.has(blue, PackagerCapability.SPECIAL_BLOCK_PACKING)
+            && !PackagerCapabilities.has(blue, PackagerCapability.MOD_COMPATIBILITY), "Blue only adds ordinary block packing");
+        h.assertTrue(PackagerCapabilities.has(purple, PackagerCapability.BLOCK_PACKING)
+            && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
+            && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
+            && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
+        var blueColor = PackagerItems.BLOCK_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
+            .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        var purpleColor = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
+            .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Blue tool rarity must actually be blue");
+        h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Purple tool rarity must actually be purple");
+        h.succeed();
     }
 
     @GameTest(template="empty")
@@ -57,7 +92,7 @@ public final class ElasticParcelGameTests {
             h.assertTrue(a.width()==b.width() && a.height()==b.height(), "Package dimensions must match");
             h.assertTrue(elastic.getAttributeValue(Attributes.MOVEMENT_SPEED) == normal.getAttributeValue(Attributes.MOVEMENT_SPEED), "Movement modifier must match");
             h.assertTrue(elastic.getPersistentData().getInt(PackedPlayerState.ESCAPES) == normal.getPersistentData().getInt(PackedPlayerState.ESCAPES), "Escape state must match");
-            var style = ElasticItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
+            var style = PackagerItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
             h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Tool rarity must actually be green");
             h.assertTrue(PlayerParcel.unpack(elastic) && !elastic.getPersistentData().contains(ElasticParcelState.ELASTIC), "Unpack must clear elastic state");
             h.succeed();
@@ -74,7 +109,7 @@ public final class ElasticParcelGameTests {
             target.removeEffect(CMPPlayerPack.IMMUNITY);
             source.setShiftKeyDown(true);
             source.setItemInHand(InteractionHand.MAIN_HAND, CMPItems.MOBILE_PACKAGER.asStack());
-            ItemStack tool = ElasticItems.PACKAGER.get().getDefaultInstance();
+            ItemStack tool = PackagerItems.PACKAGER.get().getDefaultInstance();
             source.setItemInHand(InteractionHand.OFF_HAND, tool);
             tool.interactLivingEntity(source, target, InteractionHand.OFF_HAND);
             h.assertTrue(ElasticParcelState.isElastic(target), "The actual offhand interaction must select elastic");
@@ -175,6 +210,10 @@ public final class ElasticParcelGameTests {
         try {
             mob.setCustomName(Component.literal("Elastic mob regression"));
             mob.setPos(p.position());
+            ItemStack nativeTool = CMPItems.MOBILE_PACKAGER.asStack();
+            var nativeResult = nativeTool.interactLivingEntity(p, mob, InteractionHand.MAIN_HAND);
+            h.assertTrue(!nativeResult.consumesAction() && !mob.isRemoved(),
+                "White native tool must not pack entities");
             ItemStack tool=p.getMainHandItem();
             var result=tool.interactLivingEntity(p,mob,InteractionHand.MAIN_HAND);
             h.assertTrue(result.consumesAction() && mob.isRemoved(),"Existing mob packing must still consume the interaction");
@@ -194,7 +233,7 @@ public final class ElasticParcelGameTests {
         net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, original, tag -> tag.putString("packager_payload","address and saved settings"));
         var before=original.save(h.getLevel().registryAccess());
         ItemStack upgraded=ElasticPackager.upgrade(original);
-        h.assertTrue(upgraded.is(ElasticItems.PACKAGER.get()),"Upgrade must change the registered item");
+        h.assertTrue(upgraded.is(PackagerItems.PACKAGER.get()),"Upgrade must change the registered item");
         h.assertTrue(upgraded.getComponentsPatch().equals(original.getComponentsPatch()),"All original item NBT must survive");
         h.assertTrue(original.save(h.getLevel().registryAccess()).equals(before),"Crafting preview must not mutate the input");
         h.succeed();

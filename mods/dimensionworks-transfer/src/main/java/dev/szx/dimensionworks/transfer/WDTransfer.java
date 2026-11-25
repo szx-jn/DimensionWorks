@@ -22,7 +22,7 @@ public final class WDTransfer {
             event.enqueueWork(dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy::initialize));
         modEventBus.addListener(TransferNetwork::register);
         modEventBus.addListener(dev.szx.dimensionworks.transfer.elastic.ElasticNetwork::register);
-        dev.szx.dimensionworks.transfer.elastic.ElasticItems.ITEMS.register(modEventBus);
+        dev.szx.dimensionworks.transfer.elastic.PackagerItems.ITEMS.register(modEventBus);
         dev.szx.dimensionworks.transfer.dispatch.DispatchItems.ITEMS.register(modEventBus);
         DispatchBlocks.BLOCKS.register(modEventBus);
         ModChunkGenerators.CHUNK_GENERATORS.register(modEventBus);

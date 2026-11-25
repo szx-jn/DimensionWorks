@@ -162,7 +162,7 @@ public final class TransferAeBlockGameTests {
         var receiver = player(level);
         level.setBlockAndUpdate(pos.below(), Blocks.STONE.defaultBlockState());
         try {
-            for (String itemId : new String[]{"mekanism:cardboard_box", "create_mobile_packages:mobile_packager"}) {
+            for (String itemId : new String[]{"dimensionworks_transfer:advanced_packager"}) {
                 source.setBlockAndUpdate(sourcePos, block("ae2:charger").defaultBlockState());
                 source.getBlockEntity(sourcePos).getPersistentData().putString("preserve", "packed-machine-data");
                 var tool = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId)));

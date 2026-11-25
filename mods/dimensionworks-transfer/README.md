@@ -8,14 +8,16 @@
 
 ## 弹力打包工具
 
-- `dimensionworks_transfer:elastic_packager` 沿用 CMP 打包工具模型与功能，名称显示绿色；`kubejs:bounce_tape` 与旧工具无序合成升级，保留旧工具完整保存数据。
+- 打包工具按能力组合分为白/绿/蓝/紫四档：白色使用 CMP 原版工具；绿色增加弹力包裹与实体打包；蓝色增加普通方块打包；紫色增加 Sable 船只、特殊模组兼容和特殊方块打包。
+- 绿色、蓝色、紫色共用 CMP 打包核心，通过独立能力模块组合，不再使用品质继承链；其他系统也可通过 CMP 的 `PackagerCapabilities` 查询能力。
+- `dimensionworks_transfer:elastic_packager` 保留现有绿色工具 ID 和模型；`kubejs:bounce_tape` 仍用于从白色工具升级，保留原工具完整保存数据。
 - 只有被该工具打包的玩家成为史莱姆色系弹力包裹，不透明度约 88%；普通包裹及生物/方块封装仍使用原处理。
 - 落地调用原版史莱姆块反弹，Shift 潜行抑制反弹。站在地面长按 Shift 蓄力，40 tick（正常 20 TPS 下 2 秒）满；松开后按蓄力力度向当前视角方向发射。未满蓄力的 1–39 tick 保持原线性力度 `0.35 + 3.3625 × 蓄力tick / 60`，不随蓄力上限缩短而放大；只有满蓄力速度提高至 18.5625 格/tick，为此前 3.7125 的 5 倍。满蓄力用专用速度包同步，避免原版速度包将各分量截断为 ±3.9；客户端与服务端须使用同版弹力网络协议。三段绿、橙、红蓄力条按 40 tick 填满，仍居中显示在物品栏上方 20 个 HUD 像素，满蓄力全金色。
 - 弹力玩家包裹贴住运行中的 Create 竖直传送带侧面时可随带面上行或下行，同一条带两面方向相反，反转立即改变方向；速度使用 Create 的带速 `RPM / 480`。自行横向走离或按 Shift 可以脱离。普通玩家、普通 CMP 包裹、生物和物品不能进入这条新运输路径。停机、越过上下末端、解包或离开接触面后恢复普通运动；飞行、骑乘、锁链悬挂与引导锁定优先。运输保留方块碰撞，不新增实体或贴图。
 - 服务端验证弹力状态与地面条件并计算力度，客户端预测显示。离地、解包、下线、切换维度或界面取消时清理蓄力；保留现有维度钥匙引导的操作锁定；运行状态不补算离线时间，不创建实体或加载票据。
 - 旧工具配方与交互、玩家免疫、五次挣脱、原包裹运输及解包特效沿用原路径。专属工具与工件统一进入已有维度工坊页签。
 - 配方和工件分别位于 `kubejs/server_scripts/elastic_packager.js` 与 `kubejs/startup_scripts/elastic_packager.js`。脚本调用 `ElasticPackager.upgrade(ItemStack original)` 得到新工具，复制完整保存数据并替换物品 ID，不修改传入栈。
-- 工具依赖定制 CMP NeoForge 固定源码提交 `723aef4af591784c050d4edfe7130a573e55ae51`。根共享脚本核对源码归档 SHA-256 后，在忽略的构建目录执行 fork 的 `jar` 任务；没有中途发行版，也不内嵌第三方类。
+- 工具依赖定制 CMP NeoForge 源码提交 `af08d5c49a5b84c0a303b88cf9b35d7605f156e2`，该提交提供可复用能力 API，并将特殊方块限制绕过绑定到紫色工具上下文。根共享脚本固定源码提交并校验源码归档 SHA-256，再在忽略的构建目录执行 fork 的 `jar` 任务；最终 JAR 校验值与发布清单待最终构建后更新，不发布中间 Release。
 - 直接交互 Mixin 只绑定目标版本的原生 `interactLivingEntity`。网络改用有明确方向的 NeoForge 载荷，中转协议为 `4`、弹力协议为 `3`；服务端保留权限与状态验证。
 
 详见 [玩法与制造规格](../../docs/design/twilight-easter-egg-toys.md)、[本地验证记录](../../docs/validation/2026-11-14-elastic-packager.md)、[两秒蓄力增强验证](../../docs/validation/2026-11-14-elastic-charge.md)、[竖直带运输验证](../../docs/validation/2026-11-14-elastic-vertical-belt.md) 和 [正式 JAR 启动回归验证](../../docs/validation/2026-11-14-elastic-startup-fix.md)。验证用客户端与 GameTest 代码不进入发行 JAR，昂贵客户端检查仅按需本地运行。

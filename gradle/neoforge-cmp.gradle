@@ -1,6 +1,7 @@
-// 固定源码及校验和构建定制 CMP；无需中间发行版或开发者机器上的 JAR。
-def commit = '723aef4af591784c050d4edfe7130a573e55ae51'
-def checksum = '00bb239bb2b87f1d1ad39ccfd4c0b349e0f772bd480c46aa00b0d8acfcae290a'
+// 固定 CMP 源码归档及 SHA-256；不依赖开发者机器上的 JAR。
+// 此 fork 仅提供通用能力 API 与按工具品质启用的兼容性上下文。
+def commit = 'af08d5c49a5b84c0a303b88cf9b35d7605f156e2'
+def checksum = '54afb6126aacc23f4b80d03b5324641e0fbaf4ebd576c7c539b09212657832ee'
 def sourceDirectory = layout.buildDirectory.dir("cmp-source/${commit}")
 def sourceArchive = layout.buildDirectory.file("cmp-source/${commit}.zip")
 def jarName = 'create_mobile_packages-1.21.1-0.7.8-dimensionworks.4.jar'
@@ -27,8 +28,9 @@ if (project.hasProperty('cmpTestJar')) {
                 int count
                 while ((count = input.read(buffer)) != -1) digest.update(buffer, 0, count)
             }
-            if (digest.digest().encodeHex().toString() != checksum) {
-                throw new GradleException('固定 CMP 源码校验失败；拒绝构建')
+            def actualChecksum = digest.digest().encodeHex().toString()
+            if (actualChecksum != checksum) {
+                throw new GradleException("固定 CMP 源码校验失败：expected=${checksum}, actual=${actualChecksum}")
             }
             copy {
                 from zipTree(archive)
@@ -45,7 +47,6 @@ if (project.hasProperty('cmpTestJar')) {
         outputs.file(sourceJar)
         workingDir sourceDirectory
         commandLine 'bash', 'gradlew', '--no-daemon', '--max-workers=2', '--console=plain', 'jar'
-        // 不继承 CI 的分支/构建号后缀，也不执行 fork 的发布任务。
         environment 'BRANCH_NAME', ''
         environment 'BUILD_NUMBER', ''
     }

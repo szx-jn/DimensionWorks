@@ -36,5 +36,7 @@
   "message.dimensionworks_transfer.upgrade_already_installed": "This terminal already has access to the Alex cave routes.",
   "message.dimensionworks_transfer.upgrade_installed": "Terminal upgraded. All six Alex cave routes are now open!",
   "message.dimensionworks_transfer.alex_caves_unlocked": "Alex cave routes unlocked",
-  "message.dimensionworks_transfer.alex_caves_upgrade_hint": "1 Twilight log + any 3 Boss trophies → Terminal upgrade"
+  "message.dimensionworks_transfer.alex_caves_upgrade_hint": "1 Twilight log + any 3 Boss trophies → Terminal upgrade",
+  "item.dimensionworks_transfer.block_packager": "Block Packager",
+  "item.dimensionworks_transfer.advanced_packager": "Advanced Packager"
 }

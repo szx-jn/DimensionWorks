@@ -22,7 +22,7 @@ sourceSets.test {
     compileClasspath += sourceSets.main.compileClasspath
     runtimeClasspath += sourceSets.main.runtimeClasspath
 }
-ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 52 : project.hasProperty('elasticRecipeCheck') ? 43 : 40
+ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 54 : project.hasProperty('elasticRecipeCheck') ? 45 : 42
 def gameTestNamespaces = ['dimensionworks_transfer', 'dimensionworks_elastic', 'dimensionworks_cardboard']
 if (project.hasProperty('cardboardStorageCheck')) {
     dependencies {
