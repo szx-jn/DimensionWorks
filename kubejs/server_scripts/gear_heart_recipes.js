@@ -36,12 +36,12 @@ ServerEvents.recipes(event => {
             }
           }
         ],
-        results: [{ item: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
+        results: [{ id: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
       })),
       {
         type: 'create:pressing',
         ingredients: [incompleteFragment],
-        results: [{ item: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
+        results: [{ id: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
       }
     ],
     results: [{ id: repairFragmentIds[0] }]
@@ -78,13 +78,12 @@ ServerEvents.recipes(event => {
   register({
     type: 'create:mechanical_crafting',
     accept_mirrored: false,
-    pattern: ['SAS', 'ADA', 'LCL'],
+    pattern: ['SAS', 'ADA', 'SCS'],
     key: {
       S: { item: 'mekanism:ingot_steel' },
       A: { item: 'mekanism:alloy_infused' },
       D: { item: 'dimensionworks_mek_stress:memory_drive_ddr1' },
-      C: { item: 'mekanism:basic_control_circuit' },
-      L: { item: 'mekanism:basic_control_circuit' }
+      C: { item: 'mekanism:basic_control_circuit' }
     },
     result: { id: repairFragmentIds[4] }
   }, repairFragmentIds[4])
