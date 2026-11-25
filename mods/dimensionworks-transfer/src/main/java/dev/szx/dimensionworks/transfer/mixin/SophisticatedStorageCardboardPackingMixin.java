@@ -17,7 +17,7 @@ public abstract class SophisticatedStorageCardboardPackingMixin {
             remap = false), index = 2, remap = false)
     private BlockEntity dimensionworks$markStoragePacked(BlockEntity blockEntity) {
         if (ModList.get().isLoaded("sophisticatedstorage")
-                && MobilePackagerBlockContext.isExtendedCompatibility()
+                && MobilePackagerBlockContext.hasModCompatibility()
                 && blockEntity instanceof SophisticatedStoragePackedAccessor accessor) {
             accessor.dimensionworks$setPacked(true);
         }
