@@ -1,6 +1,6 @@
 package dev.szx.dimensionworks.pressurecrystals;
 
-import dev.szx.dimensionworks.pressurecrystals.compat.jade.CrystalTraitTooltip;
+import dev.szx.dimensionworks.pressurecrystals.CrystalTraitData;
 import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -12,7 +12,7 @@ public final class CrystalItemTooltipEvents {
 
     @SubscribeEvent
     public static void appendItemTooltip(ItemTooltipEvent event) {
-        Component trait = CrystalTraitTooltip.getTraitLine(event.getItemStack());
+        Component trait = CrystalTraitData.getTooltipLine(event.getItemStack());
         if (trait != null) {
             event.getToolTip().add(trait);
         }
