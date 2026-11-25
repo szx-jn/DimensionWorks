@@ -13,9 +13,37 @@ ServerEvents.recipes(event => {
     event.custom(json).id(id)
   }
 
+  const incompleteFragment = { item: 'kubejs:incomplete_gear_heart_repair_fragment_1' }
+  const metalCrystals = ['iron', 'copper', 'zinc', 'gold', 'tin', 'osmium']
+
   register({
-    type: 'create:pressing',
-    ingredients: [{ item: 'create:andesite_alloy' }],
+    type: 'create:sequenced_assembly',
+    ingredient: { item: 'create:andesite_alloy' },
+    transitional_item: 'kubejs:incomplete_gear_heart_repair_fragment_1',
+    loops: 1,
+    sequence: [
+      ...metalCrystals.map(metal => ({
+        type: 'create:deploying',
+        ingredients: [
+          incompleteFragment,
+          {
+            type: 'neoforge:components',
+            items: 'dimensionworks_pressure_crystals:low_pressure_crystal',
+            components: {
+              'minecraft:custom_data': {
+                DimensionWorks: { Metal: metal }
+              }
+            }
+          }
+        ],
+        results: [{ item: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
+      })),
+      {
+        type: 'create:pressing',
+        ingredients: [incompleteFragment],
+        results: [{ item: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
+      }
+    ],
     results: [{ id: repairFragmentIds[0] }]
   }, repairFragmentIds[0])
 
@@ -50,12 +78,13 @@ ServerEvents.recipes(event => {
   register({
     type: 'create:mechanical_crafting',
     accept_mirrored: false,
-    pattern: ['SAS', 'ADA', 'SCS'],
+    pattern: ['SAS', 'ADA', 'LCL'],
     key: {
       S: { item: 'mekanism:ingot_steel' },
       A: { item: 'mekanism:alloy_infused' },
       D: { item: 'dimensionworks_mek_stress:memory_drive_ddr1' },
-      C: { item: 'mekanism:basic_control_circuit' }
+      C: { item: 'mekanism:basic_control_circuit' },
+      L: { item: 'mekanism:basic_control_circuit' }
     },
     result: { id: repairFragmentIds[4] }
   }, repairFragmentIds[4])
