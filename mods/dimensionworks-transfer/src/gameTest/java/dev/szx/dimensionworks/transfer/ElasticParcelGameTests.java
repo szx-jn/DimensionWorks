@@ -72,9 +72,9 @@ public final class ElasticParcelGameTests {
             && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
             && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
             && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
-        var blueColor = PackagerItems.BLOCK_PACKAGER.get().getRarity().getStyleModifier()
+        var blueColor = PackagerItems.BLOCK_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
             .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
-        var purpleColor = PackagerItems.ADVANCED_PACKAGER.get().getRarity().getStyleModifier()
+        var purpleColor = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
             .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
         h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Blue tool rarity must actually be blue");
         h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Purple tool rarity must actually be purple");
