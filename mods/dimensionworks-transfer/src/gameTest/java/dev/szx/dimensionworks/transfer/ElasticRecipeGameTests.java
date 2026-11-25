@@ -29,6 +29,53 @@ public final class ElasticRecipeGameTests {
         return stack;
     }
 
+    private static void verifyTierUpgrade(GameTestHelper h, String recipeId, String sourceId,
+            String targetId, String... ingredients) {
+        var recipe = (CraftingRecipe) h.getLevel().getRecipeManager()
+            .byKey(ResourceLocation.parse(recipeId)).orElseThrow().value();
+        var menu = new AbstractContainerMenu(null, -1) {
+            @Override public ItemStack quickMoveStack(Player player, int slot) { return ItemStack.EMPTY; }
+            @Override public boolean stillValid(Player player) { return true; }
+        };
+        var grid = new TransientCraftingContainer(menu, 3, 3);
+        ItemStack original = item(sourceId);
+        original.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("Saved packager"));
+        net.minecraft.world.item.component.CustomData.update(
+            net.minecraft.core.component.DataComponents.CUSTOM_DATA, original,
+            tag -> tag.putString("SavedAddress", "my-factory"));
+        var before = original.save(h.getLevel().registryAccess());
+        grid.setItem(0, original);
+        for (int i = 0; i < ingredients.length; i++) grid.setItem(i + 1, item(ingredients[i]));
+
+        h.assertTrue(recipe.matches(grid.asCraftInput(), h.getLevel()), recipeId + " must accept all required cave materials");
+        ItemStack upgraded = recipe.assemble(grid.asCraftInput(), h.getLevel().registryAccess());
+        h.assertTrue(upgraded.is(item(targetId).getItem())
+            && upgraded.getComponentsPatch().equals(original.getComponentsPatch()),
+            recipeId + " must preserve the complete source tool data");
+        h.assertTrue(original.save(h.getLevel().registryAccess()).equals(before),
+            recipeId + " preview must not mutate its input");
+
+        grid.setItem(8, item("minecraft:dirt"));
+        h.assertTrue(!recipe.matches(grid.asCraftInput(), h.getLevel()),
+            recipeId + " must reject unrelated extra ingredients");
+    }
+
+    @GameTest(template="empty")
+    public static void alexCavesTierUpgradesRequireRegionalMaterialsAndPreserveData(GameTestHelper h) {
+        verifyTierUpgrade(h, "dimensionworks:elastic/upgrade_block_packager",
+            "dimensionworks_transfer:elastic_packager", "dimensionworks_transfer:block_packager",
+            "alexscaves:energized_galena_neutral",
+            "alexscaves:raw_scarlet_neodymium", "alexscaves:raw_scarlet_neodymium",
+            "alexscaves:raw_azure_neodymium", "alexscaves:raw_azure_neodymium",
+            "create:sturdy_sheet");
+        verifyTierUpgrade(h, "dimensionworks:elastic/upgrade_advanced_packager",
+            "dimensionworks_transfer:block_packager", "dimensionworks_transfer:advanced_packager",
+            "alexscaves:pewen_sap", "alexscaves:uranium", "alexscaves:pearl",
+            "alexscaves:pure_darkness", "alexscaves:sweet_tooth",
+            "create:precision_mechanism", "mekanism:alloy_atomic");
+        h.succeed();
+    }
+
     @GameTest(template="empty")
     public static void realKubeJsUpgradePreservesDataAndRejectsIncompleteTape(GameTestHelper h) {
         var recipe=(CraftingRecipe)h.getLevel().getRecipeManager().byKey(ResourceLocation.parse("dimensionworks:elastic/upgrade_packager")).orElseThrow().value();
