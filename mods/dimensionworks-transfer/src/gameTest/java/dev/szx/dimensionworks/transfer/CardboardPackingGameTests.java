@@ -122,6 +122,16 @@ public final class CardboardPackingGameTests {
         try {
             set.invoke(blacklist, List.of("mekanism", "ae2", "create"));
 
+            for (String lowerTier : List.of("create_mobile_packages:mobile_packager", "dimensionworks_transfer:elastic_packager")) {
+                var protectedTarget = block("minecraft:oak_planks");
+                level.setBlock(pos, protectedTarget.defaultBlockState(), FLAGS);
+                var lowerTool = tool(lowerTier);
+                h.assertTrue(!pack(p, pos, lowerTool).consumesAction()
+                    && level.getBlockState(pos).is(protectedTarget),
+                    lowerTier + " must not have block-packing capability");
+                clear(level, pos);
+            }
+
             // Blue can pack ordinary blocks, but cannot bypass block tags, hardness or mod namespaces.
             var ordinary = block("minecraft:oak_planks");
             level.setBlock(pos, ordinary.defaultBlockState(), FLAGS);
@@ -132,6 +142,8 @@ public final class CardboardPackingGameTests {
             h.assertTrue(blue.getCount() == 1 && emptyBoxes(level, pos) == 0, "Blue tool is reusable and returns no empty box");
             clear(level, pos);
 
+            h.assertTrue(Blocks.STONE.defaultBlockState().is(TagKey.create(Registries.BLOCK,
+                ResourceLocation.parse("c:relocation_not_supported"))), "Stone must exercise the block blacklist");
             for (String id : List.of("minecraft:stone", "minecraft:bedrock", "ae2:controller",
                     "mekanism:ultimate_bin", "create:track")) {
                 var target = block(id);
