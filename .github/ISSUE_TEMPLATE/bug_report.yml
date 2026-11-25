@@ -1,0 +1,82 @@
+name: 游戏崩溃 / 启动异常
+description: 报告整合包客户端或服务端的崩溃、启动失败及运行异常
+title: "[问题反馈] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请确认问题发生在未擅自修改整合包文件的环境中。
+        如果你添加、删除或替换过整合包原有 Mod，请同时说明具体改动；由此产生的问题通常需要先联系对应整合包修改者排查。
+
+  - type: dropdown
+    id: affected_side
+    attributes:
+      label: 问题发生在哪一端？
+      description: 必须选择。请选择实际出现崩溃或异常的端。
+      options:
+        - 客户端
+        - 服务端
+        - 客户端与服务端均出现问题
+    validations:
+      required: true
+
+  - type: input
+    id: client_os
+    attributes:
+      label: 客户端操作系统
+      description: 选填。仅在客户端参与复现或出现问题时填写。
+      placeholder: 例如：Windows 11 24H2、macOS 26、Android 15
+
+  - type: input
+    id: server_os
+    attributes:
+      label: 服务端操作系统
+      description: 选填。填写服务端实际运行的操作系统及版本。
+      placeholder: 例如：Ubuntu 24.04、Windows Server 2022、Debian 13
+
+  - type: input
+    id: pack_version
+    attributes:
+      label: 整合包版本
+      description: 请填写启动器中显示的完整整合包版本号。
+      placeholder: 例如：0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: java_21
+    attributes:
+      label: 游戏使用的 Java 运行时是否为 Java 21？
+      description: 请确认启动器实际分配给游戏的 Java 版本，而不是电脑上安装的任意 Java 版本。
+      options:
+        - 是，Java 21
+        - 否，不是 Java 21
+        - 不清楚
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 描述问题出现的时机、操作步骤和实际表现。
+      placeholder: |
+        例如：
+        1. 启动客户端并进入存档
+        2. 放置某个机器
+        3. 游戏崩溃或出现异常
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 崩溃报告
+      description: 请尽量附上完整的 latest.log 或 crash-report。可直接拖入文件，或粘贴到此处。
+      placeholder: 请提供日志内容或附件。
+      render: text
+    validations:
+      required: true
