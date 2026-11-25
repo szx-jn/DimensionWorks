@@ -27,7 +27,7 @@ body:
     attributes:
       label: 客户端操作系统
       description: 选填。仅在客户端参与复现或出现问题时填写。
-      placeholder: 例如：Windows 11 24H2、macOS 26、Android 15
+      placeholder: 例如：Windows 11 24H2、macOS 26
 
   - type: input
     id: server_os
