@@ -44,7 +44,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("dimensionworks_cardboard")
 @PrefixGameTestTemplate(false)
 public final class CardboardPackingGameTests {
-    private static final List<String> PACKERS = List.of("mekanism:cardboard_box", "create_mobile_packages:mobile_packager");
+    private static final List<String> PACKERS = List.of("dimensionworks_transfer:block_packager", "dimensionworks_transfer:advanced_packager");
     private static final int FLAGS = Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE;
 
     private static FakePlayer player(GameTestHelper h) {
@@ -111,7 +111,7 @@ public final class CardboardPackingGameTests {
     }
 
     @GameTest(template = "empty")
-    public static void bothPackersBypassAllMekanismTypeRestrictions(GameTestHelper h) throws ReflectiveOperationException {
+    public static void blueAndPurpleRespectTheirMekanismRestrictions(GameTestHelper h) throws ReflectiveOperationException {
         var level = h.getLevel();
         var pos = h.absolutePos(new BlockPos(3, 2, 3));
         var p = player(h);
@@ -120,33 +120,45 @@ public final class CardboardPackingGameTests {
         var set = blacklist.getClass().getMethod("set", Object.class);
         Object original = blacklist.getClass().getMethod("get").invoke(blacklist);
         try {
-            set.invoke(blacklist, List.of("minecraft", "mekanism", "ae2", "create"));
-            level.setBlock(pos.below(), Blocks.STONE.defaultBlockState(), FLAGS);
-            for (String packer : PACKERS) {
-                for (String id : List.of("minecraft:stone", "minecraft:bedrock", "minecraft:end_portal_frame",
-                        "minecraft:end_portal", "minecraft:nether_portal", "minecraft:command_block",
-                        "minecraft:structure_block", "minecraft:jigsaw", "minecraft:spawner", "minecraft:piston_head",
-                        "minecraft:water", "minecraft:chest", "ae2:controller", "ae2:cable_bus",
-                        "mekanism:ultimate_bin", "create:track")) {
-                    var target = block(id);
-                    level.setBlock(pos, target.defaultBlockState(), FLAGS);
-                    var tile = level.getBlockEntity(pos);
-                    if (tile != null) tile.getPersistentData().putString("dw_cardboard_probe", id);
-                    if (id.equals("minecraft:stone")) h.assertTrue(level.getBlockState(pos).is(TagKey.create(Registries.BLOCK,
-                        ResourceLocation.parse("c:relocation_not_supported"))), "Exercise an actual block blacklist");
-                    if (id.equals("minecraft:chest")) h.assertTrue(BuiltInRegistries.BLOCK_ENTITY_TYPE.getTag(TagKey.create(Registries.BLOCK_ENTITY_TYPE, ResourceLocation.parse("c:relocation_not_supported")))
-                        .orElseThrow().contains(BuiltInRegistries.BLOCK_ENTITY_TYPE.wrapAsHolder(tile.getType())), "Exercise an actual block-entity blacklist");
-                    var stack = tool(packer);
-                    h.assertTrue(pack(p, pos, stack).consumesAction() && level.getBlockState(pos).is(block("mekanism:cardboard_box")),
-                        packer + " must package " + id);
-                    h.assertTrue(stack.getCount() == (packer.equals(PACKERS.get(0)) ? 0 : 1), "Only an ordinary empty box is consumed");
-                    unpack(p, pos);
-                    h.assertTrue(level.getBlockState(pos).is(target), "Unpacking must restore " + id);
-                    if (tile != null) h.assertTrue(level.getBlockEntity(pos).getPersistentData().getString("dw_cardboard_probe").equals(id),
-                        "Block-entity data must survive for " + id);
-                    h.assertTrue(emptyBoxes(level, pos) == (packer.equals(PACKERS.get(0)) ? 1 : 0), "Empty box return must follow origin");
-                    clear(level, pos);
-                }
+            set.invoke(blacklist, List.of("mekanism", "ae2", "create"));
+
+            // Blue can pack ordinary blocks, but cannot bypass block tags, hardness or mod namespaces.
+            var ordinary = block("minecraft:oak_planks");
+            level.setBlock(pos, ordinary.defaultBlockState(), FLAGS);
+            var blue = tool(PACKERS.get(0));
+            h.assertTrue(pack(p, pos, blue).consumesAction(), "Blue must pack ordinary blocks");
+            unpack(p, pos);
+            h.assertTrue(level.getBlockState(pos).is(ordinary), "Blue must restore ordinary blocks");
+            h.assertTrue(blue.getCount() == 1 && emptyBoxes(level, pos) == 0, "Blue tool is reusable and returns no empty box");
+            clear(level, pos);
+
+            for (String id : List.of("minecraft:stone", "minecraft:bedrock", "ae2:controller",
+                    "mekanism:ultimate_bin", "create:track")) {
+                var target = block(id);
+                level.setBlock(pos, target.defaultBlockState(), FLAGS);
+                var stack = tool(PACKERS.get(0));
+                h.assertTrue(!pack(p, pos, stack).consumesAction(), "Blue must respect Mekanism restrictions for " + id);
+                h.assertTrue(level.getBlockState(pos).is(target) && stack.getCount() == 1,
+                    "Rejected blue packing must retain " + id);
+                clear(level, pos);
+            }
+
+            // Purple alone bypasses those restrictions, including hardness and namespace blacklists.
+            for (String id : List.of("minecraft:stone", "minecraft:bedrock", "minecraft:end_portal_frame",
+                    "minecraft:end_portal", "minecraft:nether_portal", "minecraft:command_block",
+                    "minecraft:structure_block", "minecraft:jigsaw", "minecraft:spawner",
+                    "ae2:controller", "ae2:cable_bus", "mekanism:ultimate_bin", "create:track")) {
+                var target = block(id);
+                level.setBlock(pos, target.defaultBlockState(), FLAGS);
+                var stack = tool(PACKERS.get(1));
+                h.assertTrue(pack(p, pos, stack).consumesAction()
+                    && level.getBlockState(pos).is(block("mekanism:cardboard_box")),
+                    "Purple must pack extended block " + id);
+                h.assertTrue(stack.getCount() == 1, "Purple tool must not be consumed");
+                unpack(p, pos);
+                h.assertTrue(level.getBlockState(pos).is(target), "Purple must restore " + id);
+                h.assertTrue(emptyBoxes(level, pos) == 0, "Purple tool-origin boxes must not return as items");
+                clear(level, pos);
             }
         } finally {
             set.invoke(blacklist, original);
@@ -210,7 +222,7 @@ public final class CardboardPackingGameTests {
                 var payload = ((mekanism.common.tile.TileEntityCardboardBox) box).components().get(mekanism.common.registries.MekanismDataComponents.BLOCK_DATA.get());
                 box.loadWithComponents(saved, level.registryAccess());
                 h.assertTrue(((de.theidler.create_mobile_packages.items.mobile_packager.MobilePackagerCardboardBox) box).createMobilePackages$isFromMobilePackager()
-                    == packer.equals(PACKERS.get(1)), "Origin must persist in BlockData");
+                    == true, "Both tiered tools must mark their cardboard-box origin");
                 h.assertTrue(level.destroyBlock(source, true, p), "Actual harvesting must destroy the sealed box");
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(source).inflate(2));
                 h.assertTrue(drops.size() == 1, "The packed box must yield exactly one transported item");
@@ -225,7 +237,7 @@ public final class CardboardPackingGameTests {
                 unpack(p, destination);
                 h.assertTrue(level.getBlockState(destination).is(Blocks.CHEST), "Transported chest must restore");
                 h.assertTrue(((Container) level.getBlockEntity(destination)).getItem(0).getCount() == 7, "All seven diamonds must remain");
-                h.assertTrue(emptyBoxes(level, destination) == (packer.equals(PACKERS.get(0)) ? 1 : 0), "Transport must preserve empty box returns");
+                h.assertTrue(emptyBoxes(level, destination) == 0, "Transport must preserve empty box returns");
                 clear(level, destination);
             }
         } finally { p.discard(); clear(level, source); clear(level, destination); }
