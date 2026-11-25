@@ -1,0 +1,45 @@
+name: Sync README to BBSMC
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - .github/workflows/sync-bbsmc-readme.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Update BBSMC project description
+        env:
+          BBSMC_TOKEN: ${{ secrets.BBSMC_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${BBSMC_TOKEN:-}" ]]; then
+            echo "::error::Repository secret BBSMC_TOKEN is missing or empty."
+            exit 1
+          fi
+
+          payload="$(jq -n --rawfile body README.md '{body: $body}')"
+
+          response="$(curl --silent --show-error --fail-with-body \
+            --request PATCH \
+            --url "https://api.bbsmc.net/v2/project/dimensionworks" \
+            --header "Authorization: ${BBSMC_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --header "User-Agent: szx-jn/DimensionWorks-readme-sync" \
+            --data-binary "${payload}")"
+
+          printf '%s' "${response}" | jq -e --arg expected "$(cat README.md)" '.body == $expected' >/dev/null
+
+          echo "BBSMC project body updated and verified successfully."
