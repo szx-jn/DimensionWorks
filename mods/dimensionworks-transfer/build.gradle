@@ -104,8 +104,8 @@ if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispat
         runtimeOnly 'maven.modrinth:rhino:SqkDvOLG'
         runtimeOnly 'maven.modrinth:kubejs-create:1qmcLagN'
         runtimeOnly 'maven.modrinth:better-advanced-tooltips:uPFbnD32'
-        runtimeOnly 'maven.modrinth:alex-s-caves-unofficial-port:pC1MYhqR'
-        runtimeOnly 'maven.modrinth:citadel-1.21.1-port:mIylVpkN'
+        runtimeOnly 'maven.modrinth:kSsLSjEt:pC1MYhqR'
+        runtimeOnly 'maven.modrinth:XjY0RcQj:mIylVpkN'
         runtimeOnly 'curse.maven:vintage-improvenents-ssw-edition-1255448:8941692'
     }
     neoForge.runs.gameTestServer {
