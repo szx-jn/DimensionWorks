@@ -16,16 +16,14 @@ public final class PackagerItems {
     public static final DeferredRegister<Item> ITEMS =
         DeferredRegister.create(BuiltInRegistries.ITEM, WDTransfer.MOD_ID);
 
-    private static final Rarity GREEN = Rarity.valueOf("DIMENSIONWORKS_TRANSFER_ELASTIC");
-    private static final Rarity BLUE = Rarity.valueOf("DIMENSIONWORKS_TRANSFER_BLOCK");
-    private static final Rarity PURPLE = Rarity.valueOf("DIMENSIONWORKS_TRANSFER_ADVANCED");
+    private static final Rarity TRANSCENDENT = Rarity.valueOf("DIMENSIONWORKS_TRANSFER_TRANSCENDENT");
 
     public static final DeferredHolder<Item, TieredPackager> PACKAGER = ITEMS.register("elastic_packager",
-        () -> new TieredPackager(new Item.Properties().rarity(GREEN), PackagerProfiles.GREEN));
+        () -> new TieredPackager(new Item.Properties().rarity(TRANSCENDENT), PackagerProfiles.GREEN));
     public static final DeferredHolder<Item, TieredPackager> BLOCK_PACKAGER = ITEMS.register("block_packager",
-        () -> new TieredPackager(new Item.Properties().rarity(BLUE), PackagerProfiles.BLUE));
+        () -> new TieredPackager(new Item.Properties().rarity(TRANSCENDENT), PackagerProfiles.BLUE));
     public static final DeferredHolder<Item, TieredPackager> ADVANCED_PACKAGER = ITEMS.register("advanced_packager",
-        () -> new TieredPackager(new Item.Properties().rarity(PURPLE), PackagerProfiles.PURPLE));
+        () -> new TieredPackager(new Item.Properties().rarity(TRANSCENDENT), PackagerProfiles.PURPLE));
 
     @SubscribeEvent
     public static void addToOriginalPackagerTab(BuildCreativeModeTabContentsEvent event) {
