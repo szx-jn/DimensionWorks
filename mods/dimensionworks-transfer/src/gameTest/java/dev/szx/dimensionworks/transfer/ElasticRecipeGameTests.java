@@ -61,18 +61,16 @@ public final class ElasticRecipeGameTests {
     }
 
     @GameTest(template="empty")
-    public static void packagersAndMagicEggShareTranscendentRarity(GameTestHelper h) {
+    public static void packagersAndMagicEggUseTheirIntendedRarities(GameTestHelper h) {
+        h.assertTrue(item("dimensionworks_transfer:elastic_packager").getRarity()
+            == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_ELASTIC"), "Advanced packager must have green rarity");
+        h.assertTrue(item("dimensionworks_transfer:block_packager").getRarity()
+            == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_BLOCK"), "Universal packager must have blue rarity");
         Rarity transcendent = Rarity.valueOf("DIMENSIONWORKS_TRANSFER_TRANSCENDENT");
-        for (String id : new String[] {
-            "dimensionworks_transfer:elastic_packager",
-            "dimensionworks_transfer:block_packager",
-            "dimensionworks_transfer:advanced_packager",
-            "kubejs:magic_century_egg"
-        }) {
-            ItemStack stack = item(id);
-            h.assertTrue(stack.getRarity() == transcendent,
-                id + " must use the shared transcendent rarity");
-        }
+        h.assertTrue(item("dimensionworks_transfer:advanced_packager").getRarity() == transcendent,
+            "Omnipotent packager must have transcendent rarity");
+        h.assertTrue(item("kubejs:magic_century_egg").getRarity() == transcendent,
+            "Magic century egg must share transcendent rarity");
         h.succeed();
     }
 
