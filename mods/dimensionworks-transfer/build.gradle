@@ -22,7 +22,7 @@ sourceSets.test {
     compileClasspath += sourceSets.main.compileClasspath
     runtimeClasspath += sourceSets.main.runtimeClasspath
 }
-ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 55 : project.hasProperty('elasticRecipeCheck') ? 46 : 42
+ext.gameTestCount = project.hasProperty('alexDispatchCheck') ? 56 : project.hasProperty('elasticRecipeCheck') ? 47 : 42
 def gameTestNamespaces = ['dimensionworks_transfer', 'dimensionworks_elastic', 'dimensionworks_cardboard']
 if (project.hasProperty('cardboardStorageCheck')) {
     dependencies {
@@ -113,6 +113,7 @@ if (project.hasProperty('elasticRecipeCheck') || project.hasProperty('alexDispat
     }
     tasks.register('prepareElasticRecipeCheck', Copy) {
         from(rootProject.file('kubejs/startup_scripts/elastic_packager.js')) { into 'startup_scripts' }
+        from(rootProject.file('kubejs/startup_scripts/magic_century_egg.js')) { into 'startup_scripts' }
         from(rootProject.file('kubejs/server_scripts/elastic_packager.js')) { into 'server_scripts' }
         from(rootProject.file('kubejs/data/dimensionworks_transfer')) { into 'data/dimensionworks_transfer' }
         from(rootProject.file('kubejs/data/vintageimprovements/recipe/craft/fiery_wire.json')) { into 'data/vintageimprovements/recipe/craft' }
