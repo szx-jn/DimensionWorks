@@ -48,9 +48,13 @@
 		#   Combining selectors - Any number of selectors can be combined with a plus sign.
 		
 	[client.options.manual_borders]
+		"green" = [
+			"dimensionworks_transfer:elastic_packager"
+		]
+		"blue" = [
+			"dimensionworks_transfer:block_packager"
+		]
 		"20_red_orange_yellow_green_blue_purple" = [
-			"dimensionworks_transfer:elastic_packager",
-			"dimensionworks_transfer:block_packager",
 			"dimensionworks_transfer:advanced_packager",
 			"kubejs:magic_century_egg"
 		]
