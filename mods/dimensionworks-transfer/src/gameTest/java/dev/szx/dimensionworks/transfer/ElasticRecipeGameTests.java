@@ -6,13 +6,13 @@ import de.theidler.create_mobile_packages.index.CMPItems;
 import dev.szx.dimensionworks.transfer.elastic.ElasticItems;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -58,6 +58,22 @@ public final class ElasticRecipeGameTests {
         grid.setItem(8, item("minecraft:dirt"));
         h.assertTrue(!recipe.matches(grid.asCraftInput(), h.getLevel()),
             recipeId + " must reject unrelated extra ingredients");
+    }
+
+    @GameTest(template="empty")
+    public static void packagersAndMagicEggShareTranscendentRarity(GameTestHelper h) {
+        Rarity transcendent = Rarity.valueOf("DIMENSIONWORKS_TRANSFER_TRANSCENDENT");
+        for (String id : new String[] {
+            "dimensionworks_transfer:elastic_packager",
+            "dimensionworks_transfer:block_packager",
+            "dimensionworks_transfer:advanced_packager",
+            "kubejs:magic_century_egg"
+        }) {
+            ItemStack stack = item(id);
+            h.assertTrue(stack.getItem().getRarity(stack) == transcendent,
+                id + " must use the shared transcendent rarity");
+        }
+        h.succeed();
     }
 
     @GameTest(template="empty")
