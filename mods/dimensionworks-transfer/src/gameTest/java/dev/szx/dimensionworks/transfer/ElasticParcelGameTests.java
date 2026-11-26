@@ -72,12 +72,18 @@ public final class ElasticParcelGameTests {
             && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
             && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
             && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
-        h.assertTrue(green.getRarity() == blue.getRarity() && green.getRarity() == purple.getRarity(),
-            "All custom packager tiers share the transcendent rarity");
-        var rarityColor = green.getRarity().getStyleModifier()
-            .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
-        h.assertTrue(rarityColor == ChatFormatting.GOLD.getColor(),
-            "Custom packager rarity must use the transcendent gold name color");
+        h.assertTrue(green.getRarity() == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_ELASTIC"),
+            "Advanced packager must have green rarity");
+        h.assertTrue(blue.getRarity() == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_BLOCK"),
+            "Universal packager must have blue rarity");
+        h.assertTrue(purple.getRarity() == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_TRANSCENDENT"),
+            "Omnipotent packager must have transcendent rarity");
+        int greenColor = green.getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        int blueColor = blue.getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        int purpleColor = purple.getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        h.assertTrue(greenColor == ChatFormatting.GREEN.getColor(), "Advanced packager rarity name must be green");
+        h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Universal packager rarity name must be blue");
+        h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Omnipotent packager rarity name must be purple");
         h.succeed();
     }
 
@@ -93,7 +99,7 @@ public final class ElasticParcelGameTests {
             h.assertTrue(elastic.getAttributeValue(Attributes.MOVEMENT_SPEED) == normal.getAttributeValue(Attributes.MOVEMENT_SPEED), "Movement modifier must match");
             h.assertTrue(elastic.getPersistentData().getInt(PackedPlayerState.ESCAPES) == normal.getPersistentData().getInt(PackedPlayerState.ESCAPES), "Escape state must match");
             var style = PackagerItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
-            h.assertTrue(style.getColor().getValue() == ChatFormatting.GOLD.getColor(), "Tool rarity must use the transcendent gold color");
+            h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Advanced packager rarity name must be green");
             h.assertTrue(PlayerParcel.unpack(elastic) && !elastic.getPersistentData().contains(ElasticParcelState.ELASTIC), "Unpack must clear elastic state");
             h.succeed();
         } finally { close(elastic); close(normal); }
