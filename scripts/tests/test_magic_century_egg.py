@@ -134,9 +134,11 @@ class MagicCenturyEggContractTest(unittest.TestCase):
 
         borders = (ROOT / "config" / "itemborders-common.toml").read_text(encoding="utf-8")
         self.assertIn('"20_red_orange_yellow_green_blue_purple"', borders)
+        self.assertIn('"green" = [', borders)
+        self.assertIn('"dimensionworks_transfer:elastic_packager"', borders)
+        self.assertIn('"blue" = [', borders)
+        self.assertIn('"dimensionworks_transfer:block_packager"', borders)
         for item_id in (
-            "dimensionworks_transfer:elastic_packager",
-            "dimensionworks_transfer:block_packager",
             "dimensionworks_transfer:advanced_packager",
             "kubejs:magic_century_egg",
         ):
