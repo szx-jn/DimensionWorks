@@ -22,7 +22,7 @@
   "dimensionworks_transfer.destination.aether": "The Aether",
   "message.dimensionworks_transfer.tutorial_action": "Controls unlock when you arrive",
   "message.dimensionworks_transfer.no_safe_landing": "No safe landing in your plot: a safe floor and two clear vertical blocks are required.",
-  "item.dimensionworks_transfer.elastic_packager": "Elastic Packager",
+  "item.dimensionworks_transfer.elastic_packager": "Advanced Packager",
   "item.dimensionworks_transfer.twilight_dispatch_upgrade": "Twilight Terminal Upgrade",
   "tooltip.dimensionworks_transfer.twilight_dispatch_upgrade": "Use on your dispatch terminal to unlock all six Alex cave routes.",
   "screen.dimensionworks_transfer.alex_caves": "Alex Caves · Choose a Destination",
@@ -37,6 +37,6 @@
   "message.dimensionworks_transfer.upgrade_installed": "Terminal upgraded. All six Alex cave routes are now open!",
   "message.dimensionworks_transfer.alex_caves_unlocked": "Alex cave routes unlocked",
   "message.dimensionworks_transfer.alex_caves_upgrade_hint": "1 Twilight log + any 3 Boss trophies → Terminal upgrade",
-  "item.dimensionworks_transfer.block_packager": "Block Packager",
-  "item.dimensionworks_transfer.advanced_packager": "Advanced Packager"
+  "item.dimensionworks_transfer.block_packager": "Universal Packager",
+  "item.dimensionworks_transfer.advanced_packager": "Omnipotent Packager"
 }

@@ -1,3 +1,5 @@
+const $DWRarity = Java.loadClass('net.minecraft.world.item.Rarity')
+
 StartupEvents.registry('item', event => {
   event.create('century_egg_mixture')
     .displayName(Text.translate('item.kubejs.century_egg_mixture'))
@@ -52,7 +54,7 @@ StartupEvents.registry('item', event => {
     .tooltip(Text.translate('item.kubejs.magic_century_egg.tooltip.1'))
     .tooltip(Text.translate('item.kubejs.magic_century_egg.tooltip.2'))
     .texture('kaleidoscope_chinesefood:item/century_egg')
-    .rarity('epic')
+    .rarity($DWRarity.valueOf('DIMENSIONWORKS_TRANSFER_TRANSCENDENT'))
     .glow(true)
     .food(food => food
       .nutrition(20)

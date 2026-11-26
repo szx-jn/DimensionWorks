@@ -26,6 +26,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
@@ -72,12 +73,18 @@ public final class ElasticParcelGameTests {
             && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
             && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
             && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
-        var blueColor = PackagerItems.BLOCK_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
-            .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
-        var purpleColor = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
-            .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
-        h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Blue tool rarity must actually be blue");
-        h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Purple tool rarity must actually be purple");
+        h.assertTrue(green.getRarity() == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_ELASTIC"),
+            "Advanced packager must have green rarity");
+        h.assertTrue(blue.getRarity() == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_BLOCK"),
+            "Universal packager must have blue rarity");
+        h.assertTrue(purple.getRarity() == Rarity.valueOf("DIMENSIONWORKS_TRANSFER_TRANSCENDENT"),
+            "Omnipotent packager must have transcendent rarity");
+        int greenColor = green.getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        int blueColor = blue.getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        int purpleColor = purple.getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
+        h.assertTrue(greenColor == ChatFormatting.GREEN.getColor(), "Advanced packager rarity name must be green");
+        h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Universal packager rarity name must be blue");
+        h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Omnipotent packager rarity name must be purple");
         h.succeed();
     }
 
@@ -93,7 +100,7 @@ public final class ElasticParcelGameTests {
             h.assertTrue(elastic.getAttributeValue(Attributes.MOVEMENT_SPEED) == normal.getAttributeValue(Attributes.MOVEMENT_SPEED), "Movement modifier must match");
             h.assertTrue(elastic.getPersistentData().getInt(PackedPlayerState.ESCAPES) == normal.getPersistentData().getInt(PackedPlayerState.ESCAPES), "Escape state must match");
             var style = PackagerItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
-            h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Tool rarity must actually be green");
+            h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Advanced packager rarity name must be green");
             h.assertTrue(PlayerParcel.unpack(elastic) && !elastic.getPersistentData().contains(ElasticParcelState.ELASTIC), "Unpack must clear elastic state");
             h.succeed();
         } finally { close(elastic); close(normal); }

@@ -36,16 +36,53 @@ ServerEvents.recipes(event => {
   event.shapeless('dimensionworks_transfer:elastic_packager', [
     'create_mobile_packages:mobile_packager', 'kubejs:bounce_tape'
   ]).modifyResult('dimensionworks:elastic_packager_upgrade').id('dimensionworks:elastic/upgrade_packager')
+
+  // Magnetic Caves materials form the opposing-polarity clamp for ordinary block packing.
+  event.shapeless('dimensionworks_transfer:block_packager', [
+    'dimensionworks_transfer:elastic_packager',
+    'alexscaves:energized_galena_neutral',
+    'alexscaves:raw_scarlet_neodymium',
+    'alexscaves:raw_scarlet_neodymium',
+    'alexscaves:raw_azure_neodymium',
+    'alexscaves:raw_azure_neodymium',
+    'create:sturdy_sheet'
+  ]).modifyResult('dimensionworks:block_packager_upgrade').id('dimensionworks:elastic/upgrade_block_packager')
+
+  // Purple requires one signature material from each of the five remaining caves.
+  event.shapeless('dimensionworks_transfer:advanced_packager', [
+    'dimensionworks_transfer:block_packager',
+    'alexscaves:pewen_sap',
+    'alexscaves:uranium',
+    'alexscaves:pearl',
+    'alexscaves:pure_darkness',
+    'alexscaves:sweet_tooth',
+    'create:precision_mechanism',
+    'mekanism:alloy_atomic'
+  ]).modifyResult('dimensionworks:advanced_packager_upgrade').id('dimensionworks:elastic/upgrade_advanced_packager')
 })
 
 // 2101 的结果修饰器以固定名称注册，使用原生 CraftingInput 读取输入。
-ServerEvents.modifyRecipeResult('dimensionworks:elastic_packager_upgrade', event => {
-  const ElasticPackager = Java.loadClass('dev.szx.dimensionworks.transfer.elastic.ElasticPackager')
+const ElasticPackager = Java.loadClass('dev.szx.dimensionworks.transfer.elastic.ElasticPackager')
+
+function upgradePackagerResult(event, sourceId, upgrade) {
   for (let slot = 0; slot < event.grid.size(); slot++) {
     const stack = event.grid.getItem(slot)
-    if (stack.id === 'create_mobile_packages:mobile_packager') {
-      event.exit(ElasticPackager.upgrade(stack))
+    if (stack.id === sourceId) {
+      event.exit(upgrade(stack))
+      return
     }
   }
-  throw new Error('弹力工具升级配方缺少移动打包器输入')
+  throw new Error('打包工具升级配方缺少前置工具：' + sourceId)
+}
+
+ServerEvents.modifyRecipeResult('dimensionworks:elastic_packager_upgrade', event => {
+  upgradePackagerResult(event, 'create_mobile_packages:mobile_packager', stack => ElasticPackager.upgrade(stack))
+})
+
+ServerEvents.modifyRecipeResult('dimensionworks:block_packager_upgrade', event => {
+  upgradePackagerResult(event, 'dimensionworks_transfer:elastic_packager', stack => ElasticPackager.upgradeToBlue(stack))
+})
+
+ServerEvents.modifyRecipeResult('dimensionworks:advanced_packager_upgrade', event => {
+  upgradePackagerResult(event, 'dimensionworks_transfer:block_packager', stack => ElasticPackager.upgradeToPurple(stack))
 })

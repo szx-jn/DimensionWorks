@@ -121,7 +121,8 @@ class MagicCenturyEggContractTest(unittest.TestCase):
 
         self.assertNotIn(".name(", startup)
         self.assertNotIn(".hunger(99999)", startup)
-        self.assertIn(".rarity('epic')", startup)
+        self.assertIn("const $DWRarity = Java.loadClass('net.minecraft.world.item.Rarity')", startup)
+        self.assertIn(".rarity($DWRarity.valueOf('DIMENSIONWORKS_TRANSFER_TRANSCENDENT'))", startup)
         self.assertIn(".nutrition(20)", startup)
         self.assertNotIn(".effect(", startup)
         self.assertNotIn(".eaten(", startup)
@@ -130,6 +131,18 @@ class MagicCenturyEggContractTest(unittest.TestCase):
         self.assertIn("$DWMagicEggSelection.open(player, data)", server)
         self.assertIn("ItemEvents.foodEaten(DW_MAGIC_EGG_ID", server)
         self.assertIn("DURATION_TICKS = 20 * 60 * 10", gui)
+
+        borders = (ROOT / "config" / "itemborders-common.toml").read_text(encoding="utf-8")
+        self.assertIn('"20_red_orange_yellow_green_blue_purple"', borders)
+        self.assertIn('"green" = [', borders)
+        self.assertIn('"dimensionworks_transfer:elastic_packager"', borders)
+        self.assertIn('"blue" = [', borders)
+        self.assertIn('"dimensionworks_transfer:block_packager"', borders)
+        for item_id in (
+            "dimensionworks_transfer:advanced_packager",
+            "kubejs:magic_century_egg",
+        ):
+            self.assertIn(item_id, borders)
 
     def test_eating_again_triggers_death_immediately(self) -> None:
         startup = (ROOT / "kubejs" / "startup_scripts" / "magic_century_egg.js").read_text(encoding="utf-8")
