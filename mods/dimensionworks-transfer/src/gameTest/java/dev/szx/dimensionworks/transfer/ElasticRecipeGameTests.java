@@ -70,7 +70,7 @@ public final class ElasticRecipeGameTests {
             "kubejs:magic_century_egg"
         }) {
             ItemStack stack = item(id);
-            h.assertTrue(stack.getItem().getRarity(stack) == transcendent,
+            h.assertTrue(stack.getRarity() == transcendent,
                 id + " must use the shared transcendent rarity");
         }
         h.succeed();
