@@ -72,12 +72,12 @@ public final class ElasticParcelGameTests {
             && PackagerCapabilities.has(purple, PackagerCapability.SPECIAL_BLOCK_PACKING)
             && PackagerCapabilities.has(purple, PackagerCapability.MOD_COMPATIBILITY)
             && PackagerCapabilities.has(purple, PackagerCapability.SABLE_SHIP_PACKING), "Purple adds special compatibility and ship capture");
-        var blueColor = PackagerItems.BLOCK_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
+        h.assertTrue(green.getRarity() == blue.getRarity() && green.getRarity() == purple.getRarity(),
+            "All custom packager tiers share the transcendent rarity");
+        var rarityColor = green.getRarity().getStyleModifier()
             .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
-        var purpleColor = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
-            .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
-        h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Blue tool rarity must actually be blue");
-        h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Purple tool rarity must actually be purple");
+        h.assertTrue(rarityColor == ChatFormatting.GOLD.getColor(),
+            "Custom packager rarity must use the transcendent gold name color");
         h.succeed();
     }
 
@@ -93,7 +93,7 @@ public final class ElasticParcelGameTests {
             h.assertTrue(elastic.getAttributeValue(Attributes.MOVEMENT_SPEED) == normal.getAttributeValue(Attributes.MOVEMENT_SPEED), "Movement modifier must match");
             h.assertTrue(elastic.getPersistentData().getInt(PackedPlayerState.ESCAPES) == normal.getPersistentData().getInt(PackedPlayerState.ESCAPES), "Escape state must match");
             var style = PackagerItems.PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier().apply(net.minecraft.network.chat.Style.EMPTY);
-            h.assertTrue(style.getColor().getValue() == ChatFormatting.GREEN.getColor(), "Tool rarity must actually be green");
+            h.assertTrue(style.getColor().getValue() == ChatFormatting.GOLD.getColor(), "Tool rarity must use the transcendent gold color");
             h.assertTrue(PlayerParcel.unpack(elastic) && !elastic.getPersistentData().contains(ElasticParcelState.ELASTIC), "Unpack must clear elastic state");
             h.succeed();
         } finally { close(elastic); close(normal); }
