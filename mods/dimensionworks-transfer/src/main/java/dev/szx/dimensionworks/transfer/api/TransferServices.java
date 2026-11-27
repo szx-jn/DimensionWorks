@@ -1,6 +1,5 @@
 package dev.szx.dimensionworks.transfer.api;
 
-import dev.szx.dimensionworks.transfer.territory.Territory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,8 +40,8 @@ public final class TransferServices {
         return tutorialLockPolicy.isLocked(player);
     }
 
-    public static void ensureTerritoryTerminal(ServerLevel level, Territory territory) {
-        territoryDispatchHook.ensureDispatchTerminal(level, territory);
+    public static void ensureTerritoryTerminal(ServerLevel level, BlockPos terminal) {
+        territoryDispatchHook.ensureDispatchTerminal(level, terminal);
     }
 
     public static ITransferNetworkRouter networkRouter() {

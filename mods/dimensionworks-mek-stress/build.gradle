@@ -1,5 +1,9 @@
 plugins { id 'java-library' }
 
+sourceSets {
+    gameTest
+}
+
 version = '0.3.30'
 base.archivesName = 'dimensionworks_mek_stress'
 apply from: rootProject.file('gradle/neoforge-module.gradle')
@@ -17,6 +21,7 @@ dependencies {
     implementation 'maven.modrinth:codechicken-lib:vLDGhjNJ'
     implementation 'maven.modrinth:jade:eYz2YBGT'
     runtimeOnly 'maven.modrinth:curios:KJsZIQrT'
+    gameTestImplementation 'maven.modrinth:curios:KJsZIQrT'
     runtimeOnly 'maven.modrinth:guideme:QeYKsstN'
     implementation 'maven.modrinth:create-more-package-couriers:aG9jHA8l'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
@@ -28,5 +33,5 @@ sourceSets.test {
     runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.compileClasspath
 }
 
-ext.gameTestCount = 17
+ext.gameTestCount = 18
 apply from: rootProject.file('gradle/neoforge-gametest.gradle')

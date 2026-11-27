@@ -11,7 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
-import top.theillusivec4.curios.api.CuriosApi;
 
 /** Owns the one-time Gear Heart to logistics-dimension tutorial. */
 public final class TutorialManager {
@@ -21,9 +20,6 @@ public final class TutorialManager {
     private static final String USED = "Used";
     private static final String DONE = "Done";
     private static final ResourceLocation KEY_ID = ResourceLocation.fromNamespaceAndPath("kubejs", "dimension_key");
-    private static final ResourceLocation HEART_ID = ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart");
-    private static final ResourceLocation BLESSED_HEART_ID =
-        ResourceLocation.fromNamespaceAndPath("kubejs", "gear_heart_enchanted");
 
     private TutorialManager() {}
 
@@ -43,7 +39,7 @@ public final class TutorialManager {
         boolean milestone = player.getPersistentData()
             .getCompound(Player.PERSISTED_NBT_TAG)
             .getBoolean(STAGE_TWO);
-        if (milestone || hasReachedStageTwo(player)) {
+        if (milestone || GearHeartMilestoneAdapter.hasReachedStageTwo(player)) {
             begin(player, savedData);
         }
     }
@@ -142,24 +138,6 @@ public final class TutorialManager {
         player.closeContainer();
         TransferNetwork.tutorial(player, true);
     }
-
-    private static boolean hasReachedStageTwo(ServerPlayer player) {
-        return CuriosApi.getCuriosInventory(player)
-            .map(inventory -> inventory.findFirstCurio(stack -> {
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                if (BLESSED_HEART_ID.equals(itemId)) {
-                    var model = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
-                    return model == null || model.value() != 2;
-                }
-                if (!HEART_ID.equals(itemId)) {
-                    return false;
-                }
-                int repairedMask = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag().getInt("DimensionWorksGearHeartRepaired");
-                return (repairedMask & 3) == 3;
-            }).isPresent())
-            .orElse(false);
-    }
-
     private static void finish(ServerPlayer player, CompoundTag state, TutorialSavedData savedData) {
         if (state.getBoolean(DONE) || !player.level().dimension().equals(WDKeys.TRANSFER_LEVEL)) {
             return;

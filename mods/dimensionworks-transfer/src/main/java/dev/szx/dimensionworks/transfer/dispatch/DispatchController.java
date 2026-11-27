@@ -9,7 +9,7 @@ import dev.szx.dimensionworks.transfer.returnpoint.ReturnPointSavedData;
 import dev.szx.dimensionworks.transfer.territory.Territory;
 import dev.szx.dimensionworks.transfer.territory.TerritoryManager;
 import dev.szx.dimensionworks.transfer.territory.TerritorySavedData;
-import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import dev.szx.dimensionworks.transfer.territory.SafeLanding;
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,14 +39,17 @@ public final class DispatchController {
     private DispatchController() {}
 
     public static BlockPos terminal(Territory territory) {
-        return BlockPos.containing(territory.centerX(), Territory.FLOOR_Y + 1, territory.centerZ());
+        return territory.dispatchTerminal();
+    }
+
+    public static void ensure(ServerLevel level, BlockPos terminal) {
+        if (!level.getBlockState(terminal).is(DispatchBlocks.TERMINAL.get())) {
+            level.setBlockAndUpdate(terminal, DispatchBlocks.TERMINAL.get().defaultBlockState());
+        }
     }
 
     public static void ensure(ServerLevel level, Territory territory) {
-        BlockPos pos = terminal(territory);
-        if (!level.getBlockState(pos).is(DispatchBlocks.TERMINAL.get())) {
-            level.setBlockAndUpdate(pos, DispatchBlocks.TERMINAL.get().defaultBlockState());
-        }
+        ensure(level, terminal(territory));
     }
 
     public static boolean authorized(ServerPlayer player) {
@@ -68,7 +71,7 @@ public final class DispatchController {
             territory != null && terminal(territory).equals(pos),
             player.distanceToSqr(Vec3.atCenterOf(pos)) < 9,
             PlayerParcel.isPacked(player),
-            TutorialManager.locked(player),
+            TransferServices.isTutorialLocked(player),
             true);
     }
 
@@ -127,7 +130,7 @@ public final class DispatchController {
         Long openedAt = OPEN.get(player.getUUID());
         if (openedAt != null && (territory == null
             || !PlayerParcel.isPacked(player)
-            || TutorialManager.locked(player)
+            || TransferServices.isTutorialLocked(player)
             || player.distanceToSqr(Vec3.atCenterOf(terminal(territory))) > 144
             || now - openedAt > 600)) {
             forceClose(player);

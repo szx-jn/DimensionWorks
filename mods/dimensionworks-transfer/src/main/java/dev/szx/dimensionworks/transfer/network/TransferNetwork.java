@@ -1,9 +1,7 @@
 package dev.szx.dimensionworks.transfer.network;
 
 import dev.szx.dimensionworks.transfer.WDTransfer;
-import dev.szx.dimensionworks.transfer.dispatch.DispatchController;
-import dev.szx.dimensionworks.transfer.handler.TransferController;
-import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,13 +17,13 @@ public final class TransferNetwork {
     public static void register(RegisterPayloadHandlersEvent event) {
         var registrar=event.registrar("4");
         registrar.playToServer(TransferToggleRequest.TYPE, TransferToggleRequest.CODEC, (packet,context)->{
-            if(context.player() instanceof ServerPlayer player && !TutorialManager.locked(player))TransferController.useFromKey(player);
+            if(context.player() instanceof ServerPlayer player)TransferServices.networkRouter().onToggleRequested(player);
         });
         registrar.playToServer(ChooseDestination.TYPE, ChooseDestination.CODEC, (packet,context)->{
-            if(context.player() instanceof ServerPlayer player)DispatchController.send(player,packet.pos,packet.route);
+            if(context.player() instanceof ServerPlayer player)TransferServices.networkRouter().onDispatchChoice(player,packet.pos,packet.route);
         });
         registrar.playToServer(CloseDispatch.TYPE, CloseDispatch.CODEC, (packet,context)->{
-            if(context.player() instanceof ServerPlayer player)DispatchController.close(player);
+            if(context.player() instanceof ServerPlayer player)TransferServices.networkRouter().onDispatchClosed(player);
         });
         registrar.playToClient(OpenDispatch.TYPE, OpenDispatch.CODEC, (packet,context)->TransferClientPayloads.open(packet));
         registrar.playToClient(TutorialState.TYPE, TutorialState.CODEC, (packet,context)->TransferClientPayloads.tutorial(packet));
@@ -36,7 +34,7 @@ public final class TransferNetwork {
         return new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(WDTransfer.MOD_ID,name));
     }
     public static void sendToggleRequest(){PacketDistributor.sendToServer(new TransferToggleRequest());}
-    public static void open(ServerPlayer player,BlockPos pos){PacketDistributor.sendToPlayer(player,new OpenDispatch(pos,DispatchController.alexCavesUnlocked(player)));}
+    public static void open(ServerPlayer player,BlockPos pos){PacketDistributor.sendToPlayer(player,new OpenDispatch(pos,TransferServices.networkRouter().isAlexCavesUnlocked(player)));}
     public static void sendChoice(BlockPos pos,String route){PacketDistributor.sendToServer(new ChooseDestination(pos,route));}
     public static void sendClose(){PacketDistributor.sendToServer(new CloseDispatch());}
     public static void tutorial(ServerPlayer player,boolean locked){PacketDistributor.sendToPlayer(player,new TutorialState(locked));}

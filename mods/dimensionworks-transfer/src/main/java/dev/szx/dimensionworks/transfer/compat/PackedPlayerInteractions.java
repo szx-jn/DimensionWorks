@@ -2,7 +2,7 @@ package dev.szx.dimensionworks.transfer.compat;
 
 import com.simibubi.create.content.logistics.packager.PackagerBlock;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
-import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
@@ -12,14 +12,14 @@ public final class PackedPlayerInteractions {
     private PackedPlayerInteractions() {}
 
     public static boolean unpackAt(ServerPlayer player, PackagerBlockEntity packager) {
-        if (!PlayerParcel.isPacked(player) || TutorialManager.locked(player)
+        if (!PlayerParcel.isPacked(player) || TransferServices.isTutorialLocked(player)
             || packager.getLevel() != player.level() || packager.animationTicks != 0 || !packager.heldBox.isEmpty()) return false;
         // The player has no item contents to insert; use CMP's one authoritative unpack operation.
         return PlayerParcel.unpack(player);
     }
 
     public static void tick(ServerPlayer player) {
-        if (!PlayerParcel.isPacked(player) || TutorialManager.locked(player)) return;
+        if (!PlayerParcel.isPacked(player) || TransferServices.isTutorialLocked(player)) return;
         BlockPos center = player.blockPosition();
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-1,-1,-1), center.offset(1,1,1))) {
             if (!player.level().hasChunkAt(pos)) continue;

@@ -5,7 +5,7 @@ import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltSlope;
 import dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport;
-import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +29,7 @@ public final class ElasticVerticalBelt {
             || player.isShiftKeyDown() || player.getAbilities().flying || player.isPassenger()
             || PackedPlayerTransport.ignoresBlocks(player)
             || player.level().isClientSide && dev.szx.dimensionworks.transfer.client.TutorialOverlay.isLocked()
-            || player instanceof ServerPlayer serverPlayer && TutorialManager.locked(serverPlayer)) return null;
+            || TransferServices.isTutorialLocked(player)) return null;
 
         AABB box = player.getBoundingBox();
         Contact closest = null;

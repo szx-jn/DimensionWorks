@@ -1,10 +1,10 @@
 package dev.szx.dimensionworks.transfer.dispatch;
 
 import dev.szx.dimensionworks.transfer.WDKeys;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import dev.szx.dimensionworks.transfer.territory.Territory;
 import dev.szx.dimensionworks.transfer.territory.TerritoryManager;
 import dev.szx.dimensionworks.transfer.territory.TerritorySavedData;
-import dev.szx.dimensionworks.transfer.tutorial.TutorialManager;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -34,7 +34,7 @@ public final class DispatchUpgradeItem extends Item {
         Territory territory = TerritoryManager.getTerritory(player);
         if (!level.dimension().equals(WDKeys.TRANSFER_LEVEL) || territory == null
             || !DispatchController.terminal(territory).equals(pos)
-            || player.distanceToSqr(Vec3.atCenterOf(pos)) > 36 || TutorialManager.locked(player)) {
+            || player.distanceToSqr(Vec3.atCenterOf(pos)) > 36 || TransferServices.isTutorialLocked(player)) {
             player.displayClientMessage(Component.translatable("message.dimensionworks_transfer.upgrade_not_owner"), true);
             return InteractionResult.FAIL;
         }

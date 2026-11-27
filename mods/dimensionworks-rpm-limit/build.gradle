@@ -19,5 +19,5 @@ sourceSets.test {
     runtimeClasspath += sourceSets.main.runtimeClasspath
 }
 
-ext.gameTestCount = 34
+ext.gameTestCount = 33
 apply from: rootProject.file('gradle/neoforge-gametest.gradle')

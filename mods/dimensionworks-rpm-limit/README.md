@@ -8,6 +8,10 @@
 
 文中早期 Forge 验证记录属于 1.20.1 基线，不能作为本次迁移通过的依据；本次结果见文末和[迁移执行记录](../../docs/validation/2026-11-20-neoforge-migration-execution.md)。
 
+## 模块间 Java API
+
+其他自研模块通过 `dev.szx.dimensionworks.rpmlimit.api` 调用限速与工业额度能力，不直接依赖内部管理器、优化器或配额实现。主要入口为 `RpmLimitServices.rpm()`、`optimizer()`、`overspeed()`、`quota()` 与 `topology()`；Mekanism 配方上下文、Mixin 和专属处理逻辑由 `dimensionworks_mek_stress` 持有。现有 `/dw` 命令与 KubeJS 调用入口保持不变。
+
 ## Default
 New players start at **32 RPM**. The hard maximum is **10240 RPM**.
 The mod declares Create as a `BEFORE` dependency and its Mixin configuration is required, so the Create kinetic hooks are applied before Create's content is loaded.

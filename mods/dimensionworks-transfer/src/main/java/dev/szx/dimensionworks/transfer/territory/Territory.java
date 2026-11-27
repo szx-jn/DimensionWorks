@@ -1,5 +1,7 @@
 package dev.szx.dimensionworks.transfer.territory;
 
+import net.minecraft.core.BlockPos;
+
 /**
  * One player's 3x3 chunk plot. Plots are laid out on a square grid whose cell size is
  * {@link #STRIDE_CHUNKS} chunks, so two neighbouring plots always leave {@link #MIN_GAP_CHUNKS}
@@ -75,6 +77,10 @@ public record Territory(int spiralIndex, int gridX, int gridZ) {
 
     public double centerZ() {
         return minZ() + (TERRITORY_CHUNKS * 16) / 2.0D;
+    }
+
+    public BlockPos dispatchTerminal() {
+        return BlockPos.containing(centerX(), FLOOR_Y + 1, centerZ());
     }
 
     /** Center of the block immediately west of the dispatch terminal. */

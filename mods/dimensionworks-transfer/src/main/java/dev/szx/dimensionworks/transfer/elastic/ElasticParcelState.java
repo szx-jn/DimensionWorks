@@ -5,6 +5,7 @@ import de.theidler.create_mobile_packages.items.mobile_packager.PackagerCapabili
 import de.theidler.create_mobile_packages.items.mobile_packager.ability.PackagerCapability;
 import dev.szx.dimensionworks.transfer.compat.PlayerParcel;
 import dev.szx.dimensionworks.transfer.compat.PackedPlayerTransport;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -47,8 +48,7 @@ public final class ElasticParcelState {
     public static boolean canCharge(Player player) {
         return isElastic(player) && player.isAlive() && player.onGround()
             && !player.isPassenger() && !PackedPlayerTransport.ignoresBlocks(player)
-            && !(player instanceof ServerPlayer serverPlayer
-                && dev.szx.dimensionworks.transfer.tutorial.TutorialManager.locked(serverPlayer));
+            && !TransferServices.isTutorialLocked(player);
     }
 
     public static void input(ServerPlayer player, boolean down, float pitch, float yaw) {

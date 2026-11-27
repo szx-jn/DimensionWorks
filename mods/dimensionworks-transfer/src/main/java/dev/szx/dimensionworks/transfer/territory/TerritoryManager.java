@@ -1,7 +1,7 @@
 package dev.szx.dimensionworks.transfer.territory;
 
 import dev.szx.dimensionworks.transfer.WDKeys;
-import dev.szx.dimensionworks.transfer.dispatch.DispatchController;
+import dev.szx.dimensionworks.transfer.api.TransferServices;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +35,7 @@ public final class TerritoryManager {
         }
 
         Territory territory = prepare(player, transfer);
-        DispatchController.ensure(transfer, territory);
+        TransferServices.ensureTerritoryTerminal(transfer, territory.dispatchTerminal());
         var landing = SafeLanding.inTerritory(transfer, territory);
         if (landing.isEmpty()) {
             if (player.serverLevel() != transfer) PlotChunkLoading.deactivate(player.getUUID());
@@ -61,7 +61,7 @@ public final class TerritoryManager {
         }
 
         Territory territory = prepare(player, level);
-        DispatchController.ensure(level, territory);
+        TransferServices.ensureTerritoryTerminal(level, territory.dispatchTerminal());
         SafeLanding.inTerritory(level, territory).ifPresentOrElse(
             landing -> teleportInto(player, level, landing),
             () -> player.displayClientMessage(Component.translatable("message.dimensionworks_transfer.no_safe_landing"), false));
