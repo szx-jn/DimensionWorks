@@ -8,8 +8,7 @@ import dev.szx.dimensionworks.cavefactory.logic.FactoryModule;
 import dev.szx.dimensionworks.cavefactory.recipe.FluidStabilizationRecipe;
 import dev.szx.dimensionworks.cavefactory.registry.CFBlockEntities;
 import dev.szx.dimensionworks.cavefactory.registry.CFRecipes;
-import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
-import dev.szx.dimensionworks.rpmlimit.quota.GearHeartOwnerResolver;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -74,8 +73,8 @@ public class FluidStabilizerBlockEntity extends FactoryMachineBlockEntity {
         if (operations == 0) return;
         long gateAmount = (long) result.getCount() * operations;
         if (!canAccept(result)
-            || !FinalProductionGate.tryConsumeItem(
-                GearHeartOwnerResolver.normalize(owner()), result, gateAmount,
+            || !RpmLimitServices.quota().tryConsumeFinalItem(
+                RpmLimitServices.quota().normalizeOwner(owner()), result, gateAmount,
                 level.getGameTime())) {
             return;
         }

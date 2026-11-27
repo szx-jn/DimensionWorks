@@ -13,6 +13,7 @@ import dev.szx.dimensionworks.cavefactory.logic.MachineTuning;
 import dev.szx.dimensionworks.cavefactory.logic.ModuleHost;
 import dev.szx.dimensionworks.cavefactory.logic.PhaseCycle;
 import dev.szx.dimensionworks.cavefactory.logic.PortMode;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,8 +36,6 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.UUID;
 
 public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
@@ -133,7 +132,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     };
     private final IItemHandler outputItemCapability = new FactoryOutputItemHandler(outputItems, residue, ampouleOutput);
 
-    private final Map<Direction, PortMode> portModes = new EnumMap<>(Direction.class);
+    private final MachinePortController portController = new MachinePortController();
     private UUID owner;
     private String ownerName = "";
     private PhaseCycle phaseCycle;
@@ -169,9 +168,6 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     ) {
         super(type, pos, state);
         phaseCycle = new PhaseCycle(FactoryPhase.PHASE_A, 0, CaveFactoryConfig.PHASE_BATCHES.get());
-        for (Direction direction : Direction.values()) {
-            portModes.put(direction, PortMode.DISABLED);
-        }
         inputTank.setValidator(dev.szx.dimensionworks.cavefactory.registry.CFFluids::isFactoryFluid);
         outputTank.setValidator(dev.szx.dimensionworks.cavefactory.registry.CFFluids::isFactoryFluid);
         setLazyTickRate(20);
@@ -218,24 +214,24 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     }
 
     public float effectiveRpm() {
-        return dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp(this, getTheoreticalSpeed());
+        return RpmLimitServices.rpm().clamp(this, getTheoreticalSpeed());
     }
 
     public double overspeedMultiplier() {
-        if (!dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_ENABLED.get()) return 1.0D;
-        return dev.szx.dimensionworks.rpmlimit.OverspeedCurve.multiplier(effectiveRpm(),
-            CaveFactoryConfig.KINETIC_SATURATION_RPM.get(), dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_CAP.get());
+        var overspeed = RpmLimitServices.overspeed();
+        if (!overspeed.isEnabled()) return 1.0D;
+        return overspeed.multiplier(effectiveRpm(), CaveFactoryConfig.KINETIC_SATURATION_RPM.get());
     }
 
     public float stressImpactWithOverspeed(float baseImpact) {
         float impact = Math.max(0, baseImpact);
-        if (!dev.szx.dimensionworks.rpmlimit.RpmLimitConfig.OVERSPEED_STRESS_SCALING.get()
-            || dev.szx.dimensionworks.rpmlimit.OverspeedBonus.isWhitelisted(this)) return impact;
+        var overspeed = RpmLimitServices.overspeed();
+        if (!overspeed.isStressScalingEnabled() || overspeed.isWhitelisted(this)) return impact;
         return (float) (impact * overspeedMultiplier());
     }
 
     public int batchesThisTick() {
-        return dev.szx.dimensionworks.rpmlimit.OverspeedCurve.batches(overspeedMultiplier(), level == null ? 0 : level.getGameTime());
+        return RpmLimitServices.overspeed().batches(overspeedMultiplier(), level == null ? 0 : level.getGameTime());
     }
 
     protected void recordSuccessfulBatch() {
@@ -260,30 +256,15 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     }
 
     public PortMode portMode(Direction direction) {
-        return portModes.getOrDefault(direction, PortMode.DISABLED);
+        return portController.mode(direction);
     }
 
     public boolean cyclePort(Direction direction, Player player) {
         if (!isOwner(player)) {
             return false;
         }
-        PortMode next = portMode(direction).next();
-        if (next == PortMode.KINETIC_INPUT && hasKineticPort(direction)) {
-            next = next.next();
-        }
-        portModes.put(direction, next);
-        if (level != null) {
-            level.invalidateCapabilities(worldPosition);
-            for (Direction adjacent : Direction.values()) level.invalidateCapabilities(worldPosition.relative(adjacent));
-        }
+        portController.cycle(direction, level, worldPosition);
         refreshKineticConnection(direction);
-        if (level != null) {
-            BlockEntity port = level.getBlockEntity(worldPosition.relative(direction));
-            if (port != null) {
-                level.invalidateCapabilities(port.getBlockPos());
-                level.sendBlockUpdated(port.getBlockPos(), port.getBlockState(), port.getBlockState(), 3);
-            }
-        }
         setChanged();
         return true;
     }
@@ -364,22 +345,8 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         }
     }
 
-    private boolean hasKineticPort(Direction except) {
-        for (Map.Entry<Direction, PortMode> entry : portModes.entrySet()) {
-            if (entry.getKey() != except && entry.getValue() == PortMode.KINETIC_INPUT) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public Direction kineticPort() {
-        for (Map.Entry<Direction, PortMode> entry : portModes.entrySet()) {
-            if (entry.getValue() == PortMode.KINETIC_INPUT) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return portController.kineticPort();
     }
 
     protected void refreshKineticConnection(Direction changedDirection) {
@@ -431,31 +398,11 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
 
     public void expireAmpoulesInternal() {
         long now = System.currentTimeMillis();
-        expireAmpoules(ampouleInput, now);
-        expireAmpoules(ampouleOutput, now);
-    }
-
-    private void expireAmpoules(ItemStackHandler handler, long now) {
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
-            ItemStack stack = handler.getStackInSlot(slot);
-            if (stack.isEmpty()) {
-                continue;
-            }
-            if (stack.getItem() instanceof FluidAmpouleItem ampoule && level != null) {
-                AmpouleExpiry.observe(
-                    stack,
-                    level.dimension().location().toString(),
-                    now,
-                    CaveFactoryConfig.STABILITY_SECONDS.get() * 1000L
-                );
-            }
-            AmpouleExpiry.Settlement settlement = AmpouleExpiry.settle(stack, now);
-            if (settlement.expired()) {
-                int count = stack.getCount();
-                handler.setStackInSlot(slot, settlement.stack().copyWithCount(count));
-                addResidueOrDrop(settlement.residue().copyWithCount(count));
-                setChanged();
-            }
+        if (MachineAmpouleHandler.expireHandler(ampouleInput, level, now, this::addResidueOrDrop)) {
+            setChanged();
+        }
+        if (MachineAmpouleHandler.expireHandler(ampouleOutput, level, now, this::addResidueOrDrop)) {
+            setChanged();
         }
     }
 
@@ -733,22 +680,12 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
 
     @Nullable
     public IItemHandler itemHandler(@Nullable Direction side) {
-        if (side == null || isRemoved()) return null;
-        return switch (portMode(side)) {
-            case ITEM_INPUT -> inputItems;
-            case ITEM_OUTPUT -> outputItemCapability;
-            default -> null;
-        };
+        return portController.itemHandler(side, isRemoved(), inputItems, outputItemCapability);
     }
 
     @Nullable
     public IFluidHandler fluidHandler(@Nullable Direction side) {
-        if (side == null || isRemoved()) return null;
-        return switch (portMode(side)) {
-            case FLUID_INPUT -> inputTank;
-            case FLUID_OUTPUT -> outputTank;
-            default -> null;
-        };
+        return portController.fluidHandler(side, isRemoved(), inputTank, outputTank);
     }
 
     @Override
@@ -766,11 +703,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         tag.put(MODULES_KEY, modules.serializeNBT(registries));
         tag.put(INPUT_FLUID_KEY, inputTank.writeToNBT(registries, new CompoundTag()));
         tag.put(OUTPUT_FLUID_KEY, outputTank.writeToNBT(registries, new CompoundTag()));
-        CompoundTag modes = new CompoundTag();
-        for (Direction direction : Direction.values()) {
-            modes.putString(direction.getName(), portMode(direction).id());
-        }
-        tag.put(PORT_MODES_KEY, modes);
+        tag.put(PORT_MODES_KEY, portController.writeNbt());
     }
 
     @Override
@@ -789,18 +722,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         refreshFluidCapacity();
         if (tag.contains(INPUT_FLUID_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readFluid(registries, tag.getCompound(INPUT_FLUID_KEY), inputTank);
         if (tag.contains(OUTPUT_FLUID_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readFluid(registries, tag.getCompound(OUTPUT_FLUID_KEY), outputTank);
-        CompoundTag modes = tag.getCompound(PORT_MODES_KEY);
-        for (Direction direction : Direction.values()) {
-            String id = modes.getString(direction.getName());
-            PortMode mode = PortMode.DISABLED;
-            for (PortMode candidate : PortMode.values()) {
-                if (candidate.id().equals(id)) {
-                    mode = candidate;
-                    break;
-                }
-            }
-            portModes.put(direction, mode);
-        }
+        portController.readNbt(tag.getCompound(PORT_MODES_KEY));
     }
 
     @Override
@@ -842,15 +764,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
         if (inputTank.getFluidAmount() > 0 || outputTank.getFluidAmount() > 0) {
             return true;
         }
-        for (ItemStackHandler handler : java.util.List.of(ampouleInput, ampouleOutput)) {
-            for (int slot = 0; slot < handler.getSlots(); slot++) {
-                ItemStack stack = handler.getStackInSlot(slot);
-                if (stack.getItem() instanceof FluidAmpouleItem ampoule && ampoule.hasStoredFluid(stack)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return MachineAmpouleHandler.hasStoredFluid(ampouleInput, ampouleOutput);
     }
 
     public void onRemovedByBlock() {
@@ -863,21 +777,7 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
 
     @Override
     public boolean addToGoggleTooltip(java.util.List<Component> tooltip, boolean isPlayerSneaking) {
-        tooltip.add(Component.translatable(
-            "goggles.dimensionworks_cave_factory.status",
-            Math.round(Math.abs(effectiveRpm())),
-            CaveFactoryConfig.KINETIC_SATURATION_RPM.get(),
-            String.format(java.util.Locale.ROOT, "%.2f", overspeedMultiplier())
-        ));
-        tooltip.add(Component.translatable(
-            "goggles.dimensionworks_cave_factory.phase",
-            phaseCycle.phase().name(),
-            phaseCycle.progress(),
-            CaveFactoryConfig.PHASE_BATCHES.get()
-        ));
-        if (redstoneLocked) {
-            tooltip.add(Component.translatable("goggles.dimensionworks_cave_factory.redstone_lock"));
-        }
-        return true;
+        return MachineGogglePresenter.appendTooltip(
+            tooltip, effectiveRpm(), overspeedMultiplier(), phaseCycle, redstoneLocked);
     }
 }
