@@ -11,7 +11,7 @@ class RpmLimitManagerContractTest {
     @Test
     void ownerlessKineticChainsUseTheConservativeDefaultLimit() throws IOException {
         String source = Files.readString(Path.of(
-            "src/main/java/dev/szx/dimensionworks/rpmlimit/RpmLimitManager.java"));
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/KineticClampService.java"));
 
         assertTrue(source.contains("return owner == null ? RpmLimitConfig.DEFAULT_RPM.get()"));
         assertTrue(source.contains("instanceof IPreclampedKineticSpeed"));
@@ -23,11 +23,13 @@ class RpmLimitManagerContractTest {
             "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/KineticBlockEntityMixin.java"));
         String manager = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/RpmLimitManager.java"));
+        String clampService = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/KineticClampService.java"));
 
         assertTrue(mixin.contains("@ModifyVariable(method = \"setSpeed\""));
-        assertTrue(manager.contains("float cappedSpeed = RpmLimitMath.cap(currentSpeed, value)"));
-        assertTrue(manager.contains("loadOfflineProfile(direct, server)"));
-        assertTrue(manager.contains("CACHE.containsKey(direct) ? getEffectiveLimit(direct) : storedMachineLimit(k)"));
+        assertTrue(clampService.contains("float cappedSpeed = RpmLimitMath.cap(currentSpeed, value)"));
+        assertTrue(manager.contains("PLAYER_STORE.loadOfflineProfile(direct, server)"));
+        assertTrue(manager.contains("PLAYER_STORE.isCached(direct) ? getEffectiveLimit(direct) : KineticClampService.storedMachineLimit(k)"));
 
         String outputGate = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/quota/FinalProductionGate.java"));

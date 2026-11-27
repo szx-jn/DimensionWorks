@@ -13,9 +13,9 @@ class FluidStabilizerQuotaContractTest {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/cavefactory/blockentity/FluidStabilizerBlockEntity.java"));
 
-        assertTrue(source.contains("FinalProductionGate.tryConsumeItem("));
+        assertTrue(source.contains("RpmLimitServices.quota().tryConsumeFinalItem("));
         assertTrue(source.contains("owner()"));
-        assertTrue(source.indexOf("FinalProductionGate.tryConsumeItem(")
+        assertTrue(source.indexOf("RpmLimitServices.quota().tryConsumeFinalItem(")
             < source.indexOf("inputTank().drain("));
     }
 }

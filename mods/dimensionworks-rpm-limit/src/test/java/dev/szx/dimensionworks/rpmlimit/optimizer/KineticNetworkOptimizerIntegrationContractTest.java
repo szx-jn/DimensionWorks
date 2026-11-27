@@ -11,12 +11,12 @@ class KineticNetworkOptimizerIntegrationContractTest {
 
     @Test
     void playerRpmLimitChangesInvalidateAndScheduleNetworkRecalculation() throws IOException {
-        String manager = Files.readString(Path.of(
-            "src/main/java/dev/szx/dimensionworks/rpmlimit/RpmLimitManager.java"));
+        String clampService = Files.readString(Path.of(
+            "src/main/java/dev/szx/dimensionworks/rpmlimit/KineticClampService.java"));
         String optimizer = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
 
-        assertTrue(manager.contains("KineticNetworkOptimizer.invalidateAndRefreshFor(k)"));
+        assertTrue(clampService.contains("KineticNetworkOptimizer.invalidateAndRefreshFor(k)"));
         assertTrue(optimizer.contains("public static void invalidateAndRefreshFor("));
         assertTrue(optimizer.contains("candidate.networkDirty = true"));
     }
@@ -67,7 +67,7 @@ class KineticNetworkOptimizerIntegrationContractTest {
         String optimizer = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/rpmlimit/optimizer/KineticNetworkOptimizer.java"));
 
-        assertTrue(virtualMixin.contains("KineticNetworkOptimizer.onMemberPruned("));
+        assertTrue(virtualMixin.contains("RpmLimitServices.optimizer().onMemberPruned("));
         assertTrue(mixin.contains("finishCapacityRebuild(self, naturalCapacity)"));
         assertTrue(optimizer.contains("if (sourceSetChanged) {"));
         assertTrue(optimizer.contains("NetworkRpmLimit.invalidate(network);"));
