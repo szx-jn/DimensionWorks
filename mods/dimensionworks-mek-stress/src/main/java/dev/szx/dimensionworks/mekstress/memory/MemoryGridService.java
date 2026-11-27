@@ -15,7 +15,7 @@ import dev.szx.dimensionworks.mekstress.blockentity.MemoryDriveBlockEntity;
 import dev.szx.dimensionworks.mekstress.core.InputStressMath;
 import dev.szx.dimensionworks.mekstress.core.LiveStressBudget;
 import dev.szx.dimensionworks.mekstress.core.MemoryTier;
-import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -192,7 +192,7 @@ public final class MemoryGridService implements IMemoryGridService {
         // ME output must not be recycled as a fresh input, even through a second AE grid.
         if (network == null || network.sources.keySet().stream().anyMatch(source ->
             source instanceof MEGearboxBlockEntity me && me.getMode() == MEGearboxBlockEntity.Mode.EXPORT)) return 0;
-        float rpm = RpmLimitManager.clamp(gearbox, gearbox.getTheoreticalSpeed());
+        float rpm = RpmLimitServices.rpm().clamp(gearbox, gearbox.getTheoreticalSpeed());
         rpm = Math.min(Math.abs(rpm), MekStressConfig.directMaxRpm());
         return LiveStressBudget.stress(gearbox.getConfiguredStress(), rpm);
     }

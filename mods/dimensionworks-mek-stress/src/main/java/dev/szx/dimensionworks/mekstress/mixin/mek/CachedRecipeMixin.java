@@ -1,7 +1,7 @@
-package dev.szx.dimensionworks.rpmlimit.mixin.mek;
+package dev.szx.dimensionworks.mekstress.mixin.mek;
 
-import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
-import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingGate;
+import dev.szx.dimensionworks.mekstress.integration.mek.MekProcessingContext;
+import dev.szx.dimensionworks.mekstress.integration.mek.MekProcessingGate;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.cache.CachedRecipe;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;

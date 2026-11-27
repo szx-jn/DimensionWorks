@@ -14,10 +14,10 @@ class KineticNetworkOptimizerContractTest {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/mixin/create/KineticNetworkMixin.java"));
 
-        assertTrue(source.contains("KineticNetworkOptimizer.cachedStress(network)"));
-        assertTrue(source.contains("KineticNetworkOptimizer.beginStressRebuild(network)"));
-        assertTrue(source.contains("KineticNetworkOptimizer.recordStressContribution(network, member, contribution)"));
-        assertTrue(source.contains("KineticNetworkOptimizer.finishStressRebuild(network, totalStress)"));
+        assertTrue(source.contains("RpmLimitServices.optimizer().cachedStress(network)"));
+        assertTrue(source.contains("RpmLimitServices.optimizer().beginStressRebuild(network)"));
+        assertTrue(source.contains("RpmLimitServices.optimizer().recordStressContribution(network, member, contribution)"));
+        assertTrue(source.contains("RpmLimitServices.optimizer().finishStressRebuild(network, totalStress)"));
         assertTrue(source.contains("IVirtualKineticMember"));
         assertTrue(source.contains("dimensionworks$isValid()"));
     }
@@ -27,7 +27,7 @@ class KineticNetworkOptimizerContractTest {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/memory/MachineKineticRegistry.java"));
 
-        assertTrue(source.contains("KineticNetworkOptimizer.invalidate(previous)"));
-        assertTrue(source.contains("KineticNetworkOptimizer.invalidate(network)"));
+        assertTrue(source.contains("RpmLimitServices.optimizer().invalidate(previous)"));
+        assertTrue(source.contains("RpmLimitServices.optimizer().invalidate(network)"));
     }
 }

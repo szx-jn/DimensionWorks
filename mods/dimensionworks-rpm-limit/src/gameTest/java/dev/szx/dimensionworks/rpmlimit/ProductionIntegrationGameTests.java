@@ -6,18 +6,12 @@ import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
 import appeng.blockentity.networking.EnergyAcceptorBlockEntity;
 import appeng.crafting.execution.CraftingSubmitResult;
-import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
 import java.util.Map;
-import mekanism.api.recipes.basic.BasicCrushingRecipe;
-import mekanism.api.recipes.cache.CachedRecipe;
-import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
-import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -52,46 +46,6 @@ public final class ProductionIntegrationGameTests {
             return amount;
         }
         public void jobStateChange(appeng.api.networking.crafting.ICraftingLink link) {}
-    }
-
-    private static final class CountingRecipe extends CachedRecipe<BasicCrushingRecipe> {
-        int completed;
-        CountingRecipe() {
-            super(new BasicCrushingRecipe(IngredientCreatorAccess.item().from(Items.COBBLESTONE),
-                new ItemStack(Items.GRAVEL)), () -> false);
-            setBaselineMaxOperations(() -> 1);
-        }
-        @Override public boolean isInputValid() { return true; }
-        @Override protected void finishProcessing(int operations) { completed += operations; }
-    }
-    private static void process(CountingRecipe recipe, TileEntityMekanism machine) {
-        var previous = MekProcessingContext.push(machine);
-        try { recipe.process(); } finally { MekProcessingContext.pop(previous); }
-    }
-
-    @GameTest(template="empty", timeoutTicks=100)
-    public static void actualMekanismCachedRecipeObeysOreRateAndRepair(GameTestHelper h) {
-        var player = GearHeartEffectGameTests.equipped(h, new GearHeartEffectGameTests.RecordingConnection());
-        var pos = new BlockPos(2, 1, 2);
-        h.setBlock(pos, BuiltInRegistries.BLOCK.get(ResourceLocation.parse("mekanism:crusher")).defaultBlockState());
-        var machine = (TileEntityMekanism) h.getBlockEntity(pos);
-        // GameTestServer 无用户档案缓存；测试真实无主机器的共享配额，不能绕过在线玩家限制。
-        var recipe = new CountingRecipe();
-        process(recipe, machine);
-        h.assertTrue(recipe.completed == 0, "矿物加工配额不得在初始时积攒整次操作");
-        h.runAfterDelay(3, () -> {
-            try {
-                process(recipe, machine);
-                h.assertTrue(recipe.completed == 1, "8 次/秒的配额在三个 tick 后应允许一次真实 CachedRecipe 操作");
-                process(recipe, machine);
-                h.assertTrue(recipe.completed == 1, "同一 tick 的第二次 CachedRecipe 操作必须被拦截");
-                for (int stage = 0; stage < 3; stage++) GearHeartEffects.repairEquippedCurse(player, 1 << stage);
-                process(recipe, machine);
-                h.assertTrue(recipe.completed == 2, "修复第三阶段后必须解除矿物加工配额");
-                h.assertTrue(MekProcessingContext.current() == null, "处理上下文必须在调用后清理");
-                h.succeed();
-            } finally { GearHeartEffectGameTests.close(player); }
-        });
     }
 
     @GameTest(template="empty", timeoutTicks=100)

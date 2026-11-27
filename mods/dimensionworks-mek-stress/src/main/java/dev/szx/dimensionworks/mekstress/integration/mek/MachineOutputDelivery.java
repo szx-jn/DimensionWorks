@@ -1,17 +1,18 @@
 package dev.szx.dimensionworks.mekstress.integration.mek;
 
 import dev.szx.dimensionworks.mekstress.core.MachineWorkContext;
-import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
-import dev.szx.dimensionworks.rpmlimit.quota.GearHeartOwnerResolver;
-import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.UUID;
@@ -150,16 +151,18 @@ public final class MachineOutputDelivery {
     }
 
     private static boolean allowFinalProduction(ItemStack output, long amount) {
-        return FinalProductionGate.tryConsume(owner(), output, amount, tick());
+        return RpmLimitServices.quota().tryConsumeFinalItem(owner(), output, amount, tick());
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static boolean allowFinalProduction(ChemicalStack output, long amount) {
-        return FinalProductionGate.tryConsume(owner(), output, amount, tick());
+        boolean tagged = output != null && !output.isEmpty() && output.is(TagKey.create(
+            MekanismAPI.CHEMICAL_REGISTRY_NAME, ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production")));
+        return RpmLimitServices.quota().tryConsumeFinalTagged(owner(), tagged, amount, tick());
     }
 
     private static boolean allowFinalProduction(FluidStack output, long amount) {
-        return FinalProductionGate.tryConsume(owner(), output, amount, tick());
+        return RpmLimitServices.quota().tryConsumeFinalFluid(owner(), output, amount, tick());
     }
 
     private static long scaledAmount(long baseAmount, int operations) {
@@ -175,7 +178,7 @@ public final class MachineOutputDelivery {
 
     private static UUID owner() {
         MekProcessingContext.Context context = MekProcessingContext.current();
-        return context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        return context == null ? RpmLimitServices.quota().sharedOwner() : context.owner();
     }
 
     private static long tick() {

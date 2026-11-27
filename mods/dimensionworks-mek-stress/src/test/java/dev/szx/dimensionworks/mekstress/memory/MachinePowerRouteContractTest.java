@@ -41,9 +41,9 @@ class MachinePowerRouteContractTest {
         String source = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/memory/MachinePowerManager.java"));
 
-        assertTrue(source.contains("RpmLimitManager.clamp(kinetic, kinetic.getTheoreticalSpeed())"));
+        assertTrue(source.contains("RpmLimitServices.rpm().clamp(kinetic, kinetic.getTheoreticalSpeed())"));
         assertTrue(source.contains("MachinePowerMath.directRpm(limitedRpm"));
-        assertTrue(source.contains("RpmLimitManager.clamp(gearbox, configuredRpm)"));
+        assertTrue(source.contains("RpmLimitServices.rpm().clamp(gearbox, configuredRpm)"));
     }
 
     @Test

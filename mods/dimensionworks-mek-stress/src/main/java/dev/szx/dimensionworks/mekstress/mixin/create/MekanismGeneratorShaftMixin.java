@@ -4,7 +4,7 @@ import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.integration.mekgenerators.GeneratorPowerBridge;
 import dev.szx.dimensionworks.mekstress.reactor.ReactorPowerBridge;
-import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -70,10 +70,10 @@ public abstract class MekanismGeneratorShaftMixin implements dev.szx.dimensionwo
         lastCapacityProvided = capacity;
         Float previous = network.sources.put(shaft, capacity);
         if (previous == null) {
-            KineticNetworkOptimizer.invalidate(network);
+            RpmLimitServices.optimizer().invalidate(network);
             network.updateNetwork();
         } else if (Float.compare(previous, capacity) != 0) {
-            KineticNetworkOptimizer.updateCapacityContribution(network, shaft);
+            RpmLimitServices.optimizer().updateCapacityContribution(network, shaft);
             network.updateCapacity();
         }
         dimensionworks$mekGeneratorSource = true;
@@ -86,7 +86,7 @@ public abstract class MekanismGeneratorShaftMixin implements dev.szx.dimensionwo
         lastCapacityProvided = 0;
         if (network != null) {
             network.sources.remove(shaft);
-            KineticNetworkOptimizer.invalidate(network);
+            RpmLimitServices.optimizer().invalidate(network);
         }
         if (!shaft.hasSource()) {
             shaft.detachKinetics();

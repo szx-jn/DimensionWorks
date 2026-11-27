@@ -1,14 +1,14 @@
 package dev.szx.dimensionworks.mekstress.mixin.mek;
 
 import dev.szx.dimensionworks.mekstress.core.MachineWorkContext;
-import dev.szx.dimensionworks.rpmlimit.quota.GearHeartOwnerResolver;
-import dev.szx.dimensionworks.rpmlimit.quota.FinalProductionGate;
-import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
+import dev.szx.dimensionworks.mekstress.integration.mek.MekProcessingContext;
 import dev.szx.dimensionworks.mekstress.integration.mek.MachineOutputDelivery;
 import dev.szx.dimensionworks.mekstress.integration.mek.ItemOutputCredit;
 import dev.szx.dimensionworks.mekstress.integration.mek.ScaledOutputHandler;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.fluid.IExtendedFluidTank;
@@ -17,6 +17,8 @@ import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import mekanism.api.recipes.outputs.OutputHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import java.util.UUID;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -40,13 +42,13 @@ public abstract class OutputHelperMixin {
             return;
         }
         MekProcessingContext.Context context = MekProcessingContext.current();
-        UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        UUID owner = context == null ? RpmLimitServices.quota().sharedOwner() : context.owner();
         long tick = context == null ? 0L : context.tick();
         long gateAmount = MachineWorkContext.scaling()
             ? ItemOutputCredit.preview(slot, toOutput, toOutput.getCount(), operations)
             : (long) toOutput.getCount() * operations;
         if (!hasItemSpace(slot, toOutput, gateAmount)
-            || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
+            || !RpmLimitServices.quota().tryConsumeFinalItem(owner, toOutput, gateAmount, tick)) {
             ci.cancel();
             return;
         }
@@ -70,13 +72,15 @@ public abstract class OutputHelperMixin {
             return;
         }
         MekProcessingContext.Context context = MekProcessingContext.current();
-        UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        UUID owner = context == null ? RpmLimitServices.quota().sharedOwner() : context.owner();
         long tick = context == null ? 0L : context.tick();
         long gateAmount = MachineWorkContext.scaling()
             ? MachineWorkContext.scaleOutput(toOutput.getAmount(), operations)
             : saturatingMultiply(toOutput.getAmount(), operations);
+        boolean tagged = toOutput.is(TagKey.create(MekanismAPI.CHEMICAL_REGISTRY_NAME,
+            ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production")));
         if (!hasChemicalSpace(tank, toOutput, gateAmount)
-            || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
+            || !RpmLimitServices.quota().tryConsumeFinalTagged(owner, tagged, gateAmount, tick)) {
             ci.cancel();
             return;
         }
@@ -104,13 +108,13 @@ public abstract class OutputHelperMixin {
             return;
         }
         MekProcessingContext.Context context = MekProcessingContext.current();
-        UUID owner = context == null ? GearHeartOwnerResolver.SHARED_OWNER : context.owner();
+        UUID owner = context == null ? RpmLimitServices.quota().sharedOwner() : context.owner();
         long tick = context == null ? 0L : context.tick();
         long gateAmount = MachineWorkContext.scaling()
             ? MachineWorkContext.scaleOutput(toOutput.getAmount(), operations)
             : saturatingMultiply(toOutput.getAmount(), operations);
         if (!hasFluidSpace(tank, toOutput, gateAmount)
-            || !FinalProductionGate.tryConsume(owner, toOutput, gateAmount, tick)) {
+            || !RpmLimitServices.quota().tryConsumeFinalFluid(owner, toOutput, gateAmount, tick)) {
             ci.cancel();
             return;
         }

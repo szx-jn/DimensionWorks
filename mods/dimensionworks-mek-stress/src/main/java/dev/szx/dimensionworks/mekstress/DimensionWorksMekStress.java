@@ -17,6 +17,7 @@ import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
 import dev.szx.dimensionworks.mekstress.memory.MachineKineticRegistry;
 import dev.szx.dimensionworks.mekstress.memory.CrossDimensionTransportManager;
 import dev.szx.dimensionworks.mekstress.memory.MatterBallMailbox;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -200,7 +201,7 @@ public final class DimensionWorksMekStress {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             MemoryGridService.register();
-            dev.szx.dimensionworks.rpmlimit.diagnostics.TopologyNetwork.registerAdapter(
+            RpmLimitServices.topology().registerAdapter(
                 tile -> tile instanceof mekanism.common.tile.base.TileEntityMekanism,
                 tile -> {
                     var route = dev.szx.dimensionworks.mekstress.memory.MachinePowerManager.powerRoute(

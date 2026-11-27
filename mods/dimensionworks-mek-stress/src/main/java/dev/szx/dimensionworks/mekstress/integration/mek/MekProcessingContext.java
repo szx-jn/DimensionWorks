@@ -1,5 +1,6 @@
-package dev.szx.dimensionworks.rpmlimit.quota;
+package dev.szx.dimensionworks.mekstress.integration.mek;
 
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.recipe.lookup.IRecipeLookupHandler;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -18,7 +19,7 @@ public final class MekProcessingContext {
 
     public static Context push(TileEntityMekanism machine) {
         Context previous = CURRENT.get();
-        UUID owner = GearHeartOwnerResolver.normalize(machine.getOwnerUUID());
+        UUID owner = RpmLimitServices.quota().normalizeOwner(machine.getOwnerUUID());
         long tick = machine.getLevel() == null ? 0L : machine.getLevel().getGameTime();
         CURRENT.set(new Context(machine, owner, isOreProcessing(machine), tick));
         return previous;

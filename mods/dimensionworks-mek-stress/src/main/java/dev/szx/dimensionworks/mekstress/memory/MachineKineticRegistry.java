@@ -2,7 +2,7 @@ package dev.szx.dimensionworks.mekstress.memory;
 
 import com.simibubi.create.content.kinetics.KineticNetwork;
 import dev.szx.dimensionworks.mekstress.DimensionWorksMekStress;
-import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -45,28 +45,28 @@ public final class MachineKineticRegistry {
 
             if (previous != network) {
                 if (previous != null) {
-                    KineticNetworkOptimizer.invalidate(previous);
+                    RpmLimitServices.optimizer().invalidate(previous);
                     previous.members.remove(member);
                 }
                 member.dimensionworks$bindNetwork(network);
             }
             if (topologyChanged) {
-                KineticNetworkOptimizer.invalidate(network);
+                RpmLimitServices.optimizer().invalidate(network);
                 network.members.put(member, coefficient);
             } else if (speedChanged || loadChanged) {
                 network.members.put(member, coefficient);
                 // Virtual members do not tick in the world, so their own KineticBlockEntity
                 // dirty flag cannot drive the refresh. Update the aggregate directly when cached.
-                KineticNetworkOptimizer.updateStressContribution(network, member);
+                RpmLimitServices.optimizer().updateStressContribution(network, member);
             }
 
             if (previous != null && previous != network) {
-                KineticNetworkOptimizer.invalidate(previous);
+                RpmLimitServices.optimizer().invalidate(previous);
                 schedule(previous);
             }
             if (topologyChanged || speedChanged || loadChanged) {
                 if (topologyChanged)
-                    KineticNetworkOptimizer.invalidate(network);
+                    RpmLimitServices.optimizer().invalidate(network);
                 // Pay before processing, including first connection and newly installed upgrades.
                 network.updateNetwork();
             }
@@ -82,7 +82,7 @@ public final class MachineKineticRegistry {
             KineticNetwork network = member.dimensionworks$boundNetwork();
             member.dimensionworks$unbindNetwork();
             if (network != null) {
-                KineticNetworkOptimizer.invalidate(network);
+                RpmLimitServices.optimizer().invalidate(network);
                 network.members.remove(member);
                 schedule(network);
             }
@@ -90,7 +90,7 @@ public final class MachineKineticRegistry {
     }
 
     static void flushDirtyNetworks() {
-        KineticNetworkOptimizer.abortBatch();
+        RpmLimitServices.optimizer().abortBatch();
         ArrayList<KineticNetwork> pending;
         synchronized (DIRTY_NETWORKS) {
             pending = new ArrayList<>(DIRTY_NETWORKS);

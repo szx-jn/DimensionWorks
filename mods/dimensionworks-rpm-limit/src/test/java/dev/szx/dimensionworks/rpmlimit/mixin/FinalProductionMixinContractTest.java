@@ -35,7 +35,7 @@ class FinalProductionMixinContractTest {
             "../dimensionworks-mek-stress/src/main/java/dev/szx/dimensionworks/mekstress/mixin/mek/OutputHelperMixin.java"));
 
         assertTrue(source.contains("MekProcessingContext.current()"));
-        assertTrue(source.contains("FinalProductionGate.tryConsume("));
+        assertTrue(source.contains("RpmLimitServices.quota().tryConsumeFinal"));
         assertTrue(source.contains("AutomationType.INTERNAL"));
     }
 

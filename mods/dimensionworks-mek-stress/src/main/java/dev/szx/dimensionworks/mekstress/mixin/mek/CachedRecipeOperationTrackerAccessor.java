@@ -1,4 +1,4 @@
-package dev.szx.dimensionworks.rpmlimit.mixin.mek;
+package dev.szx.dimensionworks.mekstress.mixin.mek;
 
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import org.spongepowered.asm.mixin.Mixin;

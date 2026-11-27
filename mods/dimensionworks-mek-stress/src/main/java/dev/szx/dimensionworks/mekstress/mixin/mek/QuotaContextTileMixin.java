@@ -1,9 +1,8 @@
-package dev.szx.dimensionworks.rpmlimit.mixin.mek;
+package dev.szx.dimensionworks.mekstress.mixin.mek;
 
-import dev.szx.dimensionworks.rpmlimit.quota.MekProcessingContext;
+import dev.szx.dimensionworks.mekstress.integration.mek.MekProcessingContext;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * onUpdateServer, so injecting only the empty base implementation would miss real machines.
  */
 @Mixin(value = TileEntityMekanism.class, remap = false)
-public abstract class TileEntityMekanismMixin {
+public abstract class QuotaContextTileMixin {
 
     @Inject(method = "tickServer", at = @At("HEAD"), remap = false)
     private static void dimensionworks$pushQuotaContext(Level level, BlockPos pos,

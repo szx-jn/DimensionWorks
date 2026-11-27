@@ -8,7 +8,7 @@ import dev.szx.dimensionworks.mekstress.api.IMEGearboxExportState;
 import dev.szx.dimensionworks.mekstress.api.IMemoryGridService;
 import dev.szx.dimensionworks.mekstress.core.StressTransfer;
 import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
-import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -96,7 +96,7 @@ public abstract class MEGearboxBlockEntityMixin implements IMEGearboxExportState
         hasStressSupply = running;
         if (changed && self.getLevel() != null && !self.getLevel().isClientSide && !self.isRemoved()) {
             self.updateGeneratedRotation();
-            KineticNetworkOptimizer.invalidateAndRefreshFor(self);
+            RpmLimitServices.optimizer().invalidateAndRefreshFor(self);
             self.sendData();
         }
     }

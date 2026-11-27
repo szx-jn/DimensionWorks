@@ -1,4 +1,4 @@
-package dev.szx.dimensionworks.rpmlimit.mixin;
+package dev.szx.dimensionworks.mekstress.mixin.mek;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -8,15 +8,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 class MekMixinContractTest {
 
     @Test
     void wrapsTheServerTickWithContextAndClearsIt() throws IOException {
         String source = Files.readString(Path.of(
-            "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/mek/TileEntityMekanismMixin.java"));
+            "src/main/java/dev/szx/dimensionworks/mekstress/mixin/mek/QuotaContextTileMixin.java"));
 
         assertEquals(2, occurrences(source, "method = \"tickServer\""));
         assertEquals(1, occurrences(source, "at = @At(\"HEAD\")"));
@@ -28,7 +26,7 @@ class MekMixinContractTest {
     @Test
     void gatesTheActualCachedRecipeOperationCount() throws IOException {
         String source = Files.readString(Path.of(
-            "src/main/java/dev/szx/dimensionworks/rpmlimit/mixin/mek/CachedRecipeMixin.java"));
+            "src/main/java/dev/szx/dimensionworks/mekstress/mixin/mek/CachedRecipeMixin.java"));
 
         assertEquals(1, occurrences(source, "@Redirect"));
         assertTrue(source.contains("method = \"process\""));
@@ -39,10 +37,10 @@ class MekMixinContractTest {
     @Test
     void registersBothMekQuotaMixins() throws IOException {
         String source = Files.readString(Path.of(
-            "src/main/resources/dimensionworks_rpm_limit.mixins.json"));
+            "src/main/resources/dimensionworks_mek_stress.mixins.json"));
 
         assertNotNull(source);
-        assertTrue(source.contains("\"mek.TileEntityMekanismMixin\""));
+        assertTrue(source.contains("\"mek.QuotaContextTileMixin\""));
         assertTrue(source.contains("\"mek.CachedRecipeMixin\""));
     }
 

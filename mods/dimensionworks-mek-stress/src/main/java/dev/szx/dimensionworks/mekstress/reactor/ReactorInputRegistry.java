@@ -4,7 +4,7 @@ import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCore;
 import com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorInjector;
-import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -22,7 +22,7 @@ final class ReactorInputRegistry {
 
     static void sync(TileReactorCore core, TileReactorInjector injector,
                      KineticBlockEntity shaft, KineticNetwork network, long fePerTick) {
-        float rpm = Math.abs(dev.szx.dimensionworks.rpmlimit.RpmLimitManager.clamp(shaft, shaft.getTheoreticalSpeed()));
+        float rpm = Math.abs(RpmLimitServices.rpm().clamp(shaft, shaft.getTheoreticalSpeed()));
         synchronized (MEMBERS) {
             ReactorInputMember member = MEMBERS.get(core);
             if (member != null && (!member.dimensionworks$isValid()
@@ -45,7 +45,7 @@ final class ReactorInputRegistry {
             if (previous != null && previous != network) {
                 member.unbind();
                 previous.members.remove(member);
-                KineticNetworkOptimizer.invalidate(previous);
+                RpmLimitServices.optimizer().invalidate(previous);
                 previous.updateNetwork();
             }
 
@@ -54,11 +54,11 @@ final class ReactorInputRegistry {
             member.bind(network);
             if (topologyChanged) {
                 network.members.put(member, coefficient);
-                KineticNetworkOptimizer.invalidate(network);
+                RpmLimitServices.optimizer().invalidate(network);
                 network.updateNetwork();
             } else if (speedChanged || loadChanged) {
                 network.members.put(member, coefficient);
-                KineticNetworkOptimizer.updateStressContribution(network, member);
+                RpmLimitServices.optimizer().updateStressContribution(network, member);
                 network.updateNetwork();
             }
         }
@@ -88,7 +88,7 @@ final class ReactorInputRegistry {
             return;
         }
         network.members.remove(member);
-        KineticNetworkOptimizer.invalidate(network);
+        RpmLimitServices.optimizer().invalidate(network);
         network.updateNetwork();
     }
 }

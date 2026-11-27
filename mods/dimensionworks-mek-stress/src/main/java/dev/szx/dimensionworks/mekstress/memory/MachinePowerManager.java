@@ -10,7 +10,7 @@ import dev.szx.dimensionworks.mekstress.core.MachineFootprint;
 import dev.szx.dimensionworks.mekstress.core.MachineTier;
 import dev.szx.dimensionworks.mekstress.core.PowerRouteSafety;
 import dev.szx.dimensionworks.mekstress.core.MachinePowerRouteScope;
-import dev.szx.dimensionworks.rpmlimit.RpmLimitManager;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.List;
 import java.util.Map;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -174,12 +174,12 @@ public final class MachinePowerManager {
         if (configuredRpm <= 0) {
             return 0;
         }
-        float limitedRpm = RpmLimitManager.clamp(gearbox, configuredRpm);
+        float limitedRpm = RpmLimitServices.rpm().clamp(gearbox, configuredRpm);
         return Math.round(MachinePowerMath.directRpm(limitedRpm, MekStressConfig.directMaxRpm()));
     }
 
     private static float effectiveNetworkRpm(KineticBlockEntity kinetic) {
-        float limitedRpm = RpmLimitManager.clamp(kinetic, kinetic.getTheoreticalSpeed());
+        float limitedRpm = RpmLimitServices.rpm().clamp(kinetic, kinetic.getTheoreticalSpeed());
         return MachinePowerMath.directRpm(limitedRpm, MekStressConfig.directMaxRpm());
     }
 

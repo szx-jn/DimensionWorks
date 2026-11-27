@@ -35,7 +35,7 @@ class ProductionOutputContractTest {
         String delivery = Files.readString(Path.of(
             "src/main/java/dev/szx/dimensionworks/mekstress/integration/mek/MachineOutputDelivery.java"));
 
-        assertTrue(delivery.contains("FinalProductionGate.tryConsume("));
+        assertTrue(delivery.contains("RpmLimitServices.quota().tryConsumeFinal"));
         assertTrue(delivery.contains("MekProcessingContext.current()"));
         assertTrue(delivery.contains("capItem"));
         assertTrue(delivery.contains("capChemical"));

@@ -3,8 +3,6 @@ package dev.szx.dimensionworks.rpmlimit.quota;
 import dev.szx.dimensionworks.rpmlimit.GearHeartEffects;
 import dev.szx.dimensionworks.rpmlimit.GearHeartState;
 import dev.szx.dimensionworks.rpmlimit.RpmLimitConfig;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.MekanismAPI;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -41,14 +39,12 @@ public final class FinalProductionGate {
         return consume(owner, amount, tick);
     }
 
-    public static boolean tryConsume(UUID owner, ChemicalStack output, long amount, long tick) {
-        if (amount <= 0L || output == null || output.isEmpty()) {
-            return amount <= 0L;
+    /** Generic tag-checked entry point for external domain types (e.g. Mekanism chemicals). */
+    public static boolean tryConsumeTagged(UUID owner, boolean taggedAsFinalProduction, long amount, long tick) {
+        if (amount <= 0L || !taggedAsFinalProduction) {
+            return true;
         }
-
-        ResourceLocation name = ResourceLocation.fromNamespaceAndPath("gear_heart", "final_production");
-        boolean tagged = output.is(TagKey.create(MekanismAPI.CHEMICAL_REGISTRY_NAME, name));
-        return !tagged || consume(owner, amount, tick);
+        return consume(owner, amount, tick);
     }
 
     public static boolean tryConsumeOutputs(UUID owner, Iterable<ItemStack> outputs, long tick) {

@@ -1,8 +1,5 @@
 package dev.szx.dimensionworks.cavefactory.logic;
 
-import dev.szx.dimensionworks.cavefactory.registry.CFItems;
-import net.minecraft.world.item.ItemStack;
-
 public enum FactoryModule {
     FLUX_CONSERVATOR("flux_conservator", FactoryDimension.MAGNETIC, ModuleKind.NUMERIC),
     POLARITY_INVERTER("polarity_inverter", FactoryDimension.MAGNETIC, ModuleKind.MECHANISM),
@@ -44,18 +41,6 @@ public enum FactoryModule {
             return this == PRESSURE_BUFFER ? MachineCapability.ITEM_AND_FLUID_TANKS : MachineCapability.ITEM_ONLY;
         }
         return this == PHASE_CONVERTER ? MachineCapability.MAPPED_RECIPES : MachineCapability.NONE;
-    }
-
-    public static FactoryModule byItem(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return null;
-        }
-        for (FactoryModule module : values()) {
-            if (CFItems.module(module) != null && stack.is(CFItems.module(module).get())) {
-                return module;
-            }
-        }
-        return null;
     }
 
     public boolean isCompatible(MachineCapability capability) {

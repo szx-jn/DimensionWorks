@@ -1,9 +1,11 @@
-package dev.szx.dimensionworks.rpmlimit.quota;
+package dev.szx.dimensionworks.mekstress.integration.mek;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import dev.szx.dimensionworks.rpmlimit.api.IQuotaGateService.QuotaFamily;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,17 +17,6 @@ class MekProcessingGateTest {
     @BeforeEach
     void clearActiveMachines() {
         MekProcessingGate.clearActives();
-    }
-
-    @Test
-    void configuredRateUsesRepairedPolicyAndNeverRaisesIt() {
-        assertEquals(8.0D, MekProcessingGate.configuredRateLimit(
-            0, GearHeartQuotaType.MEK_ORE_OPERATIONS, 8, 64));
-        assertEquals(Double.POSITIVE_INFINITY, MekProcessingGate.configuredRateLimit(
-            GearHeartStateBits.MEK_ORE_OPERATIONS,
-            GearHeartQuotaType.MEK_ORE_OPERATIONS, 8, 1));
-        assertEquals(4096.0D, MekProcessingGate.configuredRateLimit(
-            0, GearHeartQuotaType.CREATE_CAPACITY, 8, 64));
     }
 
     @Test
@@ -54,8 +45,14 @@ class MekProcessingGateTest {
             new Object(), other, 0, 200L, 8));
     }
 
+    @Test
+    void quotaApiExposesActiveMachineAndOreFlagsWithoutLeakingMekanismTypes() {
+        assertTrue(RpmLimitServices.quota().isRepairApplied(
+            GearHeartStateBits.ACTIVE_MACHINES, QuotaFamily.ACTIVE_MACHINES));
+        assertFalse(RpmLimitServices.quota().isRepairApplied(0, QuotaFamily.MEK_ORE_OPERATIONS));
+    }
+
     private static final class GearHeartStateBits {
-        private static final int MEK_ORE_OPERATIONS = 1 << 2;
         private static final int ACTIVE_MACHINES = 1 << 5;
     }
 }

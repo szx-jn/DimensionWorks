@@ -17,7 +17,14 @@ public interface ModuleHost {
     MachineCapability machineCapability();
 
     default FactoryModule moduleAt(int slot) {
-        return FactoryModule.byItem(moduleInventory().getStackInSlot(slot));
+        var stack = moduleInventory().getStackInSlot(slot);
+        if (stack.isEmpty()) {
+            return null;
+        }
+        if (stack.getItem() instanceof dev.szx.dimensionworks.cavefactory.item.ModuleItem moduleItem) {
+            return moduleItem.module();
+        }
+        return null;
     }
 
     default boolean hasRecipeMapping(FactoryModule module) {

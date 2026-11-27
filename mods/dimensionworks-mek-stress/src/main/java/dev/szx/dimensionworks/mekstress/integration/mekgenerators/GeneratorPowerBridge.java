@@ -5,6 +5,7 @@ import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
 import dev.szx.dimensionworks.mekstress.core.EnergyPowerMath;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -90,7 +91,7 @@ public final class GeneratorPowerBridge {
         if (previous != null) changed.addAll(previous.shafts());
         // A multiblock output can feed several Create shafts on one kinetic network. Update each
         // source contribution immediately, but publish the completed network totals only once.
-        dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.beginBatch();
+        RpmLimitServices.optimizer().beginBatch();
         try {
             for (BlockPos pos : changed) {
                 if (level.hasChunkAt(pos)
@@ -98,7 +99,7 @@ public final class GeneratorPowerBridge {
                     shaft.dimensionworks$refreshMechanicalSource();
             }
         } finally {
-            dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer.endBatch();
+            RpmLimitServices.optimizer().endBatch();
         }
     }
 

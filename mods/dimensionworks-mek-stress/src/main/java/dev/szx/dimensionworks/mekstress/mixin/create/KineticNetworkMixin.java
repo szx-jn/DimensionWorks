@@ -4,7 +4,7 @@ import com.simibubi.create.content.kinetics.KineticNetwork;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.szx.dimensionworks.mekstress.memory.IVirtualKineticMember;
 import dev.szx.dimensionworks.mekstress.memory.MemoryGridService;
-import dev.szx.dimensionworks.rpmlimit.optimizer.KineticNetworkOptimizer;
+import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
 import java.util.Iterator;
 import java.util.Map;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,13 +41,13 @@ public abstract class KineticNetworkMixin {
     @Inject(method = "calculateStress", at = @At("HEAD"), cancellable = true, remap = false)
     private void dimensionworks$calculateVirtualMachineStress(CallbackInfoReturnable<Float> cir) {
         KineticNetwork network = (KineticNetwork) (Object) this;
-        Float cached = KineticNetworkOptimizer.cachedStress(network);
+        Float cached = RpmLimitServices.optimizer().cachedStress(network);
         if (cached != null) {
             cir.setReturnValue(cached);
             return;
         }
 
-        KineticNetworkOptimizer.beginStressRebuild(network);
+        RpmLimitServices.optimizer().beginStressRebuild(network);
         float presentStress = 0.0F;
         Iterator<KineticBlockEntity> iterator = members.keySet().iterator();
         while (iterator.hasNext()) {
@@ -55,22 +55,22 @@ public abstract class KineticNetworkMixin {
             if (member instanceof IVirtualKineticMember virtualMember) {
                 if (!virtualMember.dimensionworks$isValid()) {
                     iterator.remove();
-                    KineticNetworkOptimizer.onMemberPruned(network, member);
+                    RpmLimitServices.optimizer().onMemberPruned(network, member);
                     continue;
                 }
             } else if (member.getLevel() == null
                 || member.getLevel().getBlockEntity(member.getBlockPos()) != member) {
                 iterator.remove();
-                KineticNetworkOptimizer.onMemberPruned(network, member);
+                RpmLimitServices.optimizer().onMemberPruned(network, member);
                 continue;
             }
 
             float contribution = network.getActualStressOf(member);
-            KineticNetworkOptimizer.recordStressContribution(network, member, contribution);
+            RpmLimitServices.optimizer().recordStressContribution(network, member, contribution);
             presentStress += contribution;
         }
         float totalStress = presentStress + unloadedStress;
-        KineticNetworkOptimizer.finishStressRebuild(network, totalStress);
+        RpmLimitServices.optimizer().finishStressRebuild(network, totalStress);
         cir.setReturnValue(totalStress);
     }
 }
