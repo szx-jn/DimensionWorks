@@ -11,6 +11,7 @@ Minecraft 1.21.1 / NeoForge 21.1.267 / Java 21。通过自研 Mixin 接入 Creat
 - 方块能力采用 NeoForge 显式注册。内存驱动器注册 AE2 网络节点宿主和物品能力，真实相邻 AE 网络可建立连接；Create 管道使用新版能力缓存与 `ICapabilityProvider`，只查询已加载区块。
 - Mekanism 化学品统一为 `ChemicalStack`，保留配方标记字段 `Gas`、`InputGas` 及两个工作盆缓存职责。配方标记、物质球和安瓿元数据放在 `minecraft:custom_data`；物品、流体的嵌套序列化必须传入所属世界的注册表上下文。
 - 频道的 `Number`、`Stack`、`Origin`、`Amount`、`Maximum`、容量升级以及云盘所有者 UUID/通知均保留。数量独立于计数为一的物品原型。非法 UUID、无法解析的物品/流体及错误列表类型会阻止读取，避免库存静默消失。这里仅处理目标格式；源存档转换由独立迁移器执行，不能直接用目标加载器打开原档。
+- 跨维频道对 Cave Factory 安瓿只依赖 `dimensionworks_cave_factory:api` 的 `AmpouleExpiry` / `IFluidAmpoule` 契约。入库准备与过期结算由安瓿自身实现，不在 Mek Stress 中读取安瓿 NBT 键、残渣 ID 或 Cave Factory 配置；Cave Factory 是本模组的显式必需依赖。
 - 内存驱动器的掉落包含完整 `BLOCK_ENTITY_DATA`，补齐五级原生掉落表，关闭 AE2 默认额外库存掉落，防止同时掉落已内嵌的内存卡。物质球无法按大小上限打包时仍保留原有可恢复库存路径。
 - 驱动器逐级合成升级由整包 `me_memory.js` 的具名结果回调复制完整 `minecraft:block_entity_data` 组件。保留原代内存卡与驱动器设置，不将卡片自动改为下一代；原代卡须单独升级才能在新代驱动器生效。
 - Mekanism 能量预算采用原生 `long`，删除旧 `FloatingLong` 配方除法修正。每 tick 的模拟不扣款、执行扣款和余量采用整数记账；普通机器保持原生额定能耗，SPS 转速缩放只在冻结预算时转换一次。服务端更新合并新版原生布尔同步结果，低速与多次加工不丢失客户端状态同步。

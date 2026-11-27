@@ -4,6 +4,7 @@ import dev.szx.dimensionworks.mekstress.core.ChannelRateLimit;
 import dev.szx.dimensionworks.mekstress.core.ChannelCapacity;
 import dev.szx.dimensionworks.mekstress.core.DimensionTransportPolicy;
 import dev.szx.dimensionworks.mekstress.MekStressConfig;
+import dev.szx.dimensionworks.cavefactory.api.AmpouleExpiry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +13,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -23,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.neoforged.fml.ModList;
 
 /** Shared inventory for transport channels. Runtime credits are deliberately never saved. */
 public final class ChannelStockSavedData extends SavedData {
@@ -122,8 +120,8 @@ public final class ChannelStockSavedData extends SavedData {
 
     public int insertItems(int channel, String origin, ItemStack input, boolean simulate) {
         if (input.isEmpty()) return 0;
-        ItemStack storedInput = prepareAmpoule(input);
-        if (storedInput == null || encodedSize((CompoundTag) storedInput.save(registries))
+        ItemStack storedInput = AmpouleExpiry.prepareForChannelStorage(input, System.currentTimeMillis());
+        if (storedInput.isEmpty() || encodedSize((CompoundTag) storedInput.save(registries))
             > MekStressConfig.maximumTransportItemNbtBytes()) return 0;
         Stock stock = stock(channel);
         int slots = ChannelCapacity.of(stock.itemUpgrades, stock.fluidUpgrades).itemSlots();
@@ -134,10 +132,11 @@ public final class ChannelStockSavedData extends SavedData {
         if (allowed <= 0) return 0;
         int remaining = allowed;
         int maximum = storedInput.getMaxStackSize();
-        boolean ampoule = isFilledAmpoule(storedInput);
+        boolean ampoule = AmpouleExpiry.isFilled(storedInput);
         boolean hasMatch = stock.items.stream().anyMatch(record -> record.origin.equals(origin)
             && record.maximum == maximum && ItemStack.isSameItemSameComponents(record.prototype, storedInput));
-        int reservedAmpouleSlots = (int) stock.items.stream().filter(record -> isFilledAmpoule(record.prototype)).count();
+        int reservedAmpouleSlots = (int) stock.items.stream()
+            .filter(record -> AmpouleExpiry.isFilled(record.prototype)).count();
         int insertionLimit = slots - reservedAmpouleSlots - (ampoule && !hasMatch ? 1 : 0);
         if (stock.items.size() > insertionLimit) return 0;
         int possibleFreeSlots = Math.max(0, insertionLimit - stock.items.size());
@@ -320,53 +319,16 @@ public final class ChannelStockSavedData extends SavedData {
         return key != null && key.getNamespace().equals("dimensionworks_cave_factory");
     }
 
-    private static ItemStack prepareAmpoule(ItemStack input) {
-        if (!isFilledAmpoule(input)) return input.copy();
-        long now = System.currentTimeMillis();
-        CompoundTag tag = input.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        long oldExpiry = tag.getLong("ExpiresAtEpochMs");
-        if (oldExpiry > 0 && now >= oldExpiry) return null;
-        ItemStack result = input.copy();
-        CompoundTag resultTag = result.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        resultTag.putLong("ExpiresAtEpochMs", now + (long) ampouleStabilitySeconds() * 1_000L);
-        result.set(DataComponents.CUSTOM_DATA, CustomData.of(resultTag));
-        return result;
-    }
-
-    private static boolean isFilledAmpoule(ItemStack stack) {
-        if (stack.isEmpty() || !stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains("Fluid")) return false;
-        var itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return itemId != null && itemId.toString().equals("dimensionworks_cave_factory:fluid_ampoule");
-    }
-
-    private static int ampouleStabilitySeconds() {
-        if (!ModList.get().isLoaded("dimensionworks_cave_factory")) return 60;
-        try {
-            Class<?> config = Class.forName("dev.szx.dimensionworks.cavefactory.CaveFactoryConfig");
-            Object value = config.getField("STABILITY_SECONDS").get(null);
-            return Math.max(1, (int) value.getClass().getMethod("get").invoke(value));
-        } catch (ReflectiveOperationException | LinkageError exception) {
-            return 60;
-        }
-    }
-
     private void settleExpiredAmpoules(int channel) {
         Stock stock = stock(channel);
         long now = System.currentTimeMillis();
         int slotLimit = ITEM_SLOTS * (1 + stock.itemUpgrades);
         boolean changed = false;
         for (ItemRecord record : List.copyOf(stock.items)) {
-            if (!isFilledAmpoule(record.prototype)) continue;
-            CompoundTag ampouleTag = record.prototype.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-            long expiry = ampouleTag.getLong("ExpiresAtEpochMs");
-            if (expiry <= 0 || now < expiry) continue;
-            String residueId = ampouleResidueId(ampouleTag.getString("OriginDimension"));
-            if (residueId == null) continue;
-            net.minecraft.world.item.Item residueItem = BuiltInRegistries.ITEM.get(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("dimensionworks_cave_factory", residueId));
-            if (residueItem == net.minecraft.world.item.Items.AIR)
-                throw new IllegalStateException("Missing ampoule residue item: " + residueId);
-            ItemStack residue = new ItemStack(residueItem);
+            if (!AmpouleExpiry.isFilled(record.prototype)) continue;
+            AmpouleExpiry.Settlement settlement = AmpouleExpiry.settle(record.prototype, now);
+            if (!settlement.expired() || settlement.residue().isEmpty()) continue;
+            ItemStack residue = settlement.residue();
             ItemRecord residueRecord = stock.items.stream().filter(candidate -> candidate != record
                 && candidate.origin.equals(record.origin) && candidate.maximum == residue.getMaxStackSize()
                 && ItemStack.isSameItemSameComponents(candidate.prototype, residue)).findFirst().orElse(null);
@@ -385,22 +347,10 @@ public final class ChannelStockSavedData extends SavedData {
                 stock.items.add(new ItemRecord(residue, record.origin, amount, residue.getMaxStackSize()));
                 remainder -= amount;
             }
-            record.prototype = new ItemStack(record.prototype.getItem());
+            record.prototype = settlement.stack().copyWithCount(1);
             changed = true;
         }
         if (changed) setDirty();
-    }
-
-    private static String ampouleResidueId(String origin) {
-        return switch (origin) {
-            case "alex_caves_dimensions:magnetic_caves" -> "polarity_residue";
-            case "alex_caves_dimensions:primordial_caves" -> "genesis_residue";
-            case "alex_caves_dimensions:toxic_caves" -> "decay_residue";
-            case "alex_caves_dimensions:abyssal_chasm" -> "pressure_residue";
-            case "alex_caves_dimensions:forlorn_hollows" -> "umbral_residue";
-            case "alex_caves_dimensions:candy_cavity" -> "crystal_residue";
-            default -> null;
-        };
     }
 
     private static final class LimitedCountingOutputStream extends OutputStream {

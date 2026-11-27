@@ -6,45 +6,53 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Application-level service registry breaking cyclic package dependencies across
- * {@code territory}, {@code dispatch}, {@code tutorial}, {@code elastic}, and {@code network}.
+ * Immutable application services assembled once by the mod composition root.
  */
 public final class TransferServices {
-    private static volatile ITutorialLockPolicy tutorialLockPolicy = player -> false;
-    private static volatile ITerritoryDispatchHook territoryDispatchHook = (level, territory) -> {};
-    private static volatile ITransferNetworkRouter networkRouter = new ITransferNetworkRouter() {
-        @Override public void onToggleRequested(ServerPlayer player) {}
-        @Override public void onDispatchChoice(ServerPlayer player, BlockPos pos, String route) {}
-        @Override public void onDispatchClosed(ServerPlayer player) {}
-        @Override public boolean isAlexCavesUnlocked(ServerPlayer player) { return false; }
-    };
+    public record Services(
+        ITutorialLockPolicy tutorialLockPolicy,
+        ITerritoryDispatchHook territoryDispatchHook,
+        ITransferNetworkRouter networkRouter
+    ) {
+        public Services {
+            Objects.requireNonNull(tutorialLockPolicy, "tutorialLockPolicy");
+            Objects.requireNonNull(territoryDispatchHook, "territoryDispatchHook");
+            Objects.requireNonNull(networkRouter, "networkRouter");
+        }
+    }
+
+    private static final AtomicReference<Services> INSTALLED = new AtomicReference<>();
 
     private TransferServices() {
     }
 
-    public static void registerTutorialLockPolicy(ITutorialLockPolicy policy) {
-        tutorialLockPolicy = Objects.requireNonNull(policy);
-    }
-
-    public static void registerTerritoryDispatchHook(ITerritoryDispatchHook hook) {
-        territoryDispatchHook = Objects.requireNonNull(hook);
-    }
-
-    public static void registerNetworkRouter(ITransferNetworkRouter router) {
-        networkRouter = Objects.requireNonNull(router);
+    public static void install(Services services) {
+        Objects.requireNonNull(services, "services");
+        if (!INSTALLED.compareAndSet(null, services)) {
+            throw new IllegalStateException("Transfer application services are already installed");
+        }
     }
 
     public static boolean isTutorialLocked(Player player) {
-        return tutorialLockPolicy.isLocked(player);
+        return services().tutorialLockPolicy().isLocked(player);
     }
 
     public static void ensureTerritoryTerminal(ServerLevel level, BlockPos terminal) {
-        territoryDispatchHook.ensureDispatchTerminal(level, terminal);
+        services().territoryDispatchHook().ensureDispatchTerminal(level, terminal);
     }
 
     public static ITransferNetworkRouter networkRouter() {
-        return networkRouter;
+        return services().networkRouter();
+    }
+
+    private static Services services() {
+        Services services = INSTALLED.get();
+        if (services == null) {
+            throw new IllegalStateException("Transfer application services were used before initialization");
+        }
+        return services;
     }
 }

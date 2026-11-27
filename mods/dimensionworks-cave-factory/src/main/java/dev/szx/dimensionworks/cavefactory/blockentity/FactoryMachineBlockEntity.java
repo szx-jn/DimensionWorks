@@ -40,20 +40,6 @@ import java.util.UUID;
 
 public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     implements MachineInventory, ModuleHost, net.minecraft.world.MenuProvider {
-    private static final String OWNER_KEY = "Owner";
-    private static final String OWNER_NAME_KEY = "OwnerName";
-    private static final String PHASE_KEY = "FactoryPhase";
-    private static final String PHASE_PROGRESS_KEY = "PhaseProgress";
-    private static final String INPUT_ITEMS_KEY = "InputItems";
-    private static final String OUTPUT_ITEMS_KEY = "OutputItems";
-    private static final String RESIDUE_KEY = "Residue";
-    private static final String AMPOULE_IN_KEY = "AmpouleInput";
-    private static final String AMPOULE_OUT_KEY = "AmpouleOutput";
-    private static final String MODULES_KEY = "Modules";
-    private static final String INPUT_FLUID_KEY = "InputFluid";
-    private static final String OUTPUT_FLUID_KEY = "OutputFluid";
-    private static final String PORT_MODES_KEY = "PortModes";
-
     private final ItemStackHandler inputItems = new ItemStackHandler(4) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -691,38 +677,48 @@ public abstract class FactoryMachineBlockEntity extends KineticBlockEntity
     @Override
     protected void write(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
-        tag.putString(OWNER_KEY, owner == null ? "" : owner.toString());
-        tag.putString(OWNER_NAME_KEY, ownerName);
-        tag.putString(PHASE_KEY, phaseCycle.phase().name());
-        tag.putInt(PHASE_PROGRESS_KEY, phaseCycle.progress());
-        tag.put(INPUT_ITEMS_KEY, inputItems.serializeNBT(registries));
-        tag.put(OUTPUT_ITEMS_KEY, outputItems.serializeNBT(registries));
-        tag.put(RESIDUE_KEY, residue.serializeNBT(registries));
-        tag.put(AMPOULE_IN_KEY, ampouleInput.serializeNBT(registries));
-        tag.put(AMPOULE_OUT_KEY, ampouleOutput.serializeNBT(registries));
-        tag.put(MODULES_KEY, modules.serializeNBT(registries));
-        tag.put(INPUT_FLUID_KEY, inputTank.writeToNBT(registries, new CompoundTag()));
-        tag.put(OUTPUT_FLUID_KEY, outputTank.writeToNBT(registries, new CompoundTag()));
-        tag.put(PORT_MODES_KEY, portController.writeNbt());
+        MachinePersistenceCodec.write(
+            tag,
+            registries,
+            owner,
+            ownerName,
+            phaseCycle,
+            inputItems,
+            outputItems,
+            residue,
+            ampouleInput,
+            ampouleOutput,
+            modules,
+            inputTank,
+            outputTank,
+            portController
+        );
     }
 
     @Override
     protected void read(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
-        owner = tag.getString(OWNER_KEY).isBlank() ? null : UUID.fromString(tag.getString(OWNER_KEY));
-        ownerName = tag.getString(OWNER_NAME_KEY);
-        FactoryPhase phase = tag.contains(PHASE_KEY) ? FactoryPhase.valueOf(tag.getString(PHASE_KEY)) : FactoryPhase.PHASE_A;
-        phaseCycle = PhaseCycle.fromState(phase, tag.getInt(PHASE_PROGRESS_KEY), CaveFactoryConfig.PHASE_BATCHES.get());
-        if (tag.contains(INPUT_ITEMS_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(INPUT_ITEMS_KEY), inputItems);
-        if (tag.contains(OUTPUT_ITEMS_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(OUTPUT_ITEMS_KEY), outputItems);
-        if (tag.contains(RESIDUE_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(RESIDUE_KEY), residue);
-        if (tag.contains(AMPOULE_IN_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(AMPOULE_IN_KEY), ampouleInput);
-        if (tag.contains(AMPOULE_OUT_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(AMPOULE_OUT_KEY), ampouleOutput);
-        if (tag.contains(MODULES_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readItems(registries, tag.getCompound(MODULES_KEY), modules);
-        refreshFluidCapacity();
-        if (tag.contains(INPUT_FLUID_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readFluid(registries, tag.getCompound(INPUT_FLUID_KEY), inputTank);
-        if (tag.contains(OUTPUT_FLUID_KEY)) dev.szx.dimensionworks.cavefactory.logic.FactoryStorage.readFluid(registries, tag.getCompound(OUTPUT_FLUID_KEY), outputTank);
-        portController.readNbt(tag.getCompound(PORT_MODES_KEY));
+        MachinePersistenceCodec.MachineState state = MachinePersistenceCodec.readState(
+            tag,
+            CaveFactoryConfig.PHASE_BATCHES.get()
+        );
+        owner = state.owner();
+        ownerName = state.ownerName();
+        phaseCycle = state.phaseCycle();
+        MachinePersistenceCodec.readStorage(
+            tag,
+            registries,
+            inputItems,
+            outputItems,
+            residue,
+            ampouleInput,
+            ampouleOutput,
+            modules,
+            inputTank,
+            outputTank,
+            this::refreshFluidCapacity,
+            portController
+        );
     }
 
     @Override

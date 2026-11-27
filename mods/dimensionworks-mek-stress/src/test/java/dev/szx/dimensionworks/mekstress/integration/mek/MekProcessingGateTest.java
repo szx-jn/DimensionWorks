@@ -6,13 +6,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.szx.dimensionworks.rpmlimit.api.IQuotaGateService.QuotaFamily;
 import dev.szx.dimensionworks.rpmlimit.api.RpmLimitServices;
+import dev.szx.dimensionworks.rpmlimit.RpmLimitServiceBindings;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class MekProcessingGateTest {
 
     private final UUID owner = UUID.fromString("1159fa7d-13d4-4f74-a711-48a44c8c5252");
+
+    @BeforeAll
+    static void installRpmLimitServices() {
+        RpmLimitServiceBindings.install();
+    }
 
     @BeforeEach
     void clearActiveMachines() {

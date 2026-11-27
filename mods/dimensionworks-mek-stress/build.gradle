@@ -11,6 +11,7 @@ apply from: rootProject.file('gradle/neoforge-create.gradle')
 
 dependencies {
     implementation project(':dimensionworks-rpm-limit')
+    implementation project(':dimensionworks-cave-factory')
     implementation 'maven.modrinth:mekanism:5KzzycBT'
     implementation 'maven.modrinth:mekanism-generators:a6gl7srE'
     implementation 'maven.modrinth:ae2:7Ac6mXbf'
@@ -33,5 +34,5 @@ sourceSets.test {
     runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.compileClasspath
 }
 
-ext.gameTestCount = 18
+ext.gameTestCount = 19
 apply from: rootProject.file('gradle/neoforge-gametest.gradle')

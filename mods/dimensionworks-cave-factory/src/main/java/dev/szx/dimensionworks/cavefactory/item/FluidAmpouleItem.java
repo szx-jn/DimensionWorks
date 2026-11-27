@@ -1,16 +1,20 @@
 package dev.szx.dimensionworks.cavefactory.item;
 
 import dev.szx.dimensionworks.cavefactory.api.AmpouleExpiry;
+import dev.szx.dimensionworks.cavefactory.api.IFluidAmpoule;
 import dev.szx.dimensionworks.cavefactory.CaveFactoryConfig;
 import dev.szx.dimensionworks.cavefactory.logic.AmpouleState;
 import dev.szx.dimensionworks.cavefactory.logic.FactoryDimension;
 import dev.szx.dimensionworks.cavefactory.logic.MachineType;
+import dev.szx.dimensionworks.cavefactory.registry.CFDataComponents;
 import dev.szx.dimensionworks.cavefactory.registry.CFFluids;
 import dev.szx.dimensionworks.cavefactory.registry.CFItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.CustomData;
-import dev.szx.dimensionworks.cavefactory.registry.CFDataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -28,7 +32,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import java.util.List;
 
-public class FluidAmpouleItem extends Item {
+public class FluidAmpouleItem extends Item implements IFluidAmpoule {
     public static final int DEFAULT_CAPACITY = 250;
     public static final String FLUID_KEY = "Fluid";
     public static final String ORIGIN_KEY = "OriginDimension";
@@ -41,7 +45,32 @@ public class FluidAmpouleItem extends Item {
 
     public static FluidStack storedFluid(ItemStack stack) {
         AmpouleFluid value = stack.get(CFDataComponents.AMPOULE_FLUID.get());
-        return value == null ? FluidStack.EMPTY : value.toStack();
+        if (value != null) {
+            return value.toStack();
+        }
+        CompoundTag customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        if (customData == null || !customData.contains(FLUID_KEY, Tag.TAG_COMPOUND)) {
+            return FluidStack.EMPTY;
+        }
+        CompoundTag legacy = customData.getCompound(FLUID_KEY);
+        if (!legacy.contains("FluidName", Tag.TAG_STRING) || !legacy.contains("Amount", Tag.TAG_INT)) {
+            return FluidStack.EMPTY;
+        }
+        ResourceLocation id = ResourceLocation.tryParse(legacy.getString("FluidName"));
+        if (id == null) {
+            return FluidStack.EMPTY;
+        }
+        var fluid = BuiltInRegistries.FLUID.getHolder(id).orElse(null);
+        int amount = legacy.getInt("Amount");
+        if (fluid == null || amount <= 0) {
+            return FluidStack.EMPTY;
+        }
+        FluidStack result = new FluidStack(fluid, amount);
+        CompoundTag legacyComponents = legacy.getCompound("Tag");
+        if (!legacyComponents.isEmpty()) {
+            result.set(DataComponents.CUSTOM_DATA, CustomData.of(legacyComponents));
+        }
+        return result;
     }
 
     public AmpouleState readState(ItemStack stack) {
@@ -82,8 +111,64 @@ public class FluidAmpouleItem extends Item {
         }
         return ItemStack.EMPTY;
     }
+    @Override
     public boolean hasStoredFluid(ItemStack stack) {
         return !storedFluid(stack).isEmpty();
+    }
+
+    @Override
+    public AmpouleExpiry.Settlement observe(
+        ItemStack stack,
+        String observedDimension,
+        long nowMillis,
+        long windowMillis
+    ) {
+        if (!hasStoredFluid(stack)) {
+            return new AmpouleExpiry.Settlement(stack, ItemStack.EMPTY, false);
+        }
+        AmpouleState state = readState(stack);
+        if (!state.hasTimer() && state.originDimension().isEmpty()) {
+            writeState(stack, AmpouleState.fresh(observedDimension));
+            return new AmpouleExpiry.Settlement(stack, ItemStack.EMPTY, false);
+        }
+        AmpouleState observed = AmpouleState.observeDimension(state, observedDimension, nowMillis, windowMillis);
+        if (!observed.equals(state)) {
+            writeState(stack, observed);
+        }
+        return new AmpouleExpiry.Settlement(stack, ItemStack.EMPTY, false);
+    }
+
+    @Override
+    public AmpouleExpiry.Settlement settle(ItemStack stack, long nowMillis) {
+        if (!hasStoredFluid(stack)) {
+            return new AmpouleExpiry.Settlement(stack, ItemStack.EMPTY, false);
+        }
+        AmpouleState state = readState(stack);
+        if (!state.isExpired(nowMillis)) {
+            return new AmpouleExpiry.Settlement(stack, ItemStack.EMPTY, false);
+        }
+        return new AmpouleExpiry.Settlement(emptyStack(), residueFor(state), true);
+    }
+
+    @Override
+    public boolean mergeable(ItemStack first, ItemStack second) {
+        return second.getItem() instanceof FluidAmpouleItem other
+            && readState(first).canMerge(other.readState(second));
+    }
+
+    @Override
+    public ItemStack prepareForChannelStorage(ItemStack stack, long nowMillis) {
+        AmpouleState state = readState(stack);
+        if (state.isExpired(nowMillis)) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack prepared = stack.copy();
+        AmpouleState withExpiry = new AmpouleState(
+            state.originDimension(),
+            nowMillis + (long) CaveFactoryConfig.STABILITY_SECONDS.get() * 1_000L
+        );
+        writeState(prepared, withExpiry);
+        return prepared;
     }
 
     public static void setOrigin(ItemStack stack, FactoryDimension dimension) {
@@ -266,7 +351,7 @@ public class FluidAmpouleItem extends Item {
             FluidStack result = current.isEmpty()
                 ? resource.copyWithAmount(accepted)
                 : current.copyWithAmount(current.getAmount() + accepted);
-            container.set(CFDataComponents.AMPOULE_FLUID.get(), AmpouleFluid.of(result));
+            writeStoredFluid(container, result);
             return accepted;
         }
 
@@ -291,15 +376,21 @@ public class FluidAmpouleItem extends Item {
                 if (drained >= current.getAmount()) {
                     clearStoredState(container);
                 } else {
-                    container.set(CFDataComponents.AMPOULE_FLUID.get(), AmpouleFluid.of(current.copyWithAmount(current.getAmount() - drained)));
+                    writeStoredFluid(container, current.copyWithAmount(current.getAmount() - drained));
                 }
             }
             return result;
         }
 
+    private static void writeStoredFluid(ItemStack stack, FluidStack fluid) {
+        stack.set(CFDataComponents.AMPOULE_FLUID.get(), AmpouleFluid.of(fluid));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(FLUID_KEY));
+    }
+
         private static void clearStoredState(ItemStack stack) {
             stack.remove(CFDataComponents.AMPOULE_FLUID.get());
             CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            tag.remove(FLUID_KEY);
                 tag.remove(ORIGIN_KEY);
                 tag.remove(EXPIRY_KEY);
                 tag.remove(RESIDUE_KEY);

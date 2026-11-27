@@ -2,6 +2,7 @@ package dev.szx.dimensionworks.transfer.network;
 
 import dev.szx.dimensionworks.transfer.WDTransfer;
 import dev.szx.dimensionworks.transfer.api.TransferServices;
+import dev.szx.dimensionworks.transfer.client.TransferClientPayloads;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

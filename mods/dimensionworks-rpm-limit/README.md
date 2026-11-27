@@ -10,7 +10,7 @@
 
 ## 模块间 Java API
 
-其他自研模块通过 `dev.szx.dimensionworks.rpmlimit.api` 调用限速与工业额度能力，不直接依赖内部管理器、优化器或配额实现。主要入口为 `RpmLimitServices.rpm()`、`optimizer()`、`overspeed()`、`quota()` 与 `topology()`；Mekanism 配方上下文、Mixin 和专属处理逻辑由 `dimensionworks_mek_stress` 持有。现有 `/dw` 命令与 KubeJS 调用入口保持不变。
+其他自研模块通过 `dev.szx.dimensionworks.rpmlimit.api` 调用限速与工业额度能力，不直接依赖内部管理器、优化器或配额实现。主要入口为 `RpmLimitServices.rpm()`、`optimizer()`、`overspeed()`、`quota()` 与 `topology()`；接口契约不依赖 RPM Limit 的实现包，由模组组合根在初始化时绑定且拒绝重复绑定。Mekanism 配方上下文、Mixin 和专属处理逻辑由 `dimensionworks_mek_stress` 持有。现有 `/dw` 命令与 KubeJS 调用入口保持不变。
 
 ## Default
 New players start at **32 RPM**. The hard maximum is **10240 RPM**.

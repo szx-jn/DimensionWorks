@@ -9,6 +9,8 @@ on:
       - 'build.gradle'
       - 'settings.gradle'
       - 'gradle.properties'
+      - 'AGENTS.md'
+      - 'scripts/**'
       - '.github/workflows/build-java-mods.yml'
 
 concurrency:
@@ -117,3 +119,21 @@ jobs:
           if [[ -d "mods/$MODULE/src/gameTest" ]]; then
             ./gradlew ":$MODULE:runGameTestServer" --no-daemon --console=plain
           fi
+
+  architecture:
+    name: 架构依赖边界检查
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 检查模组依赖环与分层边界
+        run: python3 scripts/check_architecture.py
+
+      - name: 测试架构依赖图解析
+        run: python3 -m unittest discover -s scripts/tests -p 'test_check_architecture.py' -v

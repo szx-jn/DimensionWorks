@@ -1,7 +1,5 @@
 package dev.szx.dimensionworks.cavefactory.api;
 
-import dev.szx.dimensionworks.cavefactory.item.FluidAmpouleItem;
-import dev.szx.dimensionworks.cavefactory.logic.AmpouleState;
 import net.minecraft.world.item.ItemStack;
 
 public final class AmpouleExpiry {
@@ -9,47 +7,43 @@ public final class AmpouleExpiry {
 
     private AmpouleExpiry() {}
 
+    public static boolean isAmpoule(ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() instanceof IFluidAmpoule;
+    }
+
+    public static boolean isFilled(ItemStack stack) {
+        return stack.getItem() instanceof IFluidAmpoule ampoule && ampoule.hasStoredFluid(stack);
+    }
+
     public static Settlement observe(ItemStack stack, String observedDimension, long nowMillis, long windowMillis) {
-        if (!(stack.getItem() instanceof FluidAmpouleItem ampoule)) {
+        if (!(stack.getItem() instanceof IFluidAmpoule ampoule)) {
             return new Settlement(stack, ItemStack.EMPTY, false);
         }
-        if (!ampoule.hasStoredFluid(stack)) {
-            return new Settlement(stack, ItemStack.EMPTY, false);
-        }
-        AmpouleState state = ampoule.readState(stack);
-        if (!state.hasTimer() && state.originDimension().isEmpty()) {
-            state = AmpouleState.fresh(observedDimension);
-            ampoule.writeState(stack, state);
-            return new Settlement(stack, ItemStack.EMPTY, false);
-        }
-        AmpouleState observed = AmpouleState.observeDimension(state, observedDimension, nowMillis, windowMillis);
-        if (!observed.equals(state)) {
-            ampoule.writeState(stack, observed);
-        }
-        return new Settlement(stack, ItemStack.EMPTY, false);
+        return ampoule.observe(stack, observedDimension, nowMillis, windowMillis);
     }
 
     public static Settlement settle(ItemStack stack, long nowMillis) {
-        if (!(stack.getItem() instanceof FluidAmpouleItem ampoule)) {
+        if (!(stack.getItem() instanceof IFluidAmpoule ampoule)) {
             return new Settlement(stack, ItemStack.EMPTY, false);
         }
-        if (!ampoule.hasStoredFluid(stack)) {
-            return new Settlement(stack, ItemStack.EMPTY, false);
-        }
-        AmpouleState state = ampoule.readState(stack);
-        if (!state.isExpired(nowMillis)) {
-            return new Settlement(stack, ItemStack.EMPTY, false);
-        }
-        ItemStack residue = ampoule.residueFor(state);
-        ItemStack empty = ampoule.emptyStack();
-        return new Settlement(empty, residue, true);
+        return ampoule.settle(stack, nowMillis);
     }
 
     public static boolean mergeable(ItemStack first, ItemStack second) {
-        if (!(first.getItem() instanceof FluidAmpouleItem firstAmpoule)
-            || !(second.getItem() instanceof FluidAmpouleItem secondAmpoule)) {
-            return false;
+        return first.getItem() instanceof IFluidAmpoule ampoule && ampoule.mergeable(first, second);
+    }
+
+    /**
+     * Returns an empty stack when an expired ampoule cannot enter channel storage.
+     * Non-ampoule stacks are copied unchanged.
+     */
+    public static ItemStack prepareForChannelStorage(ItemStack stack, long nowMillis) {
+        if (!(stack.getItem() instanceof IFluidAmpoule ampoule)) {
+            return stack.copy();
         }
-        return firstAmpoule.readState(first).canMerge(secondAmpoule.readState(second));
+        if (!ampoule.hasStoredFluid(stack)) {
+            return stack.copy();
+        }
+        return ampoule.prepareForChannelStorage(stack, nowMillis);
     }
 }

@@ -20,6 +20,7 @@ public final class DimensionWorksRpmLimit {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public DimensionWorksRpmLimit(IEventBus modBus, ModContainer container, Dist dist) {
+        RpmLimitServiceBindings.install();
         dev.szx.dimensionworks.rpmlimit.controller.AdvancedController.register(modBus);
         container.registerConfig(ModConfig.Type.COMMON, RpmLimitConfig.SPEC);
         NeoForge.EVENT_BUS.register(RpmForgeEvents.class);

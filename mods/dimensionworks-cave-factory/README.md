@@ -48,7 +48,7 @@
 
 公开 API：
 
-- `AmpouleExpiry`：封装离维观察、结算与堆叠可合并判定。
+- `api.IFluidAmpoule` / `AmpouleExpiry`：通过稳定契约执行安瓿状态观察、过期结算、堆叠判定与频道入库准备；外部模组不得读取安瓿物品实现类或 `minecraft:custom_data` 内部键。
 - `ModuleHost`：模块宿主能力、能力映射与显式配方映射入口。
 - `FactoryMachineBlockEntity#phase()`：机器相位状态。
 - `FluidStabilizerBlockEntity`：通用 4:1 稳定化接口。
@@ -102,7 +102,7 @@
 
 保留全部自研注册 ID、六个原有洞穴职责与 16 条配方。物品配方结果使用 `id/count/components`，流体使用 `id/amount/components`；目录改为 `recipe/`、`tags/item/` 和 `tags/fluid/`。稳定化输入 `amount` 可省略，解析时读取服务端配置，网络发送已解析的数值。
 
-封装流体使用不可变组件 `dimensionworks_cave_factory:ampoule_fluid`；来源维度、到期时间和残渣保存在 `minecraft:custom_data`。组件保存、部分排出及过期转换保留名称和其他数据。原 Forge 标签须由整包一次性转换器迁移，当前运行代码不读取旧格式。
+封装流体使用不可变组件 `dimensionworks_cave_factory:ampoule_fluid`；来源维度、到期时间和残渣保存在 `minecraft:custom_data`。组件保存、部分排出及过期转换保留名称和其他数据。旧 Forge 安瓿的 `CustomData["Fluid"]`（`FluidName`、`Amount`、可选 `Tag`）仍可读取；首次写入流体时迁入新组件并仅移除旧流体字段，保留来源、到期时间及其他数据。此兼容只覆盖安瓿流体载荷，不替代其他旧世界格式的离线转换与预检。
 
 能力由 `CFCapabilities` 注册；`ModuleHost.find` 使用方块能力查询，五类 Create 宿主使用附件管理生命周期，通过其原有持久化键保存模块、归属和计数。配方重载后缓存立即失效。稳定器先确认整批产物可容纳，再申请额度和消耗流体。非法库存列表、槽位、物品、流体、归属 UUID 或机器相位显式拒绝；完整旧档转换仍需在开服前离线预检，不能依赖方块实体加载器阻断整座世界。
 

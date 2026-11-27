@@ -22,7 +22,7 @@ sourceSets.test {
     runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.compileClasspath
 }
 
-ext.gameTestCount = project.hasProperty('crystalCheck') ? 16 : 11
+ext.gameTestCount = project.hasProperty('crystalCheck') ? 17 : 12
 apply from: rootProject.file('gradle/neoforge-gametest.gradle')
 
 // 按需验证实际 KubeJS 熔融材料脚本与客户端图集；这些检查类不会进入模组 JAR。

@@ -24,6 +24,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -81,6 +82,50 @@ public final class FactoryPersistenceGameTests {
     }
 
     @GameTest(template = "empty_9x9x9")
+    public static void legacyAmpouleCustomDataRemainsReadable(GameTestHelper h) {
+        var registries = h.getLevel().registryAccess();
+        var brine = CFFluids.get(MachineType.ABYSSAL).still().get();
+        CompoundTag legacyFluid = new CompoundTag();
+        legacyFluid.putString("FluidName", BuiltInRegistries.FLUID.getKey(brine).toString());
+        legacyFluid.putInt("Amount", 200);
+        CompoundTag fluidTag = new CompoundTag();
+        fluidTag.putString("legacy_component", "retained");
+        legacyFluid.put("Tag", fluidTag);
+
+        CompoundTag legacyData = new CompoundTag();
+        legacyData.put("Fluid", legacyFluid);
+        legacyData.putString(FluidAmpouleItem.ORIGIN_KEY, FactoryDimension.ABYSSAL.dimensionId());
+        legacyData.putLong(FluidAmpouleItem.EXPIRY_KEY, 500L);
+        legacyData.putString("note", "preserve");
+        ItemStack stack = new ItemStack(CFItems.FLUID_AMPOULE.get());
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(legacyData));
+        ItemStack loaded = ItemStack.parse(registries, stack.save(registries)).orElseThrow();
+
+        FluidStack restored = FluidAmpouleItem.storedFluid(loaded);
+        h.assertTrue(restored.is(brine) && restored.getAmount() == 200,
+            "Legacy FluidName/Amount payload should remain available");
+        h.assertTrue(restored.get(DataComponents.CUSTOM_DATA).copyTag().getString("legacy_component").equals("retained"),
+            "Legacy fluid tag payload should be retained");
+        h.assertTrue(AmpouleExpiry.isFilled(loaded), "Public ampoule API should detect the legacy payload");
+        var expired = AmpouleExpiry.settle(loaded, 500L);
+        h.assertTrue(expired.expired()
+            && expired.residue().is(CFItems.residue(MachineType.ABYSSAL).get()),
+            "Legacy expiry should still produce the origin residue");
+
+        var handler = new FluidAmpouleItem.AmpouleFluidHandler(loaded);
+        h.assertTrue(handler.drain(50, FluidAction.EXECUTE).getAmount() == 50,
+            "Legacy fluid should support partial extraction");
+        CompoundTag migratedData = loaded.get(DataComponents.CUSTOM_DATA).copyTag();
+        h.assertTrue(!migratedData.contains(FluidAmpouleItem.FLUID_KEY)
+            && migratedData.getString("note").equals("preserve")
+            && migratedData.getString(FluidAmpouleItem.ORIGIN_KEY).equals(FactoryDimension.ABYSSAL.dimensionId()),
+            "First write should remove only the legacy fluid payload");
+        h.assertTrue(FluidAmpouleItem.storedFluid(loaded).getAmount() == 150,
+            "Partial extraction should persist through the new component");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty_9x9x9")
     public static void allFactoryCompartmentsSurviveNativeSave(GameTestHelper h) {
         h.setBlock(POS, CFBlocks.controller(MachineType.ABYSSAL).get());
         var controller = (FactoryControllerBlockEntity) h.getBlockEntity(POS);
@@ -100,8 +145,27 @@ public final class FactoryPersistenceGameTests {
         controller.outputTank().setFluid(new FluidStack(CFFluids.get(MachineType.ABYSSAL).still().get(), 9100));
         controller.setPhaseState(FactoryPhase.PHASE_B, 7);
         controller.cyclePort(Direction.NORTH, player);
-        var loaded = (FactoryControllerBlockEntity) BlockEntity.loadStatic(controller.getBlockPos(), controller.getBlockState(),
-            controller.saveWithFullMetadata(h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        CompoundTag saved = controller.saveWithFullMetadata(h.getLevel().registryAccess());
+        h.assertTrue(saved.contains("Owner", Tag.TAG_STRING)
+            && saved.contains("OwnerName", Tag.TAG_STRING)
+            && saved.contains("FactoryPhase", Tag.TAG_STRING)
+            && saved.contains("PhaseProgress", Tag.TAG_INT)
+            && saved.contains("InputItems", Tag.TAG_COMPOUND)
+            && saved.contains("OutputItems", Tag.TAG_COMPOUND)
+            && saved.contains("Residue", Tag.TAG_COMPOUND)
+            && saved.contains("AmpouleInput", Tag.TAG_COMPOUND)
+            && saved.contains("AmpouleOutput", Tag.TAG_COMPOUND)
+            && saved.contains("Modules", Tag.TAG_COMPOUND)
+            && saved.contains("InputFluid", Tag.TAG_COMPOUND)
+            && saved.contains("OutputFluid", Tag.TAG_COMPOUND)
+            && saved.contains("PortModes", Tag.TAG_COMPOUND),
+            "Factory save-format keys or tag types changed");
+        var loaded = (FactoryControllerBlockEntity) BlockEntity.loadStatic(
+            controller.getBlockPos(),
+            controller.getBlockState(),
+            saved,
+            h.getLevel().registryAccess()
+        );
         h.assertTrue(loaded != null && loaded.owner().equals(player.getUUID()), "Factory owner lost");
         for (int slot = 0; slot < MachineInventory.MENU_SLOTS; slot++) h.assertTrue(ItemStack.matches(controller.getStack(slot), loaded.getStack(slot)), "Factory compartment changed: " + slot);
         h.assertTrue(loaded.fluidInputCapacity() == 5000 && loaded.fluidOutputCapacity() == 10000

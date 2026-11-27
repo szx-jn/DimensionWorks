@@ -25,37 +25,35 @@ public final class WDTransfer {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public WDTransfer(IEventBus modEventBus) {
+        TransferServices.install(new TransferServices.Services(
+            player -> player instanceof ServerPlayer serverPlayer && TutorialManager.locked(serverPlayer),
+            (level, terminal) -> DispatchController.ensure(level, terminal),
+            new ITransferNetworkRouter() {
+                @Override
+                public void onToggleRequested(ServerPlayer player) {
+                    if (!TutorialManager.locked(player)) {
+                        TransferController.useFromKey(player);
+                    }
+                }
+
+                @Override
+                public void onDispatchChoice(ServerPlayer player, BlockPos pos, String route) {
+                    DispatchController.send(player, pos, route);
+                }
+
+                @Override
+                public void onDispatchClosed(ServerPlayer player) {
+                    DispatchController.close(player);
+                }
+
+                @Override
+                public boolean isAlexCavesUnlocked(ServerPlayer player) {
+                    return DispatchController.alexCavesUnlocked(player);
+                }
+            }
+        ));
         modEventBus.addListener((net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent event) ->
-            event.enqueueWork(() -> {
-                dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy.initialize();
-                TransferServices.registerTutorialLockPolicy(
-                    player -> player instanceof ServerPlayer serverPlayer && TutorialManager.locked(serverPlayer));
-                TransferServices.registerTerritoryDispatchHook((level, terminal) ->
-                    DispatchController.ensure(level, terminal));
-                TransferServices.registerNetworkRouter(new ITransferNetworkRouter() {
-                    @Override
-                    public void onToggleRequested(ServerPlayer player) {
-                        if (!TutorialManager.locked(player)) {
-                            TransferController.useFromKey(player);
-                        }
-                    }
-
-                    @Override
-                    public void onDispatchChoice(ServerPlayer player, BlockPos pos, String route) {
-                        DispatchController.send(player, pos, route);
-                    }
-
-                    @Override
-                    public void onDispatchClosed(ServerPlayer player) {
-                        DispatchController.close(player);
-                    }
-
-                    @Override
-                    public boolean isAlexCavesUnlocked(ServerPlayer player) {
-                        return DispatchController.alexCavesUnlocked(player);
-                    }
-                });
-            }));
+            event.enqueueWork(dev.szx.dimensionworks.transfer.territory.TransferBlockPolicy::initialize));
         modEventBus.addListener(TransferNetwork::register);
         modEventBus.addListener(dev.szx.dimensionworks.transfer.elastic.ElasticNetwork::register);
         dev.szx.dimensionworks.transfer.elastic.PackagerItems.ITEMS.register(modEventBus);

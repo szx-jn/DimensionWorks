@@ -1,8 +1,14 @@
 package dev.szx.dimensionworks.mekstress;
 
+import dev.szx.dimensionworks.cavefactory.api.AmpouleExpiry;
 import dev.szx.dimensionworks.mekstress.memory.ChannelStockSavedData;
 import dev.szx.dimensionworks.mekstress.memory.MatterBallPacking;
 import java.util.List;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -93,6 +99,34 @@ public class CrossDimensionTransportGameTests {
             packedAmount += fluid.getAmount();
         }
         helper.assertTrue(packedAmount == originalAmount, "Packing must conserve the full fluid amount");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void channelStoresAmpoulesThroughCaveFactoryApi(GameTestHelper helper) {
+        var ampouleId = ResourceLocation.parse("dimensionworks_cave_factory:fluid_ampoule");
+        var ampouleItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ampouleId);
+        ItemStack ampoule = new ItemStack(ampouleItem);
+        var fluidId = ResourceLocation.parse("dimensionworks_cave_factory:abyssal_brine");
+        var brine = net.minecraft.core.registries.BuiltInRegistries.FLUID.get(fluidId);
+        CompoundTag legacyFluid = new CompoundTag();
+        legacyFluid.putString("FluidName", net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(brine).toString());
+        legacyFluid.putInt("Amount", 250);
+        CompoundTag legacyData = new CompoundTag();
+        legacyData.put("Fluid", legacyFluid);
+        legacyData.putString("OriginDimension", "alex_caves_dimensions:abyssal_chasm");
+        ampoule.set(DataComponents.CUSTOM_DATA, CustomData.of(legacyData));
+
+        ChannelStockSavedData stock = new ChannelStockSavedData(helper.getLevel().registryAccess());
+        stock.tickChannel(1, helper.getLevel().getGameTime(), 1);
+        helper.assertTrue(stock.insertItems(1, "alex_caves_dimensions:abyssal_chasm", ampoule, false) == 1,
+            "Filled ampoule should be admitted through the public contract");
+        ItemStack stored = stock.snapshot(1).items().getFirst().stack();
+        helper.assertTrue(AmpouleExpiry.isFilled(stored), "Channel prototype retains the ampoule component");
+        CompoundTag metadata = stored.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        helper.assertTrue(metadata.getLong("ExpiresAtEpochMs") > System.currentTimeMillis(),
+            "Channel preparation writes the existing expiry key");
+        helper.assertTrue(stored.getCount() == 1, "Channel storage keeps a count-one item prototype");
         helper.succeed();
     }
 }

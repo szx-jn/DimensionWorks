@@ -66,6 +66,13 @@ ordering="AFTER"
 side="BOTH"
 
 [[dependencies.dimensionworks_mek_stress]]
+modId="dimensionworks_cave_factory"
+type="required"
+versionRange="[0.1.7,1)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.dimensionworks_mek_stress]]
 modId="draconicevolution"
 type="required"
 versionRange="[3.1.4,3.2)"
