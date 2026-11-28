@@ -696,6 +696,28 @@
       "url": "https://modrinth.com/mod/drippy-loading-screen"
     },
     {
+      "id": "drippyloadingscreen-earlywindow",
+      "name": "Drippy Early Loading Module",
+      "required": true,
+      "environment": "client",
+      "source": "modrinth",
+      "project_id": "k3TlcLvL",
+      "version": "3.1.5-1.21.1-neoforge",
+      "version_id": "12xuEYZB",
+      "url": "https://modrinth.com/mod/drippy-early-loading-module"
+    },
+    {
+      "id": "omnisearch",
+      "name": "Omnisearch",
+      "required": true,
+      "environment": "client",
+      "source": "modrinth",
+      "project_id": "vvWPliwJ",
+      "version": "2.2.0+neoforge-1.21.1",
+      "version_id": "pY9XhqQR",
+      "url": "https://modrinth.com/mod/omnisearch"
+    },
+    {
       "id": "entityculling",
       "name": "Entity Culling",
       "required": true,
