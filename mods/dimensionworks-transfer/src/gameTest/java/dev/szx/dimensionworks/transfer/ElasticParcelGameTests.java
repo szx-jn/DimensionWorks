@@ -77,7 +77,7 @@ public final class ElasticParcelGameTests {
         var purpleColor = PackagerItems.ADVANCED_PACKAGER.get().getDefaultInstance().getRarity().getStyleModifier()
             .apply(net.minecraft.network.chat.Style.EMPTY).getColor().getValue();
         h.assertTrue(blueColor == ChatFormatting.BLUE.getColor(), "Blue tool rarity must actually be blue");
-        h.assertTrue(purpleColor == ChatFormatting.DARK_PURPLE.getColor(), "Purple tool rarity must actually be purple");
+        h.assertTrue(purpleColor == ChatFormatting.GOLD.getColor(), "Advanced tool rarity name must actually be gold");
         h.succeed();
     }
 

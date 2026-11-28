@@ -17,7 +17,7 @@ public final class PackagerRarityParameters {
     }
 
     public static Object purple(int index, Class<?> expectedType) {
-        return parameter(index, expectedType, 6, "dimensionworks_transfer:advanced", ChatFormatting.DARK_PURPLE);
+        return parameter(index, expectedType, 6, "dimensionworks_transfer:advanced", ChatFormatting.GOLD);
     }
 
     private static Object parameter(int index, Class<?> expectedType, int id, String name, ChatFormatting color) {
