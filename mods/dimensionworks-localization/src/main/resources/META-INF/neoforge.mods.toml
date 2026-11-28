@@ -4,10 +4,10 @@ license="MIT"
 
 [[mods]]
 modId="dimensionworks_localization"
-version="0.1.6"
+version="0.1.7"
 displayName="DimensionWorks 简体中文汉化"
 authors="szx-jn"
-description='''DimensionWorks 客户端简体中文覆盖，只补充第三方 Mod 缺失的语言键与指南页面。'''
+description='''DimensionWorks 客户端简体中文覆盖，含 Iris 光影选项翻译。'''
 
 [[dependencies.dimensionworks_localization]]
 modId="neoforge"
@@ -22,3 +22,13 @@ type="required"
 versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.dimensionworks_localization]]
+modId="iris"
+type="optional"
+versionRange="[1.8.14-beta.1,1.8.15)"
+ordering="AFTER"
+side="CLIENT"
+
+[[mixins]]
+config="dimensionworks_localization.mixins.json"

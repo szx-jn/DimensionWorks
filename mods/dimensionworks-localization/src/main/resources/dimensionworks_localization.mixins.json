@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "dev.szx.dimensionworks.localization.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "IrisShaderLanguageMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
