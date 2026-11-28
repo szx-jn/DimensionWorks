@@ -206,7 +206,7 @@ key_key.mekanism.key_boost:key.keyboard.left.control
 key_key.mekanism.key_hud:key.keyboard.h
 key_key.dimensionworks_transfer.toggle:key.keyboard.p
 key_key.traderefresh.refresh:key.keyboard.t
-key_key.guideme.guide:key.keyboard.b
+key_key.guideme.guide:key.keyboard.g
 key_key.special_ability:key.keyboard.g
 key_key.jade.config:key.keyboard.0
 key_key.jade.show_overlay:key.keyboard.keypad.1

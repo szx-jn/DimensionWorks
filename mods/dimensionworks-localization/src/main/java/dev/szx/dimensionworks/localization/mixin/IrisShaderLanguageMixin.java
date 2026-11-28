@@ -1,15 +1,18 @@
 package dev.szx.dimensionworks.localization.mixin;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -23,8 +26,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "net.irisshaders.iris.shaderpack.LanguageMap", remap = false)
 public abstract class IrisShaderLanguageMixin {
     @Unique
-    private static final String TRANSLATION_RESOURCE =
-            "/assets/dimensionworks_localization/iris/shaders/lang/complementary_unbound_r5_9_3_zh_cn.lang";
+    private static final Logger DIMENSIONWORKS$LOGGER =
+            LoggerFactory.getLogger("DimensionWorks Localization");
+
+    @Unique
+    private static final ResourceLocation DIMENSIONWORKS$TRANSLATION_RESOURCE =
+            ResourceLocation.fromNamespaceAndPath(
+                    "dimensionworks_localization",
+                    "iris/shaders/lang/complementary_unbound_r5_9_3_zh_cn.lang");
 
     @Shadow
     @Final
@@ -37,20 +46,21 @@ public abstract class IrisShaderLanguageMixin {
             return;
         }
 
-        try (InputStream stream = IrisShaderLanguageMixin.class.getResourceAsStream(TRANSLATION_RESOURCE)) {
-            if (stream == null) {
-                throw new IllegalStateException("Missing bundled Complementary Unbound zh_cn translation");
-            }
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager()
+                    .getResource(DIMENSIONWORKS$TRANSLATION_RESOURCE)
+                    .orElseThrow(() -> new IOException("Bundled Complementary Unbound zh_cn translation not found"));
             Properties properties = new Properties();
-            try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            try (InputStreamReader reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
                 properties.load(reader);
             }
-
             Map<String, String> translations = new HashMap<>();
             properties.forEach((key, value) -> translations.put(key.toString(), value.toString()));
             translationMaps.put("zh_cn", Map.copyOf(translations));
         } catch (IOException exception) {
-            throw new UncheckedIOException("Could not load Complementary Unbound zh_cn translation", exception);
+            DIMENSIONWORKS$LOGGER.error(
+                    "Could not load Complementary Unbound zh_cn translation; continuing shaderpack loading",
+                    exception);
         }
     }
 }

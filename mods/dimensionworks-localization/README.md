@@ -1,6 +1,6 @@
 # DimensionWorks 简体中文汉化
 
-`dimensionworks_localization` 是随 DimensionWorks 客户端分发的 NeoForge 汉化 Mod，目标为 Minecraft 1.21.1。它主要提供资源覆盖，并有一个只在 Iris 存在时启用的客户端 Mixin，用于把固定版 Complementary Unbound 的中文选项表合并到 Iris 的光影选项界面；不注册物品、方块、命令或网络包。现有译文在迁移阶段完整保留；下述覆盖数字来自原 1.20.1 内容，须在目标第三方 JAR 锁定后重新审计源键和指南路径，不能视为 1.21.1 已完成汉化验收。
+`dimensionworks_localization` 是随 DimensionWorks 客户端分发的 NeoForge 汉化 Mod，目标为 Minecraft 1.21.1。它主要提供资源覆盖，并有一个只在 Iris 存在时启用的客户端 Mixin，用于把固定版 Complementary Unbound 的中文选项表合并到 Iris 的光影选项界面；译文通过 Minecraft 资源管理器读取，若译文不可用则记录错误并继续加载光影。不注册物品、方块、命令或网络包。现有译文在迁移阶段完整保留；下述覆盖数字来自原 1.20.1 内容，须在目标第三方 JAR 锁定后重新审计源键和指南路径，不能视为 1.21.1 已完成汉化验收。
 
 ## 覆盖范围
 
@@ -37,7 +37,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 ./gradlew :dimensionworks-localization:build --no-daemon
 ```
 
-当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.7.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
+当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.8.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
 
 ## 校验
 
@@ -79,6 +79,10 @@ python3 scripts/check_localization.py
 ## Complementary Unbound 光影选项（0.1.7）
 
 补齐 Complementary Unbound r5.9.3 的 927 条 Iris 光影选项中文键。译文基于 Euphoria Patches 社区语言文件，保留原译者署名与 MIT 许可；针对原版 r5.9.3 独有的 3 个键另行补译。Iris 不从普通资源包读取光影选项语言，因此通过客户端 Mixin 仅在该固定版光影加载时注入译文。
+
+## Iris 光影加载兼容修复（0.1.8）
+
+从 Minecraft 资源管理器读取已打包的 Complementary Unbound 译文，修复此前使用 Java 根资源路径而无法找到译文、导致 Iris 拒绝加载光影的问题。译文缺失或读取失败时仅记录错误，不再中断光影包加载。
 
 ## Sophisticated Core 创造页签（0.1.5）
 
