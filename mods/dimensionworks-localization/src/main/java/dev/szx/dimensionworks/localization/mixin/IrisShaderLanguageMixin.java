@@ -1,15 +1,14 @@
 package dev.szx.dimensionworks.localization.mixin;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import net.neoforged.fml.ModList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Final;
@@ -43,21 +42,13 @@ public abstract class IrisShaderLanguageMixin {
             return;
         }
 
-        try {
-            Path translationFile = ModList.get()
-                    .getModContainerById("dimensionworks_localization")
-                    .orElseThrow(() -> new IllegalStateException(
-                            "DimensionWorks Localization mod container is unavailable"))
-                    .getModInfo()
-                    .getOwningFile()
-                    .getFile()
-                    .findResource(DIMENSIONWORKS$TRANSLATION_RESOURCE);
-            if (Files.notExists(translationFile)) {
+        try (InputStream translationStream =
+                IrisShaderLanguageMixin.class.getResourceAsStream("/" + DIMENSIONWORKS$TRANSLATION_RESOURCE)) {
+            if (translationStream == null) {
                 throw new IOException("Bundled Complementary Unbound zh_cn translation not found");
             }
             Properties properties = new Properties();
-            try (InputStreamReader reader = new InputStreamReader(
-                    Files.newInputStream(translationFile), StandardCharsets.UTF_8)) {
+            try (InputStreamReader reader = new InputStreamReader(translationStream, StandardCharsets.UTF_8)) {
                 properties.load(reader);
             }
             Map<String, String> translations = new HashMap<>();

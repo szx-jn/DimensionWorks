@@ -36,7 +36,7 @@ public final class UnboundShortcutScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        this.renderTransparentBackground(graphics);
 
         int panelWidth = Math.min(PANEL_WIDTH, this.width - 24);
         int left = (this.width - panelWidth) / 2;

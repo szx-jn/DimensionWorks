@@ -1,6 +1,6 @@
 plugins { id 'java-library' }
 
-version = '0.1.0'
+version = '0.1.1'
 base.archivesName = 'dimensionworks_shortcut_panel'
 apply from: rootProject.file('gradle/neoforge-module.gradle')
 
