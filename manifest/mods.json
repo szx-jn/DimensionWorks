@@ -469,12 +469,12 @@
       "environment": "both",
       "source": "github-source",
       "repository": "szx-jn/Create-Mobile-Packages",
-      "commit": "af08d5c49a5b84c0a303b88cf9b35d7605f156e2",
-      "source_sha256": "54afb6126aacc23f4b80d03b5324641e0fbaf4ebd576c7c539b09212657832ee",
-      "sha256": "01662aefed6d4ea680c612ef139e408204b821c6f4ddc83705235f242921723a",
+      "commit": "6bf31d3b877ef9906c098850c0fbb4079de79582",
+      "source_sha256": "4b3105a2749fffe8e9160ea93d40077a994c26bfd12532f1e02031c44c3b1d25",
+      "sha256": "90263646e417f0c18350718c76a3eeacfb476cf8d2ff8bdd034de2ce682a6e11",
       "file_name": "create_mobile_packages-1.21.1-0.7.8-dimensionworks.4.jar",
       "version": "0.7.8-dimensionworks.4",
-      "url": "https://github.com/szx-jn/Create-Mobile-Packages/tree/af08d5c49a5b84c0a303b88cf9b35d7605f156e2"
+      "url": "https://github.com/szx-jn/Create-Mobile-Packages/tree/6bf31d3b877ef9906c098850c0fbb4079de79582"
     },
     {
       "id": "create-ultimine",
@@ -1134,12 +1134,12 @@
       "environment": "both",
       "source": "github-source",
       "repository": "szx-jn/KaleidoscopeCookery-Automation",
-      "commit": "9053486f76a7ffb05a44a6c6be54fbb5e7c9a7e7",
-      "source_sha256": "b79d03118286cf059736aa87249498497650096b7a0c2c08a422b23448079281",
-      "sha256": "856f4368d5b23413fd7b96303ffa9ddad5bbe746384b94d8fd9edfa68ee18235",
+      "commit": "30368289c141faf12dee461a4c8914670cc0798c",
+      "source_sha256": "7369a6461064fae17c5925ee0cc9aea9dd9ec5dc1fa5212a0f56dfe399290271",
+      "sha256": "7aa2e7420c52e5c43d013a2a7690215179d995e941c2055faeedddf699894d34",
       "file_name": "kaleidoscopecookery_automation-1.21.1-1.0.1-dimensionworks.2.jar",
       "version": "1.0.1-dimensionworks.2",
-      "url": "https://github.com/szx-jn/KaleidoscopeCookery-Automation/tree/9053486f76a7ffb05a44a6c6be54fbb5e7c9a7e7"
+      "url": "https://github.com/szx-jn/KaleidoscopeCookery-Automation/tree/30368289c141faf12dee461a4c8914670cc0798c"
     },
     {
       "id": "konkrete",
@@ -1649,12 +1649,12 @@
       "environment": "both",
       "source": "github-source",
       "repository": "szx-jn/TrueUUID-DimensionWorks",
-      "commit": "b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89",
-      "source_sha256": "e10d9bed03fc066141a3adc225d2c4a51905cfea7f27f9e1c3dd8d8bd67f719b",
-      "sha256": "06919ff0da0ebb53b6a507531b128ad9a12f965b5f9e50d235ea8650ac2da423",
+      "commit": "1737b2a6d98742bda73eff73e95d53094399885d",
+      "source_sha256": "3c9b1be69f571bc7daf7007da55e537bba575eeaf43e952fc68a043d9f793973",
+      "sha256": "edad0d4829586e9513e9ca1e4154b024a5ca4162cd8f62725cdffcfca71efb37",
       "file_name": "trueuuid-1.0.10-neoforge1.21.1.jar",
       "version": "1.0.10-neoforge1.21.1",
-      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/tree/b2fa74999f4df0e492f5ef3fb018dca3b7dbbd89"
+      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/tree/1737b2a6d98742bda73eff73e95d53094399885d"
     },
     {
       "id": "twilightforest",
