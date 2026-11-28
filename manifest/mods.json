@@ -1649,12 +1649,12 @@
       "environment": "both",
       "source": "github-source",
       "repository": "szx-jn/TrueUUID-DimensionWorks",
-      "commit": "1737b2a6d98742bda73eff73e95d53094399885d",
-      "source_sha256": "3c9b1be69f571bc7daf7007da55e537bba575eeaf43e952fc68a043d9f793973",
-      "sha256": "edad0d4829586e9513e9ca1e4154b024a5ca4162cd8f62725cdffcfca71efb37",
+      "commit": "5c72e224c3bb4f21681303858a1ac72cc3fa2eb9",
+      "source_sha256": "eb3087e27ce3ca0c67f4ba51d546d881f4f099f294b95daa0caed21f38ebf88d",
+      "sha256": "dab8db755ab9841cd9322fefb48e50d5a9053676a968390dc2d9f85dcb34dcbe",
       "file_name": "trueuuid-1.0.10-neoforge1.21.1.jar",
       "version": "1.0.10-neoforge1.21.1",
-      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/tree/1737b2a6d98742bda73eff73e95d53094399885d"
+      "url": "https://github.com/szx-jn/TrueUUID-DimensionWorks/tree/5c72e224c3bb4f21681303858a1ac72cc3fa2eb9"
     },
     {
       "id": "twilightforest",
