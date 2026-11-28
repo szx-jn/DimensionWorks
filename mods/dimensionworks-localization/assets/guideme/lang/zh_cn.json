@@ -19,7 +19,7 @@
   "guideme.guidebook.HideAnnotations": "隐藏附加说明",
   "guideme.guidebook.HistoryGoBack": "返回上一页",
   "guideme.guidebook.HistoryGoForward": "前往下一页",
-  "guideme.guidebook.HoldToShow": "按住 [%s] 打开指南",
+  "guideme.guidebook.HoldToShow": "按住 [%s] 打开百科",
   "guideme.guidebook.ItemInvalidGuideId": "设置的指南 ID 无效：%s",
   "guideme.guidebook.ItemNoGuideId": "未设置指南 ID",
   "guideme.guidebook.ResetView": "重置视图",
@@ -34,5 +34,5 @@
   "guideme.guidebook.ZoomOut": "缩小",
   "item.guideme.guide": "指南",
   "key.guideme.category": "GuideME",
-  "key.guideme.guide": "打开指南"
+  "key.guideme.guide": "打开百科"
 }
