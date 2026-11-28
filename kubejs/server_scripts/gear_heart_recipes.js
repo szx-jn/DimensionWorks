@@ -15,35 +15,37 @@ ServerEvents.recipes(event => {
 
   const incompleteFragment = { item: 'kubejs:incomplete_gear_heart_repair_fragment_1' }
   const metalCrystals = ['iron', 'copper', 'zinc', 'gold', 'tin', 'osmium']
+  const sequence = []
+  metalCrystals.forEach(metal => {
+    sequence.push({
+      type: 'create:deploying',
+      ingredients: [
+        incompleteFragment,
+        {
+          type: 'neoforge:components',
+          items: 'dimensionworks_pressure_crystals:low_pressure_crystal',
+          components: {
+            'minecraft:custom_data': {
+              DimensionWorks: { Metal: metal }
+            }
+          }
+        }
+      ],
+      results: [{ id: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
+    })
+  })
+  sequence.push({
+    type: 'create:pressing',
+    ingredients: [incompleteFragment],
+    results: [{ id: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
+  })
 
   register({
     type: 'create:sequenced_assembly',
     ingredient: { item: 'create:andesite_alloy' },
     transitional_item: 'kubejs:incomplete_gear_heart_repair_fragment_1',
     loops: 1,
-    sequence: [
-      ...metalCrystals.map(metal => ({
-        type: 'create:deploying',
-        ingredients: [
-          incompleteFragment,
-          {
-            type: 'neoforge:components',
-            items: 'dimensionworks_pressure_crystals:low_pressure_crystal',
-            components: {
-              'minecraft:custom_data': {
-                DimensionWorks: { Metal: metal }
-              }
-            }
-          }
-        ],
-        results: [{ id: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
-      })),
-      {
-        type: 'create:pressing',
-        ingredients: [incompleteFragment],
-        results: [{ id: 'kubejs:incomplete_gear_heart_repair_fragment_1' }]
-      }
-    ],
+    sequence: sequence,
     results: [{ id: repairFragmentIds[0] }]
   }, repairFragmentIds[0])
 
