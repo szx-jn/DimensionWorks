@@ -1,0 +1,17 @@
+plugins { id 'java-library' }
+
+version = '0.1.0'
+base.archivesName = 'dimensionworks_shortcut_panel'
+apply from: rootProject.file('gradle/neoforge-module.gradle')
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+test { useJUnitPlatform() }
+
+sourceSets.test {
+    compileClasspath += sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.runtimeClasspath
+}

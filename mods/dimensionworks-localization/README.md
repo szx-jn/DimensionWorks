@@ -5,6 +5,7 @@
 ## 覆盖范围
 
 - 按当前安装模组版本补齐全部缺失的 `zh_cn` 语言键；以构建预检统计为准。
+- Omnisearch 2.2.0：启用物品提示中的按键说明，并将“按住 %s 打开百科”覆盖到中文提示。
 - AE2 GuideME 手册 119 页。
 - ExtendedAE GuideME 手册 32 页。
 - 车万女仆 Patchouli 手册 55 页。
@@ -14,6 +15,7 @@
 ## 资源布局
 
 - 普通语言键：`assets/<命名空间>/lang/zh_cn.json`
+- Omnisearch：`assets/omnisearch/lang/zh_cn.json`
 - Complementary Unbound r5.9.3 光影选项：`assets/dimensionworks_localization/iris/shaders/lang/complementary_unbound_r5_9_3_zh_cn.lang`；Iris 只从所选光影包内部读取选项语言，因此客户端 Mixin 仅对该固定版光影合并此资源，不修改光影包文件。
 - GuideME 页面：`assets/<命名空间>/<指南目录>/_zh_cn/`
 - Patchouli 页面：`assets/<命名空间>/patchouli_books/<书>/zh_cn/`
@@ -37,7 +39,7 @@ Patchouli 页面从锁定版本的 `en_us` 页面复制结构，可见文本通�
 ./gradlew :dimensionworks-localization:build --no-daemon
 ```
 
-当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.9.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
+当前本地验证产物为 `mods/dimensionworks-localization/build/libs/dimensionworks_localization-0.1.10.jar`。模块内 `assets/` 通过 `build.gradle` 的 `processResources` 映射到 Jar 内同名 `assets/` 目录；NeoForge lowcodefml 元数据和资源格式已切换到 1.21.1。
 
 ## 校验
 

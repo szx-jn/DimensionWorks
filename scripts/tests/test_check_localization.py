@@ -92,6 +92,89 @@ class CheckLocalizationTest(unittest.TestCase):
             [("example", "example.hello")],
         )
 
+    def test_accepts_explicit_omnisearch_copy_overrides(self) -> None:
+        source_en = {
+            "hint.omnisearch.education": "Hold %s to inspect this item",
+            "hint.omnisearch.hover_action": "Hold %s to inspect it",
+            "key.categories.omnisearch": "Omnisearch",
+            "key.omnisearch.inspect_hovered": "Inspect Hovered Item",
+            "key.omnisearch.open": "Open Search Window",
+        }
+        source_zh = {
+            "hint.omnisearch.education": "长按 %s 查看资料",
+            "hint.omnisearch.hover_action": "长按 %s 查看资料",
+            "key.categories.omnisearch": "Omnisearch",
+            "key.omnisearch.inspect_hovered": "查询悬停物品",
+            "key.omnisearch.open": "打开搜索窗口",
+        }
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        instance = Path(temp.name)
+        mods = instance / "mods"
+        mods.mkdir()
+        with ZipFile(mods / "omnisearch.jar", "w") as archive:
+            archive.writestr(
+                "assets/omnisearch/lang/en_us.json",
+                json.dumps(source_en),
+            )
+            archive.writestr(
+                "assets/omnisearch/lang/zh_cn.json",
+                json.dumps(source_zh, ensure_ascii=False),
+            )
+
+        with tempfile.TemporaryDirectory() as temp_override:
+            override = Path(temp_override)
+            lang = override / "assets/omnisearch/lang"
+            lang.mkdir(parents=True)
+            (lang / "zh_cn.json").write_text(
+                json.dumps(
+                    {
+                        "hint.omnisearch.education": "按住 %s 打开百科",
+                        "hint.omnisearch.hover_action": "按住 %s 打开百科",
+                        "key.categories.omnisearch": "MC 百科",
+                        "key.omnisearch.inspect_hovered": "查询悬停物品",
+                        "key.omnisearch.open": "打开百科搜索",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            report = check_localization.build_report(instance, override)
+
+        self.assertEqual(report.redundant_override_keys, [])
+        self.assertEqual(report.placeholder_mismatches, [])
+
+    def test_checks_placeholders_for_explicit_omnisearch_overrides(self) -> None:
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        instance = Path(temp.name)
+        mods = instance / "mods"
+        mods.mkdir()
+        with ZipFile(mods / "omnisearch.jar", "w") as archive:
+            archive.writestr(
+                "assets/omnisearch/lang/en_us.json",
+                json.dumps({"hint.omnisearch.education": "Hold %s to inspect this item"}),
+            )
+            archive.writestr(
+                "assets/omnisearch/lang/zh_cn.json",
+                json.dumps({"hint.omnisearch.education": "长按 %s 查看资料"}, ensure_ascii=False),
+            )
+
+        with tempfile.TemporaryDirectory() as temp_override:
+            override = Path(temp_override)
+            lang = override / "assets/omnisearch/lang"
+            lang.mkdir(parents=True)
+            (lang / "zh_cn.json").write_text(
+                json.dumps({"hint.omnisearch.education": "按住 B 打开百科"}),
+                encoding="utf-8",
+            )
+            report = check_localization.build_report(instance, override)
+
+        self.assertEqual(
+            report.placeholder_mismatches,
+            [("omnisearch", "hint.omnisearch.education", ["%s"], [])],
+        )
+
     def test_rejects_placeholder_mismatch(self) -> None:
         instance = self.make_instance(source_en={"example.hello": "Hello %s"})
         with tempfile.TemporaryDirectory() as temp:

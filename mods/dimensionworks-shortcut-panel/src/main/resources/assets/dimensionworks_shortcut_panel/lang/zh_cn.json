@@ -1,0 +1,8 @@
+{
+  "key.categories.dimensionworks_shortcut_panel": "维度工序",
+  "key.dimensionworks_shortcut_panel.open": "打开无按键快捷键面板",
+  "screen.dimensionworks_shortcut_panel.title": "无按键快捷键",
+  "screen.dimensionworks_shortcut_panel.count": "检测到 %s 个无按键快捷键",
+  "screen.dimensionworks_shortcut_panel.empty": "没有检测到无按键快捷键",
+  "screen.dimensionworks_shortcut_panel.footer": "点击快捷键触发一次 · 按 Esc 关闭 · 滚动浏览"
+}

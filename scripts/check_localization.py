@@ -26,6 +26,15 @@ GUIDEME_PAGE = re.compile(r"assets/([^/]+)/([^/]+)/(.+\.md)")
 PATCHOULI_PAGE = re.compile(
     r"assets/([^/]+)/patchouli_books/([^/]+)/(en_us|zh_cn)/(.+\.json)"
 )
+# Omnisearch ships these simplified Chinese strings, but the pack deliberately
+# replaces them to match its B-key controls and the requested tooltip wording.
+INTENTIONAL_REDUNDANT_KEYS = {
+    ("omnisearch", "hint.omnisearch.education"),
+    ("omnisearch", "hint.omnisearch.hover_action"),
+    ("omnisearch", "key.categories.omnisearch"),
+    ("omnisearch", "key.omnisearch.inspect_hovered"),
+    ("omnisearch", "key.omnisearch.open"),
+}
 
 
 @dataclass
@@ -267,7 +276,14 @@ def build_report(instance_dir: Path, override_root: Path) -> LocalizationReport:
         for key in sorted(set(override) - set(english)):
             report.unknown_override_keys.append((namespace, key))
         for key in sorted(set(override) & set(existing)):
-            report.redundant_override_keys.append((namespace, key))
+            if (namespace, key) not in INTENTIONAL_REDUNDANT_KEYS:
+                report.redundant_override_keys.append((namespace, key))
+                continue
+            if key in english:
+                expected = _placeholder_signature(english[key])
+                actual = _placeholder_signature(override[key])
+                if _placeholder_shape(english[key]) != _placeholder_shape(override[key]):
+                    report.placeholder_mismatches.append((namespace, key, expected, actual))
         for key in sorted(set(english) - set(existing)):
             translated = override.get(key)
             if translated is None:

@@ -1,0 +1,8 @@
+{
+  "key.categories.dimensionworks_shortcut_panel": "DimensionWorks Shortcut Panel",
+  "key.dimensionworks_shortcut_panel.open": "Open Unbound Shortcuts",
+  "screen.dimensionworks_shortcut_panel.title": "Unbound Shortcuts",
+  "screen.dimensionworks_shortcut_panel.count": "%s unbound shortcuts detected",
+  "screen.dimensionworks_shortcut_panel.empty": "No unbound shortcuts detected",
+  "screen.dimensionworks_shortcut_panel.footer": "Click a shortcut to activate it once · Esc to close · Scroll to browse"
+}

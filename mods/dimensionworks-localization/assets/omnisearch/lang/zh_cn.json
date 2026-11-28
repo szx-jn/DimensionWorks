@@ -1,0 +1,7 @@
+{
+  "key.categories.omnisearch": "MC 百科",
+  "key.omnisearch.open": "打开百科搜索",
+  "key.omnisearch.inspect_hovered": "查询悬停物品",
+  "hint.omnisearch.education": "按住 %s 打开百科",
+  "hint.omnisearch.hover_action": "按住 %s 打开百科"
+}

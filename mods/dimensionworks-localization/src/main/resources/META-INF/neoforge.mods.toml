@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="dimensionworks_localization"
-version="0.1.9"
+version="0.1.10"
 displayName="DimensionWorks 简体中文汉化"
 authors="szx-jn"
 description='''DimensionWorks 客户端简体中文覆盖，含 Iris 光影选项翻译。'''
@@ -27,6 +27,13 @@ side="BOTH"
 modId="iris"
 type="optional"
 versionRange="[1.8.14-beta.1,1.8.15)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.dimensionworks_localization]]
+modId="omnisearch"
+type="required"
+versionRange="[2.2.0,2.3.0)"
 ordering="AFTER"
 side="CLIENT"
 

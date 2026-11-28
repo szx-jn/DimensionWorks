@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+clientSideOnly=true
+
+[[mods]]
+modId="dimensionworks_shortcut_panel"
+version="0.1.0"
+displayName="DimensionWorks Shortcut Panel"
+authors="szx-jn"
+displayTest="IGNORE_ALL_VERSION"
+description='''按 F12 打开无按键快捷键面板，并通过 Minecraft 原生快捷键队列触发所选功能。'''
+
+[[dependencies.dimensionworks_shortcut_panel]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.267,21.2)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.dimensionworks_shortcut_panel]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.21.2)"
+ordering="NONE"
+side="CLIENT"

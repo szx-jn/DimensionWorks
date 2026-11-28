@@ -598,7 +598,7 @@
       "name": "DimensionWorks 简体中文汉化",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-localization",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "required": true,
       "environment": "client",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/1.21.1-neoforge/mods/dimensionworks-localization"
@@ -642,6 +642,16 @@
       "required": true,
       "environment": "both",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/1.21.1-neoforge/mods/dimensionworks-spectator-toggle"
+    },
+    {
+      "id": "dimensionworks_shortcut_panel",
+      "name": "DimensionWorks Shortcut Panel",
+      "source": "in-repo",
+      "project_path": "mods/dimensionworks-shortcut-panel",
+      "version": "0.1.0",
+      "required": true,
+      "environment": "client",
+      "url": "https://github.com/szx-jn/DimensionWorks/tree/main/mods/dimensionworks-shortcut-panel"
     },
     {
       "id": "dimensionworks_transfer",
