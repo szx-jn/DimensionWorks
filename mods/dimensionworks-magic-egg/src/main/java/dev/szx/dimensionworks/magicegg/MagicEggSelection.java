@@ -71,6 +71,13 @@ public final class MagicEggSelection {
         if (session != null && session.token().equals(token)) SESSIONS.remove(player.getUUID());
     }
 
+    /** Clears the KubeJS-owned death countdown and any open selection for an administrator recovery command. */
+    public static void clearCountdown(ServerPlayer player, CompoundTag countdownData) {
+        SESSIONS.remove(player.getUUID());
+        countdownData.putBoolean(PENDING, false);
+        countdownData.putLong(DEADLINE, 0);
+    }
+
     @SubscribeEvent
     public static void clonePlayer(PlayerEvent.Clone event) {
         SESSIONS.remove(event.getEntity().getUUID());

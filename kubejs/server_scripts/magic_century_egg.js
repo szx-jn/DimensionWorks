@@ -1,6 +1,8 @@
 const $DWMagicEggParticleTypes = Java.loadClass('net.minecraft.core.particles.ParticleTypes')
 const $DWMagicEggSelection = Java.loadClass('dev.szx.dimensionworks.magicegg.MagicEggSelection')
 const $DWMagicEggUUID = Java.loadClass('java.util.UUID')
+const $DWMagicEggCommands = Java.loadClass('net.minecraft.commands.Commands')
+const $DWMagicEggEntityArgument = Java.loadClass('net.minecraft.commands.arguments.EntityArgument')
 
 const DW_MAGIC_EGG_ID = 'kubejs:magic_century_egg'
 const DW_ORIGINAL_CENTURY_EGG_ID = 'kaleidoscope_chinesefood:century_egg'
@@ -14,6 +16,28 @@ let dwMagicEggFireworkShows = []
 ServerEvents.recipes(event => {
   event.remove({ output: DW_ORIGINAL_CENTURY_EGG_ID })
   event.remove({ output: 'kaleidoscope_chinesefood:century_egg_congee' })
+})
+
+ServerEvents.commandRegistry(event => {
+  event.register(
+    $DWMagicEggCommands.literal('dw')
+      .requires(source => source.hasPermission(2))
+      .then($DWMagicEggCommands.literal('magicegg')
+        .then($DWMagicEggCommands.literal('clear')
+          .then($DWMagicEggCommands.argument('player', $DWMagicEggEntityArgument.player())
+            .executes(context => {
+              const target = $DWMagicEggEntityArgument.getPlayer(context, 'player')
+              $DWMagicEggSelection.clearCountdown(target, target.persistentData)
+              context.source.sendSuccess(
+                () => Text.of(`已清理玩家 ${target.getGameProfile().getName()} 的魔法皮蛋死亡倒计时。`),
+                true
+              )
+              return 1
+            })
+          )
+        )
+      )
+  )
 })
 
 function dwPurgeOriginalCenturyEgg(player) {

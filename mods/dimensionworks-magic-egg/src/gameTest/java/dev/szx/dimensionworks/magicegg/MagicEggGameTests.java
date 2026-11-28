@@ -72,4 +72,28 @@ public final class MagicEggGameTests {
         }
         helper.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void administratorRecoveryClearsCountdownAndOpenSelection(GameTestHelper helper) throws Exception {
+        var player = helper.makeMockServerPlayerInLevel();
+        var countdown = new CompoundTag();
+        countdown.putBoolean("dw_magic_century_egg_pending", true);
+        countdown.putLong("dw_magic_century_egg_deadline", 12345);
+        var field = MagicEggSelection.class.getDeclaredField("SESSIONS");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        var sessions = (Map<UUID, SelectionSession>) field.get(null);
+        sessions.put(player.getUUID(), new SelectionSession(List.of(), List.of(), false, countdown));
+        try {
+            helper.assertTrue(sessions.containsKey(player.getUUID()), "测试前应存在未完成的选择会话");
+            MagicEggSelection.clearCountdown(player, countdown);
+            helper.assertTrue(!countdown.getBoolean("dw_magic_century_egg_pending"), "必须清除立即处决标记");
+            helper.assertTrue(countdown.getLong("dw_magic_century_egg_deadline") == 0, "必须清空死亡截止时间");
+            helper.assertTrue(!sessions.containsKey(player.getUUID()), "必须取消该玩家未完成的选择会话");
+        } finally {
+            sessions.remove(player.getUUID());
+            player.discard();
+        }
+        helper.succeed();
+    }
 }
