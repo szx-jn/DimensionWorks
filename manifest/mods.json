@@ -598,7 +598,7 @@
       "name": "DimensionWorks 简体中文汉化",
       "source": "in-repo",
       "project_path": "mods/dimensionworks-localization",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "required": true,
       "environment": "client",
       "url": "https://github.com/szx-jn/DimensionWorks/tree/1.21.1-neoforge/mods/dimensionworks-localization"
